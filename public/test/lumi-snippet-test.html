@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Door 2 validation — Lumi SDK script tag test publisher</title>
+<meta name="robots" content="noindex,nofollow">
+
+<!-- ════════════════════════════════════════════════════════════════════
+     INTERNAL VALIDATION PUBLISHER FOR DOOR 2 (Lumi SDK script tag).
+     This is a throwaway page — not linked from anywhere on the site.
+     Purpose: load lumi.js with sandbox publisher ID, mount all four slot
+     formats, watch them render in the browser, take screenshots.
+
+     Usage:
+       https://boostboss.ai/test/lumi-snippet-test
+     (or open the file directly via local server)
+
+     What to verify:
+       1. Each slot renders the [Sandbox] creative
+       2. Disclosure label "Sponsored · TEST" is visible
+       3. CTA button is clickable and includes ?bbx_sandbox=1
+       4. Impression beacons fire (DevTools → Network → /api/track?...&event=impression)
+       5. Click events fire (click any CTA → /api/track?...&event=click)
+       6. Console has no Lumi errors
+       7. Layout adapts to dark mode (set OS to dark + reload)
+     ════════════════════════════════════════════════════════════════════ -->
+
+<!-- The Lumi SDK script tag — exactly what a publisher would add. -->
+<script async
+  src="/lumi.js"
+  data-publisher-id="pub_test_demo"
+  data-debug="1"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF7; --card: #FFFFFF; --ink: #0F0F1A; --ink-soft: #4B4B5E;
+    --line: #E5E7EB; --muted: #6B7280; --accent: #FF2D78; --accent-2: #04BEFE;
+    /* Lumi reads these for its theming if present */
+    --lumi-card-bg: #FFFFFF; --lumi-card-border: #E5E7EB;
+    --lumi-text: #0F0F1A; --lumi-text-muted: #6B7280;
+    --lumi-cta-bg: #0F0F1A; --lumi-cta-text: #FFFFFF;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    color: var(--ink); line-height: 1.55; background: var(--bg);
+    min-height: 100vh; padding: 24px;
+  }
+  .test-banner {
+    background: #FFE6F0; border: 1.5px dashed var(--accent);
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;
+    font-size: 13px; color: #B91C1C; font-weight: 600;
+  }
+  .test-banner code {
+    background: rgba(15,15,26,0.06); padding: 1px 6px; border-radius: 4px;
+    font-family: "SF Mono", Consolas, monospace; font-size: 12px;
+  }
+  .layout {
+    display: grid; grid-template-columns: 1fr 320px; gap: 24px;
+    max-width: 1180px; margin: 0 auto;
+  }
+  /* CHAT COLUMN ============================================== */
+  .chat-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 28px;
+  }
+  .chat-card > h2 {
+    font-size: 18px; font-weight: 700; margin-bottom: 6px;
+  }
+  .chat-card > .sub {
+    color: var(--muted); font-size: 13px; margin-bottom: 22px;
+  }
+  .msg { display: flex; gap: 12px; margin-bottom: 18px; }
+  .msg .av {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff;
+  }
+  .msg.user .av { background: #0F0F1A; }
+  .msg.ai   .av { background: linear-gradient(135deg, #FF2D78, #04BEFE); }
+  .msg .body {
+    flex: 1; padding-top: 4px;
+  }
+  .msg .body .name {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .msg .body p { font-size: 15px; color: var(--ink); }
+
+  .label {
+    display: block; font-size: 11px; font-weight: 700;
+    color: #B91C1C; letter-spacing: 0.6px; text-transform: uppercase;
+    margin: 22px 0 10px;
+  }
+
+  /* SIDEBAR COLUMN =========================================== */
+  .sidebar {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 18px; align-self: start;
+    position: sticky; top: 24px;
+  }
+  .sidebar > h3 {
+    font-size: 14px; font-weight: 700; margin-bottom: 14px;
+  }
+  .sidebar > .sub {
+    color: var(--muted); font-size: 12px; margin-bottom: 18px;
+  }
+
+  /* INTERSTITIAL TRIGGER ===================================== */
+  .interstitial-bar {
+    grid-column: 1 / -1;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 18px 22px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 14px;
+  }
+  .interstitial-bar h4 { font-size: 14px; font-weight: 700; }
+  .interstitial-bar p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .interstitial-bar button {
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: inherit;
+  }
+  .interstitial-bar button:hover { background: #E01E65; }
+
+  /* DEV PANEL — live event log =============================== */
+  .devlog {
+    grid-column: 1 / -1;
+    background: #0F0F1A; color: #B0B0C7;
+    border-radius: 12px; padding: 16px 18px;
+    font-family: "SF Mono", Consolas, monospace; font-size: 12px;
+    max-height: 220px; overflow-y: auto;
+  }
+  .devlog h4 {
+    color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 10px;
+    font-family: -apple-system, sans-serif;
+  }
+  .devlog .row { padding: 3px 0; border-bottom: 1px solid #1A1A2E; }
+  .devlog .row:last-child { border-bottom: none; }
+  .devlog .row .t  { color: #6B7280; margin-right: 10px; }
+  .devlog .row .ev { color: #04BEFE; }
+  .devlog .row.error .ev { color: #FF2D78; }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<div class="test-banner">
+  <strong>VALIDATION PUBLISHER</strong> — Door 2 (Lumi SDK script tag) ·
+  publisher_id = <code>pub_test_demo</code> · sandbox creatives ·
+  noindex · NOT FOR PRODUCTION
+</div>
+
+<div class="layout">
+
+  <!-- LEFT: chat-style mockup with ad slots embedded -->
+  <main class="chat-card">
+    <h2>Test AI Chat</h2>
+    <p class="sub">A throwaway publisher mimicking a typical AI chat UI. Each Lumi slot below should render a sandbox creative and fire impression/click events to <code>/api/track</code>.</p>
+
+    <div class="msg user">
+      <div class="av">U</div>
+      <div class="body">
+        <div class="name">User</div>
+        <p>How do I deploy a FastAPI app?</p>
+      </div>
+    </div>
+
+    <div class="msg ai">
+      <div class="av">AI</div>
+      <div class="body">
+        <div class="name">Assistant</div>
+        <p>Railway and Fly.io are both solid options for Python apps. Railway has zero-config git push deploys; Fly.io gives you global edge regions out of the box.</p>
+      </div>
+    </div>
+
+    <!-- INLINE slot — flows in the conversation -->
+    <span class="label">▼ data-lumi-slot="inline" (renders below)</span>
+    <div data-lumi-slot="inline" data-lumi-context="deploying a FastAPI app"></div>
+
+    <div class="msg ai" style="margin-top: 22px;">
+      <div class="body" style="padding-left: 0;">
+        <p style="font-size: 14px; color: var(--ink-soft);">Want me to walk through the Railway CLI flow?</p>
+      </div>
+    </div>
+
+    <!-- BANNER slot — bottom of conversation -->
+    <span class="label">▼ data-lumi-slot="banner" (renders below)</span>
+    <div data-lumi-slot="banner" data-lumi-context="deploying a FastAPI app"></div>
+  </main>
+
+  <!-- RIGHT: sidebar with sidebar-format slot -->
+  <aside class="sidebar">
+    <h3>Suggested for you</h3>
+    <p class="sub">Sidebar context — usually shows related links / tools.</p>
+    <span class="label">▼ data-lumi-slot="sidebar"</span>
+    <div data-lumi-slot="sidebar" data-lumi-context="python deployment tools"></div>
+  </aside>
+
+  <!-- INTERSTITIAL — only mounts when user clicks the button -->
+  <div class="interstitial-bar">
+    <div>
+      <h4>Interstitial test</h4>
+      <p>Clicking will mount a <code>data-lumi-slot="interstitial"</code> overlay. Skippable after 3s per protocol §4.1.</p>
+    </div>
+    <button id="triggerInter">Trigger interstitial</button>
+  </div>
+
+  <!-- DEV LOG — live readout of Lumi events -->
+  <div class="devlog">
+    <h4>Lumi event log (live)</h4>
+    <div id="logRows"></div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Live event log so the validator can see what's firing without the
+  //     DevTools console open. Mirrors what window.Lumi.on() emits.
+  const logRows = document.getElementById('logRows');
+  function row(ev, payload, level) {
+    const t = new Date().toTimeString().slice(0, 8);
+    const div = document.createElement('div');
+    div.className = 'row ' + (level || '');
+    div.innerHTML = '<span class="t">' + t + '</span><span class="ev">' + ev + '</span> ' +
+                    (payload ? JSON.stringify(payload).slice(0, 200) : '');
+    logRows.prepend(div);
+  }
+  row('page-load', { sandbox: true, publisher_id: 'pub_test_demo' });
+
+  // Lumi calls this if it exposes an event subscription API.
+  // Fall back to listening to window beacons if not.
+  (function waitForLumi() {
+    if (!window.Lumi) return setTimeout(waitForLumi, 60);
+    row('lumi-loaded', { version: window.Lumi.version || '?' });
+
+    if (typeof window.Lumi.on === 'function') {
+      window.Lumi.on('impression', (p) => row('impression', p));
+      window.Lumi.on('click',      (p) => row('click', p));
+      window.Lumi.on('error',      (p) => row('error', p, 'error'));
+    } else {
+      row('note', { msg: 'window.Lumi.on() not available — watch DevTools Network for /api/track beacons' });
+    }
+
+    // Interstitial trigger
+    document.getElementById('triggerInter').addEventListener('click', () => {
+      if (typeof window.Lumi.show === 'function') {
+        window.Lumi.show({ format: 'interstitial', context: 'python deployment cli' });
+        row('interstitial-trigger', { format: 'interstitial' });
+      } else {
+        // Fallback: create a slot and mount it
+        const el = document.createElement('div');
+        el.setAttribute('data-lumi-slot', 'interstitial');
+        el.setAttribute('data-lumi-context', 'python deployment cli');
+        document.body.appendChild(el);
+        row('interstitial-fallback', { msg: 'Lumi.show() not exposed — appended slot element' });
+      }
+    });
+  })();
+
+  // Also intercept fetch to /api/track so we see the beacons even if Lumi
+  // doesn't expose a subscription API.
+  const origFetch = window.fetch;
+  window.fetch = function(...args) {
+    const url = (typeof args[0] === 'string') ? args[0] : (args[0] && args[0].url) || '';
+    if (/\/api\/track/.test(url)) {
+      const m = url.match(/event=([^&]+)/);
+      const c = url.match(/campaign_id=([^&]+)/);
+      row('beacon ' + (m ? m[1] : '?'), { campaign: c ? c[1] : '?' });
+    }
+    return origFetch.apply(this, args);
+  };
+  // Also intercept Image() pixel beacons (the GET-style impression pixels)
+  const origImage = window.Image;
+  window.Image = function() {
+    const img = new origImage(...arguments);
+    let _src = '';
+    Object.defineProperty(img, 'src', {
+      set(v) { _src = v;
+        if (/\/api\/track/.test(v)) {
+          const m = v.match(/event=([^&]+)/);
+          const c = v.match(/campaign_id=([^&]+)/);
+          row('pixel ' + (m ? m[1] : '?'), { campaign: c ? c[1] : '?' });
+        }
+        img.setAttribute('src', v);
+      },
+      get() { return _src; }
+    });
+    return img;
+  };
+</script>
+
+</body>
+</html>

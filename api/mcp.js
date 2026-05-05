@@ -80,6 +80,17 @@ function deriveBennaContext(args) {
 
   if (args.session_len_min) out.session_len = args.session_len_min;
 
+  // Pass-through MCP-native targeting fields from the request so scoreBid
+  // can match against campaign.target_intent_tokens / target_active_tools /
+  // target_host_apps / target_surfaces directly. Without this, only the
+  // regex-derived single-value `intent` and `mcp_tool` reach scoreBid, and
+  // requests with rich intent_tokens arrays only get partial scoring.
+  // (Surfaced by Door 1 internal validation, 2026-05-01.)
+  if (Array.isArray(args.intent_tokens))  out.intent_tokens  = args.intent_tokens;
+  if (Array.isArray(args.active_tools))   out.active_tools   = args.active_tools;
+  if (args.host_app)                      out.host_app       = args.host_app;
+  if (args.surface)                       out.surface        = args.surface;
+
   return out;
 }
 
