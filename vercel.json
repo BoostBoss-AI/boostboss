@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "boostboss",
   "framework": null,
   "buildCommand": null,
   "outputDirectory": "public",
@@ -129,7 +128,7 @@
     },
     {
       "path": "/api/stats?type=recon",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }

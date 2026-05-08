@@ -733,6 +733,9 @@ function formatDeveloper(dev) {
 // uuid type mismatch that dropped every sandbox impression for a week
 // (caught by Door 4 / Telegram validation 2026-05-08).
 //
+// Cron schedule: daily at 02:00 UTC (vercel.json). Wanted every 6h but
+// Vercel Hobby plan only allows daily — upgrade to Pro to tighten the loop.
+//
 // Returns:
 //   {
 //     window_hours: 24,
