@@ -156,8 +156,13 @@ module.exports = async function handler(req, res) {
   }
 
   // Validate campaign_id exists before recording billable events
-  // This prevents attackers from burning budgets on non-existent or others' campaigns
-  if (["impression", "click", "video_complete"].includes(event)) {
+  // This prevents attackers from burning budgets on non-existent or others' campaigns.
+  // Sandbox traffic skips this check: sandbox creatives are hardcoded in
+  // api/_lib/sandbox.js (not in the campaigns table) and have cost=0,
+  // so the budget-drain attack vector doesn't apply. Without this bypass,
+  // sandbox impression beacons 404 and never write to events. Surfaced by
+  // Door 4 / Telegram internal validation 2026-05-08.
+  if (["impression", "click", "video_complete"].includes(event) && !isSandbox) {
     const sb = supa();
     if (sb) {
       const { data: camp, error: campErr } = await sb.from("campaigns")
