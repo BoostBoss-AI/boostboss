@@ -133,6 +133,16 @@ module.exports = async function handler(req, res) {
       return await handleAggregate(req, res);
     }
 
+    // ── Reconciliation (Phase A — silent-failure observability) ──
+    // Compares auction wins to impression events over the last 24h. Drops
+    // below threshold mean impression beacons are silently failing
+    // somewhere — exactly the failure mode we hit 2026-05-08 (uuid type
+    // mismatch). Designed to be called by cron every 6h. See Phase A in
+    // the validation report at db/VALIDATION-2026-05-08.md.
+    if (type === "recon" && (req.method === "POST" || req.method === "GET")) {
+      return await handleRecon(req, res);
+    }
+
     return res.status(400).json({ error: "Missing type (advertiser|developer) and id/key params" });
 
   } catch (err) {
@@ -717,6 +727,142 @@ function formatDeveloper(dev) {
 }
 
 // ── Daily Stats ETL ──────────────────────────────────────────────────
+// ── Reconciliation handler (Phase A — silent-failure observability) ─────
+// Compares auction wins to impression events over the last 24h. The drop
+// ratio surfaces silent write failures we'd otherwise never see, like the
+// uuid type mismatch that dropped every sandbox impression for a week
+// (caught by Door 4 / Telegram validation 2026-05-08).
+//
+// Returns:
+//   {
+//     window_hours: 24,
+//     production: { auction_wins, impressions, ratio, alert: bool },
+//     sandbox:    { auction_wins, impressions, ratio, alert: bool },
+//     orphan_wins: [...]   -- top 10 winning auctions with no impression
+//     thresholds: { ratio_floor: 0.5 }
+//   }
+//
+// The alert flag fires when ratio < 0.5 AND there were >= 10 wins (low
+// volume periods will naturally have noisy ratios).
+//
+// Call via: GET /api/stats?type=recon (cron) OR ?type=recon&debug=1 (manual)
+async function handleRecon(req, res) {
+  const sb = supa();
+  if (!sb) {
+    // Demo mode — no Supabase, no recon possible. Return a clear no-op
+    // response so cron doesn't error.
+    return res.status(200).json({
+      mode: "demo",
+      message: "Recon requires Supabase. Demo mode runs in-memory and resets per request.",
+    });
+  }
+
+  const RATIO_FLOOR  = 0.5;
+  const MIN_WINS_FOR_ALERT = 10;
+  const sinceIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+
+  // ── Counts ──
+  // Use { count: "exact", head: true } pattern so we don't pull rows.
+  async function countAuctionWins(isSandbox) {
+    const { count, error } = await sb.from("auction_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("outcome", "won")
+      .eq("is_sandbox", isSandbox)
+      .gte("ts", sinceIso);
+    if (error) console.error("bbx:recon:auction_wins_query_fail", error.message);
+    return count || 0;
+  }
+  async function countImpressions(isSandbox) {
+    const { count, error } = await sb.from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "impression")
+      .eq("is_sandbox", isSandbox)
+      .gte("created_at", sinceIso);
+    if (error) console.error("bbx:recon:impressions_query_fail", error.message);
+    return count || 0;
+  }
+
+  const [prodWins, prodImps, sbxWins, sbxImps] = await Promise.all([
+    countAuctionWins(false),
+    countImpressions(false),
+    countAuctionWins(true),
+    countImpressions(true),
+  ]);
+
+  function summary(wins, imps) {
+    const ratio = wins > 0 ? +(imps / wins).toFixed(3) : null;
+    const alert = wins >= MIN_WINS_FOR_ALERT && ratio !== null && ratio < RATIO_FLOOR;
+    return { auction_wins: wins, impressions: imps, ratio, alert };
+  }
+  const production = summary(prodWins, prodImps);
+  const sandbox    = summary(sbxWins, sbxImps);
+
+  // ── Orphan wins — winning auctions with no impression event ──
+  // Top 10 most recent. Useful for diagnosing the actual write_fail row
+  // shape (campaign_id, integration_method) when an alert fires.
+  let orphanWins = [];
+  try {
+    const { data: recentWins } = await sb.from("auction_logs")
+      .select("auction_id, ts, integration_method, is_sandbox, winner_campaign_id, request")
+      .eq("outcome", "won")
+      .gte("ts", sinceIso)
+      .order("ts", { ascending: false })
+      .limit(50);
+    if (Array.isArray(recentWins) && recentWins.length > 0) {
+      const aucIds = recentWins.map((r) => r.auction_id);
+      const { data: hits } = await sb.from("events")
+        .select("auction_id")
+        .eq("event_type", "impression")
+        .in("auction_id", aucIds);
+      const matched = new Set((hits || []).map((h) => h.auction_id));
+      orphanWins = recentWins
+        .filter((r) => !matched.has(r.auction_id))
+        .slice(0, 10)
+        .map((r) => ({
+          auction_id:        r.auction_id,
+          ts:                r.ts,
+          integration_method: r.integration_method,
+          is_sandbox:        r.is_sandbox,
+          campaign_id:       r.winner_campaign_id,
+          host_app:          r.request && r.request.host_app,
+        }));
+    }
+  } catch (e) {
+    console.error("bbx:recon:orphan_query_fail", e && e.message);
+  }
+
+  // ── Structured log so Vercel monitoring can pick up alerts ──
+  // Same prefix shape as track.js write_fail. Anything an operator should
+  // see surfaces under `bbx:recon:*` in logs.
+  if (production.alert || sandbox.alert) {
+    console.error("bbx:recon:alert", JSON.stringify({
+      ts: new Date().toISOString(),
+      tag: "recon.alert",
+      production, sandbox,
+      orphan_count: orphanWins.length,
+      orphan_sample: orphanWins.slice(0, 3),
+    }));
+  } else {
+    // Clean run — log at info level so operators can see the cron is alive.
+    console.log("bbx:recon:ok", JSON.stringify({
+      ts: new Date().toISOString(),
+      tag: "recon.ok",
+      production, sandbox,
+    }));
+  }
+
+  return res.status(200).json({
+    window_hours: 24,
+    production, sandbox,
+    orphan_wins: orphanWins,
+    thresholds: {
+      ratio_floor:           RATIO_FLOOR,
+      min_wins_for_alert:    MIN_WINS_FOR_ALERT,
+    },
+    generated_at: new Date().toISOString(),
+  });
+}
+
 // Aggregates the events table into daily_stats for a given date.
 // Idempotent: uses UPSERT on the (date, campaign_id, developer_id) unique key.
 // Call via: POST /api/stats?type=aggregate&date=2026-04-15

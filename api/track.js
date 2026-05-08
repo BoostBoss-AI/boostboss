@@ -298,7 +298,30 @@ module.exports = async function handler(req, res) {
       if (error.code === "23505") {
         res.setHeader("x-track-deduplicated", "race");
       } else {
-        console.error("[Track] event insert:", error.message);
+        // Phase A — silent-failure observability. Structured log so Vercel
+        // log search can grep `bbx:track:write_fail` and surface every
+        // dropped beacon. Includes enough context to diagnose without PII.
+        // Surfaced by Door 4 / Telegram validation 2026-05-08 — a uuid type
+        // mismatch had been silently dropping every sandbox impression.
+        console.error("bbx:track:write_fail", JSON.stringify({
+          ts: new Date().toISOString(),
+          tag: "track.write_fail",
+          event_type:         record.event_type,
+          campaign_id:        record.campaign_id,
+          auction_id:         record.auction_id,
+          integration_method: record.integration_method,
+          is_sandbox:         record.is_sandbox,
+          surface:            record.surface,
+          format:             record.format,
+          pg_code:            error.code || null,
+          pg_message:         error.message || null,
+          pg_details:         error.details || null,
+        }));
+        // Surface via response header too, so SDK callers that DO inspect
+        // the response know something went wrong (most fire-and-forget,
+        // but the JS Snippet's `data-debug` mode reads this).
+        res.setHeader("x-track-write-failed", "1");
+        res.setHeader("x-track-write-fail-code", String(error.code || "unknown"));
       }
     }
   } else {
