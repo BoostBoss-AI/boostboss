@@ -1,0 +1,16 @@
+{
+  "name": "lumi-telegram-example-bot",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway Telegram bot demonstrating @boostbossai/lumi-telegram. Door 4 internal validation.",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "@boostbossai/lumi-telegram": "*",
+    "dotenv": "^16.4.5"
+  }
+}

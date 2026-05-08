@@ -1,0 +1,16 @@
+{
+  "name": "lumi-slack-example-bot",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway Slack bot demonstrating @boostbossai/lumi-slack. Door 4 internal validation.",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.18.0",
+    "@boostbossai/lumi-slack": "*",
+    "dotenv": "^16.4.5"
+  }
+}

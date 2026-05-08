@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Article AI · Summarizer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FFFFFF; --ink: #0F0F1A; --ink-soft: #4B4B5E;
+    --line: #E5E7EB; --muted: #6B7280; --pink: #FF2D78; --cyan: #04BEFE;
+    /* Lumi reads these CSS vars for in-extension theming */
+    --lumi-card-bg: #FFFFFF; --lumi-card-border: #E5E7EB;
+    --lumi-text: #0F0F1A; --lumi-text-muted: #6B7280;
+    --lumi-cta-bg: #0F0F1A; --lumi-cta-text: #FFFFFF;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    color: var(--ink); background: var(--bg);
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+
+  /* Header — mock extension chrome */
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; background: #0F0F1A; color: #fff;
+  }
+  header .mark {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  header .name { font-size: 14px; font-weight: 700; }
+  header .sub { font-size: 11px; opacity: 0.7; margin-left: 4px; }
+
+  /* Tab bar */
+  .tabs {
+    display: flex; background: #F4F3EE; padding: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tabs .tab {
+    flex: 1; padding: 7px 10px; text-align: center;
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    border-radius: 6px; cursor: pointer; user-select: none;
+  }
+  .tabs .tab.active { background: #fff; color: var(--ink); }
+
+  /* Body — summary content + bottom ad slot */
+  main {
+    padding: 18px 16px 16px; flex: 1;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .eyebrow {
+    font-size: 10px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  .summary li {
+    list-style: none; padding: 5px 0; font-size: 13px;
+    color: var(--ink); line-height: 1.5;
+  }
+  .summary li::before {
+    content: "▸"; color: var(--pink); margin-right: 8px;
+  }
+  .related a {
+    display: block; padding: 4px 0; font-size: 12.5px;
+    color: var(--cyan); text-decoration: none;
+  }
+  .related a:hover { text-decoration: underline; }
+
+  /* Ad slot host — Lumi renders inside this */
+  #ad-slot { margin-top: auto; }
+  .placeholder {
+    border: 1px dashed var(--line); border-radius: 10px;
+    padding: 16px; text-align: center; color: var(--muted);
+    font-size: 11.5px;
+  }
+
+  /* Validation banner */
+  .val-banner {
+    background: #FFE6F0; border-bottom: 1px dashed var(--pink);
+    padding: 8px 12px; font-size: 11px; color: #B91C1C; font-weight: 600;
+    text-align: center;
+  }
+  .val-banner code {
+    background: rgba(15,15,26,0.06); padding: 0 4px; border-radius: 3px;
+    font-family: "SF Mono", Consolas, monospace; font-size: 10.5px;
+  }
+
+  /* Live event log */
+  .devlog {
+    background: #0F0F1A; color: #B0B0C7;
+    font-family: "SF Mono", Consolas, monospace; font-size: 10.5px;
+    padding: 8px 12px; max-height: 100px; overflow-y: auto;
+    border-top: 1px solid #1A1A2E;
+  }
+  .devlog .row { padding: 1px 0; }
+  .devlog .row .t { color: #6B7280; margin-right: 6px; }
+  .devlog .row .ev { color: #04BEFE; }
+  .devlog .row.error .ev { color: #FF2D78; }
+</style>
+</head>
+<body>
+
+<div class="val-banner">
+  Door 3 validation · publisher_id <code>pub_test_demo</code> · sandbox
+</div>
+
+<header>
+  <div class="mark">A</div>
+  <div>
+    <div class="name">Article AI</div>
+    <div class="sub">Summarizer · Door 3 test</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active">Summary</div>
+  <div class="tab">Q&amp;A</div>
+  <div class="tab">Sources</div>
+  <div class="tab">Notes</div>
+</div>
+
+<main>
+  <div>
+    <div class="eyebrow">Key points</div>
+    <ul class="summary" style="margin-top: 8px;">
+      <li>AI infrastructure demand has tripled YoY</li>
+      <li>Bottleneck shifted from compute to deployment surface area</li>
+      <li>Integration is the new lever — not raw model size</li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="eyebrow">Related</div>
+    <div class="related" style="margin-top: 6px;">
+      <a href="#">→ Why Vercel won deploys (TC)</a>
+      <a href="#">→ Replit's pivot to agents</a>
+    </div>
+  </div>
+
+  <!-- Ad slot — Lumi.render() targets #ad-slot -->
+  <div id="ad-slot">
+    <div class="placeholder">Loading sponsored content…</div>
+  </div>
+</main>
+
+<div class="devlog" id="devlog"></div>
+
+<script type="module" src="sidepanel.js"></script>
+
+</body>
+</html>

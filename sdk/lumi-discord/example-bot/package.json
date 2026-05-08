@@ -1,0 +1,17 @@
+{
+  "name": "lumi-discord-example-bot",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway Discord bot demonstrating @boostbossai/lumi-discord. Door 4 internal validation.",
+  "main": "bot.js",
+  "scripts": {
+    "register": "node register-commands.js",
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "@boostbossai/lumi-discord": "*",
+    "dotenv": "^16.4.5"
+  }
+}
