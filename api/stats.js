@@ -766,13 +766,17 @@ async function handleRecon(req, res) {
 
   // ── Counts ──
   // Use { count: "exact", head: true } pattern so we don't pull rows.
-  async function countAuctionWins(isSandbox) {
+  // Production wins are outcome='won'; sandbox traffic short-circuits the
+  // real auction and gets outcome='sandbox' (mcp.js emitLog). Either way
+  // an ad was served and an impression beacon SHOULD have followed.
+  async function countAuctionsServed(isSandbox) {
+    const wantedOutcome = isSandbox ? "sandbox" : "won";
     const { count, error } = await sb.from("auction_logs")
       .select("*", { count: "exact", head: true })
-      .eq("outcome", "won")
+      .eq("outcome", wantedOutcome)
       .eq("is_sandbox", isSandbox)
       .gte("ts", sinceIso);
-    if (error) console.error("bbx:recon:auction_wins_query_fail", error.message);
+    if (error) console.error("bbx:recon:auctions_served_query_fail", error.message);
     return count || 0;
   }
   async function countImpressions(isSandbox) {
@@ -786,9 +790,9 @@ async function handleRecon(req, res) {
   }
 
   const [prodWins, prodImps, sbxWins, sbxImps] = await Promise.all([
-    countAuctionWins(false),
+    countAuctionsServed(false),
     countImpressions(false),
-    countAuctionWins(true),
+    countAuctionsServed(true),
     countImpressions(true),
   ]);
 
@@ -807,7 +811,7 @@ async function handleRecon(req, res) {
   try {
     const { data: recentWins } = await sb.from("auction_logs")
       .select("auction_id, ts, integration_method, is_sandbox, winner_campaign_id, request")
-      .eq("outcome", "won")
+      .in("outcome", ["won", "sandbox"])  // both real wins and sandbox short-circuits served ads
       .gte("ts", sinceIso)
       .order("ts", { ascending: false })
       .limit(50);
