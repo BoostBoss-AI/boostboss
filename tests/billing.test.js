@@ -872,6 +872,49 @@ async function test(name, fn) {
     assert(/Stripe/.test(r._body.error));
   });
 
+  // ── Phase F — integration_verify ────────────────────────────────────
+  await test("integration_verify requires GET", async () => {
+    const r = await run({
+      method: "POST", query: { action: "integration_verify" },
+      body: { developer_id: "x" },
+    });
+    assert.strictEqual(r._status, 405);
+  });
+
+  await test("integration_verify requires developer_id", async () => {
+    const r = await run({
+      method: "GET", query: { action: "integration_verify" },
+    });
+    assert.strictEqual(r._status, 400);
+  });
+
+  await test("integration_verify demo mode returns all-doors-inactive shape", async () => {
+    const r = await run({
+      method: "GET",
+      query: { action: "integration_verify", developer_id: "dev_demo_e2e" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert.strictEqual(r._body.any_active, false);
+    assert.strictEqual(r._body.first_door_at, null);
+    for (const door of ["mcp", "js-snippet", "npm-sdk", "rest-api"]) {
+      assert(r._body[door], "should have row for door " + door);
+      assert.strictEqual(r._body[door].active, false);
+      assert.strictEqual(r._body[door].impressions_24h, 0);
+      assert.strictEqual(r._body[door].clicks_24h, 0);
+      assert.strictEqual(r._body[door].last_seen_at, null);
+    }
+  });
+
+  await test("integration_verify accepts ?id= as alias for developer_id", async () => {
+    const r = await run({
+      method: "GET",
+      query: { action: "integration_verify", id: "dev_alias_e2e" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+  });
+
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }
   else console.log(`\x1b[32m${passed} checks passed.\x1b[0m`);

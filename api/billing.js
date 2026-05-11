@@ -166,6 +166,11 @@ module.exports = async function handler(req, res) {
       // from Stripe and sync our flags. Used when account.updated webhook
       // doesn't propagate (Day 5 scenario).
       case "admin_sync_stripe_account": return await handleAdminSyncStripeAccount(req, res);
+      // Phase F — per-door integration verification. Returns whether each
+      // of the four doors (mcp, js-snippet, npm-sdk, rest-api) has fired
+      // any event for this publisher in the last 24h. Powers the
+      // onboarding wizard's live "Verify" check.
+      case "integration_verify":      return await handleIntegrationVerify(req, res);
       case "invoice":         return await handleInvoice(req, res);
       case "payout":          return await handlePayout(req, res);
       case "history":         return await handleHistory(req, res);
@@ -1430,6 +1435,87 @@ async function handleAdminSyncStripeAccount(req, res) {
     instant_payouts_enabled: instantOn,
     requirements_due:  reqs,
   });
+}
+
+// GET /api/billing?action=integration_verify&developer_id=<UUID>
+//
+// Phase F — onboarding wizard verification. Returns per-door integration
+// state for a given publisher:
+//
+//   {
+//     mcp:        { active, impressions_24h, clicks_24h, last_seen_at },
+//     js-snippet: { ... },
+//     npm-sdk:    { ... },
+//     rest-api:   { ... },
+//     any_active: boolean,
+//     first_door_at: ISO timestamp or null  (first time any door went active)
+//   }
+//
+// Used by the dashboard's per-door wizard to render real-time "✓ Verified"
+// checkmarks. Public — no auth — because the data is per-publisher and
+// the developer_id is the identifier the publisher already knows about
+// themselves.
+async function handleIntegrationVerify(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  const developerId = req.query && (req.query.developer_id || req.query.id);
+  if (!developerId) return res.status(400).json({ error: "Missing developer_id" });
+
+  const DOORS = ["mcp", "js-snippet", "npm-sdk", "rest-api"];
+
+  // Demo mode
+  const sb = supa();
+  if (!sb) {
+    const out = { mode: "demo", any_active: false, first_door_at: null };
+    for (const d of DOORS) {
+      out[d] = { active: false, impressions_24h: 0, clicks_24h: 0, last_seen_at: null };
+    }
+    return res.json(out);
+  }
+
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+
+  // One query, group in JS — Supabase JS client doesn't expose GROUP BY
+  // cleanly without raw SQL.
+  let rows = [];
+  try {
+    const { data, error } = await sb.from("events")
+      .select("event_type, integration_method, created_at")
+      .eq("developer_id", developerId)
+      .gte("created_at", since)
+      .not("integration_method", "is", null);
+    if (error) throw error;
+    rows = data || [];
+  } catch (e) {
+    console.error("bbx:integration_verify:fail",
+      JSON.stringify({ developer_id: developerId, message: e && e.message }));
+    return res.status(500).json({ error: "query failed", message: e && e.message });
+  }
+
+  const byDoor = {};
+  for (const d of DOORS) byDoor[d] = { impressions_24h: 0, clicks_24h: 0, last_seen_at: null };
+  for (const r of rows) {
+    const door = r.integration_method;
+    if (!byDoor[door]) continue;
+    if (r.event_type === "impression") byDoor[door].impressions_24h++;
+    if (r.event_type === "click")      byDoor[door].clicks_24h++;
+    if (!byDoor[door].last_seen_at || new Date(r.created_at) > new Date(byDoor[door].last_seen_at)) {
+      byDoor[door].last_seen_at = r.created_at;
+    }
+  }
+
+  const out = { mode: "stripe", any_active: false, first_door_at: null };
+  for (const d of DOORS) {
+    const v = byDoor[d];
+    const active = (v.impressions_24h + v.clicks_24h) > 0;
+    out[d] = { active, ...v };
+    if (active) out.any_active = true;
+    if (active && v.last_seen_at) {
+      if (!out.first_door_at || new Date(v.last_seen_at) < new Date(out.first_door_at)) {
+        out.first_door_at = v.last_seen_at;
+      }
+    }
+  }
+  return res.json(out);
 }
 
 // ── invoice generation (advertiser) ────────────────────────────────────
