@@ -2626,7 +2626,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 };
                 localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
                 // No session token in api-key-only mode; store a marker
-                localStorage.setItem('bb_dev_session', JSON.stringify({ token: null, user_id: userProfile.user_id, api_key_only: true }));
+                localStorage.setItem('bb_dev_session', JSON.stringify({ token: null, user_id: userProfile.id, api_key_only: true }));
                 loadDashboard();
             } catch (e) {
                 errEl.textContent = 'Network error: ' + (e.message || 'unknown');
@@ -3613,46 +3613,24 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         }
 
         // ───────────── LOAD EARNINGS DATA ─────────────
+        // Phase E Day 6: payout_status is the source of truth for
+        // balance + threshold + next payout date + stripe_account_id.
+        // The legacy /api/billing?action=earnings endpoint still feeds
+        // the older "total_earnings" stats card and the historical
+        // earnings table; we keep calling it for those, but the payout
+        // section is fully driven by payout_status now.
         async function loadEarningsData() {
-            if (!userProfile || !userProfile.api_key) return;
-            try {
-                const r = await fetch(`${API_BASE}/api/billing?action=earnings&key=${encodeURIComponent(userProfile.api_key)}`);
-                if (!r.ok) return;
-                const data = await r.json();
-                // Update payout section
-                const pending = parseFloat(data.pending_payout) || 0;
-                document.getElementById('pendingPayout').textContent = '$' + pending.toFixed(2);
-                document.getElementById('payoutThreshold').textContent = '$' + (data.payout_threshold || 25).toFixed(2);
-                if (data.next_payout_date) {
-                    const d = new Date(data.next_payout_date);
-                    document.getElementById('nextPayoutDate').textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                }
-                // Enable payout button only if above threshold and Stripe connected
-                const threshold = parseFloat(data.payout_threshold) || 25;
-                const stripeConnected = !!(userProfile && userProfile.stripe_account_id);
-                const btn = document.getElementById('payoutBtn');
-                if (btn) {
-                    btn.disabled = !(pending >= threshold && stripeConnected);
-                    btn.title = !stripeConnected
-                        ? 'Connect Stripe first to enable payouts'
-                        : pending < threshold
-                            ? `Minimum payout threshold is $${threshold.toFixed(2)}`
-                            : 'Request your payout';
-                }
-            } catch (e) {
-                console.error('Earnings load error:', e);
-            }
-            // Phase E Day 1 — load Stripe Connect status and render banner
-            loadPayoutStatus();
+            // Phase E payout section — single source of truth.
+            await loadPayoutStatus();
         }
 
         // ───────────── PHASE E PAYOUT STATUS ─────────────
         // Reads /api/billing?action=payout_status, renders the action-state
         // banner: setup_required / threshold_pending / blocked / enabled.
         async function loadPayoutStatus() {
-            if (!userProfile || !userProfile.user_id) return;
+            if (!userProfile || !userProfile.id) return;
             try {
-                const r = await fetch(`${API_BASE}/api/billing?action=payout_status&developer_id=${encodeURIComponent(userProfile.user_id)}`);
+                const r = await fetch(`${API_BASE}/api/billing?action=payout_status&developer_id=${encodeURIComponent(userProfile.id)}`);
                 if (!r.ok) return;
                 const s = await r.json();
                 const banner = document.getElementById('payoutStatusBanner');
@@ -3661,6 +3639,25 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 // Update threshold display from API (single source of truth)
                 if (s.balance != null) {
                     document.getElementById('pendingPayout').textContent = '$' + (parseFloat(s.balance) || 0).toFixed(2);
+                }
+                // Phase E Day 6: threshold is fixed at $25 (Decision 3).
+                // No longer driven by the legacy /api/billing?action=earnings field.
+                const thresholdEl = document.getElementById('payoutThreshold');
+                if (thresholdEl) thresholdEl.textContent = '$25.00';
+                // Enable/disable Request Payout button using the same
+                // single source of truth.
+                const balance = parseFloat(s.balance) || 0;
+                const btn = document.getElementById('payoutBtn');
+                if (btn) {
+                    const eligible = s.payouts_enabled && !s.payout_blocked && balance >= 25;
+                    btn.disabled = !eligible;
+                    btn.title = !s.payouts_enabled
+                        ? 'Connect Stripe first to enable payouts'
+                        : s.payout_blocked
+                            ? 'Resolve the Stripe issue above first'
+                            : balance < 25
+                                ? `Minimum payout threshold is $25.00`
+                                : 'Request your payout now';
                 }
                 // Render next-payout label
                 const nextEl = document.getElementById('nextPayoutDate');
@@ -3712,12 +3709,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // Banner click → mint a fresh Account Link via backend (HARD-3:
         // never store the URL; it expires in ~5 minutes and is single-use).
         async function resolveStripeIssue() {
-            if (!userProfile || !userProfile.user_id) return;
+            if (!userProfile || !userProfile.id) return;
             try {
                 const r = await fetch(`${API_BASE}/api/billing?action=refresh_connect`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ developer_id: userProfile.user_id }),
+                    body: JSON.stringify({ developer_id: userProfile.id }),
                 });
                 const data = await r.json();
                 if (data.onboarding_url) {
@@ -3748,7 +3745,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const r = await fetch(`${API_BASE}/api/billing?action=payout`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
-                    body: JSON.stringify({ developer_id: userProfile.user_id })
+                    body: JSON.stringify({ developer_id: userProfile.id })
                 });
                 const data = await r.json();
                 if (data.payout_id || data.mode === 'demo') {
@@ -3770,7 +3767,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const r = await fetch(`${API_BASE}/api/billing?action=create_connect`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
-                    body: JSON.stringify({ developer_id: userProfile.user_id, email: userProfile.email })
+                    body: JSON.stringify({ developer_id: userProfile.id, email: userProfile.email })
                 });
                 const data = await r.json();
                 if (!r.ok) {

@@ -162,6 +162,10 @@ module.exports = async function handler(req, res) {
       // Phase E Day 5 — E2E inventory diagnostic. Returns the count and
       // most-recent timestamp at every checkpoint of the autonomous loop.
       case "e2e_inventory":           return await handleE2EInventory(req, res);
+      // Phase E Day 6 — pull a developer's Stripe account state directly
+      // from Stripe and sync our flags. Used when account.updated webhook
+      // doesn't propagate (Day 5 scenario).
+      case "admin_sync_stripe_account": return await handleAdminSyncStripeAccount(req, res);
       case "invoice":         return await handleInvoice(req, res);
       case "payout":          return await handlePayout(req, res);
       case "history":         return await handleHistory(req, res);
@@ -571,6 +575,44 @@ function computePayoutFee(balance, method) {
   return 0;
 }
 
+// Phase E Day 6 — detect the platform's available-balance currency so
+// stripe.transfers.create() doesn't reject with "insufficient available
+// funds" on non-USD platform accounts.
+//
+// Decision 4 of the design doc says "USD only at launch" — but that's a
+// requirement on the platform Stripe account itself (i.e. set the
+// platform region to US during onboarding), NOT a hardcode in our code.
+// Hardcoding made the Day 5 sandbox (which happened to be SGD-based)
+// fail every transfer. Reading the platform's currency at runtime keeps
+// us correct across any platform region.
+//
+// Cached for 5 min — platform currency changes essentially never.
+let _platformCurrencyCache = { value: null, fetchedAt: 0 };
+async function getPlatformCurrency(s, fallback = "usd") {
+  if (!s) return fallback;
+  const now = Date.now();
+  if (_platformCurrencyCache.value && (now - _platformCurrencyCache.fetchedAt) < 5 * 60 * 1000) {
+    return _platformCurrencyCache.value;
+  }
+  try {
+    const bal = await s.balance.retrieve();
+    const cur = (bal.available && bal.available[0] && bal.available[0].currency) ||
+                (bal.pending && bal.pending[0] && bal.pending[0].currency) ||
+                fallback;
+    _platformCurrencyCache = { value: cur, fetchedAt: now };
+    return cur;
+  } catch (e) {
+    console.error("bbx:platform_currency:retrieve_fail",
+      JSON.stringify({ message: e && e.message }));
+    return fallback;
+  }
+}
+// Exported for tests.
+module.exports._getPlatformCurrency = getPlatformCurrency;
+module.exports._resetPlatformCurrencyCache = function () {
+  _platformCurrencyCache = { value: null, fetchedAt: 0 };
+};
+
 async function handleRunPayoutCron(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   if (!isCronAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
@@ -664,6 +706,12 @@ async function handleRunPayoutCron(req, res) {
   }
   const balByDev = new Map(balances.map((b) => [b.developer_id, parseFloat(b.balance) || 0]));
 
+  // Detect the platform's currency once per cron run. See getPlatformCurrency()
+  // above for why we don't hardcode "usd". Even on a USD platform this is
+  // a single cached call, so the overhead is one Stripe API hit per week.
+  const platformCurrency = await getPlatformCurrency(s);
+  summary.platform_currency = platformCurrency;
+
   // Loop and fire transfers.
   for (const dev of devs) {
     const balance = balByDev.get(dev.id);
@@ -704,7 +752,7 @@ async function handleRunPayoutCron(req, res) {
     try {
       const tr = await s.transfers.create({
         amount: amountCents,
-        currency: "usd",
+        currency: platformCurrency,        // Day 6 fix: dynamic, not hardcoded "usd"
         destination: dev.stripe_account_id,
         metadata: {
           developer_id: dev.id,
@@ -859,11 +907,13 @@ async function handleRunPayoutRetrySweep(req, res) {
     }
 
     const amountCents = Math.round(parseFloat(p.amount) * 100);
+    // Day 6 fix: currency from platform balance, not hardcoded.
+    const platformCurrencyR = await getPlatformCurrency(s);
     let transferId = null;
     let stripeErr  = null;
     try {
       const tr = await s.transfers.create({
-        amount: amountCents, currency: "usd",
+        amount: amountCents, currency: platformCurrencyR,
         destination: dev.stripe_account_id,
         metadata: { developer_id: p.developer_id, retry_of: p.id, run_id: runId },
       });
@@ -1312,6 +1362,76 @@ async function handleE2EInventory(req, res) {
   return res.json(out);
 }
 
+// POST /api/billing?action=admin_sync_stripe_account  body: { developer_id }
+//
+// Phase E Day 6 — manually fetch a developer's Stripe Connect account from
+// Stripe and sync our developers.payouts_enabled / payout_blocked flags.
+// Use when the account.updated webhook didn't propagate.
+//
+// Idempotent: re-runnable.
+async function handleAdminSyncStripeAccount(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  if (!isAdminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const { developer_id } = req.body || {};
+  if (!developer_id) return res.status(400).json({ error: "Missing developer_id" });
+
+  const sb = supa();
+  const s  = stripe();
+  if (!sb || !s) {
+    return res.status(500).json({ error: "Production Supabase + Stripe required" });
+  }
+
+  // Look up the developer's stripe_account_id
+  const { data: dev, error: devErr } = await sb.from("developers")
+    .select("id, email, stripe_account_id")
+    .eq("id", developer_id).single();
+  if (devErr || !dev) return res.status(404).json({ error: "developer not found" });
+  if (!dev.stripe_account_id) return res.status(400).json({ error: "no stripe_account_id on developer" });
+
+  // Fetch the connected account from Stripe
+  let account;
+  try {
+    account = await s.accounts.retrieve(dev.stripe_account_id);
+  } catch (e) {
+    return res.status(500).json({ error: "Stripe retrieve failed", message: e && e.message });
+  }
+
+  const reqs       = (account.requirements && account.requirements.currently_due) || [];
+  const payoutsOk  = !!account.payouts_enabled && reqs.length === 0;
+  const blocked    = !payoutsOk && (reqs.length > 0 || account.payouts_enabled === false);
+  const blockedReason = blocked
+    ? (reqs.length > 0 ? "requirements_due: " + reqs.slice(0, 5).join(", ") : "payouts_disabled_by_stripe")
+    : null;
+  const caps       = (account.capabilities || {});
+  const instantOn  = caps.instant_payouts === "active";
+
+  await sb.from("developers").update({
+    payouts_enabled:         payoutsOk,
+    payout_blocked:          blocked,
+    payout_blocked_reason:   blockedReason,
+    payout_blocked_at:       blocked ? new Date().toISOString() : null,
+    instant_payouts_enabled: instantOn,
+    stripe_requirements_due: reqs,
+    updated_at:              new Date().toISOString(),
+  }).eq("id", developer_id);
+
+  console.log("bbx:admin:sync_stripe_account", JSON.stringify({
+    developer_id, email: dev.email, account_id: dev.stripe_account_id,
+    payouts_enabled: payoutsOk, blocked, reqs: reqs.length,
+  }));
+
+  return res.json({
+    developer_id,
+    stripe_account_id: dev.stripe_account_id,
+    payouts_enabled:   payoutsOk,
+    payout_blocked:    blocked,
+    payout_blocked_reason: blockedReason,
+    instant_payouts_enabled: instantOn,
+    requirements_due:  reqs,
+  });
+}
+
 // ── invoice generation (advertiser) ────────────────────────────────────
 // Reads the auction ledger for all wins on this advertiser's campaigns
 // in the period and sums them. Optionally creates a Stripe invoice.
@@ -1590,6 +1710,20 @@ async function handleWebhook(req, res) {
   if (event.type === "account.updated") {
     const account = event.data.object;
     const developerId = account.metadata && account.metadata.developer_id;
+    // Phase E Day 6 — structured logging so future ops can see every
+    // account.updated event we receive and what we did with it. Without
+    // this, the Day 5 issue (webhook never flipped payouts_enabled) was
+    // invisible from logs.
+    console.log("bbx:webhook:account_updated", JSON.stringify({
+      tag: "webhook.account_updated",
+      account_id: account.id,
+      developer_id: developerId || null,
+      payouts_enabled: !!account.payouts_enabled,
+      charges_enabled: !!account.charges_enabled,
+      currently_due: ((account.requirements && account.requirements.currently_due) || []).length,
+      has_metadata: !!(account.metadata && Object.keys(account.metadata).length),
+      capabilities: account.capabilities ? Object.keys(account.capabilities) : [],
+    }));
     if (developerId) {
       const reqs       = (account.requirements && account.requirements.currently_due) || [];
       const payoutsOk  = !!account.payouts_enabled && reqs.length === 0;

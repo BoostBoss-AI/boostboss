@@ -802,6 +802,76 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 405);
   });
 
+  // ── Phase E Day 6 — currency detection + admin_sync_stripe_account ──
+  await test("getPlatformCurrency falls back to usd with null Stripe client", async () => {
+    billing._resetPlatformCurrencyCache();
+    const cur = await billing._getPlatformCurrency(null);
+    assert.strictEqual(cur, "usd");
+  });
+
+  await test("getPlatformCurrency uses available[0].currency from balance retrieve", async () => {
+    billing._resetPlatformCurrencyCache();
+    const fakeStripe = {
+      balance: {
+        retrieve: async () => ({
+          available: [{ currency: "sgd", amount: 11900 }],
+          pending: [{ currency: "sgd", amount: 5924 }],
+        }),
+      },
+    };
+    const cur = await billing._getPlatformCurrency(fakeStripe);
+    assert.strictEqual(cur, "sgd");
+  });
+
+  await test("getPlatformCurrency caches result within TTL", async () => {
+    billing._resetPlatformCurrencyCache();
+    let callCount = 0;
+    const fakeStripe = {
+      balance: {
+        retrieve: async () => {
+          callCount++;
+          return { available: [{ currency: "eur", amount: 0 }] };
+        },
+      },
+    };
+    await billing._getPlatformCurrency(fakeStripe);
+    await billing._getPlatformCurrency(fakeStripe);
+    await billing._getPlatformCurrency(fakeStripe);
+    assert.strictEqual(callCount, 1, "second + third calls should hit cache");
+  });
+
+  await test("getPlatformCurrency falls back when retrieve throws", async () => {
+    billing._resetPlatformCurrencyCache();
+    const brokenStripe = {
+      balance: {
+        retrieve: async () => { throw new Error("nope"); },
+      },
+    };
+    const cur = await billing._getPlatformCurrency(brokenStripe);
+    assert.strictEqual(cur, "usd");
+  });
+
+  await test("admin_sync_stripe_account requires POST", async () => {
+    const r = await run({ method: "GET", query: { action: "admin_sync_stripe_account" } });
+    assert.strictEqual(r._status, 405);
+  });
+
+  await test("admin_sync_stripe_account requires developer_id", async () => {
+    const r = await run({
+      method: "POST", query: { action: "admin_sync_stripe_account" }, body: {},
+    });
+    assert.strictEqual(r._status, 400);
+  });
+
+  await test("admin_sync_stripe_account demo mode 500s (requires Stripe+Supabase)", async () => {
+    const r = await run({
+      method: "POST", query: { action: "admin_sync_stripe_account" },
+      body: { developer_id: "anything" },
+    });
+    assert.strictEqual(r._status, 500);
+    assert(/Stripe/.test(r._body.error));
+  });
+
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }
   else console.log(`\x1b[32m${passed} checks passed.\x1b[0m`);
