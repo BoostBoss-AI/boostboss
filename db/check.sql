@@ -58,7 +58,10 @@ WHERE NOT EXISTS (
       '08_auction_logs.sql',
       '08_voyage_embeddings.sql',
       '09_target_integration_methods.sql',
-      '10_events_campaign_id_text.sql'
+      '10_events_campaign_id_text.sql',
+      '11_conversion_config.sql',
+      '12_stripe_connect_payouts.sql',
+      '13_publisher_balance_accrual.sql'
     ]) AS name
   ) d
   WHERE d.name = m.name

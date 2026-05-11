@@ -129,6 +129,14 @@
     {
       "path": "/api/stats?type=recon",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/billing?action=run_payout_cron",
+      "schedule": "0 12 * * 5"
+    },
+    {
+      "path": "/api/billing?action=run_payout_retry_sweep",
+      "schedule": "0 12 * * 6"
     }
   ]
 }

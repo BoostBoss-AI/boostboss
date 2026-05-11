@@ -15,6 +15,12 @@
 
 const TAKE_RATE = Number(process.env.BBX_TAKE_RATE) || 0.15;
 
+// Phase E Day 2 — per-event balance accrual. Imported here so it runs
+// inside the same handler invocation as the event insert; lazy require
+// keeps cold-start cost minimal when balance isn't wired (e.g. legacy
+// callers exclusively in demo mode).
+const publisherBalance = require("./_lib/publisher_balance.js");
+
 // Rate limiting: prevent abuse by limiting events per IP per minute
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 120; // 120 events per IP per minute (2/sec avg)
@@ -199,9 +205,34 @@ module.exports = async function handler(req, res) {
     params.integration_method ||
     ""
   ).toLowerCase().trim();
-  const integrationMethod = ["mcp", "js-snippet", "npm-sdk", "rest-api"].includes(_src)
+  let integrationMethod = ["mcp", "js-snippet", "npm-sdk", "rest-api"].includes(_src)
     ? _src
     : null;
+
+  // ── Phase B: inherit integration_method + sandbox from the originating
+  // auction when this is a conversion event. The advertiser-side pixel
+  // (public/pixel.js) doesn't know which door served the impression, so
+  // without inheritance every conversion ends up with integration_method=null
+  // and dashboard slices break.
+  let inheritedSandbox = null;
+  if (event === "conversion" && auctionId && (!integrationMethod || integrationMethod === "rest-api")) {
+    const sbI = supa();
+    if (sbI) {
+      const { data: parent } = await sbI.from("events")
+        .select("integration_method, is_sandbox")
+        .eq("auction_id", auctionId)
+        .eq("event_type", "impression")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (parent) {
+        if (!integrationMethod && parent.integration_method) {
+          integrationMethod = parent.integration_method;
+        }
+        if (parent.is_sandbox === true) inheritedSandbox = true;
+      }
+    }
+  }
 
   const record = {
     event_type: event,
@@ -233,8 +264,10 @@ module.exports = async function handler(req, res) {
     integration_method: integrationMethod,
     // Sandbox flag (db/07_sandbox.sql). True when the event came from a
     // pub_test_* / sk_test_* publisher; dashboard queries WHERE is_sandbox=false
-    // to exclude test traffic from real metrics.
-    is_sandbox: isSandbox,
+    // to exclude test traffic from real metrics. For conversions, inherit
+    // sandbox from the parent auction (Phase B) so a sandbox impression
+    // followed by a real /api/track conversion call is still tagged sandbox.
+    is_sandbox: isSandbox || inheritedSandbox === true,
     created_at: new Date().toISOString(),
   };
 
@@ -269,13 +302,27 @@ module.exports = async function handler(req, res) {
     // Insert with cost pre-computed so we never need a second update (fixes race condition)
     // Sandbox events skip cost computation entirely — record stays at cost=0,
     // payout=0, and no budget is deducted. is_sandbox tags the row so the
-    // dashboard can exclude it from real metrics.
-    if (!isSandbox && ["impression", "click", "video_complete"].includes(event)) {
+    // dashboard can exclude it from real metrics. CPA conversion events also
+    // count here (Phase B): when billing_model='cpa' and the conversion_type
+    // matches the campaign's conversion_event_types allowlist, charge bid_amount.
+    const billable = ["impression", "click", "video_complete", "conversion"].includes(event);
+    if (!isSandbox && !(inheritedSandbox === true) && billable) {
       const { data: campaign } = await sb.from("campaigns")
-        .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget")
+        .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget, conversion_event_types")
         .eq("id", campaignId).single();
       if (campaign) {
-        const cost = computeCost(event, campaign);
+        // For CPA, the conversion_type must be in the campaign's allowlist
+        // (or the allowlist is empty — meaning "any conversion counts").
+        let chargeable = true;
+        if (event === "conversion") {
+          if (campaign.billing_model !== "cpa") chargeable = false;
+          else {
+            const allow = Array.isArray(campaign.conversion_event_types)
+              ? campaign.conversion_event_types : [];
+            if (allow.length > 0 && !allow.includes(conversionType)) chargeable = false;
+          }
+        }
+        const cost = chargeable ? computeCost(event, campaign) : 0;
         if (cost > 0) {
           record.cost = cost;
           record.developer_payout = +(cost * (1 - TAKE_RATE)).toFixed(4);
@@ -323,6 +370,35 @@ module.exports = async function handler(req, res) {
         res.setHeader("x-track-write-failed", "1");
         res.setHeader("x-track-write-fail-code", String(error.code || "unknown"));
       }
+    } else {
+      // Phase E Day 2 — credit the publisher's balance after a clean
+      // event insert. Skipped for sandbox traffic (we already gated cost
+      // computation on !isSandbox + !inheritedSandbox upstream, so
+      // developer_payout is 0 for sandbox events and creditPublisherBalance
+      // no-ops on amount<=0 anyway — but we belt-and-suspenders the gate
+      // here to keep the closed loop obvious to future readers).
+      if (record.developer_payout > 0 && record.developer_id && !record.is_sandbox) {
+        try {
+          const credit = await publisherBalance.creditPublisherBalance(
+            sb, record.developer_id, record.developer_payout,
+          );
+          if (credit.applied_to_clawbacks_usd > 0) {
+            res.setHeader("x-publisher-clawback-applied",
+              String(credit.applied_to_clawbacks_usd));
+          }
+          res.setHeader("x-publisher-credit-mode", credit.mode);
+        } catch (e) {
+          // Non-fatal — the event is recorded; balance is recoverable from
+          // the events table (Decision 9 V2 rollup path). Log and move on.
+          console.error("bbx:track:credit_fail", JSON.stringify({
+            tag: "track.credit_fail",
+            developer_id:    record.developer_id,
+            developer_payout: record.developer_payout,
+            campaign_id:     record.campaign_id,
+            message:         e && e.message,
+          }));
+        }
+      }
     }
   } else {
     // ── Demo path — compute cost and attribute to developer ──
@@ -340,7 +416,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    if (["impression", "click", "video_complete"].includes(event)) {
+    if (["impression", "click", "video_complete", "conversion"].includes(event)) {
       let campaign = null;
       try {
         // _DEMO_CAMPAIGNS is a Map in campaigns.js — use .get() not .find()
@@ -349,7 +425,18 @@ module.exports = async function handler(req, res) {
         else if (Array.isArray(camps)) campaign = camps.find(c => c.id === campaignId);
       } catch (_) {}
       if (campaign) {
-        const cost = computeCost(event, campaign);
+        // Same CPA gating as the supabase path — only charge if the
+        // campaign opted into CPA and the conversion_type matches.
+        let chargeable = true;
+        if (event === "conversion") {
+          if (campaign.billing_model !== "cpa") chargeable = false;
+          else {
+            const allow = Array.isArray(campaign.conversion_event_types)
+              ? campaign.conversion_event_types : [];
+            if (allow.length > 0 && !allow.includes(conversionType)) chargeable = false;
+          }
+        }
+        const cost = chargeable ? computeCost(event, campaign) : 0;
         if (cost > 0) {
           record.cost = cost;
           record.developer_payout = +(cost * (1 - TAKE_RATE)).toFixed(4);
@@ -364,6 +451,22 @@ module.exports = async function handler(req, res) {
       }
     }
     DEMO_EVENTS.push(record);
+
+    // Phase E Day 2 — demo-path balance accrual. The publisher_balance
+    // helper maintains an in-memory map mirroring the Supabase path so
+    // tests covering the full credit+clawback flow can run without a DB.
+    if (record.developer_payout > 0 && record.developer_id && !record.is_sandbox) {
+      try {
+        const credit = await publisherBalance.creditPublisherBalance(
+          null, record.developer_id, record.developer_payout,
+        );
+        if (credit.applied_to_clawbacks_usd > 0) {
+          res.setHeader("x-publisher-clawback-applied",
+            String(credit.applied_to_clawbacks_usd));
+        }
+        res.setHeader("x-publisher-credit-mode", credit.mode);
+      } catch (_) { /* non-fatal */ }
+    }
   }
 
   // GET requests return a pixel (from <img> beacons inside ad markup)
@@ -390,6 +493,12 @@ function computeCost(event, campaign) {
   if (event === "video_complete" && campaign.billing_model === "cpv") {
     return campaign.bid_amount || 0;
   }
+  // CPA — Phase B. Charged when a matching conversion event lands. The
+  // caller (track.js handler) is responsible for filtering against the
+  // campaign's conversion_event_types allowlist before reaching here.
+  if (event === "conversion" && campaign.billing_model === "cpa") {
+    return campaign.bid_amount || 0;
+  }
   return 0;
 }
 
@@ -398,4 +507,10 @@ module.exports.HAS_SUPABASE = HAS_SUPABASE;
 module.exports._DEMO_EVENTS = DEMO_EVENTS;
 module.exports._rateLimitMap = rateLimitMap;
 module.exports._RATE_LIMIT_MAX = RATE_LIMIT_MAX;
-module.exports._reset = function () { DEMO_EVENTS.length = 0; rateLimitMap.clear(); };
+module.exports._reset = function () {
+  DEMO_EVENTS.length = 0;
+  rateLimitMap.clear();
+  // Phase E Day 2 — clear the in-memory publisher balance store too so
+  // tests don't bleed into each other.
+  publisherBalance._reset();
+};

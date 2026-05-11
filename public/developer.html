@@ -2173,15 +2173,20 @@ await message.reply({
                         <div class="key-value" id="payoutThreshold">$100.00</div>
                     </div>
                 </div>
+                <!-- Phase E Day 1 — Stripe Connect status banner.
+                     Renders 'setup_required' (no account), 'pending'
+                     (account created, requirements outstanding),
+                     'blocked' (Tier-2 failure), or 'enabled' (ready). -->
+                <div id="payoutStatusBanner" style="display:none; margin-bottom: 16px; padding: 14px 16px; border-radius: 10px; font-size: 13px; line-height: 1.5;"></div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically when your balance reaches the minimum threshold and Stripe Connect is linked">Request Payout</button>
-                    <button onclick="connectStripe()" style="
+                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically every Friday when your balance reaches $25 and Stripe Connect is linked">Request Payout</button>
+                    <button id="connectStripeBtn" onclick="connectStripe()" style="
                         padding: 12px 24px; background: #635BFF; color: #fff;
                         border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px;
                     ">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-                        Connect Stripe
+                        <span id="connectStripeLabel">Connect Stripe</span>
                     </button>
                 </div>
             </div>
@@ -3617,13 +3622,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 // Update payout section
                 const pending = parseFloat(data.pending_payout) || 0;
                 document.getElementById('pendingPayout').textContent = '$' + pending.toFixed(2);
-                document.getElementById('payoutThreshold').textContent = '$' + (data.payout_threshold || 100).toFixed(2);
+                document.getElementById('payoutThreshold').textContent = '$' + (data.payout_threshold || 25).toFixed(2);
                 if (data.next_payout_date) {
                     const d = new Date(data.next_payout_date);
                     document.getElementById('nextPayoutDate').textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 }
                 // Enable payout button only if above threshold and Stripe connected
-                const threshold = parseFloat(data.payout_threshold) || 100;
+                const threshold = parseFloat(data.payout_threshold) || 25;
                 const stripeConnected = !!(userProfile && userProfile.stripe_account_id);
                 const btn = document.getElementById('payoutBtn');
                 if (btn) {
@@ -3637,6 +3642,100 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             } catch (e) {
                 console.error('Earnings load error:', e);
             }
+            // Phase E Day 1 — load Stripe Connect status and render banner
+            loadPayoutStatus();
+        }
+
+        // ───────────── PHASE E PAYOUT STATUS ─────────────
+        // Reads /api/billing?action=payout_status, renders the action-state
+        // banner: setup_required / threshold_pending / blocked / enabled.
+        async function loadPayoutStatus() {
+            if (!userProfile || !userProfile.user_id) return;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=payout_status&developer_id=${encodeURIComponent(userProfile.user_id)}`);
+                if (!r.ok) return;
+                const s = await r.json();
+                const banner = document.getElementById('payoutStatusBanner');
+                const btnLabel = document.getElementById('connectStripeLabel');
+                if (!banner) return;
+                // Update threshold display from API (single source of truth)
+                if (s.balance != null) {
+                    document.getElementById('pendingPayout').textContent = '$' + (parseFloat(s.balance) || 0).toFixed(2);
+                }
+                // Render next-payout label
+                const nextEl = document.getElementById('nextPayoutDate');
+                if (s.next_payout_eta === 'blocked')          nextEl.textContent = 'Action Required';
+                else if (s.next_payout_eta === 'setup_required') nextEl.textContent = 'Set up Stripe';
+                else if (s.next_payout_eta === 'threshold_pending') nextEl.textContent = 'Below $25 threshold';
+                else if (s.next_payout_eta && s.next_payout_eta.includes('T')) {
+                    const d = new Date(s.next_payout_eta);
+                    nextEl.textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                }
+                // Render banner
+                if (s.payout_blocked) {
+                    banner.style.display = 'block';
+                    banner.style.background = '#FEF3E2';
+                    banner.style.border = '1px solid #F59E0B';
+                    banner.style.color = '#92400E';
+                    banner.innerHTML = `
+                        <strong>Action required:</strong> ${escapeHtml(s.payout_blocked_reason || 'Stripe needs more info to enable payouts')}.
+                        <button onclick="resolveStripeIssue()" style="margin-left:10px; padding:6px 14px; background:#F59E0B; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Resolve in Stripe</button>
+                    `;
+                    if (btnLabel) btnLabel.textContent = 'Reconnect Stripe';
+                } else if (!s.payouts_enabled && !s.stripe_account_id) {
+                    banner.style.display = 'block';
+                    banner.style.background = '#EEF2FF';
+                    banner.style.border = '1px solid #6366F1';
+                    banner.style.color = '#3730A3';
+                    banner.innerHTML = `<strong>Get paid weekly.</strong> Connect Stripe (5 min) to receive automatic payouts every Friday when your balance hits $25.`;
+                    if (btnLabel) btnLabel.textContent = 'Connect Stripe';
+                } else if (!s.payouts_enabled && s.stripe_account_id) {
+                    banner.style.display = 'block';
+                    banner.style.background = '#FEF3E2';
+                    banner.style.border = '1px solid #F59E0B';
+                    banner.style.color = '#92400E';
+                    banner.innerHTML = `
+                        <strong>Stripe onboarding incomplete.</strong> Finish the verification steps to enable payouts.
+                        <button onclick="resolveStripeIssue()" style="margin-left:10px; padding:6px 14px; background:#F59E0B; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Finish Setup</button>
+                    `;
+                    if (btnLabel) btnLabel.textContent = 'Finish Setup';
+                } else {
+                    // payouts_enabled — hide banner, label the button "Manage Stripe"
+                    banner.style.display = 'none';
+                    if (btnLabel) btnLabel.textContent = 'Manage Stripe';
+                }
+            } catch (e) {
+                console.error('Payout status load error:', e);
+            }
+        }
+
+        // Banner click → mint a fresh Account Link via backend (HARD-3:
+        // never store the URL; it expires in ~5 minutes and is single-use).
+        async function resolveStripeIssue() {
+            if (!userProfile || !userProfile.user_id) return;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=refresh_connect`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ developer_id: userProfile.user_id }),
+                });
+                const data = await r.json();
+                if (data.onboarding_url) {
+                    window.location.href = data.onboarding_url;
+                } else if (data.mode === 'demo') {
+                    showToast('Demo mode — no Stripe to refresh', 'success');
+                } else {
+                    showToast(data.error || 'Could not refresh Stripe link', 'error');
+                }
+            } catch (e) {
+                showToast('Refresh failed: ' + e.message, 'error');
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
         }
 
         // ───────────── STRIPE CONNECT PAYOUT ─────────────
