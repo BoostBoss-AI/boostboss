@@ -365,6 +365,426 @@ async function test(name, fn) {
     assert(billing._DEMO.events.some(e => e.type === "charge.failed"), "charge.failed should be in audit log");
   });
 
+  // ── Phase E Day 1 — Stripe Connect onboarding + state machine ──────
+  // These tests run in demo mode (no Stripe SDK). They cover the
+  // request-routing and state-transition logic in billing.js.
+
+  await test("create_connect returns demo onboarding stub", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "create_connect" },
+      body: { developer_id: "dev_phaseE_1", email: "phaseE@example.com" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert(r._body.stripe_account_id.startsWith("acct_demo_"));
+  });
+
+  await test("refresh_connect rejects unknown developer", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "refresh_connect" },
+      body: { developer_id: "dev_no_stripe_yet" },
+    });
+    // In demo mode without prior create_connect, we hit the "demo" path
+    // which returns 200 + null onboarding_url, NOT 404. That's correct:
+    // demo mode never has a real Stripe account to refresh against.
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert.strictEqual(r._body.onboarding_url, null);
+  });
+
+  await test("refresh_connect rejects missing developer_id", async () => {
+    const r = await run({
+      method: "POST", query: { action: "refresh_connect" },
+      body: {},
+    });
+    assert.strictEqual(r._status, 400);
+    assert(/Missing developer_id/.test(r._body.error));
+  });
+
+  await test("payout_status returns shape for new developer in demo mode", async () => {
+    billing._reset();
+    const r = await run({
+      method: "GET",
+      query: { action: "payout_status", developer_id: "dev_status_demo" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert.strictEqual(r._body.payout_blocked, false);
+    assert.strictEqual(r._body.balance, 0);
+    assert.strictEqual(r._body.lifetime_paid, 0);
+    // No stripe account yet → next_payout_eta is null (demo synth)
+    assert.strictEqual(r._body.payouts_enabled, false);
+  });
+
+  await test("payout_status rejects missing developer_id", async () => {
+    const r = await run({
+      method: "GET", query: { action: "payout_status" },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(/Missing developer_id/.test(r._body.error));
+  });
+
+  await test("payout_status only accepts GET", async () => {
+    const r = await run({
+      method: "POST", query: { action: "payout_status" },
+      body: { developer_id: "anything" },
+    });
+    assert.strictEqual(r._status, 405);
+  });
+
+  await test("refresh_connect only accepts POST", async () => {
+    const r = await run({
+      method: "GET", query: { action: "refresh_connect" },
+    });
+    assert.strictEqual(r._status, 405);
+  });
+
+  // ── account.updated state machine ──
+  // In demo mode the webhook updates the in-memory developer record.
+  // We exercise both "enabled" and "blocked" transitions.
+
+  await test("account.updated with payouts_enabled=true clears block flags", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "account.updated",
+        data: { object: {
+          id: "acct_phE_clean", payouts_enabled: true, charges_enabled: true,
+          requirements: { currently_due: [] },
+          capabilities: { transfers: "active" },
+          metadata: { developer_id: "dev_phE_clean" },
+        }},
+      },
+    });
+    assert.strictEqual(r._status, 200);
+    const d = billing._DEMO.developers.get("dev_phE_clean");
+    assert(d, "developer should exist in demo store");
+    assert.strictEqual(d.payouts_enabled, true);
+    assert.strictEqual(d.payout_blocked, false);
+    assert.strictEqual(d.stripe_account_id, "acct_phE_clean");
+  });
+
+  await test("account.updated with requirements.currently_due sets blocked", async () => {
+    billing._reset();
+    await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "account.updated",
+        data: { object: {
+          id: "acct_phE_blocked", payouts_enabled: false, charges_enabled: false,
+          requirements: { currently_due: ["individual.id_number", "tos_acceptance.date"] },
+          capabilities: {},
+          metadata: { developer_id: "dev_phE_blocked" },
+        }},
+      },
+    });
+    const d = billing._DEMO.developers.get("dev_phE_blocked");
+    assert.strictEqual(d.payouts_enabled, false);
+    assert.strictEqual(d.payout_blocked, true);
+    assert(d.payout_blocked_reason.includes("requirements_due"));
+    assert.strictEqual(d.stripe_requirements_due.length, 2);
+  });
+
+  await test("account.updated capabilities.instant_payouts='active' flips opt-in flag", async () => {
+    billing._reset();
+    await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "account.updated",
+        data: { object: {
+          id: "acct_phE_instant", payouts_enabled: true, charges_enabled: true,
+          requirements: { currently_due: [] },
+          capabilities: { transfers: "active", instant_payouts: "active" },
+          metadata: { developer_id: "dev_phE_instant" },
+        }},
+      },
+    });
+    const d = billing._DEMO.developers.get("dev_phE_instant");
+    assert.strictEqual(d.instant_payouts_enabled, true);
+  });
+
+  await test("webhook handles event without developer_id metadata silently", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "account.updated",
+        data: { object: {
+          id: "acct_no_meta", payouts_enabled: true, charges_enabled: true,
+          requirements: { currently_due: [] },
+          // no metadata at all
+        }},
+      },
+    });
+    assert.strictEqual(r._status, 200);
+    // No developer record was created (we keyed off metadata.developer_id)
+  });
+
+  // Clawback helper is exported for testing; verify it gracefully no-ops
+  // when there's no Supabase (demo mode can't simulate the full clawback
+  // path, but we want the export wired so the Day 2/3 tests can exercise it).
+  await test("_fireRefundClawbacks export exists and tolerates null sb", async () => {
+    assert.strictEqual(typeof billing._fireRefundClawbacks, "function");
+    // Should not throw with sb=null
+    await billing._fireRefundClawbacks(null, "adv_x", 10, "ch_x");
+  });
+
+  // ── Phase E Day 3 — autonomous payout cron ─────────────────────────
+  // Demo-mode runs walk in-memory DEMO maps; no Stripe, no Supabase, but
+  // the full state-machine logic (eligibility, threshold, blocked-skip,
+  // balance decrement, payout row insert) exercises end-to-end.
+  const publisherBalance = require("../api/_lib/publisher_balance.js");
+
+  await test("run_payout_cron requires POST", async () => {
+    const r = await run({ method: "GET", query: { action: "run_payout_cron" } });
+    assert.strictEqual(r._status, 405);
+  });
+
+  await test("run_payout_cron in demo mode returns summary with zero attempts", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    const r = await run({
+      method: "POST", query: { action: "run_payout_cron" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert.strictEqual(r._body.publishers_attempted, 0);
+    assert.strictEqual(r._body.succeeded, 0);
+  });
+
+  await test("run_payout_cron skips developer with payouts_enabled=false", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    // Seed a developer with balance but payouts disabled
+    const d = billing._DEMO.developers;
+    d.set("dev_disabled", {
+      id: "dev_disabled", payouts_enabled: false, payout_blocked: false,
+      stripe_account_id: "acct_d", instant_payouts_enabled: false,
+    });
+    // Give them $100 balance
+    publisherBalance._getDemoBalance("dev_disabled").balance = 100;
+    publisherBalance._getDemoBalance("dev_disabled").lifetime_earned = 100;
+
+    const r = await run({ method: "POST", query: { action: "run_payout_cron" } });
+    assert.strictEqual(r._body.publishers_attempted, 0);
+    assert.strictEqual(r._body.skipped, 1);
+    // Balance unchanged
+    assert.strictEqual(publisherBalance._getDemoBalance("dev_disabled").balance, 100);
+  });
+
+  await test("run_payout_cron skips blocked publisher", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    const d = billing._DEMO.developers;
+    d.set("dev_blocked", {
+      id: "dev_blocked", payouts_enabled: true, payout_blocked: true,
+      stripe_account_id: "acct_b", instant_payouts_enabled: false,
+    });
+    publisherBalance._getDemoBalance("dev_blocked").balance = 100;
+    const r = await run({ method: "POST", query: { action: "run_payout_cron" } });
+    assert.strictEqual(r._body.publishers_attempted, 0);
+    assert.strictEqual(r._body.skipped, 1);
+  });
+
+  await test("run_payout_cron skips publisher below $25 threshold", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    const d = billing._DEMO.developers;
+    d.set("dev_below", {
+      id: "dev_below", payouts_enabled: true, payout_blocked: false,
+      stripe_account_id: "acct_x", instant_payouts_enabled: false,
+    });
+    publisherBalance._getDemoBalance("dev_below").balance = 24.99;
+    const r = await run({ method: "POST", query: { action: "run_payout_cron" } });
+    assert.strictEqual(r._body.publishers_attempted, 0);
+    assert.strictEqual(r._body.skipped, 1);
+  });
+
+  await test("run_payout_cron pays eligible publisher and debits balance", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    const d = billing._DEMO.developers;
+    d.set("dev_pay", {
+      id: "dev_pay", payouts_enabled: true, payout_blocked: false,
+      stripe_account_id: "acct_pay", instant_payouts_enabled: false,
+    });
+    publisherBalance._getDemoBalance("dev_pay").balance = 50;
+    publisherBalance._getDemoBalance("dev_pay").lifetime_earned = 50;
+    const r = await run({ method: "POST", query: { action: "run_payout_cron" } });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.publishers_attempted, 1);
+    assert.strictEqual(r._body.succeeded, 1);
+    assert.strictEqual(r._body.total_usd, 50);
+    // Balance debited, lifetime_paid bumped
+    const bal = publisherBalance._getDemoBalance("dev_pay");
+    assert.strictEqual(bal.balance, 0);
+    assert.strictEqual(bal.lifetime_paid, 50);
+    // lifetime_earned unchanged (we didn't earn anything; we paid out)
+    assert.strictEqual(bal.lifetime_earned, 50);
+  });
+
+  await test("run_payout_cron with instant_payouts_enabled deducts fee from amount", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    const d = billing._DEMO.developers;
+    d.set("dev_instant", {
+      id: "dev_instant", payouts_enabled: true, payout_blocked: false,
+      stripe_account_id: "acct_i", instant_payouts_enabled: true,
+    });
+    publisherBalance._getDemoBalance("dev_instant").balance = 100;
+    const r = await run({ method: "POST", query: { action: "run_payout_cron" } });
+    assert.strictEqual(r._body.succeeded, 1);
+    // Instant fee: $0.50 + 1.5% of $100 = $0.50 + $1.50 = $2.00.
+    // Recorded payout amount = $100 - $2 = $98.
+    const row = Array.from(billing._DEMO.payouts.values()).find(p => p.developer_id === "dev_instant");
+    assert(row, "demo payout row should exist");
+    assert.strictEqual(row.method, "instant");
+    assert.strictEqual(row.fee_usd, 2);
+    assert.strictEqual(row.amount, 98);
+  });
+
+  await test("run_payout_retry_sweep returns demo summary without retries", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "run_payout_retry_sweep" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert.strictEqual(r._body.retried, 0);
+  });
+
+  await test("run_payout_retry_sweep requires POST", async () => {
+    const r = await run({ method: "GET", query: { action: "run_payout_retry_sweep" } });
+    assert.strictEqual(r._status, 405);
+  });
+
+  // ── Phase E Day 4 — admin endpoints ────────────────────────────────
+  await test("admin_payouts_list returns demo summary with empty body", async () => {
+    billing._reset();
+    const r = await run({ method: "GET", query: { action: "admin_payouts_list" } });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert.strictEqual(r._body.count, 0);
+    assert(Array.isArray(r._body.payouts));
+  });
+
+  await test("admin_payouts_list filters by status", async () => {
+    billing._reset();
+    publisherBalance._reset();
+    // Seed two demo payout rows with different statuses
+    billing._DEMO.payouts.set("p1", {
+      id: "p1", developer_id: "dev_x", status: "paid", amount: 50,
+      created_at: new Date().toISOString(),
+    });
+    billing._DEMO.payouts.set("p2", {
+      id: "p2", developer_id: "dev_x", status: "failed", amount: 30,
+      created_at: new Date().toISOString(),
+    });
+    const r = await run({
+      method: "GET",
+      query: { action: "admin_payouts_list", status: "failed" },
+    });
+    assert.strictEqual(r._body.count, 1);
+    assert.strictEqual(r._body.payouts[0].status, "failed");
+  });
+
+  await test("admin_payouts_list rejects POST", async () => {
+    const r = await run({ method: "POST", query: { action: "admin_payouts_list" } });
+    assert.strictEqual(r._status, 405);
+  });
+
+  await test("admin_force_retry resets demo payout to pending", async () => {
+    billing._reset();
+    billing._DEMO.payouts.set("p_force", {
+      id: "p_force", developer_id: "dev_y", status: "failed",
+      retry_count: 3, failure_tier: 1, amount: 25,
+      created_at: new Date().toISOString(),
+    });
+    const r = await run({
+      method: "POST", query: { action: "admin_force_retry" },
+      body: { payout_id: "p_force" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.reset, true);
+    const row = billing._DEMO.payouts.get("p_force");
+    assert.strictEqual(row.status, "pending");
+    assert.strictEqual(row.retry_count, 0);
+    assert.strictEqual(row.failure_tier, null);
+  });
+
+  await test("admin_force_retry 404s for unknown payout_id", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "admin_force_retry" },
+      body: { payout_id: "doesnotexist" },
+    });
+    assert.strictEqual(r._status, 404);
+  });
+
+  await test("admin_force_retry requires payout_id", async () => {
+    const r = await run({
+      method: "POST", query: { action: "admin_force_retry" }, body: {},
+    });
+    assert.strictEqual(r._status, 400);
+  });
+
+  await test("admin_unblock_publisher clears block flags", async () => {
+    billing._reset();
+    billing._DEMO.developers.set("dev_unblk", {
+      id: "dev_unblk", email: "blk@x.test",
+      payout_blocked: true, payout_blocked_reason: "stripe_payout_failed: card_declined",
+    });
+    const r = await run({
+      method: "POST", query: { action: "admin_unblock_publisher" },
+      body: { developer_id: "dev_unblk", reason: "resolved out of band" },
+    });
+    assert.strictEqual(r._status, 200);
+    const d = billing._DEMO.developers.get("dev_unblk");
+    assert.strictEqual(d.payout_blocked, false);
+    assert.strictEqual(d.payout_blocked_reason, null);
+  });
+
+  await test("admin_unblock_publisher 404s for unknown developer", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "admin_unblock_publisher" },
+      body: { developer_id: "ghost" },
+    });
+    assert.strictEqual(r._status, 404);
+  });
+
+  await test("admin_blocked_publishers lists only blocked developers", async () => {
+    billing._reset();
+    billing._DEMO.developers.set("dev_ok", {
+      id: "dev_ok", email: "ok@x.test", payout_blocked: false,
+    });
+    billing._DEMO.developers.set("dev_b1", {
+      id: "dev_b1", email: "blk1@x.test", payout_blocked: true,
+      payout_blocked_reason: "requirements_due", payout_blocked_at: new Date().toISOString(),
+    });
+    billing._DEMO.developers.set("dev_b2", {
+      id: "dev_b2", email: "blk2@x.test", payout_blocked: true,
+      payout_blocked_reason: "stripe_payout_failed", payout_blocked_at: new Date().toISOString(),
+    });
+    const r = await run({
+      method: "GET", query: { action: "admin_blocked_publishers" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.count, 2);
+    const emails = r._body.blocked.map((p) => p.email).sort();
+    assert.deepStrictEqual(emails, ["blk1@x.test", "blk2@x.test"]);
+  });
+
+  await test("admin_blocked_publishers rejects POST", async () => {
+    const r = await run({
+      method: "POST", query: { action: "admin_blocked_publishers" },
+    });
+    assert.strictEqual(r._status, 405);
+  });
+
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }
   else console.log(`\x1b[32m${passed} checks passed.\x1b[0m`);

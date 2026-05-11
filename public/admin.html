@@ -249,6 +249,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns <span class="kbd">3</span></button>
     <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats <span class="kbd">4</span></button>
     <button class="nav-item" data-panel="users"><span class="icon">👥</span> Users <span class="kbd">5</span></button>
+    <button class="nav-item" data-panel="payouts"><span class="icon">💸</span> Payouts <span class="badge-count" id="payout-pending-count">0</span></button>
 
     <div class="sidebar-footer">
       <p class="meta">Mode: <span id="auth-mode-badge" class="mono">—</span></p>
@@ -410,6 +411,94 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
         <p style="margin-top:8px;">Use Supabase dashboard for direct user management.</p>
       </div>
     </div>
+
+    <!-- ── PAYOUTS (Phase E Day 4) ── -->
+    <div class="panel" id="panel-payouts">
+      <div class="section-header">
+        <h1>Payouts</h1>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-sm btn-action" onclick="loadPayoutsPanel()">Refresh</button>
+          <button class="btn-sm btn-action" onclick="manualTriggerPayoutCron()"
+            title="Manually fires the Friday payout cron now (auth: ADMIN_TOKEN)">
+            ▶ Run cron now
+          </button>
+          <button class="btn-sm btn-action" onclick="manualTriggerRetrySweep()"
+            title="Manually fires the Saturday retry sweep now">
+            ↻ Run retry sweep
+          </button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        Last cron run summary, recent payouts, blocked publishers, manual controls.
+        Real money flows through these tables every Friday at 12:00 UTC.
+      </p>
+
+      <!-- Recon health summary cards -->
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="label">Pending</div>
+          <div class="value yellow" id="po-pending">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Tier-1 failed</div>
+          <div class="value pink" id="po-tier1">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Tier-2 failed</div>
+          <div class="value pink" id="po-tier2">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Blocked publishers</div>
+          <div class="value pink" id="po-blocked">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Eligible next run</div>
+          <div class="value cyan" id="po-eligible">—</div>
+        </div>
+      </div>
+
+      <!-- Blocked publishers (action-required panel) -->
+      <div style="margin-bottom:24px;">
+        <div class="section-header"><h2>Blocked publishers</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Email</th><th>Stripe Account</th><th>Reason</th><th>Blocked At</th><th>Action</th></tr>
+            </thead>
+            <tbody id="blocked-publishers-body">
+              <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent payouts table -->
+      <div>
+        <div class="section-header">
+          <h2>Recent payouts</h2>
+          <select id="payout-status-filter" onchange="loadPayoutsPanel()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="held">Held</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Created</th><th>Email</th><th>Amount</th><th>Fee</th><th>Method</th>
+                <th>Status</th><th>Retries</th><th>Failure</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="payouts-body">
+              <tr><td colspan="9" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -454,6 +543,9 @@ function showDashboard() {
   loadReviewQueue();
   renderAuditLog();
   detectModes();
+  // Phase E Day 4 — poll payout health on login so the sidebar pending
+  // count is accurate even before the admin opens the Payouts panel.
+  loadPayoutHealth();
 }
 
 function logout() {
@@ -489,6 +581,7 @@ function switchPanel(name) {
   if (name === "campaigns") loadAllCampaigns();
   if (name === "seats") loadSeats();
   if (name === "review") loadReviewQueue();
+  if (name === "payouts") loadPayoutsPanel();
 }
 
 // ── Detect modes ──
@@ -741,8 +834,191 @@ function toast(msg, type) {
   setTimeout(() => el.classList.remove("show"), 3000);
 }
 
+// ── Phase E Day 4 — Payouts panel ─────────────────────────────────────
+// All requests authenticate via Authorization: Bearer ${ADMIN_TOKEN}.
+// The admin login already populates `token` from /api/auth?action=login;
+// we send it on every admin_* call. If the env var ADMIN_TOKEN is not
+// configured the backend returns 401 — which we surface in the UI.
+
+async function loadPayoutsPanel() {
+  await Promise.all([
+    loadPayoutHealth(),
+    loadBlockedPublishers(),
+    loadPayoutsList(),
+  ]);
+}
+
+async function loadPayoutHealth() {
+  try {
+    const r = await fetch(API + "/api/stats?type=recon");
+    if (!r.ok) return;
+    const data = await r.json();
+    const ph = data.payout_cron_health || {};
+    document.getElementById("po-pending").textContent  = ph.pending_count ?? 0;
+    document.getElementById("po-tier1").textContent    = ph.failed_tier1_count ?? 0;
+    document.getElementById("po-tier2").textContent    = ph.failed_tier2_count ?? 0;
+    document.getElementById("po-blocked").textContent  = ph.blocked_publishers_count ?? 0;
+    document.getElementById("po-eligible").textContent = ph.eligible_for_next_payout ?? 0;
+    // Mirror the pending count into the sidebar nav badge.
+    const navBadge = document.getElementById("payout-pending-count");
+    if (navBadge) {
+      const total = (ph.pending_count || 0) + (ph.failed_tier2_count || 0);
+      navBadge.textContent = total;
+      navBadge.style.display = total > 0 ? "inline-flex" : "none";
+    }
+  } catch (e) { console.error("payout health", e); }
+}
+
+async function loadBlockedPublishers() {
+  try {
+    const r = await fetch(API + "/api/billing?action=admin_blocked_publishers", {
+      headers: { "Authorization": "Bearer " + (token || "") },
+    });
+    if (r.status === 401) {
+      document.getElementById("blocked-publishers-body").innerHTML =
+        `<tr><td colspan="5" class="empty-state">Unauthorized — set ADMIN_TOKEN env var on Vercel.</td></tr>`;
+      return;
+    }
+    const data = await r.json();
+    const rows = data.blocked || [];
+    if (rows.length === 0) {
+      document.getElementById("blocked-publishers-body").innerHTML =
+        `<tr><td colspan="5" class="empty-state">No blocked publishers. 🎉</td></tr>`;
+      return;
+    }
+    document.getElementById("blocked-publishers-body").innerHTML = rows.map(p => `
+      <tr>
+        <td>${esc(p.email || "—")}</td>
+        <td><code style="font-size:11px;">${esc(p.stripe_account_id || "—")}</code></td>
+        <td>${esc((p.payout_blocked_reason || "").slice(0, 80))}</td>
+        <td title="${esc(p.payout_blocked_at || "")}">${relTime(p.payout_blocked_at)}</td>
+        <td>
+          <button class="btn-sm btn-action" onclick="adminUnblockPublisher('${esc(p.developer_id)}')">Unblock</button>
+        </td>
+      </tr>
+    `).join("");
+  } catch (e) { console.error("blocked publishers", e); }
+}
+
+async function loadPayoutsList() {
+  try {
+    const status = document.getElementById("payout-status-filter").value;
+    const qs = "limit=50" + (status ? "&status=" + encodeURIComponent(status) : "");
+    const r = await fetch(API + "/api/billing?action=admin_payouts_list&" + qs, {
+      headers: { "Authorization": "Bearer " + (token || "") },
+    });
+    if (r.status === 401) {
+      document.getElementById("payouts-body").innerHTML =
+        `<tr><td colspan="9" class="empty-state">Unauthorized — set ADMIN_TOKEN env var on Vercel.</td></tr>`;
+      return;
+    }
+    const data = await r.json();
+    const rows = data.payouts || [];
+    if (rows.length === 0) {
+      document.getElementById("payouts-body").innerHTML =
+        `<tr><td colspan="9" class="empty-state">No payouts yet${status ? " matching '" + status + "'" : ""}.</td></tr>`;
+      return;
+    }
+    document.getElementById("payouts-body").innerHTML = rows.map(p => {
+      const statusColor = {
+        paid: "color:#10B981;font-weight:600",
+        pending: "color:#F59E0B;font-weight:600",
+        failed: "color:#EF4444;font-weight:600",
+        held: "color:#6B7280;font-weight:600",
+      }[p.status] || "";
+      const canRetry = p.status === "failed" || p.status === "pending";
+      return `
+        <tr>
+          <td title="${esc(p.created_at || "")}">${relTime(p.created_at)}</td>
+          <td>${esc(p.developer_email || p.developer_id || "—")}</td>
+          <td>$${Number(p.amount || 0).toFixed(2)}</td>
+          <td>$${Number(p.fee_usd || 0).toFixed(2)}</td>
+          <td><code style="font-size:11px;">${esc(p.method || "—")}</code></td>
+          <td style="${statusColor}">${esc(p.status)}${p.failure_tier ? " T" + p.failure_tier : ""}</td>
+          <td>${p.retry_count ?? 0}</td>
+          <td style="max-width:280px;">${esc((p.failure_reason || "").slice(0, 100))}</td>
+          <td>${canRetry
+            ? `<button class="btn-sm btn-action" onclick="adminForceRetry('${esc(p.id)}')">Retry</button>`
+            : ""}</td>
+        </tr>
+      `;
+    }).join("");
+  } catch (e) { console.error("payouts list", e); }
+}
+
+async function adminForceRetry(payoutId) {
+  if (!confirm("Reset this payout to pending and queue it for retry?")) return;
+  try {
+    const r = await fetch(API + "/api/billing?action=admin_force_retry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (token || "") },
+      body: JSON.stringify({ payout_id: payoutId }),
+    });
+    const data = await r.json();
+    if (r.ok) {
+      toast("Queued for retry. Run retry sweep to fire now.", "success");
+      loadPayoutsPanel();
+    } else {
+      toast(data.error || "Retry failed", "error");
+    }
+  } catch (e) { toast("Retry failed: " + e.message, "error"); }
+}
+
+async function adminUnblockPublisher(developerId) {
+  const reason = prompt("Operator reason for unblock (logged in audit trail):", "Manually resolved out-of-band");
+  if (reason === null) return;
+  try {
+    const r = await fetch(API + "/api/billing?action=admin_unblock_publisher", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (token || "") },
+      body: JSON.stringify({ developer_id: developerId, reason }),
+    });
+    const data = await r.json();
+    if (r.ok) {
+      toast("Publisher unblocked.", "success");
+      loadPayoutsPanel();
+    } else {
+      toast(data.error || "Unblock failed", "error");
+    }
+  } catch (e) { toast("Unblock failed: " + e.message, "error"); }
+}
+
+async function manualTriggerPayoutCron() {
+  if (!confirm("Fire the Friday payout cron NOW? Real money will move if eligible publishers exist.")) return;
+  try {
+    const r = await fetch(API + "/api/billing?action=run_payout_cron", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + (window.prompt("Paste CRON_SECRET (different from admin token):") || "") },
+    });
+    const data = await r.json();
+    if (r.ok) {
+      toast(`Cron ran. ${data.succeeded || 0} paid, ${data.tier1_failed || 0} retry, ${data.tier2_failed || 0} blocked.`, "success");
+      loadPayoutsPanel();
+    } else {
+      toast(data.error || "Cron failed", "error");
+    }
+  } catch (e) { toast("Cron failed: " + e.message, "error"); }
+}
+
+async function manualTriggerRetrySweep() {
+  if (!confirm("Fire the Saturday retry sweep NOW?")) return;
+  try {
+    const r = await fetch(API + "/api/billing?action=run_payout_retry_sweep", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + (window.prompt("Paste CRON_SECRET:") || "") },
+    });
+    const data = await r.json();
+    if (r.ok) {
+      toast(`Retry done. ${data.succeeded || 0} succeeded, ${data.final_failed || 0} exhausted.`, "success");
+      loadPayoutsPanel();
+    } else {
+      toast(data.error || "Retry sweep failed", "error");
+    }
+  } catch (e) { toast("Retry sweep failed: " + e.message, "error"); }
+}
+
 // ── Keyboard shortcuts ──
-const panels = ['overview','review','campaigns','seats','users'];
+const panels = ['overview','review','campaigns','seats','users','payouts'];
 document.addEventListener('keydown', e => {
   // Don't fire in inputs
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -754,7 +1030,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeSearch(); return; }
   // Number keys for panels
   const n = parseInt(e.key);
-  if (n >= 1 && n <= 5 && !document.getElementById('searchOverlay').classList.contains('open')) {
+  if (n >= 1 && n <= 6 && !document.getElementById('searchOverlay').classList.contains('open')) {
     switchPanel(panels[n - 1]);
   }
   // R to refresh current panel
@@ -764,6 +1040,7 @@ document.addEventListener('keydown', e => {
     else if (active?.id === 'panel-review') loadReviewQueue();
     else if (active?.id === 'panel-campaigns') loadAllCampaigns();
     else if (active?.id === 'panel-seats') loadSeats();
+    else if (active?.id === 'panel-payouts') loadPayoutsPanel();
     toast('Refreshed', 'success');
   }
 });
@@ -775,6 +1052,7 @@ const searchItems = [
   { label: 'All Campaigns', panel: 'campaigns' },
   { label: 'DSP Seats', panel: 'seats' },
   { label: 'Users', panel: 'users' },
+  { label: 'Payouts — Cron health, blocked publishers, manual controls', panel: 'payouts' },
   { label: 'Benna Playground', href: '/playground.html' },
   { label: 'System Status', href: '/status.html' },
   { label: 'API Docs', href: '/docs' },

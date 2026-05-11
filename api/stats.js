@@ -788,21 +788,52 @@ async function handleRecon(req, res) {
     if (error) console.error("bbx:recon:impressions_query_fail", error.message);
     return count || 0;
   }
+  // Phase B (2026-05-11) — extend recon with click → conversion ratios so
+  // ops can spot dropped conversion beacons the same way we spotted dropped
+  // impression beacons. CVR is the more standard metric than impression→conv
+  // (and lets us reuse the same alert-threshold logic).
+  async function countByEventType(eventType, isSandbox) {
+    const { count, error } = await sb.from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", eventType)
+      .eq("is_sandbox", isSandbox)
+      .gte("created_at", sinceIso);
+    if (error) console.error("bbx:recon:" + eventType + "_query_fail", error.message);
+    return count || 0;
+  }
 
-  const [prodWins, prodImps, sbxWins, sbxImps] = await Promise.all([
+  const [prodWins, prodImps, prodClicks, prodConvs,
+         sbxWins,  sbxImps,  sbxClicks,  sbxConvs] = await Promise.all([
     countAuctionsServed(false),
     countImpressions(false),
+    countByEventType("click",      false),
+    countByEventType("conversion", false),
     countAuctionsServed(true),
     countImpressions(true),
+    countByEventType("click",      true),
+    countByEventType("conversion", true),
   ]);
 
-  function summary(wins, imps) {
+  function summary(wins, imps, clicks, convs) {
     const ratio = wins > 0 ? +(imps / wins).toFixed(3) : null;
     const alert = wins >= MIN_WINS_FOR_ALERT && ratio !== null && ratio < RATIO_FLOOR;
-    return { auction_wins: wins, impressions: imps, ratio, alert };
+    // CVR is conversions / clicks. We don't alert on absent CVR (most
+    // sessions won't have any conversions yet) — but we publish the
+    // ratio + counts so operators can spot a sudden zero-conversions
+    // anomaly when conversions used to be flowing.
+    const cvr = clicks > 0 ? +(convs / clicks).toFixed(3) : null;
+    return {
+      auction_wins: wins,
+      impressions:  imps,
+      clicks:       clicks,
+      conversions:  convs,
+      ratio,
+      cvr,
+      alert,
+    };
   }
-  const production = summary(prodWins, prodImps);
-  const sandbox    = summary(sbxWins, sbxImps);
+  const production = summary(prodWins, prodImps, prodClicks, prodConvs);
+  const sandbox    = summary(sbxWins,  sbxImps,  sbxClicks,  sbxConvs);
 
   // ── Orphan wins — winning auctions with no impression event ──
   // Top 10 most recent. Useful for diagnosing the actual write_fail row
@@ -858,13 +889,156 @@ async function handleRecon(req, res) {
     }));
   }
 
+  // Phase E Day 2 — publisher balance health check. Flags any developer
+  // whose (lifetime_earned − lifetime_paid) differs from balance by more
+  // than 1%, surfacing accrual integrity drift (e.g., a credit RPC that
+  // silently failed; a clawback that satisfied wrongly).
+  //
+  // The math:
+  //   expected_balance = lifetime_earned − lifetime_paid − pending_clawbacks_remaining
+  //   drift            = abs(balance − expected_balance)
+  //   pct              = drift / max(balance, expected_balance)
+  //   flag             = pct > 0.01 AND drift > $0.50
+  //                      (cents-level drift is normal float rounding; we
+  //                      only flag operationally-meaningful drift)
+  let balanceHealth = { checked: 0, drifted: 0, drift_sample: [] };
+  try {
+    const { data: balances } = await sb.from("publisher_balance")
+      .select("developer_id, balance, lifetime_earned, lifetime_paid")
+      .gt("lifetime_earned", 0)        // ignore brand-new developers
+      .limit(500);                     // cap so recon doesn't time out at scale
+    if (Array.isArray(balances) && balances.length > 0) {
+      const devIds = balances.map((b) => b.developer_id);
+      // Pull pending clawbacks per developer in one query.
+      const { data: pendingClaws } = await sb.from("payout_clawbacks")
+        .select("developer_id, remaining_usd")
+        .in("developer_id", devIds)
+        .eq("status", "pending");
+      const pendingByDev = new Map();
+      for (const c of (pendingClaws || [])) {
+        const cur = pendingByDev.get(c.developer_id) || 0;
+        pendingByDev.set(c.developer_id, cur + (parseFloat(c.remaining_usd) || 0));
+      }
+
+      for (const b of balances) {
+        balanceHealth.checked++;
+        const balance        = parseFloat(b.balance) || 0;
+        const lifetimeEarned = parseFloat(b.lifetime_earned) || 0;
+        const lifetimePaid   = parseFloat(b.lifetime_paid) || 0;
+        const pendingClaw    = pendingByDev.get(b.developer_id) || 0;
+        const expected       = lifetimeEarned - lifetimePaid - pendingClaw;
+        const drift          = Math.abs(balance - expected);
+        const denom          = Math.max(Math.abs(balance), Math.abs(expected), 1);
+        const pct            = drift / denom;
+        if (pct > 0.01 && drift > 0.50) {
+          balanceHealth.drifted++;
+          if (balanceHealth.drift_sample.length < 5) {
+            balanceHealth.drift_sample.push({
+              developer_id:    b.developer_id,
+              balance, lifetime_earned: lifetimeEarned,
+              lifetime_paid:   lifetimePaid,
+              pending_clawback_remaining: +pendingClaw.toFixed(2),
+              expected_balance: +expected.toFixed(2),
+              drift_usd:       +drift.toFixed(2),
+              drift_pct:       +(pct * 100).toFixed(2),
+            });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("bbx:recon:balance_health_fail",
+      JSON.stringify({ message: e && e.message }));
+  }
+
+  if (balanceHealth.drifted > 0) {
+    console.error("bbx:recon:balance_drift", JSON.stringify({
+      tag: "recon.balance_drift",
+      drifted: balanceHealth.drifted,
+      checked: balanceHealth.checked,
+      sample:  balanceHealth.drift_sample,
+    }));
+  }
+
+  // Phase E Day 4 — payout cron health summary. Surfaces the most recent
+  // run's outcome plus aggregate counters so an operator can scan a
+  // single recon endpoint and know whether anything needs attention.
+  let payoutHealth = {
+    last_run_at: null,
+    last_run_status: null,            // 'paid' | 'pending' | 'failed' | null
+    last_run_amount_usd: 0,
+    pending_count: 0,
+    failed_tier1_count: 0,
+    failed_tier2_count: 0,
+    blocked_publishers_count: 0,
+    eligible_for_next_payout: 0,
+  };
+  try {
+    // Most recent payout row
+    const { data: lastRow } = await sb.from("payouts")
+      .select("created_at, status, amount, completed_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (lastRow) {
+      payoutHealth.last_run_at        = lastRow.completed_at || lastRow.created_at;
+      payoutHealth.last_run_status    = lastRow.status;
+      payoutHealth.last_run_amount_usd = parseFloat(lastRow.amount) || 0;
+    }
+
+    // Pending count
+    const { count: pendingC } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending");
+    payoutHealth.pending_count = pendingC || 0;
+
+    // Tier breakdown of failed
+    const { count: t1 } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "failed").eq("failure_tier", 1);
+    payoutHealth.failed_tier1_count = t1 || 0;
+    const { count: t2 } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "failed").eq("failure_tier", 2);
+    payoutHealth.failed_tier2_count = t2 || 0;
+
+    // Blocked publishers
+    const { count: blocked } = await sb.from("developers")
+      .select("*", { count: "exact", head: true })
+      .eq("payout_blocked", true);
+    payoutHealth.blocked_publishers_count = blocked || 0;
+
+    // Eligible-for-next-payout: payouts_enabled, !blocked, balance ≥ $25.
+    // Two queries; supabase-js doesn't expose the join cleanly.
+    const { data: eligibleDevs } = await sb.from("developers")
+      .select("id")
+      .eq("payouts_enabled", true)
+      .eq("payout_blocked",  false)
+      .not("stripe_account_id", "is", null);
+    const eligibleIds = (eligibleDevs || []).map((d) => d.id);
+    if (eligibleIds.length > 0) {
+      const { count: ec } = await sb.from("publisher_balance")
+        .select("*", { count: "exact", head: true })
+        .in("developer_id", eligibleIds)
+        .gte("balance", 25);
+      payoutHealth.eligible_for_next_payout = ec || 0;
+    }
+  } catch (e) {
+    console.error("bbx:recon:payout_health_fail",
+      JSON.stringify({ message: e && e.message }));
+  }
+
   return res.status(200).json({
     window_hours: 24,
     production, sandbox,
     orphan_wins: orphanWins,
+    publisher_balance_health: balanceHealth,
+    payout_cron_health: payoutHealth,
     thresholds: {
       ratio_floor:           RATIO_FLOOR,
       min_wins_for_alert:    MIN_WINS_FOR_ALERT,
+      balance_drift_pct:     0.01,
+      balance_drift_min_usd: 0.50,
     },
     generated_at: new Date().toISOString(),
   });

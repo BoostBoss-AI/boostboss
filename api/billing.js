@@ -31,6 +31,8 @@
  */
 
 const ledger = require("./_lib/ledger.js");
+// Phase E Day 2/3 — atomic balance helpers shared with api/track.js.
+const publisherBalance = require("./_lib/publisher_balance.js");
 
 const HAS_STRIPE   = !!process.env.STRIPE_SECRET_KEY;
 const HAS_SUPABASE = !!(
@@ -139,6 +141,24 @@ module.exports = async function handler(req, res) {
       case "earnings":        return await handleEarnings(req, res);
       case "create_checkout": return await handleCreateCheckout(req, res);
       case "create_connect":  return await handleCreateConnect(req, res);
+      // Phase E Day 1 — onboarding refresh + payout status read.
+      // refresh_connect mints a NEW Account Link every call; do not cache.
+      case "refresh_connect": return await handleRefreshConnect(req, res);
+      case "payout_status":   return await handlePayoutStatus(req, res);
+      // Phase E Day 3 — autonomous weekly payouts.
+      // run_payout_cron is hit by Vercel cron Friday 12:00 UTC.
+      // run_payout_retry_sweep is hit Saturday 12:00 UTC.
+      // Both require Authorization: Bearer ${CRON_SECRET} (Vercel sends
+      // automatically when cron triggers; operators can call manually too).
+      case "run_payout_cron":         return await handleRunPayoutCron(req, res);
+      case "run_payout_retry_sweep":  return await handleRunPayoutRetrySweep(req, res);
+      // Phase E Day 4 — operator admin payouts surface. All admin
+      // actions auth via Authorization: Bearer ${ADMIN_TOKEN} (separate
+      // from CRON_SECRET so a leaked cron token can't drive admin ops).
+      case "admin_payouts_list":      return await handleAdminPayoutsList(req, res);
+      case "admin_force_retry":       return await handleAdminForceRetry(req, res);
+      case "admin_unblock_publisher": return await handleAdminUnblockPublisher(req, res);
+      case "admin_blocked_publishers":return await handleAdminBlockedPublishers(req, res);
       case "invoice":         return await handleInvoice(req, res);
       case "payout":          return await handlePayout(req, res);
       case "history":         return await handleHistory(req, res);
@@ -359,6 +379,766 @@ async function handleCreateConnect(req, res) {
   const sb = supa();
   if (sb) await sb.from("developers").update({ stripe_account_id: account.id }).eq("id", developer_id);
   return res.json({ mode: "stripe", onboarding_url: link.url, stripe_account_id: account.id });
+}
+
+// ── Phase E Day 1 — refresh Stripe Connect onboarding link ─────────────
+// Per HARD-3 in the design doc: Stripe Account Links expire after ~5 min
+// and are single-use. The dashboard's "Action Required" banner must call
+// THIS endpoint on every click — never store the URL.
+async function handleRefreshConnect(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  const { developer_id } = req.body || {};
+  if (!developer_id) return res.status(400).json({ error: "Missing developer_id" });
+
+  const s = stripe();
+  if (!s) {
+    return res.json({
+      mode: "demo", onboarding_url: null,
+      message: "Demo mode — no Stripe account to refresh.",
+    });
+  }
+
+  // Look up the publisher's stripe_account_id. If they don't have one yet,
+  // the caller should hit create_connect first — refresh is for re-onboarding
+  // existing accounts that hit a requirements wall.
+  const sb = supa();
+  let stripeAccountId = null;
+  if (sb) {
+    const { data: dev } = await sb.from("developers")
+      .select("stripe_account_id").eq("id", developer_id).single();
+    stripeAccountId = dev && dev.stripe_account_id;
+  } else {
+    const d = DEMO.developers.get(developer_id);
+    stripeAccountId = d && d.stripe_account_id;
+  }
+  if (!stripeAccountId) {
+    return res.status(404).json({
+      error: "No Stripe Connect account on file. Call create_connect first.",
+    });
+  }
+
+  const link = await s.accountLinks.create({
+    account: stripeAccountId,
+    refresh_url: `${PUBLIC_BASE_URL}/developer?stripe=refresh`,
+    return_url:  `${PUBLIC_BASE_URL}/developer?stripe=connected`,
+    type: "account_onboarding",
+  });
+  return res.json({
+    mode: "stripe", onboarding_url: link.url,
+    stripe_account_id: stripeAccountId,
+  });
+}
+
+// ── Phase E Day 1 — read publisher payout status ───────────────────────
+// Surfaces the state the dashboard needs to render the Earnings section:
+// connected/blocked flags, current balance, requirements_due, next payout
+// hint. One query, one round-trip.
+async function handlePayoutStatus(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  const developerId = req.query && (req.query.developer_id || req.query.id);
+  if (!developerId) return res.status(400).json({ error: "Missing developer_id" });
+
+  const sb = supa();
+  if (!sb) {
+    // Demo: synthesize a plausible state from the in-memory developer.
+    const d = DEMO.developers.get(developerId) || ensureDemoDeveloper(developerId);
+    return res.json({
+      mode: "demo",
+      developer_id: developerId,
+      stripe_account_id: d.stripe_account_id || null,
+      payouts_enabled: !!d.stripe_account_id,
+      payout_blocked: false,
+      payout_blocked_reason: null,
+      instant_payouts_enabled: false,
+      stripe_requirements_due: [],
+      balance: 0,
+      lifetime_earned: d.total_earnings || 0,
+      lifetime_paid: 0,
+      next_payout_eta: null,
+    });
+  }
+
+  const { data: dev } = await sb.from("developers")
+    .select("id, stripe_account_id, payouts_enabled, payout_blocked, payout_blocked_reason, payout_blocked_at, instant_payouts_enabled, stripe_requirements_due")
+    .eq("id", developerId).single();
+  if (!dev) return res.status(404).json({ error: "Publisher not found" });
+
+  // publisher_balance may not exist for legacy rows that predate migration 12.
+  // Don't 500; just return zeros and let the dashboard message accordingly.
+  // Column is developer_id per migration 12 (matches existing schema convention).
+  let bal = { balance: 0, lifetime_earned: 0, lifetime_paid: 0 };
+  try {
+    const { data: b } = await sb.from("publisher_balance")
+      .select("balance, lifetime_earned, lifetime_paid")
+      .eq("developer_id", developerId).maybeSingle();
+    if (b) bal = b;
+  } catch (_) {}
+
+  // Next payout hint: Friday-at-12-UTC if eligible, else "when balance reaches $25"
+  // (Decision 2 + Decision 3 of the design doc). If blocked, override with that.
+  let nextPayoutEta = null;
+  if (dev.payout_blocked) {
+    nextPayoutEta = "blocked";
+  } else if (!dev.payouts_enabled || !dev.stripe_account_id) {
+    nextPayoutEta = "setup_required";
+  } else if ((parseFloat(bal.balance) || 0) < 25) {
+    nextPayoutEta = "threshold_pending";
+  } else {
+    // Find the next Friday 12:00 UTC
+    const now = new Date();
+    const nextFriday = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12, 0, 0,
+    ));
+    const dow = nextFriday.getUTCDay();
+    const days = (5 - dow + 7) % 7 || 7;
+    nextFriday.setUTCDate(nextFriday.getUTCDate() + days);
+    nextPayoutEta = nextFriday.toISOString();
+  }
+
+  return res.json({
+    mode: "stripe",
+    developer_id: developerId,
+    stripe_account_id: dev.stripe_account_id,
+    payouts_enabled: !!dev.payouts_enabled,
+    payout_blocked: !!dev.payout_blocked,
+    payout_blocked_reason: dev.payout_blocked_reason,
+    payout_blocked_at: dev.payout_blocked_at,
+    instant_payouts_enabled: !!dev.instant_payouts_enabled,
+    stripe_requirements_due: dev.stripe_requirements_due || [],
+    balance: parseFloat(bal.balance) || 0,
+    lifetime_earned: parseFloat(bal.lifetime_earned) || 0,
+    lifetime_paid: parseFloat(bal.lifetime_paid) || 0,
+    next_payout_eta: nextPayoutEta,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase E Day 3 — autonomous weekly payout cron.
+//
+// Friday 12:00 UTC primary: handleRunPayoutCron
+//   Queries every developer where:
+//     payouts_enabled = true
+//     payout_blocked  = false
+//     stripe_account_id IS NOT NULL
+//     publisher_balance.balance >= MIN_PAYOUT_USD ($25 per Decision 3)
+//   For each, fires stripe.transfers.create() to their Connect account.
+//   - On success: debit balance via bbx_decrement_publisher_balance,
+//     mark payouts row status='paid'
+//   - On Tier-1 (network / timeout / transient): leave payouts row at
+//     'pending' for Saturday sweep
+//   - On Tier-2 (Stripe rejected — bank closed, account suspended):
+//     set developers.payout_blocked=true with reason; payouts row
+//     status='failed' failure_tier=2
+//
+// Saturday 12:00 UTC retry sweep: handleRunPayoutRetrySweep
+//   Re-attempts any payouts row where status='pending' AND
+//   failure_tier IS NULL AND retry_count < 3 from the last 7 days.
+//
+// Auth: both require Authorization: Bearer ${CRON_SECRET} when in
+// Supabase mode. Vercel cron sends this header automatically; operators
+// can call manually with the env value. Demo mode skips auth so
+// hermetic tests can exercise the full state machine.
+// ═══════════════════════════════════════════════════════════════════════
+
+const MIN_PAYOUT_USD_E   = 25;   // Decision 3
+const PAYOUT_FEE_FLAT    = 0.25;
+const PAYOUT_FEE_RATE    = 0.0025;
+const INSTANT_FEE_FLAT   = 0.50;
+const INSTANT_FEE_RATE   = 0.015;
+const MAX_RETRIES        = 3;
+const TIER3_FAILURE_PCT  = 0.20; // >20% failures in a run → operator alert
+
+function isCronAuthorized(req) {
+  // Demo mode skips auth so tests can exercise the cron path.
+  if (!HAS_SUPABASE) return true;
+  const expected = process.env.CRON_SECRET || "";
+  if (!expected) {
+    // No secret configured — refuse rather than silently allow.
+    return false;
+  }
+  const auth = (req.headers && (req.headers.authorization || req.headers.Authorization)) || "";
+  return auth === `Bearer ${expected}`;
+}
+
+function computePayoutFee(balance, method) {
+  // Standard ACH: BB absorbs. Instant: publisher pays (deducted before transfer).
+  if (method === "instant") {
+    return +(INSTANT_FEE_FLAT + balance * INSTANT_FEE_RATE).toFixed(4);
+  }
+  return 0;
+}
+
+async function handleRunPayoutCron(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  if (!isCronAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const sb = supa();
+  const s  = stripe();
+  const runId  = "cron_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+  const tStart = Date.now();
+  const summary = {
+    run_id: runId,
+    started_at: new Date().toISOString(),
+    publishers_attempted: 0,
+    succeeded:    0,
+    tier1_failed: 0,
+    tier2_failed: 0,
+    skipped:      0,
+    total_usd:    0,
+    failures:     [],
+  };
+
+  // ── Demo path ──────────────────────────────────────────────────────
+  // Walks the in-memory developer + balance maps, simulates a successful
+  // transfer for any eligible publisher. Exercises the full state
+  // transition (decrement balance, mark payouts row paid).
+  if (!sb || !s) {
+    for (const [devId, d] of DEMO.developers) {
+      if (d.payout_blocked || !d.payouts_enabled || !d.stripe_account_id) {
+        summary.skipped++;
+        continue;
+      }
+      const bal = publisherBalance._getDemoBalance(devId);
+      if (!bal || bal.balance < MIN_PAYOUT_USD_E) { summary.skipped++; continue; }
+      summary.publishers_attempted++;
+      const method = d.instant_payouts_enabled ? "instant" : "standard";
+      const fee    = computePayoutFee(bal.balance, method);
+      const amount = +(bal.balance - fee).toFixed(2);
+      const deducted = await publisherBalance.debitPublisherBalance(null, devId, bal.balance);
+      // Record the simulated payout row in DEMO.payouts
+      DEMO.payouts.set(runId + "_" + devId, {
+        id: runId + "_" + devId, developer_id: devId,
+        amount: amount, fee_usd: fee, method,
+        status: "paid", stripe_transfer_id: "tr_demo_" + Math.random().toString(36).slice(2, 10),
+        created_at: new Date().toISOString(), completed_at: new Date().toISOString(),
+      });
+      summary.succeeded++;
+      summary.total_usd += deducted;
+    }
+    summary.completed_at = new Date().toISOString();
+    summary.duration_ms  = Date.now() - tStart;
+    summary.mode = "demo";
+    console.log("bbx:payout_cron:ok", JSON.stringify(summary));
+    return res.json(summary);
+  }
+
+  // ── Supabase path ──────────────────────────────────────────────────
+  // Eligible publishers: developers join publisher_balance, filtered.
+  // Two queries because supabase-js doesn't expose SQL joins cleanly.
+  let devs = [];
+  try {
+    const { data, error } = await sb.from("developers")
+      .select("id, email, stripe_account_id, payouts_enabled, payout_blocked, instant_payouts_enabled")
+      .eq("payouts_enabled", true)
+      .eq("payout_blocked",  false)
+      .not("stripe_account_id", "is", null);
+    if (error) throw error;
+    devs = data || [];
+  } catch (e) {
+    console.error("bbx:payout_cron:devs_query_fail", JSON.stringify({ message: e && e.message }));
+    return res.status(500).json({ error: "developers query failed", message: e && e.message });
+  }
+
+  // Pull every balance row for these developers in one query.
+  const devIds = devs.map((d) => d.id);
+  if (devIds.length === 0) {
+    summary.completed_at = new Date().toISOString();
+    summary.duration_ms  = Date.now() - tStart;
+    summary.mode = "stripe";
+    console.log("bbx:payout_cron:no_eligible", JSON.stringify(summary));
+    return res.json(summary);
+  }
+  let balances = [];
+  try {
+    const { data } = await sb.from("publisher_balance")
+      .select("developer_id, balance")
+      .in("developer_id", devIds)
+      .gte("balance", MIN_PAYOUT_USD_E);
+    balances = data || [];
+  } catch (e) {
+    console.error("bbx:payout_cron:balance_query_fail", JSON.stringify({ message: e && e.message }));
+    return res.status(500).json({ error: "balance query failed", message: e && e.message });
+  }
+  const balByDev = new Map(balances.map((b) => [b.developer_id, parseFloat(b.balance) || 0]));
+
+  // Loop and fire transfers.
+  for (const dev of devs) {
+    const balance = balByDev.get(dev.id);
+    if (!balance || balance < MIN_PAYOUT_USD_E) { summary.skipped++; continue; }
+    summary.publishers_attempted++;
+
+    const method   = dev.instant_payouts_enabled ? "instant" : "standard";
+    const fee      = computePayoutFee(balance, method);
+    const transferAmount = +(balance - fee).toFixed(2);
+    const amountCents    = Math.round(transferAmount * 100);
+
+    // Insert payouts row at status='pending' BEFORE firing the transfer
+    // so we have an audit row even if the Stripe call hangs / crashes.
+    let payoutRowId = null;
+    try {
+      const { data: inserted } = await sb.from("payouts").insert({
+        developer_id: dev.id,
+        amount:       transferAmount,
+        fee_usd:      fee,
+        status:       "pending",
+        method,
+        retry_count:  0,
+        period_start: new Date(Date.now() - 7 * 86400 * 1000).toISOString().slice(0, 10),
+        period_end:   new Date().toISOString().slice(0, 10),
+        created_at:   new Date().toISOString(),
+      }).select("id").single();
+      payoutRowId = inserted && inserted.id;
+    } catch (e) {
+      console.error("bbx:payout_cron:row_insert_fail",
+        JSON.stringify({ developer_id: dev.id, message: e && e.message }));
+      // Skip this publisher — we couldn't record the attempt safely.
+      continue;
+    }
+
+    // Fire the transfer.
+    let transferId = null;
+    let stripeErr  = null;
+    try {
+      const tr = await s.transfers.create({
+        amount: amountCents,
+        currency: "usd",
+        destination: dev.stripe_account_id,
+        metadata: {
+          developer_id: dev.id,
+          run_id:       runId,
+          method,
+        },
+      });
+      transferId = tr.id;
+    } catch (e) {
+      stripeErr = e;
+    }
+
+    if (transferId) {
+      // ── Success path: debit balance, mark paid ──
+      const deducted = await publisherBalance.debitPublisherBalance(sb, dev.id, balance);
+      try {
+        await sb.from("payouts").update({
+          status: "paid",
+          stripe_transfer_id: transferId,
+          completed_at: new Date().toISOString(),
+        }).eq("id", payoutRowId);
+      } catch (_) { /* non-fatal — transfer already happened */ }
+      summary.succeeded++;
+      summary.total_usd += deducted;
+      console.log("bbx:payout_cron:transfer_ok", JSON.stringify({
+        developer_id: dev.id, transfer_id: transferId,
+        amount: transferAmount, method, run_id: runId,
+      }));
+      continue;
+    }
+
+    // ── Failure: classify Tier-1 vs Tier-2 ──
+    const errMsg  = (stripeErr && stripeErr.message) || "unknown_error";
+    const errType = stripeErr && stripeErr.type;
+    const errCode = stripeErr && stripeErr.code;
+    // Tier-2 (publisher-action-required): Stripe-rejected reasons.
+    // The full list grows over time; we cast a wide net for safety.
+    const tier2Reasons = [
+      "account_invalid", "balance_insufficient", "bank_account_unverified",
+      "destination_account_disabled", "insufficient_capabilities_for_transfer",
+      "invalid_request_error",
+    ];
+    const isTier2 = (errType === "StripeInvalidRequestError") ||
+                    (errCode && tier2Reasons.includes(errCode));
+
+    if (isTier2) {
+      // Mark publisher blocked; the dashboard will surface the resolve flow.
+      try {
+        await sb.from("developers").update({
+          payout_blocked: true,
+          payout_blocked_reason: "stripe_transfer_rejected: " + (errCode || errType || errMsg).toString().slice(0, 200),
+          payout_blocked_at: new Date().toISOString(),
+        }).eq("id", dev.id);
+        await sb.from("payouts").update({
+          status: "failed", failure_tier: 2,
+          failure_reason: errMsg.slice(0, 500),
+          completed_at: new Date().toISOString(),
+        }).eq("id", payoutRowId);
+      } catch (_) { /* non-fatal */ }
+      summary.tier2_failed++;
+      summary.failures.push({ developer_id: dev.id, tier: 2, error: errMsg });
+    } else {
+      // Tier-1: leave row at pending, increment retry_count, Saturday will retry.
+      try {
+        await sb.from("payouts").update({
+          retry_count:    1,
+          failure_reason: errMsg.slice(0, 500),
+        }).eq("id", payoutRowId);
+      } catch (_) {}
+      summary.tier1_failed++;
+      summary.failures.push({ developer_id: dev.id, tier: 1, error: errMsg });
+    }
+  }
+
+  // ── Tier-3 check: >20% failed in this run → operator alert ──
+  if (summary.publishers_attempted > 0) {
+    const failPct = (summary.tier1_failed + summary.tier2_failed) / summary.publishers_attempted;
+    if (failPct > TIER3_FAILURE_PCT) {
+      console.error("bbx:payout_cron:tier3_alert", JSON.stringify({
+        tag: "payout_cron.tier3", run_id: runId,
+        publishers_attempted: summary.publishers_attempted,
+        failure_pct: +(failPct * 100).toFixed(1),
+        summary,
+      }));
+      summary.tier3_alert = true;
+    }
+  }
+
+  summary.completed_at = new Date().toISOString();
+  summary.duration_ms  = Date.now() - tStart;
+  summary.mode = "stripe";
+  console.log("bbx:payout_cron:done", JSON.stringify(summary));
+  return res.json(summary);
+}
+
+// ── Saturday retry sweep ─────────────────────────────────────────────
+// Re-attempts payouts rows where status='pending' AND failure_tier IS NULL
+// AND retry_count < MAX_RETRIES from the last 7 days. Same Tier-1/Tier-2
+// classification as the primary cron. Caps retry_count at MAX_RETRIES; on
+// the third consecutive failure, marks the row as failed Tier-1 and alerts.
+async function handleRunPayoutRetrySweep(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  if (!isCronAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const sb = supa();
+  const s  = stripe();
+  const runId  = "retry_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+  const summary = {
+    run_id: runId,
+    started_at: new Date().toISOString(),
+    retried:    0,
+    succeeded:  0,
+    still_pending: 0,
+    final_failed: 0,
+    tier2_failed: 0,
+  };
+
+  // Demo mode: nothing pending to retry (cron records 'paid' immediately).
+  if (!sb || !s) {
+    summary.mode = "demo";
+    summary.completed_at = new Date().toISOString();
+    return res.json(summary);
+  }
+
+  const sinceIso = new Date(Date.now() - 7 * 86400 * 1000).toISOString();
+  let pending = [];
+  try {
+    const { data } = await sb.from("payouts")
+      .select("id, developer_id, amount, fee_usd, method, retry_count, created_at")
+      .eq("status", "pending")
+      .is("failure_tier", null)
+      .lt("retry_count", MAX_RETRIES)
+      .gte("created_at", sinceIso);
+    pending = data || [];
+  } catch (e) {
+    console.error("bbx:payout_retry:query_fail", JSON.stringify({ message: e && e.message }));
+    return res.status(500).json({ error: "pending query failed", message: e && e.message });
+  }
+
+  for (const p of pending) {
+    summary.retried++;
+    // Re-look-up the publisher's stripe_account_id (it could have changed
+    // since the failed primary run).
+    const { data: dev } = await sb.from("developers")
+      .select("stripe_account_id, payout_blocked")
+      .eq("id", p.developer_id).single();
+    if (!dev || dev.payout_blocked || !dev.stripe_account_id) {
+      // Publisher got blocked between Friday and Saturday — leave the row
+      // pending so it sticks out in the operator dashboard.
+      summary.still_pending++;
+      continue;
+    }
+
+    const amountCents = Math.round(parseFloat(p.amount) * 100);
+    let transferId = null;
+    let stripeErr  = null;
+    try {
+      const tr = await s.transfers.create({
+        amount: amountCents, currency: "usd",
+        destination: dev.stripe_account_id,
+        metadata: { developer_id: p.developer_id, retry_of: p.id, run_id: runId },
+      });
+      transferId = tr.id;
+    } catch (e) { stripeErr = e; }
+
+    if (transferId) {
+      // The original primary run never debited balance; do it now.
+      const deducted = await publisherBalance.debitPublisherBalance(
+        sb, p.developer_id, parseFloat(p.amount),
+      );
+      try {
+        await sb.from("payouts").update({
+          status: "paid",
+          stripe_transfer_id: transferId,
+          completed_at: new Date().toISOString(),
+        }).eq("id", p.id);
+      } catch (_) {}
+      summary.succeeded++;
+      continue;
+    }
+
+    // Failure on retry — classify and update retry_count.
+    const errMsg  = (stripeErr && stripeErr.message) || "unknown_error";
+    const errType = stripeErr && stripeErr.type;
+    const errCode = stripeErr && stripeErr.code;
+    const tier2Reasons = [
+      "account_invalid", "balance_insufficient", "bank_account_unverified",
+      "destination_account_disabled", "insufficient_capabilities_for_transfer",
+      "invalid_request_error",
+    ];
+    const isTier2 = (errType === "StripeInvalidRequestError") ||
+                    (errCode && tier2Reasons.includes(errCode));
+
+    const newRetryCount = (parseInt(p.retry_count, 10) || 0) + 1;
+    if (isTier2) {
+      try {
+        await sb.from("developers").update({
+          payout_blocked: true,
+          payout_blocked_reason: "stripe_transfer_rejected: " + (errCode || errType || errMsg).toString().slice(0, 200),
+          payout_blocked_at: new Date().toISOString(),
+        }).eq("id", p.developer_id);
+        await sb.from("payouts").update({
+          status: "failed", failure_tier: 2,
+          failure_reason: errMsg.slice(0, 500),
+          retry_count: newRetryCount,
+          completed_at: new Date().toISOString(),
+        }).eq("id", p.id);
+      } catch (_) {}
+      summary.tier2_failed++;
+    } else if (newRetryCount >= MAX_RETRIES) {
+      // Tier-1 exhausted — mark failed and alert.
+      try {
+        await sb.from("payouts").update({
+          status: "failed", failure_tier: 1,
+          failure_reason: errMsg.slice(0, 500),
+          retry_count: newRetryCount,
+          completed_at: new Date().toISOString(),
+        }).eq("id", p.id);
+      } catch (_) {}
+      summary.final_failed++;
+      console.error("bbx:payout_retry:tier1_exhausted", JSON.stringify({
+        developer_id: p.developer_id, payout_id: p.id, retries: newRetryCount,
+      }));
+    } else {
+      // Still retryable — bump retry_count, leave pending.
+      try {
+        await sb.from("payouts").update({
+          retry_count: newRetryCount,
+          failure_reason: errMsg.slice(0, 500),
+        }).eq("id", p.id);
+      } catch (_) {}
+      summary.still_pending++;
+    }
+  }
+
+  summary.mode = "stripe";
+  summary.completed_at = new Date().toISOString();
+  console.log("bbx:payout_retry:done", JSON.stringify(summary));
+  return res.json(summary);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase E Day 4 — operator admin endpoints.
+//
+// All four actions below require Authorization: Bearer ${ADMIN_TOKEN}
+// (separate from CRON_SECRET — operator key shouldn't be the same as
+// what cron uses). Demo mode skips auth so unit tests can exercise the
+// state machine without an env var.
+// ═══════════════════════════════════════════════════════════════════════
+
+function isAdminAuthorized(req) {
+  if (!HAS_SUPABASE) return true;
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected) return false;
+  const auth = (req.headers && (req.headers.authorization || req.headers.Authorization)) || "";
+  return auth === `Bearer ${expected}`;
+}
+
+// GET /api/billing?action=admin_payouts_list&status=...&limit=...
+//
+// Returns most-recent N payout rows, optionally filtered by status.
+// Joins developer email/stripe_account_id for the operator to scan
+// without round-tripping. Capped at 100 rows.
+async function handleAdminPayoutsList(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  if (!isAdminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const status = req.query && req.query.status;          // pending|paid|failed|held
+  const limit  = Math.min(100, parseInt((req.query && req.query.limit) || "50", 10) || 50);
+
+  const sb = supa();
+  if (!sb) {
+    // Demo mode: read from in-memory DEMO.payouts
+    const rows = Array.from(DEMO.payouts.values())
+      .filter((p) => !status || p.status === status)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, limit);
+    return res.json({ mode: "demo", count: rows.length, payouts: rows });
+  }
+
+  let q = sb.from("payouts")
+    .select("id, developer_id, amount, fee_usd, method, status, failure_tier, failure_reason, retry_count, stripe_transfer_id, period_start, period_end, created_at, completed_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (status) q = q.eq("status", status);
+
+  let payouts = [];
+  try {
+    const { data, error } = await q;
+    if (error) throw error;
+    payouts = data || [];
+  } catch (e) {
+    console.error("bbx:admin_payouts:query_fail", JSON.stringify({ message: e && e.message }));
+    return res.status(500).json({ error: "query failed", message: e && e.message });
+  }
+
+  // Enrich with developer email + stripe_account_id in a single follow-up query.
+  if (payouts.length > 0) {
+    const devIds = [...new Set(payouts.map((p) => p.developer_id))];
+    try {
+      const { data: devs } = await sb.from("developers")
+        .select("id, email, stripe_account_id")
+        .in("id", devIds);
+      const byId = new Map((devs || []).map((d) => [d.id, d]));
+      for (const p of payouts) {
+        const d = byId.get(p.developer_id);
+        if (d) {
+          p.developer_email = d.email;
+          p.developer_stripe_account_id = d.stripe_account_id;
+        }
+      }
+    } catch (_) { /* enrichment is nice-to-have */ }
+  }
+
+  return res.json({ mode: "stripe", count: payouts.length, payouts });
+}
+
+// POST /api/billing?action=admin_force_retry  body: { payout_id }
+//
+// Manually retries a single failed/pending payout. Resets retry_count
+// to 0 (so the Saturday sweep treats it fresh) and sets status='pending'.
+// The next Saturday cron — or a manual run_payout_retry_sweep call —
+// will pick it up.
+async function handleAdminForceRetry(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  if (!isAdminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const { payout_id } = req.body || {};
+  if (!payout_id) return res.status(400).json({ error: "Missing payout_id" });
+
+  const sb = supa();
+  if (!sb) {
+    const row = DEMO.payouts.get(payout_id);
+    if (!row) return res.status(404).json({ error: "payout not found" });
+    row.status = "pending";
+    row.retry_count = 0;
+    row.failure_tier = null;
+    return res.json({ mode: "demo", payout_id, reset: true });
+  }
+
+  try {
+    const { data, error } = await sb.from("payouts").update({
+      status: "pending",
+      retry_count: 0,
+      failure_tier: null,
+      failure_reason: null,
+      completed_at: null,
+    }).eq("id", payout_id).select("id, developer_id, status").single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "payout not found" });
+    console.log("bbx:admin:force_retry", JSON.stringify({
+      payout_id, developer_id: data.developer_id,
+    }));
+    return res.json({ mode: "stripe", payout_id, reset: true, developer_id: data.developer_id });
+  } catch (e) {
+    return res.status(500).json({ error: "update failed", message: e && e.message });
+  }
+}
+
+// POST /api/billing?action=admin_unblock_publisher  body: { developer_id }
+//
+// Manually clears payout_blocked + reason on a developer. Use after the
+// publisher has resolved their Stripe issue out-of-band (or an operator
+// is overriding a Tier-2 mark they consider resolved).
+async function handleAdminUnblockPublisher(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  if (!isAdminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const { developer_id, reason } = req.body || {};
+  if (!developer_id) return res.status(400).json({ error: "Missing developer_id" });
+
+  const sb = supa();
+  if (!sb) {
+    const d = DEMO.developers.get(developer_id);
+    if (!d) return res.status(404).json({ error: "developer not found" });
+    d.payout_blocked = false;
+    d.payout_blocked_reason = null;
+    return res.json({ mode: "demo", developer_id, unblocked: true });
+  }
+
+  try {
+    const { data, error } = await sb.from("developers").update({
+      payout_blocked: false,
+      payout_blocked_reason: null,
+      payout_blocked_at: null,
+      updated_at: new Date().toISOString(),
+    }).eq("id", developer_id).select("id, email").single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "developer not found" });
+    console.log("bbx:admin:unblock", JSON.stringify({
+      developer_id, email: data.email, operator_reason: reason || "(no reason supplied)",
+    }));
+    return res.json({ mode: "stripe", developer_id, unblocked: true, email: data.email });
+  } catch (e) {
+    return res.status(500).json({ error: "update failed", message: e && e.message });
+  }
+}
+
+// GET /api/billing?action=admin_blocked_publishers
+//
+// Quick list of every publisher currently blocked, with the Stripe
+// reason and when it happened. Drives the Day 4 dashboard's "Action
+// required" panel.
+async function handleAdminBlockedPublishers(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  if (!isAdminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const sb = supa();
+  if (!sb) {
+    const rows = Array.from(DEMO.developers.values())
+      .filter((d) => d.payout_blocked)
+      .map((d) => ({
+        developer_id: d.id, email: d.email,
+        payout_blocked_reason: d.payout_blocked_reason,
+        payout_blocked_at: d.payout_blocked_at,
+        stripe_account_id: d.stripe_account_id,
+      }));
+    return res.json({ mode: "demo", count: rows.length, blocked: rows });
+  }
+
+  try {
+    const { data, error } = await sb.from("developers")
+      .select("id, email, stripe_account_id, payout_blocked_reason, payout_blocked_at")
+      .eq("payout_blocked", true)
+      .order("payout_blocked_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    const rows = (data || []).map((d) => ({
+      developer_id: d.id, email: d.email,
+      stripe_account_id: d.stripe_account_id,
+      payout_blocked_reason: d.payout_blocked_reason,
+      payout_blocked_at: d.payout_blocked_at,
+    }));
+    return res.json({ mode: "stripe", count: rows.length, blocked: rows });
+  } catch (e) {
+    return res.status(500).json({ error: "query failed", message: e && e.message });
+  }
 }
 
 // ── invoice generation (advertiser) ────────────────────────────────────
@@ -625,18 +1405,94 @@ async function handleWebhook(req, res) {
     }
   }
 
-  // Handle Stripe Connect account updates (publisher onboarding completion)
+  // Handle Stripe Connect account updates — Phase E Day 1.
+  //
+  // State machine (per Decision 6 Tier-2):
+  //   payouts_enabled=true  AND requirements.currently_due=[]  → mark
+  //     payouts_enabled, clear payout_blocked
+  //   requirements.currently_due is non-empty (eventually-due / past-due) →
+  //     set payout_blocked + reason. Banner click regenerates an Account
+  //     Link (handleRefreshConnect).
+  //   capabilities.transfers='active' → ready to receive standard payouts
+  //   payouts.schedule.interval='manual' (or instant) signals publisher
+  //     opted into Instant Payouts via Stripe Express dashboard.
   if (event.type === "account.updated") {
     const account = event.data.object;
-    if (account.charges_enabled && account.metadata && account.metadata.developer_id) {
+    const developerId = account.metadata && account.metadata.developer_id;
+    if (developerId) {
+      const reqs       = (account.requirements && account.requirements.currently_due) || [];
+      const payoutsOk  = !!account.payouts_enabled && reqs.length === 0;
+      const blocked    = !payoutsOk && (reqs.length > 0 || account.payouts_enabled === false);
+      const blockedReason = blocked
+        ? (reqs.length > 0 ? "requirements_due: " + reqs.slice(0, 5).join(", ") : "payouts_disabled_by_stripe")
+        : null;
+      // Detect Instant Payouts opt-in (Decision 8). Stripe sets
+      // capabilities.instant_payouts='active' on accounts that have opted in.
+      const caps       = (account.capabilities || {});
+      const instantOn  = caps.instant_payouts === "active";
+
       if (sb) {
-        await sb.from("developers")
-          .update({ stripe_account_id: account.id, updated_at: new Date().toISOString() })
-          .eq("id", account.metadata.developer_id);
+        await sb.from("developers").update({
+          stripe_account_id:       account.id,
+          payouts_enabled:         payoutsOk,
+          payout_blocked:          blocked,
+          payout_blocked_reason:   blockedReason,
+          payout_blocked_at:       blocked ? new Date().toISOString() : null,
+          instant_payouts_enabled: instantOn,
+          stripe_requirements_due: reqs,
+          updated_at:              new Date().toISOString(),
+        }).eq("id", developerId);
       } else {
-        const d = ensureDemoDeveloper(account.metadata.developer_id);
-        d.stripe_account_id = account.id;
+        const d = ensureDemoDeveloper(developerId);
+        d.stripe_account_id        = account.id;
+        d.payouts_enabled          = payoutsOk;
+        d.payout_blocked           = blocked;
+        d.payout_blocked_reason    = blockedReason;
+        d.instant_payouts_enabled  = instantOn;
+        d.stripe_requirements_due  = reqs;
       }
+    }
+  }
+
+  // account.application.deauthorized — publisher disconnected our Connect app.
+  // Wipe stripe_account_id and mark blocked so the dashboard prompts re-setup
+  // and we never attempt a transfer to a disconnected account.
+  if (event.type === "account.application.deauthorized") {
+    const account = event.data.object;
+    if (sb) {
+      await sb.from("developers").update({
+        stripe_account_id:       null,
+        payouts_enabled:         false,
+        payout_blocked:          true,
+        payout_blocked_reason:   "stripe_account_deauthorized",
+        payout_blocked_at:       new Date().toISOString(),
+      }).eq("stripe_account_id", account.id);
+    }
+  }
+
+  // payout.failed — Stripe couldn't push to the publisher's bank.
+  // Tier-2: mark the publisher blocked; their dashboard will surface the
+  // failure reason and the Resolve button (handleRefreshConnect).
+  if (event.type === "payout.failed") {
+    const payout = event.data.object;
+    // Stripe sends this on the connected account; account is the recipient.
+    const acct = event.account; // the connected account id
+    if (sb && acct) {
+      await sb.from("developers").update({
+        payout_blocked:        true,
+        payout_blocked_reason: "stripe_payout_failed: " + (payout.failure_message || payout.failure_code || "unknown"),
+        payout_blocked_at:     new Date().toISOString(),
+      }).eq("stripe_account_id", acct);
+
+      // Mark the corresponding payouts row failed if we can identify it.
+      try {
+        await sb.from("payouts").update({
+          status:         "failed",
+          failure_reason: payout.failure_message || payout.failure_code || "stripe_payout_failed",
+          failure_tier:   2,
+          completed_at:   new Date().toISOString(),
+        }).eq("stripe_transfer_id", payout.id);
+      } catch (_) { /* payouts table may not exist pre-migration */ }
     }
   }
 
@@ -655,7 +1511,7 @@ async function handleWebhook(req, res) {
     }
   }
 
-  // Handle refunds — deduct from advertiser balance
+  // Handle refunds — deduct from advertiser balance AND fire publisher clawback (Phase E HARD-1).
   if (event.type === "charge.refunded") {
     const charge = event.data.object;
     const refundAmount = (charge.amount_refunded || 0) / 100;
@@ -682,6 +1538,21 @@ async function handleWebhook(req, res) {
             stripe_session_id: charge.id, status: "completed",
           });
         } catch (_) {}
+
+        // ── Publisher clawback (Phase E HARD-1) ──
+        // Find every campaign that was funded by this refunded charge, sum
+        // each publisher's attributed share (85% of attributed spend), and
+        // try to deduct from balance. Insufficient balance → row stays
+        // pending and future earnings satisfy it first. Per Decision 7.
+        try {
+          await fireRefundClawbacks(sb, advertiserId, refundAmount, charge.id);
+        } catch (e) {
+          console.error("bbx:clawback:fail", JSON.stringify({
+            tag: "clawback.fail", advertiser_id: advertiserId,
+            refund_amount: refundAmount, charge_id: charge.id,
+            message: e && e.message,
+          }));
+        }
       } else {
         const a = ensureDemoAdvertiser(advertiserId);
         a.balance = Math.max(0, a.balance - refundAmount);
@@ -697,6 +1568,118 @@ function nextPayoutDate() {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().split("T")[0];
 }
+
+/**
+ * Phase E HARD-1 — fire publisher clawbacks when an advertiser charge is
+ * refunded. Per Decision 7 of the design doc:
+ *
+ *   1. Find every (publisher, attributed_share) pair from events tied to
+ *      this advertiser's campaigns.
+ *   2. Pro-rate the refund across publishers in the same ratio.
+ *   3. For each publisher: try to deduct from balance first; if balance
+ *      insufficient, log a 'pending' clawback that future earnings satisfy.
+ *
+ * Day 1 implementation is intentionally conservative — it logs the
+ * clawback intent to payout_clawbacks and (when balance is sufficient)
+ * decrements the balance. The full "future earnings satisfy pending
+ * clawback first" reconciliation lives in api/track.js (Day 2/3 wiring
+ * once per-event accrual ships). Either way, no operator action required.
+ */
+async function fireRefundClawbacks(sb, advertiserId, refundAmount, sourceStripeId) {
+  if (!sb || !advertiserId || refundAmount <= 0) return;
+
+  // Step 1: sum publisher_payout per publisher for events on this
+  // advertiser's campaigns. Cap the lookback at 90 days to bound the
+  // query — refunds beyond that are exceedingly rare and unrecoverable
+  // anyway (Decision 7's 90-day operator escalation).
+  const since = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
+  const { data: camps, error: campErr } = await sb.from("campaigns")
+    .select("id").eq("advertiser_id", advertiserId);
+  if (campErr || !Array.isArray(camps) || camps.length === 0) {
+    console.warn("bbx:clawback:no_campaigns",
+      JSON.stringify({ advertiser_id: advertiserId, refund: refundAmount }));
+    return;
+  }
+  const campaignIds = camps.map((c) => c.id);
+  const { data: evts, error: evtErr } = await sb.from("events")
+    .select("developer_id, developer_payout, cost, campaign_id")
+    .in("campaign_id", campaignIds)
+    .eq("is_sandbox", false)
+    .gte("created_at", since)
+    .gt("developer_payout", 0);
+  if (evtErr) {
+    console.error("bbx:clawback:events_query_fail", evtErr.message);
+    return;
+  }
+  if (!Array.isArray(evts) || evts.length === 0) return;
+
+  // Aggregate attributed earnings per publisher + total spend on these
+  // campaigns. Pro-rate refund by each publisher's share of total spend.
+  const totalSpend = evts.reduce((s, e) => s + (parseFloat(e.cost) || 0), 0);
+  if (totalSpend <= 0) return;
+  const perPub = new Map();
+  for (const e of evts) {
+    if (!e.developer_id) continue;
+    const cur = perPub.get(e.developer_id) || { earned: 0, spend: 0, campaign_id: e.campaign_id };
+    cur.earned += parseFloat(e.developer_payout) || 0;
+    cur.spend  += parseFloat(e.cost) || 0;
+    perPub.set(e.developer_id, cur);
+  }
+
+  // Iterate by developer_id (the project's existing FK convention for
+  // publishers — see api/_lib/campaign_history.js, supabase-schema.sql).
+  for (const [developerId, stats] of perPub) {
+    const share = (stats.spend / totalSpend) * refundAmount;     // refund pro-rated by spend
+    const clawAmount = Math.min(stats.earned, share * 0.85);     // clawback bounded by what they actually earned
+    if (clawAmount <= 0) continue;
+
+    // Read current balance to decide applied-vs-pending.
+    let currentBalance = 0;
+    try {
+      const { data: bal } = await sb.from("publisher_balance")
+        .select("balance").eq("developer_id", developerId).maybeSingle();
+      currentBalance = parseFloat(bal && bal.balance) || 0;
+    } catch (_) {}
+
+    const canCover = currentBalance >= clawAmount;
+    const status   = canCover ? "applied" : "pending";
+
+    try {
+      await sb.from("payout_clawbacks").insert({
+        developer_id:       developerId,
+        amount_usd:         clawAmount,
+        remaining_usd:      canCover ? 0 : clawAmount,
+        source_event_type:  "refund",
+        source_stripe_id:   sourceStripeId,
+        source_campaign_id: stats.campaign_id,
+        status,
+        applied_at:         canCover ? new Date().toISOString() : null,
+        notes:              "auto-clawback from charge.refunded webhook",
+      });
+
+      if (canCover) {
+        // Atomic decrement attempt; fall back to read-modify-write.
+        try {
+          await sb.rpc("bbx_decrement_publisher_balance", {
+            p_developer_id: developerId,
+            p_amount_usd:   clawAmount,
+          });
+        } catch (_) {
+          const newBalance = Math.max(0, currentBalance - clawAmount);
+          await sb.from("publisher_balance").update({
+            balance:    newBalance,
+            updated_at: new Date().toISOString(),
+          }).eq("developer_id", developerId);
+        }
+      }
+    } catch (e) {
+      // Table may not exist pre-migration 12 — log but don't bubble up.
+      console.error("bbx:clawback:insert_fail",
+        JSON.stringify({ developer_id: developerId, amount: clawAmount, message: e && e.message }));
+    }
+  }
+}
+module.exports._fireRefundClawbacks = fireRefundClawbacks;
 
 // ── exports for testing ────────────────────────────────────────────────
 module.exports.HAS_STRIPE   = HAS_STRIPE;
