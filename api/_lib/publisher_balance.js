@@ -157,10 +157,32 @@ async function debitPublisherBalance(sb, developerId, amount_usd) {
       } catch (_) { /* non-fatal */ }
     }
     return deductedNum;
-  } catch (e) {
-    console.error("bbx:balance:debit_fail",
-      JSON.stringify({ developer_id: developerId, amount, message: e && e.message }));
-    return 0;
+  } catch (rpcErr) {
+    // Phase E Day 6 fix — fall back to read-modify-write when the RPC
+    // isn't deployed (matches what creditPublisherBalance does). Without
+    // this, a missing migration 13 caused Day 5/6 to silently lose
+    // ledger updates: Stripe transfer succeeded but balance never decremented.
+    console.warn("bbx:balance:debit_rpc_unavailable_falling_back",
+      JSON.stringify({ developer_id: developerId, message: rpcErr && rpcErr.message }));
+    try {
+      const { data: cur } = await sb.from("publisher_balance")
+        .select("balance, lifetime_paid").eq("developer_id", developerId).maybeSingle();
+      if (!cur) return 0;
+      const curBalance = parseFloat(cur.balance) || 0;
+      const curPaid    = parseFloat(cur.lifetime_paid) || 0;
+      const deducted   = Math.min(curBalance, amount);
+      if (deducted <= 0) return 0;
+      await sb.from("publisher_balance").update({
+        balance:       curBalance - deducted,
+        lifetime_paid: curPaid + deducted,
+        updated_at:    new Date().toISOString(),
+      }).eq("developer_id", developerId);
+      return deducted;
+    } catch (e) {
+      console.error("bbx:balance:debit_fallback_fail",
+        JSON.stringify({ developer_id: developerId, amount, message: e && e.message }));
+      return 0;
+    }
   }
 }
 
