@@ -159,6 +159,9 @@ module.exports = async function handler(req, res) {
       case "admin_force_retry":       return await handleAdminForceRetry(req, res);
       case "admin_unblock_publisher": return await handleAdminUnblockPublisher(req, res);
       case "admin_blocked_publishers":return await handleAdminBlockedPublishers(req, res);
+      // Phase E Day 5 — E2E inventory diagnostic. Returns the count and
+      // most-recent timestamp at every checkpoint of the autonomous loop.
+      case "e2e_inventory":           return await handleE2EInventory(req, res);
       case "invoice":         return await handleInvoice(req, res);
       case "payout":          return await handlePayout(req, res);
       case "history":         return await handleHistory(req, res);
@@ -1139,6 +1142,174 @@ async function handleAdminBlockedPublishers(req, res) {
   } catch (e) {
     return res.status(500).json({ error: "query failed", message: e && e.message });
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase E Day 5 — E2E inventory diagnostic.
+//
+// Returns the count and most-recent timestamp at every checkpoint of the
+// autonomous payout loop. Used by the Day 5 runbook to quickly verify
+// each stage of the demo flow worked. One round-trip per call; no Stripe
+// API hits.
+//
+// Auth: Authorization: Bearer ${ADMIN_TOKEN}
+// ═══════════════════════════════════════════════════════════════════════
+async function handleE2EInventory(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  if (!isAdminAuthorized(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const sb = supa();
+  if (!sb) {
+    return res.json({
+      mode: "demo",
+      message: "E2E inventory only meaningful in Supabase production mode.",
+    });
+  }
+
+  const out = {
+    mode: "stripe",
+    generated_at: new Date().toISOString(),
+    advertisers:           { count: 0, latest_signup_at: null },
+    advertiser_deposits:   { total_usd: 0, count: 0, latest_at: null },
+    campaigns_active:      { count: 0, latest_launched_at: null },
+    auctions_24h:          { total: 0, sandbox: 0, production: 0 },
+    impressions_24h:       { production: 0, sandbox: 0 },
+    paying_events_1h:      { count: 0, total_publisher_payout_usd: 0 },
+    developers:            { count: 0, with_stripe_account: 0, payouts_enabled: 0 },
+    publisher_balances:    { with_positive_balance: 0, total_owed_to_publishers_usd: 0 },
+    payouts:               { paid: 0, pending: 0, failed: 0, total_paid_usd: 0, last_paid_at: null },
+    clawbacks:             { applied: 0, pending: 0, total_pending_usd: 0 },
+  };
+
+  try {
+    // Advertisers
+    const { count: advCount } = await sb.from("advertisers")
+      .select("*", { count: "exact", head: true });
+    out.advertisers.count = advCount || 0;
+    const { data: lastAdv } = await sb.from("advertisers")
+      .select("created_at").order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (lastAdv) out.advertisers.latest_signup_at = lastAdv.created_at;
+
+    // Advertiser deposits (transactions of type='deposit', completed)
+    try {
+      const { data: deposits } = await sb.from("transactions")
+        .select("amount, created_at").eq("type", "deposit").eq("status", "completed");
+      if (Array.isArray(deposits)) {
+        out.advertiser_deposits.count = deposits.length;
+        out.advertiser_deposits.total_usd = +deposits.reduce(
+          (s, d) => s + (parseFloat(d.amount) || 0), 0,
+        ).toFixed(2);
+        const latest = deposits.reduce((a, b) =>
+          new Date(b.created_at) > new Date(a.created_at) ? b : a, deposits[0]);
+        if (latest) out.advertiser_deposits.latest_at = latest.created_at;
+      }
+    } catch (_) { /* transactions table may not exist; skip */ }
+
+    // Active campaigns
+    const { count: campCount } = await sb.from("campaigns")
+      .select("*", { count: "exact", head: true }).eq("status", "active");
+    out.campaigns_active.count = campCount || 0;
+    const { data: lastCamp } = await sb.from("campaigns")
+      .select("created_at").eq("status", "active")
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (lastCamp) out.campaigns_active.latest_launched_at = lastCamp.created_at;
+
+    // 24h auctions
+    const since24h = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const { count: prodAucs } = await sb.from("auction_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("is_sandbox", false).eq("outcome", "won").gte("ts", since24h);
+    const { count: sbxAucs } = await sb.from("auction_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("is_sandbox", true).eq("outcome", "sandbox").gte("ts", since24h);
+    out.auctions_24h.production = prodAucs || 0;
+    out.auctions_24h.sandbox = sbxAucs || 0;
+    out.auctions_24h.total = out.auctions_24h.production + out.auctions_24h.sandbox;
+
+    // 24h impressions
+    const { count: prodImps } = await sb.from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "impression").eq("is_sandbox", false).gte("created_at", since24h);
+    const { count: sbxImps } = await sb.from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "impression").eq("is_sandbox", true).gte("created_at", since24h);
+    out.impressions_24h.production = prodImps || 0;
+    out.impressions_24h.sandbox = sbxImps || 0;
+
+    // 1h paying events (developer_payout > 0)
+    const since1h = new Date(Date.now() - 3600 * 1000).toISOString();
+    const { data: payingEvts } = await sb.from("events")
+      .select("developer_payout")
+      .gt("developer_payout", 0).eq("is_sandbox", false).gte("created_at", since1h);
+    if (Array.isArray(payingEvts)) {
+      out.paying_events_1h.count = payingEvts.length;
+      out.paying_events_1h.total_publisher_payout_usd = +payingEvts.reduce(
+        (s, e) => s + (parseFloat(e.developer_payout) || 0), 0,
+      ).toFixed(4);
+    }
+
+    // Developers
+    const { count: devCount } = await sb.from("developers")
+      .select("*", { count: "exact", head: true });
+    out.developers.count = devCount || 0;
+    const { count: devWithStripe } = await sb.from("developers")
+      .select("*", { count: "exact", head: true }).not("stripe_account_id", "is", null);
+    out.developers.with_stripe_account = devWithStripe || 0;
+    const { count: devEnabled } = await sb.from("developers")
+      .select("*", { count: "exact", head: true }).eq("payouts_enabled", true);
+    out.developers.payouts_enabled = devEnabled || 0;
+
+    // Publisher balances
+    const { data: bals } = await sb.from("publisher_balance")
+      .select("balance").gt("balance", 0);
+    if (Array.isArray(bals)) {
+      out.publisher_balances.with_positive_balance = bals.length;
+      out.publisher_balances.total_owed_to_publishers_usd = +bals.reduce(
+        (s, b) => s + (parseFloat(b.balance) || 0), 0,
+      ).toFixed(2);
+    }
+
+    // Payouts
+    const { count: paidC } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true }).eq("status", "paid");
+    out.payouts.paid = paidC || 0;
+    const { count: pendC } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true }).eq("status", "pending");
+    out.payouts.pending = pendC || 0;
+    const { count: failC } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true }).eq("status", "failed");
+    out.payouts.failed = failC || 0;
+    try {
+      const { data: paidRows } = await sb.from("payouts")
+        .select("amount, completed_at").eq("status", "paid");
+      if (Array.isArray(paidRows)) {
+        out.payouts.total_paid_usd = +paidRows.reduce(
+          (s, p) => s + (parseFloat(p.amount) || 0), 0,
+        ).toFixed(2);
+        const latest = paidRows.reduce((a, b) =>
+          new Date(b.completed_at || 0) > new Date(a.completed_at || 0) ? b : a, paidRows[0]);
+        if (latest) out.payouts.last_paid_at = latest.completed_at;
+      }
+    } catch (_) {}
+
+    // Clawbacks
+    const { count: appCB } = await sb.from("payout_clawbacks")
+      .select("*", { count: "exact", head: true }).eq("status", "applied");
+    out.clawbacks.applied = appCB || 0;
+    const { data: pendCB } = await sb.from("payout_clawbacks")
+      .select("remaining_usd").eq("status", "pending");
+    if (Array.isArray(pendCB)) {
+      out.clawbacks.pending = pendCB.length;
+      out.clawbacks.total_pending_usd = +pendCB.reduce(
+        (s, c) => s + (parseFloat(c.remaining_usd) || 0), 0,
+      ).toFixed(2);
+    }
+  } catch (e) {
+    console.error("bbx:e2e_inventory:fail", JSON.stringify({ message: e && e.message }));
+    out.error = e && e.message;
+  }
+
+  return res.json(out);
 }
 
 // ── invoice generation (advertiser) ────────────────────────────────────

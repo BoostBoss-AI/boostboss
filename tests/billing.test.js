@@ -785,6 +785,23 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 405);
   });
 
+  // ── Phase E Day 5 — e2e_inventory diagnostic ───────────────────────
+  await test("e2e_inventory returns demo-mode message", async () => {
+    const r = await run({
+      method: "GET", query: { action: "e2e_inventory" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "demo");
+    assert(/only meaningful in Supabase/i.test(r._body.message));
+  });
+
+  await test("e2e_inventory rejects POST", async () => {
+    const r = await run({
+      method: "POST", query: { action: "e2e_inventory" },
+    });
+    assert.strictEqual(r._status, 405);
+  });
+
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }
   else console.log(`\x1b[32m${passed} checks passed.\x1b[0m`);
