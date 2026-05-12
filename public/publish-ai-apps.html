@@ -141,6 +141,11 @@
   .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
   .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
 
+  /* Phase G — real screenshot graceful fallback */
+  .hero-mockup-wrap .hero-mockup-real { display: none; width: 100%; height: auto; border-radius: 10px; }
+  .hero-mockup-wrap.has-real-img .hero-mockup-real { display: block; }
+  .hero-mockup-wrap.has-real-img svg { display: none; }
+
   /* SEE-IT (animated) section */
   .see-it { padding: 40px 0 70px; }
   .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
@@ -196,7 +201,12 @@
     <span class="section-eyebrow">See it appear</span>
     <h2 class="section-h">Drop a slot. Watch the ad render in.<br>Style stays yours.</h2>
     <p class="section-sub">A <code>&lt;div data-lumi-slot&gt;</code> placed wherever you want it. Lumi only renders the inner card — your typography, spacing, and chrome carry through.</p>
-    <div class="stage" aria-label="Animation: a sponsored card slides into a web AI chat conversation">
+    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored card slides into a web AI chat conversation">
+      <!-- Phase G: real screenshot if /assets/publish/ai-apps-hero.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/ai-apps-hero.png"
+           alt="A web AI app showing a sponsored card inline with the conversation"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <style>
           .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
@@ -333,7 +343,12 @@
     <p class="code-caption">That's the entire integration. Same snippet for OpenAI, Anthropic, Gemini, LangChain, Vercel AI SDK, CrewAI — Lumi works at the rendering surface, not the agent logic. <a href="/docs/js-snippet">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: AI app with sidebar + inline sponsored card -->
-    <div class="product-shot" aria-label="Sponsored card rendered inline in a web AI chat app">
+    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored card rendered inline in a web AI chat app">
+      <!-- Phase G: real screenshot if /assets/publish/ai-apps-product.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/ai-apps-product.png"
+           alt="Sponsored card rendered inline in a web AI app"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <!-- Browser chrome -->
         <rect x="0" y="0" width="720" height="440" fill="#FFFFFF"/>

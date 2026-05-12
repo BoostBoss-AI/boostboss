@@ -135,6 +135,11 @@
   .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
   .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
 
+  /* Phase G — real screenshot graceful fallback */
+  .hero-mockup-wrap .hero-mockup-real { display: none; width: 100%; height: auto; border-radius: 10px; }
+  .hero-mockup-wrap.has-real-img .hero-mockup-real { display: block; }
+  .hero-mockup-wrap.has-real-img svg { display: none; }
+
   /* SEE-IT (animated) section */
   .see-it { padding: 40px 0 70px; }
   .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
@@ -190,7 +195,12 @@
     <span class="section-eyebrow">See it appear</span>
     <h2 class="section-h">Your bot replies first.<br>The sponsored message arrives right after.</h2>
     <p class="section-sub">Same campaign renders natively on Discord, Telegram, and Slack — embed, card, or attachment, depending on the platform. Helper libs handle the formatting.</p>
-    <div class="stage" aria-label="Animation: a sponsored card slides up after a bot reply on a Telegram phone screen">
+    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored card slides up after a bot reply on a Telegram phone screen">
+      <!-- Phase G: real screenshot if /assets/publish/bots-hero.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/bots-hero.png"
+           alt="A Telegram bot reply followed by a sponsored card"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <style>
           .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
@@ -348,7 +358,12 @@ message.<span class="fn">reply</span>({
     <p class="code-caption">Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are convenience wrappers around the Lumi API for Bots — they format the ad payload into each platform's native message type. Skip them and roll your own formatting if you'd rather not add a dependency. <a href="/docs/rest-api">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: Discord / Telegram / Slack message previews side by side -->
-    <div class="product-shot" aria-label="Sponsored block rendered on Discord, Telegram, and Slack">
+    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered on Discord, Telegram, and Slack">
+      <!-- Phase G: real screenshot if /assets/publish/bots-product.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/bots-product.png"
+           alt="Sponsored block on Discord, Telegram, and Slack"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <rect x="0" y="0" width="720" height="440" fill="#FAFAF7"/>
 

@@ -135,6 +135,11 @@
   .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
   .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
 
+  /* Phase G — real screenshot graceful fallback */
+  .hero-mockup-wrap .hero-mockup-real { display: none; width: 100%; height: auto; border-radius: 10px; }
+  .hero-mockup-wrap.has-real-img .hero-mockup-real { display: block; }
+  .hero-mockup-wrap.has-real-img svg { display: none; }
+
   /* SEE-IT (animated) section */
   .see-it { padding: 40px 0 70px; }
   .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
@@ -190,7 +195,12 @@
     <span class="section-eyebrow">See it appear</span>
     <h2 class="section-h">Lives in your side panel.<br>Renders contextually with the page.</h2>
     <p class="section-sub">Manifest v3 native. Service-worker safe. Targets from on-page context — never user surveillance.</p>
-    <div class="stage" aria-label="Animation: a sponsored block fades into the bottom of an extension side panel">
+    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored block fades into the bottom of an extension side panel">
+      <!-- Phase G: real screenshot if /assets/publish/extensions-hero.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/extensions-hero.png"
+           alt="Chrome extension side panel with a sponsored block at the bottom"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <style>
           .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
@@ -320,7 +330,12 @@ lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
     <p class="code-caption">Manifest v3 compatible. Works in service workers, content scripts, sidepanel, and popups. <a href="/docs/npm-sdk">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: Chrome side panel with AI extension and sponsored block -->
-    <div class="product-shot" aria-label="Sponsored block rendered inside a Chrome extension side panel">
+    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered inside a Chrome extension side panel">
+      <!-- Phase G: real screenshot if /assets/publish/extensions-product.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/extensions-product.png"
+           alt="Sponsored block in a Chrome extension side panel"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <!-- Browser chrome -->
         <rect x="0" y="0" width="720" height="440" fill="#FFFFFF"/>

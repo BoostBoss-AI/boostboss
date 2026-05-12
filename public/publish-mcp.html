@@ -146,6 +146,15 @@
   .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
   .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
 
+  /* Phase G — real screenshot graceful fallback.
+     By default the inline SVG renders. If a real screenshot exists at
+     the img's src, onload fires and sets .has-real-img on the wrapper,
+     which hides the SVG and shows the img. If the screenshot 404s,
+     onerror removes the img and the SVG stays visible. */
+  .hero-mockup-wrap .hero-mockup-real { display: none; width: 100%; height: auto; border-radius: 10px; }
+  .hero-mockup-wrap.has-real-img .hero-mockup-real { display: block; }
+  .hero-mockup-wrap.has-real-img svg { display: none; }
+
   /* SEE-IT (animated) section */
   .see-it { padding: 40px 0 70px; }
   .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
@@ -220,7 +229,12 @@
     <span class="section-eyebrow">See it appear</span>
     <h2 class="section-h">When your tool runs, your output renders first.<br>The sponsored block slides in after.</h2>
     <p class="section-sub">No interruption. No latency. The user always gets your tool result before they see the ad.</p>
-    <div class="stage" aria-label="Animation: a sponsored block slides into a Claude Desktop tool response">
+    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored block slides into a Claude Desktop tool response">
+      <!-- Phase G: real screenshot if /assets/publish/mcp-hero.png exists; SVG fallback otherwise. -->
+      <img class="hero-mockup-real" src="/assets/publish/mcp-hero.png"
+           alt="Claude Desktop showing a sponsored block in a tool response"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <style>
           .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
@@ -345,7 +359,12 @@
     <p class="code-caption">That's it. The MCP host renders the ad payload natively. <a href="/docs/mcp">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: Claude Desktop with sponsored block in tool response -->
-    <div class="product-shot" aria-label="Sponsored block rendered inside a Claude Desktop tool response">
+    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered inside a Claude Desktop tool response">
+      <!-- Phase G: real screenshot if /assets/publish/mcp-product.png exists; SVG fallback otherwise. -->
+      <img class="hero-mockup-real" src="/assets/publish/mcp-product.png"
+           alt="Claude Desktop with a sponsored block rendered inside a tool response"
+           onload="this.parentElement.classList.add('has-real-img')"
+           onerror="this.remove()" />
       <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <!-- Window chrome -->
         <rect x="0" y="0" width="720" height="440" fill="#FAFAF7"/>
