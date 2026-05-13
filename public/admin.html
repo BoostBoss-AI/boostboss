@@ -1222,6 +1222,8 @@ function renderAuctionDetail(j) {
   const cands = Array.isArray(a.candidates) ? a.candidates : [];
   const pub = j.publisher || {};
   const win = j.winner_campaign || {};
+  const timeline = j.timeline || {};
+  const credit   = j.publisher_credit || {};
 
   const headStr = [
     `auction_id: ${a.auction_id}`,
@@ -1250,7 +1252,87 @@ function renderAuctionDetail(j) {
         `  factors: ${JSON.stringify(c.factors || {}, null, 2).replace(/\n/g, '\n  ')}`
       ).join('\n\n');
 
+  // ── Phase H Panel 3 (post-patch) — event timeline + publisher credit ──
+  // Each "tile" answers one operator question at a glance: did the beacon
+  // fire? When? With what value? Bright green for fired, muted red for
+  // not-fired — colours mirror the dot system used elsewhere in admin.
+  function tile(label, ev, extras) {
+    if (!ev) {
+      return `<div style="background:#1F0F12;border:1px solid #4B1F1F;border-radius:8px;padding:10px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#EF4444;">${label}</div>
+        <div style="margin-top:4px;font-size:13px;color:#9CA3AF;">✗ Not fired</div>
+      </div>`;
+    }
+    const when = ev.fired_at ? new Date(ev.fired_at).toLocaleString() : '—';
+    const extraLines = (extras || []).filter(Boolean).join('<br>');
+    return `<div style="background:#0F1A14;border:1px solid #1F4B2F;border-radius:8px;padding:10px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#10B981;">${label}</div>
+      <div style="margin-top:4px;font-size:13px;color:#F5F5F7;">✓ Fired at <span class="mono">${when}</span></div>
+      ${extraLines ? `<div style="margin-top:4px;font-size:11px;color:#9CA3AF;line-height:1.5;">${extraLines}</div>` : ''}
+    </div>`;
+  }
+
+  const impTile = tile('Impression', timeline.impression, timeline.impression && [
+    `Cost charged: $${Number(timeline.impression.cost_usd || 0).toFixed(4)}`,
+    `Publisher payout (85%): $${Number(timeline.impression.developer_payout_usd || 0).toFixed(4)}`,
+    timeline.impression.integration_method ? `Door: <span class="mono">${timeline.impression.integration_method}</span>` : '',
+    timeline.impression.geo ? `Geo: ${timeline.impression.geo}` : '',
+    timeline.impression.is_sandbox ? `<span style="color:#06B6D4;">⚠ Sandbox traffic — no real money moved</span>` : '',
+  ]);
+  const clickTile = tile('Click', timeline.click, timeline.click && [
+    win.cta_url ? `Destination: <span class="mono" style="word-break:break-all;">${(win.cta_url + '?bbx_auc=' + (a.auction_id || '')).replace(/</g,'&lt;')}</span>` : '',
+    timeline.click.integration_method ? `Door: <span class="mono">${timeline.click.integration_method}</span>` : '',
+  ]);
+  const convTile = tile('Conversion', timeline.conversion, timeline.conversion && [
+    timeline.conversion.conversion_type ? `Type: <span class="mono">${timeline.conversion.conversion_type}</span>` : '',
+    timeline.conversion.value_usd != null ? `Value: ${timeline.conversion.currency || 'USD'} $${Number(timeline.conversion.value_usd).toFixed(2)}` : '',
+    timeline.conversion.external_id ? `External ID: <span class="mono">${timeline.conversion.external_id}</span>` : '',
+  ]);
+
+  // Secondary engagement signals — usually low-importance but useful
+  // when troubleshooting "user closed it before impression beacon".
+  const engagementTiles = ['close', 'skip', 'video_complete', 'dismiss', 'error']
+    .filter((k) => timeline[k])
+    .map((k) => tile(k.replace('_', ' '), timeline[k], [
+      timeline[k].integration_method ? `Door: <span class="mono">${timeline[k].integration_method}</span>` : '',
+    ])).join('');
+
+  // Publisher credit summary block — distinct background so it pops.
+  let creditBlock = '';
+  if (a.publisher_id) {
+    const credited = !!credit.credited_at_impression;
+    const color = credited ? '#10B981' : '#EF4444';
+    const headline = credited
+      ? `✓ Publisher credited $${Number(credit.credited_amount_usd || 0).toFixed(4)} at impression time`
+      : `✗ Publisher NOT credited`;
+    const reason = credit.reason_not_credited
+      ? `<div style="font-size:12px;color:#F59E0B;margin-top:6px;">${credit.reason_not_credited.replace(/</g,'&lt;')}</div>`
+      : '';
+    const snapshot = (credit.current_balance != null) ? `
+      <div style="margin-top:8px;font-size:11px;color:#9CA3AF;line-height:1.6;">
+        <strong style="color:#F5F5F7;">Publisher balance snapshot (now):</strong><br>
+        Balance: <span class="mono">$${Number(credit.current_balance).toFixed(2)}</span> ·
+        Lifetime earned: <span class="mono">$${Number(credit.lifetime_earned).toFixed(2)}</span> ·
+        Lifetime paid: <span class="mono">$${Number(credit.lifetime_paid).toFixed(2)}</span>
+      </div>` : '';
+    creditBlock = `
+      <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Publisher Credit</h3>
+      <div style="background:#0F0F1A;border:1px solid var(--line);border-left:3px solid ${color};border-radius:6px;padding:10px;">
+        <div style="font-size:13px;color:${color};font-weight:600;">${headline}</div>
+        ${credit.credit_timestamp ? `<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Reference: impression event <span class="mono">${credit.credit_event_id || '—'}</span> at <span class="mono">${new Date(credit.credit_timestamp).toLocaleString()}</span>.</div>` : ''}
+        ${reason}
+        ${snapshot}
+      </div>`;
+  }
+
   const html = `<pre style="margin:0 0 14px;padding:10px;background:#0F0F1A;border:1px solid var(--line);border-radius:6px;color:#F5F5F7;overflow-x:auto;">${headStr.replace(/</g, '&lt;')}</pre>
+
+    <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Event Timeline</h3>
+    <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;margin-bottom:8px;">${impTile}${clickTile}${convTile}</div>
+    ${engagementTiles ? `<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:8px;">${engagementTiles}</div>` : ''}
+
+    ${creditBlock}
+
     <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Eligibility</h3>
     <pre style="margin:0 0 14px;padding:10px;background:#0F0F1A;border:1px solid var(--line);border-radius:6px;color:#F5F5F7;overflow-x:auto;">${eligStr.replace(/</g, '&lt;')}</pre>
     <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Request</h3>

@@ -1968,10 +1968,109 @@ async function handleAuctionInspect(req, res) {
     }
     if (data.winner_campaign_id) {
       const { data: camp } = await sb.from("campaigns")
-        .select("id, name, advertiser_id").eq("id", data.winner_campaign_id).maybeSingle();
+        .select("id, name, advertiser_id, cta_url").eq("id", data.winner_campaign_id).maybeSingle();
       if (camp) winner_campaign = camp;
     }
-    return res.status(200).json({ auction: data, publisher, winner_campaign });
+
+    // ── Phase H Panel 3 (post-patch) — post-auction event timeline ──
+    // Join the events table by auction_id so an operator can answer
+    // "did the impression beacon fire? click? conversion?" without
+    // pivoting to SQL. Idempotency partial index events_auction_type_unique
+    // (db/04_bbx_mcp_extensions.sql) means at most one row per
+    // (auction_id, event_type) pair — we can rely on that for "fired? yes/no".
+    const { data: eventsRows } = await sb.from("events")
+      .select("id, event_type, created_at, cost, developer_payout, conversion_type, value_cents, external_id, currency, surface, integration_method, ip_country, ip_region, ip_city, is_sandbox")
+      .eq("auction_id", String(data.auction_id))
+      .order("created_at", { ascending: true });
+
+    // Build a timeline keyed by event_type so the UI can show "✓ fired"
+    // / "✗ not fired" cells without scanning the array each render.
+    const TIMELINE_KEYS = ["impression", "click", "close", "skip", "video_complete", "conversion", "dismiss", "error"];
+    const timeline = {};
+    for (const k of TIMELINE_KEYS) timeline[k] = null;
+    for (const e of (eventsRows || [])) {
+      // Normalise value_cents → value_usd for the UI; keep raw value_cents
+      // available for callers that want it.
+      const value_usd = (e.value_cents != null && Number.isFinite(Number(e.value_cents)))
+        ? +(Number(e.value_cents) / 100).toFixed(2)
+        : null;
+      timeline[e.event_type] = {
+        id: e.id,
+        fired_at: e.created_at,
+        cost_usd: Number(e.cost) || 0,
+        developer_payout_usd: Number(e.developer_payout) || 0,
+        conversion_type: e.conversion_type || null,
+        value_usd,
+        value_cents: e.value_cents,
+        external_id: e.external_id || null,
+        currency: e.currency || "USD",
+        surface: e.surface || null,
+        integration_method: e.integration_method || null,
+        geo: [e.ip_city, e.ip_region, e.ip_country].filter(Boolean).join(", ") || null,
+        is_sandbox: !!e.is_sandbox,
+      };
+    }
+
+    // ── Publisher credit summary ──
+    // Was the 85% credited? We can't show a per-event balance audit (no
+    // history table; bbx_credit_publisher_balance does an atomic UPSERT)
+    // but the developer_payout column ON the impression row IS the
+    // ground truth for "what was credited at impression time". We also
+    // pull the current publisher_balance snapshot for context so the
+    // operator can see whether the credit landed in lifetime_earned.
+    let publisher_credit = {
+      credited_at_impression: false,
+      credited_amount_usd:    0,
+      credit_event_id:        null,
+      // 'auction time' = the impression event's created_at. Closest thing
+      // we have to "when was the credit applied" without a balance ledger.
+      credit_timestamp:       null,
+      // current snapshot for the publisher (lets the operator confirm
+      // the credit landed in lifetime_earned and the balance is sane).
+      current_balance:        null,
+      lifetime_earned:        null,
+      lifetime_paid:          null,
+      // Sandbox impressions never credit publisher_balance (Phase E Day 2
+      // hardening — we don't accrue funny money). Surfacing this so
+      // "no credit found" doesn't look like a bug when it's actually
+      // a sandbox auction.
+      reason_not_credited:    null,
+    };
+    if (timeline.impression) {
+      const imp = timeline.impression;
+      publisher_credit.credit_timestamp = imp.fired_at;
+      publisher_credit.credit_event_id  = imp.id;
+      if (imp.is_sandbox) {
+        publisher_credit.reason_not_credited = "Sandbox auction — publisher_balance is not credited for sandbox traffic.";
+      } else if (imp.developer_payout_usd > 0) {
+        publisher_credit.credited_at_impression = true;
+        publisher_credit.credited_amount_usd    = imp.developer_payout_usd;
+      } else if (!data.publisher_id) {
+        publisher_credit.reason_not_credited = "No publisher_id on auction — payout not attributable to any developer.";
+      } else {
+        publisher_credit.reason_not_credited = "Impression fired but developer_payout was zero. Possible causes: campaign in clawback, publisher in pending status, revenue_share_pct = 0.";
+      }
+    } else if (data.publisher_id) {
+      publisher_credit.reason_not_credited = "Impression beacon never fired — there is nothing to credit.";
+    }
+    if (data.publisher_id) {
+      const { data: pb } = await sb.from("publisher_balance")
+        .select("balance, lifetime_earned, lifetime_paid")
+        .eq("developer_id", data.publisher_id).maybeSingle();
+      if (pb) {
+        publisher_credit.current_balance = Number(pb.balance) || 0;
+        publisher_credit.lifetime_earned = Number(pb.lifetime_earned) || 0;
+        publisher_credit.lifetime_paid   = Number(pb.lifetime_paid) || 0;
+      }
+    }
+
+    return res.status(200).json({
+      auction: data,
+      publisher,
+      winner_campaign,
+      timeline,
+      publisher_credit,
+    });
   }
 
   // ── List mode ──
