@@ -29,6 +29,7 @@
     { "source": "/playground", "destination": "/playground.html" },
     { "source": "/v1/ad-request", "destination": "/api/ad-request" },
     { "source": "/docs", "destination": "/docs.html" },
+    { "source": "/docs/quickstart", "destination": "/docs-quickstart.html" },
     { "source": "/docs/api-reference", "destination": "/docs-api-reference.html" },
     { "source": "/docs/mcp", "destination": "/docs-mcp.html" },
     { "source": "/docs/js-snippet", "destination": "/docs-js-snippet.html" },

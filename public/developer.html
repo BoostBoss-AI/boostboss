@@ -1793,8 +1793,8 @@
                     <div class="ob-step" id="ob-step4" data-step="4">
                         <span class="ob-bullet">4</span>
                         <div class="ob-body">
-                            <div class="ob-title">Send a test impression</div>
-                            <div class="ob-desc">Click below to fire a synthetic ad request and watch your dashboard light up.</div>
+                            <div class="ob-title">Verify with a sandbox test</div>
+                            <div class="ob-desc">Fires a real request against <code>pub_test_demo</code> — always returns a fill, so you can confirm rendering + the impression beacon end-to-end. Your stats counters will tick up; once you switch to your live key, sandbox traffic is excluded from earnings.</div>
                         </div>
                         <button class="ob-cta ob-cta-primary" onclick="onboardRunTest()">Run test</button>
                     </div>
@@ -2224,6 +2224,14 @@ await message.reply({
             <!-- Payout Section -->
             <div class="section">
                 <div class="section-title">Payout Settings</div>
+                <!-- Friend-onboarding audit (2026-05-13): publishers consistently
+                     confused about when their first payout actually arrives.
+                     Spell out the rule once, plainly, above the cards. -->
+                <p style="font-size:13px;color:#6B7280;margin:0 0 14px;line-height:1.55;">
+                    Earn at least $25 in publisher accruals, connect Stripe, and the next Friday
+                    cron pays you out automatically. Most publishers see their first payout 1–3 weeks
+                    after installation, depending on traffic.
+                </p>
                 <div class="payout-grid">
                     <div class="payout-card">
                         <div class="key-label">Next Payout Date</div>
@@ -2235,7 +2243,11 @@ await message.reply({
                     </div>
                     <div class="payout-card">
                         <div class="key-label">Minimum Threshold</div>
-                        <div class="key-value" id="payoutThreshold">$100.00</div>
+                        <!-- Static default matches the actual policy ($25, Phase E Day 6 Decision 3).
+                             JS in loadPayoutStatus() reconfirms this on every load — but seeding
+                             with $25 (not the legacy $100) avoids a flash-of-incorrect-content
+                             on first paint for every new publisher. -->
+                        <div class="key-value" id="payoutThreshold">$25.00</div>
                     </div>
                 </div>
                 <!-- Phase E Day 1 — Stripe Connect status banner.
@@ -2274,7 +2286,17 @@ await message.reply({
                                 <option value="native">Native</option>
                             </select>
                         </div>
-                        <div style="align-self:flex-end;">
+                        <div style="align-self:flex-end;display:flex;gap:8px;align-items:center;">
+                            <!-- Friend-onboarding audit (2026-05-13): when a new publisher
+                                 runs the integration test using their live key, they often
+                                 see "No ad" because no demand-side campaign matches their
+                                 context yet. That looks broken even though their integration
+                                 is fine. Sandbox mode guarantees a fill, so we let them
+                                 toggle in for the first run and see the full happy path. -->
+                            <label style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;cursor:pointer;" title="Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live.">
+                                <input type="checkbox" id="testSandboxToggle" checked style="margin:0;">
+                                <span>Sandbox</span>
+                            </label>
                             <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:8px 20px;background:#04BEFE;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Run Test</button>
                         </div>
                     </div>
@@ -3948,7 +3970,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             const context = document.getElementById('testContext').value;
             const format = document.getElementById('testFormat').value;
-            const apiKey = userProfile ? userProfile.api_key : '';
+            // Friend-onboarding audit fix: sandbox toggle. When checked, swap
+            // in pub_test_demo credentials so the test is guaranteed to fill
+            // even when no demand-side campaign matches the publisher's
+            // context. Default = on, so a brand-new publisher always sees
+            // the happy path on their first Run Test click.
+            const sandboxToggle = document.getElementById('testSandboxToggle');
+            const useSandbox = sandboxToggle ? sandboxToggle.checked : false;
+            const apiKey = useSandbox ? 'sk_test_demo' : (userProfile ? userProfile.api_key : '');
+            const publisherId = useSandbox ? 'pub_test_demo' : (userProfile ? userProfile.id : '');
 
             const start = performance.now();
             try {
@@ -3968,6 +3998,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                                 user_language: 'en',
                                 session_id: 'test_' + Date.now(),
                                 developer_api_key: apiKey,
+                                publisher_id: publisherId,
                                 host: 'integration-test.local',
                             },
                         },
