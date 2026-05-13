@@ -245,6 +245,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <button class="nav-item" onclick="openSearch()" style="margin-bottom:12px;border:1px dashed var(--line);"><span class="icon">🔍</span> Search <span class="kbd">⌘K</span></button>
 
     <button class="nav-item active" data-panel="overview"><span class="icon">📊</span> Overview <span class="kbd">1</span></button>
+    <button class="nav-item" data-panel="live"><span class="icon">🟢</span> Live Activity <span class="kbd">2</span></button>
     <button class="nav-item" data-panel="review"><span class="icon">🔍</span> Review Queue <span class="badge-count" id="review-count">0</span></button>
     <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns <span class="kbd">3</span></button>
     <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats <span class="kbd">4</span></button>
@@ -322,6 +323,106 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
               <tr><td colspan="3" class="empty-state">Loading...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LIVE ACTIVITY (Phase H Panel 1) ── -->
+    <div class="panel" id="panel-live">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h1 style="margin:0;">Live Activity</h1>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+            <span>Mode:</span>
+            <select id="live-mode" style="background:var(--bg-soft);color:#F5F5F7;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:13px;">
+              <option value="production">Production</option>
+              <option value="sandbox">Sandbox</option>
+            </select>
+          </label>
+          <span id="live-refresh-state" style="font-size:11px;color:var(--muted);min-width:120px;text-align:right;">—</span>
+          <button class="btn-sm btn-action" onclick="loadLiveActivity()">Refresh</button>
+        </div>
+      </div>
+
+      <!-- Top row: Health + Volume + Money -->
+      <div class="stats-row" id="live-top-cards">
+        <div class="stat-card" id="live-card-health">
+          <div class="label">Health</div>
+          <div class="value" id="live-health-status" style="display:flex;align-items:center;gap:8px;">
+            <span id="live-health-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#9CA3AF;"></span>
+            <span id="live-health-text">—</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
+            Fill rate: <span id="live-fill-rate" class="mono">—</span><br>
+            Tier-2 / Tier-3: <span id="live-tier-counts" class="mono">—</span><br>
+            Blocked publishers: <span id="live-blocked" class="mono">—</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Volume</div>
+          <div class="value cyan"><span id="live-vol-1h">—</span> <span style="font-size:12px;color:var(--muted);font-weight:400;">/ 1h</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
+            5 min: <span id="live-vol-5m" class="mono">—</span><br>
+            24 h: <span id="live-vol-24h" class="mono">—</span><br>
+            Trend: <span id="live-vol-trend" class="mono">—</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Money (24h)</div>
+          <div class="value pink">$<span id="live-money-spend">—</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
+            BB take (15%): <span id="live-money-bb" class="mono">—</span><br>
+            Publisher accrued: <span id="live-money-pub" class="mono">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle row: Top publishers + Top campaigns -->
+      <div class="section" style="margin-top:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div class="section-header"><h2 style="font-size:14px;">Top Publishers (24h)</h2></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Publisher</th><th style="text-align:right;">Imps</th><th style="text-align:right;">Earnings</th></tr></thead>
+                <tbody id="live-publishers-body">
+                  <tr><td colspan="3" class="empty-state">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="section-header"><h2 style="font-size:14px;">Top Campaigns (24h)</h2></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Campaign</th><th>Advertiser</th><th style="text-align:right;">Imps</th><th style="text-align:right;">Spend</th></tr></thead>
+                <tbody id="live-campaigns-body">
+                  <tr><td colspan="4" class="empty-state">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- By-door breakdown -->
+      <div class="section">
+        <div class="section-header"><h2 style="font-size:14px;">By Door (24h)</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Door</th><th style="text-align:right;">Auctions</th><th style="text-align:right;">Imps</th><th style="text-align:right;">Avg eCPM</th><th style="text-align:right;">Fill rate</th></tr></thead>
+            <tbody id="live-by-door-body">
+              <tr><td colspan="5" class="empty-state">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent alerts -->
+      <div class="section">
+        <div class="section-header"><h2 style="font-size:14px;">Recent Alerts</h2></div>
+        <div id="live-alerts-body">
+          <p class="empty-state" style="padding:16px;text-align:center;color:var(--muted);">—</p>
         </div>
       </div>
     </div>
@@ -582,6 +683,142 @@ function switchPanel(name) {
   if (name === "seats") loadSeats();
   if (name === "review") loadReviewQueue();
   if (name === "payouts") loadPayoutsPanel();
+  if (name === "live") startLiveActivity();
+  else stopLiveActivity();
+}
+
+// ── Live Activity (Phase H Panel 1) ──
+// Polls /api/stats?type=live_activity every 30s while the panel is
+// visible. Pauses when the tab/panel isn't visible to keep DB usage in
+// check (per design doc).
+let _liveTimer = null;
+let _liveLastFetchAt = 0;
+function startLiveActivity() {
+  loadLiveActivity();
+  if (_liveTimer) clearInterval(_liveTimer);
+  _liveTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') loadLiveActivity();
+  }, 30 * 1000);
+  // Re-fetch when user switches modes.
+  const modeSel = document.getElementById('live-mode');
+  if (modeSel && !modeSel._wired) {
+    modeSel._wired = true;
+    modeSel.addEventListener('change', loadLiveActivity);
+  }
+}
+function stopLiveActivity() {
+  if (_liveTimer) { clearInterval(_liveTimer); _liveTimer = null; }
+}
+
+async function loadLiveActivity() {
+  const mode = (document.getElementById('live-mode') || {}).value || 'production';
+  const stateEl = document.getElementById('live-refresh-state');
+  if (stateEl) stateEl.textContent = 'Refreshing…';
+  try {
+    const r = await fetch(`${API}/api/stats?type=live_activity&mode=${encodeURIComponent(mode)}`, {
+      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    renderLiveActivity(j);
+    _liveLastFetchAt = Date.now();
+    if (stateEl) stateEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    if (stateEl) stateEl.textContent = 'Error: ' + e.message;
+  }
+}
+
+function _fmtN(n) { return (Number(n) || 0).toLocaleString('en-US'); }
+function _fmtPct(r) { return r == null ? '—' : (r * 100).toFixed(0) + '%'; }
+function _fmtMoney(n) { return '$' + (Number(n) || 0).toFixed(2); }
+
+function renderLiveActivity(j) {
+  if (!j) return;
+  // Health card
+  const dot = document.getElementById('live-health-dot');
+  const txt = document.getElementById('live-health-text');
+  const colors = { healthy: '#10B981', watch: '#F59E0B', action_required: '#EF4444' };
+  const labels = { healthy: 'Healthy', watch: 'Watch', action_required: 'Action required' };
+  const s = (j.health && j.health.status) || 'healthy';
+  if (dot) dot.style.background = colors[s] || '#9CA3AF';
+  if (txt) txt.textContent = labels[s] || s;
+  document.getElementById('live-fill-rate').textContent = _fmtPct(j.health && j.health.fill_rate_24h);
+  document.getElementById('live-tier-counts').textContent =
+    (j.health.tier2_24h || 0) + ' / ' + (j.health.tier3_alerts_24h || 0);
+  document.getElementById('live-blocked').textContent = _fmtN(j.health.blocked_publishers || 0);
+
+  // Volume card
+  document.getElementById('live-vol-5m').textContent = _fmtN(j.volume.auctions_5m);
+  document.getElementById('live-vol-1h').textContent = _fmtN(j.volume.auctions_1h);
+  document.getElementById('live-vol-24h').textContent = _fmtN(j.volume.auctions_24h);
+  const trend = j.volume.trend_pct || 0;
+  const trendEl = document.getElementById('live-vol-trend');
+  trendEl.textContent = (trend >= 0 ? '↑ +' : '↓ ') + Math.abs(trend).toFixed(1) + '%';
+  trendEl.style.color = trend >= 0 ? '#10B981' : '#EF4444';
+
+  // Money card
+  document.getElementById('live-money-spend').textContent = (Number(j.money.advertiser_spend_24h) || 0).toFixed(2);
+  document.getElementById('live-money-bb').textContent = _fmtMoney(j.money.bb_revenue_24h);
+  document.getElementById('live-money-pub').textContent = _fmtMoney(j.money.publisher_accrued_24h);
+
+  // Top publishers
+  const pubBody = document.getElementById('live-publishers-body');
+  if (!j.top_publishers || j.top_publishers.length === 0) {
+    pubBody.innerHTML = '<tr><td colspan="3" class="empty-state">No publisher activity yet.</td></tr>';
+  } else {
+    pubBody.innerHTML = j.top_publishers.map(p => `
+      <tr>
+        <td>${(p.email || p.app_name || p.developer_id || '').toString().replace(/</g,'&lt;')}</td>
+        <td style="text-align:right;" class="mono">${_fmtN(p.impressions_24h)}</td>
+        <td style="text-align:right;" class="mono">${_fmtMoney(p.earnings_24h)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Top campaigns
+  const campBody = document.getElementById('live-campaigns-body');
+  if (!j.top_campaigns || j.top_campaigns.length === 0) {
+    campBody.innerHTML = '<tr><td colspan="4" class="empty-state">No campaign activity yet.</td></tr>';
+  } else {
+    campBody.innerHTML = j.top_campaigns.map(c => `
+      <tr>
+        <td>${(c.name || c.campaign_id || '').toString().replace(/</g,'&lt;')}</td>
+        <td>${(c.advertiser_company || c.advertiser_email || '').toString().replace(/</g,'&lt;')}</td>
+        <td style="text-align:right;" class="mono">${_fmtN(c.impressions_24h)}</td>
+        <td style="text-align:right;" class="mono">${_fmtMoney(c.spend_24h)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // By-door
+  const doorBody = document.getElementById('live-by-door-body');
+  if (!j.by_door || j.by_door.length === 0) {
+    doorBody.innerHTML = '<tr><td colspan="5" class="empty-state">—</td></tr>';
+  } else {
+    doorBody.innerHTML = j.by_door.map(d => `
+      <tr>
+        <td>${d.door}</td>
+        <td style="text-align:right;" class="mono">${_fmtN(d.auctions_24h)}</td>
+        <td style="text-align:right;" class="mono">${_fmtN(d.impressions_24h)}</td>
+        <td style="text-align:right;" class="mono">${d.avg_ecpm == null ? '—' : '$' + Number(d.avg_ecpm).toFixed(2)}</td>
+        <td style="text-align:right;" class="mono">${_fmtPct(d.fill_rate)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Alerts
+  const alertsBody = document.getElementById('live-alerts-body');
+  if (!j.recent_alerts || j.recent_alerts.length === 0) {
+    alertsBody.innerHTML = '<p class="empty-state" style="padding:16px;text-align:center;color:var(--muted);">Quiet — system healthy.</p>';
+  } else {
+    alertsBody.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;">' + j.recent_alerts.map(a => {
+      const when = a.ts ? new Date(a.ts).toLocaleTimeString() : '';
+      return `<div style="padding:8px 12px;background:var(--bg-soft);border-radius:6px;border-left:3px solid var(--pink);font-size:13px;display:flex;justify-content:space-between;gap:12px;cursor:pointer;" onclick="switchPanel('${a.link || 'payouts'}')">
+        <span><span class="mono" style="color:var(--muted);">${when}</span> · ${(a.message || '').replace(/</g,'&lt;')}</span>
+        <span class="mono" style="color:var(--muted);">${a.tag || ''}</span>
+      </div>`;
+    }).join('') + '</div>';
+  }
 }
 
 // ── Detect modes ──

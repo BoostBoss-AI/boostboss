@@ -143,6 +143,14 @@ module.exports = async function handler(req, res) {
       return await handleRecon(req, res);
     }
 
+    // ── Live Activity (Phase H Panel 1 — hospital-monitor view) ──
+    // Single round-trip "is the machine healthy?" panel for the admin
+    // console. Returns health / volume / money / top-publishers /
+    // top-campaigns / by-door / recent-alerts in one JSON. Admin-gated.
+    if (type === "live_activity" && req.method === "GET") {
+      return await handleLiveActivity(req, res);
+    }
+
     return res.status(400).json({ error: "Missing type (advertiser|developer) and id/key params" });
 
   } catch (err) {
@@ -1213,5 +1221,366 @@ async function mergeLiveEvents(sb, dailyStats, filter) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// Phase H Panel 1 — Live Activity ("hospital monitor")
+// ═══════════════════════════════════════════════════════════════════════
+// One round-trip view of the system's current heartbeat. Designed so the
+// operator's question — "is the machine healthy?" — gets answered in
+// under 10 seconds at a glance.
+//
+// Auth: Authorization: Bearer ${ADMIN_TOKEN}
+//   • Same scheme as billing admin actions (api/billing.js).
+//   • Demo mode (no Supabase) skips auth so tests can exercise the path.
+//
+// Query params:
+//   • mode = production | sandbox  (default: production)
+//        Lets the operator flip between live traffic and their sandbox
+//        validation traffic without rebuilding the URL each time.
+//
+// Returned shape: see launch-kit/phase-h-panel-1-live-activity-plan.md §
+// "Data source plan" — kept stable so the UI can rev independently.
+
+function _liveActivityAdminAuth(req) {
+  if (!HAS_SUPABASE) return true;
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected) return false;
+  const auth = (req.headers && (req.headers.authorization || req.headers.Authorization)) || "";
+  return auth === `Bearer ${expected}`;
+}
+
+async function handleLiveActivity(req, res) {
+  if (!_liveActivityAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const mode = (req.query && req.query.mode === "sandbox") ? "sandbox" : "production";
+  const isSandbox = mode === "sandbox";
+
+  const sb = supa();
+  if (!sb) {
+    // Demo mode — return a zeroed-out but well-shaped payload. Lets the
+    // UI test render without crashing while we're offline.
+    return res.status(200).json({
+      mode, generated_at: new Date().toISOString(), demo: true,
+      health: { status: "healthy", fill_rate_24h: null, tier2_24h: 0, tier3_alerts_24h: 0, blocked_publishers: 0 },
+      volume: { auctions_5m: 0, auctions_1h: 0, auctions_24h: 0, trend_pct: 0 },
+      money:  { advertiser_spend_24h: 0, bb_revenue_24h: 0, publisher_accrued_24h: 0 },
+      top_publishers: [], top_campaigns: [],
+      by_door: [
+        { door: "mcp",        auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
+        { door: "js-snippet", auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
+        { door: "npm-sdk",    auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
+        { door: "rest-api",   auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
+      ],
+      recent_alerts: [],
+    });
+  }
+
+  const now = Date.now();
+  const since5m  = new Date(now -      5 * 60 * 1000).toISOString();
+  const since1h  = new Date(now -     60 * 60 * 1000).toISOString();
+  const since24h = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+
+  // Helper — count rows matching a window. Uses HEAD to avoid pulling rows.
+  async function countAuctions(sinceIso, outcome = null) {
+    let q = sb.from("auction_logs").select("*", { count: "exact", head: true })
+      .eq("is_sandbox", isSandbox).gte("ts", sinceIso);
+    if (outcome) q = q.eq("outcome", outcome);
+    const { count } = await q;
+    return count || 0;
+  }
+
+  // ── 1. Volume: auctions in last 5m / 1h / 24h ──
+  const [auctions_5m, auctions_1h, auctions_24h, wins_24h] = await Promise.all([
+    countAuctions(since5m),
+    countAuctions(since1h),
+    countAuctions(since24h),
+    countAuctions(since24h, "won"),
+  ]);
+
+  // 1h auctions vs trailing-24h hourly average → trend %.
+  const trailing24hAvgPerHour = auctions_24h / 24;
+  const trend_pct = trailing24hAvgPerHour > 0
+    ? +(((auctions_1h - trailing24hAvgPerHour) / trailing24hAvgPerHour) * 100).toFixed(1)
+    : 0;
+
+  // ── 2. Health: fill rate + payout failures + blocked publishers ──
+  const totalNonSandbox = isSandbox ? auctions_24h : auctions_24h; // both modes use is_sandbox filter
+  const fill_rate_24h = totalNonSandbox > 0 ? +(wins_24h / totalNonSandbox).toFixed(3) : null;
+
+  async function countPayouts(failureTier) {
+    const { count } = await sb.from("payouts")
+      .select("*", { count: "exact", head: true })
+      .eq("failure_tier", failureTier).gte("created_at", since24h);
+    return count || 0;
+  }
+  // Tier-3 is an "alert" rather than a payout-row attribute — we surface
+  // recent payout rows with failure_tier=3 to drive both the count and
+  // the recent_alerts feed below. Same query, two consumers.
+  async function recentTier3Failures() {
+    const { data } = await sb.from("payouts")
+      .select("id, developer_id, failure_reason, created_at")
+      .eq("failure_tier", 3).gte("created_at", since24h)
+      .order("created_at", { ascending: false }).limit(10);
+    return data || [];
+  }
+  // blocked_publishers — count of developers in 'blocked' status.
+  async function countBlockedPublishers() {
+    const { count } = await sb.from("developers")
+      .select("*", { count: "exact", head: true }).eq("status", "blocked");
+    return count || 0;
+  }
+
+  const [tier2_24h, tier3Failures, blocked_publishers] = await Promise.all([
+    countPayouts(2).catch(() => 0),
+    recentTier3Failures().catch(() => []),
+    countBlockedPublishers().catch(() => 0),
+  ]);
+  const tier3_24h = tier3Failures.length;
+
+  // Status calc per design doc Q1 (defaults).
+  let status = "healthy";
+  if (
+    (fill_rate_24h !== null && fill_rate_24h < 0.30) ||
+    tier3_24h > 0 ||
+    blocked_publishers >= 5
+  ) status = "action_required";
+  else if (
+    (fill_rate_24h !== null && fill_rate_24h < 0.60) ||
+    tier2_24h > 0 ||
+    blocked_publishers > 0
+  ) status = "watch";
+
+  // ── 3. Money: spend / BB take / publisher accrual ──
+  // Sum events.cost (advertiser cost) and events.developer_payout (publisher accrual).
+  // We pull aggregated sums via a single SELECT with sum() — Supabase
+  // doesn't expose sum() through PostgREST in a clean way, so we use
+  // a tiny RPC-style read pulling cost + developer_payout in batches.
+  let advertiser_spend_24h = 0, publisher_accrued_24h = 0;
+  {
+    const PAGE = 1000;
+    let offset = 0;
+    for (let i = 0; i < 50; i++) { // hard cap at 50k events / call
+      const { data, error } = await sb.from("events")
+        .select("cost, developer_payout")
+        .eq("is_sandbox", isSandbox).gte("created_at", since24h)
+        .range(offset, offset + PAGE - 1);
+      if (error || !data || data.length === 0) break;
+      for (const e of data) {
+        advertiser_spend_24h += Number(e.cost) || 0;
+        publisher_accrued_24h += Number(e.developer_payout) || 0;
+      }
+      if (data.length < PAGE) break;
+      offset += PAGE;
+    }
+  }
+  const bb_revenue_24h = +(advertiser_spend_24h - publisher_accrued_24h).toFixed(4);
+  advertiser_spend_24h  = +advertiser_spend_24h.toFixed(4);
+  publisher_accrued_24h = +publisher_accrued_24h.toFixed(4);
+
+  // ── 4. Top publishers (24h, by impressions) ──
+  // Aggregate impressions + earnings by developer_id, join email/app_name.
+  async function loadTopPublishers() {
+    const { data: events } = await sb.from("events")
+      .select("developer_id, event_type, developer_payout")
+      .eq("is_sandbox", isSandbox).gte("created_at", since24h)
+      .not("developer_id", "is", null);
+    if (!events || events.length === 0) return [];
+
+    const agg = new Map();
+    for (const e of events) {
+      if (!e.developer_id) continue;
+      const a = agg.get(e.developer_id) || { developer_id: e.developer_id, impressions_24h: 0, earnings_24h: 0 };
+      if (e.event_type === "impression") a.impressions_24h += 1;
+      a.earnings_24h += Number(e.developer_payout) || 0;
+      agg.set(e.developer_id, a);
+    }
+    const top = [...agg.values()].sort((x, y) => y.impressions_24h - x.impressions_24h).slice(0, 5);
+    if (top.length === 0) return [];
+
+    // Backfill email + app_name.
+    const ids = top.map((r) => r.developer_id);
+    const { data: devs } = await sb.from("developers")
+      .select("id, email, app_name").in("id", ids);
+    const byId = new Map((devs || []).map((d) => [d.id, d]));
+    return top.map((r) => ({
+      ...r,
+      earnings_24h: +r.earnings_24h.toFixed(4),
+      email: (byId.get(r.developer_id) || {}).email || null,
+      app_name: (byId.get(r.developer_id) || {}).app_name || null,
+    }));
+  }
+
+  // ── 5. Top campaigns (24h, by impressions) ──
+  async function loadTopCampaigns() {
+    const { data: events } = await sb.from("events")
+      .select("campaign_id, event_type, cost")
+      .eq("is_sandbox", isSandbox).gte("created_at", since24h)
+      .not("campaign_id", "is", null);
+    if (!events || events.length === 0) return [];
+
+    const agg = new Map();
+    for (const e of events) {
+      if (!e.campaign_id) continue;
+      const a = agg.get(e.campaign_id) || { campaign_id: e.campaign_id, impressions_24h: 0, spend_24h: 0 };
+      if (e.event_type === "impression") a.impressions_24h += 1;
+      a.spend_24h += Number(e.cost) || 0;
+      agg.set(e.campaign_id, a);
+    }
+    const top = [...agg.values()].sort((x, y) => y.impressions_24h - x.impressions_24h).slice(0, 5);
+    if (top.length === 0) return [];
+    const ids = top.map((r) => r.campaign_id);
+    const { data: campaigns } = await sb.from("campaigns")
+      .select("id, name, advertiser_id").in("id", ids);
+    const advIds = [...new Set((campaigns || []).map((c) => c.advertiser_id).filter(Boolean))];
+    const { data: advertisers } = advIds.length
+      ? await sb.from("advertisers").select("id, email, company_name").in("id", advIds)
+      : { data: [] };
+    const advById  = new Map((advertisers || []).map((a) => [a.id, a]));
+    const campById = new Map((campaigns || []).map((c) => [c.id, c]));
+    return top.map((r) => {
+      const c = campById.get(r.campaign_id) || {};
+      const a = advById.get(c.advertiser_id) || {};
+      return {
+        ...r,
+        spend_24h: +r.spend_24h.toFixed(4),
+        name: c.name || null,
+        advertiser_email: a.email || null,
+        advertiser_company: a.company_name || null,
+      };
+    });
+  }
+
+  // ── 6. By-door breakdown ──
+  // auction_logs.integration_method drives this. Some rows pre-date
+  // migration 06 and have null integration_method; we bucket those into
+  // 'unknown' but only return the 4 production doors in the response.
+  async function loadByDoor() {
+    const buckets = {
+      "mcp":        { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
+      "js-snippet": { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
+      "npm-sdk":    { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
+      "rest-api":   { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
+    };
+
+    // auctions per door (paged)
+    {
+      const PAGE = 1000;
+      let offset = 0;
+      for (let i = 0; i < 50; i++) {
+        const { data, error } = await sb.from("auction_logs")
+          .select("integration_method, outcome")
+          .eq("is_sandbox", isSandbox).gte("ts", since24h)
+          .range(offset, offset + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        for (const a of data) {
+          const door = (a.integration_method || "").toLowerCase();
+          const b = buckets[door];
+          if (!b) continue;
+          b.auctions_24h += 1;
+          if (a.outcome === "won") b.won_24h += 1;
+        }
+        if (data.length < PAGE) break;
+        offset += PAGE;
+      }
+    }
+    // events per door — impressions & spend
+    {
+      const PAGE = 1000;
+      let offset = 0;
+      for (let i = 0; i < 50; i++) {
+        const { data, error } = await sb.from("events")
+          .select("integration_method, event_type, cost")
+          .eq("is_sandbox", isSandbox).gte("created_at", since24h)
+          .range(offset, offset + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        for (const e of data) {
+          const door = (e.integration_method || "").toLowerCase();
+          const b = buckets[door];
+          if (!b) continue;
+          if (e.event_type === "impression") b.impressions_24h += 1;
+          b.spend_24h += Number(e.cost) || 0;
+        }
+        if (data.length < PAGE) break;
+        offset += PAGE;
+      }
+    }
+
+    return Object.entries(buckets).map(([door, b]) => ({
+      door,
+      auctions_24h:    b.auctions_24h,
+      impressions_24h: b.impressions_24h,
+      // eCPM = spend / impressions * 1000
+      avg_ecpm: b.impressions_24h > 0 ? +((b.spend_24h / b.impressions_24h) * 1000).toFixed(2) : null,
+      // Fill rate at the door level uses won/auctions of that door.
+      fill_rate: b.auctions_24h > 0 ? +(b.won_24h / b.auctions_24h).toFixed(3) : null,
+    }));
+  }
+
+  // ── 7. Recent alerts feed ──
+  // Tier-2 + Tier-3 payout failures, fill-rate dips, blocked-publisher
+  // counts. Capped at 10 most-recent. Each carries a deep link the UI
+  // wires to a switchPanel call.
+  async function loadRecentAlerts() {
+    const out = [];
+    // Tier-3 (already loaded above)
+    for (const t3 of tier3Failures.slice(0, 5)) {
+      out.push({
+        ts: t3.created_at,
+        tag: "payout.tier3",
+        message: "Tier-3 payout failure" + (t3.failure_reason ? ` — ${t3.failure_reason}` : ""),
+        link: "payouts",
+      });
+    }
+    // Recent Tier-2 (separate query, capped)
+    const { data: t2 } = await sb.from("payouts")
+      .select("id, developer_id, failure_reason, created_at")
+      .eq("failure_tier", 2).gte("created_at", since24h)
+      .order("created_at", { ascending: false }).limit(5);
+    for (const r of (t2 || [])) {
+      out.push({
+        ts: r.created_at,
+        tag: "payout.tier2",
+        message: "Tier-2 payout failure" + (r.failure_reason ? ` — ${r.failure_reason}` : ""),
+        link: "payouts",
+      });
+    }
+    // Fill-rate dip alert (derived; not stored)
+    if (fill_rate_24h !== null && fill_rate_24h < 0.30) {
+      out.push({
+        ts: new Date().toISOString(),
+        tag: "fill.dip",
+        message: `Fill rate ${(fill_rate_24h * 100).toFixed(0)}% (24h) — below 30% floor`,
+        link: "campaigns",
+      });
+    }
+    return out.sort((a, b) => (b.ts || "").localeCompare(a.ts || "")).slice(0, 10);
+  }
+
+  const [top_publishers, top_campaigns, by_door, recent_alerts] = await Promise.all([
+    loadTopPublishers().catch(() => []),
+    loadTopCampaigns().catch(() => []),
+    loadByDoor().catch(() => []),
+    loadRecentAlerts().catch(() => []),
+  ]);
+
+  return res.status(200).json({
+    mode,
+    generated_at: new Date().toISOString(),
+    health: {
+      status,
+      fill_rate_24h,
+      tier2_24h,
+      tier3_alerts_24h: tier3_24h,
+      blocked_publishers,
+    },
+    volume: { auctions_5m, auctions_1h, auctions_24h, trend_pct },
+    money: { advertiser_spend_24h, bb_revenue_24h, publisher_accrued_24h },
+    top_publishers,
+    top_campaigns,
+    by_door,
+    recent_alerts,
+  });
+}
+
 // ── Exports for testing ───────────────────────────────────────────────
 module.exports.HAS_SUPABASE = HAS_SUPABASE;
+module.exports._handleLiveActivity = handleLiveActivity;
