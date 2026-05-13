@@ -153,6 +153,17 @@ yarn add @boostbossai/lumi-mcp</pre>
     <h3 id="trackClick"><code>lumi.trackClick(ad)</code></h3>
     <p>Fires the click beacon. The click URL embedded in <code>toMCPBlock()</code> already redirects through Boost Boss for tracking — only invoke manually if you build your own link.</p>
 
+    <h3 id="trackConversion"><code>lumi.trackConversion(ad, conversion)</code></h3>
+    <p>Fires a conversion event tied to a previously-served ad. Use when the user takes the action your campaign was bidding on (signup, purchase, tool invoke, lead). The conversion shares the auction context with the original impression so attribution and CPA billing work end-to-end.</p>
+<pre>// Inside any tool handler, after the user completes the desired action:
+await lumi.trackConversion(ad, {
+  type:       <span class="str">"signup"</span>,        <span class="cmt">// matches campaigns.conversion_event_types</span>
+  value:      29.99,             <span class="cmt">// USD; optional but required for ROAS</span>
+  currency:   <span class="str">"USD"</span>,          <span class="cmt">// ISO 4217; defaults to USD</span>
+  externalId: <span class="str">"order_98123"</span>,  <span class="cmt">// optional — your CRM/order id</span>
+});</pre>
+    <p>Fire-and-forget — never throws. Failures emit an <code>error</code> event on the SDK and are surfaced via the silent-failure observability endpoint (<code>/api/stats?type=recon</code>).</p>
+
     <h2 id="rendering">Rendering the ad</h2>
     <p>You don't render anything yourself. <code>toMCPBlock()</code> returns a structured MCP content block, and the host (Claude Desktop, Cursor, etc.) renders it natively in whatever style fits its UI. The block looks roughly like this on the wire:</p>
 <pre>{

@@ -172,6 +172,217 @@ async function test(name, fn) {
     assert.strictEqual(r._body.mode, "demo");
   });
 
+  // ── Phase B: Conversion firing ─────────────────────────────────────
+  // Conversions skip the campaign-existence check so tests can fire
+  // them against arbitrary campaign_ids without seeding _DEMO_CAMPAIGNS.
+  track._reset();
+  await test("conversion event accepted with all required fields", async () => {
+    const r = await run({
+      method: "POST",
+      body: {
+        event:           "conversion",
+        campaign_id:     "cam_conv_1",
+        auction_id:      "auc_conv_1",
+        conversion_type: "signup",
+        value:           29.99,
+        currency:        "USD",
+        external_id:     "order_123",
+      },
+    });
+    assert.strictEqual(r._status, 200, "should accept conversion");
+    assert.strictEqual(r._body.tracked, true);
+    assert.strictEqual(r._body.event, "conversion");
+  });
+
+  await test("conversion event populates conversion_type/value_cents/external_id", async () => {
+    track._reset();
+    await run({
+      method: "POST",
+      body: {
+        event: "conversion", campaign_id: "cam_conv_2",
+        conversion_type: "purchase", value: 49.5, external_id: "ord_42",
+      },
+    });
+    const ev = track._DEMO_EVENTS[track._DEMO_EVENTS.length - 1];
+    assert.strictEqual(ev.event_type, "conversion");
+    assert.strictEqual(ev.conversion_type, "purchase");
+    assert.strictEqual(ev.value_cents, 4950, "USD 49.5 → 4950 cents");
+    assert.strictEqual(ev.external_id, "ord_42");
+    assert.strictEqual(ev.currency, "USD");
+  });
+
+  await test("conversion accepts value via value_micros", async () => {
+    track._reset();
+    await run({
+      method: "POST",
+      body: {
+        event: "conversion", campaign_id: "cam_conv_3",
+        conversion_type: "lead",
+        value_micros: 100000, // 100000 micros = $10
+      },
+    });
+    const ev = track._DEMO_EVENTS[track._DEMO_EVENTS.length - 1];
+    assert.strictEqual(ev.value_cents, 1000, "100000 micros = 1000 cents");
+  });
+
+  await test("conversion fields null when event != conversion", async () => {
+    track._reset();
+    await run({
+      method: "POST",
+      body: { event: "impression", campaign_id: "cam_conv_4",
+              conversion_type: "signup", value: 9.99 },
+    });
+    const ev = track._DEMO_EVENTS[track._DEMO_EVENTS.length - 1];
+    assert.strictEqual(ev.conversion_type, null);
+    assert.strictEqual(ev.value_cents, null);
+  });
+
+  await test("conversion is recorded with X-Lumi-Source integration_method", async () => {
+    track._reset();
+    await run({
+      method: "POST",
+      body: { event: "conversion", campaign_id: "cam_conv_5",
+              conversion_type: "signup" },
+      headers: { "x-lumi-source": "npm-sdk" },
+    });
+    const ev = track._DEMO_EVENTS[track._DEMO_EVENTS.length - 1];
+    assert.strictEqual(ev.integration_method, "npm-sdk");
+  });
+
+  await test("conversion via GET pixel beacon returns image", async () => {
+    track._reset();
+    const r = await run({
+      method: "GET",
+      query: {
+        event: "conversion", campaign_id: "cam_conv_6",
+        conversion_type: "signup", value: "5.00",
+      },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._headers["content-type"], "image/gif");
+  });
+
+  // ── Phase E Day 2: per-event balance accrual ───────────────────────
+  // These tests exercise the full accrual path including clawback
+  // satisfaction. They run against the demo-mode in-memory store so
+  // they're hermetic — no Supabase required.
+  const publisherBalance = require("../api/_lib/publisher_balance.js");
+
+  await test("paid impression credits publisher balance in demo mode", async () => {
+    track._reset();
+    // Seed a campaign so cost computation fires
+    const camps = require("../api/campaigns.js")._DEMO_CAMPAIGNS;
+    camps.set("cam_accrual_1", {
+      id: "cam_accrual_1", status: "active", billing_model: "cpm",
+      bid_amount: 10, daily_budget: 1000, total_budget: 10000,
+      spent_today: 0, spent_total: 0,
+    });
+
+    const r = await run({
+      method: "POST",
+      body: {
+        event: "impression", campaign_id: "cam_accrual_1",
+        developer_id: "dev_accrual_1",
+      },
+    });
+    assert.strictEqual(r._status, 200);
+
+    const bal = publisherBalance._getDemoBalance("dev_accrual_1");
+    // CPM=$10, impression cost = $10/1000 = $0.01, publisher share 85%
+    // = $0.0085
+    assert(bal.balance > 0, "balance should be > 0 after paid impression");
+    assert(bal.lifetime_earned > 0, "lifetime_earned should track balance");
+    assert.strictEqual(bal.balance, bal.lifetime_earned,
+      "balance and lifetime_earned should match before any payouts");
+  });
+
+  await test("sandbox event does not accrue to publisher balance", async () => {
+    track._reset();
+    const camps = require("../api/campaigns.js")._DEMO_CAMPAIGNS;
+    camps.set("cam_sbx", {
+      id: "cam_sbx", status: "active", billing_model: "cpm",
+      bid_amount: 10, daily_budget: 1000, total_budget: 10000,
+      spent_today: 0, spent_total: 0,
+    });
+    // is_sandbox=true via the bbx_sandbox flag
+    await run({
+      method: "POST",
+      body: {
+        event: "impression", campaign_id: "cam_sbx",
+        developer_id: "dev_sbx", bbx_sandbox: 1,
+      },
+    });
+    const bal = publisherBalance._getDemoBalance("dev_sbx");
+    assert.strictEqual(bal.balance, 0, "sandbox should not accrue");
+    assert.strictEqual(bal.lifetime_earned, 0);
+  });
+
+  await test("pending clawback is satisfied by new earnings before balance accrues", async () => {
+    track._reset();
+    const camps = require("../api/campaigns.js")._DEMO_CAMPAIGNS;
+    // CPC campaign so a single click earns enough to test
+    camps.set("cam_cb", {
+      id: "cam_cb", status: "active", billing_model: "cpc",
+      bid_amount: 5, daily_budget: 1000, total_budget: 10000,
+      spent_today: 0, spent_total: 0,
+    });
+    // Seed a $1 pending clawback for this developer
+    publisherBalance._addDemoClawback("dev_cb", 1.00);
+
+    // First click — earns $5 × 0.85 = $4.25. $1 satisfies clawback,
+    // $3.25 lands in balance.
+    await run({
+      method: "POST",
+      body: { event: "click", campaign_id: "cam_cb", developer_id: "dev_cb" },
+    });
+    const bal = publisherBalance._getDemoBalance("dev_cb");
+    assert(bal.balance > 0, "balance should accrue what's left after clawback");
+    assert(bal.balance < 4.25, "balance should be reduced by the clawback");
+    const claws = publisherBalance._getDemoClawbacks("dev_cb");
+    assert.strictEqual(claws[0].status, "applied",
+      "clawback should be marked applied after being fully consumed");
+    assert.strictEqual(claws[0].remaining_usd, 0);
+  });
+
+  await test("clawback larger than earning leaves balance at 0 and clawback partial", async () => {
+    track._reset();
+    const camps = require("../api/campaigns.js")._DEMO_CAMPAIGNS;
+    camps.set("cam_big_cb", {
+      id: "cam_big_cb", status: "active", billing_model: "cpc",
+      bid_amount: 5, daily_budget: 1000, total_budget: 10000,
+      spent_today: 0, spent_total: 0,
+    });
+    // $100 clawback — bigger than a single click's earnings
+    publisherBalance._addDemoClawback("dev_big_cb", 100.00);
+    await run({
+      method: "POST",
+      body: { event: "click", campaign_id: "cam_big_cb", developer_id: "dev_big_cb" },
+    });
+    const bal = publisherBalance._getDemoBalance("dev_big_cb");
+    assert.strictEqual(bal.balance, 0,
+      "balance should stay 0 while clawback is unsatisfied");
+    const claws = publisherBalance._getDemoClawbacks("dev_big_cb");
+    assert.strictEqual(claws[0].status, "pending",
+      "clawback should stay pending until fully satisfied");
+    assert(claws[0].remaining_usd < 100,
+      "clawback remaining should drop by the earning amount");
+    assert(claws[0].remaining_usd > 95,
+      "clawback remaining should be ≈ $95.75 after $4.25 satisfies");
+  });
+
+  await test("non-paying event (no developer_payout) does not call credit", async () => {
+    track._reset();
+    // No campaign seeded; cost = 0; developer_payout = 0; credit skipped.
+    const r = await run({
+      method: "POST",
+      body: { event: "close", campaign_id: "cam_nopay", developer_id: "dev_nopay" },
+    });
+    assert.strictEqual(r._status, 200);
+    const bal = publisherBalance._getDemoBalance("dev_nopay");
+    assert.strictEqual(bal.balance, 0);
+    assert.strictEqual(bal.lifetime_earned, 0);
+  });
+
   // ── Rate Limiting ───────────────────────────────────────────────────
   track._reset(); // also clears rateLimitMap
   await test("rate limiter allows up to RATE_LIMIT_MAX requests per IP", async () => {

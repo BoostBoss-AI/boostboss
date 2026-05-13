@@ -160,6 +160,49 @@ export class LumiMCP {
     await fireBeacon(url).catch(() => {});
   }
 
+  /**
+   * Fire a conversion event tied to a previously-served ad. Use this when
+   * the user takes the action your campaign was bidding on (signup,
+   * purchase, tool_invoke, etc.). Server-side path — fires through the
+   * MCP track_event JSON-RPC tool so the conversion shares the auction
+   * context with the original impression.
+   *
+   * @param ad           Ad object returned by fetchAd()
+   * @param conversion   { type, value?, currency?, externalId? }
+   */
+  async trackConversion(
+    ad: Ad,
+    conversion: {
+      type: string;
+      value?: number;
+      currency?: string;
+      externalId?: string;
+    },
+  ): Promise<void> {
+    if (!conversion || !conversion.type) {
+      this.emitter.emit("error", {
+        code: "BBX_BAD_REQUEST",
+        message: "trackConversion: 'type' is required (e.g. 'signup', 'purchase')",
+      });
+      return;
+    }
+    const args: Record<string, unknown> = {
+      event:           "conversion",
+      campaign_id:     ad.adId,
+      auction_id:      ad.auctionId,
+      developer_api_key: this.apiKey,
+      conversion_type: conversion.type,
+    };
+    if (conversion.value != null) args.value = conversion.value;
+    if (conversion.currency)       args.currency = conversion.currency;
+    if (conversion.externalId)     args.external_id = conversion.externalId;
+
+    const resp = await this.client.callTool<unknown>("track_event", args);
+    if (!resp.ok) {
+      this.emitter.emit("error", { code: resp.code, message: resp.message });
+    }
+  }
+
   /** Subscribe to SDK events: 'impression', 'click', 'no_fill', 'error'. */
   on<E extends LumiEventName>(event: E, handler: LumiHandler<E>): void {
     this.emitter.on(event, handler);

@@ -20,6 +20,7 @@ const { mcpTargetingMatch, mintAuctionId } = require("./_lib/mcp_targeting.js");
 const { lookupCachedEmbedding } = require("./_lib/embeddings.js");
 const { isSandboxCredential, buildSandboxResponse } = require("./_lib/sandbox.js");
 const auctionLog = require("./_lib/auction_log.js");
+const { getCampaignHistoryBatch } = require("./_lib/campaign_history.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -58,6 +59,55 @@ const DEMO_EVENTS = [];
 // Rate limiting per session (3 min window)
 const sessionCache = new Map();
 const RATE_LIMIT_MS = 3 * 60 * 1000;
+
+// ── Per-door creative resolver (Phase E.5 / migration 14) ──────────────
+// Given a winning campaign and the door the auction came through, pick
+// the right creative row. Cache by (campaign_id, door) for 60s so a
+// hot campaign with a steady traffic mix only hits Supabase once a
+// minute per door — the table is small and per-row, but auction is the
+// hottest path in the system.
+const _creativeCache = new Map(); // key: `${campaign_id}|${door}` → { row, until }
+const CREATIVE_TTL_MS = 60 * 1000;
+
+async function resolveCampaignCreative(campaignId, door) {
+  if (!campaignId) return null;
+  const allowedDoors = ["mcp", "js-snippet", "npm-sdk", "rest-api"];
+  const wantedDoor = allowedDoors.includes(door) ? door : "default";
+  const key = `${campaignId}|${wantedDoor}`;
+
+  const now = Date.now();
+  const cached = _creativeCache.get(key);
+  if (cached && cached.until > now) return cached.row;
+
+  let row = null;
+
+  if (HAS_SUPABASE) {
+    const sb = supa();
+    if (sb) {
+      // Pull the door-specific row + the 'default' fallback in one query.
+      // Then pick the door-specific row if it exists, else the default.
+      const { data } = await sb.from("campaign_creatives")
+        .select("door, headline, subtext, media_url, poster_url, cta_label, cta_url")
+        .eq("campaign_id", campaignId)
+        .in("door", [wantedDoor, "default"]);
+      if (Array.isArray(data) && data.length > 0) {
+        row = data.find((r) => r.door === wantedDoor) || data.find((r) => r.door === "default") || null;
+      }
+    }
+  } else {
+    // Demo mode — read the in-memory _per_door_creatives off the
+    // campaign object (set by api/campaigns.js handleCreate/handleUpdate).
+    try {
+      const camps = demoCampaigns();
+      const c = camps.find((x) => String(x.id) === String(campaignId));
+      const rows = (c && c._per_door_creatives) || [];
+      row = rows.find((r) => r.door === wantedDoor) || rows.find((r) => r.door === "default") || null;
+    } catch (_) { row = null; }
+  }
+
+  _creativeCache.set(key, { row, until: now + CREATIVE_TTL_MS });
+  return row;
+}
 
 // ── Context derivation (MCP args → Benna bid context) ──────────────────
 function deriveBennaContext(args) {
@@ -226,11 +276,11 @@ module.exports = async function handler(req, res) {
           },
           {
             name: "track_event",
-            description: "Track ad event: impression, click, close, video_complete, skip. Pass auction_id from get_sponsored_content for idempotent (auction × event) recording.",
+            description: "Track ad event: impression, click, close, video_complete, skip, conversion. Pass auction_id from get_sponsored_content for idempotent (auction × event) recording. For conversion events, supply conversion_type + value (USD) + currency.",
             inputSchema: {
               type: "object",
               properties: {
-                event:         { type: "string", enum: ["impression", "click", "close", "video_complete", "skip"] },
+                event:         { type: "string", enum: ["impression", "click", "close", "video_complete", "skip", "conversion"] },
                 campaign_id:   { type: "string" },
                 session_id:    { type: "string" },
                 developer_api_key: { type: "string" },
@@ -239,6 +289,11 @@ module.exports = async function handler(req, res) {
                 surface:       { type: "string", description: "UI surface this impression rendered into" },
                 format:        { type: "string", description: "Creative format actually rendered" },
                 intent_match_score: { type: "number", description: "Benna intent-match score returned by get_sponsored_content" },
+                // Conversion-specific fields (only populated when event === 'conversion')
+                conversion_type: { type: "string", description: "What the conversion is for (signup, purchase, lead, tool_invoke, etc.)" },
+                value:           { type: "number", description: "Conversion value in USD (e.g. 29.99 for a $29.99 purchase)" },
+                currency:        { type: "string", description: "ISO 4217 currency code; default USD" },
+                external_id:     { type: "string", description: "Advertiser's user/order id for cross-system reconciliation" },
               },
               required: ["event", "campaign_id"],
             },
@@ -501,7 +556,16 @@ async function handleGetSponsoredContent(body, args, res) {
   });
   const afterMcp             = afterDoor.filter((c) => mcpTargetingMatch(c, mcpCtx));
 
+  // Phase C — batch-fetch 7-day history for every candidate campaign in a
+  // single SQL round-trip (in-process cached for 5 min, see
+  // api/_lib/campaign_history.js). Both scoreBid and scorePrice consume
+  // the result to apply observed-CTR modifiers. Campaigns with <100 imps
+  // get a learning-phase fallback; campaigns warmed up shift Benna's
+  // bid in line with real performance instead of pure targeting overlap.
+  const historyMap = await getCampaignHistoryBatch(sb, afterMcp.map((c) => c.id));
+
   const candidatesScored = afterMcp.map((c) => {
+      const cHistory = historyMap.get(c.id) || null;
       // p_click / p_convert / signal_contributions for the dashboard
       // "Why did this win" panel. scoreBid() reads the campaign's actual
       // target_* columns to compute per-signal contributions; scorePrice()
@@ -515,7 +579,7 @@ async function handleGetSponsoredContent(body, args, res) {
         target_host_apps:    c.target_host_apps    || [],
         target_surfaces:     c.target_surfaces     || [],
         target_keywords:     c.target_keywords     || [],
-      });
+      }, cHistory);
       const priced = benna.scorePrice({
         placement: scorePlacement,
         context: {
@@ -535,6 +599,7 @@ async function handleGetSponsoredContent(body, args, res) {
         // are non-null, intentMatchScore() uses cosine similarity instead
         // of Jaccard, which produces real semantic variance.
         request_intent_embedding: requestEmbedding,
+        history: cHistory,
       });
       const kwBoost = keywordContextBoost(c, args.context_summary);
       // Apply the keyword-context heuristic on top of the §9 price as a
@@ -605,6 +670,24 @@ async function handleGetSponsoredContent(body, args, res) {
   const w = winner.c;
   const p = winner.prediction;
   sessionCache.set(sessionId, Date.now());
+
+  // Phase E.5 — resolve per-door creative override.
+  // If the advertiser supplied door-specific copy via the
+  // campaign_creatives table (migration 14), prefer that row; otherwise
+  // fall back to the campaign's 'default' row; otherwise fall back to
+  // the legacy fields on the campaign itself. We override `w`'s
+  // creative-shaped fields in-place so the rest of the response builder
+  // below doesn't need to know about the table.
+  const doorForCreative = args._integration_method || "default";
+  const creative = await resolveCampaignCreative(w.id, doorForCreative);
+  if (creative) {
+    if (creative.headline)    w.headline   = creative.headline;
+    if (creative.subtext)     w.subtext    = creative.subtext;
+    if (creative.media_url)   w.media_url  = creative.media_url;
+    if (creative.poster_url)  w.poster_url = creative.poster_url;
+    if (creative.cta_label)   w.cta_label  = creative.cta_label;
+    if (creative.cta_url)     w.cta_url    = creative.cta_url;
+  }
 
   const base = process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai";
   // Auction-keyed tracking URLs. /api/track will use (auction_id, event_type)
@@ -737,6 +820,13 @@ async function handleTrackEvent(body, args, res) {
       surface:      args.surface || null,
       format:       args.format || null,
       intent_match_score: args.intent_match_score != null ? Number(args.intent_match_score) : null,
+      // Conversion-specific fields (Phase B). Forwarded only when present;
+      // track.js no-ops them for non-conversion events. value is USD dollars
+      // on the wire — track.js converts to cents for storage.
+      conversion_type: args.conversion_type || null,
+      value:           args.value != null ? Number(args.value) : null,
+      currency:        args.currency || null,
+      external_id:     args.external_id || null,
     },
   };
   let trackErr = null;

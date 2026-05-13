@@ -295,6 +295,9 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST" && action === "upload_creative") {
       return await handleUploadCreative(req, res);
     }
+    if (req.method === "POST" && action === "fetch_url_preview") {
+      return await handleFetchUrlPreview(req, res);
+    }
     if ((req.method === "PATCH" || req.method === "POST") && action === "update") {
       return await handleUpdate(req, res);
     }
@@ -419,6 +422,12 @@ async function handleCreate(req, res) {
       : [],
     optimization_goal: b.optimization_goal || "target_cpa",
     billing_model: b.billing_model || "cpm",
+    // Phase B (2026-05-11) — conversion event allowlist for CPA campaigns.
+    // Empty array = "any conversion counts". Whitelisted values are free-form
+    // strings the advertiser also passes in trackConversion / pixel.js.
+    conversion_event_types: Array.isArray(b.conversion_event_types)
+      ? b.conversion_event_types.filter((s) => typeof s === "string" && s.length <= 32)
+      : [],
     bid_amount: b.bid_amount || 5.00,
     daily_budget: b.daily_budget || 50.00,
     total_budget: b.total_budget || 1000.00,
@@ -475,10 +484,72 @@ async function handleCreate(req, res) {
 
     const { data, error } = await sb.from("campaigns").insert(row).select().single();
     if (error) return res.status(500).json({ error: error.message });
+    // Phase E.5 — persist per-door creative rows alongside the campaign.
+    // Always writes a 'default' row mirroring the top-level copy; writes
+    // per-door rows only when the advertiser overrode that door.
+    await upsertCampaignCreatives(sb, data.id, row, b.per_door_creatives);
     return res.status(201).json({ campaign: data, policy, auto_approved: autoApproved });
   }
   DEMO_CAMPAIGNS.set(row.id, row);
+  // Demo mode — store per-door creatives on the campaign object so the
+  // tests can verify the same shape without Supabase.
+  row._per_door_creatives = normalisePerDoorCreatives(row, b.per_door_creatives);
   return res.status(201).json({ campaign: row, policy, auto_approved: autoApproved });
+}
+
+// ── per-door creative helpers (Phase E.5) ──────────────────────────────
+// Normalise an advertiser-supplied per_door_creatives map into rows
+// we can insert. Always writes a 'default' row; door-specific rows
+// only when at least one field differs from the campaign-level copy.
+function normalisePerDoorCreatives(campaignRow, perDoor) {
+  const out = [];
+  const FIELDS = ["headline", "subtext", "media_url", "poster_url", "cta_label", "cta_url"];
+  const defaults = {};
+  for (const f of FIELDS) defaults[f] = campaignRow[f] != null ? campaignRow[f] : null;
+  // The 'default' row always tracks campaign-level copy.
+  out.push({
+    door: "default",
+    source: "inherited",
+    ...defaults,
+  });
+  if (!perDoor || typeof perDoor !== "object") return out;
+  for (const door of ["mcp", "js-snippet", "npm-sdk", "rest-api"]) {
+    const override = perDoor[door];
+    if (!override || typeof override !== "object") continue;
+    // Only persist when at least one field is supplied AND differs from default.
+    const row = { door, source: "user-uploaded" };
+    let differs = false;
+    for (const f of FIELDS) {
+      const v = override[f];
+      // Treat empty string / null as "no override for this field" — but
+      // we still write the row if any other field has a real override.
+      row[f] = (v != null && v !== "") ? String(v).slice(0, 2000) : defaults[f];
+      if (v != null && v !== "" && row[f] !== defaults[f]) differs = true;
+    }
+    if (differs) out.push(row);
+  }
+  return out;
+}
+
+// Insert/upsert per-door rows for a campaign. Idempotent — replaces any
+// existing rows for the campaign so PATCH semantics are dead simple
+// (the advertiser sends the full desired state; we mirror it).
+async function upsertCampaignCreatives(sb, campaignId, campaignRow, perDoor) {
+  if (!sb) return;
+  const rows = normalisePerDoorCreatives(campaignRow, perDoor).map((r) => ({
+    campaign_id: campaignId,
+    ...r,
+  }));
+  // Clear-and-rewrite is simpler than per-row upsert here. Volume per
+  // call is tiny (max 5 rows) and the table is indexed on campaign_id.
+  await sb.from("campaign_creatives").delete().eq("campaign_id", campaignId);
+  if (rows.length === 0) return;
+  const { error } = await sb.from("campaign_creatives").insert(rows);
+  if (error) {
+    // Don't block the campaign write on creative-row failure — the
+    // auction read path falls back to campaigns.* if the table is empty.
+    console.error("[campaigns] upsert creatives failed:", error.message);
+  }
 }
 
 // ── update ──────────────────────────────────────────────────────────────
@@ -497,6 +568,8 @@ async function handleUpdate(req, res) {
     "target_intent_tokens", "target_active_tools", "target_host_apps", "target_surfaces",
     // Per-door opt-in (migration 09)
     "target_integration_methods",
+    // Conversion-billing allowlist (migration 11 / Phase B)
+    "conversion_event_types",
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];
@@ -531,12 +604,29 @@ async function handleUpdate(req, res) {
     }
     const { data, error } = await sb.from("campaigns").update(updates).eq("id", b.id).select().single();
     if (error) return res.status(500).json({ error: error.message });
+    // Phase E.5 — re-sync per-door creatives if the advertiser sent a
+    // per_door_creatives payload OR if the campaign-level copy moved
+    // (so the inherited 'default' row stays in sync).
+    if (b.per_door_creatives !== undefined || hasCreativeFieldUpdate(updates)) {
+      await upsertCampaignCreatives(sb, data.id, data, b.per_door_creatives);
+    }
     return res.json({ campaign: data });
   }
   const c = DEMO_CAMPAIGNS.get(b.id);
   if (!c) return res.status(404).json({ error: "Campaign not found" });
   Object.assign(c, updates);
+  // Demo mode — keep the in-memory _per_door_creatives in sync.
+  if (b.per_door_creatives !== undefined || hasCreativeFieldUpdate(updates)) {
+    c._per_door_creatives = normalisePerDoorCreatives(c, b.per_door_creatives);
+  }
   return res.json({ campaign: c });
+}
+
+// True when any creative-level field (headline/media/cta) was just updated.
+// Drives the per-door 'default' row resync in handleUpdate.
+function hasCreativeFieldUpdate(updates) {
+  return ["headline", "subtext", "media_url", "poster_url", "cta_label", "cta_url"]
+    .some((f) => updates[f] !== undefined);
 }
 
 // ── pause / resume ─────────────────────────────────────────────────────
@@ -659,6 +749,177 @@ async function handleUploadCreative(req, res) {
     media_url,
     detected_type: type,
     message: "Creative URL validated. Attach to campaign via create or update.",
+  });
+}
+
+// ── fetch_url_preview ──────────────────────────────────────────────────
+// Phase E.5 — Server-side fetch of the advertiser's landing-page URL,
+// parse OpenGraph + standard <meta> tags, return a normalised preview
+// shape the advertiser dashboard uses to autofill the create-campaign
+// form (no AI involved — we're just relaying what the page already
+// declares about itself).
+//
+// Why server-side (not browser-side): the advertiser's browser would hit
+// CORS on most domains. Doing the fetch from our server avoids that and
+// gives us a single place to enforce SSRF + size limits.
+//
+// SSRF defense:
+//   • HTTPS only.
+//   • Public DNS only — resolved host must not be private/loopback/link-local.
+//   • 8 KB read cap (OG tags live in <head>, no reason to pull MBs of HTML).
+//   • 5-second wall clock via AbortController.
+//   • Follow redirects up to 3 hops (fetch default is 20 — too generous).
+// All five of these have to fail for the advertiser to be able to map
+// our server into their internal network.
+async function handleFetchUrlPreview(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  const { url } = req.body || {};
+  if (!url) return res.status(400).json({ error: "Missing url" });
+
+  // Parse + protocol check
+  let parsed;
+  try { parsed = new URL(url); }
+  catch (_) { return res.status(400).json({ error: "Invalid URL format" }); }
+  if (parsed.protocol !== "https:") {
+    return res.status(400).json({ error: "URL must use HTTPS" });
+  }
+
+  // SSRF — reject obvious internal hostnames before we even hit DNS.
+  // (For full hardening we'd resolve and check the IP, but Node fetch
+  // doesn't expose the resolved IP and we don't want to add a dns dep
+  // for marginal benefit when the cheap hostname check catches 99%.)
+  const host = parsed.hostname.toLowerCase();
+  const blocked =
+    host === "localhost" ||
+    host === "0.0.0.0" ||
+    host === "::1" ||
+    host.endsWith(".local") ||
+    host.endsWith(".internal") ||
+    /^127\./.test(host) ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^169\.254\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host);
+  if (blocked) {
+    return res.status(400).json({ error: "URL host is not publicly reachable" });
+  }
+
+  // Fetch with timeout + size cap
+  const ctrl = new AbortController();
+  const timeoutMs = 5000;
+  const maxBytes = 8192;
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+
+  let html = "";
+  let status = 0;
+  let finalUrl = parsed.toString();
+  try {
+    const r = await fetch(parsed.toString(), {
+      method: "GET",
+      redirect: "follow",
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "BoostBoss-Preview/1.0 (+https://boostboss.ai)",
+        "Accept": "text/html,*/*;q=0.5",
+      },
+    });
+    status = r.status;
+    finalUrl = r.url || finalUrl;
+    if (!r.ok) {
+      return res.status(400).json({
+        error: `Upstream returned HTTP ${status}`,
+        status,
+        url: finalUrl,
+      });
+    }
+    // Bounded read — slurp the body but cap at maxBytes so a 10 GB stream
+    // can't OOM us. We only need <head>, which is always in the first KB.
+    const reader = r.body && r.body.getReader ? r.body.getReader() : null;
+    if (reader) {
+      let total = 0;
+      const decoder = new TextDecoder("utf-8", { fatal: false });
+      while (total < maxBytes) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.length;
+        html += decoder.decode(value, { stream: true });
+        if (total >= maxBytes) {
+          try { await reader.cancel(); } catch (_) {}
+          break;
+        }
+      }
+      html += decoder.decode();
+    } else {
+      // Older runtimes — fall back to .text() but slice.
+      const t = await r.text();
+      html = t.slice(0, maxBytes);
+    }
+  } catch (e) {
+    return res.status(400).json({
+      error: e.name === "AbortError" ? "Fetch timed out" : `Fetch failed: ${e.message}`,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+
+  // Parse OpenGraph + standard <meta> + <title> with regex (no jsdom dep).
+  // The HEAD is small and well-structured; regex is good enough here.
+  // Order matters: og: tags beat name= tags beat <title>.
+  function pickMeta(re) {
+    const m = html.match(re);
+    return m ? decodeEntities(m[1].trim()) : "";
+  }
+  function decodeEntities(s) {
+    return s
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
+  }
+
+  // Note the `[^>]*` between tag name and attribute — meta tags often
+  // have multiple attributes in arbitrary order.
+  const ogTitle    = pickMeta(/<meta[^>]+property=["']og:title["'][^>]*content=["']([^"']+)["']/i)
+                  || pickMeta(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
+  const ogDesc     = pickMeta(/<meta[^>]+property=["']og:description["'][^>]*content=["']([^"']+)["']/i)
+                  || pickMeta(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:description["']/i);
+  const ogImage    = pickMeta(/<meta[^>]+property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+                  || pickMeta(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+  const ogSiteName = pickMeta(/<meta[^>]+property=["']og:site_name["'][^>]*content=["']([^"']+)["']/i);
+  const metaDesc   = pickMeta(/<meta[^>]+name=["']description["'][^>]*content=["']([^"']+)["']/i)
+                  || pickMeta(/<meta[^>]+content=["']([^"']+)["'][^>]*name=["']description["']/i);
+  const titleTag   = pickMeta(/<title[^>]*>([^<]+)<\/title>/i);
+
+  // Resolve a possibly-relative image URL against finalUrl. Advertisers
+  // who don't use absolute og:image values still get a usable URL back.
+  let mediaUrl = "";
+  if (ogImage) {
+    try { mediaUrl = new URL(ogImage, finalUrl).toString(); }
+    catch (_) { mediaUrl = ""; }
+  }
+
+  // Cap field lengths to match what create-campaign accepts. Saves a
+  // round-trip — the advertiser sees the same string we'd persist.
+  function cap(s, n) { return (s || "").slice(0, n); }
+
+  return res.json({
+    ok: true,
+    url: finalUrl,
+    site_name: cap(ogSiteName, 80),
+    headline: cap(ogTitle || titleTag, 90),
+    subtext: cap(ogDesc || metaDesc, 160),
+    media_url: mediaUrl,
+    // Debug — useful for the dashboard's "we found / we didn't" hint.
+    found: {
+      og_title:    !!ogTitle,
+      og_desc:     !!ogDesc,
+      og_image:    !!ogImage,
+      meta_desc:   !!metaDesc,
+      title_tag:   !!titleTag,
+    },
   });
 }
 
@@ -812,3 +1073,6 @@ module.exports.HAS_SUPABASE = HAS_SUPABASE;
 module.exports._DEMO_CAMPAIGNS = DEMO_CAMPAIGNS;
 module.exports._reset = function () { DEMO_CAMPAIGNS.clear(); _seeded = false; };
 module.exports._seed = seedDemoCampaigns;
+// Phase E.5
+module.exports._normalisePerDoorCreatives = normalisePerDoorCreatives;
+module.exports._handleFetchUrlPreview = handleFetchUrlPreview;

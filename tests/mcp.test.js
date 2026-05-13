@@ -330,6 +330,108 @@ async function test(name, fn) {
     assert.strictEqual(mcp._DEMO_EVENTS.length, 0);
   });
 
+  // ── Phase E.5: per-door creative override read path ──────────────────
+  // The auction read-path should prefer a door-specific row when the
+  // request came in via that door, fall back to the 'default' row
+  // otherwise, and fall back to legacy campaigns.* if no rows exist.
+  await test("per-door creative override is applied when door matches", async () => {
+    mcp._reset();
+    const campaigns = require("../api/campaigns.js");
+    // Pick a seeded campaign and attach a per-door override directly.
+    const all = [...campaigns._DEMO_CAMPAIGNS.values()];
+    const target = all.find((c) => c.status === "active");
+    assert(target, "expected at least one active demo campaign");
+    target._per_door_creatives = [
+      { door: "default", headline: target.headline, subtext: target.subtext, media_url: target.media_url, poster_url: target.poster_url, cta_label: target.cta_label, cta_url: target.cta_url, source: "inherited" },
+      { door: "js-snippet", headline: "JS-SNIPPET ONLY HEADLINE", subtext: target.subtext, media_url: target.media_url, poster_url: target.poster_url, cta_label: target.cta_label, cta_url: target.cta_url, source: "user-uploaded" },
+    ];
+    const r = await run({
+      method: "POST",
+      headers: { "x-lumi-source": "js-snippet" },
+      body: {
+        method: "tools/call", id: 200,
+        params: {
+          name: "get_sponsored_content",
+          arguments: {
+            context_summary: target.target_intent_tokens?.join(" ") || "deploy app",
+            session_id: "test_e5_door_match",
+            // force this campaign to win by restricting targeting
+            host_app: target.target_host_apps?.[0],
+          },
+        },
+      },
+    });
+    const content = JSON.parse(r._body.result.content[0].text);
+    if (content.sponsored && String(content.sponsored.campaign_id) === String(target.id)) {
+      assert.strictEqual(content.sponsored.headline, "JS-SNIPPET ONLY HEADLINE",
+        "js-snippet override should be applied");
+    }
+    // Cleanup so later tests aren't affected by mutated demo state.
+    delete target._per_door_creatives;
+  });
+
+  await test("falls back to 'default' row when door has no specific override", async () => {
+    mcp._reset();
+    const campaigns = require("../api/campaigns.js");
+    const all = [...campaigns._DEMO_CAMPAIGNS.values()];
+    const target = all.find((c) => c.status === "active");
+    target._per_door_creatives = [
+      { door: "default", headline: "DEFAULT FALLBACK HEADLINE", subtext: "", media_url: target.media_url, poster_url: null, cta_label: target.cta_label, cta_url: target.cta_url, source: "inherited" },
+      // no door-specific row for 'rest-api'
+    ];
+    const r = await run({
+      method: "POST",
+      headers: { "x-lumi-source": "rest-api" },
+      body: {
+        method: "tools/call", id: 201,
+        params: {
+          name: "get_sponsored_content",
+          arguments: {
+            context_summary: target.target_intent_tokens?.join(" ") || "deploy app",
+            session_id: "test_e5_door_default",
+            host_app: target.target_host_apps?.[0],
+          },
+        },
+      },
+    });
+    const content = JSON.parse(r._body.result.content[0].text);
+    if (content.sponsored && String(content.sponsored.campaign_id) === String(target.id)) {
+      assert.strictEqual(content.sponsored.headline, "DEFAULT FALLBACK HEADLINE",
+        "default row should be used when no door-specific row exists");
+    }
+    delete target._per_door_creatives;
+  });
+
+  await test("falls back to legacy campaign fields when no creative rows exist", async () => {
+    mcp._reset();
+    const campaigns = require("../api/campaigns.js");
+    const all = [...campaigns._DEMO_CAMPAIGNS.values()];
+    const target = all.find((c) => c.status === "active");
+    // Ensure no per-door rows are attached.
+    delete target._per_door_creatives;
+    const r = await run({
+      method: "POST",
+      headers: { "x-lumi-source": "mcp" },
+      body: {
+        method: "tools/call", id: 202,
+        params: {
+          name: "get_sponsored_content",
+          arguments: {
+            context_summary: target.target_intent_tokens?.join(" ") || "deploy app",
+            session_id: "test_e5_door_legacy",
+            host_app: target.target_host_apps?.[0],
+          },
+        },
+      },
+    });
+    const content = JSON.parse(r._body.result.content[0].text);
+    if (content.sponsored && String(content.sponsored.campaign_id) === String(target.id)) {
+      // No override → headline matches the campaign's own headline.
+      assert.strictEqual(content.sponsored.headline, target.headline,
+        "should fall back to legacy campaign field");
+    }
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

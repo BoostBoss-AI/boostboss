@@ -471,6 +471,184 @@ async function test(name, fn) {
     assert(r._body.error.includes("bid_amount"));
   });
 
+  // ── Phase E.5: fetch_url_preview ───────────────────────────────────
+  // We stub global.fetch so we can drive the parser deterministically
+  // without hitting the network — and restore it afterwards.
+  await test("fetch_url_preview rejects missing url", async () => {
+    const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: {} });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.toLowerCase().includes("missing url"));
+  });
+
+  await test("fetch_url_preview rejects non-HTTPS", async () => {
+    const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "http://insecure.com" } });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("HTTPS"));
+  });
+
+  await test("fetch_url_preview rejects malformed URL", async () => {
+    const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "not-a-url" } });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.toLowerCase().includes("invalid"));
+  });
+
+  await test("fetch_url_preview blocks loopback host (SSRF)", async () => {
+    const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "https://127.0.0.1/x" } });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.toLowerCase().includes("publicly reachable"));
+  });
+
+  await test("fetch_url_preview blocks private RFC1918 host (SSRF)", async () => {
+    const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "https://10.0.0.5/x" } });
+    assert.strictEqual(r._status, 400);
+  });
+
+  await test("fetch_url_preview parses og:title / og:description / og:image", async () => {
+    const originalFetch = global.fetch;
+    const html = `
+      <html><head>
+        <meta property="og:title" content="Stripe Atlas">
+        <meta property="og:description" content="Start your global startup in minutes">
+        <meta property="og:image" content="https://stripe.com/img/atlas-card.png">
+        <meta property="og:site_name" content="Stripe">
+        <title>Atlas — Stripe</title>
+      </head><body></body></html>`;
+    global.fetch = async () => ({
+      ok: true, status: 200, url: "https://stripe.com/atlas",
+      body: null, // exercise the .text() fallback branch
+      text: async () => html,
+    });
+    try {
+      const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "https://stripe.com/atlas" } });
+      assert.strictEqual(r._status, 200, "expected 200, got " + r._status);
+      assert.strictEqual(r._body.ok, true);
+      assert.strictEqual(r._body.headline, "Stripe Atlas");
+      assert.strictEqual(r._body.subtext, "Start your global startup in minutes");
+      assert.strictEqual(r._body.media_url, "https://stripe.com/img/atlas-card.png");
+      assert.strictEqual(r._body.site_name, "Stripe");
+      assert(r._body.found.og_title && r._body.found.og_image);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  await test("fetch_url_preview falls back to <title> + meta description", async () => {
+    const originalFetch = global.fetch;
+    const html = `
+      <html><head>
+        <meta name="description" content="Plain old meta description.">
+        <title>Plain Title</title>
+      </head></html>`;
+    global.fetch = async () => ({
+      ok: true, status: 200, url: "https://example.com/x",
+      body: null, text: async () => html,
+    });
+    try {
+      const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "https://example.com/x" } });
+      assert.strictEqual(r._body.headline, "Plain Title");
+      assert.strictEqual(r._body.subtext, "Plain old meta description.");
+      assert.strictEqual(r._body.media_url, "");
+      assert.strictEqual(r._body.found.og_title, false);
+      assert.strictEqual(r._body.found.title_tag, true);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  await test("fetch_url_preview resolves relative og:image against final URL", async () => {
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
+      ok: true, status: 200, url: "https://example.com/landing",
+      body: null,
+      text: async () => `<meta property="og:image" content="/img/hero.png"><title>X</title>`,
+    });
+    try {
+      const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "https://example.com/landing" } });
+      assert.strictEqual(r._body.media_url, "https://example.com/img/hero.png");
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  await test("fetch_url_preview returns 400 on upstream HTTP error", async () => {
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
+      ok: false, status: 503, url: "https://example.com/down",
+      body: null, text: async () => "",
+    });
+    try {
+      const r = await run({ method: "POST", query: { action: "fetch_url_preview" }, body: { url: "https://example.com/down" } });
+      assert.strictEqual(r._status, 400);
+      assert.strictEqual(r._body.status, 503);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  // ── Phase E.5: per-door creative normalisation ─────────────────────
+  await test("normalisePerDoorCreatives always emits a 'default' row", () => {
+    const rows = campaigns._normalisePerDoorCreatives({
+      headline: "H", subtext: "S", media_url: "https://x/m.png",
+      cta_label: "Go", cta_url: "https://x", poster_url: null,
+    }, undefined);
+    assert.strictEqual(rows.length, 1);
+    assert.strictEqual(rows[0].door, "default");
+    assert.strictEqual(rows[0].source, "inherited");
+    assert.strictEqual(rows[0].headline, "H");
+  });
+
+  await test("normalisePerDoorCreatives skips door rows with no real overrides", () => {
+    const rows = campaigns._normalisePerDoorCreatives(
+      { headline: "H", subtext: "S", media_url: "https://x/m.png", cta_label: "Go", cta_url: "https://x", poster_url: null },
+      { mcp: {}, "js-snippet": { headline: "" } } // both effectively empty
+    );
+    // Only the default row should be present.
+    assert.strictEqual(rows.length, 1);
+    assert.strictEqual(rows[0].door, "default");
+  });
+
+  await test("normalisePerDoorCreatives emits a door row when at least one field differs", () => {
+    const rows = campaigns._normalisePerDoorCreatives(
+      { headline: "H", subtext: "S", media_url: "https://x/m.png", cta_label: "Go", cta_url: "https://x", poster_url: null },
+      { mcp: { headline: "MCP-specific headline" } }
+    );
+    assert.strictEqual(rows.length, 2);
+    const mcpRow = rows.find((r) => r.door === "mcp");
+    assert(mcpRow);
+    assert.strictEqual(mcpRow.source, "user-uploaded");
+    assert.strictEqual(mcpRow.headline, "MCP-specific headline");
+    // Non-overridden fields inherit from the campaign-level copy.
+    assert.strictEqual(mcpRow.cta_url, "https://x");
+  });
+
+  await test("normalisePerDoorCreatives ignores override identical to default", () => {
+    const rows = campaigns._normalisePerDoorCreatives(
+      { headline: "Same", subtext: "S", media_url: "", cta_label: "Go", cta_url: "https://x", poster_url: null },
+      { mcp: { headline: "Same" } } // same as default → not an override
+    );
+    // Should be only the default row, since nothing materially differs.
+    assert.strictEqual(rows.length, 1);
+  });
+
+  await test("create persists per_door_creatives on the demo campaign object", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: {
+        advertiser_id: "adv_test_e5",
+        name: "E5 demo", headline: "Hello", cta_url: "https://x.com",
+        format: "native", daily_budget: 100, total_budget: 5000,
+        per_door_creatives: { mcp: { headline: "MCP override" } },
+      },
+    });
+    assert.strictEqual(r._status, 201, "expected 201, got " + r._status);
+    const c = r._body.campaign;
+    assert(Array.isArray(c._per_door_creatives), "_per_door_creatives should be an array");
+    const doorIds = c._per_door_creatives.map((x) => x.door).sort();
+    assert.deepStrictEqual(doorIds, ["default", "mcp"]);
+    const mcp = c._per_door_creatives.find((x) => x.door === "mcp");
+    assert.strictEqual(mcp.headline, "MCP override");
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

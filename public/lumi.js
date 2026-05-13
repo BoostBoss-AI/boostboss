@@ -587,6 +587,103 @@
       mountSlot(el);
     },
 
+    /**
+     * Fire a conversion event tied to an ad served in this session.
+     *
+     * Phase B (2026-05-11) — adds publisher-side conversion firing for
+     * in-app conversions (signup/purchase happens on the same page that
+     * hosted the ad). For conventional advertiser-side conversions on a
+     * separate thank-you page, advertisers should still use pixel.js with
+     * the bbx_auc query param (see public/pixel.js).
+     *
+     * @param {Object} opts
+     * @param {string} opts.type         conversion type, e.g. "signup", "purchase"
+     * @param {string} [opts.adId]       campaign_id of the ad that converted (required if no slot match)
+     * @param {string} [opts.auctionId]  auction_id of the originating ad (recommended for attribution)
+     * @param {string|Element} [opts.slot] alternative — provide the slot we rendered into
+     * @param {number} [opts.value]      conversion value in USD (e.g. 29.99)
+     * @param {string} [opts.currency]   ISO 4217 currency; default USD
+     * @param {string} [opts.externalId] advertiser's user/order id for reconciliation
+     */
+    trackConversion: function (opts) {
+      opts = opts || {};
+      if (!opts.type || typeof opts.type !== "string") {
+        emitError("BBX_BAD_REQUEST", "trackConversion: 'type' is required (e.g. 'signup')");
+        return;
+      }
+
+      // Resolve adId + auctionId from the slot reference if needed.
+      var adId      = opts.adId      || null;
+      var auctionId = opts.auctionId || null;
+      if (!adId || !auctionId) {
+        var slotEl = null;
+        if (opts.slot) {
+          slotEl = (typeof opts.slot === "string")
+            ? document.querySelector(opts.slot)
+            : opts.slot;
+        }
+        if (slotEl && slots.has(slotEl)) {
+          var s = slots.get(slotEl);
+          if (s && s.ad) {
+            adId      = adId      || s.ad.adId;
+            auctionId = auctionId || s.ad.auctionId;
+          }
+        } else {
+          // Best-effort: walk every mounted slot and take the first
+          // one's ad context. Useful for "one ad per page" sites that
+          // don't bother passing slot references.
+          slots.forEach(function (m) {
+            if ((!adId || !auctionId) && m && m.ad) {
+              adId      = adId      || m.ad.adId;
+              auctionId = auctionId || m.ad.auctionId;
+            }
+          });
+        }
+      }
+
+      if (!adId) {
+        emitError("BBX_BAD_REQUEST",
+          "trackConversion: cannot determine adId — pass opts.adId, opts.slot, or call after an ad has rendered");
+        return;
+      }
+
+      var body = {
+        event:           "conversion",
+        campaign_id:     adId,
+        auction_id:      auctionId,
+        conversion_type: opts.type,
+        value:           (opts.value != null) ? Number(opts.value) : null,
+        currency:        opts.currency || "USD",
+        external_id:     opts.externalId || null,
+        session_id:      SESSION_ID,
+      };
+
+      try {
+        fetch(apiBase.replace(/\/$/, "") + "/api/track", {
+          method: "POST",
+          keepalive: true,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Lumi-Source": "js-snippet",
+          },
+          body: JSON.stringify(body),
+        }).then(function (r) {
+          if (!r.ok) {
+            emitError("BBX_HTTP_" + r.status, "conversion beacon rejected: HTTP " + r.status);
+          } else {
+            dispatch("conversion", {
+              adId: adId, auctionId: auctionId,
+              type: opts.type, value: body.value, currency: body.currency,
+            });
+          }
+        }).catch(function (e) {
+          emitError("BBX_NETWORK", "conversion beacon failed: " + (e && e.message));
+        });
+      } catch (e) {
+        emitError("BBX_NETWORK", "conversion beacon threw: " + (e && e.message));
+      }
+    },
+
     /** Last error object or null. */
     getLastError: function () { return lastError; },
 

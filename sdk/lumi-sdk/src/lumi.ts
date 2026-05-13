@@ -33,6 +33,7 @@ export class Lumi {
   static readonly version = VERSION;
 
   private readonly publisherId: string;
+  private readonly apiBase:     string;
   private readonly client:      Client;
   private readonly emitter      = new TypedEmitter();
   private readonly slots        = new Map<HTMLElement, SlotState>();
@@ -48,12 +49,13 @@ export class Lumi {
       throw new TypeError("Lumi: 'publisherId' is required (e.g. 'pub_xxx')");
     }
     this.publisherId  = options.publisherId;
+    this.apiBase      = options.apiBase ?? DEFAULT_API_BASE;
     this.debugEnabled = Boolean(options.debug);
     this.sessionId    = "lumi_" + Math.random().toString(36).slice(2, 10) + "_" + Date.now();
 
     this.client = new Client({
       publisherId: options.publisherId,
-      apiBase:     options.apiBase ?? DEFAULT_API_BASE,
+      apiBase:     this.apiBase,
       timeoutMs:   options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       source:      "npm-sdk",
     });
@@ -143,6 +145,107 @@ export class Lumi {
     const entries = [...this.slots.entries()];
     for (const [el, state] of entries) {
       await this.render(el, { format: state.format as RenderOptions["format"] });
+    }
+  }
+
+  /**
+   * Fire a conversion event tied to an ad served in this session.
+   *
+   * Phase B (2026-05-11) — adds publisher-side conversion firing for
+   * in-app conversions where the conversion happens in the same surface
+   * that hosted the ad (browser extension popup, Electron, embedded web).
+   * For conventional advertiser-side conversions on a separate landing
+   * page, advertisers should use the public/pixel.js script instead.
+   *
+   * Resolution order for adId/auctionId:
+   *   1. Explicit `opts.adId` / `opts.auctionId`
+   *   2. The `opts.slot` reference (must be a slot we previously rendered)
+   *   3. Any one of our currently-mounted slots (best-effort)
+   */
+  async trackConversion(opts: {
+    type:        string;
+    adId?:       string;
+    auctionId?:  string;
+    slot?:       string | HTMLElement;
+    value?:      number;
+    currency?:   string;
+    externalId?: string;
+  }): Promise<void> {
+    if (this.destroyed) return;
+    if (!opts || !opts.type) {
+      this.emitter.emit("error", {
+        code: ERROR_CODES.BAD_REQUEST,
+        message: "trackConversion: 'type' is required (e.g. 'signup', 'purchase')",
+      });
+      return;
+    }
+
+    let adId      = opts.adId      ?? null;
+    let auctionId = opts.auctionId ?? null;
+
+    if (!adId || !auctionId) {
+      let slotEl: HTMLElement | null = null;
+      if (opts.slot) {
+        slotEl = typeof opts.slot === "string"
+          ? (typeof document !== "undefined" ? document.querySelector<HTMLElement>(opts.slot) : null)
+          : opts.slot;
+      }
+      const state = slotEl ? this.slots.get(slotEl) : null;
+      if (state?.ad) {
+        adId      = adId      ?? state.ad.adId;
+        auctionId = auctionId ?? state.ad.auctionId;
+      } else {
+        for (const s of this.slots.values()) {
+          if (!s.ad) continue;
+          adId      = adId      ?? s.ad.adId;
+          auctionId = auctionId ?? s.ad.auctionId;
+          if (adId && auctionId) break;
+        }
+      }
+    }
+
+    if (!adId) {
+      this.emitter.emit("error", {
+        code: ERROR_CODES.BAD_REQUEST,
+        message: "trackConversion: cannot determine adId — pass opts.adId, opts.slot, or call after an ad has rendered",
+      });
+      return;
+    }
+
+    const body: Record<string, unknown> = {
+      event:           "conversion",
+      campaign_id:     adId,
+      auction_id:      auctionId,
+      conversion_type: opts.type,
+      value:           opts.value ?? null,
+      currency:        opts.currency ?? "USD",
+      external_id:     opts.externalId ?? null,
+      session_id:      this.sessionId,
+    };
+
+    try {
+      const url = this.apiBase.replace(/\/$/, "") + "/api/track";
+      const resp = await fetch(url, {
+        method:    "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type":  "application/json",
+          "X-Lumi-Source": "npm-sdk",
+        },
+        body: JSON.stringify(body),
+      });
+      if (!resp.ok) {
+        this.emitter.emit("error", {
+          code:    ERROR_CODES.BAD_RESPONSE,
+          message: `conversion beacon rejected: HTTP ${resp.status}`,
+        });
+      }
+    } catch (e) {
+      const err = e as { message?: string };
+      this.emitter.emit("error", {
+        code:    ERROR_CODES.NETWORK,
+        message: `conversion beacon failed: ${err.message || "network error"}`,
+      });
     }
   }
 

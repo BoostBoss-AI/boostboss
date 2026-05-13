@@ -886,6 +886,164 @@
             .format-cards { grid-template-columns: 1fr; }
         }
 
+        /* ── Phase E.5 — URL autofill + per-door preview grid ─────────── */
+        .url-autofill {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .url-autofill input[type="url"] { flex: 1; }
+        .url-autofill-btn {
+            padding: 0 14px;
+            background: var(--accent-primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .url-autofill-btn:disabled { background: #9CA3AF; cursor: not-allowed; }
+        .url-autofill-status {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            min-height: 14px;
+        }
+        .url-autofill-status.error { color: #DC2626; }
+        .url-autofill-status.ok    { color: #059669; }
+
+        /* 4-door preview grid */
+        .door-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 4px;
+        }
+        @media (max-width: 520px) {
+            .door-preview-grid { grid-template-columns: 1fr; }
+        }
+        .door-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .door-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+        }
+        .door-card-head .door-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+        .door-card-head .door-badge.edited {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        .door-edit-btn {
+            border: none;
+            background: none;
+            color: var(--accent-primary);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+        .door-edit-btn:hover { text-decoration: underline; }
+
+        /* Door-specific image aspect ratios — CSS object-fit handles the crop */
+        .door-media {
+            width: 100%;
+            background: repeating-linear-gradient(45deg, #F3F4F6 0 8px, #E5E7EB 8px 16px);
+            border-radius: 6px;
+            object-fit: cover;
+            display: block;
+        }
+        .door-media.aspect-1x1   { aspect-ratio: 1 / 1; }
+        .door-media.aspect-16x9  { aspect-ratio: 16 / 9; }
+        .door-media.aspect-9x16  { aspect-ratio: 9 / 16; max-height: 220px; }
+
+        .door-headline {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+        .door-subtext {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .door-cta {
+            display: inline-block;
+            background: var(--accent-primary);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            align-self: flex-start;
+            text-decoration: none;
+        }
+
+        /* Per-door override editor (collapses by default) */
+        .door-override {
+            display: none;
+            background: #F9FAFB;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            gap: 8px;
+            flex-direction: column;
+        }
+        .door-override.open { display: flex; }
+        .door-override input,
+        .door-override textarea {
+            width: 100%;
+            padding: 7px 9px;
+            font-size: 12px;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+        }
+        .door-override textarea { resize: vertical; min-height: 48px; }
+        .door-override .door-override-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .door-override .door-override-reset {
+            font-size: 10px;
+            color: #DC2626;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            align-self: flex-end;
+        }
+
         .radio-option,
         .checkbox-option {
             display: flex;
@@ -2759,6 +2917,16 @@
                 </div>
 
                 <form id="campaignForm">
+                    <!-- Phase E.5 — Landing-page URL autofill -->
+                    <div class="form-group">
+                        <label class="form-label">Landing Page URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(we'll autofill the headline, subtext, and image)</span></label>
+                        <div class="url-autofill">
+                            <input type="url" class="form-input" id="urlAutofillInput" placeholder="https://your-landing-page.com">
+                            <button type="button" class="url-autofill-btn" id="urlAutofillBtn">Fetch</button>
+                        </div>
+                        <div class="url-autofill-status" id="urlAutofillStatus"></div>
+                    </div>
+
                     <!-- Campaign Name -->
                     <div class="form-group">
                         <label class="form-label">Campaign Name</label>
@@ -2862,20 +3030,13 @@
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
                     </div>
 
-                    <!-- Live Preview — updates as advertiser types -->
+                    <!-- Live Preview — 4-door grid; per-door copy override (Phase E.5) -->
                     <div class="form-group">
-                        <label class="form-label">Live Preview</label>
+                        <label class="form-label">Live Preview <span style="font-size:11px;color:#9CA3AF;font-weight:400;">— how your ad renders across the 4 publisher doors</span></label>
                         <div class="live-preview">
-                            <div class="live-preview-header">How your ad will appear on publisher sites</div>
-                            <div class="lp-card" id="livePreview">
-                                <div class="lp-label">
-                                    <span class="lp-bb">BB</span>
-                                    Sponsored · via Boost Boss
-                                </div>
-                                <div id="lpMediaSlot"></div>
-                                <div class="lp-title" id="lpTitle">Your headline goes here</div>
-                                <div class="lp-sub" id="lpSub">Your subtext goes here — describe what users get when they click.</div>
-                                <a class="lp-cta" id="lpCta" href="#" onclick="return false;">Learn More →</a>
+                            <div class="live-preview-header">Same creative, four contexts. Click "Edit" to customise copy per door.</div>
+                            <div class="door-preview-grid" id="doorPreviewGrid">
+                                <!-- Each door card is built by renderDoorPreviews() in JS -->
                             </div>
                         </div>
                     </div>
@@ -3064,6 +3225,27 @@
                                 <input type="radio" id="billing-cpv" name="billing_model" value="cpv" required>
                                 <label for="billing-cpv">CPV (Cost Per View)</label>
                             </div>
+                            <div class="radio-option">
+                                <input type="radio" id="billing-cpa" name="billing_model" value="cpa" required>
+                                <label for="billing-cpa">CPA (Cost Per Acquisition)</label>
+                            </div>
+                        </div>
+                        <!-- Conversion event types — only relevant when billing_model=cpa
+                             (or when using target_cpa optimization). Free-form CSV that
+                             becomes campaigns.conversion_event_types[]. Empty = any. -->
+                        <div id="conversionTypesRow" style="margin-top:12px; display:none;">
+                            <label for="conversionEventTypes" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
+                                Conversion event types
+                                <span style="font-weight:400; color:#6B7280;">(comma-separated, e.g. <code>signup, purchase</code>; empty = any)</span>
+                            </label>
+                            <input type="text" id="conversionEventTypes" name="conversion_event_types"
+                                placeholder="signup, purchase, lead"
+                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px;">
+                            <p style="margin:6px 0 0; font-size:12px; color:#6B7280;">
+                                Only conversions whose <code>type</code> matches this list will be charged.
+                                Configure conversion firing in the
+                                <a href="/docs-api-reference#api-conversion" target="_blank" style="color:#2563EB;">conversion beacon docs</a>.
+                            </p>
                         </div>
                     </div>
 
@@ -4330,6 +4512,36 @@
             window.__updateBennaPlan = updateBennaPlan;
         }
 
+        // ───────────── Phase B: conversion event types row ─────────────
+        // Show the "Conversion event types" input only when CPA billing is
+        // selected (or target_cpa optimization, since the dashboard surfaces
+        // a CPA value either way). Empty list always = "any conversion".
+        function initConversionTypesToggle() {
+            const row = document.getElementById('conversionTypesRow');
+            if (!row) return;
+            const billingRadios = document.querySelectorAll('input[name="billing_model"]');
+            const optGoal = document.getElementById('optimizationGoal');
+            function update() {
+                const billing = (document.querySelector('input[name="billing_model"]:checked') || {}).value;
+                const goal = optGoal ? optGoal.value : '';
+                const show = billing === 'cpa' || goal === 'target_cpa' || goal === 'target_roas' || goal === 'max_conversions';
+                row.style.display = show ? '' : 'none';
+            }
+            billingRadios.forEach(r => r.addEventListener('change', update));
+            // Re-evaluate when optimization goal changes (handled via the
+            // tile click → render() above, which mutates optGoal.value).
+            const obs = new MutationObserver(update);
+            if (optGoal) obs.observe(optGoal, { attributes: true, attributeFilter: ['value'] });
+            // Also poll-on-click of any goal tile, since render() sets .value
+            // programmatically (not via attribute) — the MutationObserver
+            // above only catches attribute mutations.
+            document.querySelectorAll('.goal-tile').forEach(t => t.addEventListener('click', () => setTimeout(update, 0)));
+            update();
+        }
+        // Wire it after the form is rendered.
+        if (document.readyState !== 'loading') initConversionTypesToggle();
+        else document.addEventListener('DOMContentLoaded', initConversionTypesToggle);
+
         function updateUploadAreaText(fileName) {
             uploadArea.innerHTML = `
                 <div class="upload-icon">✓</div>
@@ -4339,7 +4551,25 @@
         }
 
         // Create campaign
-        // ── Format cards + Live Preview — updates preview as advertiser types.
+        // ── Format cards + Live Preview — Phase E.5: 4-door grid, per-door overrides.
+        // The four doors map to integration_method values (X-Lumi-Source).
+        // Aspect ratios reflect each door's natural canvas:
+        //   • mcp        → 1:1 square (MCP responses render text-first; image is supplemental thumbnail)
+        //   • js-snippet → 16:9 wide  (web pages, banner-style real estate)
+        //   • npm-sdk    → 9:16 tall  (in-app cards, mobile-shape)
+        //   • rest-api   → 1:1 square (generic JSON consumers; safest default)
+        const DOORS = [
+            { id: 'mcp',        label: 'MCP',        aspect: 'aspect-1x1',   note: 'Square · in-tool card' },
+            { id: 'js-snippet', label: 'JS Snippet', aspect: 'aspect-16x9',  note: 'Wide · website banner' },
+            { id: 'npm-sdk',    label: 'NPM SDK',    aspect: 'aspect-9x16',  note: 'Tall · mobile card'   },
+            { id: 'rest-api',   label: 'REST API',   aspect: 'aspect-1x1',   note: 'Square · JSON consumer'},
+        ];
+
+        // Per-door overrides live in a single object keyed by door id. Empty
+        // string ⇒ inherit from campaign-level copy. We serialise this map
+        // into per_door_creatives on campaign submit.
+        const doorOverrides = { 'mcp': {}, 'js-snippet': {}, 'npm-sdk': {}, 'rest-api': {} };
+
         function initFormatCardsAndLivePreview() {
             const cards = document.querySelectorAll('.format-card');
             const form = campaignForm;
@@ -4352,86 +4582,256 @@
                     radio.checked = true;
                     cards.forEach(c => c.classList.remove('selected'));
                     card.classList.add('selected');
-                    updateLivePreview();
+                    renderDoorPreviews();
                 });
                 radio?.addEventListener('change', () => {
                     if (radio.checked) {
                         cards.forEach(c => c.classList.remove('selected'));
                         card.classList.add('selected');
-                        updateLivePreview();
+                        renderDoorPreviews();
                     }
                 });
             });
 
-            // Any form-field change updates the preview.
+            // Any form-field change refreshes the previews.
             ['headline', 'subtext', 'cta_text', 'cta_url'].forEach((fieldName) => {
                 const input = form.querySelector(`[name="${fieldName}"]`);
-                if (input) input.addEventListener('input', updateLivePreview);
+                if (input) input.addEventListener('input', renderDoorPreviews);
             });
-            // File upload also updates preview (media slot).
+            // File upload also updates previews (image source).
             const fileInput = document.getElementById('fileInput');
-            if (fileInput) fileInput.addEventListener('change', updateLivePreview);
+            if (fileInput) fileInput.addEventListener('change', renderDoorPreviews);
 
-            updateLivePreview();
+            // URL autofill wire-up (Phase E.5).
+            initUrlAutofill();
+
+            renderDoorPreviews();
         }
 
-        // Renders the live preview block to match what publishers would see.
-        // Handles all 3 formats + missing content gracefully (placeholders).
-        function updateLivePreview() {
+        // ── Phase E.5 — URL autofill ─────────────────────────────────────
+        // Server-side fetch + og: parse. No AI. Populates headline/subtext/
+        // cta_url + media preview, then triggers a re-render.
+        function initUrlAutofill() {
+            const input  = document.getElementById('urlAutofillInput');
+            const btn    = document.getElementById('urlAutofillBtn');
+            const status = document.getElementById('urlAutofillStatus');
+            if (!input || !btn) return;
+
+            async function run() {
+                const url = (input.value || '').trim();
+                if (!url) { status.textContent = 'Enter a URL first.'; status.className = 'url-autofill-status error'; return; }
+                if (!/^https:\/\//i.test(url)) { status.textContent = 'URL must use https://'; status.className = 'url-autofill-status error'; return; }
+
+                btn.disabled = true;
+                status.textContent = 'Fetching…';
+                status.className = 'url-autofill-status';
+
+                try {
+                    const r = await fetch(`${API_BASE}/api/campaigns?action=fetch_url_preview`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`,
+                        },
+                        body: JSON.stringify({ url }),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) throw new Error(j.error || 'Fetch failed');
+
+                    // Autofill the form. Don't clobber fields the user already
+                    // typed — only fill blanks. Otherwise re-clicking Fetch
+                    // would wipe out their edits.
+                    const headlineEl = campaignForm.querySelector('[name="headline"]');
+                    const subtextEl  = campaignForm.querySelector('[name="subtext"]');
+                    const ctaUrlEl   = campaignForm.querySelector('[name="cta_url"]');
+                    const adomainEl  = campaignForm.querySelector('[name="adomain"]');
+                    const nameEl     = campaignForm.querySelector('[name="name"]');
+                    if (headlineEl && !headlineEl.value) headlineEl.value = j.headline || '';
+                    if (subtextEl  && !subtextEl.value)  subtextEl.value  = j.subtext  || '';
+                    if (ctaUrlEl   && !ctaUrlEl.value)   ctaUrlEl.value   = j.url      || url;
+                    if (nameEl     && !nameEl.value)     nameEl.value     = (j.site_name || j.headline || '').slice(0, 40);
+                    if (adomainEl  && !adomainEl.value) {
+                        try { adomainEl.value = new URL(j.url || url).hostname.replace(/^www\./, ''); } catch (_) {}
+                    }
+                    // Stash media_url on the form's dataset — the preview reads
+                    // from this when no file is uploaded, and the create-campaign
+                    // submit handler uses it as the fallback media_url.
+                    if (j.media_url) campaignForm.dataset.fetchedMediaUrl = j.media_url;
+
+                    const found = Object.values(j.found || {}).filter(Boolean).length;
+                    status.textContent = found > 0
+                        ? `Found ${found} field${found === 1 ? '' : 's'} from the page · feel free to edit.`
+                        : 'No og:/meta tags found — fill the fields manually.';
+                    status.className = found > 0 ? 'url-autofill-status ok' : 'url-autofill-status';
+
+                    renderDoorPreviews();
+                } catch (e) {
+                    status.textContent = 'Failed: ' + (e.message || 'fetch error');
+                    status.className = 'url-autofill-status error';
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+            btn.addEventListener('click', run);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); run(); } });
+        }
+
+        // Read the "campaign-level" copy state into a single object the
+        // door renderer can override on a per-door basis.
+        function readCampaignCreativeState() {
             const form = campaignForm;
-            if (!form) return;
-            const data = new FormData(form);
-            const format = data.get('format') || 'image';
-            const headline = (data.get('headline') || '').toString().trim();
-            const subtext = (data.get('subtext') || '').toString().trim();
-            const ctaLabel = (data.get('cta_text') || '').toString().trim();
-
-            document.getElementById('lpTitle').textContent = headline || 'Your headline goes here';
-            document.getElementById('lpSub').textContent = subtext || 'Your subtext goes here — describe what users get when they click.';
-            document.getElementById('lpSub').style.display = (format === 'native' || subtext) ? '' : 'none';
-            document.getElementById('lpCta').textContent = (ctaLabel || 'Learn More') + ' →';
-
-            const mediaSlot = document.getElementById('lpMediaSlot');
+            const data = form ? new FormData(form) : new FormData();
+            const format = (data.get('format') || 'image').toString();
             const fileInput = document.getElementById('fileInput');
             const file = fileInput?.files?.[0];
-
-            mediaSlot.innerHTML = '';
-            if (format === 'image') {
-                if (file && file.type.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.className = 'lp-media';
-                    img.src = URL.createObjectURL(file);
-                    img.alt = '';
-                    mediaSlot.appendChild(img);
-                } else {
-                    mediaSlot.innerHTML = '<div class="lp-media-placeholder">Upload an image to see it here</div>';
-                }
-            } else if (format === 'video') {
-                const wrap = document.createElement('div');
-                wrap.style.position = 'relative';
-                wrap.style.marginBottom = '10px';
-                if (file && file.type.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.className = 'lp-media';
-                    video.src = URL.createObjectURL(file);
-                    video.muted = true;
-                    video.playsInline = true;
-                    wrap.appendChild(video);
-                } else {
-                    const ph = document.createElement('div');
-                    ph.className = 'lp-media-placeholder';
-                    ph.style.height = '150px';
-                    ph.textContent = 'Upload a video to see it here';
-                    wrap.appendChild(ph);
-                }
-                const play = document.createElement('div');
-                play.className = 'lp-video-play';
-                play.textContent = '▶';
-                wrap.appendChild(play);
-                mediaSlot.appendChild(wrap);
-            }
-            // native: no media slot content
+            // Local blob URL when the user just uploaded a file; fall back to
+            // the URL we got from fetch_url_preview; finally fall back to a
+            // visible placeholder so the preview never looks broken.
+            let media = '';
+            if (file && file.type.startsWith('image/')) media = URL.createObjectURL(file);
+            else if (form?.dataset?.fetchedMediaUrl)     media = form.dataset.fetchedMediaUrl;
+            return {
+                format,
+                headline: (data.get('headline') || '').toString().trim(),
+                subtext:  (data.get('subtext')  || '').toString().trim(),
+                cta_label:(data.get('cta_text') || '').toString().trim() || 'Learn More',
+                cta_url:  (data.get('cta_url')  || '').toString().trim(),
+                media_url: media,
+            };
         }
+
+        // Merge campaign-level state with the per-door override. Empty
+        // override fields fall through to campaign-level.
+        function effectiveCreativeForDoor(doorId, base) {
+            const o = doorOverrides[doorId] || {};
+            return {
+                headline:  o.headline  || base.headline,
+                subtext:   o.subtext   || base.subtext,
+                cta_label: o.cta_label || base.cta_label,
+                cta_url:   o.cta_url   || base.cta_url,
+                media_url: o.media_url || base.media_url,
+            };
+        }
+
+        function doorHasOverride(doorId) {
+            const o = doorOverrides[doorId] || {};
+            return ['headline','subtext','cta_label','cta_url','media_url'].some((k) => o[k]);
+        }
+
+        function escapeHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, (ch) => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[ch]));
+        }
+
+        // Render all four door preview cards. Each card includes a small
+        // "Edit" button that toggles an inline override form.
+        function renderDoorPreviews() {
+            const grid = document.getElementById('doorPreviewGrid');
+            if (!grid) return;
+            const base = readCampaignCreativeState();
+
+            grid.innerHTML = DOORS.map((door) => {
+                const c = effectiveCreativeForDoor(door.id, base);
+                const edited = doorHasOverride(door.id);
+                const o = doorOverrides[door.id] || {};
+                const ph = 'https://placehold.co/600x600/F3F4F6/9CA3AF?text=' + encodeURIComponent('Upload an image or paste a URL above');
+                const mediaSrc = c.media_url || ph;
+                const headline  = escapeHtml(c.headline  || 'Your headline goes here');
+                const subtext   = escapeHtml(c.subtext   || 'Describe what users get when they click.');
+                const ctaLabel  = escapeHtml(c.cta_label || 'Learn More');
+                return `
+                    <div class="door-card" data-door="${door.id}">
+                        <div class="door-card-head">
+                            <span>${escapeHtml(door.label)} <span class="door-badge ${edited ? 'edited' : ''}">${edited ? 'Edited' : 'Default'}</span></span>
+                            <button type="button" class="door-edit-btn" data-edit="${door.id}">${edited ? 'Edit' : 'Edit'}</button>
+                        </div>
+                        <img class="door-media ${door.aspect}" src="${escapeHtml(mediaSrc)}" alt="" loading="lazy" onerror="this.src='${ph}'">
+                        <div class="door-headline">${headline}</div>
+                        <div class="door-subtext">${subtext}</div>
+                        <a class="door-cta" href="#" onclick="return false;">${ctaLabel} →</a>
+                        <div style="font-size:10px;color:#9CA3AF;margin-top:auto;">${escapeHtml(door.note)}</div>
+                        <div class="door-override ${edited ? 'open' : ''}" data-override="${door.id}">
+                            <div class="door-override-label">Override copy for ${escapeHtml(door.label)}</div>
+                            <input type="text" data-field="headline"  placeholder="Headline (leave blank to inherit)"  value="${escapeHtml(o.headline  || '')}" maxlength="90">
+                            <textarea     data-field="subtext"   placeholder="Subtext (leave blank to inherit)"   maxlength="160">${escapeHtml(o.subtext || '')}</textarea>
+                            <input type="text" data-field="cta_label" placeholder="CTA label (leave blank to inherit)" value="${escapeHtml(o.cta_label || '')}" maxlength="32">
+                            <input type="url"  data-field="cta_url"   placeholder="CTA URL (leave blank to inherit)"   value="${escapeHtml(o.cta_url   || '')}">
+                            <input type="url"  data-field="media_url" placeholder="Media URL (leave blank to inherit)" value="${escapeHtml(o.media_url || '')}">
+                            <button type="button" class="door-override-reset" data-reset="${door.id}">Clear overrides</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Wire up per-card events. We re-query after the innerHTML reset.
+            grid.querySelectorAll('[data-edit]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const doorId = btn.getAttribute('data-edit');
+                    const panel = grid.querySelector(`[data-override="${doorId}"]`);
+                    if (panel) panel.classList.toggle('open');
+                });
+            });
+            grid.querySelectorAll('[data-override] input, [data-override] textarea').forEach((inp) => {
+                inp.addEventListener('input', () => {
+                    const doorId = inp.closest('[data-override]').getAttribute('data-override');
+                    const field  = inp.getAttribute('data-field');
+                    const v = (inp.value || '').trim();
+                    if (v) doorOverrides[doorId][field] = v;
+                    else   delete doorOverrides[doorId][field];
+                    // Re-render only the affected card body to avoid blowing away focus.
+                    updateDoorCard(doorId);
+                });
+            });
+            grid.querySelectorAll('[data-reset]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const doorId = btn.getAttribute('data-reset');
+                    doorOverrides[doorId] = {};
+                    renderDoorPreviews(); // full re-render acceptable on reset
+                });
+            });
+        }
+
+        // Update only the visible head + body of one door card, preserving
+        // focus inside the override panel. Avoids the full innerHTML
+        // re-render that would blur whatever the user is typing into.
+        function updateDoorCard(doorId) {
+            const grid = document.getElementById('doorPreviewGrid');
+            if (!grid) return;
+            const card = grid.querySelector(`[data-door="${doorId}"]`);
+            if (!card) return;
+            const base = readCampaignCreativeState();
+            const c = effectiveCreativeForDoor(doorId, base);
+            const edited = doorHasOverride(doorId);
+            const headline = card.querySelector('.door-headline');
+            const subtext  = card.querySelector('.door-subtext');
+            const cta      = card.querySelector('.door-cta');
+            const img      = card.querySelector('.door-media');
+            const badge    = card.querySelector('.door-badge');
+            const ph = 'https://placehold.co/600x600/F3F4F6/9CA3AF?text=' + encodeURIComponent('Upload an image or paste a URL above');
+            if (headline) headline.textContent = c.headline  || 'Your headline goes here';
+            if (subtext)  subtext.textContent  = c.subtext   || 'Describe what users get when they click.';
+            if (cta)      cta.textContent      = (c.cta_label || 'Learn More') + ' →';
+            if (img)      img.src              = c.media_url || ph;
+            if (badge) {
+                badge.textContent = edited ? 'Edited' : 'Default';
+                badge.classList.toggle('edited', edited);
+            }
+        }
+
+        // Build the per_door_creatives payload submitted to the backend.
+        // Only doors with at least one non-empty override get a row;
+        // backend writes the 'default' row from campaign-level fields.
+        function buildPerDoorCreativesPayload() {
+            const out = {};
+            for (const d of DOORS) {
+                if (doorHasOverride(d.id)) out[d.id] = { ...doorOverrides[d.id] };
+            }
+            return out;
+        }
+        // Expose for handleCreateCampaign.
+        window.__buildPerDoorCreatives = buildPerDoorCreativesPayload;
 
         async function handleCreateCampaign(e) {
             e.preventDefault();
@@ -4439,9 +4839,12 @@
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const formData = new FormData(campaignForm);
 
-            // Build media_url — placeholder for demo; production would upload to CDN
+            // Build media_url — Phase E.5: prefer uploaded file, then URL-autofill og:image,
+            // finally placeholder. Production would upload to CDN.
             const uploadedFile = fileInput.files && fileInput.files[0];
-            let mediaUrl = 'https://placehold.co/540x304/1a1a2e/ffffff?text=' + encodeURIComponent(formData.get('name') || 'Ad');
+            const fetchedMediaUrl = campaignForm.dataset.fetchedMediaUrl || '';
+            let mediaUrl = fetchedMediaUrl
+                || 'https://placehold.co/540x304/1a1a2e/ffffff?text=' + encodeURIComponent(formData.get('name') || 'Ad');
             if (uploadedFile) {
                 // Convert to base64 data URL so it persists (blob URLs expire)
                 try {
@@ -4452,7 +4855,7 @@
                         reader.readAsDataURL(uploadedFile);
                     });
                 } catch (_) {
-                    // Fall back to placeholder
+                    // Fall back to whatever mediaUrl was already set above
                 }
             }
 
@@ -4494,6 +4897,18 @@
                 target_surfaces: getSelectedSurfaces(),
                 // Per-door opt-in (migration 09). Empty array = all four doors.
                 target_integration_methods: getSelectedIntegrationMethods(),
+                // Conversion event allowlist (migration 11 / Phase B). Comma-
+                // separated text input → trimmed array. Empty = any conversion counts.
+                conversion_event_types: (function () {
+                    const raw = formData.get('conversion_event_types') || '';
+                    return String(raw).split(',').map(s => s.trim()).filter(Boolean);
+                })(),
+                // Phase E.5 — per-door creative overrides. Empty object = no
+                // overrides; backend still writes the 'default' row mirroring
+                // campaign-level copy so the auction read path is uniform.
+                per_door_creatives: typeof window.__buildPerDoorCreatives === 'function'
+                    ? window.__buildPerDoorCreatives()
+                    : {},
             };
 
             try {
@@ -4697,8 +5112,14 @@
                 if (form.querySelector('[name="bid_amount"]')) form.querySelector('[name="bid_amount"]').value = c.bid_amount || '';
                 if (form.querySelector('[name="billing_model"]')) {
                     const radio = form.querySelector(`[name="billing_model"][value="${c.billing_model || 'cpm'}"]`);
-                    if (radio) radio.checked = true;
+                    if (radio) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
                 }
+                // Restore conversion event types CSV when editing.
+                const cvEl = form.querySelector('[name="conversion_event_types"]');
+                if (cvEl) cvEl.value = (c.conversion_event_types || []).join(', ');
 
                 // Populate intent chips. Prefer target_intent_tokens (BBX
                 // canonical column); fall back to target_keywords for

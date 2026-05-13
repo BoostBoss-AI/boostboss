@@ -21,7 +21,17 @@
  * Protocol §9 pricing lives in scorePrice() further down.
  */
 
-const MODEL_VERSION = "benna-rc4-2026.05.01";
+const MODEL_VERSION = "benna-rc5-2026.05.11";
+
+// Phase C (2026-05-11) — closed-loop learning constants.
+// When a campaign has accumulated enough impressions to be "warm" (gate
+// enforced by api/_lib/campaign_history.js), Benna multiplies its raw
+// targeting-overlap score by a modifier derived from observed CTR. New
+// campaigns stay in a deterministic learning phase until they cross the
+// warm threshold. The clamp keeps a single outlier from blowing the bid.
+const LEARNING_BASELINE_CTR    = 0.02;   // what we treat as "average" CTR
+const LEARNING_MODIFIER_FLOOR  = 0.5;    // worst case: half the cold score
+const LEARNING_MODIFIER_CEIL   = 2.0;    // best case: 2× the cold score
 
 // Per-signal weights for scoreBid. These determine how much each targeting
 // dimension contributes to the predicted p_click. Sum is ~1.0 by design so
@@ -113,8 +123,47 @@ function fmtMatched(prefix, matched) {
   return matched.length > 3 ? `${prefix}: ${head},+${matched.length - 3}` : `${prefix}: ${head}`;
 }
 
+// ── Phase C: derive a learning modifier from observed campaign history ─
+// Returns { modifier, label, note } — modifier ∈ [LEARNING_MODIFIER_FLOOR,
+// LEARNING_MODIFIER_CEIL]. Cold campaigns get modifier=1.0 and label set
+// to "learning" so the contribution row shows the cold-start state instead
+// of a false zero. The whole feature can be disabled by passing
+// history=null (default) so existing callers and unit tests are unaffected.
+function learningModifier(history) {
+  if (!history) {
+    return { modifier: 1.0, label: null, note: null };
+  }
+  if (!history.isWarm) {
+    return {
+      modifier: 1.0,
+      label: "learning_phase",
+      note: `cold (${history.impressions || 0} imps; need ≥${MIN_WARM_IMPRESSIONS})`,
+    };
+  }
+  const ctr = Number.isFinite(history.ctr) ? history.ctr : 0;
+  const raw = ctr / LEARNING_BASELINE_CTR;
+  const modifier = Math.min(
+    LEARNING_MODIFIER_CEIL,
+    Math.max(LEARNING_MODIFIER_FLOOR, raw),
+  );
+  return {
+    modifier: +modifier.toFixed(4),
+    label: "observed_ctr",
+    note:  `ctr_7d=${(ctr * 100).toFixed(2)}% over ${history.impressions} imps`,
+  };
+}
+
+// Re-imported here so it lives next to its only consumer.
+const { MIN_WARM_IMPRESSIONS } = require("./_lib/campaign_history.js");
+
 // ─── core inference: targeting-overlap score ───
-function scoreBid(context = {}, campaign = {}) {
+//
+// Phase C (2026-05-11): scoreBid accepts an optional `history` argument.
+// When the campaign has accumulated enough impressions to be warm, observed
+// CTR shifts p_click via learningModifier(). Cold campaigns and callers
+// that pass no history keep the deterministic-overlap behaviour exactly
+// as it was before — tests and demo mode are unaffected.
+function scoreBid(context = {}, campaign = {}, history = null) {
   const ctx = normalizeContext(context);
   const rnd = seeded(
     hash(JSON.stringify(context) + (campaign.target_cpa || campaign.bid_amount || "") + currentBucketSeed())
@@ -208,7 +257,21 @@ function scoreBid(context = {}, campaign = {}) {
   // of 12% (saturation cap). signalScore ∈ [0, ~1.0] when fully aligned.
   const P_CLICK_FLOOR = 0.01;
   const P_CLICK_CEIL  = 0.12;
-  const p_click = Math.min(P_CLICK_CEIL, P_CLICK_FLOOR + signalScore * (P_CLICK_CEIL - P_CLICK_FLOOR));
+  const p_click_raw = Math.min(P_CLICK_CEIL, P_CLICK_FLOOR + signalScore * (P_CLICK_CEIL - P_CLICK_FLOOR));
+
+  // Phase C — closed-loop modifier. Warm campaigns nudge p_click up/down
+  // based on observed 7-day CTR. Clamped to [floor, ceil] so a single
+  // outlier can't blow the bid. Surfaced in signal_contributions so the
+  // dashboard's "why did this win" panel exposes the learning signal.
+  const lm = learningModifier(history);
+  const p_click = Math.min(P_CLICK_CEIL, p_click_raw * lm.modifier);
+  if (lm.label) {
+    contributions.push({
+      signal: `${lm.label}${lm.note ? " (" + lm.note + ")" : ""}`,
+      weight: 0,
+      lift:   +((lm.modifier - 1) * 100).toFixed(1),
+    });
+  }
 
   const p_convert = p_click * (0.18 + rnd() * 0.15);
 
@@ -225,6 +288,18 @@ function scoreBid(context = {}, campaign = {}) {
     signal_contributions: contributions.sort((a, b) => b.lift - a.lift),
     latency_ms: +(3.4 + rnd() * 1.8).toFixed(1),
     model_version: MODEL_VERSION,
+    // Phase C — surface the learning state on the result so callers can
+    // log it to auction_logs without re-deriving it. null when no history
+    // was supplied (legacy callers, unit tests).
+    learning: history
+      ? {
+          phase: history.isWarm ? "warm" : "learning",
+          modifier: lm.modifier,
+          impressions_7d: history.impressions,
+          ctr_7d: history.ctr,
+          cvr_7d: history.cvr,
+        }
+      : null,
   };
 }
 
@@ -375,9 +450,26 @@ function scorePrice(req) {
   const placement = req.placement || {};
   const context   = req.context   || {};
   const campaign  = req.campaign  || {};
+  // Phase C — optional campaign history used to substitute observed CTR
+  // for the placement's static baseline_ctr when the campaign is warm.
+  const history   = req.history || null;
 
   const advertiser_bid_cpm = Number(campaign.bid_amount) || 0;
-  const baseline_ctr       = Number(placement.baseline_ctr) || 1.0;
+  const placement_baseline_ctr = Number(placement.baseline_ctr) || 1.0;
+  // When warm, observed CTR replaces the placement default. We normalize
+  // observed CTR against the LEARNING_BASELINE_CTR (2%) so the scale
+  // continues to play nicely with intent_match (~0.2–1.5) and the geo/
+  // format multipliers. Cold campaigns keep the placement default.
+  let baseline_ctr = placement_baseline_ctr;
+  let baseline_source = "placement_default";
+  if (history && history.isWarm && Number.isFinite(history.ctr)) {
+    const observedFactor = Math.min(
+      LEARNING_MODIFIER_CEIL,
+      Math.max(LEARNING_MODIFIER_FLOOR, history.ctr / LEARNING_BASELINE_CTR),
+    );
+    baseline_ctr = +(placement_baseline_ctr * observedFactor).toFixed(4);
+    baseline_source = "observed_ctr_7d";
+  }
   const geo_mult           = geoMultiplier(context.country);
   const format_mult        = formatMultiplier(
     campaign.format || placement.format,
@@ -416,11 +508,21 @@ function scorePrice(req) {
     factors: {
       advertiser_bid_cpm: +advertiser_bid_cpm.toFixed(4),
       baseline_ctr:       +baseline_ctr.toFixed(4),
+      baseline_source,                       // "placement_default" | "observed_ctr_7d"
       geo_multiplier:     +geo_mult.toFixed(4),
       format_multiplier:  +format_mult.toFixed(4),
       intent_match_score: intent_match,
       safety_multiplier:  safety_mult,
       floor_cpm:          +floor_cpm.toFixed(4),
+      // Phase C — null when no history was supplied
+      learning: history
+        ? {
+            phase: history.isWarm ? "warm" : "learning",
+            impressions_7d: history.impressions,
+            ctr_7d: history.ctr,
+            cvr_7d: history.cvr,
+          }
+        : null,
     },
     latency_ms: +latency_ms.toFixed(2),
     model_version: MODEL_VERSION,

@@ -154,6 +154,24 @@ Content-Type: application/json
     <h2 id="click-tracking">Click tracking</h2>
     <p>The <code>click_url</code> we return is already a tracking redirect — link your CTA button to it directly. Don't substitute the underlying advertiser URL; that bypasses tracking and breaks revenue attribution.</p>
 
+    <h2 id="conversion-tracking">Conversion tracking</h2>
+    <p>Fire a conversion when the user takes the action your ad campaign was bidding on (signup, purchase, lead, tool invoke). Conversions tie back to the original auction via <code>auction_id</code>, so attribution and CPA billing work end-to-end.</p>
+    <pre>POST https://boostboss.ai/api/track
+Content-Type: application/json
+X-Lumi-Source: rest-api
+
+{
+  <span class="str">"event"</span>:           <span class="str">"conversion"</span>,
+  <span class="str">"campaign_id"</span>:     <span class="str">"camp_..."</span>,         <span class="cm">// from the original ad payload</span>
+  <span class="str">"auction_id"</span>:      <span class="str">"auc_..."</span>,          <span class="cm">// from the original ad payload</span>
+  <span class="str">"conversion_type"</span>: <span class="str">"signup"</span>,           <span class="cm">// matches campaigns.conversion_event_types</span>
+  <span class="str">"value"</span>:           29.99,                <span class="cm">// USD; required for ROAS optimization</span>
+  <span class="str">"currency"</span>:        <span class="str">"USD"</span>,             <span class="cm">// optional; ISO 4217</span>
+  <span class="str">"external_id"</span>:     <span class="str">"order_98123"</span>      <span class="cm">// optional — your order/user id</span>
+}</pre>
+    <p>Returns <code>{ "tracked": true, "event": "conversion", ... }</code>. Conversions are deduplicated per <code>(auction_id, "conversion")</code> tuple — retries are safe.</p>
+    <p>If your conversion happens on a different page from the impression (typical web flow), the standalone <a href="/pixel.js"><code>pixel.js</code></a> snippet auto-reads <code>bbx_auc</code> from the click-through URL — much less plumbing than POSTing yourself. See <a href="/docs-api-reference#api-conversion">the conversion beacon doc</a>.</p>
+
     <h2 id="rate-limits">Rate limits</h2>
     <p>1,000 requests/minute per publisher. Burst capacity above the steady rate is allowed for short windows. Email <code>hello@boostboss.ai</code> if you're approaching the cap and need it raised.</p>
 

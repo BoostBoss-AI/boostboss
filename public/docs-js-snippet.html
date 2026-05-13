@@ -138,6 +138,20 @@ router.<span class="fn">on</span>(<span class="str">'navigated'</span>, () =&gt;
 <pre><span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">'late-bound-slot'</span>);
 <span class="fn">Lumi.render</span>(el, { format: <span class="str">'inline'</span>, context: <span class="str">'pricing page'</span> });</pre>
 
+    <h2 id="conversion-tracking">Conversion tracking</h2>
+    <p>For conventional advertiser-side conversions (the user clicks an ad, lands on a separate thank-you page, fires the conversion there) advertisers should install <a href="/pixel.js"><code>pixel.js</code></a> on their landing/thank-you page — see the <a href="/docs-api-reference#api-conversion">conversion beacon docs</a>.</p>
+    <p>For <strong>publisher-side</strong> conversions — when the user converts inside the same surface that hosted the ad (in-app signup, in-page checkout) — call <code>Lumi.trackConversion()</code>:</p>
+<pre><span class="cm">// After the user signs up / completes the action your ad promoted:</span>
+<span class="fn">Lumi.trackConversion</span>({
+  type:       <span class="str">'signup'</span>,           <span class="cm">// matches campaigns.conversion_event_types</span>
+  value:      29.99,              <span class="cm">// USD; required for ROAS / target_roas optimization</span>
+  currency:   <span class="str">'USD'</span>,             <span class="cm">// optional; defaults to 'USD'</span>
+  externalId: <span class="str">'order_98123'</span>,     <span class="cm">// optional — your order/user id for reconciliation</span>
+});</pre>
+    <p>Lumi auto-resolves the <code>adId</code> + <code>auctionId</code> from the most recent slot it rendered. To target a specific slot when multiple ads are on screen, pass <code>slot</code>:</p>
+<pre><span class="fn">Lumi.trackConversion</span>({ type: <span class="str">'purchase'</span>, slot: <span class="str">'#sidebar-ad'</span>, value: 49.0 });</pre>
+    <p>Failures emit a <code>lumi:error</code> event and are surfaced via the silent-failure observability endpoint.</p>
+
     <h2 id="event-handling">Event handling</h2>
     <p>Lumi dispatches DOM events on <code>window</code>. Listen for any of:</p>
 <pre>window.<span class="fn">addEventListener</span>(<span class="str">'lumi:ready'</span>, () =&gt; { <span class="cm">/* SDK loaded */</span> });
