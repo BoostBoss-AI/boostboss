@@ -94,6 +94,60 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 400);
   });
 
+  // ── money_flow (Phase H Panel 2) ────────────────────────────────────
+  await test("money_flow returns 200 with full shape in demo mode", async () => {
+    const r = await run({ method: "GET", query: { type: "money_flow" } });
+    assert.strictEqual(r._status, 200);
+    const b = r._body;
+    assert.strictEqual(b.mode, "production");
+    assert(b.windows, "should include windows");
+    assert(b.windows["24h"], "should include 24h window");
+    assert(b.windows["7d"],  "should include 7d window");
+    assert(b.windows["30d"], "should include 30d window");
+    assert.strictEqual(typeof b.windows["24h"].advertiser_spend, "number");
+    assert.strictEqual(typeof b.windows["24h"].bb_revenue, "number");
+    assert.strictEqual(typeof b.windows["24h"].publisher_accrued, "number");
+    assert.strictEqual(typeof b.windows["24h"].payouts_paid, "number");
+    assert(Array.isArray(b.top_advertisers_by_spend_24h));
+    assert(Array.isArray(b.top_publishers_by_balance));
+    assert(b.eligible_for_next_payout, "should include eligible_for_next_payout");
+  });
+
+  await test("money_flow respects mode=sandbox", async () => {
+    const r = await run({ method: "GET", query: { type: "money_flow", mode: "sandbox" } });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.mode, "sandbox");
+  });
+
+  await test("money_flow demo returns zeroed but well-shaped windows", async () => {
+    const r = await run({ method: "GET", query: { type: "money_flow" } });
+    const b = r._body;
+    assert.strictEqual(b.windows["24h"].advertiser_spend, 0);
+    assert.strictEqual(b.windows["7d"].advertiser_spend,  0);
+    assert.strictEqual(b.windows["30d"].advertiser_spend, 0);
+    assert.strictEqual(b.advertiser_deposits_24h, 0);
+    assert.strictEqual(b.pending_clawbacks_total, 0);
+    assert.strictEqual(b.eligible_for_next_payout.count, 0);
+  });
+
+  // ── auction_inspect (Phase H Panel 3) ───────────────────────────────
+  await test("auction_inspect list returns 200 with empty list in demo mode", async () => {
+    const r = await run({ method: "GET", query: { type: "auction_inspect" } });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.count, 0);
+    assert(Array.isArray(r._body.logs));
+  });
+
+  await test("auction_inspect detail returns 404 for unknown id in demo mode", async () => {
+    const r = await run({ method: "GET", query: { type: "auction_inspect", id: "no-such-id" } });
+    assert.strictEqual(r._status, 404);
+  });
+
+  await test("auction_inspect rejects non-GET", async () => {
+    const r = await run({ method: "POST", query: { type: "auction_inspect" } });
+    assert.strictEqual(r._status, 400);
+  });
+
   // ── Summary ─────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

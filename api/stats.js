@@ -151,6 +151,23 @@ module.exports = async function handler(req, res) {
       return await handleLiveActivity(req, res);
     }
 
+    // ── Money Flow (Phase H Panel 2 — full financial picture) ──
+    // Multi-window financial dashboard: advertiser deposits, spend, BB
+    // take, publisher accrual, payouts paid, pending clawbacks, balance
+    // health, eligible-for-next-payout. Admin-gated.
+    if (type === "money_flow" && req.method === "GET") {
+      return await handleMoneyFlow(req, res);
+    }
+
+    // ── Auction Inspector (Phase H Panel 3 — per-auction replay) ──
+    // Two modes:
+    //   list:   ?type=auction_inspect&limit=N&outcome=X&publisher_id=Y
+    //   detail: ?type=auction_inspect&id=AUCTION_ID
+    // Admin-gated. Reads auction_logs (db/08_auction_logs.sql).
+    if (type === "auction_inspect" && req.method === "GET") {
+      return await handleAuctionInspect(req, res);
+    }
+
     return res.status(400).json({ error: "Missing type (advertiser|developer) and id/key params" });
 
   } catch (err) {
@@ -1581,6 +1598,426 @@ async function handleLiveActivity(req, res) {
   });
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// Phase H Panel 2 — Money Flow
+// ═══════════════════════════════════════════════════════════════════════
+// Full financial picture in one round-trip. Where Panel 1 answers
+// "is the machine healthy?", Panel 2 answers "is the money moving
+// correctly?" — across three time windows (24h / 7d / 30d) so the
+// operator can spot trends, not just instantaneous state.
+//
+// Shape:
+//   {
+//     mode, generated_at,
+//     windows: {
+//       "24h": { advertiser_spend, bb_revenue, publisher_accrued, payouts_paid },
+//       "7d":  { ... },
+//       "30d": { ... },
+//     },
+//     advertiser_deposits_24h, advertiser_deposits_7d, advertiser_deposits_30d,
+//     top_advertisers_by_spend_24h: [{ id, company_name, email, spend }],
+//     top_publishers_by_balance:    [{ developer_id, email, balance, lifetime_earned, lifetime_paid }],
+//     pending_clawbacks_total,
+//     payout_health: { ...payout_cron_health from recon },
+//     balance_drift: { checked, drifted, sample[] },          // from recon
+//     eligible_for_next_payout: { count, total_usd_ready },
+//     stripe_balance_available_usd,                            // for "can cron pay?" check
+//   }
+
+async function handleMoneyFlow(req, res) {
+  if (!_liveActivityAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const mode = (req.query && req.query.mode === "sandbox") ? "sandbox" : "production";
+  const isSandbox = mode === "sandbox";
+
+  const sb = supa();
+  if (!sb) {
+    return res.status(200).json({
+      mode, demo: true, generated_at: new Date().toISOString(),
+      windows: {
+        "24h": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
+        "7d":  { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
+        "30d": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
+      },
+      advertiser_deposits_24h: 0, advertiser_deposits_7d: 0, advertiser_deposits_30d: 0,
+      top_advertisers_by_spend_24h: [],
+      top_publishers_by_balance: [],
+      pending_clawbacks_total: 0,
+      payout_health: null,
+      balance_drift: { checked: 0, drifted: 0, sample: [] },
+      eligible_for_next_payout: { count: 0, total_usd_ready: 0 },
+      stripe_balance_available_usd: null,
+    });
+  }
+
+  const now = Date.now();
+  const since24h = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const since7d  = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const since30d = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Paged read of events.cost + developer_payout for one time window.
+  async function sumEvents(sinceIso) {
+    let spend = 0, accrued = 0, rows = 0;
+    const PAGE = 1000;
+    let offset = 0;
+    for (let i = 0; i < 60; i++) { // hard cap at 60k events / call
+      const { data, error } = await sb.from("events")
+        .select("cost, developer_payout")
+        .eq("is_sandbox", isSandbox).gte("created_at", sinceIso)
+        .range(offset, offset + PAGE - 1);
+      if (error || !data || data.length === 0) break;
+      for (const e of data) {
+        spend  += Number(e.cost) || 0;
+        accrued += Number(e.developer_payout) || 0;
+      }
+      rows += data.length;
+      if (data.length < PAGE) break;
+      offset += PAGE;
+    }
+    return { spend: +spend.toFixed(4), accrued: +accrued.toFixed(4), rows };
+  }
+  async function sumPayouts(sinceIso) {
+    let paid = 0;
+    const { data } = await sb.from("payouts")
+      .select("amount, status, completed_at, created_at")
+      .eq("status", "paid")
+      .gte("completed_at", sinceIso);
+    for (const p of (data || [])) paid += Number(p.amount) || 0;
+    return +paid.toFixed(2);
+  }
+  async function sumDeposits(sinceIso) {
+    // Advertiser deposits come from transactions table where type=deposit.
+    const { data } = await sb.from("transactions")
+      .select("amount, type, status, created_at")
+      .eq("type", "deposit").eq("status", "completed")
+      .gte("created_at", sinceIso);
+    let dep = 0;
+    for (const t of (data || [])) dep += Number(t.amount) || 0;
+    return +dep.toFixed(2);
+  }
+
+  const [w24, w7, w30, p24, p7, p30, d24, d7, d30] = await Promise.all([
+    sumEvents(since24h).catch(() => ({ spend: 0, accrued: 0 })),
+    sumEvents(since7d ).catch(() => ({ spend: 0, accrued: 0 })),
+    sumEvents(since30d).catch(() => ({ spend: 0, accrued: 0 })),
+    sumPayouts(since24h).catch(() => 0),
+    sumPayouts(since7d ).catch(() => 0),
+    sumPayouts(since30d).catch(() => 0),
+    sumDeposits(since24h).catch(() => 0),
+    sumDeposits(since7d ).catch(() => 0),
+    sumDeposits(since30d).catch(() => 0),
+  ]);
+
+  const windowsOut = {
+    "24h": { advertiser_spend: w24.spend, bb_revenue: +(w24.spend - w24.accrued).toFixed(4), publisher_accrued: w24.accrued, payouts_paid: p24 },
+    "7d":  { advertiser_spend: w7.spend,  bb_revenue: +(w7.spend  - w7.accrued ).toFixed(4), publisher_accrued: w7.accrued,  payouts_paid: p7  },
+    "30d": { advertiser_spend: w30.spend, bb_revenue: +(w30.spend - w30.accrued).toFixed(4), publisher_accrued: w30.accrued, payouts_paid: p30 },
+  };
+
+  // Top advertisers by 24h spend.
+  async function loadTopAdvertisersBySpend() {
+    const { data: campaigns } = await sb.from("campaigns").select("id, advertiser_id");
+    const campToAdv = new Map((campaigns || []).map((c) => [c.id, c.advertiser_id]));
+    // Aggregate events.cost by advertiser_id over 24h.
+    const PAGE = 1000;
+    let offset = 0;
+    const totals = new Map(); // advertiser_id → spend
+    for (let i = 0; i < 60; i++) {
+      const { data, error } = await sb.from("events")
+        .select("campaign_id, cost").eq("is_sandbox", isSandbox).gte("created_at", since24h)
+        .not("campaign_id", "is", null)
+        .range(offset, offset + PAGE - 1);
+      if (error || !data || data.length === 0) break;
+      for (const e of data) {
+        const adv = campToAdv.get(e.campaign_id);
+        if (!adv) continue;
+        totals.set(adv, (totals.get(adv) || 0) + (Number(e.cost) || 0));
+      }
+      if (data.length < PAGE) break;
+      offset += PAGE;
+    }
+    const top = [...totals.entries()]
+      .map(([id, spend]) => ({ id, spend: +spend.toFixed(4) }))
+      .sort((a, b) => b.spend - a.spend).slice(0, 5);
+    if (top.length === 0) return [];
+    const { data: advs } = await sb.from("advertisers")
+      .select("id, email, company_name, balance")
+      .in("id", top.map((t) => t.id));
+    const byId = new Map((advs || []).map((a) => [a.id, a]));
+    return top.map((t) => ({
+      ...t,
+      email: (byId.get(t.id) || {}).email || null,
+      company_name: (byId.get(t.id) || {}).company_name || null,
+      balance: Number((byId.get(t.id) || {}).balance) || 0,
+    }));
+  }
+
+  // Top publishers by current balance.
+  async function loadTopPublishersByBalance() {
+    const { data: balances } = await sb.from("publisher_balance")
+      .select("developer_id, balance, lifetime_earned, lifetime_paid")
+      .order("balance", { ascending: false }).limit(10);
+    if (!balances || balances.length === 0) return [];
+    const ids = balances.map((b) => b.developer_id);
+    const { data: devs } = await sb.from("developers")
+      .select("id, email, app_name").in("id", ids);
+    const byId = new Map((devs || []).map((d) => [d.id, d]));
+    return balances.map((b) => ({
+      developer_id: b.developer_id,
+      email:        (byId.get(b.developer_id) || {}).email || null,
+      app_name:     (byId.get(b.developer_id) || {}).app_name || null,
+      balance:         +Number(b.balance         || 0).toFixed(2),
+      lifetime_earned: +Number(b.lifetime_earned || 0).toFixed(2),
+      lifetime_paid:   +Number(b.lifetime_paid   || 0).toFixed(2),
+    })).slice(0, 5);
+  }
+
+  // Pending clawbacks total.
+  async function sumPendingClawbacks() {
+    const { data } = await sb.from("payout_clawbacks")
+      .select("remaining_usd").eq("status", "pending");
+    let s = 0;
+    for (const c of (data || [])) s += Number(c.remaining_usd) || 0;
+    return +s.toFixed(2);
+  }
+
+  // Eligible-for-next-payout: developers w/ payouts enabled, not blocked,
+  // stripe account set, balance ≥ $25. Returns {count, total_usd_ready}.
+  async function loadEligibleForNextPayout() {
+    const { data: devs } = await sb.from("developers")
+      .select("id").eq("payouts_enabled", true).eq("payout_blocked", false)
+      .not("stripe_account_id", "is", null);
+    const ids = (devs || []).map((d) => d.id);
+    if (ids.length === 0) return { count: 0, total_usd_ready: 0 };
+    const { data: balances } = await sb.from("publisher_balance")
+      .select("developer_id, balance").in("developer_id", ids).gte("balance", 25);
+    let total = 0;
+    for (const b of (balances || [])) total += Number(b.balance) || 0;
+    return { count: (balances || []).length, total_usd_ready: +total.toFixed(2) };
+  }
+
+  // Stripe available balance (so we can warn the operator if cron would
+  // fail for "insufficient platform balance"). Best-effort; never blocks
+  // the response. Cached for 60s to avoid hammering the Stripe API.
+  let stripeBalanceUsd = null;
+  if (process.env.STRIPE_SECRET_KEY) {
+    try {
+      stripeBalanceUsd = await _cachedStripeBalance(60_000);
+    } catch (e) {
+      console.error("bbx:money_flow:stripe_balance_fail", e && e.message);
+    }
+  }
+
+  // Reuse the heavier-lift recon pieces directly (cheaper than re-running
+  // their query mass; we already pay for them via the cron call). For
+  // now we re-do them inline so this endpoint is callable on its own.
+  const payoutHealth = await _loadPayoutHealthInline(sb).catch(() => null);
+  const balanceDrift = await _loadBalanceDriftInline(sb).catch(() => ({ checked: 0, drifted: 0, sample: [] }));
+
+  const [top_advertisers_by_spend_24h, top_publishers_by_balance, pending_clawbacks_total, eligible_for_next_payout] =
+    await Promise.all([
+      loadTopAdvertisersBySpend().catch(() => []),
+      loadTopPublishersByBalance().catch(() => []),
+      sumPendingClawbacks().catch(() => 0),
+      loadEligibleForNextPayout().catch(() => ({ count: 0, total_usd_ready: 0 })),
+    ]);
+
+  return res.status(200).json({
+    mode,
+    generated_at: new Date().toISOString(),
+    windows: windowsOut,
+    advertiser_deposits_24h: d24,
+    advertiser_deposits_7d:  d7,
+    advertiser_deposits_30d: d30,
+    top_advertisers_by_spend_24h,
+    top_publishers_by_balance,
+    pending_clawbacks_total,
+    payout_health: payoutHealth,
+    balance_drift: balanceDrift,
+    eligible_for_next_payout,
+    stripe_balance_available_usd: stripeBalanceUsd,
+  });
+}
+
+// Stripe balance — cached so concurrent admin tabs don't hammer the API.
+let _stripeBalanceCache = { until: 0, value: null };
+async function _cachedStripeBalance(ttlMs) {
+  const now = Date.now();
+  if (_stripeBalanceCache.until > now) return _stripeBalanceCache.value;
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  // Tiny REST call instead of pulling the full stripe SDK just for one
+  // balance retrieve. Bonus: matches the lightweight pattern we use in
+  // api/billing.js for currency detection.
+  const r = await fetch("https://api.stripe.com/v1/balance", {
+    headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  // available[0].amount is in cents.
+  const usd = j && j.available && j.available[0] ? j.available[0].amount / 100 : null;
+  _stripeBalanceCache = { until: now + ttlMs, value: usd };
+  return usd;
+}
+
+// Inline payout-health summary (mirrors recon's payout_cron_health).
+async function _loadPayoutHealthInline(sb) {
+  const out = {
+    last_run_at: null, last_run_status: null, last_run_amount_usd: 0,
+    pending_count: 0, failed_tier1_count: 0, failed_tier2_count: 0,
+    blocked_publishers_count: 0,
+  };
+  const { data: lastRow } = await sb.from("payouts")
+    .select("created_at, status, amount, completed_at")
+    .order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (lastRow) {
+    out.last_run_at         = lastRow.completed_at || lastRow.created_at;
+    out.last_run_status     = lastRow.status;
+    out.last_run_amount_usd = Number(lastRow.amount) || 0;
+  }
+  const { count: pendingC } = await sb.from("payouts").select("*", { count: "exact", head: true }).eq("status", "pending");
+  out.pending_count = pendingC || 0;
+  const { count: t1 } = await sb.from("payouts").select("*", { count: "exact", head: true }).eq("status", "failed").eq("failure_tier", 1);
+  out.failed_tier1_count = t1 || 0;
+  const { count: t2 } = await sb.from("payouts").select("*", { count: "exact", head: true }).eq("status", "failed").eq("failure_tier", 2);
+  out.failed_tier2_count = t2 || 0;
+  const { count: blocked } = await sb.from("developers").select("*", { count: "exact", head: true }).eq("payout_blocked", true);
+  out.blocked_publishers_count = blocked || 0;
+  return out;
+}
+
+// Inline balance-drift summary (mirrors recon's publisher_balance_health).
+async function _loadBalanceDriftInline(sb) {
+  const out = { checked: 0, drifted: 0, sample: [] };
+  const { data: balances } = await sb.from("publisher_balance")
+    .select("developer_id, balance, lifetime_earned, lifetime_paid");
+  if (!balances || balances.length === 0) return out;
+  const devIds = balances.map((b) => b.developer_id);
+  const { data: pendingClaws } = await sb.from("payout_clawbacks")
+    .select("developer_id, remaining_usd").in("developer_id", devIds).eq("status", "pending");
+  const pendingByDev = new Map();
+  for (const c of (pendingClaws || [])) {
+    pendingByDev.set(c.developer_id, (pendingByDev.get(c.developer_id) || 0) + (Number(c.remaining_usd) || 0));
+  }
+  for (const b of balances) {
+    out.checked++;
+    const balance        = Number(b.balance) || 0;
+    const lifetimeEarned = Number(b.lifetime_earned) || 0;
+    const lifetimePaid   = Number(b.lifetime_paid) || 0;
+    const pendingClaw    = pendingByDev.get(b.developer_id) || 0;
+    const expected       = lifetimeEarned - lifetimePaid - pendingClaw;
+    const drift          = Math.abs(balance - expected);
+    const denom          = Math.max(Math.abs(balance), Math.abs(expected), 1);
+    const pct            = drift / denom;
+    if (pct > 0.01 && drift > 0.50) {
+      out.drifted++;
+      if (out.sample.length < 5) {
+        out.sample.push({
+          developer_id: b.developer_id,
+          balance, lifetime_earned: lifetimeEarned, lifetime_paid: lifetimePaid,
+          pending_clawback_remaining: +pendingClaw.toFixed(2),
+          expected_balance: +expected.toFixed(2),
+          drift_usd: +drift.toFixed(2),
+          drift_pct: +(pct * 100).toFixed(2),
+        });
+      }
+    }
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase H Panel 3 — Auction Inspector
+// ═══════════════════════════════════════════════════════════════════════
+// Lets the operator answer "why didn't my campaign serve here?" from the
+// admin UI. Two modes:
+//   • list:   ?type=auction_inspect&limit=N&outcome=X&publisher_id=Y&since=ISO
+//             Returns N most-recent auction_logs summaries.
+//   • detail: ?type=auction_inspect&id=AUCTION_ID
+//             Returns the full row including the candidates array.
+//
+// Why this matters: today the only way to debug an auction is `select *
+// from auction_logs where auction_id = '...'` in Supabase. That's fine
+// for engineers; for operators we need a UI surface. Same data, friendlier.
+
+async function handleAuctionInspect(req, res) {
+  if (!_liveActivityAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
+
+  const sb = supa();
+  if (!sb) {
+    // Demo mode — return empty list / 404 detail.
+    if (req.query && req.query.id) {
+      return res.status(404).json({ error: "Not found (demo mode)" });
+    }
+    return res.status(200).json({ mode: "demo", count: 0, logs: [] });
+  }
+
+  // ── Detail mode ──
+  const id = req.query && req.query.id;
+  if (id) {
+    const { data, error } = await sb.from("auction_logs")
+      .select("*").eq("auction_id", id).maybeSingle();
+    if (error)   return res.status(500).json({ error: error.message });
+    if (!data)   return res.status(404).json({ error: "Auction not found" });
+
+    // Backfill publisher + winner names for friendlier display.
+    let publisher = null, winner_campaign = null;
+    if (data.publisher_id) {
+      const { data: dev } = await sb.from("developers")
+        .select("id, email, app_name").eq("id", data.publisher_id).maybeSingle();
+      if (dev) publisher = dev;
+    }
+    if (data.winner_campaign_id) {
+      const { data: camp } = await sb.from("campaigns")
+        .select("id, name, advertiser_id").eq("id", data.winner_campaign_id).maybeSingle();
+      if (camp) winner_campaign = camp;
+    }
+    return res.status(200).json({ auction: data, publisher, winner_campaign });
+  }
+
+  // ── List mode ──
+  const limit       = Math.min(200, parseInt((req.query && req.query.limit) || "50", 10) || 50);
+  const outcome     = req.query && req.query.outcome;          // won|no_match|below_floor|rate_limited|sandbox|error
+  const publisherId = req.query && req.query.publisher_id;
+  const integration = req.query && req.query.integration_method; // mcp|js-snippet|npm-sdk|rest-api
+  const sandbox     = (req.query && req.query.mode === "sandbox") ? true : false;
+
+  let q = sb.from("auction_logs")
+    .select("auction_id, ts, surface, publisher_id, publisher_domain, integration_method, is_sandbox, outcome, no_fill_reason, winner_campaign_id, winning_price_cpm, latency_ms")
+    .eq("is_sandbox", sandbox)
+    .order("ts", { ascending: false }).limit(limit);
+  if (outcome)     q = q.eq("outcome", outcome);
+  if (publisherId) q = q.eq("publisher_id", publisherId);
+  if (integration) q = q.eq("integration_method", integration);
+
+  const { data, error } = await q;
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Bulk-fetch publisher emails + campaign names to enrich list display.
+  const pubIds  = [...new Set((data || []).map((r) => r.publisher_id).filter(Boolean))];
+  const winIds  = [...new Set((data || []).map((r) => r.winner_campaign_id).filter(Boolean))];
+  const [pubsRes, winsRes] = await Promise.all([
+    pubIds.length ? sb.from("developers").select("id, email, app_name").in("id", pubIds) : { data: [] },
+    winIds.length ? sb.from("campaigns").select("id, name").in("id", winIds) : { data: [] },
+  ]);
+  const pubMap = new Map((pubsRes.data || []).map((d) => [d.id, d]));
+  const winMap = new Map((winsRes.data || []).map((c) => [c.id, c]));
+
+  const logs = (data || []).map((r) => ({
+    ...r,
+    publisher_email:    r.publisher_id      ? (pubMap.get(r.publisher_id)      || {}).email : null,
+    publisher_app_name: r.publisher_id      ? (pubMap.get(r.publisher_id)      || {}).app_name : null,
+    winner_campaign_name: r.winner_campaign_id ? (winMap.get(r.winner_campaign_id) || {}).name : null,
+  }));
+
+  return res.status(200).json({
+    count: logs.length,
+    filters: { outcome: outcome || null, publisher_id: publisherId || null, integration_method: integration || null, sandbox },
+    logs,
+  });
+}
+
 // ── Exports for testing ───────────────────────────────────────────────
 module.exports.HAS_SUPABASE = HAS_SUPABASE;
 module.exports._handleLiveActivity = handleLiveActivity;
+module.exports._handleMoneyFlow = handleMoneyFlow;
+module.exports._handleAuctionInspect = handleAuctionInspect;

@@ -246,6 +246,8 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 
     <button class="nav-item active" data-panel="overview"><span class="icon">📊</span> Overview <span class="kbd">1</span></button>
     <button class="nav-item" data-panel="live"><span class="icon">🟢</span> Live Activity <span class="kbd">2</span></button>
+    <button class="nav-item" data-panel="money"><span class="icon">💰</span> Money Flow</button>
+    <button class="nav-item" data-panel="inspector"><span class="icon">🔬</span> Auction Inspector</button>
     <button class="nav-item" data-panel="review"><span class="icon">🔍</span> Review Queue <span class="badge-count" id="review-count">0</span></button>
     <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns <span class="kbd">3</span></button>
     <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats <span class="kbd">4</span></button>
@@ -424,6 +426,195 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
         <div id="live-alerts-body">
           <p class="empty-state" style="padding:16px;text-align:center;color:var(--muted);">—</p>
         </div>
+      </div>
+    </div>
+
+    <!-- ── MONEY FLOW (Phase H Panel 2) ── -->
+    <div class="panel" id="panel-money">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h1 style="margin:0;">Money Flow</h1>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+            <span>Mode:</span>
+            <select id="money-mode" style="background:var(--bg-soft);color:#F5F5F7;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:13px;">
+              <option value="production">Production</option>
+              <option value="sandbox">Sandbox</option>
+            </select>
+          </label>
+          <span id="money-refresh-state" style="font-size:11px;color:var(--muted);min-width:140px;text-align:right;">—</span>
+          <button class="btn-sm btn-action" onclick="loadMoneyFlow()">Refresh</button>
+        </div>
+      </div>
+
+      <!-- Top-line: windowed flows (24h / 7d / 30d) -->
+      <div class="section">
+        <div class="section-header"><h2 style="font-size:14px;">Flow by Window</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Window</th>
+              <th style="text-align:right;">Deposits in</th>
+              <th style="text-align:right;">Advertiser spend</th>
+              <th style="text-align:right;">BB take</th>
+              <th style="text-align:right;">Publisher accrued</th>
+              <th style="text-align:right;">Payouts paid</th>
+            </tr></thead>
+            <tbody id="money-windows-body">
+              <tr><td colspan="6" class="empty-state">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">
+          Deposits = advertiser top-ups via Stripe. Spend = events.cost (advertiser side). Publisher accrued = events.developer_payout. BB take = spend - accrued. Payouts paid = transferred to Stripe Connect.
+        </p>
+      </div>
+
+      <!-- Mid-row: balance health + payout health -->
+      <div class="section">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div class="section-header"><h2 style="font-size:14px;">Eligible for Next Payout Cron</h2></div>
+            <div class="stat-card">
+              <div class="label">Publishers ready</div>
+              <div class="value pink"><span id="money-eligible-count">—</span></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
+                Total ready: <span id="money-eligible-total" class="mono">—</span><br>
+                Stripe platform balance: <span id="money-stripe-balance" class="mono">—</span><br>
+                Pending clawbacks: <span id="money-clawbacks" class="mono">—</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-header"><h2 style="font-size:14px;">Payout Cron Health</h2></div>
+            <div class="stat-card">
+              <div class="label">Last payout run</div>
+              <div class="value" id="money-last-status">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
+                When: <span id="money-last-when" class="mono">—</span><br>
+                Amount: <span id="money-last-amount" class="mono">—</span><br>
+                Tier-1 / Tier-2 failed: <span id="money-tier-failed" class="mono">—</span><br>
+                Blocked publishers: <span id="money-blocked" class="mono">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance drift -->
+      <div class="section">
+        <div class="section-header"><h2 style="font-size:14px;">Publisher Balance Drift</h2></div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+          Drift = |publisher_balance.balance − (lifetime_earned − lifetime_paid − pending_clawbacks)|. We flag >$0.50 AND >1%. Any non-zero drifted count is worth investigating.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Developer</th>
+              <th style="text-align:right;">Balance</th>
+              <th style="text-align:right;">Expected</th>
+              <th style="text-align:right;">Drift $</th>
+              <th style="text-align:right;">Drift %</th>
+            </tr></thead>
+            <tbody id="money-drift-body">
+              <tr><td colspan="5" class="empty-state">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top advertisers + top publisher balances -->
+      <div class="section">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div class="section-header"><h2 style="font-size:14px;">Top Advertisers by 24h Spend</h2></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Advertiser</th><th style="text-align:right;">24h spend</th><th style="text-align:right;">Balance</th></tr></thead>
+                <tbody id="money-top-advertisers-body">
+                  <tr><td colspan="3" class="empty-state">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="section-header"><h2 style="font-size:14px;">Top Publishers by Balance</h2></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Publisher</th><th style="text-align:right;">Balance</th><th style="text-align:right;">Lifetime earned</th></tr></thead>
+                <tbody id="money-top-publishers-body">
+                  <tr><td colspan="3" class="empty-state">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AUCTION INSPECTOR (Phase H Panel 3) ── -->
+    <div class="panel" id="panel-inspector">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h1 style="margin:0;">Auction Inspector</h1>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <select id="inspector-outcome" style="background:var(--bg-soft);color:#F5F5F7;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;">
+            <option value="">All outcomes</option>
+            <option value="won">won</option>
+            <option value="no_match">no_match</option>
+            <option value="below_floor">below_floor</option>
+            <option value="rate_limited">rate_limited</option>
+            <option value="sandbox">sandbox</option>
+            <option value="error">error</option>
+          </select>
+          <select id="inspector-integration" style="background:var(--bg-soft);color:#F5F5F7;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;">
+            <option value="">All doors</option>
+            <option value="mcp">mcp</option>
+            <option value="js-snippet">js-snippet</option>
+            <option value="npm-sdk">npm-sdk</option>
+            <option value="rest-api">rest-api</option>
+          </select>
+          <select id="inspector-mode" style="background:var(--bg-soft);color:#F5F5F7;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;">
+            <option value="production">Production</option>
+            <option value="sandbox">Sandbox</option>
+          </select>
+          <button class="btn-sm btn-action" onclick="loadAuctionInspector()">Search</button>
+        </div>
+      </div>
+
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+        Recent auction logs. Click an auction_id to see the full eligibility breakdown, scored candidates, and outcome reasoning. 30-day retention (db/08_auction_logs.sql).
+      </p>
+
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+        <input type="text" id="inspector-jump" placeholder="Jump to auction_id…" style="flex:1;background:var(--bg-soft);color:#F5F5F7;border:1px solid var(--line);border-radius:6px;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;">
+        <button class="btn-sm btn-action" onclick="loadAuctionDetail(document.getElementById('inspector-jump').value)">Inspect</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Time</th>
+            <th>Auction ID</th>
+            <th>Surface</th>
+            <th>Door</th>
+            <th>Publisher</th>
+            <th>Outcome</th>
+            <th>Winner</th>
+            <th style="text-align:right;">CPM</th>
+            <th style="text-align:right;">ms</th>
+          </tr></thead>
+          <tbody id="inspector-body">
+            <tr><td colspan="9" class="empty-state">Click Search to load recent auctions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detail drawer (shown when an auction is selected) -->
+      <div id="inspector-detail" style="display:none;margin-top:24px;padding:16px;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h2 style="margin:0;font-size:16px;">Auction Detail</h2>
+          <button class="btn-sm" onclick="document.getElementById('inspector-detail').style.display='none'" style="background:transparent;color:var(--muted);border:1px solid var(--line);">Close</button>
+        </div>
+        <div id="inspector-detail-body" style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:#E5E7EB;"></div>
       </div>
     </div>
 
@@ -685,6 +876,8 @@ function switchPanel(name) {
   if (name === "payouts") loadPayoutsPanel();
   if (name === "live") startLiveActivity();
   else stopLiveActivity();
+  if (name === "money") loadMoneyFlow();
+  if (name === "inspector") loadAuctionInspector();
 }
 
 // ── Live Activity (Phase H Panel 1) ──
@@ -819,6 +1012,253 @@ function renderLiveActivity(j) {
       </div>`;
     }).join('') + '</div>';
   }
+}
+
+// ── Money Flow (Phase H Panel 2) ──
+async function loadMoneyFlow() {
+  const mode = (document.getElementById('money-mode') || {}).value || 'production';
+  const stateEl = document.getElementById('money-refresh-state');
+  if (stateEl) stateEl.textContent = 'Refreshing…';
+  try {
+    const r = await fetch(`${API}/api/stats?type=money_flow&mode=${encodeURIComponent(mode)}`, {
+      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    renderMoneyFlow(j);
+    if (stateEl) stateEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    if (stateEl) stateEl.textContent = 'Error: ' + e.message;
+  }
+  // Wire mode dropdown once.
+  const modeSel = document.getElementById('money-mode');
+  if (modeSel && !modeSel._wired) {
+    modeSel._wired = true;
+    modeSel.addEventListener('change', loadMoneyFlow);
+  }
+}
+
+function _money(n) { return '$' + (Number(n) || 0).toFixed(2); }
+
+function renderMoneyFlow(j) {
+  if (!j) return;
+  // Window table
+  const rowsBody = document.getElementById('money-windows-body');
+  const order = [['24h', '24 hours'], ['7d', '7 days'], ['30d', '30 days']];
+  rowsBody.innerHTML = order.map(([k, label]) => {
+    const w = (j.windows || {})[k] || {};
+    const dep = j[`advertiser_deposits_${k}`];
+    return `<tr>
+      <td>${label}</td>
+      <td style="text-align:right;" class="mono">${_money(dep)}</td>
+      <td style="text-align:right;" class="mono">${_money(w.advertiser_spend)}</td>
+      <td style="text-align:right;" class="mono">${_money(w.bb_revenue)}</td>
+      <td style="text-align:right;" class="mono">${_money(w.publisher_accrued)}</td>
+      <td style="text-align:right;" class="mono">${_money(w.payouts_paid)}</td>
+    </tr>`;
+  }).join('');
+
+  // Eligible card
+  const elig = j.eligible_for_next_payout || { count: 0, total_usd_ready: 0 };
+  document.getElementById('money-eligible-count').textContent = (elig.count || 0).toLocaleString();
+  document.getElementById('money-eligible-total').textContent = _money(elig.total_usd_ready);
+  const stripeBal = j.stripe_balance_available_usd;
+  const stripeEl = document.getElementById('money-stripe-balance');
+  if (stripeBal == null) {
+    stripeEl.textContent = '— (not configured)';
+  } else {
+    stripeEl.textContent = _money(stripeBal);
+    // Warn if stripe balance < total ready
+    if (Number(stripeBal) < Number(elig.total_usd_ready || 0)) {
+      stripeEl.style.color = '#EF4444';
+      stripeEl.title = 'Stripe platform balance < total ready — cron will fail at Tier-1.';
+    } else {
+      stripeEl.style.color = '';
+      stripeEl.title = '';
+    }
+  }
+  document.getElementById('money-clawbacks').textContent = _money(j.pending_clawbacks_total);
+
+  // Payout health card
+  const ph = j.payout_health || {};
+  const lastStatus = (ph.last_run_status || '—');
+  const statusColor = lastStatus === 'paid' ? '#10B981' : lastStatus === 'failed' ? '#EF4444' : lastStatus === 'pending' ? '#F59E0B' : '#9CA3AF';
+  const ls = document.getElementById('money-last-status');
+  ls.textContent = lastStatus;
+  ls.style.color = statusColor;
+  document.getElementById('money-last-when').textContent = ph.last_run_at ? new Date(ph.last_run_at).toLocaleString() : '—';
+  document.getElementById('money-last-amount').textContent = _money(ph.last_run_amount_usd);
+  document.getElementById('money-tier-failed').textContent = (ph.failed_tier1_count || 0) + ' / ' + (ph.failed_tier2_count || 0);
+  document.getElementById('money-blocked').textContent = (ph.blocked_publishers_count || 0).toLocaleString();
+
+  // Balance drift table
+  const driftBody = document.getElementById('money-drift-body');
+  const drift = j.balance_drift || { checked: 0, drifted: 0, sample: [] };
+  if (!drift.sample || drift.sample.length === 0) {
+    const note = drift.checked === 0
+      ? 'No publisher balances to check.'
+      : `Checked ${drift.checked} publishers · 0 drifted · all reconciled ✓`;
+    driftBody.innerHTML = `<tr><td colspan="5" class="empty-state">${note}</td></tr>`;
+  } else {
+    driftBody.innerHTML = drift.sample.map(s => `
+      <tr>
+        <td class="mono" style="font-size:11px;">${s.developer_id}</td>
+        <td style="text-align:right;" class="mono">${_money(s.balance)}</td>
+        <td style="text-align:right;" class="mono">${_money(s.expected_balance)}</td>
+        <td style="text-align:right;color:#EF4444;" class="mono">${_money(s.drift_usd)}</td>
+        <td style="text-align:right;color:#EF4444;" class="mono">${Number(s.drift_pct).toFixed(2)}%</td>
+      </tr>
+    `).join('');
+  }
+
+  // Top advertisers
+  const advBody = document.getElementById('money-top-advertisers-body');
+  if (!j.top_advertisers_by_spend_24h || j.top_advertisers_by_spend_24h.length === 0) {
+    advBody.innerHTML = '<tr><td colspan="3" class="empty-state">No advertiser spend in the last 24h.</td></tr>';
+  } else {
+    advBody.innerHTML = j.top_advertisers_by_spend_24h.map(a => `
+      <tr>
+        <td>${(a.company_name || a.email || a.id || '').toString().replace(/</g,'&lt;')}</td>
+        <td style="text-align:right;" class="mono">${_money(a.spend)}</td>
+        <td style="text-align:right;" class="mono">${_money(a.balance)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Top publishers by balance
+  const pubBody = document.getElementById('money-top-publishers-body');
+  if (!j.top_publishers_by_balance || j.top_publishers_by_balance.length === 0) {
+    pubBody.innerHTML = '<tr><td colspan="3" class="empty-state">No publisher balances yet.</td></tr>';
+  } else {
+    pubBody.innerHTML = j.top_publishers_by_balance.map(p => `
+      <tr>
+        <td>${(p.email || p.app_name || p.developer_id || '').toString().replace(/</g,'&lt;')}</td>
+        <td style="text-align:right;" class="mono">${_money(p.balance)}</td>
+        <td style="text-align:right;" class="mono">${_money(p.lifetime_earned)}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+// ── Auction Inspector (Phase H Panel 3) ──
+async function loadAuctionInspector() {
+  const outcome     = (document.getElementById('inspector-outcome')     || {}).value || '';
+  const integration = (document.getElementById('inspector-integration') || {}).value || '';
+  const mode        = (document.getElementById('inspector-mode')        || {}).value || 'production';
+  const params = new URLSearchParams({ type: 'auction_inspect', limit: '50', mode });
+  if (outcome)     params.set('outcome', outcome);
+  if (integration) params.set('integration_method', integration);
+
+  const body = document.getElementById('inspector-body');
+  body.innerHTML = '<tr><td colspan="9" class="empty-state">Loading…</td></tr>';
+  try {
+    const r = await fetch(`${API}/api/stats?${params.toString()}`, {
+      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    renderAuctionInspectorList(j);
+  } catch (e) {
+    body.innerHTML = `<tr><td colspan="9" class="empty-state">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function renderAuctionInspectorList(j) {
+  const body = document.getElementById('inspector-body');
+  const logs = (j && j.logs) || [];
+  if (logs.length === 0) {
+    body.innerHTML = '<tr><td colspan="9" class="empty-state">No matching auctions.</td></tr>';
+    return;
+  }
+  const outcomeColor = (o) => ({
+    won: '#10B981', no_match: '#9CA3AF', below_floor: '#F59E0B',
+    rate_limited: '#7C3AED', sandbox: '#06B6D4', error: '#EF4444',
+  })[o] || '#9CA3AF';
+
+  body.innerHTML = logs.map(r => {
+    const when = r.ts ? new Date(r.ts).toLocaleString() : '';
+    const pub  = r.publisher_email || r.publisher_app_name || (r.publisher_domain || '—');
+    const cpm  = r.winning_price_cpm != null ? '$' + Number(r.winning_price_cpm).toFixed(2) : '—';
+    const ms   = r.latency_ms != null ? Number(r.latency_ms).toFixed(0) : '—';
+    return `<tr style="cursor:pointer;" onclick="loadAuctionDetail('${(r.auction_id || '').replace(/'/g,'')}')">
+      <td class="mono" style="font-size:11px;">${when}</td>
+      <td class="mono" style="font-size:11px;">${(r.auction_id || '').slice(0, 12)}…</td>
+      <td>${r.surface || ''}</td>
+      <td>${r.integration_method || '—'}</td>
+      <td>${(pub || '').toString().replace(/</g,'&lt;')}</td>
+      <td><span style="color:${outcomeColor(r.outcome)};font-weight:600;">${r.outcome || ''}</span>${r.no_fill_reason ? ' <span class="mono" style="color:var(--muted);font-size:11px;">('+r.no_fill_reason+')</span>' : ''}</td>
+      <td>${(r.winner_campaign_name || r.winner_campaign_id || '').toString().replace(/</g,'&lt;')}</td>
+      <td style="text-align:right;" class="mono">${cpm}</td>
+      <td style="text-align:right;" class="mono">${ms}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadAuctionDetail(auctionId) {
+  if (!auctionId) return;
+  const params = new URLSearchParams({ type: 'auction_inspect', id: auctionId });
+  const drawer = document.getElementById('inspector-detail');
+  const detail = document.getElementById('inspector-detail-body');
+  drawer.style.display = 'block';
+  detail.innerHTML = 'Loading…';
+  try {
+    const r = await fetch(`${API}/api/stats?${params.toString()}`, {
+      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+    });
+    if (!r.ok) { detail.textContent = 'HTTP ' + r.status; return; }
+    const j = await r.json();
+    if (!j.auction) { detail.textContent = 'Auction not found.'; return; }
+    renderAuctionDetail(j);
+  } catch (e) {
+    detail.textContent = 'Error: ' + e.message;
+  }
+  // Scroll the drawer into view for visibility on tall lists.
+  drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderAuctionDetail(j) {
+  const a = j.auction || {};
+  const elig = a.eligibility || {};
+  const cands = Array.isArray(a.candidates) ? a.candidates : [];
+  const pub = j.publisher || {};
+  const win = j.winner_campaign || {};
+
+  const headStr = [
+    `auction_id: ${a.auction_id}`,
+    `ts: ${a.ts}`,
+    `surface: ${a.surface}`,
+    `integration_method: ${a.integration_method || '—'}`,
+    `is_sandbox: ${a.is_sandbox ? 'true' : 'false'}`,
+    `outcome: ${a.outcome}` + (a.no_fill_reason ? `  (${a.no_fill_reason})` : ''),
+    `latency_ms: ${a.latency_ms != null ? Number(a.latency_ms).toFixed(1) : '—'}`,
+    `publisher: ${pub.email || pub.app_name || a.publisher_id || '—'}` + (a.publisher_domain ? `   (${a.publisher_domain})` : ''),
+    `winner: ${win.name || a.winner_campaign_id || '—'}`,
+    `winning_price_cpm: ${a.winning_price_cpm != null ? '$' + Number(a.winning_price_cpm).toFixed(4) : '—'}`,
+  ].join('\n');
+
+  const eligStr = JSON.stringify(elig, null, 2);
+  const reqStr  = JSON.stringify(a.request || {}, null, 2);
+  const candStr = cands.length === 0
+    ? '(no scored candidates — auction died before scoring)'
+    : cands.map((c, i) => `#${i+1} ${c.won ? '⭐ ' : ''}${c.campaign_name || c.campaign_id}\n` +
+        `  effective_price_cpm: ${c.effective_price_cpm != null ? Number(c.effective_price_cpm).toFixed(4) : '—'}\n` +
+        `  price_cpm: ${c.price_cpm != null ? Number(c.price_cpm).toFixed(4) : '—'}\n` +
+        `  p_click: ${c.p_click}\n` +
+        `  p_convert: ${c.p_convert}\n` +
+        `  kw_boost: ${c.kw_boost}\n` +
+        `  self_promote: ${c.self_promote ? 'yes' : 'no'}\n` +
+        `  factors: ${JSON.stringify(c.factors || {}, null, 2).replace(/\n/g, '\n  ')}`
+      ).join('\n\n');
+
+  const html = `<pre style="margin:0 0 14px;padding:10px;background:#0F0F1A;border:1px solid var(--line);border-radius:6px;color:#F5F5F7;overflow-x:auto;">${headStr.replace(/</g, '&lt;')}</pre>
+    <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Eligibility</h3>
+    <pre style="margin:0 0 14px;padding:10px;background:#0F0F1A;border:1px solid var(--line);border-radius:6px;color:#F5F5F7;overflow-x:auto;">${eligStr.replace(/</g, '&lt;')}</pre>
+    <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Request</h3>
+    <pre style="margin:0 0 14px;padding:10px;background:#0F0F1A;border:1px solid var(--line);border-radius:6px;color:#F5F5F7;overflow-x:auto;">${reqStr.replace(/</g, '&lt;')}</pre>
+    <h3 style="font-size:13px;margin:14px 0 6px;color:#F5F5F7;">Scored Candidates</h3>
+    <pre style="margin:0;padding:10px;background:#0F0F1A;border:1px solid var(--line);border-radius:6px;color:#F5F5F7;overflow-x:auto;">${candStr.replace(/</g, '&lt;')}</pre>`;
+
+  document.getElementById('inspector-detail-body').innerHTML = html;
 }
 
 // ── Detect modes ──
