@@ -216,3 +216,141 @@ test("destroy: tears down without error and prevents subsequent render", async (
   const ad = await lumi.render("#anywhere");
   assert.equal(ad, null);
 });
+
+// ── fetchAd / trackImpression (1.1.0 server-side surface) ────────
+
+test("fetchAd: returns AdPayload on success and does NOT emit impression", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", {
+      body: {
+        jsonrpc: "2.0", id: 1,
+        result: {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              sponsored: {
+                campaign_id: "cmp_server_1",
+                headline:    "Server-fetched ad",
+                subtext:     "rendered later by the caller",
+                cta_label:   "Go",
+                cta_url:     "https://example.com/click",
+                tracking: {
+                  impression: "https://boostboss.ai/api/track?event=impression&campaign=cmp_server_1",
+                  click:      "https://boostboss.ai/api/track?event=click&campaign=cmp_server_1",
+                },
+              },
+              auction: { auction_id: "auc_server_1", sandbox: true },
+            }),
+          }],
+        },
+      },
+    }],
+  ]);
+
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  const events = [];
+  lumi.on("impression", (e) => events.push({ kind: "impression", ...e }));
+  lumi.on("no_fill",    (e) => events.push({ kind: "no_fill", ...e }));
+  lumi.on("error",      (e) => events.push({ kind: "error", ...e }));
+
+  const ad = await lumi.fetchAd({ context: "user reading docs", format: "inline" });
+  assert.ok(ad, "expected an Ad payload");
+  assert.equal(ad.adId, "cmp_server_1");
+  assert.equal(ad.headline, "Server-fetched ad");
+  assert.equal(ad.auctionId, "auc_server_1");
+  assert.equal(ad.isSandbox, true);
+  assert.equal(ad.impressionUrl, "https://boostboss.ai/api/track?event=impression&campaign=cmp_server_1");
+  assert.equal(events.length, 0, "fetchAd must NOT auto-emit impression — that's trackImpression's job");
+  // Verify the wire request still tags the source so server logs can attribute traffic.
+  assert.equal(lastRequest.init.headers["X-Lumi-Source"], "npm-sdk");
+});
+
+test("fetchAd: returns null on no-fill and emits no_fill event with reason", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", {
+      body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text", text: JSON.stringify({ sponsored: null, reason: "no_match" }) }] } },
+    }],
+  ]);
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  let nf = null;
+  lumi.on("no_fill", (e) => { nf = e; });
+  const ad = await lumi.fetchAd({ context: "thin context" });
+  assert.equal(ad, null);
+  assert.ok(nf);
+  assert.equal(nf.context, "thin context");
+  assert.equal(nf.reason, "no_match");
+});
+
+test("fetchAd: works without a DOM (server-side / serverless)", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", {
+      body: {
+        jsonrpc: "2.0", id: 1,
+        result: { content: [{ type: "text", text: JSON.stringify({ sponsored: { campaign_id: "cmp_nodom", headline: "No DOM", cta_url: "https://example.com" } }) }] },
+      },
+    }],
+  ]);
+  // Temporarily remove the DOM shim — fetchAd must still work.
+  const savedDoc   = globalThis.document;
+  const savedImage = globalThis.Image;
+  delete globalThis.document;
+  delete globalThis.Image;
+  try {
+    const lumi = new Lumi({ publisherId: "pub_test" });
+    const ad = await lumi.fetchAd({ context: "node context" });
+    assert.ok(ad);
+    assert.equal(ad.adId, "cmp_nodom");
+  } finally {
+    globalThis.document = savedDoc;
+    globalThis.Image    = savedImage;
+  }
+});
+
+test("fetchAd: HTTP 401 returns null and emits AUTH error (does not throw)", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { status: 401, body: "unauthorised" }],
+  ]);
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  let err = null;
+  lumi.on("error", (e) => { err = e; });
+  const ad = await lumi.fetchAd({ context: "anything" });
+  assert.equal(ad, null);
+  assert.ok(err);
+  assert.equal(err.code, ERROR_CODES.AUTH);
+});
+
+test("fetchAd: returns null after destroy()", async () => {
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  lumi.destroy();
+  const ad = await lumi.fetchAd({ context: "post-destroy" });
+  assert.equal(ad, null);
+});
+
+test("trackImpression: emits impression event for a fetched ad", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", {
+      body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text", text: JSON.stringify({ sponsored: { campaign_id: "cmp_imp", headline: "x", cta_url: "https://example.com" } }) }] } },
+    }],
+    // The impression beacon URL gets hit too in browser path; allow it.
+    ["*", { body: "" }],
+  ]);
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  const ad = await lumi.fetchAd({ context: "fire impression test" });
+  assert.ok(ad);
+
+  const events = [];
+  lumi.on("impression", (e) => events.push(e));
+  await lumi.trackImpression(ad);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].adId, "cmp_imp");
+  assert.equal(events[0].format, "native"); // default type
+});
+
+test("trackImpression: rejects ad without adId via error event", async () => {
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  let err = null;
+  lumi.on("error", (e) => { err = e; });
+  await lumi.trackImpression({ adId: "", headline: "x" });
+  assert.ok(err);
+  assert.equal(err.code, ERROR_CODES.BAD_REQUEST);
+});

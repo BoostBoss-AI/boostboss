@@ -26,6 +26,35 @@ lumi.on("impression", (e) => console.log("ad shown", e.adId));
 lumi.on("error",      (e) => console.warn("ad error", e.code));
 ```
 
+## Usage — server-side (Node / serverless / SSR) <sub>v1.1.0+</sub>
+
+Need to fetch an ad on the server and hand it to a custom renderer (your own React card, a templated HTML email, an MCP tool that prefers raw payloads)? `Lumi` exposes a DOM-free fetch path:
+
+```ts
+// inside a Next.js route handler, Express endpoint, etc.
+import { Lumi } from "@boostbossai/lumi-sdk";
+
+const lumi = new Lumi({ publisherId: process.env.BB_PUBLISHER_ID! });
+
+const ad = await lumi.fetchAd({
+  context: userPrompt.slice(0, 300),
+  format:  "inline",
+});
+
+// `ad` is an AdPayload (or null on no-fill).
+// Fire the impression beacon when the ad is actually displayed:
+if (ad) {
+  // either client-side: `new Image().src = ad.impressionUrl`
+  // or call lumi.trackImpression(ad) on whichever side does the display
+}
+
+return Response.json({ ad });
+```
+
+- `fetchAd()` never throws — failures resolve to `null` and emit `error` / `no_fill` events.
+- `fetchAd()` does **not** auto-fire impressions (the consumer renders, then fires).
+- `trackImpression(ad)` fires the beacon and emits `impression` for listeners — call it when the ad is displayed.
+
 ## Usage — React
 
 ```tsx
@@ -82,6 +111,8 @@ provideLumi({ publisherId: "pub_xxx" });
 | Method | Returns | Notes |
 | --- | --- | --- |
 | `lumi.render(target, opts)` | `Promise<AdPayload \| null>` | `target` is a CSS selector or HTMLElement. Never throws. |
+| `lumi.fetchAd(opts)` <sub>1.1.0+</sub> | `Promise<AdPayload \| null>` | Fetch only — no DOM required, no impression auto-fire. For server/SSR. |
+| `lumi.trackImpression(ad)` <sub>1.1.0+</sub> | `Promise<void>` | Fire impression beacon for an ad fetched via `fetchAd`. Call at display time. |
 | `lumi.refresh(target?)` | `Promise<void>` | Re-fetch + re-render. Pass a target to refresh just one slot; omit to refresh all. |
 | `lumi.destroy()` | void | Tear down all rendered ads + remove injected styles. |
 | `lumi.on(event, handler)` | void | Events: `impression`, `click`, `close`, `no_fill`, `error`, `ready`. |

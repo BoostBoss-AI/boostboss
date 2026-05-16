@@ -129,6 +129,88 @@ export class Lumi {
   }
 
   /**
+   * Fetch an ad payload **without** rendering it. Use this in server-side
+   * (Node / serverless / SSR) contexts where there is no DOM, when you want
+   * to prefetch the payload and ship it to the client as JSON, or when you
+   * need the raw `AdPayload` for a custom renderer.
+   *
+   * - Does **not** require a DOM (works in Node 18+).
+   * - Does **not** auto-fire the impression beacon — the impression should
+   *   only fire when the ad is actually shown to a user. Fire it from the
+   *   client by hitting `ad.impressionUrl`, or call `trackImpression(ad)`.
+   * - Emits the same `no_fill` and `error` events as `render()` for the
+   *   fetch step, so existing listeners keep working. Does **not** emit
+   *   `impression` (that's the renderer's responsibility).
+   * - Never throws.
+   *
+   * @since 1.1.0
+   */
+  async fetchAd(opts: RenderOptions = {}): Promise<AdPayload | null> {
+    if (this.destroyed) return null;
+
+    const resp = await this.client.fetchAd(opts, this.sessionId);
+    if (!resp.ok) {
+      this.emitter.emit("error", { code: resp.code, message: resp.message });
+      return null;
+    }
+    if (!resp.ad) {
+      this.emitter.emit("no_fill", { context: opts.context ?? "", reason: resp.reason ?? null });
+      return null;
+    }
+
+    if (this.debugEnabled) {
+      // eslint-disable-next-line no-console
+      console.error("[lumi-sdk] fetched ad (no render):", resp.ad.headline);
+    }
+    return resp.ad;
+  }
+
+  /**
+   * Fire the impression beacon for a previously-fetched ad. Use this with
+   * `fetchAd()` when you control rendering yourself and want the SDK to
+   * report the impression at the moment of display.
+   *
+   * Idempotency is **not** guaranteed at the SDK layer — call this exactly
+   * once per displayed ad. Also emits an `impression` event so any
+   * `lumi.on("impression", …)` listeners fire.
+   *
+   * Safe to call from a browser (uses an `Image` pixel beacon if available)
+   * or from Node / serverless (uses `fetch`).
+   *
+   * @since 1.1.0
+   */
+  async trackImpression(ad: AdPayload): Promise<void> {
+    if (this.destroyed) return;
+    if (!ad || !ad.adId) {
+      this.emitter.emit("error", {
+        code: ERROR_CODES.BAD_REQUEST,
+        message: "trackImpression: ad with adId required",
+      });
+      return;
+    }
+
+    if (ad.impressionUrl) {
+      if (typeof Image !== "undefined") {
+        // Browser path — fire-and-forget pixel beacon (matches render()).
+        fireImpressionBeacon(ad.impressionUrl);
+      } else if (typeof fetch !== "undefined") {
+        // Node / serverless path — keepalive fetch, swallow errors.
+        try {
+          await fetch(ad.impressionUrl, { method: "GET", keepalive: true });
+        } catch (_e) { /* swallow — impression beacons are best-effort */ }
+      }
+    }
+
+    this.emitter.emit("impression", {
+      adId:      ad.adId,
+      auctionId: ad.auctionId,
+      format:    ad.type,
+      slot:      null,
+      sandbox:   ad.isSandbox,
+    });
+  }
+
+  /**
    * Re-fetch and re-render every mounted slot, OR a single slot when a
    * selector / element is passed.
    */
