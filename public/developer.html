@@ -4332,7 +4332,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         // makes the synthetic event actually update the per-door badge
                         // (verify endpoint filters events where integration_method is null).
                         try {
-                            const adId = parsed.sponsored.id || parsed.sponsored.creative_id;
+                            // 2026-05-20 fix — the track_event handler requires
+                            // `campaign_id` (the actual rejection reason was
+                            // "Missing event or campaign_id"). Previously we
+                            // pulled adId from sponsored.id / creative_id but
+                            // the auction response only ships `campaign_id`,
+                            // so adId came out undefined and the JSON-RPC call
+                            // silently rejected. Use campaign_id directly —
+                            // sandbox and live auctions both populate it.
+                            const campaignId = parsed.sponsored.campaign_id;
                             await fetch(`${API_BASE}/api/mcp`, {
                                 method: 'POST',
                                 headers: {
@@ -4347,7 +4355,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                                         name: 'track_event',
                                         arguments: {
                                             event_type: 'impression',
-                                            ad_id: adId,
+                                            campaign_id: campaignId,
                                             session_id: 'test_' + Date.now(),
                                             developer_api_key: apiKey,
                                             host: 'integration-test.local',
