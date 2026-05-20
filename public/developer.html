@@ -4238,13 +4238,29 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const context = document.getElementById('testContext').value;
             const format = document.getElementById('testFormat').value;
             // Friend-onboarding audit fix: sandbox toggle. When checked, swap
-            // in pub_test_demo credentials so the test is guaranteed to fill
-            // even when no demand-side campaign matches the publisher's
-            // context. Default = on, so a brand-new publisher always sees
-            // the happy path on their first Run Test click.
+            // in pub_test_demo as the publisher_id so the auction returns a
+            // sandbox creative — guaranteed to fill even when no demand-side
+            // campaign matches the publisher's context. Default = on, so a
+            // brand-new publisher always sees the happy path on first click.
+            //
+            // 2026-05-20 attribution fix — only swap the publisher_id, NOT
+            // the developer_api_key. Keeping the real api_key means the
+            // resulting events row is attributed to the publisher's actual
+            // developer_id (api_key resolution path), not to a sandbox demo
+            // account. The verify endpoint queries by the publisher's real
+            // developer_id, so badges only flip green when the synthetic
+            // event lands under that ID. Previously we sent sk_test_demo as
+            // the api_key too, which orphaned the synthetic event from the
+            // logged-in publisher entirely — test would succeed but badges
+            // would stay 'Not started' forever. Sandbox flag still triggers
+            // because isSandboxCredential() OR-checks publisher_id (which
+            // we're still setting to pub_test_demo) — see api/_lib/sandbox.js.
+            // Side benefit: sandbox events are flagged is_sandbox=true in
+            // events.cost / publisher_balance accrual paths, so no money
+            // moves and stats stay clean.
             const sandboxToggle = document.getElementById('testSandboxToggle');
             const useSandbox = sandboxToggle ? sandboxToggle.checked : false;
-            const apiKey = useSandbox ? 'sk_test_demo' : (userProfile ? userProfile.api_key : '');
+            const apiKey = userProfile ? userProfile.api_key : '';
             const publisherId = useSandbox ? 'pub_test_demo' : (userProfile ? userProfile.id : '');
 
             // 2026-05-20 fix — synthetic test events used to land with
