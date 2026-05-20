@@ -802,6 +802,16 @@ async function handleTrackEvent(body, args, res) {
     send(d) { this._body = d; return this; },
     end() { return this; },
   };
+  // 2026-05-20 — detect sandbox impressions by the campaign_id prefix.
+  // Sandbox creatives live in api/_lib/sandbox.js (cmp_sandbox_*), not in
+  // the campaigns table. track.js skips the "campaign exists" validation
+  // when params.sandbox === "1"; without that flag, sandbox impressions
+  // 404 with "Campaign not found." Also honour an explicit args.sandbox
+  // flag if a future SDK ever passes it.
+  const isSandboxCampaign =
+    args.sandbox === 1 || args.sandbox === "1" || args.sandbox === true ||
+    (typeof args.campaign_id === "string" && args.campaign_id.startsWith("cmp_sandbox_"));
+
   const mockReq = {
     method: "POST",
     // Tag every impression/click coming through MCP with integration_method='mcp'
@@ -820,6 +830,10 @@ async function handleTrackEvent(body, args, res) {
       surface:      args.surface || null,
       format:       args.format || null,
       intent_match_score: args.intent_match_score != null ? Number(args.intent_match_score) : null,
+      // Sandbox flag — only forwarded when the campaign_id pattern matches.
+      // Real impressions never get this; their campaign_id will resolve in
+      // the campaigns table and the validation passes naturally.
+      sandbox: isSandboxCampaign ? "1" : undefined,
       // Conversion-specific fields (Phase B). Forwarded only when present;
       // track.js no-ops them for non-conversion events. value is USD dollars
       // on the wire — track.js converts to cents for storage.
