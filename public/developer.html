@@ -2047,27 +2047,24 @@ await message.reply({
                     </div>
                 </div>
 
-                <!-- Verify your integration — sits inside the Integrations section so width matches everything above. -->
-                <!-- Phase F (2026-05-11): real-time per-door verification. Polls
-                     /api/billing?action=integration_verify every 5s while the
-                     publisher is on this page. Shows green check the moment a
-                     real event from the currently-selected door lands. -->
+                <!-- Verify your integration (component #3, full-width row).
+                     Merged 2026-05-20 with the former standalone "Test Your
+                     Integration" section so there's ONE testing surface, not
+                     two. Contains:
+                       (a) Header + description
+                       (b) Per-door verification badges (Phase F real-time poll)
+                       (c) Inline test form (context / format / sandbox / Run)
+                       (d) Test result metrics + raw response (hidden until run) -->
                 <div id="integrationVerifyPanel" style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #E5E7EB;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
-                        <div style="flex: 1; min-width: 200px;">
-                            <div style="font-weight: 700; font-size: 14px; color: #1A1A2E;">Verify your integration</div>
-                            <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">Fire a synthetic ad request to confirm your setup is wired correctly. Status auto-updates as soon as the first event for any door arrives.</div>
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-weight: 700; font-size: 14px; color: #1A1A2E;">Verify your integration</div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">
+                            Fire a synthetic ad request to confirm your setup is wired correctly. Per-door badges auto-update as soon as a real event for that door arrives.
                         </div>
-                        <button onclick="scrollToAndRunTest()" style="
-                            padding: 10px 18px; background: #FF2D78; color: #fff;
-                            border: 1.5px solid #1A1A2E; border-radius: 8px;
-                            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
-                            cursor: pointer; box-shadow: 2px 2px 0 #1A1A2E; transition: all 0.15s;">
-                            ▶ Run Synthetic Test
-                        </button>
                     </div>
+
                     <!-- Per-door verification badges. Updated by pollIntegrationVerify(). -->
-                    <div id="verifyBadgesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;">
+                    <div id="verifyBadgesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:16px;">
                         <div class="verify-badge" data-door="mcp">
                             <span class="verify-icon">○</span>
                             <span class="verify-name">MCP</span>
@@ -2087,6 +2084,57 @@ await message.reply({
                             <span class="verify-icon">○</span>
                             <span class="verify-name">REST API</span>
                             <span class="verify-status">Not started</span>
+                        </div>
+                    </div>
+
+                    <!-- Inline test form (merged from old #integrationTester). -->
+                    <div style="background:#FAFAFA; border:1px solid #E5E7EB; border-radius:12px; padding:16px 20px;">
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">Run a synthetic test</div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;">
+                            <div style="flex:1;min-width:200px;">
+                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Context</label>
+                                <input type="text" id="testContext" value="user is debugging a python traceback" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
+                            </div>
+                            <div style="min-width:120px;">
+                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Format</label>
+                                <select id="testFormat" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
+                                    <option value="any">Any</option>
+                                    <option value="image">Image</option>
+                                    <option value="video">Video</option>
+                                    <option value="native">Native</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <label style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;cursor:pointer;" title="Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live.">
+                                    <input type="checkbox" id="testSandboxToggle" checked style="margin:0;">
+                                    <span>Sandbox</span>
+                                </label>
+                                <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:9px 20px;background:#FF2D78;color:#fff;border:1.5px solid #1A1A2E;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:2px 2px 0 #1A1A2E;">▶ Run Test</button>
+                            </div>
+                        </div>
+                        <div id="testResults" style="display:none;">
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;" id="testMetrics">
+                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                    <div style="font-size:18px;font-weight:700;color:#1A1A2E;" id="tm-status">—</div>
+                                    <div style="font-size:11px;color:#6B7280;">Status</div>
+                                </div>
+                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                    <div style="font-size:18px;font-weight:700;color:#04BEFE;" id="tm-latency">—</div>
+                                    <div style="font-size:11px;color:#6B7280;">Latency</div>
+                                </div>
+                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                    <div style="font-size:18px;font-weight:700;color:#9D7AFF;" id="tm-bid">—</div>
+                                    <div style="font-size:11px;color:#6B7280;">Bid</div>
+                                </div>
+                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                    <div style="font-size:18px;font-weight:700;color:#FF2D78;" id="tm-payout">—</div>
+                                    <div style="font-size:11px;color:#6B7280;">Your Payout</div>
+                                </div>
+                            </div>
+                            <details style="background:#0A0A14;border-radius:8px;overflow:hidden;">
+                                <summary style="padding:10px 14px;color:#9D7AFF;font-size:12px;font-weight:600;cursor:pointer;font-family:'SFMono-Regular',Consolas,monospace;">Raw MCP Response</summary>
+                                <pre id="testRawResponse" style="padding:12px 14px;margin:0;color:#B0B0C7;font-size:11px;line-height:1.6;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace;max-height:300px;overflow-y:auto;"></pre>
+                            </details>
                         </div>
                     </div>
                 </div>
@@ -2328,64 +2376,11 @@ await message.reply({
                 </div>
             </div>
 
-            <!-- SDK Integration Tester -->
-            <div class="section" id="integrationTester">
-                <div class="section-title">Test Your Integration</div>
-                <div style="background:#FAFAFA; border:1px solid #E5E7EB; border-radius:12px; padding:20px;">
-                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-                        <div style="flex:1;min-width:200px;">
-                            <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Context</label>
-                            <input type="text" id="testContext" value="user is debugging a python traceback" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
-                        </div>
-                        <div style="min-width:120px;">
-                            <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Format</label>
-                            <select id="testFormat" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
-                                <option value="any">Any</option>
-                                <option value="image">Image</option>
-                                <option value="video">Video</option>
-                                <option value="native">Native</option>
-                            </select>
-                        </div>
-                        <div style="align-self:flex-end;display:flex;gap:8px;align-items:center;">
-                            <!-- Friend-onboarding audit (2026-05-13): when a new publisher
-                                 runs the integration test using their live key, they often
-                                 see "No ad" because no demand-side campaign matches their
-                                 context yet. That looks broken even though their integration
-                                 is fine. Sandbox mode guarantees a fill, so we let them
-                                 toggle in for the first run and see the full happy path. -->
-                            <label style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;cursor:pointer;" title="Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live.">
-                                <input type="checkbox" id="testSandboxToggle" checked style="margin:0;">
-                                <span>Sandbox</span>
-                            </label>
-                            <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:8px 20px;background:#04BEFE;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Run Test</button>
-                        </div>
-                    </div>
-                    <div id="testResults" style="display:none;">
-                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;" id="testMetrics">
-                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                <div style="font-size:18px;font-weight:700;color:#1A1A2E;" id="tm-status">—</div>
-                                <div style="font-size:11px;color:#6B7280;">Status</div>
-                            </div>
-                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                <div style="font-size:18px;font-weight:700;color:#04BEFE;" id="tm-latency">—</div>
-                                <div style="font-size:11px;color:#6B7280;">Latency</div>
-                            </div>
-                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                <div style="font-size:18px;font-weight:700;color:#9D7AFF;" id="tm-bid">—</div>
-                                <div style="font-size:11px;color:#6B7280;">Bid</div>
-                            </div>
-                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                <div style="font-size:18px;font-weight:700;color:#FF2D78;" id="tm-payout">—</div>
-                                <div style="font-size:11px;color:#6B7280;">Your Payout</div>
-                            </div>
-                        </div>
-                        <details style="background:#0A0A14;border-radius:8px;overflow:hidden;">
-                            <summary style="padding:10px 14px;color:#9D7AFF;font-size:12px;font-weight:600;cursor:pointer;font-family:'SFMono-Regular',Consolas,monospace;">Raw MCP Response</summary>
-                            <pre id="testRawResponse" style="padding:12px 14px;margin:0;color:#B0B0C7;font-size:11px;line-height:1.6;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace;max-height:300px;overflow-y:auto;"></pre>
-                        </details>
-                    </div>
-                </div>
-            </div>
+            <!-- "Test Your Integration" section removed 2026-05-20 —
+                 the form + results panel moved up into the Verify your
+                 integration block above so there's a single testing
+                 surface rather than two separate ones. -->
+
 
             <!-- SDK Quick Start -->
             <div class="section">
@@ -3433,9 +3428,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             startVerifyPolling(2000);  // every 2s for the next 60s
             setTimeout(() => startVerifyPolling(15000), 60000);
 
+            // Post-merge (2026-05-20): the test form lives inside the
+            // Verify panel now, not in a separate section. So we scroll
+            // to the Verify panel (which is the full-width row at the
+            // bottom of the integration section) and trigger the test
+            // button there. Same UX as before but no inter-section jump.
+            const verify = document.getElementById('integrationVerifyPanel');
             const testBtn = document.getElementById('testRunBtn');
+            if (verify) verify.scrollIntoView({ behavior: 'smooth', block: 'start' });
             if (testBtn) {
-                testBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => { testBtn.click(); }, 350);
             } else if (typeof runIntegrationTest === 'function') {
                 runIntegrationTest();
