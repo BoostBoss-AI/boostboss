@@ -2087,7 +2087,12 @@ await message.reply({
                         </div>
                     </div>
 
-                    <!-- Inline test form (merged from old #integrationTester). -->
+                    <!-- Inline test form + Theme & Preview (unified 2026-05-20).
+                         Top row: synthetic test form.
+                         Middle row: Theme controls (left) + live ad preview (right).
+                         Bottom row: slim status line + collapsible raw MCP response.
+                         The preview pane updates live with theme changes AND
+                         shows the actual ad data from the last test run. -->
                     <div style="background:#FAFAFA; border:1px solid #E5E7EB; border-radius:12px; padding:16px 20px;">
                         <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">Run a synthetic test</div>
                         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;">
@@ -2112,26 +2117,78 @@ await message.reply({
                                 <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:9px 20px;background:#FF2D78;color:#fff;border:1.5px solid #1A1A2E;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:2px 2px 0 #1A1A2E;">▶ Run Test</button>
                             </div>
                         </div>
-                        <div id="testResults" style="display:none;">
-                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;" id="testMetrics">
-                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                    <div style="font-size:18px;font-weight:700;color:#1A1A2E;" id="tm-status">—</div>
-                                    <div style="font-size:11px;color:#6B7280;">Status</div>
+
+                        <!-- Theme & Preview surface — the AdSense Ad Units analog.
+                             Publisher tweaks CSS variables on the left; rendered ad
+                             on the right updates in real time. After Run Test, the
+                             preview swaps from placeholder to the actual ad payload. -->
+                        <div style="display:grid;grid-template-columns:240px 1fr;gap:24px;margin-top:18px;padding-top:18px;border-top:1px dashed #E5E7EB;" class="theme-preview-grid">
+                            <!-- Theme controls -->
+                            <div>
+                                <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;">Theme</div>
+                                <div style="margin-bottom:14px;">
+                                    <label for="themePrimary" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Primary color</label>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <input type="color" id="themePrimary" value="#FF2D78" style="width:36px;height:30px;border:1px solid #E5E7EB;border-radius:6px;padding:2px;cursor:pointer;background:#fff;">
+                                        <code id="themePrimaryLabel" style="font-size:11px;color:#1A1A2E;font-family:'SFMono-Regular',monospace;">#FF2D78</code>
+                                    </div>
                                 </div>
-                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                    <div style="font-size:18px;font-weight:700;color:#04BEFE;" id="tm-latency">—</div>
-                                    <div style="font-size:11px;color:#6B7280;">Latency</div>
+                                <div style="margin-bottom:14px;">
+                                    <label for="themeRadius" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Border radius <span id="themeRadiusLabel" style="font-family:'SFMono-Regular',monospace;color:#1A1A2E;">12px</span></label>
+                                    <input type="range" id="themeRadius" min="0" max="24" value="12" style="width:100%;">
                                 </div>
-                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                    <div style="font-size:18px;font-weight:700;color:#9D7AFF;" id="tm-bid">—</div>
-                                    <div style="font-size:11px;color:#6B7280;">Bid</div>
+                                <div style="margin-bottom:14px;">
+                                    <label for="themeFont" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Font</label>
+                                    <select id="themeFont" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:12px;background:#fff;">
+                                        <option value="Inter, sans-serif">Inter</option>
+                                        <option value="system-ui, -apple-system, sans-serif">System UI</option>
+                                        <option value="'SFMono-Regular', Consolas, monospace">Monospace</option>
+                                        <option value="Georgia, serif">Georgia</option>
+                                    </select>
                                 </div>
-                                <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
-                                    <div style="font-size:18px;font-weight:700;color:#FF2D78;" id="tm-payout">—</div>
-                                    <div style="font-size:11px;color:#6B7280;">Your Payout</div>
+                                <button id="copyThemeBtn" onclick="copyThemeCss()" style="width:100%;padding:8px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Copy CSS snippet</button>
+                                <div style="font-size:10.5px;color:#9CA3AF;margin-top:6px;line-height:1.4;">Paste into your stylesheet's <code>:root</code> block to apply this theme to all Lumi ads in your app.</div>
+                            </div>
+
+                            <!-- Live preview pane -->
+                            <div>
+                                <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+                                    <span>Live preview</span>
+                                    <span id="adPreviewStatus" style="font-size:10px;color:#9CA3AF;font-weight:500;text-transform:none;letter-spacing:0;">placeholder · run a test to see a real ad</span>
+                                </div>
+                                <div id="adPreview" style="
+                                    background: #fff;
+                                    border: 1px solid #E5E7EB;
+                                    border-left: 3px solid var(--lumi-primary, #FF2D78);
+                                    border-radius: var(--lumi-radius, 12px);
+                                    padding: 14px 16px;
+                                    font-family: var(--lumi-font, 'Inter', sans-serif);
+                                    max-width: 460px;
+                                ">
+                                    <div style="font-size:10px;color:var(--lumi-primary,#FF2D78);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                                        <span style="background:var(--lumi-primary,#FF2D78);color:#fff;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:900;">BB</span>
+                                        <span>Sponsored · via Boost Boss</span>
+                                    </div>
+                                    <img id="adPreviewImg" src="" alt="" style="width:100%;border-radius:6px;margin-bottom:10px;display:none;max-height:200px;object-fit:cover;">
+                                    <div id="adPreviewHeadline" style="font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:4px;">Your headline appears here</div>
+                                    <div id="adPreviewSubtext" style="font-size:12px;color:#6B7280;margin-bottom:10px;line-height:1.5;">Run a synthetic test to see a real ad rendered with your theme settings.</div>
+                                    <a id="adPreviewCta" href="#" onclick="return false;" style="display:inline-block;background:var(--lumi-primary,#FF2D78);color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;">Try Free →</a>
                                 </div>
                             </div>
-                            <details style="background:#0A0A14;border-radius:8px;overflow:hidden;">
+                        </div>
+
+                        <!-- Slim status row + collapsible raw response. The four
+                             standalone metric cards were replaced with this single
+                             horizontal strip since the preview pane is now the
+                             primary post-test visual. -->
+                        <div id="testResults" style="display:none;margin-top:16px;padding-top:14px;border-top:1px dashed #E5E7EB;">
+                            <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#6B7280;align-items:center;">
+                                <span><strong style="color:#1A1A2E;" id="tm-status">—</strong> <span style="font-size:11px;">status</span></span>
+                                <span><strong style="color:#04BEFE;" id="tm-latency">—</strong> <span style="font-size:11px;">latency</span></span>
+                                <span><strong style="color:#9D7AFF;" id="tm-bid">—</strong> <span style="font-size:11px;">bid</span></span>
+                                <span><strong style="color:#FF2D78;" id="tm-payout">—</strong> <span style="font-size:11px;">your payout</span></span>
+                            </div>
+                            <details style="background:#0A0A14;border-radius:8px;overflow:hidden;margin-top:12px;">
                                 <summary style="padding:10px 14px;color:#9D7AFF;font-size:12px;font-weight:600;cursor:pointer;font-family:'SFMono-Regular',Consolas,monospace;">Raw MCP Response</summary>
                                 <pre id="testRawResponse" style="padding:12px 14px;margin:0;color:#B0B0C7;font-size:11px;line-height:1.6;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace;max-height:300px;overflow-y:auto;"></pre>
                             </details>
@@ -3411,6 +3468,103 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // Scroll to the detailed Integration Test panel and auto-fire it.
         // Phase F: also kick the verify poller into "detecting" mode so the
         // user gets immediate feedback that we're watching for their event.
+        // ───────────── Theme & Preview (Piece 4 of plug-and-play upgrade, shipped early 2026-05-20) ─────────────
+        // Lets the publisher tweak Lumi's CSS variables (--lumi-primary,
+        // --lumi-radius, --lumi-font) and see a rendered ad update in real
+        // time. After a successful Run Test, the preview swaps from
+        // placeholder copy to the actual returned ad payload. Theme
+        // selections persist in localStorage so the publisher's chosen
+        // styling survives reloads. Generates a copy-pasteable
+        // :root {...} CSS block they can drop into their stylesheet.
+        function applyThemePreview() {
+            const primary = (document.getElementById('themePrimary') || {}).value || '#FF2D78';
+            const radius  = (document.getElementById('themeRadius')  || {}).value || '12';
+            const font    = (document.getElementById('themeFont')    || {}).value || "'Inter', sans-serif";
+            const preview = document.getElementById('adPreview');
+            if (!preview) return;
+            preview.style.setProperty('--lumi-primary', primary);
+            preview.style.setProperty('--lumi-radius', radius + 'px');
+            preview.style.setProperty('--lumi-font', font);
+            const radLabel = document.getElementById('themeRadiusLabel');
+            const priLabel = document.getElementById('themePrimaryLabel');
+            if (radLabel) radLabel.textContent = radius + 'px';
+            if (priLabel) priLabel.textContent = primary.toUpperCase();
+            try {
+                localStorage.setItem('bb_theme_primary', primary);
+                localStorage.setItem('bb_theme_radius', radius);
+                localStorage.setItem('bb_theme_font', font);
+            } catch (_) {}
+        }
+        function loadThemeFromStorage() {
+            try {
+                const p = localStorage.getItem('bb_theme_primary');
+                const r = localStorage.getItem('bb_theme_radius');
+                const f = localStorage.getItem('bb_theme_font');
+                if (p && document.getElementById('themePrimary')) document.getElementById('themePrimary').value = p;
+                if (r && document.getElementById('themeRadius'))  document.getElementById('themeRadius').value = r;
+                if (f && document.getElementById('themeFont'))    document.getElementById('themeFont').value = f;
+            } catch (_) {}
+            applyThemePreview();
+        }
+        function copyThemeCss() {
+            const primary = (document.getElementById('themePrimary') || {}).value || '#FF2D78';
+            const radius  = (document.getElementById('themeRadius')  || {}).value || '12';
+            const font    = (document.getElementById('themeFont')    || {}).value || "'Inter', sans-serif";
+            const css = ':root {\n  --lumi-primary: ' + primary + ';\n  --lumi-radius:  ' + radius + 'px;\n  --lumi-font:    ' + font + ';\n}';
+            const btn = document.getElementById('copyThemeBtn');
+            navigator.clipboard.writeText(css).then(() => {
+                if (btn) {
+                    const orig = btn.textContent;
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => { btn.textContent = orig; }, 1500);
+                }
+                if (typeof showToast === 'function') showToast('Theme CSS copied to clipboard', 'success');
+            }).catch(() => {
+                if (typeof showToast === 'function') showToast('Copy failed — select the snippet manually', 'error');
+            });
+        }
+        // Populate the preview pane with a real ad payload after Run Test.
+        // Called from runIntegrationTest() on a successful fill.
+        function renderAdPreview(sponsored) {
+            if (!sponsored) return;
+            const headline = document.getElementById('adPreviewHeadline');
+            const subtext  = document.getElementById('adPreviewSubtext');
+            const img      = document.getElementById('adPreviewImg');
+            const cta      = document.getElementById('adPreviewCta');
+            const status   = document.getElementById('adPreviewStatus');
+            if (headline) headline.textContent = sponsored.headline || 'Your headline appears here';
+            if (subtext)  subtext.textContent  = sponsored.subtext  || '';
+            if (cta)      cta.textContent      = (sponsored.cta_label || 'Learn More') + ' →';
+            if (img) {
+                if (sponsored.media_url) {
+                    img.src = sponsored.media_url;
+                    img.style.display = '';
+                } else {
+                    img.style.display = 'none';
+                }
+            }
+            if (status) {
+                status.textContent = 'showing real ad · campaign ' + (sponsored.campaign_id || '').slice(0, 20);
+                status.style.color = '#10B981';
+            }
+        }
+        // Wire up the theme controls. Done on DOMContentLoaded so the
+        // input elements exist by the time we attach listeners.
+        function initThemeControls() {
+            const primary = document.getElementById('themePrimary');
+            const radius  = document.getElementById('themeRadius');
+            const font    = document.getElementById('themeFont');
+            if (primary) primary.addEventListener('input', applyThemePreview);
+            if (radius)  radius.addEventListener('input', applyThemePreview);
+            if (font)    font.addEventListener('change', applyThemePreview);
+            loadThemeFromStorage();
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initThemeControls);
+        } else {
+            initThemeControls();
+        }
+
         function scrollToAndRunTest() {
             // Flip the currently-selected door's badge to "detecting" — gives
             // immediate visual feedback. Real status comes from polling.
@@ -4093,11 +4247,27 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const apiKey = useSandbox ? 'sk_test_demo' : (userProfile ? userProfile.api_key : '');
             const publisherId = useSandbox ? 'pub_test_demo' : (userProfile ? userProfile.id : '');
 
+            // 2026-05-20 fix — synthetic test events used to land with
+            // integration_method=null, which the verify endpoint filters
+            // out — so the test would succeed but the per-door badge
+            // would never flip. Set X-Lumi-Source to the currently-
+            // selected door so both /api/mcp calls (get_sponsored_content
+            // + track_event) carry the door identity through. Then the
+            // event is visible to the badge poll and the verify component
+            // actually does what it visually promises.
+            const selectedDoor = (function () {
+                const sel = document.querySelector('.ic-card.ic-selected');
+                return sel && sel.dataset.door ? sel.dataset.door : 'mcp';
+            })();
+
             const start = performance.now();
             try {
                 const resp = await fetch(`${API_BASE}/api/mcp`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Lumi-Source': selectedDoor,
+                    },
                     body: JSON.stringify({
                         jsonrpc: '2.0',
                         id: Date.now(),
@@ -4133,17 +4303,26 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         document.getElementById('tm-latency').textContent = (benna.latency_ms || elapsed) + 'ms';
                         document.getElementById('tm-bid').textContent = '$' + bid.toFixed(4);
                         document.getElementById('tm-payout').textContent = '$' + payout;
+                        // Render the returned ad in the Theme & Preview pane
+                        // so the publisher sees what the real ad looks like
+                        // with their current theme variables applied.
+                        renderAdPreview(parsed.sponsored);
                         showToast('Integration test passed — ad served in ' + elapsed + 'ms', 'success');
 
                         // Fire a synthetic impression so the dashboard counter ticks up.
                         // Lets brand-new publishers see their main stats move, not just
                         // the test card. Failures here are silent — the test itself
-                        // already passed.
+                        // already passed. The X-Lumi-Source header is the fix that
+                        // makes the synthetic event actually update the per-door badge
+                        // (verify endpoint filters events where integration_method is null).
                         try {
                             const adId = parsed.sponsored.id || parsed.sponsored.creative_id;
                             await fetch(`${API_BASE}/api/mcp`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Lumi-Source': selectedDoor,
+                                },
                                 body: JSON.stringify({
                                     jsonrpc: '2.0',
                                     id: Date.now() + 1,
@@ -4162,6 +4341,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                             });
                             // Refresh the dashboard stats so the publisher sees the bump.
                             if (typeof loadStats === 'function') setTimeout(loadStats, 600);
+                            // Also bump the verify poll cadence so the badge for the
+                            // selected door flips green within seconds, not minutes.
+                            if (typeof startVerifyPolling === 'function') {
+                                startVerifyPolling(2000);
+                                setTimeout(() => startVerifyPolling(15000), 60000);
+                            }
                         } catch (_) { /* silent — test already passed */ }
                     } else {
                         document.getElementById('tm-status').textContent = 'No ad';
