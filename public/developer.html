@@ -4354,7 +4354,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                                     params: {
                                         name: 'track_event',
                                         arguments: {
-                                            event_type: 'impression',
+                                            // 2026-05-20 fix — backend reads `args.event`
+                                            // (see handleTrackEvent in api/mcp.js line 812),
+                                            // not `args.event_type`. Sending the wrong key
+                                            // caused the synthetic test to silently fail
+                                            // with "Missing event or campaign_id" even
+                                            // though campaign_id was present.
+                                            event: 'impression',
                                             campaign_id: campaignId,
                                             session_id: 'test_' + Date.now(),
                                             developer_api_key: apiKey,
