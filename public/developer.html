@@ -480,36 +480,22 @@
             border-color: rgba(4, 190, 254, 0.40);
             background: linear-gradient(180deg, rgba(4, 190, 254, 0.04), #fff 60%);
         }
-        /* Selected card — visually marked as the active tab. */
+        /* Selected card — uses `outline` (not border-width change) to avoid
+           the 0.5px bounding-box shift that used to make the grid jitter
+           when switching doors. Outline doesn't take layout space, so
+           cards stay perfectly aligned across selection changes.
+           Removed the down-pointing diamond marker (it was wrong on
+           desktop where the install panel is to the right, not below). */
         .ic-card.ic-selected {
-            border-color: #FF2D78;
-            border-width: 2px;
+            outline: 2px solid #FF2D78;
+            outline-offset: -2px;
             box-shadow: 0 8px 24px rgba(255, 45, 120, 0.14);
-            transform: translateY(-1px);
+            background: linear-gradient(180deg, rgba(255, 45, 120, 0.03), #fff 40%);
         }
-        .ic-card.ic-selected::after {
-            content: "";
-            position: absolute;
-            left: 0; right: 0; bottom: -22px;
-            height: 22px;
-            background: linear-gradient(180deg, transparent, rgba(255, 45, 120, 0.04));
-            pointer-events: none;
-        }
-        /* Down-arrow indicator on the selected card pointing to its panel below. */
-        .ic-card.ic-selected .ic-selected-marker {
-            display: inline-flex;
-        }
-        .ic-selected-marker {
-            display: none;
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%) rotate(45deg);
-            width: 14px;
-            height: 14px;
-            background: #FF2D78;
-            border-radius: 2px;
-        }
+        /* Selected-marker is hidden — kept in the DOM as a no-op so we
+           don't have to rip it out of renderIntegrationCards() for one
+           commit. CSS forces it invisible in all states. */
+        .ic-selected-marker { display: none !important; }
         .ic-header {
             display: flex;
             align-items: flex-start;
@@ -3057,9 +3043,14 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         : '<span class="ic-badge ic-badge-inactive">Not started</span>');
                 const impressions = active ? Number(m.impressions || 0).toLocaleString() : '—';
                 const earnings    = active ? '$' + Number(m.earnings || 0).toFixed(2) : '—';
+                // CTA copy: "below" was wrong on desktop (the install
+                // panel is to the right). Use directional arrow that works
+                // either way — on mobile the install panel still appears
+                // immediately after the cards-grid, so "see code →" reads
+                // as "next" naturally.
                 const ctaLabel    = isSelected
-                    ? '✓ Selected — see install + code below'
-                    : (active ? 'Switch to this door' : 'Set up');
+                    ? '✓ Selected · install + code →'
+                    : (active ? 'Switch to this door' : 'View install code');
                 return `
                     <div class="ic-card ${stateClass} ${selClass}" data-door="${d.key}" onclick="selectDoorTab('${d.key}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDoorTab('${d.key}')}">
                         <span class="ic-selected-marker" aria-hidden="true"></span>
@@ -3467,10 +3458,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const cta = card.querySelector('.ic-cta');
                 if (cta) {
                     if (isSel) {
-                        cta.textContent = '✓ Selected — see install + code below';
+                        cta.textContent = '✓ Selected · install + code →';
                     } else {
                         const isActive = card.classList.contains('ic-active');
-                        cta.textContent = isActive ? 'Switch to this door' : 'Set up';
+                        cta.textContent = isActive ? 'Switch to this door' : 'View install code';
                     }
                 }
             });
@@ -3478,6 +3469,17 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // their place. Also consumed by dashboardScrollToDoor() after
             // scroll-to-guide so the right tab is pre-selected.
             try { sessionStorage.setItem('bb_dashboard_target_door', name); } catch (_) {}
+            // Smooth-scroll the freshly-selected install panel into view.
+            // No-op on desktop where the panel is already visible to the
+            // right of the cards. On mobile (single-column layout, panel
+            // appears immediately below cards) this gets the publisher
+            // straight to the install instructions without a scroll hunt.
+            try {
+                const panel = document.getElementById('fw-' + name);
+                if (panel && window.innerWidth < 900) {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } catch (_) {}
         }
         // Backward-compat alias for any older inline handlers that still
         // reference the previous framework-tab function name.
