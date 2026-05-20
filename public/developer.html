@@ -502,6 +502,20 @@
             justify-content: space-between;
             gap: 8px;
             margin-bottom: 12px;
+            /* Reserve space at the top so the absolute-positioned badge
+               doesn't overlap the title text. The badge sits in the
+               top-right corner of the card (see .ic-badge rule below). */
+            padding-right: 0;
+            padding-top: 22px;
+            position: relative;
+        }
+        /* Title row gets full card width; badge no longer competes for
+           horizontal space — it's promoted to the card corner via the
+           `.ic-badge` absolute-position rule below. Stops "Lumi SDK for
+           browser extensions" from wrapping mid-phrase. */
+        .ic-header > div:first-child {
+            min-width: 0;
+            flex: 1;
         }
         .ic-name {
             font-size: 14px;
@@ -518,6 +532,15 @@
             border-radius: 999px;
             white-space: nowrap;
             flex-shrink: 0;
+            /* Badge moved to the top-right corner of the card (2026-05-20).
+               Previously it lived in the flex row with the title, which
+               squeezed long names like "Lumi SDK for browser extensions"
+               into 2-line wraps mid-phrase. Now title gets the full card
+               width and wraps naturally only on the genuinely long names. */
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 1;
         }
         .ic-badge-active {
             background: rgba(4, 190, 254, 0.12);
