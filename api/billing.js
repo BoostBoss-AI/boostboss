@@ -1476,10 +1476,14 @@ async function handleIntegrationVerify(req, res) {
 
   // One query, group in JS — Supabase JS client doesn't expose GROUP BY
   // cleanly without raw SQL.
+  // 2026-05-20 — also select session_id so we can distinguish synthetic
+  // dashboard tests (session_id starts with "test_") from real production
+  // traffic. Live impressions are the meaningful signal that the
+  // publisher's code is actually serving ads in their app.
   let rows = [];
   try {
     const { data, error } = await sb.from("events")
-      .select("event_type, integration_method, created_at")
+      .select("event_type, integration_method, created_at, session_id")
       .eq("developer_id", developerId)
       .gte("created_at", since)
       .not("integration_method", "is", null);
@@ -1491,24 +1495,61 @@ async function handleIntegrationVerify(req, res) {
     return res.status(500).json({ error: "query failed", message: e && e.message });
   }
 
+  // Helper — synthetic events come from the publisher dashboard's Run Test
+  // button, which sets session_id="test_<timestamp>". Real production
+  // events from installed SDKs use UUID-shaped or random session ids.
+  function isSyntheticSession(sid) {
+    return typeof sid === "string" && sid.startsWith("test_");
+  }
+
   const byDoor = {};
-  for (const d of DOORS) byDoor[d] = { impressions_24h: 0, clicks_24h: 0, last_seen_at: null };
+  for (const d of DOORS) byDoor[d] = {
+    impressions_24h: 0, clicks_24h: 0, last_seen_at: null,
+    // 2026-05-20 — distinguish synthetic test events from real ones so the
+    // badge can show "Verified (test only)" vs "Live · production".
+    live_impressions_24h: 0, live_clicks_24h: 0, last_live_at: null,
+    synthetic_impressions_24h: 0, synthetic_clicks_24h: 0, last_synthetic_at: null,
+  };
   for (const r of rows) {
     const door = r.integration_method;
     if (!byDoor[door]) continue;
-    if (r.event_type === "impression") byDoor[door].impressions_24h++;
-    if (r.event_type === "click")      byDoor[door].clicks_24h++;
+    const synthetic = isSyntheticSession(r.session_id);
+    if (r.event_type === "impression") {
+      byDoor[door].impressions_24h++;
+      if (synthetic) byDoor[door].synthetic_impressions_24h++;
+      else           byDoor[door].live_impressions_24h++;
+    }
+    if (r.event_type === "click") {
+      byDoor[door].clicks_24h++;
+      if (synthetic) byDoor[door].synthetic_clicks_24h++;
+      else           byDoor[door].live_clicks_24h++;
+    }
     if (!byDoor[door].last_seen_at || new Date(r.created_at) > new Date(byDoor[door].last_seen_at)) {
       byDoor[door].last_seen_at = r.created_at;
     }
+    if (synthetic) {
+      if (!byDoor[door].last_synthetic_at || new Date(r.created_at) > new Date(byDoor[door].last_synthetic_at)) {
+        byDoor[door].last_synthetic_at = r.created_at;
+      }
+    } else {
+      if (!byDoor[door].last_live_at || new Date(r.created_at) > new Date(byDoor[door].last_live_at)) {
+        byDoor[door].last_live_at = r.created_at;
+      }
+    }
   }
 
-  const out = { mode: "stripe", any_active: false, first_door_at: null };
+  const out = { mode: "stripe", any_active: false, any_live: false, first_door_at: null };
   for (const d of DOORS) {
     const v = byDoor[d];
     const active = (v.impressions_24h + v.clicks_24h) > 0;
-    out[d] = { active, ...v };
+    // "Live" status = any non-synthetic event seen. This is the bit that
+    // tells the publisher their actual installed code is firing — not
+    // just dashboard test clicks. The UI uses this to differentiate
+    // "Verified (test only)" from "Live".
+    const live = (v.live_impressions_24h + v.live_clicks_24h) > 0;
+    out[d] = { active, live, ...v };
     if (active) out.any_active = true;
+    if (live)   out.any_live   = true;
     if (active && v.last_seen_at) {
       if (!out.first_door_at || new Date(v.last_seen_at) < new Date(out.first_door_at)) {
         out.first_door_at = v.last_seen_at;

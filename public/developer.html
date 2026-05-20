@@ -449,6 +449,16 @@
         .verify-badge.detecting {
             background: #FEF3C7; border-color: #FCD34D;
         }
+        /* 2026-05-20 — "Verified (test)" state: integration plumbing works
+           but no real production traffic has arrived yet. Amber-tinted to
+           distinguish from green "Live" (real traffic) and gray "Not
+           started" (nothing yet). Sits between the two visually as a
+           "halfway there" status. */
+        .verify-badge.test-only {
+            background: #FFFBEB; border-color: #FCD34D;
+        }
+        .verify-badge.test-only .verify-icon { color: #B45309; }
+        .verify-badge.test-only .verify-status { color: #92400E; }
         .verify-badge .verify-icon {
             font-size: 16px; line-height: 1; width: 20px;
             display: inline-flex; align-items: center; justify-content: center;
@@ -3631,19 +3641,39 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     if (!badge) continue;
                     const iconEl   = badge.querySelector('.verify-icon');
                     const statusEl = badge.querySelector('.verify-status');
-                    if (state.active) {
-                        badge.classList.remove('detecting');
+                    // 2026-05-20 — three states instead of two:
+                    //   "Live"            = real production traffic (state.live)
+                    //   "Verified (test)" = only synthetic dashboard tests (state.active && !state.live)
+                    //   "Not started"     = no events at all
+                    // The distinction tells the publisher whether their app
+                    // is actually serving ads, or whether they've only run
+                    // dashboard tests so far. The previous logic conflated
+                    // the two — "Verified" lit up after any event, which made
+                    // dashboard tests look like production deployment.
+                    if (state.live) {
+                        badge.classList.remove('detecting', 'test-only');
                         badge.classList.add('active');
                         iconEl.textContent   = '✓';
+                        const since = state.last_live_at ? relTime(state.last_live_at) : 'just now';
+                        const imps  = state.live_impressions_24h || 0;
+                        statusEl.textContent = `Live · ${imps} imp · ${since}`;
+                    } else if (state.active) {
+                        // Active but no live traffic = synthetic-test-only.
+                        // The integration plumbing works, but the publisher's
+                        // installed code isn't serving real users yet.
+                        badge.classList.remove('detecting', 'active');
+                        badge.classList.add('test-only');
+                        iconEl.textContent   = '✓';
                         const since = state.last_seen_at ? relTime(state.last_seen_at) : 'just now';
-                        const imps  = state.impressions_24h || 0;
-                        statusEl.textContent = `Verified · ${imps} imp · ${since}`;
+                        const imps  = state.synthetic_impressions_24h || state.impressions_24h || 0;
+                        statusEl.textContent = `Verified (test) · ${imps} synthetic · ${since}`;
                     } else if (!badge.classList.contains('detecting')) {
                         // Leave 'detecting' state alone — we only flip it back
                         // to "Not started" after the 60s test window ends and
                         // no event arrived. The setTimeout in scrollToAndRunTest
                         // bumps cadence back down; clearing detecting state is
                         // handled there too.
+                        badge.classList.remove('active', 'test-only');
                         iconEl.textContent   = '○';
                         statusEl.textContent = 'Not started';
                     }
