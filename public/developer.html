@@ -3053,7 +3053,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const badge = active
                     ? '<span class="ic-badge ic-badge-active">● Active</span>'
                     : (isRecommended
-                        ? '<span class="ic-badge ic-badge-recommend" title="Based on your signup answer — you can switch any time">⭐ Recommended for your stack</span>'
+                        ? '<span class="ic-badge ic-badge-recommend" title="Based on your signup answer — you can switch any time by clicking another card">⭐ Recommended</span>'
                         : '<span class="ic-badge ic-badge-inactive">Not started</span>');
                 const impressions = active ? Number(m.impressions || 0).toLocaleString() : '—';
                 const earnings    = active ? '$' + Number(m.earnings || 0).toFixed(2) : '—';
