@@ -1050,6 +1050,25 @@
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
         }
+        /* Steady section height across door toggles. Each install panel
+           (.fw-panel) reserves the same vertical real estate regardless
+           of how much code it contains. Longer panels (NPM SDK, REST API
+           with the Discord example) reach this height naturally; shorter
+           ones (JS Snippet, MCP) sit at min-height with whitespace at
+           the bottom. Net effect: the section stops "jumping" when the
+           publisher switches between doors. 720px is the median of the
+           four panels' natural heights — picked so shorter panels don't
+           feel sparse and longer ones rarely overflow it. */
+        .fw-panel {
+            min-height: 720px;
+        }
+        @media (max-width: 900px) {
+            /* On mobile the layout is single-column (panel below cards),
+               not side-by-side — the steady-height constraint stops
+               serving the user there. Let panels collapse to natural
+               height so we're not forcing 720px of scroll on tiny screens. */
+            .fw-panel { min-height: 0; }
+        }
 
         .integration-step {
             border: 1px solid var(--border-light);
