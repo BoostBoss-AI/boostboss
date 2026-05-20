@@ -355,6 +355,26 @@ body.dark .superboost-mark { color: #F3F4F6; }
           <label for="app_name">App or product name</label>
           <input type="text" id="app_name" name="app_name" placeholder="My AI Assistant">
         </div>
+        <!-- Door-selection Layer 1 (2026-05-16): intent-first signup capture.
+             Asked only for publishers (role=developer). Answer routes them
+             to a recommended starting door in the dashboard. Stored in
+             localStorage as bb_primary_door — no DB change, server doesn't
+             need to know. UX-only; not the full plug-and-play upgrade. -->
+        <div class="form-group hidden" id="app-type-group">
+          <label for="app_type">What are you building?</label>
+          <select id="app_type" name="app_type" class="form-input" style="font-size:14px;">
+            <option value="">Select…</option>
+            <option value="js-snippet">AI chat app or web AI tool</option>
+            <option value="mcp">MCP server / tool for AI agents (Claude Desktop, Cursor, etc.)</option>
+            <option value="npm-sdk">Browser extension or desktop AI app</option>
+            <option value="rest-api">Discord / Telegram / Slack bot</option>
+            <option value="multiple">Multiple of the above</option>
+            <option value="other">Not sure / something else</option>
+          </select>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:5px;">
+            We'll set up your dashboard with the matching integration door first. You can change it anytime.
+          </div>
+        </div>
         <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
       </form>
 
@@ -522,8 +542,10 @@ const sb = window.supabase && window.supabase.createClient
   // Toggle field visibility to match the locked role
   var companyG = document.getElementById("company-group");
   var appG     = document.getElementById("app-group");
+  var appTypeG = document.getElementById("app-type-group");
   if (companyG) companyG.classList.toggle("hidden", role !== "advertiser");
   if (appG)     appG.classList.toggle("hidden", role !== "developer");
+  if (appTypeG) appTypeG.classList.toggle("hidden", role !== "developer");
 
   // Customize panel copy for the role
   var suH  = document.querySelector("#signup-panel h1");
@@ -606,6 +628,9 @@ document.querySelectorAll(".role-btn").forEach(btn => {
     selectedRole = btn.dataset.role;
     document.getElementById("company-group").classList.toggle("hidden", selectedRole !== "advertiser");
     document.getElementById("app-group").classList.toggle("hidden", selectedRole !== "developer");
+    // Door-selection Layer 1: only ask publishers what they're building.
+    var appTypeG = document.getElementById("app-type-group");
+    if (appTypeG) appTypeG.classList.toggle("hidden", selectedRole !== "developer");
   });
 });
 
@@ -624,6 +649,14 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     };
     if (selectedRole === "advertiser") payload.company_name = document.getElementById("company_name").value.trim() || undefined;
     if (selectedRole === "developer") payload.app_name = document.getElementById("app_name").value.trim() || undefined;
+
+    // Door-selection Layer 1 — persist the publisher's "what are you building?"
+    // answer to localStorage so the dashboard knows which door to recommend.
+    // Server doesn't need this; pure UX hint. UX-only; not the full plug-and-play upgrade.
+    if (selectedRole === "developer") {
+      const appType = (document.getElementById("app_type") || {}).value || "";
+      if (appType) try { localStorage.setItem("bb_primary_door", appType); } catch (_) {}
+    }
 
     const r = await fetch(API + "?action=signup", {
       method: "POST",

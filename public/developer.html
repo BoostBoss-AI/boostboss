@@ -541,6 +541,14 @@
             background: #F3F4F6;
             color: #6B7280;
         }
+        /* Door-selection Layer 2 — "Recommended for your stack" badge.
+           Reads from the signup hint (bb_primary_door localStorage).
+           Visible only when the door isn't already producing real traffic. */
+        .ic-badge-recommend {
+            background: linear-gradient(90deg, rgba(255, 230, 0, 0.22), rgba(4, 190, 254, 0.18));
+            color: #6B4F00;
+            border: 1px solid rgba(255, 230, 0, 0.55);
+        }
         .ic-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -2999,13 +3007,37 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const grid = document.getElementById('integrationCardsGrid');
             if (!grid) return;
             const data = byMethod || {};
-            // Default selected door = first Active, else "mcp." Read from
-            // sessionStorage if a previous tab pick is remembered.
+            // Door-selection Layer 2 (2026-05-16): read the signup-time
+            // "What are you building?" hint from localStorage. Used to
+            // (a) default the selected door tab on first load + (b) badge
+            // the matching card as "Recommended for your stack."
+            // Empty / "multiple" / "other" → fall through to the existing
+            // first-active-or-mcp cascade. Single-door value is honored
+            // only when no traffic has arrived yet (real traffic takes
+            // priority — a publisher who's already serving on Door X
+            // shouldn't be nagged about Door Y).
+            const VALID_DOORS = ['mcp', 'js-snippet', 'npm-sdk', 'rest-api'];
+            let primaryDoor = null;
+            try {
+                const raw = localStorage.getItem('bb_primary_door');
+                if (raw && VALID_DOORS.includes(raw)) primaryDoor = raw;
+            } catch (_) {}
+
+            // Default selected door = sessionStorage pick (explicit prior choice)
+            //                       → first Active door (traffic-based)
+            //                       → primary door from signup hint
+            //                       → 'mcp' (final fallback)
             let selectedDoor = null;
             try { selectedDoor = sessionStorage.getItem('bb_dashboard_target_door'); } catch (_) {}
             if (!selectedDoor) {
                 const firstActive = INTEGRATION_DOORS.find(d => (data[d.key] || {}).impressions > 0);
-                selectedDoor = firstActive ? firstActive.key : 'mcp';
+                if (firstActive) {
+                    selectedDoor = firstActive.key;
+                } else if (primaryDoor) {
+                    selectedDoor = primaryDoor;
+                } else {
+                    selectedDoor = 'mcp';
+                }
             }
             const html = INTEGRATION_DOORS.map(d => {
                 const m = data[d.key] || { impressions: 0, clicks: 0, earnings: 0 };
@@ -3013,9 +3045,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const isSelected = d.key === selectedDoor;
                 const stateClass  = active ? 'ic-active' : 'ic-inactive';
                 const selClass    = isSelected ? 'ic-selected' : '';
+                // Door-selection Layer 2: show "Recommended for your stack"
+                // ONLY when the card matches the signup hint AND the door
+                // isn't already producing real traffic. Once traffic flows,
+                // active status takes over — no double-badging.
+                const isRecommended = (d.key === primaryDoor) && !active;
                 const badge = active
                     ? '<span class="ic-badge ic-badge-active">● Active</span>'
-                    : '<span class="ic-badge ic-badge-inactive">Not started</span>';
+                    : (isRecommended
+                        ? '<span class="ic-badge ic-badge-recommend" title="Based on your signup answer — you can switch any time">⭐ Recommended for your stack</span>'
+                        : '<span class="ic-badge ic-badge-inactive">Not started</span>');
                 const impressions = active ? Number(m.impressions || 0).toLocaleString() : '—';
                 const earnings    = active ? '$' + Number(m.earnings || 0).toFixed(2) : '—';
                 const ctaLabel    = isSelected
