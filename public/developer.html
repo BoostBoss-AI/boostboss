@@ -1044,29 +1044,76 @@
             color: white;
         }
 
-        /* Integration Steps */
+        /* Integration Steps — three-component layout (2026-05-20):
+             ┌─────────┬─────────────────────┐
+             │ header (full width)          │
+             ├─────────┬─────────────────────┤
+             │ cards   │                     │
+             │ sidebar │  install panel      │
+             │ (4 stacked) │ (fixed size,    │
+             │         │  matches longest    │
+             │         │  door's content)    │
+             ├─────────┴─────────────────────┤
+             │  Verify your integration      │
+             │  (full width, below both)     │
+             └───────────────────────────────┘
+           Cards stack vertically as a sidebar. Install panel is fixed
+           at the tallest door's natural height so toggling doesn't
+           change the section size. Verify spans full width across the
+           bottom. Mobile collapses to single column with natural heights. */
         .integration-steps {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: 280px 1fr;
+            grid-template-areas:
+                "header  header"
+                "intro   intro"
+                "sidebar main"
+                "verify  verify";
+            gap: 18px 28px;
+            align-items: start;
         }
-        /* Steady section height across door toggles. Each install panel
-           (.fw-panel) reserves the same vertical real estate regardless
-           of how much code it contains. Longer panels (NPM SDK, REST API
-           with the Discord example) reach this height naturally; shorter
-           ones (JS Snippet, MCP) sit at min-height with whitespace at
-           the bottom. Net effect: the section stops "jumping" when the
-           publisher switches between doors. 720px is the median of the
-           four panels' natural heights — picked so shorter panels don't
-           feel sparse and longer ones rarely overflow it. */
+        /* Direct-child elements of .integration-steps mapped onto the
+           grid areas above. Selectors are scoped so they don't bleed
+           into nested .section-title / <p> elements that might live
+           further down the DOM. */
+        .integration-steps > .section-title { grid-area: header; }
+        .integration-steps > p              { grid-area: intro;  }
+        .integration-steps > #integrationCardsGrid { grid-area: sidebar; }
+        .integration-steps > .fw-panel      { grid-area: main; align-self: start; }
+        .integration-steps > #integrationVerifyPanel { grid-area: verify; }
+
+        /* All four .fw-panel elements occupy the same `main` grid area.
+           Only one is visible at a time (the other three are display:none
+           by selectDoorTab). Setting the same min-height across all four
+           means the grid row stays the same height regardless of which
+           panel is showing. 950px is sized for the tallest door (Lumi
+           API for Bots — REST + Discord example) so it never overflows
+           and shorter doors just leave whitespace at the bottom. */
         .fw-panel {
-            min-height: 720px;
+            min-height: 950px;
         }
+
+        /* Cards stack vertically in the sidebar — not a 2x2 grid anymore. */
+        @media (min-width: 901px) {
+            .integration-steps > #integrationCardsGrid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 900px) {
-            /* On mobile the layout is single-column (panel below cards),
-               not side-by-side — the steady-height constraint stops
-               serving the user there. Let panels collapse to natural
-               height so we're not forcing 720px of scroll on tiny screens. */
+            /* Mobile: collapse to single column, natural heights. The
+               fixed 950px constraint would create a 950px-tall block on
+               a phone — terrible. Let layout flow naturally and let
+               cards return to their auto-fit 2-or-1-column behavior. */
+            .integration-steps {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "intro"
+                    "sidebar"
+                    "main"
+                    "verify";
+            }
             .fw-panel { min-height: 0; }
         }
 
