@@ -502,20 +502,6 @@
             justify-content: space-between;
             gap: 8px;
             margin-bottom: 12px;
-            /* Reserve space at the top so the absolute-positioned badge
-               doesn't overlap the title text. The badge sits in the
-               top-right corner of the card (see .ic-badge rule below). */
-            padding-right: 0;
-            padding-top: 22px;
-            position: relative;
-        }
-        /* Title row gets full card width; badge no longer competes for
-           horizontal space — it's promoted to the card corner via the
-           `.ic-badge` absolute-position rule below. Stops "Lumi SDK for
-           browser extensions" from wrapping mid-phrase. */
-        .ic-header > div:first-child {
-            min-width: 0;
-            flex: 1;
         }
         .ic-name {
             font-size: 14px;
@@ -532,15 +518,6 @@
             border-radius: 999px;
             white-space: nowrap;
             flex-shrink: 0;
-            /* Badge moved to the top-right corner of the card (2026-05-20).
-               Previously it lived in the flex row with the title, which
-               squeezed long names like "Lumi SDK for browser extensions"
-               into 2-line wraps mid-phrase. Now title gets the full card
-               width and wraps naturally only on the genuinely long names. */
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            z-index: 1;
         }
         .ic-badge-active {
             background: rgba(4, 190, 254, 0.12);
@@ -3048,32 +3025,37 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // sandbox excluded). Doors with any traffic in the window are
         // marked Active; doors with zero traffic show "Not started" and
         // a CTA that scrolls to the integration guide door-tab.
+        // Dashboard-card display names shortened 2026-05-20 so the
+        // titles fit on one line in the 280px sidebar layout. Docs URLs
+        // (and the underlying door keys) unchanged — only the dashboard
+        // card display label is affected. Public docs pages and the
+        // verify-badges section still use the longer canonical names.
         const INTEGRATION_DOORS = [
             {
                 key:   'mcp',
                 icon:  '⚙️',
-                name:  'Lumi SDK for MCP',
+                name:  'Lumi MCP',
                 blurb: 'For MCP server developers. npm install @boostbossai/lumi-mcp.',
                 docs:  '/docs/mcp',
             },
             {
                 key:   'js-snippet',
                 icon:  '💬',
-                name:  'Lumi SDK script tag',
+                name:  'Lumi Web',
                 blurb: 'For AI apps and websites. <script src="https://boostboss.ai/lumi.js">',
                 docs:  '/docs/js-snippet',
             },
             {
                 key:   'npm-sdk',
                 icon:  '🧩',
-                name:  'Lumi SDK for browser extensions',
+                name:  'Lumi Extension',
                 blurb: 'Manifest v3 native, React + Vue. npm install @boostbossai/lumi-sdk.',
                 docs:  '/docs/npm-sdk',
             },
             {
                 key:   'rest-api',
                 icon:  '🤖',
-                name:  'Lumi API for Bots',
+                name:  'Lumi Bot',
                 blurb: 'Discord, Telegram, Slack. POST /v1/ad-request + optional helpers.',
                 docs:  '/docs/rest-api',
             },
