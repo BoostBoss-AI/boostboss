@@ -206,13 +206,13 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <h1>Admin Panel</h1>
     <p class="sub">Boost Boss internal dashboard</p>
     <form id="admin-login-form">
-      <input type="email" id="admin-email" placeholder="Admin email" required>
-      <input type="password" id="admin-password" placeholder="Password" required>
-      <button type="submit">Sign in</button>
+      <input type="password" id="admin-key" placeholder="Admin key" required autocomplete="off">
+      <button type="submit">Unlock</button>
     </form>
     <p class="error" id="admin-error"></p>
     <p style="font-size:12px;color:var(--muted);margin-top:16px;">
-      In demo mode, use any email and password to enter.
+      Enter the admin key (ADMIN_TOKEN). It is stored only in this browser.
+      In demo mode, any value unlocks the console.
     </p>
   </div>
 </div>
@@ -840,25 +840,26 @@ let user = null;
 const _auditLog = JSON.parse(sessionStorage.getItem("bb_admin_audit") || "[]");
 
 // ── Admin login ──
+// Single-key auth: the admin console is gated by one shared secret
+// (ADMIN_TOKEN / BBX_ADMIN_KEY env on Vercel). The key is sent as the
+// Bearer token on every admin API call. We verify it once here against
+// a real admin endpoint before unlocking, so a bad key fails fast.
 document.getElementById("admin-login-form").addEventListener("submit", async e => {
   e.preventDefault();
-  const email = document.getElementById("admin-email").value.trim();
-  const password = document.getElementById("admin-password").value;
+  const key = document.getElementById("admin-key").value.trim();
+  const el = document.getElementById("admin-error");
+  el.style.display = "none";
+  if (!key) return;
   try {
-    const r = await fetch(API + "/api/auth?action=login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+    const r = await fetch(API + "/api/stats?type=live_activity", {
+      headers: { "Authorization": "Bearer " + key },
     });
-    const j = await r.json();
-    if (!r.ok || j.error) throw new Error(j.error || "Login failed");
-    token = j.session?.access_token;
-    user = j.user;
+    if (r.status === 401) throw new Error("Invalid admin key");
+    if (!r.ok) throw new Error("Verification failed (HTTP " + r.status + ")");
+    token = key;
     localStorage.setItem("bb_admin_token", token);
-    localStorage.setItem("bb_admin_user", JSON.stringify(user));
     showDashboard();
   } catch (err) {
-    const el = document.getElementById("admin-error");
     el.textContent = err.message;
     el.style.display = "block";
   }
@@ -886,12 +887,12 @@ function logout() {
 }
 
 // ── Auto-login ──
+// The stored admin key unlocks the console directly. If it's stale the
+// individual panels will surface their own 401s.
 (function() {
   const t = localStorage.getItem("bb_admin_token");
-  const u = localStorage.getItem("bb_admin_user");
-  if (t && u) {
+  if (t) {
     token = t;
-    try { user = JSON.parse(u); } catch(e) {}
     showDashboard();
   }
 })();

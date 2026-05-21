@@ -213,11 +213,14 @@ function requireAdmin(req) {
   if (!authHeader) return null;
   const token = authHeader.replace(/^Bearer\s+/i, "");
 
-  // Static admin-key fallback. When BBX_ADMIN_KEY is set in the env,
-  // any caller presenting that exact secret as `Authorization: Bearer ...`
-  // is treated as admin. Useful for one-shot ops (re-embed backfill,
-  // cron jobs, manual cleanup) without juggling Supabase JWTs.
-  if (process.env.BBX_ADMIN_KEY && token && token === process.env.BBX_ADMIN_KEY) {
+  // Static admin-key fallback. When BBX_ADMIN_KEY or ADMIN_TOKEN is set
+  // in the env, any caller presenting that exact secret as
+  // `Authorization: Bearer ...` is treated as admin. This is the auth
+  // path the admin console uses — both env names are accepted so the
+  // operator only has to configure one. Also useful for one-shot ops
+  // (re-embed backfill, cron jobs, manual cleanup) without Supabase JWTs.
+  const staticKeys = [process.env.BBX_ADMIN_KEY, process.env.ADMIN_TOKEN].filter(Boolean);
+  if (token && staticKeys.includes(token)) {
     return { role: "admin", source: "static_key" };
   }
 

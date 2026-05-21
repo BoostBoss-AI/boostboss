@@ -1259,10 +1259,13 @@ async function mergeLiveEvents(sb, dailyStats, filter) {
 
 function _liveActivityAdminAuth(req) {
   if (!HAS_SUPABASE) return true;
-  const expected = process.env.ADMIN_TOKEN || "";
-  if (!expected) return false;
+  // Accept either env name so the admin console only needs one secret
+  // configured (ADMIN_TOKEN and BBX_ADMIN_KEY are treated as equivalent
+  // across api/stats, api/billing and api/campaigns).
+  const keys = [process.env.ADMIN_TOKEN, process.env.BBX_ADMIN_KEY].filter(Boolean);
+  if (keys.length === 0) return false;
   const auth = (req.headers && (req.headers.authorization || req.headers.Authorization)) || "";
-  return auth === `Bearer ${expected}`;
+  return keys.some((k) => auth === `Bearer ${k}`);
 }
 
 async function handleLiveActivity(req, res) {
