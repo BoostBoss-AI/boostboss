@@ -224,6 +224,11 @@ function requireAdmin(req) {
     return { role: "admin", source: "static_key" };
   }
 
+  // Demo mode (no Supabase) — the admin console is open, matching the
+  // !HAS_SUPABASE bypass in api/stats and api/billing. A bearer header
+  // is still required (checked above) so unauthenticated calls fail.
+  if (!HAS_SUPABASE) return { role: "admin", source: "demo_open" };
+
   const claims = verifyJwt(token);
   if (!claims) return null;
   // Production: only admin role. Demo: admin OR advertiser (admin.html logs in as advertiser).
