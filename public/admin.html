@@ -946,7 +946,7 @@ async function loadLiveActivity() {
   if (stateEl) stateEl.textContent = 'Refreshing…';
   try {
     const r = await fetch(`${API}/api/stats?type=live_activity&mode=${encodeURIComponent(mode)}`, {
-      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+      headers: { 'Authorization': `Bearer ${token || ''}` },
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
@@ -1112,7 +1112,7 @@ async function loadMoneyFlow() {
   if (stateEl) stateEl.textContent = 'Refreshing…';
   try {
     const r = await fetch(`${API}/api/stats?type=money_flow&mode=${encodeURIComponent(mode)}`, {
-      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+      headers: { 'Authorization': `Bearer ${token || ''}` },
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
@@ -1262,7 +1262,7 @@ async function loadAuctionInspector() {
   body.innerHTML = '<tr><td colspan="9" class="empty-state">Loading…</td></tr>';
   try {
     const r = await fetch(`${API}/api/stats?${params.toString()}`, {
-      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+      headers: { 'Authorization': `Bearer ${token || ''}` },
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
@@ -1312,7 +1312,7 @@ async function loadAuctionDetail(auctionId) {
   detail.innerHTML = 'Loading…';
   try {
     const r = await fetch(`${API}/api/stats?${params.toString()}`, {
-      headers: { 'Authorization': `Bearer ${(user && user.token) || ''}` },
+      headers: { 'Authorization': `Bearer ${token || ''}` },
     });
     if (!r.ok) { detail.textContent = 'HTTP ' + r.status; return; }
     const j = await r.json();
