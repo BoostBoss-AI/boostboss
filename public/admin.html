@@ -412,11 +412,19 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
         <div class="section-header"><h2 style="font-size:14px;">By Door (24h)</h2></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Door</th><th style="text-align:right;">Auctions</th><th style="text-align:right;">Imps</th><th style="text-align:right;">Avg eCPM</th><th style="text-align:right;">Fill rate</th></tr></thead>
+            <thead><tr><th>Door</th><th style="text-align:right;">Publishers</th><th style="text-align:right;">Auctions</th><th style="text-align:right;">Imps</th><th style="text-align:right;">Avg eCPM</th><th style="text-align:right;">Fill rate</th></tr></thead>
             <tbody id="live-by-door-body">
-              <tr><td colspan="5" class="empty-state">—</td></tr>
+              <tr><td colspan="6" class="empty-state">—</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Door distribution time-series (24h hourly) -->
+      <div class="section">
+        <div class="section-header"><h2 style="font-size:14px;">Door Distribution (24h, hourly)</h2></div>
+        <div id="live-door-timeseries" style="padding:12px 4px;">
+          <p class="empty-state" style="text-align:center;color:var(--muted);">—</p>
         </div>
       </div>
 
@@ -466,6 +474,28 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
         </div>
         <p style="font-size:11px;color:var(--muted);margin-top:8px;">
           Deposits = advertiser top-ups via Stripe. Spend = events.cost (advertiser side). Publisher accrued = events.developer_payout. BB take = spend - accrued. Payouts paid = transferred to Stripe Connect.
+        </p>
+      </div>
+
+      <!-- Per-door money breakdown -->
+      <div class="section">
+        <div class="section-header"><h2 style="font-size:14px;">By Door (24h)</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Door</th>
+              <th style="text-align:right;">Advertiser spend</th>
+              <th style="text-align:right;">BB take</th>
+              <th style="text-align:right;">Publisher accrued</th>
+              <th style="text-align:right;">Impressions</th>
+            </tr></thead>
+            <tbody id="money-by-door-body">
+              <tr><td colspan="5" class="empty-state">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">
+          Which door earns. Aggregated from events grouped by integration_method over the last 24h. BB take = spend − publisher accrued.
         </p>
       </div>
 
@@ -986,11 +1016,12 @@ function renderLiveActivity(j) {
   // By-door
   const doorBody = document.getElementById('live-by-door-body');
   if (!j.by_door || j.by_door.length === 0) {
-    doorBody.innerHTML = '<tr><td colspan="5" class="empty-state">—</td></tr>';
+    doorBody.innerHTML = '<tr><td colspan="6" class="empty-state">—</td></tr>';
   } else {
     doorBody.innerHTML = j.by_door.map(d => `
       <tr>
         <td>${d.door}</td>
+        <td style="text-align:right;" class="mono">${_fmtN(d.active_publishers || 0)}</td>
         <td style="text-align:right;" class="mono">${_fmtN(d.auctions_24h)}</td>
         <td style="text-align:right;" class="mono">${_fmtN(d.impressions_24h)}</td>
         <td style="text-align:right;" class="mono">${d.avg_ecpm == null ? '—' : '$' + Number(d.avg_ecpm).toFixed(2)}</td>
@@ -998,6 +1029,9 @@ function renderLiveActivity(j) {
       </tr>
     `).join('');
   }
+
+  // Door distribution time-series — hourly stacked bars, pure CSS.
+  _renderDoorTimeseries(j.door_timeseries || []);
 
   // Alerts
   const alertsBody = document.getElementById('live-alerts-body');
@@ -1012,6 +1046,56 @@ function renderLiveActivity(j) {
       </div>`;
     }).join('') + '</div>';
   }
+}
+
+// Door color palette — shared by the time-series bars and the legend.
+const _DOOR_META = [
+  { key: 'mcp',        label: 'MCP',        color: '#EC4899' },
+  { key: 'js-snippet', label: 'JS Snippet', color: '#3B82F6' },
+  { key: 'npm-sdk',    label: 'NPM SDK',    color: '#10B981' },
+  { key: 'rest-api',   label: 'REST API',   color: '#F59E0B' },
+];
+
+// Hourly stacked bars — pure CSS, no chart library. Each of the 24
+// buckets is a vertical column; door segments stack within it. Heights
+// are normalised against the busiest hour so the shape stays readable
+// even when volume is low.
+function _renderDoorTimeseries(series) {
+  const host = document.getElementById('live-door-timeseries');
+  if (!host) return;
+  const total = (series || []).reduce((s, b) =>
+    s + _DOOR_META.reduce((t, d) => t + (Number(b[d.key]) || 0), 0), 0);
+  if (!series || series.length === 0 || total === 0) {
+    host.innerHTML = '<p class="empty-state" style="text-align:center;color:var(--muted);">No auctions in the last 24h.</p>';
+    return;
+  }
+  const peak = Math.max(1, ...series.map(b =>
+    _DOOR_META.reduce((t, d) => t + (Number(b[d.key]) || 0), 0)));
+  const legend = _DOOR_META.map(d =>
+    `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);">
+       <span style="width:10px;height:10px;border-radius:2px;background:${d.color};display:inline-block;"></span>${d.label}</span>`
+  ).join('');
+  const bars = series.map(b => {
+    const sum = _DOOR_META.reduce((t, d) => t + (Number(b[d.key]) || 0), 0);
+    const colH = Math.round((sum / peak) * 100);
+    const hr = b.hour ? new Date(b.hour).getHours() : '';
+    const segs = _DOOR_META.map(d => {
+      const v = Number(b[d.key]) || 0;
+      if (v === 0) return '';
+      const h = sum > 0 ? (v / sum) * 100 : 0;
+      return `<div title="${d.label}: ${v}" style="height:${h}%;background:${d.color};"></div>`;
+    }).join('');
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;">
+        <div style="height:120px;width:100%;display:flex;align-items:flex-end;">
+          <div title="${sum} auction${sum===1?'':'s'}" style="width:100%;height:${colH}%;min-height:${sum>0?2:0}px;display:flex;flex-direction:column;border-radius:2px 2px 0 0;overflow:hidden;">${segs}</div>
+        </div>
+        <span class="mono" style="font-size:9px;color:var(--muted);">${String(hr).padStart(2,'0')}</span>
+      </div>`;
+  }).join('');
+  host.innerHTML =
+    `<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;">${legend}</div>
+     <div style="display:flex;gap:2px;align-items:flex-end;">${bars}</div>
+     <p style="font-size:10px;color:var(--muted);margin:6px 0 0;text-align:right;">Hour of day (local) · peak ${peak} auctions/hr</p>`;
 }
 
 // ── Money Flow (Phase H Panel 2) ──
@@ -1057,6 +1141,24 @@ function renderMoneyFlow(j) {
       <td style="text-align:right;" class="mono">${_money(w.payouts_paid)}</td>
     </tr>`;
   }).join('');
+
+  // Per-door money breakdown
+  const doorBody = document.getElementById('money-by-door-body');
+  if (doorBody) {
+    if (!j.by_door || j.by_door.length === 0) {
+      doorBody.innerHTML = '<tr><td colspan="5" class="empty-state">—</td></tr>';
+    } else {
+      doorBody.innerHTML = j.by_door.map(d => `
+        <tr>
+          <td>${d.door}</td>
+          <td style="text-align:right;" class="mono">${_money(d.advertiser_spend)}</td>
+          <td style="text-align:right;" class="mono">${_money(d.bb_revenue)}</td>
+          <td style="text-align:right;" class="mono">${_money(d.publisher_accrued)}</td>
+          <td style="text-align:right;" class="mono">${(Number(d.impressions) || 0).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+  }
 
   // Eligible card
   const elig = j.eligible_for_next_payout || { count: 0, total_usd_ready: 0 };

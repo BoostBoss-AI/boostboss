@@ -1282,11 +1282,12 @@ async function handleLiveActivity(req, res) {
       money:  { advertiser_spend_24h: 0, bb_revenue_24h: 0, publisher_accrued_24h: 0 },
       top_publishers: [], top_campaigns: [],
       by_door: [
-        { door: "mcp",        auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
-        { door: "js-snippet", auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
-        { door: "npm-sdk",    auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
-        { door: "rest-api",   auctions_24h: 0, impressions_24h: 0, avg_ecpm: null, fill_rate: null },
+        { door: "mcp",        auctions_24h: 0, impressions_24h: 0, active_publishers: 0, avg_ecpm: null, fill_rate: null },
+        { door: "js-snippet", auctions_24h: 0, impressions_24h: 0, active_publishers: 0, avg_ecpm: null, fill_rate: null },
+        { door: "npm-sdk",    auctions_24h: 0, impressions_24h: 0, active_publishers: 0, avg_ecpm: null, fill_rate: null },
+        { door: "rest-api",   auctions_24h: 0, impressions_24h: 0, active_publishers: 0, avg_ecpm: null, fill_rate: null },
       ],
+      door_timeseries: [],
       recent_alerts: [],
     });
   }
@@ -1470,21 +1471,46 @@ async function handleLiveActivity(req, res) {
   // auction_logs.integration_method drives this. Some rows pre-date
   // migration 06 and have null integration_method; we bucket those into
   // 'unknown' but only return the 4 production doors in the response.
+  // Returns { by_door, door_timeseries }.
+  //   by_door         — per-door 24h aggregate (auctions, impressions,
+  //                     eCPM, fill rate, AND distinct active publishers).
+  //   door_timeseries — 24 hourly buckets, each with per-door auction
+  //                     counts, for the distribution-over-time view.
+  // Both are built from a single pass over auction_logs + events, so
+  // adding the publisher set + hourly bucketing costs no extra queries.
   async function loadByDoor() {
-    const buckets = {
-      "mcp":        { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
-      "js-snippet": { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
-      "npm-sdk":    { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
-      "rest-api":   { auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0 },
-    };
+    const DOOR_KEYS = ["mcp", "js-snippet", "npm-sdk", "rest-api"];
+    const buckets = {};
+    for (const d of DOOR_KEYS) {
+      buckets[d] = {
+        auctions_24h: 0, won_24h: 0, spend_24h: 0, impressions_24h: 0,
+        // Distinct publisher_ids seen on this door in the window.
+        publishers: new Set(),
+      };
+    }
 
-    // auctions per door (paged)
+    // Hourly time-series — 24 buckets oldest→newest. Pre-seeded so empty
+    // hours still render (a flat-line gap is itself signal). Keyed by the
+    // ISO hour prefix ("2026-05-20T14") for O(1) lookup while paging.
+    const nowMs = Date.now();
+    const hourBuckets = [];
+    const hourIndex = {};
+    for (let h = 23; h >= 0; h--) {
+      const dt = new Date(nowMs - h * 3600 * 1000);
+      const key = dt.toISOString().slice(0, 13);
+      const bucket = { hour: key + ":00:00Z", mcp: 0, "js-snippet": 0, "npm-sdk": 0, "rest-api": 0 };
+      hourBuckets.push(bucket);
+      hourIndex[key] = bucket;
+    }
+
+    // auctions per door (paged) — also feeds the publisher set + the
+    // hourly time-series in the same loop.
     {
       const PAGE = 1000;
       let offset = 0;
       for (let i = 0; i < 50; i++) {
         const { data, error } = await sb.from("auction_logs")
-          .select("integration_method, outcome")
+          .select("integration_method, outcome, publisher_id, ts")
           .eq("is_sandbox", isSandbox).gte("ts", since24h)
           .range(offset, offset + PAGE - 1);
         if (error || !data || data.length === 0) break;
@@ -1494,6 +1520,11 @@ async function handleLiveActivity(req, res) {
           if (!b) continue;
           b.auctions_24h += 1;
           if (a.outcome === "won") b.won_24h += 1;
+          if (a.publisher_id) b.publishers.add(a.publisher_id);
+          if (a.ts) {
+            const hb = hourIndex[String(a.ts).slice(0, 13)];
+            if (hb) hb[door] += 1;
+          }
         }
         if (data.length < PAGE) break;
         offset += PAGE;
@@ -1521,15 +1552,19 @@ async function handleLiveActivity(req, res) {
       }
     }
 
-    return Object.entries(buckets).map(([door, b]) => ({
+    const by_door = Object.entries(buckets).map(([door, b]) => ({
       door,
       auctions_24h:    b.auctions_24h,
       impressions_24h: b.impressions_24h,
+      // Distinct publishers serving this door in the last 24h — adoption
+      // signal: "how many publishers actually run Lumi on this door."
+      active_publishers: b.publishers.size,
       // eCPM = spend / impressions * 1000
       avg_ecpm: b.impressions_24h > 0 ? +((b.spend_24h / b.impressions_24h) * 1000).toFixed(2) : null,
       // Fill rate at the door level uses won/auctions of that door.
       fill_rate: b.auctions_24h > 0 ? +(b.won_24h / b.auctions_24h).toFixed(3) : null,
     }));
+    return { by_door, door_timeseries: hourBuckets };
   }
 
   // ── 7. Recent alerts feed ──
@@ -1572,10 +1607,10 @@ async function handleLiveActivity(req, res) {
     return out.sort((a, b) => (b.ts || "").localeCompare(a.ts || "")).slice(0, 10);
   }
 
-  const [top_publishers, top_campaigns, by_door, recent_alerts] = await Promise.all([
+  const [top_publishers, top_campaigns, doorData, recent_alerts] = await Promise.all([
     loadTopPublishers().catch(() => []),
     loadTopCampaigns().catch(() => []),
-    loadByDoor().catch(() => []),
+    loadByDoor().catch(() => ({ by_door: [], door_timeseries: [] })),
     loadRecentAlerts().catch(() => []),
   ]);
 
@@ -1593,7 +1628,8 @@ async function handleLiveActivity(req, res) {
     money: { advertiser_spend_24h, bb_revenue_24h, publisher_accrued_24h },
     top_publishers,
     top_campaigns,
-    by_door,
+    by_door: doorData.by_door,
+    door_timeseries: doorData.door_timeseries,
     recent_alerts,
   });
 }
@@ -1639,6 +1675,12 @@ async function handleMoneyFlow(req, res) {
         "7d":  { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
         "30d": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
       },
+      by_door: [
+        { door: "mcp",        advertiser_spend: 0, publisher_accrued: 0, bb_revenue: 0, impressions: 0 },
+        { door: "js-snippet", advertiser_spend: 0, publisher_accrued: 0, bb_revenue: 0, impressions: 0 },
+        { door: "npm-sdk",    advertiser_spend: 0, publisher_accrued: 0, bb_revenue: 0, impressions: 0 },
+        { door: "rest-api",   advertiser_spend: 0, publisher_accrued: 0, bb_revenue: 0, impressions: 0 },
+      ],
       advertiser_deposits_24h: 0, advertiser_deposits_7d: 0, advertiser_deposits_30d: 0,
       top_advertisers_by_spend_24h: [],
       top_publishers_by_balance: [],
@@ -1796,6 +1838,44 @@ async function handleMoneyFlow(req, res) {
     return { count: (balances || []).length, total_usd_ready: +total.toFixed(2) };
   }
 
+  // Per-door money breakdown (24h) — answers "which door earns?".
+  // Aggregates events.cost + developer_payout grouped by integration_method.
+  // bb_revenue per door = spend − publisher_accrued for that door.
+  async function loadMoneyByDoor() {
+    const DOOR_KEYS = ["mcp", "js-snippet", "npm-sdk", "rest-api"];
+    const buckets = {};
+    for (const d of DOOR_KEYS) buckets[d] = { advertiser_spend: 0, publisher_accrued: 0, impressions: 0 };
+    const PAGE = 1000;
+    let offset = 0;
+    for (let i = 0; i < 60; i++) {
+      const { data, error } = await sb.from("events")
+        .select("integration_method, event_type, cost, developer_payout")
+        .eq("is_sandbox", isSandbox).gte("created_at", since24h)
+        .range(offset, offset + PAGE - 1);
+      if (error || !data || data.length === 0) break;
+      for (const e of data) {
+        const door = (e.integration_method || "").toLowerCase();
+        const b = buckets[door];
+        if (!b) continue;
+        b.advertiser_spend  += Number(e.cost) || 0;
+        b.publisher_accrued += Number(e.developer_payout) || 0;
+        if (e.event_type === "impression") b.impressions += 1;
+      }
+      if (data.length < PAGE) break;
+      offset += PAGE;
+    }
+    return DOOR_KEYS.map((door) => {
+      const b = buckets[door];
+      return {
+        door,
+        advertiser_spend:  +b.advertiser_spend.toFixed(4),
+        publisher_accrued: +b.publisher_accrued.toFixed(4),
+        bb_revenue:        +(b.advertiser_spend - b.publisher_accrued).toFixed(4),
+        impressions:       b.impressions,
+      };
+    });
+  }
+
   // Stripe available balance (so we can warn the operator if cron would
   // fail for "insufficient platform balance"). Best-effort; never blocks
   // the response. Cached for 60s to avoid hammering the Stripe API.
@@ -1814,18 +1894,20 @@ async function handleMoneyFlow(req, res) {
   const payoutHealth = await _loadPayoutHealthInline(sb).catch(() => null);
   const balanceDrift = await _loadBalanceDriftInline(sb).catch(() => ({ checked: 0, drifted: 0, sample: [] }));
 
-  const [top_advertisers_by_spend_24h, top_publishers_by_balance, pending_clawbacks_total, eligible_for_next_payout] =
+  const [top_advertisers_by_spend_24h, top_publishers_by_balance, pending_clawbacks_total, eligible_for_next_payout, by_door] =
     await Promise.all([
       loadTopAdvertisersBySpend().catch(() => []),
       loadTopPublishersByBalance().catch(() => []),
       sumPendingClawbacks().catch(() => 0),
       loadEligibleForNextPayout().catch(() => ({ count: 0, total_usd_ready: 0 })),
+      loadMoneyByDoor().catch(() => []),
     ]);
 
   return res.status(200).json({
     mode,
     generated_at: new Date().toISOString(),
     windows: windowsOut,
+    by_door,
     advertiser_deposits_24h: d24,
     advertiser_deposits_7d:  d7,
     advertiser_deposits_30d: d30,

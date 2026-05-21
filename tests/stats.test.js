@@ -87,6 +87,23 @@ async function test(name, fn) {
     assert.strictEqual(b.money.bb_revenue_24h, 0);
   });
 
+  await test("live_activity by_door entries include active_publishers count", async () => {
+    const r = await run({ method: "GET", query: { type: "live_activity" } });
+    for (const d of r._body.by_door) {
+      assert.strictEqual(typeof d.active_publishers, "number",
+        `door ${d.door} should expose active_publishers as a number`);
+      assert.strictEqual(d.active_publishers, 0, "demo mode → zero publishers");
+    }
+  });
+
+  await test("live_activity exposes door_timeseries array", async () => {
+    const r = await run({ method: "GET", query: { type: "live_activity" } });
+    assert(Array.isArray(r._body.door_timeseries),
+      "door_timeseries should be an array");
+    assert.strictEqual(r._body.door_timeseries.length, 0,
+      "demo mode → empty time-series");
+  });
+
   await test("live_activity rejects non-GET methods (would be 405-ish — currently falls through)", async () => {
     // POST falls through to the 400-default branch; we just want to lock
     // that it doesn't trigger handleLiveActivity.
@@ -128,6 +145,22 @@ async function test(name, fn) {
     assert.strictEqual(b.advertiser_deposits_24h, 0);
     assert.strictEqual(b.pending_clawbacks_total, 0);
     assert.strictEqual(b.eligible_for_next_payout.count, 0);
+  });
+
+  await test("money_flow exposes per-door breakdown with full shape", async () => {
+    const r = await run({ method: "GET", query: { type: "money_flow" } });
+    const b = r._body;
+    assert(Array.isArray(b.by_door), "by_door should be an array");
+    assert.strictEqual(b.by_door.length, 4, "should have 4 doors");
+    const doorIds = b.by_door.map((d) => d.door).sort();
+    assert.deepStrictEqual(doorIds, ["js-snippet", "mcp", "npm-sdk", "rest-api"]);
+    for (const d of b.by_door) {
+      assert.strictEqual(typeof d.advertiser_spend, "number");
+      assert.strictEqual(typeof d.bb_revenue, "number");
+      assert.strictEqual(typeof d.publisher_accrued, "number");
+      assert.strictEqual(typeof d.impressions, "number");
+      assert.strictEqual(d.advertiser_spend, 0, "demo mode → zero spend");
+    }
   });
 
   // ── auction_inspect (Phase H Panel 3) ───────────────────────────────
