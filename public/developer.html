@@ -459,6 +459,115 @@
         }
         .verify-badge.test-only .verify-icon { color: #B45309; }
         .verify-badge.test-only .verify-status { color: #92400E; }
+
+        /* ── Ad Format Gallery (2026-05-20) — AdSense Ad Units analog.
+           Each card renders a sample ad in that format using the
+           publisher's --lumi-* theme variables, plus an accept/reject
+           toggle. Replaces the plain toggle rows so publishers can SEE
+           each format, not just read a label. ── */
+        .format-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+        }
+        .format-card {
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+        }
+        .format-card.fmt-enabled {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+        }
+        .format-card.fmt-disabled { opacity: 0.6; }
+        .format-card-head {
+            display: flex; justify-content: space-between;
+            align-items: baseline; gap: 8px;
+        }
+        .format-card-name { font-size: 13px; font-weight: 700; color: #1A1A2E; }
+        .format-card-rpm {
+            font-size: 10px; font-weight: 700; color: #FF2D78;
+            background: #FFF0F5; padding: 2px 6px; border-radius: 4px;
+            white-space: nowrap;
+        }
+        .format-card-preview {
+            background: #F8F9FA; border-radius: 8px; padding: 14px;
+            min-height: 132px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .format-card-desc { font-size: 11px; color: #6B7280; line-height: 1.45; }
+        .format-card-toggle {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 12px; color: #6B7280; cursor: pointer; margin-top: auto;
+        }
+        /* Per-format visual mockup primitives. All read --lumi-* theme vars
+           so they stay consistent with the Theme & Preview controls. */
+        .fmt-mock { width: 100%; font-family: var(--lumi-font, 'Inter', sans-serif); }
+        .fmt-mock-card {
+            background: #fff; border: 1px solid #E5E7EB;
+            border-left: 3px solid var(--lumi-primary, #FF2D78);
+            border-radius: var(--lumi-radius, 10px); padding: 10px;
+        }
+        .fmt-mock-disclosure {
+            font-size: 7px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--lumi-primary, #FF2D78);
+            margin-bottom: 5px;
+        }
+        .fmt-mock-image {
+            height: 38px; border-radius: 4px; margin-bottom: 6px;
+            background: repeating-linear-gradient(45deg, #EEF0F2 0 6px, #E2E5E9 6px 12px);
+        }
+        .fmt-mock-video {
+            height: 38px; border-radius: 4px; margin-bottom: 6px;
+            background: #1A1A2E;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .fmt-mock-play { color: #fff; font-size: 13px; }
+        .fmt-mock-headline {
+            font-size: 9px; font-weight: 700; color: #1A1A2E;
+            line-height: 1.3; margin-bottom: 3px;
+        }
+        .fmt-mock-sub { font-size: 7.5px; color: #6B7280; margin-bottom: 6px; }
+        .fmt-mock-cta {
+            display: inline-block; background: var(--lumi-primary, #FF2D78);
+            color: #fff; font-size: 7.5px; font-weight: 700;
+            padding: 3px 8px; border-radius: 4px;
+        }
+        /* Corner + fullscreen need a mini "app window" frame to show
+           WHERE the ad sits, not just what it contains. */
+        .fmt-mock-window {
+            width: 100%; height: 104px; background: #fff;
+            border: 1px solid #E5E7EB; border-radius: 6px;
+            position: relative; overflow: hidden;
+        }
+        .fmt-mock-window::before {
+            content: ""; position: absolute;
+            top: 12px; left: 10px; right: 10px; height: 6px;
+            background: #EEF0F2; border-radius: 3px;
+            box-shadow: 0 13px 0 #EEF0F2, 0 26px 0 #F1F3F5, 0 39px 0 #F1F3F5;
+        }
+        .fmt-mock-corner {
+            position: absolute; bottom: 8px; right: 8px; width: 92px;
+            background: #fff; border: 1px solid #E5E7EB;
+            border-left: 3px solid var(--lumi-primary, #FF2D78);
+            border-radius: var(--lumi-radius, 8px); padding: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+        }
+        .fmt-mock-modal {
+            position: absolute; inset: 0;
+            background: rgba(15, 15, 26, 0.55);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .fmt-mock-modal-card {
+            width: 76%; background: #fff;
+            border-radius: var(--lumi-radius, 8px);
+            padding: 8px; text-align: center;
+        }
         .verify-badge .verify-icon {
             font-size: 16px; line-height: 1; width: 20px;
             display: inline-flex; align-items: center; justify-content: center;
@@ -3490,11 +3599,21 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const primary = (document.getElementById('themePrimary') || {}).value || '#FF2D78';
             const radius  = (document.getElementById('themeRadius')  || {}).value || '12';
             const font    = (document.getElementById('themeFont')    || {}).value || "'Inter', sans-serif";
+            // Apply theme vars to BOTH the single live-preview pane AND
+            // the Ad Format Gallery container, so every format mockup
+            // re-themes in sync when the publisher tweaks a control.
+            const targets = [
+                document.getElementById('adPreview'),
+                document.getElementById('adFormatsContainer'),
+            ];
+            for (const el of targets) {
+                if (!el) continue;
+                el.style.setProperty('--lumi-primary', primary);
+                el.style.setProperty('--lumi-radius', radius + 'px');
+                el.style.setProperty('--lumi-font', font);
+            }
             const preview = document.getElementById('adPreview');
             if (!preview) return;
-            preview.style.setProperty('--lumi-primary', primary);
-            preview.style.setProperty('--lumi-radius', radius + 'px');
-            preview.style.setProperty('--lumi-font', font);
             const radLabel = document.getElementById('themeRadiusLabel');
             const priLabel = document.getElementById('themePrimaryLabel');
             if (radLabel) radLabel.textContent = radius + 'px';
@@ -3795,33 +3914,92 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             { key: 'fullscreen', name: 'Fullscreen',       description: 'Interstitial modal. Maximum attention but intrusive — use sparingly.', rpm: 22.00 },
         ];
 
+        // Per-format visual mockup. Returns HTML rendering a sample ad in
+        // that format. All read the --lumi-* theme variables so they stay
+        // in sync with the Theme & Preview controls. (2026-05-20)
+        function formatMockup(key) {
+            const HEAD = 'DevTools Pro — ship 3× faster';
+            const SUB  = '14-day free trial · no card';
+            const CTA  = 'Try free →';
+            if (key === 'native') {
+                return `<div class="fmt-mock"><div class="fmt-mock-card">
+                    <div class="fmt-mock-disclosure">— Sponsored —</div>
+                    <div class="fmt-mock-headline">${HEAD}</div>
+                    <div class="fmt-mock-sub">${SUB}</div>
+                    <span class="fmt-mock-cta">${CTA}</span>
+                </div></div>`;
+            }
+            if (key === 'image') {
+                return `<div class="fmt-mock"><div class="fmt-mock-card">
+                    <div class="fmt-mock-disclosure">— Sponsored —</div>
+                    <div class="fmt-mock-image"></div>
+                    <div class="fmt-mock-headline">${HEAD}</div>
+                    <span class="fmt-mock-cta">${CTA}</span>
+                </div></div>`;
+            }
+            if (key === 'video') {
+                return `<div class="fmt-mock"><div class="fmt-mock-card">
+                    <div class="fmt-mock-disclosure">— Sponsored —</div>
+                    <div class="fmt-mock-video"><span class="fmt-mock-play">▶</span></div>
+                    <div class="fmt-mock-headline">${HEAD}</div>
+                    <span class="fmt-mock-cta">${CTA}</span>
+                </div></div>`;
+            }
+            if (key === 'corner') {
+                return `<div class="fmt-mock"><div class="fmt-mock-window">
+                    <div class="fmt-mock-corner">
+                        <div class="fmt-mock-disclosure">Sponsored</div>
+                        <div class="fmt-mock-headline">DevTools Pro</div>
+                        <span class="fmt-mock-cta">Try →</span>
+                    </div>
+                </div></div>`;
+            }
+            if (key === 'fullscreen') {
+                return `<div class="fmt-mock"><div class="fmt-mock-window">
+                    <div class="fmt-mock-modal">
+                        <div class="fmt-mock-modal-card">
+                            <div class="fmt-mock-disclosure">Sponsored</div>
+                            <div class="fmt-mock-headline">DevTools Pro</div>
+                            <span class="fmt-mock-cta">${CTA}</span>
+                        </div>
+                    </div>
+                </div></div>`;
+            }
+            return '';
+        }
+
         function renderAdFormats() {
             const container = document.getElementById('adFormatsContainer');
+            if (!container) return;
             container.innerHTML = '';
+            // Switch the container from the old plain-toggle grid class to
+            // the gallery grid. Idempotent — safe to set on every render.
+            container.className = 'format-gallery-grid';
 
             AD_FORMAT_CATALOG.forEach(format => {
                 const isEnabled = !!userProfile.formats?.[format.key];
-                const item = document.createElement('div');
-                item.className = 'control-item';
-                item.innerHTML = `
-                    <div class="control-info">
-                        <h3 style="display: flex; align-items: center; gap: 8px;">
-                            ${format.name}
-                            <span style="font-size: 10px; font-weight: 700; color: #FF2D78; background: #FFF0F5; padding: 2px 6px; border-radius: 4px;">
-                                ~$${format.rpm.toFixed(2)} RPM
-                            </span>
-                        </h3>
-                        <p>${format.description}</p>
+                const card = document.createElement('div');
+                card.className = 'format-card ' + (isEnabled ? 'fmt-enabled' : 'fmt-disabled');
+                card.setAttribute('data-format', format.key);
+                card.innerHTML = `
+                    <div class="format-card-head">
+                        <span class="format-card-name">${format.name}</span>
+                        <span class="format-card-rpm">~$${format.rpm.toFixed(2)} RPM</span>
                     </div>
-                    <label class="toggle">
+                    <div class="format-card-preview">${formatMockup(format.key)}</div>
+                    <div class="format-card-desc">${format.description}</div>
+                    <label class="format-card-toggle">
                         <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="updateAdFormat('${format.key}', this.checked)">
-                        <span class="toggle-slider"></span>
+                        <span>Accept this format</span>
                     </label>
                 `;
-                container.appendChild(item);
+                container.appendChild(card);
             });
 
             updateIncomeEstimate();
+            // Re-apply theme vars so the freshly-rendered mockups pick up
+            // the publisher's current color / radius / font.
+            if (typeof applyThemePreview === 'function') applyThemePreview();
         }
 
         // Monthly income estimate: takes the publisher's recent impression rate
@@ -3879,6 +4057,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             } catch (e) { /* silent — localStorage fallback already happened */ }
 
             updateIncomeEstimate();
+            // Flip the gallery card's enabled/disabled visual state
+            // (green border + full opacity vs dimmed). Surgical update —
+            // no full re-render, so the checkbox that triggered this
+            // doesn't get recreated mid-event.
+            const card = document.querySelector(`#adFormatsContainer .format-card[data-format="${format}"]`);
+            if (card) {
+                card.classList.toggle('fmt-enabled', enabled);
+                card.classList.toggle('fmt-disabled', !enabled);
+            }
             const catalog = AD_FORMAT_CATALOG.find(f => f.key === format);
             showToast(`${catalog?.name || format} ${enabled ? 'enabled' : 'disabled'}`, 'success');
         }
