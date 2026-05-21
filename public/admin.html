@@ -832,6 +832,13 @@ const API = "";
 let token = null;
 let user = null;
 
+// Admin audit log — session-scoped, also persisted to sessionStorage.
+// Declared up here (not next to renderAuditLog) because showDashboard()
+// calls renderAuditLog() during auto-login, which executes before the
+// rest of the script. A `const` further down would be in the temporal
+// dead zone at that point and crash startup before nav handlers wire.
+const _auditLog = JSON.parse(sessionStorage.getItem("bb_admin_audit") || "[]");
+
 // ── Admin login ──
 document.getElementById("admin-login-form").addEventListener("submit", async e => {
   e.preventDefault();
@@ -1571,7 +1578,8 @@ async function loadReviewQueue() {
 }
 
 // ── Admin Audit Log (session-scoped, also persists to sessionStorage) ──
-const _auditLog = JSON.parse(sessionStorage.getItem("bb_admin_audit") || "[]");
+// Note: `_auditLog` itself is declared at the top of the script — see the
+// comment there for why it can't live here.
 function logAudit(action, campaignId, campaignName, details) {
   const entry = { at: new Date().toISOString(), action, campaignId, campaignName, details };
   _auditLog.unshift(entry);
