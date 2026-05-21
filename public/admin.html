@@ -887,14 +887,24 @@ function logout() {
 }
 
 // ── Auto-login ──
-// The stored admin key unlocks the console directly. If it's stale the
-// individual panels will surface their own 401s.
+// Verify the stored key still authenticates before showing the
+// dashboard. A stale token — e.g. an old JWT from the previous
+// email/password login system — is cleared so the operator sees the
+// key gate instead of a dashboard where every API call 401s.
 (function() {
   const t = localStorage.getItem("bb_admin_token");
-  if (t) {
-    token = t;
-    showDashboard();
-  }
+  if (!t) return;
+  fetch(API + "/api/stats?type=live_activity", { headers: { "Authorization": "Bearer " + t } })
+    .then(r => {
+      if (r.status === 401) {
+        // Stale or wrong key — drop it and leave the login gate visible.
+        localStorage.removeItem("bb_admin_token");
+        return;
+      }
+      token = t;
+      showDashboard();
+    })
+    .catch(() => { token = t; showDashboard(); }); // network hiccup — show anyway
 })();
 
 // ── Navigation ──
