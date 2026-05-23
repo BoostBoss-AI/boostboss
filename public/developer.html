@@ -2343,20 +2343,20 @@ await message.reply({
                 <button class="regenerate-btn" onclick="regenerateKey()">Regenerate API Key</button>
             </div>
 
-            <!-- Ad Format Controls -->
+            <!-- Ad Placements — formats grouped into the 3 placement families -->
             <div class="section">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
-                    <div class="section-title" style="margin-bottom: 0;">Ad Formats You Accept</div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                    <div class="section-title" style="margin-bottom: 0;">Ad Placements</div>
                     <div style="font-size: 12px; color: #6B7280;">
                         Est. monthly income: <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
                         <span style="color: #9CA3AF; font-size: 11px;">&nbsp;(at current volume)</span>
                     </div>
                 </div>
-                <div class="controls-grid" id="adFormatsContainer">
-                    <!-- Dynamically populated -->
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
+                    Choose which placement families run in your product. Turning a family off removes those ad types from your auction. Defaults are safe — the gentle families are on, the interruptive ones are opt-in.
                 </div>
-                <div style="font-size: 11px; color: #9CA3AF; margin-top: 10px; line-height: 1.5;">
-                    Toggling a format OFF removes that ad type from your auction. Higher-CPM formats (video, fullscreen) pay more but require more user attention — pick based on what fits your product's UX.
+                <div id="adFormatsContainer">
+                    <!-- Dynamically populated — grouped by placement family -->
                 </div>
             </div>
 
@@ -2880,7 +2880,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     ad_requests_30d: data.profile?.ad_requests_30d,
                     fill_rate: data.profile?.fill_rate,
                     is_demo: true,
-                    formats: { corner: true, fullscreen: true, video: true, native: true }
+                    formats: { native: true, image: true, corner: true, video: false, fullscreen: false }
                 };
                 localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
                 localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
@@ -2939,7 +2939,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     api_key: data.developer.api_key,
                     app_id: data.developer.app_id,
                     revenue_share_pct: data.developer.revenue_share_pct || 85,
-                    formats: data.developer.formats || { corner: true, fullscreen: true, video: true, native: true },
+                    formats: data.developer.formats || { native: true, image: true, corner: true, video: false, fullscreen: false },
                     api_key_login: true,
                 };
                 localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
@@ -3014,10 +3014,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     app_id: data.profile?.app_id,
                     revenue_share_pct: data.profile?.revenue_share_pct || 0,
                     formats: {
+                        native: data.profile?.format_native !== false,
+                        image: data.profile?.format_image !== false,
                         corner: data.profile?.format_corner !== false,
-                        fullscreen: data.profile?.format_fullscreen !== false,
                         video: data.profile?.format_video !== false,
-                        native: data.profile?.format_native !== false
+                        fullscreen: data.profile?.format_fullscreen !== false
                     }
                 };
 
@@ -3914,6 +3915,32 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             { key: 'fullscreen', name: 'Fullscreen',       description: 'Interstitial modal. Maximum attention but intrusive — use sparingly.', rpm: 22.00 },
         ];
 
+        // The three placement families. Each groups one or more catalog
+        // formats. This is the unit a publisher actually reasons about —
+        // "do I want gentle ads or interruptive ads" — rather than picking
+        // five formats one by one. The underlying per-format toggles still
+        // exist as cards inside each family for granular control.
+        const PLACEMENT_FAMILIES = [
+            {
+                key: 'ai-native', name: 'AI-native placements', recommended: true,
+                desc: 'Sponsored lines, sources and suggestions woven into the AI response. Gentle — reads as part of the product.',
+                doors: 'Runs on every door, including MCP servers.',
+                formats: ['native'],
+            },
+            {
+                key: 'display', name: 'Display placements', recommended: true,
+                desc: 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.',
+                doors: 'Runs on Lumi Web and Lumi Extension.',
+                formats: ['image', 'corner'],
+            },
+            {
+                key: 'interruptive', name: 'Interruptive & gated', recommended: false,
+                desc: 'Video and fullscreen units that interrupt the user. Highest revenue — but they spend UX goodwill. Switch on when you are ready to trade some experience for more income.',
+                doors: 'Runs on Lumi Web and Lumi Extension only.',
+                formats: ['video', 'fullscreen'],
+            },
+        ];
+
         // Per-format visual mockup. Returns HTML rendering a sample ad in
         // that format. All read the --lumi-* theme variables so they stay
         // in sync with the Theme & Preview controls. (2026-05-20)
@@ -3968,38 +3995,101 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             return '';
         }
 
+        // Renders the Ad Placements section: one block per placement family,
+        // each with a family header (name, description, per-door note, master
+        // toggle) and the per-format cards for that family inside.
         function renderAdFormats() {
             const container = document.getElementById('adFormatsContainer');
             if (!container) return;
+            container.className = '';
             container.innerHTML = '';
-            // Switch the container from the old plain-toggle grid class to
-            // the gallery grid. Idempotent — safe to set on every render.
-            container.className = 'format-gallery-grid';
 
-            AD_FORMAT_CATALOG.forEach(format => {
-                const isEnabled = !!userProfile.formats?.[format.key];
-                const card = document.createElement('div');
-                card.className = 'format-card ' + (isEnabled ? 'fmt-enabled' : 'fmt-disabled');
-                card.setAttribute('data-format', format.key);
-                card.innerHTML = `
-                    <div class="format-card-head">
-                        <span class="format-card-name">${format.name}</span>
-                        <span class="format-card-rpm">~$${format.rpm.toFixed(2)} RPM</span>
+            PLACEMENT_FAMILIES.forEach(fam => {
+                const famFormats = AD_FORMAT_CATALOG.filter(f => fam.formats.includes(f.key));
+                const enabledCount = famFormats.filter(f => !!userProfile.formats?.[f.key]).length;
+                const allOn = enabledCount === famFormats.length;
+
+                const section = document.createElement('div');
+                section.style.cssText = 'border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:14px;';
+
+                const badge = fam.recommended
+                    ? '<span style="font-size:9px;font-weight:700;color:#1D9E75;background:#E1F5EE;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">On by default</span>'
+                    : '<span style="font-size:9px;font-weight:700;color:#854F0B;background:#FAEEDA;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">Opt-in</span>';
+
+                const header = document.createElement('div');
+                header.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px;';
+                header.innerHTML = `
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:14px;font-weight:700;color:#1A1A2E;">${fam.name}</span>
+                            ${badge}
+                        </div>
+                        <div style="font-size:12px;color:#6B7280;margin-top:5px;line-height:1.5;">${fam.desc}</div>
+                        <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">${fam.doors}</div>
                     </div>
-                    <div class="format-card-preview">${formatMockup(format.key)}</div>
-                    <div class="format-card-desc">${format.description}</div>
-                    <label class="format-card-toggle">
-                        <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="updateAdFormat('${format.key}', this.checked)">
-                        <span>Accept this format</span>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
+                        <input type="checkbox" ${allOn ? 'checked' : ''} onchange="toggleFamily('${fam.key}', this.checked)">
+                        <span style="font-size:12px;font-weight:600;color:${allOn ? '#1A1A2E' : '#9CA3AF'};">${allOn ? 'On' : 'Off'}</span>
                     </label>
                 `;
-                container.appendChild(card);
+                section.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'format-gallery-grid';
+                famFormats.forEach(format => {
+                    const isEnabled = !!userProfile.formats?.[format.key];
+                    const card = document.createElement('div');
+                    card.className = 'format-card ' + (isEnabled ? 'fmt-enabled' : 'fmt-disabled');
+                    card.setAttribute('data-format', format.key);
+                    card.innerHTML = `
+                        <div class="format-card-head">
+                            <span class="format-card-name">${format.name}</span>
+                            <span class="format-card-rpm">~$${format.rpm.toFixed(2)} RPM</span>
+                        </div>
+                        <div class="format-card-preview">${formatMockup(format.key)}</div>
+                        <div class="format-card-desc">${format.description}</div>
+                        <label class="format-card-toggle">
+                            <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="updateAdFormat('${format.key}', this.checked)">
+                            <span>Accept this format</span>
+                        </label>
+                    `;
+                    grid.appendChild(card);
+                });
+                section.appendChild(grid);
+                container.appendChild(section);
             });
 
             updateIncomeEstimate();
             // Re-apply theme vars so the freshly-rendered mockups pick up
             // the publisher's current color / radius / font.
             if (typeof applyThemePreview === 'function') applyThemePreview();
+        }
+
+        // Family master toggle — flips every format in the family at once,
+        // persists via the same update_formats endpoint, then re-renders so
+        // the family header and the per-format cards stay in sync.
+        async function toggleFamily(familyKey, enabled) {
+            const fam = PLACEMENT_FAMILIES.find(f => f.key === familyKey);
+            if (!fam) return;
+            if (!userProfile.formats) userProfile.formats = {};
+            fam.formats.forEach(k => { userProfile.formats[k] = enabled; });
+            localStorage.setItem('bb_dev_formats', JSON.stringify(userProfile.formats));
+            try {
+                const sessionRaw = localStorage.getItem('bb_dev_session');
+                const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                if (userProfile.api_key) {
+                    await fetch(`${API_BASE}/api/auth?action=update_formats`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(session?.token ? { 'Authorization': `Bearer ${session.token}` } : {}),
+                        },
+                        body: JSON.stringify({ api_key: userProfile.api_key, formats: userProfile.formats }),
+                    });
+                }
+            } catch (e) { /* silent — localStorage fallback already happened */ }
+            renderAdFormats();
+            showToast(`${fam.name} ${enabled ? 'enabled' : 'disabled'}`, 'success');
         }
 
         // Monthly income estimate: takes the publisher's recent impression rate
@@ -4056,17 +4146,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 }
             } catch (e) { /* silent — localStorage fallback already happened */ }
 
-            updateIncomeEstimate();
-            // Flip the gallery card's enabled/disabled visual state
-            // (green border + full opacity vs dimmed). Surgical update —
-            // no full re-render, so the checkbox that triggered this
-            // doesn't get recreated mid-event.
-            const card = document.querySelector(`#adFormatsContainer .format-card[data-format="${format}"]`);
-            if (card) {
-                card.classList.toggle('fmt-enabled', enabled);
-                card.classList.toggle('fmt-disabled', !enabled);
-            }
             const catalog = AD_FORMAT_CATALOG.find(f => f.key === format);
+            // Full re-render so the family master toggle re-syncs with the
+            // new per-format state. The onchange that triggered this has
+            // already finished, so recreating the checkbox is safe.
+            renderAdFormats();
             showToast(`${catalog?.name || format} ${enabled ? 'enabled' : 'disabled'}`, 'success');
         }
 
@@ -4243,7 +4327,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                             api_key: profile.api_key || 'bb_dev_sk_' + user.id.replace(/-/g, '').substring(0, 18),
                             app_id: profile.app_id || 'app_' + user.id.substring(0, 8),
                             revenue_share_pct: profile.revenue_share_pct || 85,
-                            formats: { corner: true, fullscreen: true, video: true, native: true }
+                            formats: { native: true, image: true, corner: true, video: false, fullscreen: false }
                         };
                         localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
                         localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
