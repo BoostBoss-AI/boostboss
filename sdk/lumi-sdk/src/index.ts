@@ -7,7 +7,7 @@
 export { Lumi } from "./lumi.js";
 export { ERROR_CODES, type ErrorCode } from "./errors.js";
 export type {
-  LumiOptions, RenderOptions, AdPayload,
+  LumiOptions, RenderOptions, PlacementFormat, AdPayload, AdTracking,
   LumiEventName, LumiHandler,
   LumiImpressionEvent, LumiClickEvent, LumiCloseEvent,
   LumiNoFillEvent, LumiErrorEvent, LumiReadyEvent,

@@ -5,7 +5,7 @@
  *   import { LumiProvider, LumiSlot } from "@boostbossai/lumi-sdk/react";
  *
  *   <LumiProvider publisherId="pub_xxx">
- *     <LumiSlot format="banner" context="onboarding flow" />
+ *     <LumiSlot format="toolrec" context="onboarding flow" />
  *   </LumiProvider>
  *
  * `react` is a peer dependency. Install in your app: `npm i react`.

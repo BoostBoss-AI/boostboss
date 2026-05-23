@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-sdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Boost Boss Lumi SDK — programmatic ad rendering for browser extensions, Electron / Tauri apps, React, and Vue. Same backend as the JS snippet; class-based API for environments where a <script> tag isn't an option.",
   "license": "Apache-2.0",
   "author": "Boost Boss <hello@boostboss.ai> (https://boostboss.ai)",

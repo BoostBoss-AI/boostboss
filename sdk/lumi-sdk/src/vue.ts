@@ -7,7 +7,7 @@
  *   provideLumi({ publisherId: "pub_xxx" });
  *   </script>
  *   <template>
- *     <LumiSlot format="banner" context="onboarding flow" />
+ *     <LumiSlot format="toolrec" context="onboarding flow" />
  *   </template>
  *
  * `vue` is a peer dependency. Install in your app: `npm i vue`.
@@ -43,7 +43,7 @@ export function useLumi(): Lumi {
 export const LumiSlot = defineComponent({
   name: "LumiSlot",
   props: {
-    format:       { type: String as PropType<RenderOptions["format"]>, default: "banner" },
+    format:       { type: String as PropType<RenderOptions["format"]>, default: "citation" },
     context:      { type: String, default: "" },
     sessionId:    { type: String, default: undefined },
     userLanguage: { type: String, default: undefined },

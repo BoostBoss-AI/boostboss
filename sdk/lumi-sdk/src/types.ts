@@ -14,9 +14,13 @@ export interface LumiOptions {
   timeoutMs?: number;
 }
 
+/** The four placements the Extension door owns. */
+export type PlacementFormat = "corner" | "newtab" | "citation" | "toolrec";
+
 export interface RenderOptions {
-  /** Layout format. Determines visual treatment. */
-  format?: "banner" | "sidebar" | "inline" | "interstitial";
+  /** Placement type. Determines visual treatment + render target.
+   *  Legacy names (banner/sidebar/inline/interstitial) still resolve at runtime. */
+  format?: PlacementFormat;
   /** Free-form intent string used for contextual matching. */
   context?: string;
   /** Stable per-session identifier for frequency capping. */
@@ -31,6 +35,15 @@ export interface RenderOptions {
   surface?: string;
 }
 
+/** Server-side tracking beacon URLs. Each carries the auction's context
+ *  fingerprint (ctx=), so every event is joined to the request context. */
+export interface AdTracking {
+  impression: string | null;
+  click:      string | null;
+  close:      string | null;
+  dismiss:    string | null;
+}
+
 export interface AdPayload {
   adId:            string;
   auctionId:       string | null;
@@ -40,7 +53,9 @@ export interface AdPayload {
   mediaUrl:        string | null;
   ctaLabel:        string;
   ctaUrl:          string;
+  /** @deprecated use `tracking.impression` — kept for backward compatibility. */
   impressionUrl:   string | null;
+  tracking:        AdTracking;
   disclosureLabel: string;
   isSandbox:       boolean;
 }

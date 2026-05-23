@@ -23,23 +23,30 @@ function nextId(): number {
   return _idCounter;
 }
 
+// Placement → auction format_preference. `corner` is the one interruptive
+// surface; the rest are content placements the auction treats as native.
+const FORMAT_PREF: Record<string, string> = {
+  corner: "corner", newtab: "native", citation: "native", toolrec: "native",
+};
+
 export class Client {
   private readonly opts: ClientOptions;
   constructor(opts: ClientOptions) { this.opts = opts; }
 
   async fetchAd(o: RenderOptions, sessionId: string): Promise<ClientResp> {
     const url = this.opts.apiBase.replace(/\/$/, "") + "/api/mcp";
+    const fmt = o.format ?? "citation";
     const args: Record<string, unknown> = {
       context_summary:   (o.context || "").slice(0, 1000),
-      format_preference: o.format ?? "native",
+      format_preference: FORMAT_PREF[fmt] ?? "native",
       session_id:        o.sessionId ?? sessionId,
       developer_api_key: this.opts.publisherId,
       publisher_id:      this.opts.publisherId,
+      surface:           o.surface ?? ("ext-" + fmt),
     };
     if (o.userRegion)   args.user_region   = o.userRegion;
     if (o.userLanguage) args.user_language = o.userLanguage;
     if (o.hostApp)      args.host_app      = o.hostApp;
-    if (o.surface)      args.surface       = o.surface;
 
     const body = {
       jsonrpc: "2.0",
@@ -108,7 +115,7 @@ interface SponsoredWire {
   cta_label?: string;
   cta_url: string;
   disclosure_label?: string;
-  tracking?: { impression?: string; click?: string };
+  tracking?: { impression?: string; click?: string; close?: string; dismiss?: string };
 }
 interface AuctionWire {
   auction_id?: string;
@@ -126,6 +133,12 @@ function adFromWire(s: SponsoredWire, a?: AuctionWire): AdPayload {
     ctaLabel:        s.cta_label ?? "Learn more",
     ctaUrl:          s.cta_url,
     impressionUrl:   s.tracking?.impression ?? null,
+    tracking: {
+      impression: s.tracking?.impression ?? null,
+      click:      s.tracking?.click ?? null,
+      close:      s.tracking?.close ?? null,
+      dismiss:    s.tracking?.dismiss ?? null,
+    },
     disclosureLabel: s.disclosure_label ?? "Sponsored",
     isSandbox:       a?.sandbox === true,
   };

@@ -71,21 +71,21 @@
     <p class="lede">For Chrome / Edge / Firefox extensions, Electron apps, Tauri apps, and any environment where the Lumi SDK script tag doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>) and Vue (<code>provideLumi</code> + <code>&lt;LumiSlot /&gt;</code>) bindings included.</p>
 
     <div class="callout info">
-      <strong>v1.0.1 — beta. Live on npm today.</strong>
-      <p><code>@boostbossai/lumi-sdk@1.0.1</code> is published — <code>npm install @boostbossai/lumi-sdk</code> resolves and works. Three entry points: <code>@boostbossai/lumi-sdk</code> (vanilla <code>Lumi</code> class), <code>@boostbossai/lumi-sdk/react</code> (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>), <code>@boostbossai/lumi-sdk/vue</code> (<code>&lt;LumiSlot /&gt;</code> + <code>provideLumi</code>). Manifest v3 compliant — zero <code>eval</code>, zero remote code execution. Sandbox flow works without signup using <code>publisherId: "pub_test_demo"</code>. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
+      <strong>v1.2.0 — beta.</strong>
+      <p><code>@boostbossai/lumi-sdk@1.2.0</code> — <code>npm install @boostbossai/lumi-sdk</code>. Three entry points: <code>@boostbossai/lumi-sdk</code> (vanilla <code>Lumi</code> class), <code>@boostbossai/lumi-sdk/react</code> (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>), <code>@boostbossai/lumi-sdk/vue</code> (<code>&lt;LumiSlot /&gt;</code> + <code>provideLumi</code>). Manifest v3 compliant — zero <code>eval</code>, zero remote code execution. Sandbox flow works without signup using <code>publisherId: "pub_test_demo"</code>. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="quick-start">Quick start</h2>
 <pre>npm install @boostbossai/lumi-sdk</pre>
 <pre><span class="kw">import</span> { <span class="fn">Lumi</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-sdk'</span>;
 
-<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">Lumi</span>({
-  publisherId: <span class="str">'pub_xxx'</span>,
-  format:      <span class="str">'sidebar'</span>,
-  debug:       <span class="kw">false</span>
-});
+<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">Lumi</span>({ publisherId: <span class="str">'pub_xxx'</span> });
 
-lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
+<span class="cm">// placements: corner · newtab · citation · toolrec</span>
+lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>, {
+  format:  <span class="str">'citation'</span>,
+  context: lumi.<span class="fn">captureContext</span>(),  <span class="cm">// reads the page the user is on</span>
+});</pre>
 
     <h2 id="when-to-use">When to use this vs. the JS snippet</h2>
     <p>If you can drop a <code>&lt;script&gt;</code> tag in your HTML <code>&lt;head&gt;</code>, use the <a href="/docs/js-snippet">JS snippet</a> — it's lighter and auto-discovers slots.</p>
@@ -115,7 +115,7 @@ lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
 <pre><span class="kw">import</span> { <span class="fn">LumiSlot</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-sdk/react'</span>;
 
 <span class="kw">function</span> <span class="fn">Sidebar</span>() {
-  <span class="kw">return</span> <span class="tag">&lt;LumiSlot</span> <span class="attr">format</span>=<span class="str">"sidebar"</span> <span class="attr">context</span>=<span class="str">"document.title"</span> <span class="tag">/&gt;</span>;
+  <span class="kw">return</span> <span class="tag">&lt;LumiSlot</span> <span class="attr">format</span>=<span class="str">"toolrec"</span> <span class="attr">context</span>=<span class="str">"document.title"</span> <span class="tag">/&gt;</span>;
 }</pre>
 
     <h2 id="vue">Vue component</h2>
@@ -124,7 +124,7 @@ lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
   components: { <span class="fn">LumiSlot</span> }
 }</pre>
 <pre><span class="tag">&lt;template&gt;</span>
-  <span class="tag">&lt;LumiSlot</span> <span class="attr">format</span>=<span class="str">"sidebar"</span> <span class="attr">:context</span>=<span class="str">"docTitle"</span> <span class="tag">/&gt;</span>
+  <span class="tag">&lt;LumiSlot</span> <span class="attr">format</span>=<span class="str">"toolrec"</span> <span class="attr">:context</span>=<span class="str">"docTitle"</span> <span class="tag">/&gt;</span>
 <span class="tag">&lt;/template&gt;</span></pre>
 
     <h2 id="conversion-tracking">Conversion tracking</h2>

@@ -11,14 +11,14 @@ import { Client } from "./client.js";
 import { TypedEmitter } from "./emitter.js";
 import { ERROR_CODES } from "./errors.js";
 import {
-  injectStyles, renderAd, fireImpressionBeacon, unmountSlot, resetStyles,
+  injectStyles, renderAd, fireImpressionBeacon, unmountSlot, resetStyles, normalizeFormat,
 } from "./renderer.js";
 import type {
   LumiOptions, RenderOptions, AdPayload,
   LumiEventName, LumiHandler,
 } from "./types.js";
 
-const VERSION = "0.1.0";
+const VERSION = "1.2.0";
 const DEFAULT_API_BASE = "https://boostboss.ai";
 const DEFAULT_TIMEOUT_MS = 4000;
 
@@ -85,14 +85,14 @@ export class Lumi {
       });
       return null;
     }
-    const format  = opts.format ?? "banner";
+    const format  = normalizeFormat(opts.format);
     const context = opts.context ?? "";
 
     // Already mounted? Tear down first so we re-fetch + re-render fresh.
     const existing = this.slots.get(el);
     if (existing) unmountSlot(existing.el, existing.backdrop);
 
-    const resp = await this.client.fetchAd(opts, this.sessionId);
+    const resp = await this.client.fetchAd({ ...opts, format }, this.sessionId);
     if (!resp.ok) {
       this.emitter.emit("error", { code: resp.code, message: resp.message });
       return null;
@@ -109,7 +109,10 @@ export class Lumi {
         adId: ad.adId, auctionId: ad.auctionId, slot: el,
       });
     };
-    const { backdrop } = renderAd(el, ad, format, onClick);
+    const onClose = () => {
+      this.emitter.emit("close", { adId: ad.adId, auctionId: ad.auctionId });
+    };
+    const { backdrop } = renderAd(el, ad, format, onClick, onClose);
     this.slots.set(el, { el, format, ad, backdrop });
 
     if (ad.impressionUrl) fireImpressionBeacon(ad.impressionUrl);
@@ -358,6 +361,29 @@ export class Lumi {
 
   /** Expose the publisher's session ID for debugging / cross-call correlation. */
   getSessionId(): string { return this.sessionId; }
+
+  /**
+   * Capture the user's on-screen context, for use as the `context` argument
+   * to render() / fetchAd(). Reads the current text selection when it's
+   * substantial, otherwise the document title + main content text. Returns
+   * "" outside a DOM (e.g. a service worker). This is the Extension door's
+   * distinctive context signal — "what the user is looking at right now".
+   */
+  captureContext(): string {
+    if (typeof document === "undefined") return "";
+    try {
+      const w = typeof window !== "undefined" ? window : undefined;
+      const sel = w && w.getSelection ? String(w.getSelection() || "") : "";
+      if (sel.trim().length > 20) return sel.trim().slice(0, 1000);
+      const title = document.title || "";
+      const main = document.querySelector("main, article, [role=main]") as HTMLElement | null;
+      const bodyText = (main && main.innerText) ||
+        (document.body && document.body.innerText) || "";
+      return (title + ". " + bodyText).replace(/\s+/g, " ").trim().slice(0, 1000);
+    } catch (_e) {
+      return "";
+    }
+  }
 
   /**
    * Pre-warm the SDK's stylesheet without rendering an ad. Useful when

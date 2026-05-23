@@ -32,7 +32,9 @@ function makeEl(tag) {
       return child;
     },
     remove() { if (this.parentNode) this.parentNode.removeChild(this); },
-    addEventListener() {},
+    _listeners: {},
+    addEventListener(ev, fn) { (this._listeners[ev] = this._listeners[ev] || []).push(fn); },
+    fire(ev) { (this._listeners[ev] || []).forEach((fn) => fn({ preventDefault() {} })); },
     removeEventListener() {},
     onerror: null,
     set innerHTML(v) { this._innerHTML = v; this.children = []; },
@@ -67,7 +69,12 @@ const documentShim = {
 };
 
 globalThis.document = documentShim;
-globalThis.Image = function (w, h) { return makeEl("img"); };
+const beacons = [];
+globalThis.Image = function () {
+  const o = makeEl("img");
+  Object.defineProperty(o, "src", { configurable: true, set(v) { beacons.push(v); }, get() { return undefined; } });
+  return o;
+};
 globalThis.HTMLElement = function () {};
 globalThis.Element = function () {};
 
@@ -155,13 +162,14 @@ test("render: success path returns Ad and emits impression", async () => {
   const slot = makeEl("div");
   elements.set("#main-slot", slot);
 
-  const ad = await lumi.render("#main-slot", { format: "banner", context: "test" });
+  const ad = await lumi.render("#main-slot", { format: "toolrec", context: "test" });
   assert.ok(ad);
   assert.equal(ad.adId, "cmp_abc");
   assert.equal(ad.headline, "Hi");
+  assert.ok(ad.tracking && ad.tracking.click, "AdPayload carries the full tracking object");
   assert.equal(events.length, 1);
   assert.equal(events[0].adId, "cmp_abc");
-  assert.equal(events[0].format, "banner");
+  assert.equal(events[0].format, "toolrec");
 });
 
 test("render: bearer header X-Lumi-Source: npm-sdk is sent", async () => {
@@ -253,7 +261,7 @@ test("fetchAd: returns AdPayload on success and does NOT emit impression", async
   lumi.on("no_fill",    (e) => events.push({ kind: "no_fill", ...e }));
   lumi.on("error",      (e) => events.push({ kind: "error", ...e }));
 
-  const ad = await lumi.fetchAd({ context: "user reading docs", format: "inline" });
+  const ad = await lumi.fetchAd({ context: "user reading docs", format: "citation" });
   assert.ok(ad, "expected an Ad payload");
   assert.equal(ad.adId, "cmp_server_1");
   assert.equal(ad.headline, "Server-fetched ad");
@@ -353,4 +361,92 @@ test("trackImpression: rejects ad without adId via error event", async () => {
   await lumi.trackImpression({ adId: "", headline: "x" });
   assert.ok(err);
   assert.equal(err.code, ERROR_CODES.BAD_REQUEST);
+});
+
+// ── Phase 2: matrix placements + context-joined feedback beacons ──
+
+test("render: toolrec click fires a context-joined click beacon", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text",
+      text: JSON.stringify({
+        sponsored: {
+          campaign_id: "cmp_clk", headline: "Click me", cta_label: "Go", cta_url: "https://example.com/c",
+          tracking: {
+            impression: "https://boostboss.ai/api/track?event=impression&ctx=ctx_z",
+            click:      "https://boostboss.ai/api/track?event=click&ctx=ctx_z",
+          },
+        },
+        auction: { auction_id: "auc_clk" },
+      }) }] } } }],
+    ["*", { body: "" }],
+  ]);
+  beacons.length = 0;
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  const slot = makeEl("div");
+  elements.set("#clk-slot", slot);
+  await lumi.render("#clk-slot", { format: "toolrec", context: "x" });
+
+  function findCta(el) {
+    for (const c of el.children) {
+      if (typeof c.className === "string" && c.className.includes("lumi-cta")) return c;
+      const d = findCta(c);
+      if (d) return d;
+    }
+    return null;
+  }
+  const cta = findCta(slot);
+  assert.ok(cta, "CTA anchor rendered");
+  cta.fire("click");
+  assert.ok(
+    beacons.some((u) => /event=click/.test(u) && /ctx=ctx_z/.test(u)),
+    "click must fire a server-side beacon carrying the context fingerprint",
+  );
+});
+
+test("render: corner self-mounts an anchor onto the body", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text",
+      text: JSON.stringify({
+        sponsored: {
+          campaign_id: "cmp_cnr", headline: "Corner", cta_label: "Go", cta_url: "https://example.com/c",
+          tracking: { impression: "https://boostboss.ai/api/track?event=impression" },
+        },
+        auction: { auction_id: "auc_cnr" },
+      }) }] } } }],
+    ["*", { body: "" }],
+  ]);
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  const slot = makeEl("div");
+  elements.set("#cnr-slot", slot);
+  await lumi.render("#cnr-slot", { format: "corner", context: "x" });
+  function hasAnchor(el) {
+    for (const c of el.children) {
+      if (typeof c.className === "string" && c.className.includes("lumi-corner-anchor")) return true;
+      if (hasAnchor(c)) return true;
+    }
+    return false;
+  }
+  assert.ok(hasAnchor(documentShim.body), "corner anchor mounted onto document.body");
+});
+
+test("render: legacy 'banner' format still resolves without error", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text",
+      text: JSON.stringify({
+        sponsored: { campaign_id: "cmp_lg", headline: "Legacy", cta_label: "Go", cta_url: "https://example.com/c",
+          tracking: { impression: "https://boostboss.ai/api/track?event=impression" } },
+        auction: { auction_id: "auc_lg" },
+      }) }] } } }],
+    ["*", { body: "" }],
+  ]);
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  const slot = makeEl("div");
+  elements.set("#lg-slot", slot);
+  const ad = await lumi.render("#lg-slot", { format: "banner", context: "x" });
+  assert.ok(ad, "legacy format name still resolves to a core placement");
+});
+
+test("captureContext: returns a string", () => {
+  const lumi = new Lumi({ publisherId: "pub_test" });
+  assert.equal(typeof lumi.captureContext(), "string");
 });
