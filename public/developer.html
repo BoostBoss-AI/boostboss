@@ -4870,75 +4870,222 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             setTimeout(() => { notifBadge.style.display = 'block'; render(); }, 800);
         })();
 
-        // ───────────── SETTINGS MODAL (⚙) ─────────────
+        // ───────────── SETTINGS (⚙) — sectioned account settings ─────────────
         (function initSettings() {
             const settingsBtn = document.getElementById('settingsBtn');
             if (!settingsBtn) return;
-            // Build the modal once, lazy
+
+            // Notification preferences — per-browser for now (Pass 2 moves
+            // these to a server-side store so they sync across devices).
+            const NOTIF_KEY = 'bb_dev_notif_prefs';
+            const NOTIF_DEFAULTS = { payout_sent: true, payout_failed: true, monthly_summary: true, product_updates: false };
+            function getNotifPrefs() {
+                try { return Object.assign({}, NOTIF_DEFAULTS, JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}')); }
+                catch (_) { return Object.assign({}, NOTIF_DEFAULTS); }
+            }
+            function saveNotifPrefs(p) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(p)); } catch (_) {} }
+
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
             const modal = document.createElement('div');
             modal.id = 'settingsModal';
-            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;';
+            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
             modal.innerHTML = `
-                <div style="background:#fff;border-radius:14px;width:480px;max-width:90vw;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-                        <h3 style="font-size:18px;font-weight:700;color:#111;margin:0;">Account Settings</h3>
-                        <button id="sSetClose" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9CA3AF;">×</button>
+                <div style="background:#fff;border-radius:16px;width:700px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
+                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">Settings</h3>
+                        <button id="sSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
                     </div>
-                    <div style="display:flex;flex-direction:column;gap:14px;">
-                        <div><label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">App name</label>
-                            <input id="sSetApp" type="text" style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;margin-top:6px;"></div>
-                        <div><label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Email</label>
-                            <input id="sSetEmail" type="text" disabled style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;margin-top:6px;background:#F9FAFB;color:#6B7280;"></div>
-                        <div><label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Lumi SDK API key</label>
-                            <div style="display:flex;gap:8px;margin-top:6px;">
-                                <input id="sSetKey" type="password" value="bb_dev_••••••••••••" style="flex:1;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:'JetBrains Mono',monospace;">
-                                <button id="sSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;">Show</button>
-                            </div>
-                        </div>
+                    <div style="display:flex;flex:1;min-height:0;">
+                        <nav id="sSetNav" style="width:178px;flex-shrink:0;border-right:1px solid #F0F0F2;padding:14px 10px;display:flex;flex-direction:column;gap:2px;"></nav>
+                        <div id="sSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
                     </div>
-                    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">
-                        <button id="sSetCancel" style="padding:9px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;">Cancel</button>
-                        <button id="sSetSave"   style="padding:9px 16px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;">Save</button>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
+                        <button id="sSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">Close</button>
+                        <button id="sSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">Save changes</button>
                     </div>
                 </div>`;
             document.body.appendChild(modal);
 
-            function openModal() {
-                const app   = (typeof userProfile !== 'undefined' && userProfile.app_name) || document.getElementById('navAppName').textContent || '';
-                const email = (typeof userProfile !== 'undefined' && userProfile.email)    || '';
-                const key   = (typeof userProfile !== 'undefined' && userProfile.api_key)  || '';
-                document.getElementById('sSetApp').value   = app;
-                document.getElementById('sSetEmail').value = email;
-                document.getElementById('sSetKey').value   = 'bb_dev_••••••••••••';
-                document.getElementById('sSetKey').type    = 'password';
-                document.getElementById('sSetReveal').textContent = 'Show';
-                modal.style.display = 'flex';
+            const SECTIONS = [
+                { key: 'account', icon: '👤', label: 'Account' },
+                { key: 'payouts', icon: '💸', label: 'Payouts' },
+                { key: 'api',     icon: '🔑', label: 'API & Integration' },
+                { key: 'notifs',  icon: '🔔', label: 'Notifications' },
+            ];
+            let activeSection = 'account';
+
+            const LB  = 'font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;';
+            const FLD = 'width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
+            const ROW = 'margin-bottom:18px;';
+            const HINT = 'font-size:11px;color:#9CA3AF;margin-top:5px;line-height:1.5;';
+
+            function p() { return (typeof userProfile !== 'undefined' && userProfile) || {}; }
+
+            function sectionAccount() {
+                const u = p();
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">App name</label>
+                        <input id="sSetApp" type="text" value="${esc(u.app_name || '')}" style="${FLD}">
+                        <div style="${HINT}">Shown to advertisers and on your publisher profile.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Contact email</label>
+                        <input type="text" value="${esc(u.email || '')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;">
+                        <div style="${HINT}">Used for payout and account notifications.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Developer ID</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" value="${esc(u.id || u.user_id || '—')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:'JetBrains Mono',monospace;font-size:12.5px;">
+                            <button class="sSetCopy" data-copy="${esc(u.id || u.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                        </div>
+                    </div>
+                    <div style="${ROW}margin-bottom:0;">
+                        <label style="${LB}">Revenue share</label>
+                        <div style="font-size:14px;color:#111;font-weight:600;">You keep 85% &middot; Boost Boss takes 15%</div>
+                        <div style="${HINT}">Applied to every cleared impression on your inventory.</div>
+                    </div>`;
             }
+
+            function sectionPayouts() {
+                return `
+                    <div style="background:#F0FDF8;border:1px solid #BBF7D9;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                        <div style="font-size:13px;font-weight:700;color:#0F6E56;margin-bottom:4px;">How payouts work</div>
+                        <div style="font-size:12.5px;color:#1A6B53;line-height:1.6;">Earn at least <strong>$25</strong> in publisher accruals, connect Stripe, and the next Friday cron pays you automatically — no manual request needed.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Payout threshold</label>
+                        <div style="font-size:14px;color:#111;font-weight:600;">$25.00 minimum</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Schedule</label>
+                        <div style="font-size:14px;color:#111;font-weight:600;">Weekly &middot; every Friday</div>
+                    </div>
+                    <button id="sSetGoPayouts" style="width:100%;padding:11px;border:1.5px solid #FF2D78;border-radius:8px;background:#fff;color:#FF2D78;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">Manage Stripe connection &amp; payouts →</button>
+                    <div style="${HINT}">Opens the full Payout Settings panel on your dashboard.</div>`;
+            }
+
+            function sectionApi() {
+                const u = p();
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">Lumi SDK API key</label>
+                        <div style="display:flex;gap:8px;">
+                            <input id="sSetKey" type="password" value="bb_dev_••••••••••••" style="${FLD}font-family:'JetBrains Mono',monospace;font-size:12.5px;">
+                            <button id="sSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Show</button>
+                        </div>
+                        <div style="${HINT}">Authenticates every ad request from your integration. Keep it secret.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">App ID</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" value="${esc(u.app_id || '—')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:'JetBrains Mono',monospace;font-size:12.5px;">
+                            <button class="sSetCopy" data-copy="${esc(u.app_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                        </div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">MCP endpoint</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" value="https://api.boostboss.ai/mcp" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:'JetBrains Mono',monospace;font-size:12.5px;">
+                            <button class="sSetCopy" data-copy="https://api.boostboss.ai/mcp" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                        </div>
+                    </div>
+                    <div style="border-top:1px solid #F0F0F2;padding-top:16px;">
+                        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px;">Regenerate API key</div>
+                        <div style="font-size:11.5px;color:#9CA3AF;margin-bottom:10px;line-height:1.5;">Issues a new key and immediately invalidates the old one. Update your integration right after.</div>
+                        <button id="sSetRegen" style="padding:9px 16px;border:1px solid #E24B4A;border-radius:8px;background:#fff;color:#E24B4A;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">Regenerate key</button>
+                    </div>`;
+            }
+
+            function sectionNotifs() {
+                const n = getNotifPrefs();
+                const toggle = (key, title, desc) => `
+                    <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #F3F4F6;cursor:pointer;">
+                        <input type="checkbox" class="sSetNotif" data-notif="${key}" ${n[key] ? 'checked' : ''} style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:#FF2D78;">
+                        <span>
+                            <span style="display:block;font-size:13.5px;font-weight:600;color:#111;">${title}</span>
+                            <span style="display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;">${desc}</span>
+                        </span>
+                    </label>`;
+                return `
+                    <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">Email me when…</div>
+                    ${toggle('payout_sent', 'A payout is sent', 'Confirmation each time a payout reaches your Stripe account.')}
+                    ${toggle('payout_failed', 'A payout fails', 'Alerts if a payout could not be completed so you can fix it fast.')}
+                    ${toggle('monthly_summary', 'Monthly earnings summary', 'A once-a-month recap of impressions, fill rate, and earnings.')}
+                    ${toggle('product_updates', 'Product updates', 'Occasional news on new Boost Boss features and ad formats.')}`;
+            }
+
+            function renderNav() {
+                const nav = document.getElementById('sSetNav');
+                nav.innerHTML = SECTIONS.map((s) => {
+                    const on = s.key === activeSection;
+                    return `<button class="sSetNavBtn" data-section="${s.key}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">
+                        <span style="font-size:14px;">${s.icon}</span>${s.label}</button>`;
+                }).join('');
+                nav.querySelectorAll('.sSetNavBtn').forEach((b) => {
+                    b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
+                });
+            }
+
+            function renderBody() {
+                const body = document.getElementById('sSetBody');
+                const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, notifs: sectionNotifs };
+                body.innerHTML = (map[activeSection] || sectionAccount)();
+                // Copy buttons
+                body.querySelectorAll('.sSetCopy').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const v = btn.dataset.copy || '';
+                        if (v) { navigator.clipboard.writeText(v); if (typeof showToast === 'function') showToast('Copied', 'success'); }
+                    });
+                });
+                // API key reveal
+                const reveal = document.getElementById('sSetReveal');
+                if (reveal) reveal.addEventListener('click', () => {
+                    const inp = document.getElementById('sSetKey');
+                    const key = p().api_key || '';
+                    if (inp.type === 'password') { inp.value = key || 'bb_dev_••••••••••••'; inp.type = 'text'; reveal.textContent = 'Hide'; }
+                    else { inp.value = 'bb_dev_••••••••••••'; inp.type = 'password'; reveal.textContent = 'Show'; }
+                });
+                // Regenerate
+                const regen = document.getElementById('sSetRegen');
+                if (regen) regen.addEventListener('click', () => {
+                    if (typeof regenerateKey === 'function') { closeModal(); regenerateKey(); }
+                });
+                // Go to payouts
+                const goP = document.getElementById('sSetGoPayouts');
+                if (goP) goP.addEventListener('click', () => {
+                    closeModal();
+                    const sec = Array.from(document.querySelectorAll('.section-title'))
+                        .find((el) => /payout settings/i.test(el.textContent));
+                    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                // Notification toggles — persist on change
+                body.querySelectorAll('.sSetNotif').forEach((cb) => {
+                    cb.addEventListener('change', () => {
+                        const prefs = getNotifPrefs();
+                        prefs[cb.dataset.notif] = cb.checked;
+                        saveNotifPrefs(prefs);
+                    });
+                });
+            }
+
+            function openModal() { activeSection = 'account'; renderNav(); renderBody(); modal.style.display = 'flex'; }
             function closeModal() { modal.style.display = 'none'; }
 
             settingsBtn.addEventListener('click', openModal);
             modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
             document.getElementById('sSetClose').addEventListener('click', closeModal);
             document.getElementById('sSetCancel').addEventListener('click', closeModal);
-            document.getElementById('sSetReveal').addEventListener('click', () => {
-                const inp = document.getElementById('sSetKey');
-                const btn = document.getElementById('sSetReveal');
-                const key = (typeof userProfile !== 'undefined' && userProfile.api_key) || '';
-                if (inp.type === 'password') {
-                    inp.value = key || 'bb_dev_live_' + Math.random().toString(36).slice(2, 18);
-                    inp.type  = 'text';
-                    btn.textContent = 'Hide';
-                } else {
-                    inp.value = 'bb_dev_••••••••••••';
-                    inp.type  = 'password';
-                    btn.textContent = 'Show';
-                }
-            });
             document.getElementById('sSetSave').addEventListener('click', () => {
-                const newApp = document.getElementById('sSetApp').value.trim();
-                if (newApp && typeof userProfile !== 'undefined') {
+                const appInput = document.getElementById('sSetApp');
+                const newApp = appInput ? appInput.value.trim() : '';
+                if (newApp && typeof userProfile !== 'undefined' && userProfile) {
                     userProfile.app_name = newApp;
-                    document.getElementById('navAppName').textContent = newApp;
+                    const navName = document.getElementById('navAppName');
+                    if (navName) navName.textContent = newApp;
                     const data = localStorage.getItem('bb_dev_data');
                     if (data) {
                         try { const d = JSON.parse(data); d.app_name = newApp; localStorage.setItem('bb_dev_data', JSON.stringify(d)); } catch (_) {}

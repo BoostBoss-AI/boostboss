@@ -6121,68 +6121,196 @@
         // Show badge on load
         setTimeout(() => { notifBadge.style.display = 'block'; renderNotifications(); }, 1000);
 
-        // ───────────── ACCOUNT SETTINGS ─────────────
-        const settingsModal = document.getElementById('settingsModal');
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            document.getElementById('settingsCompany').value = currentUserData?.company_name || '';
-            document.getElementById('settingsEmail').value = currentUserData?.email || '';
-            document.getElementById('settingsUserId').value = currentUserData?.user_id || '';
-            document.getElementById('settingsApiKey').value = 'bb_live_••••••••••••';
-            document.getElementById('settingsApiKey').type = 'password';
-            document.getElementById('settingsRevealKey').textContent = 'Show';
-            settingsModal.style.display = 'flex';
-        });
-        document.getElementById('settingsCloseBtn').addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) settingsModal.style.display = 'none';
-        });
-        // Toggle notification switch visual
-        document.getElementById('settingsNotify').addEventListener('change', function() {
-            const knob = document.getElementById('settingsToggleKnob');
-            const track = this.parentElement.querySelector('span:nth-child(2)');
-            if (this.checked) {
-                knob.style.left = '22px'; track.style.background = '#FF2D78';
-            } else {
-                knob.style.left = '2px'; track.style.background = '#D1D5DB';
+        // ───────────── ACCOUNT SETTINGS — sectioned ─────────────
+        (function initAdvSettings() {
+            const settingsModal = document.getElementById('settingsModal');
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (!settingsModal || !settingsBtn) return;
+
+            // Notification preferences — per-browser for now (Pass 2 moves
+            // these to a server-side store so they sync across devices).
+            const NOTIF_KEY = 'bb_adv_notif_prefs';
+            const NOTIF_DEFAULTS = { campaign_status: true, budget_alert: true, low_balance: true, weekly_report: false };
+            function getNotifPrefs() {
+                try { return Object.assign({}, NOTIF_DEFAULTS, JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}')); }
+                catch (_) { return Object.assign({}, NOTIF_DEFAULTS); }
             }
-        });
-        // Initialize toggle state
-        setTimeout(() => {
-            const cb = document.getElementById('settingsNotify');
-            if (cb.checked) {
-                document.getElementById('settingsToggleKnob').style.left = '22px';
-                cb.parentElement.querySelector('span:nth-child(2)').style.background = '#FF2D78';
+            function saveNotifPrefs(p) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(p)); } catch (_) {} }
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            function u() { return (typeof currentUserData !== 'undefined' && currentUserData) || {}; }
+
+            const LB  = 'font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;';
+            const FLD = 'width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;';
+            const ROW = 'margin-bottom:18px;';
+            const HINT = 'font-size:11px;color:#9CA3AF;margin-top:5px;line-height:1.5;';
+
+            settingsModal.style.cssText = 'display:none;position:fixed;inset:0;z-index:950;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
+            settingsModal.innerHTML = `
+                <div style="background:#fff;border-radius:16px;width:700px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
+                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">Settings</h3>
+                        <button id="aSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
+                    </div>
+                    <div style="display:flex;flex:1;min-height:0;">
+                        <nav id="aSetNav" style="width:178px;flex-shrink:0;border-right:1px solid #F0F0F2;padding:14px 10px;display:flex;flex-direction:column;gap:2px;"></nav>
+                        <div id="aSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
+                        <button id="aSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">Close</button>
+                        <button id="aSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">Save changes</button>
+                    </div>
+                </div>`;
+
+            const SECTIONS = [
+                { key: 'account', icon: '🏢', label: 'Account' },
+                { key: 'billing', icon: '💳', label: 'Billing & funds' },
+                { key: 'api',     icon: '🔑', label: 'API access' },
+                { key: 'notifs',  icon: '🔔', label: 'Notifications' },
+            ];
+            let activeSection = 'account';
+
+            function sectionAccount() {
+                const d = u();
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">Company name</label>
+                        <input id="aSetCompany" type="text" value="${esc(d.company_name || '')}" style="${FLD}">
+                        <div style="${HINT}">Shown on your campaigns and billing receipts.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Contact email</label>
+                        <input type="text" value="${esc(d.email || '')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;">
+                        <div style="${HINT}">Used for campaign and billing notifications.</div>
+                    </div>
+                    <div style="${ROW}margin-bottom:0;">
+                        <label style="${LB}">Advertiser ID</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" value="${esc(d.user_id || '—')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:monospace;font-size:12.5px;">
+                            <button class="aSetCopy" data-copy="${esc(d.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                        </div>
+                    </div>`;
             }
-        }, 0);
-        // Reveal API key
-        document.getElementById('settingsRevealKey').addEventListener('click', () => {
-            const inp = document.getElementById('settingsApiKey');
-            const btn = document.getElementById('settingsRevealKey');
-            if (inp.type === 'password') {
-                // Generate a plausible key from user id
-                const uid = currentUserData?.user_id || 'demo';
-                inp.value = 'bb_live_' + uid.replace(/-/g, '').substring(0, 24);
-                inp.type = 'text';
-                btn.textContent = 'Hide';
-            } else {
-                inp.value = 'bb_live_••••••••••••';
-                inp.type = 'password';
-                btn.textContent = 'Show';
+
+            function sectionBilling() {
+                const d = u();
+                const bal = (typeof d.balance === 'number') ? '$' + d.balance.toFixed(2) : null;
+                return `
+                    <div style="background:#FFF0F6;border:1px solid #F4C0D1;border-radius:10px;padding:16px;margin-bottom:18px;">
+                        <div style="font-size:11px;font-weight:700;color:#993556;text-transform:uppercase;letter-spacing:0.06em;">Account balance</div>
+                        <div style="font-size:26px;font-weight:800;color:#FF2D78;margin-top:4px;">${bal || 'See dashboard'}</div>
+                        <div style="font-size:12px;color:#993556;margin-top:4px;line-height:1.5;">Campaign spend is deducted from this balance as your ads run.</div>
+                    </div>
+                    <button id="aSetAddFunds" style="width:100%;padding:11px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">+ Add funds</button>
+                    <div style="${HINT}">Opens the Stripe-powered deposit flow.</div>
+                    <div style="border-top:1px solid #F0F0F2;margin-top:18px;padding-top:14px;">
+                        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px;">Billing history</div>
+                        <div style="font-size:11.5px;color:#9CA3AF;line-height:1.5;">A full transaction & receipt history is coming in the next settings update.</div>
+                    </div>`;
             }
-        });
-        // Save settings
-        document.getElementById('settingsSaveBtn').addEventListener('click', () => {
-            const newCompany = document.getElementById('settingsCompany').value.trim();
-            if (newCompany && currentUserData) {
-                currentUserData.company_name = newCompany;
-                localStorage.setItem('bb_user_data', JSON.stringify(currentUserData));
-                companyDisplayName.textContent = newCompany;
+
+            function sectionApi() {
+                const d = u();
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">API key</label>
+                        <div style="display:flex;gap:8px;">
+                            <input id="aSetKey" type="password" value="bb_live_••••••••••••" style="${FLD}font-family:monospace;font-size:12.5px;">
+                            <button id="aSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Show</button>
+                        </div>
+                        <div style="${HINT}">Authenticates programmatic campaign management via the REST API. Keep it secret.</div>
+                    </div>
+                    <div style="${ROW}margin-bottom:0;">
+                        <label style="${LB}">Advertiser ID</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" value="${esc(d.user_id || '—')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:monospace;font-size:12.5px;">
+                            <button class="aSetCopy" data-copy="${esc(d.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                        </div>
+                    </div>`;
             }
-            settingsModal.style.display = 'none';
-            showToast('Settings saved', 'success');
-        });
+
+            function sectionNotifs() {
+                const n = getNotifPrefs();
+                const toggle = (key, title, desc) => `
+                    <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #F3F4F6;cursor:pointer;">
+                        <input type="checkbox" class="aSetNotif" data-notif="${key}" ${n[key] ? 'checked' : ''} style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:#FF2D78;">
+                        <span>
+                            <span style="display:block;font-size:13.5px;font-weight:600;color:#111;">${title}</span>
+                            <span style="display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;">${desc}</span>
+                        </span>
+                    </label>`;
+                return `
+                    <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">Email me when…</div>
+                    ${toggle('campaign_status', 'A campaign changes status', 'Approved, rejected, paused, or out of budget.')}
+                    ${toggle('budget_alert', 'A campaign nears its budget', 'Heads-up before a campaign spends its daily or total cap.')}
+                    ${toggle('low_balance', 'My account balance runs low', 'So campaigns never stop unexpectedly for lack of funds.')}
+                    ${toggle('weekly_report', 'Weekly performance summary', 'A once-a-week recap of impressions, clicks, spend, and conversions.')}`;
+            }
+
+            function renderNav() {
+                const nav = settingsModal.querySelector('#aSetNav');
+                nav.innerHTML = SECTIONS.map((s) => {
+                    const on = s.key === activeSection;
+                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">
+                        <span style="font-size:14px;">${s.icon}</span>${s.label}</button>`;
+                }).join('');
+                nav.querySelectorAll('.aSetNavBtn').forEach((b) => {
+                    b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
+                });
+            }
+
+            function renderBody() {
+                const body = settingsModal.querySelector('#aSetBody');
+                const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs };
+                body.innerHTML = (map[activeSection] || sectionAccount)();
+                body.querySelectorAll('.aSetCopy').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const v = btn.dataset.copy || '';
+                        if (v) { navigator.clipboard.writeText(v); if (typeof showToast === 'function') showToast('Copied', 'success'); }
+                    });
+                });
+                const reveal = settingsModal.querySelector('#aSetReveal');
+                if (reveal) reveal.addEventListener('click', () => {
+                    const inp = settingsModal.querySelector('#aSetKey');
+                    if (inp.type === 'password') {
+                        const uid = (u().api_key) || ('bb_live_' + String(u().user_id || 'demo').replace(/-/g, '').substring(0, 24));
+                        inp.value = uid; inp.type = 'text'; reveal.textContent = 'Hide';
+                    } else { inp.value = 'bb_live_••••••••••••'; inp.type = 'password'; reveal.textContent = 'Show'; }
+                });
+                const addF = settingsModal.querySelector('#aSetAddFunds');
+                if (addF) addF.addEventListener('click', () => {
+                    closeModal();
+                    const btn = Array.from(document.querySelectorAll('button')).find((b) => /add funds/i.test((b.textContent || '').trim()));
+                    if (btn) btn.click();
+                });
+                body.querySelectorAll('.aSetNotif').forEach((cb) => {
+                    cb.addEventListener('change', () => {
+                        const prefs = getNotifPrefs();
+                        prefs[cb.dataset.notif] = cb.checked;
+                        saveNotifPrefs(prefs);
+                    });
+                });
+            }
+
+            function openModal() { activeSection = 'account'; renderNav(); renderBody(); settingsModal.style.display = 'flex'; }
+            function closeModal() { settingsModal.style.display = 'none'; }
+
+            settingsBtn.addEventListener('click', openModal);
+            settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(); });
+            settingsModal.querySelector('#aSetClose').addEventListener('click', closeModal);
+            settingsModal.querySelector('#aSetCancel').addEventListener('click', closeModal);
+            settingsModal.querySelector('#aSetSave').addEventListener('click', () => {
+                const companyInput = settingsModal.querySelector('#aSetCompany');
+                const newCompany = companyInput ? companyInput.value.trim() : '';
+                if (newCompany && typeof currentUserData !== 'undefined' && currentUserData) {
+                    currentUserData.company_name = newCompany;
+                    try { localStorage.setItem('bb_user_data', JSON.stringify(currentUserData)); } catch (_) {}
+                    if (typeof companyDisplayName !== 'undefined' && companyDisplayName) companyDisplayName.textContent = newCompany;
+                }
+                closeModal();
+                if (typeof showToast === 'function') showToast('Settings saved', 'success');
+            });
+        })();
 
         // ───────────── COMMAND PALETTE (Cmd+K) ─────────────
         const cmdPalette = document.createElement('div');
