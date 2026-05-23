@@ -234,6 +234,25 @@ function demoHandler(action, body, req, res) {
     return res.status(404).json({ error: "Developer not found" });
   }
 
+  // Update a user's notification preferences (publisher or advertiser).
+  // Demo mode: match by api_key when supplied; otherwise just acknowledge
+  // (demo state is in-memory and ephemeral, so persistence isn't critical).
+  if (action === "update_notif_prefs") {
+    const prefs = body && body.prefs;
+    if (!prefs || typeof prefs !== "object" || Array.isArray(prefs)) {
+      return res.status(400).json({ error: "prefs must be an object" });
+    }
+    if (body.api_key) {
+      for (const user of DEMO_USERS.values()) {
+        if (user.profile && user.profile.api_key === body.api_key) {
+          user.profile.notification_prefs = { ...(user.profile.notification_prefs || {}), ...prefs };
+          return res.json({ success: true, mode: "demo", notification_prefs: user.profile.notification_prefs });
+        }
+      }
+    }
+    return res.json({ success: true, mode: "demo", notification_prefs: prefs });
+  }
+
   if (action === "oauth_sync") {
     // Demo mode has no Supabase; OAuth isn't available here.
     return res.status(501).json({ error: "Google sign-in requires Supabase — demo mode doesn't support OAuth. Use email + password or try the demo." });
@@ -473,7 +492,29 @@ async function supabaseHandler(action, body, req, res) {
     });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats" });
+  // Update notification preferences — token-verified, works for both
+  // publisher (developers) and advertiser (advertisers) accounts.
+  if (action === "update_notif_prefs") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
+    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
+    const prefs = body && body.prefs;
+    if (!prefs || typeof prefs !== "object" || Array.isArray(prefs)) {
+      return res.status(400).json({ error: "prefs must be an object" });
+    }
+    const table = (body && body.role === "advertiser") ? "advertisers" : "developers";
+    const { data, error: upErr } = await supabaseAdmin
+      .from(table)
+      .update({ notification_prefs: prefs })
+      .eq("id", user.id)
+      .select("notification_prefs")
+      .single();
+    if (upErr) return res.status(500).json({ error: upErr.message });
+    return res.json({ success: true, mode: "supabase", notification_prefs: (data && data.notification_prefs) || prefs });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_notif_prefs" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {

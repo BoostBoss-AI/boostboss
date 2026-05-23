@@ -3019,7 +3019,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         corner: data.profile?.format_corner !== false,
                         video: data.profile?.format_video !== false,
                         fullscreen: data.profile?.format_fullscreen !== false
-                    }
+                    },
+                    notification_prefs: data.profile?.notification_prefs || {}
                 };
 
                 // Store session and user data
@@ -4875,15 +4876,33 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const settingsBtn = document.getElementById('settingsBtn');
             if (!settingsBtn) return;
 
-            // Notification preferences — per-browser for now (Pass 2 moves
-            // these to a server-side store so they sync across devices).
+            // Notification preferences — server-stored (so they follow the
+            // publisher across devices) with a localStorage mirror for an
+            // instant read and an offline fallback.
             const NOTIF_KEY = 'bb_dev_notif_prefs';
             const NOTIF_DEFAULTS = { payout_sent: true, payout_failed: true, monthly_summary: true, product_updates: false };
             function getNotifPrefs() {
-                try { return Object.assign({}, NOTIF_DEFAULTS, JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}')); }
-                catch (_) { return Object.assign({}, NOTIF_DEFAULTS); }
+                let local = {};
+                try { local = JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'); } catch (_) {}
+                const server = (typeof userProfile !== 'undefined' && userProfile && userProfile.notification_prefs) || {};
+                return Object.assign({}, NOTIF_DEFAULTS, local, server);
             }
-            function saveNotifPrefs(p) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(p)); } catch (_) {} }
+            function saveNotifPrefs(p) {
+                try { localStorage.setItem(NOTIF_KEY, JSON.stringify(p)); } catch (_) {}
+                if (typeof userProfile !== 'undefined' && userProfile) userProfile.notification_prefs = p;
+                // Sync to the server (best-effort) so prefs persist across devices.
+                try {
+                    const sessionRaw = localStorage.getItem('bb_dev_session');
+                    const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                    if (session && session.token) {
+                        fetch(`${API_BASE}/api/auth?action=update_notif_prefs`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                            body: JSON.stringify({ role: 'developer', prefs: p }),
+                        }).catch(() => {});
+                    }
+                } catch (_) {}
+            }
 
             const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) =>
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

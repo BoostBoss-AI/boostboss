@@ -3659,7 +3659,8 @@
                 currentUserData = {
                     company_name: resolvedCompany,
                     email: email,
-                    user_id: userId
+                    user_id: userId,
+                    notification_prefs: data.profile?.notification_prefs || {}
                 };
 
                 localStorage.setItem('bb_session_token', JSON.stringify(currentUser));
@@ -6127,15 +6128,32 @@
             const settingsBtn = document.getElementById('settingsBtn');
             if (!settingsModal || !settingsBtn) return;
 
-            // Notification preferences — per-browser for now (Pass 2 moves
-            // these to a server-side store so they sync across devices).
+            // Notification preferences — server-stored (so they follow the
+            // advertiser across devices) with a localStorage mirror for an
+            // instant read and an offline fallback.
             const NOTIF_KEY = 'bb_adv_notif_prefs';
             const NOTIF_DEFAULTS = { campaign_status: true, budget_alert: true, low_balance: true, weekly_report: false };
             function getNotifPrefs() {
-                try { return Object.assign({}, NOTIF_DEFAULTS, JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}')); }
-                catch (_) { return Object.assign({}, NOTIF_DEFAULTS); }
+                let local = {};
+                try { local = JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'); } catch (_) {}
+                const server = (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.notification_prefs) || {};
+                return Object.assign({}, NOTIF_DEFAULTS, local, server);
             }
-            function saveNotifPrefs(p) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(p)); } catch (_) {} }
+            function saveNotifPrefs(p) {
+                try { localStorage.setItem(NOTIF_KEY, JSON.stringify(p)); } catch (_) {}
+                if (typeof currentUserData !== 'undefined' && currentUserData) currentUserData.notification_prefs = p;
+                // Sync to the server (best-effort) so prefs persist across devices.
+                try {
+                    const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                    if (tok) {
+                        fetch(`${API_BASE}/api/auth?action=update_notif_prefs`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}` },
+                            body: JSON.stringify({ role: 'advertiser', prefs: p }),
+                        }).catch(() => {});
+                    }
+                } catch (_) {}
+            }
             const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) =>
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             function u() { return (typeof currentUserData !== 'undefined' && currentUserData) || {}; }
