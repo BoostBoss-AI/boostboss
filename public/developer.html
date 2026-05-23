@@ -3856,6 +3856,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             } catch (_) {}
+            // Re-render the Ad Placements panel so it shows the families
+            // this door can render (MCP → AI-native only, etc.).
+            if (typeof renderAdFormats === 'function') renderAdFormats();
         }
         // Backward-compat alias for any older inline handlers that still
         // reference the previous framework-tab function name.
@@ -3995,16 +3998,45 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             return '';
         }
 
+        // Which placement families each integration door can physically
+        // render. The Ad Placements panel shows only the families relevant
+        // to the door selected in the Integration section — an MCP server
+        // can't render Display or Interruptive, a chat bot can't render
+        // Interruptive, so those are hidden when that door is selected.
+        const DOOR_FAMILIES = {
+            'mcp':        ['ai-native'],
+            'js-snippet': ['ai-native', 'display', 'interruptive'],
+            'npm-sdk':    ['ai-native', 'display', 'interruptive'],
+            'rest-api':   ['ai-native', 'display'],
+        };
+        const DOOR_LABELS = {
+            'mcp': 'Lumi MCP', 'js-snippet': 'Lumi Web',
+            'npm-sdk': 'Lumi Extension', 'rest-api': 'Lumi Bot',
+        };
+
         // Renders the Ad Placements section: one block per placement family,
         // each with a family header (name, description, per-door note, master
-        // toggle) and the per-format cards for that family inside.
+        // toggle) and the per-format cards for that family inside. The set of
+        // families shown is tailored to the door selected above.
         function renderAdFormats() {
             const container = document.getElementById('adFormatsContainer');
-            if (!container) return;
+            if (!container || typeof userProfile === 'undefined' || !userProfile) return;
             container.className = '';
             container.innerHTML = '';
 
-            PLACEMENT_FAMILIES.forEach(fam => {
+            // Tailor to the door selected in the Integration section — show
+            // only the families that door can physically render.
+            const _sel = document.querySelector('.ic-card.ic-selected');
+            const _door = (_sel && _sel.dataset.door) || 'mcp';
+            const _allowed = DOOR_FAMILIES[_door] || ['ai-native', 'display', 'interruptive'];
+            const _families = PLACEMENT_FAMILIES.filter(f => _allowed.includes(f.key));
+
+            const _ctx = document.createElement('div');
+            _ctx.style.cssText = 'font-size:12px;color:#6B7280;margin-bottom:14px;line-height:1.5;';
+            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong>. Switch doors in the Integration section above to see each door's placements.`;
+            container.appendChild(_ctx);
+
+            _families.forEach(fam => {
                 const famFormats = AD_FORMAT_CATALOG.filter(f => fam.formats.includes(f.key));
                 const enabledCount = famFormats.filter(f => !!userProfile.formats?.[f.key]).length;
                 const allOn = enabledCount === famFormats.length;

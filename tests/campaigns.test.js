@@ -160,6 +160,69 @@ async function test(name, fn) {
     assert(r._body.policy.issues.some(i => i.includes("IAB26-1")));
   });
 
+  // ── Placement tier ─────────────────────────────────────────────────
+  await test("create stores a valid placement_tier", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: {
+        advertiser_id: "adv_tier_valid",
+        headline: "Interruptive Tier Campaign",
+        cta_url: "https://example.com/tier",
+        placement_tier: "interruptive",
+        daily_budget: 100, total_budget: 5000,
+      },
+    });
+    assert.strictEqual(r._status, 201);
+    assert.strictEqual(r._body.campaign.placement_tier, "interruptive");
+  });
+
+  await test("create coerces an unknown placement_tier to null", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: {
+        advertiser_id: "adv_tier_bogus",
+        headline: "Bad Tier Campaign",
+        cta_url: "https://example.com/tier",
+        placement_tier: "premium-galaxy",
+        daily_budget: 100, total_budget: 5000,
+      },
+    });
+    assert.strictEqual(r._status, 201);
+    assert.strictEqual(r._body.campaign.placement_tier, null);
+  });
+
+  await test("create defaults placement_tier to null when omitted", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: {
+        advertiser_id: "adv_tier_omitted",
+        headline: "No Tier Campaign",
+        cta_url: "https://example.com/tier",
+        daily_budget: 100, total_budget: 5000,
+      },
+    });
+    assert.strictEqual(r._status, 201);
+    assert.strictEqual(r._body.campaign.placement_tier, null);
+  });
+
+  await test("update can change placement_tier", async () => {
+    const r = await run({
+      method: "PATCH", query: { action: "update" },
+      body: { id: "cam_cursor_001", placement_tier: "ai-native" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.campaign.placement_tier, "ai-native");
+  });
+
+  await test("update coerces an unknown placement_tier to null", async () => {
+    const r = await run({
+      method: "PATCH", query: { action: "update" },
+      body: { id: "cam_cursor_001", placement_tier: "not-a-tier" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.campaign.placement_tier, null);
+  });
+
   // ── Update ─────────────────────────────────────────────────────────
   await test("PATCH action=update modifies campaign fields", async () => {
     const r = await run({
