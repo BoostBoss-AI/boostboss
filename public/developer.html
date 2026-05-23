@@ -2316,6 +2316,23 @@ await message.reply({
                 </div>
             </div>
 
+            <!-- Ad Placements — formats grouped into the 3 placement families -->
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                    <div class="section-title" style="margin-bottom: 0;">Ad Placements</div>
+                    <div style="font-size: 12px; color: #6B7280;">
+                        Est. monthly income: <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
+                        <span style="color: #9CA3AF; font-size: 11px;">&nbsp;(at current volume)</span>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
+                    Choose which placement families run in your product. Turning a family off removes those ad types from your auction. Defaults are safe — the gentle families are on, the interruptive ones are opt-in.
+                </div>
+                <div id="adFormatsContainer">
+                    <!-- Dynamically populated — grouped by placement family -->
+                </div>
+            </div>
+
             <!-- API Keys Section -->
             <div class="section">
                 <div class="section-title">API Keys & Credentials</div>
@@ -2341,23 +2358,6 @@ await message.reply({
                     <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')">Copy</button>
                 </div>
                 <button class="regenerate-btn" onclick="regenerateKey()">Regenerate API Key</button>
-            </div>
-
-            <!-- Ad Placements — formats grouped into the 3 placement families -->
-            <div class="section">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <div class="section-title" style="margin-bottom: 0;">Ad Placements</div>
-                    <div style="font-size: 12px; color: #6B7280;">
-                        Est. monthly income: <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
-                        <span style="color: #9CA3AF; font-size: 11px;">&nbsp;(at current volume)</span>
-                    </div>
-                </div>
-                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
-                    Choose which placement families run in your product. Turning a family off removes those ad types from your auction. Defaults are safe — the gentle families are on, the interruptive ones are opt-in.
-                </div>
-                <div id="adFormatsContainer">
-                    <!-- Dynamically populated — grouped by placement family -->
-                </div>
             </div>
 
             <!-- BBX Placements Breakdown — per-slot economics from placement_daily_stats -->
