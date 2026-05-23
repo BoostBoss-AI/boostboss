@@ -71,7 +71,7 @@
     <p class="lede">One async <code>&lt;script&gt;</code> tag in your <code>&lt;head&gt;</code>, one or more <code>&lt;div data-lumi-slot&gt;</code> elements where you want ads. No backend changes. Works with any LLM provider (OpenAI, Anthropic, Gemini, open-source) and any framework (LangChain, Vercel AI SDK, CrewAI, plain React) — Lumi attaches at the rendering surface.</p>
 
     <div class="callout info">
-      <strong>v0.1 — beta. Live on <code>boostboss.ai/lumi.js</code> today.</strong>
+      <strong>v0.2 — beta. Live on <code>boostboss.ai/lumi.js</code> today.</strong>
       <p>The slot-based API documented on this page is shipped. <code>&lt;script src="https://boostboss.ai/lumi.js"&gt;</code> resolves and works against the live Boost Boss backend. Try the sandbox flow with <code>data-publisher-id="pub_test_demo"</code> — no signup required to verify integration end-to-end. The legacy <code>BoostBoss.init</code> API at <code>boostboss.ai/sdk.js</code> remains supported for backward compatibility. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
@@ -92,15 +92,15 @@
 
     <h2 id="initialization">Slot placement</h2>
     <p>Drop a <code>&lt;div&gt;</code> with <code>data-lumi-slot</code> wherever you want an ad. Lumi auto-discovers slots on page load and on DOM mutations (so SPA route changes work without ceremony).</p>
-<pre><span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"sidebar"</span><span class="tag">&gt;&lt;/div&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"inline"</span> <span class="attr">data-lumi-context</span>=<span class="str">"checkout flow"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+<pre><span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"card"</span><span class="tag">&gt;&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"citation"</span> <span class="attr">data-lumi-context</span>=<span class="str">"comparing CRM tools"</span><span class="tag">&gt;&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"corner"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
 
     <h3>Slot data attributes</h3>
     <table>
       <thead><tr><th>Attribute</th><th>Values</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td><code>data-lumi-slot</code></td><td><code>banner</code> · <code>sidebar</code> · <code>inline</code> · <code>interstitial</code></td><td>Ad format. Lumi picks creative dimensions accordingly.</td></tr>
+        <tr><td><code>data-lumi-slot</code></td><td><code>corner</code> · <code>card</code> · <code>loading</code> · <code>citation</code> · <code>chip</code></td><td>Placement type. <code>corner</code> anchors a sticky unit to a screen corner; <code>card</code> / <code>loading</code> / <code>citation</code> / <code>chip</code> render inside the slot element.</td></tr>
         <tr><td><code>data-lumi-context</code></td><td>any string</td><td>Context signal for matching. Defaults to page <code>&lt;h1&gt;</code> + URL path.</td></tr>
         <tr><td><code>data-lumi-frequency</code></td><td><code>once</code> · <code>session</code> · <code>always</code></td><td>How often this slot refreshes. Default: <code>session</code>.</td></tr>
         <tr><td><code>data-lumi-fallback</code></td><td>any HTML id</td><td>Element to show when no ad fills the slot (e.g. your own promo).</td></tr>

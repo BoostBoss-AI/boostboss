@@ -12,8 +12,17 @@
  *     src="https://boostboss.ai/lumi.js"
  *     data-publisher-id="pub_xxx"></script>
  *
- *   <div data-lumi-slot="banner"></div>
- *   <div data-lumi-slot="sidebar" data-lumi-context="checkout flow"></div>
+ *   <div data-lumi-slot="card"></div>
+ *   <div data-lumi-slot="citation" data-lumi-context="checkout flow"></div>
+ *
+ * Slot types (the five placements the Web door owns):
+ *   corner    Corner / sticky anchored unit. Renders fixed to a screen corner.
+ *   card      Inline sponsored card. Renders in the slot.
+ *   loading   Loading / "thinking"-state ad. Renders in the slot; remove the
+ *             slot element when your AI response is ready.
+ *   citation  Sponsored source / citation. Compact, inline.
+ *   chip      Sponsored suggested-action chip. A tappable pill.
+ *   (legacy banner/sidebar/inline/interstitial still resolve — see normalizeFormat)
  *
  * Sandbox: data-publisher-id="pub_test_demo" returns a fixed test creative.
  *
@@ -21,14 +30,19 @@
  *   lumi:ready        — SDK booted
  *   lumi:impression   — slot rendered an ad
  *   lumi:click        — user clicked CTA
- *   lumi:close        — user dismissed (interstitial only)
+ *   lumi:close        — user dismissed (corner / card)
  *   lumi:no_fill      — slot stayed empty
  *   lumi:error        — request or parse error; see e.detail.code
+ *
+ * Every impression / click / dismiss also fires a server-side tracking
+ * beacon. Those beacon URLs carry the context fingerprint (ctx=) minted by
+ * the auction, so feedback is context-joined end to end.
  *
  * Programmatic API:
  *   Lumi.refresh(selector?)  — re-fetch + re-render. No arg refreshes all.
  *   Lumi.destroy()           — tear down all rendered ads + observers.
  *   Lumi.render(el, opts)    — manual mount for a slot not auto-discovered.
+ *   Lumi.trackConversion(o)  — fire a publisher-side conversion event.
  *   Lumi.getLastError()      — last error object or null.
  *   Lumi.setDebug(bool)      — toggle debug logging at runtime.
  *   Lumi.version             — semver string.
@@ -40,7 +54,7 @@
   if (window.Lumi && window.Lumi.__loaded) return;     // idempotent
 
   // ── Config ─────────────────────────────────────────────────────────
-  const VERSION    = "0.1.0";
+  const VERSION    = "0.2.0";
   const SESSION_ID = "lumi_" + Math.random().toString(36).slice(2, 12) + "_" + Date.now();
   const DEFAULT_API_BASE = "https://boostboss.ai";
 
@@ -56,6 +70,18 @@
   let cssInjected  = false;
   let observer     = null;
   let initialized  = false;
+
+  // ── Placement taxonomy ─────────────────────────────────────────────
+  // The five placements the Web door owns. Legacy slot names from the
+  // pre-matrix taxonomy still resolve so existing integrations don't break.
+  const CORE_FORMATS   = ["corner", "card", "loading", "citation", "chip"];
+  const LEGACY_FORMATS = { banner: "card", sidebar: "card", inline: "citation", interstitial: "corner" };
+  const FORMAT_PREF    = { corner: "corner", card: "native", loading: "native", citation: "native", chip: "native" };
+  function normalizeFormat(raw) {
+    const f = String(raw || "").toLowerCase().trim();
+    if (CORE_FORMATS.indexOf(f) >= 0) return f;
+    return LEGACY_FORMATS[f] || "card";
+  }
 
   // ── Logging ────────────────────────────────────────────────────────
   function log(msg, ...args) {
@@ -81,7 +107,7 @@
     const style = document.createElement("style");
     style.id = "lumi-styles";
     style.textContent = `
-.lumi-card, .lumi-banner, .lumi-sidebar, .lumi-inline, .lumi-interstitial {
+.lumi-corner, .lumi-cardbox, .lumi-loading, .lumi-citation, .lumi-chip {
   --_p:   var(--lumi-primary, #FF2D78);
   --_t:   var(--lumi-text, #0F0F1A);
   --_m:   var(--lumi-muted, #6B7280);
@@ -104,67 +130,77 @@
   transition: filter 0.15s; white-space: nowrap;
 }
 .lumi-cta:hover { filter: brightness(1.08); }
-
-.lumi-banner {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 16px; background: var(--_bg);
-  border: 1px solid var(--_b); border-radius: var(--_r);
-}
-.lumi-banner__media { width: 64px; height: 64px; flex-shrink: 0; border-radius: 8px; object-fit: cover; }
-.lumi-banner__body  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.lumi-banner__title { font-size: 15px; font-weight: 600; line-height: 1.3; margin: 0; }
-.lumi-banner__sub   { font-size: 13px; color: var(--_m); line-height: 1.4; margin: 0; }
-.lumi-banner__cta   { flex-shrink: 0; }
-
-.lumi-sidebar {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 18px; background: var(--_bg);
-  border: 1px solid var(--_b); border-radius: var(--_r);
-}
-.lumi-sidebar__media { width: 100%; border-radius: 8px; object-fit: cover; }
-.lumi-sidebar__title { font-size: 16px; font-weight: 700; line-height: 1.25; margin: 0; }
-.lumi-sidebar__sub   { font-size: 14px; color: var(--_m); line-height: 1.45; margin: 0; }
-.lumi-sidebar__cta   { align-self: stretch; padding: 10px 16px; }
-
-.lumi-inline {
-  font-size: 14px; line-height: 1.5; padding: 10px 12px;
-  border-left: 3px solid var(--_p);
-  background: var(--_bg); border-radius: 6px;
-}
-.lumi-inline__title { font-weight: 600; }
-.lumi-inline__sub   { color: var(--_m); }
-.lumi-inline__cta   {
-  color: var(--_p); font-weight: 600; text-decoration: none;
-  margin-left: 4px;
-}
-.lumi-inline__cta:hover { text-decoration: underline; }
-
-.lumi-interstitial-backdrop {
-  position: fixed; inset: 0; background: rgba(15, 15, 26, 0.55);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 2147483646; padding: 20px;
-}
-.lumi-interstitial {
-  position: relative; max-width: 420px; width: 100%;
-  background: var(--_bg); border-radius: var(--_r);
-  padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.30);
-  display: flex; flex-direction: column; gap: 12px;
-}
-.lumi-interstitial__close {
+.lumi-x {
   position: absolute; top: 8px; right: 10px;
-  background: transparent; border: none; cursor: pointer;
-  width: 32px; height: 32px; border-radius: 50%;
-  font-size: 22px; color: var(--_m); line-height: 1;
+  width: 24px; height: 24px; border: none; background: transparent;
+  cursor: pointer; font-size: 18px; line-height: 1; color: var(--_m); padding: 0;
 }
-.lumi-interstitial__close:hover { background: rgba(0,0,0,0.05); color: var(--_t); }
-.lumi-interstitial__media { width: 100%; border-radius: 8px; }
-.lumi-interstitial__title { font-size: 19px; font-weight: 700; line-height: 1.25; margin: 0; }
-.lumi-interstitial__sub   { font-size: 14.5px; color: var(--_m); line-height: 1.5; margin: 0; }
-.lumi-interstitial__cta   { padding: 12px 18px; font-size: 14px; align-self: flex-start; }
+.lumi-x:hover { color: var(--_t); }
+
+/* ── card — inline sponsored card ── */
+.lumi-cardbox {
+  position: relative; display: flex; flex-direction: column; gap: 8px;
+  padding: 14px 16px; background: var(--_bg);
+  border: 1px solid var(--_b); border-left: 3px solid var(--_p);
+  border-radius: var(--_r); max-width: 540px;
+}
+.lumi-cardbox__media { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; }
+.lumi-cardbox__title { font-size: 15px; font-weight: 700; line-height: 1.3; margin: 0; }
+.lumi-cardbox__sub   { font-size: 13px; color: var(--_m); line-height: 1.45; margin: 0; }
+.lumi-cardbox__cta   { align-self: flex-start; }
+
+/* ── corner — sticky anchored unit ── */
+.lumi-corner-anchor { position: fixed; bottom: 24px; right: 24px; width: 320px; z-index: 2147483646; }
+.lumi-corner {
+  position: relative; display: flex; flex-direction: column; gap: 8px;
+  padding: 16px; background: var(--_bg);
+  border: 1px solid var(--_b); border-radius: var(--_r);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+}
+.lumi-corner__media { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; }
+.lumi-corner__title { font-size: 15px; font-weight: 700; line-height: 1.3; margin: 0; }
+.lumi-corner__sub   { font-size: 13px; color: var(--_m); line-height: 1.45; margin: 0; }
+.lumi-corner__cta   { align-self: stretch; }
+
+/* ── loading — "thinking"-state ad ── */
+.lumi-loading {
+  position: relative; overflow: hidden;
+  padding: 13px 16px; background: var(--_bg);
+  border: 1px solid var(--_b); border-radius: var(--_r); max-width: 540px;
+}
+.lumi-loading::after {
+  content: ''; position: absolute; top: 0; left: -40%; width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.045), transparent);
+  animation: lumi-shim 1.4s infinite;
+}
+.lumi-loading__title { font-size: 13px; font-weight: 700; margin: 6px 0 3px; }
+.lumi-loading__sub   { font-size: 12px; color: var(--_m); margin: 0 0 8px; }
+.lumi-loading__cta   { color: var(--_p); font-weight: 600; text-decoration: none; font-size: 12px; }
+.lumi-loading__cta:hover { text-decoration: underline; }
+@keyframes lumi-shim { to { left: 120%; } }
+
+/* ── citation — sponsored source ── */
+.lumi-citation { font-size: 13px; line-height: 1.5; }
+.lumi-citation__title { font-weight: 600; }
+.lumi-citation__cta {
+  color: var(--_p); font-weight: 600; text-decoration: none; margin-left: 4px;
+}
+.lumi-citation__cta:hover { text-decoration: underline; }
+
+/* ── chip — suggested-action pill ── */
+.lumi-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--_bg); border: 1px solid var(--_p); border-radius: 999px;
+  padding: 7px 14px; margin: 4px 6px 4px 0;
+  font-size: 12px; font-weight: 600; color: var(--_t);
+  text-decoration: none; cursor: pointer; transition: background 0.15s;
+}
+.lumi-chip:hover { background: rgba(255,45,120,0.07); }
+.lumi-chip__dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--_p); flex-shrink: 0; }
+.lumi-chip__tag  { font-size: 9px; color: var(--_m); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
 
 @media (max-width: 480px) {
-  .lumi-banner { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .lumi-banner__cta { align-self: stretch; }
+  .lumi-corner-anchor { left: 12px; right: 12px; width: auto; }
 }
     `;
     document.head.appendChild(style);
@@ -181,6 +217,7 @@
       emitError("BBX_BAD_REQUEST", "context required for fetchAd");
       return null;
     }
+    const format = opts.format || "card";
 
     const body = {
       jsonrpc: "2.0",
@@ -190,7 +227,7 @@
         name: "get_sponsored_content",
         arguments: {
           context_summary: context,
-          format_preference: opts.format || "native",
+          format_preference: FORMAT_PREF[format] || "native",
           session_id: SESSION_ID,
           // Snippet uses publisher_id as the public identifier; backend
           // also accepts it under developer_api_key for sandbox prefix
@@ -199,7 +236,7 @@
           publisher_id:      publisherId,
           user_language:     navigator.language ? navigator.language.split("-")[0] : "en",
           host_app:          "web",
-          surface:           opts.surface || "web",
+          surface:           "web-" + format,
         },
       },
     };
@@ -267,14 +304,16 @@
   }
 
   // ── Beacons ────────────────────────────────────────────────────────
-  function fireImpressionBeacon(ad) {
-    if (!ad || !ad.tracking || !ad.tracking.impression) return;
-    // Use Image() so we don't run into CORS issues; impression beacons
-    // accept GET on any origin.
+  // Fire a server-side tracking beacon. The URL is minted by the auction
+  // and already carries auction_id + the context fingerprint (ctx=), so
+  // every impression / click / dismiss is context-joined. Image() is used
+  // so cross-origin GET beacons don't trip CORS.
+  function beacon(url) {
+    if (!url) return;
     try {
       const img = new Image(1, 1);
       img.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;";
-      img.src = ad.tracking.impression;
+      img.src = url;
     } catch (_e) { /* ignore */ }
   }
 
@@ -290,19 +329,6 @@
   }
 
   // ── Rendering ──────────────────────────────────────────────────────
-  function buildCta(ad, slotEl, format) {
-    const a = document.createElement("a");
-    a.className = "lumi-cta lumi-" + format + "__cta";
-    a.href = ad.ctaUrl;
-    a.target = "_blank";
-    a.rel = "noopener sponsored";
-    a.textContent = ad.ctaLabel;
-    a.addEventListener("click", function () {
-      dispatch("click", { adId: ad.adId, auctionId: ad.auctionId, slot: slotEl });
-    }, { once: false });
-    return a;
-  }
-
   function makeDisclosure(ad) {
     const span = document.createElement("span");
     span.className = "lumi-disclosure";
@@ -310,141 +336,169 @@
     return span;
   }
 
-  function renderBanner(el, ad) {
-    el.classList.add("lumi-card", "lumi-banner");
-    el.innerHTML = "";
-    if (ad.mediaUrl) {
-      const img = document.createElement("img");
-      img.className = "lumi-banner__media";
-      img.src = ad.mediaUrl;
-      img.alt = "";
-      img.onerror = function () { img.remove(); };
-      el.appendChild(img);
-    }
-    const body = document.createElement("div");
-    body.className = "lumi-banner__body";
-    body.appendChild(makeDisclosure(ad));
-    const h = document.createElement("p");
-    h.className = "lumi-banner__title";
-    h.textContent = ad.headline;
-    body.appendChild(h);
-    if (ad.subtext) {
-      const s = document.createElement("p");
-      s.className = "lumi-banner__sub";
-      s.textContent = ad.subtext;
-      body.appendChild(s);
-    }
-    el.appendChild(body);
-    el.appendChild(buildCta(ad, el, "banner"));
+  function closeButton(onClick) {
+    const b = document.createElement("button");
+    b.className = "lumi-x";
+    b.setAttribute("aria-label", "Dismiss");
+    b.textContent = "×";
+    b.addEventListener("click", onClick);
+    return b;
   }
 
-  function renderSidebar(el, ad) {
-    el.classList.add("lumi-card", "lumi-sidebar");
+  function buildCta(ad, slotEl, cls) {
+    const a = document.createElement("a");
+    a.className = "lumi-cta" + (cls ? " " + cls : "");
+    a.href = ad.ctaUrl;
+    a.target = "_blank";
+    a.rel = "noopener sponsored";
+    a.textContent = ad.ctaLabel;
+    a.addEventListener("click", function () {
+      // Server-side click feedback — context-joined via the ctx= in the URL.
+      beacon(ad.tracking && ad.tracking.click);
+      dispatch("click", { adId: ad.adId, auctionId: ad.auctionId, slot: slotEl });
+    });
+    return a;
+  }
+
+  function addMedia(parent, ad, cls) {
+    if (!ad.mediaUrl) return;
+    const img = document.createElement("img");
+    img.className = cls;
+    img.src = ad.mediaUrl;
+    img.alt = "";
+    img.onerror = function () { img.remove(); };
+    parent.appendChild(img);
+  }
+
+  // card — inline sponsored card with a dismiss control.
+  function renderCard(el, ad) {
+    el.classList.add("lumi-cardbox");
     el.innerHTML = "";
+    el.appendChild(closeButton(function () {
+      beacon(ad.tracking && ad.tracking.dismiss);
+      dispatch("close", { adId: ad.adId, auctionId: ad.auctionId });
+      el.innerHTML = ""; el.style.display = "none";
+    }));
     el.appendChild(makeDisclosure(ad));
-    if (ad.mediaUrl) {
-      const img = document.createElement("img");
-      img.className = "lumi-sidebar__media";
-      img.src = ad.mediaUrl;
-      img.alt = "";
-      img.onerror = function () { img.remove(); };
-      el.appendChild(img);
-    }
+    addMedia(el, ad, "lumi-cardbox__media");
     const h = document.createElement("p");
-    h.className = "lumi-sidebar__title";
+    h.className = "lumi-cardbox__title";
     h.textContent = ad.headline;
     el.appendChild(h);
     if (ad.subtext) {
       const s = document.createElement("p");
-      s.className = "lumi-sidebar__sub";
+      s.className = "lumi-cardbox__sub";
       s.textContent = ad.subtext;
       el.appendChild(s);
     }
-    el.appendChild(buildCta(ad, el, "sidebar"));
+    el.appendChild(buildCta(ad, el, "lumi-cardbox__cta"));
   }
 
-  function renderInline(el, ad) {
-    el.classList.add("lumi-card", "lumi-inline");
-    el.innerHTML = "";
-    el.appendChild(makeDisclosure(ad));
-    el.appendChild(document.createTextNode(" "));
-    const t = document.createElement("span");
-    t.className = "lumi-inline__title";
-    t.textContent = ad.headline;
-    el.appendChild(t);
-    if (ad.subtext) {
-      el.appendChild(document.createTextNode(" — "));
-      const s = document.createElement("span");
-      s.className = "lumi-inline__sub";
-      s.textContent = ad.subtext;
-      el.appendChild(s);
-    }
-    el.appendChild(document.createTextNode(" "));
-    const a = buildCta(ad, el, "inline");
-    a.className = "lumi-inline__cta";        // override; inline CTA is link-style
-    a.textContent = ad.ctaLabel + " →";
-    el.appendChild(a);
-  }
-
-  function renderInterstitial(el, ad) {
-    // Interstitial mounts to body, not the slot element. The slot itself
-    // becomes a hidden anchor we use for cleanup tracking.
-    el.classList.add("lumi-card");
+  // corner — sticky anchored unit. Mounts a fixed-position element to the
+  // body; the slot div itself becomes a hidden cleanup anchor.
+  function renderCorner(el, ad) {
     el.style.display = "none";
-
-    const backdrop = document.createElement("div");
-    backdrop.className = "lumi-interstitial-backdrop";
-
+    const anchor = document.createElement("div");
+    anchor.className = "lumi-corner-anchor";
     const card = document.createElement("div");
-    card.className = "lumi-card lumi-interstitial";
-
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "lumi-interstitial__close";
-    closeBtn.setAttribute("aria-label", "Close");
-    closeBtn.textContent = "×";
-    closeBtn.addEventListener("click", function () {
+    card.className = "lumi-corner";
+    card.appendChild(closeButton(function () {
+      beacon(ad.tracking && ad.tracking.close);
       dispatch("close", { adId: ad.adId, auctionId: ad.auctionId });
-      backdrop.remove();
-    });
-
-    card.appendChild(closeBtn);
+      if (anchor.parentNode) anchor.parentNode.removeChild(anchor);
+    }));
     card.appendChild(makeDisclosure(ad));
-    if (ad.mediaUrl) {
-      const img = document.createElement("img");
-      img.className = "lumi-interstitial__media";
-      img.src = ad.mediaUrl;
-      img.alt = "";
-      img.onerror = function () { img.remove(); };
-      card.appendChild(img);
-    }
+    addMedia(card, ad, "lumi-corner__media");
     const h = document.createElement("p");
-    h.className = "lumi-interstitial__title";
+    h.className = "lumi-corner__title";
     h.textContent = ad.headline;
     card.appendChild(h);
     if (ad.subtext) {
       const s = document.createElement("p");
-      s.className = "lumi-interstitial__sub";
+      s.className = "lumi-corner__sub";
       s.textContent = ad.subtext;
       card.appendChild(s);
     }
-    card.appendChild(buildCta(ad, el, "interstitial"));
-    backdrop.appendChild(card);
-    document.body.appendChild(backdrop);
-
-    // Track the backdrop so destroy() can remove it.
+    card.appendChild(buildCta(ad, el, "lumi-corner__cta"));
+    anchor.appendChild(card);
+    document.body.appendChild(anchor);
+    // Track the anchor so destroy()/unmountSlot can remove it.
     const slot = slots.get(el);
-    if (slot) slot.backdrop = backdrop;
+    if (slot) slot.backdrop = anchor;
+  }
+
+  // loading — "thinking"-state ad. Shown while the AI generates; the
+  // publisher removes the slot element when the response is ready.
+  function renderLoading(el, ad) {
+    el.classList.add("lumi-loading");
+    el.innerHTML = "";
+    el.appendChild(makeDisclosure(ad));
+    const h = document.createElement("div");
+    h.className = "lumi-loading__title";
+    h.textContent = ad.headline;
+    el.appendChild(h);
+    if (ad.subtext) {
+      const s = document.createElement("div");
+      s.className = "lumi-loading__sub";
+      s.textContent = ad.subtext;
+      el.appendChild(s);
+    }
+    const a = buildCta(ad, el, "lumi-loading__cta");
+    a.textContent = ad.ctaLabel + " →";
+    el.appendChild(a);
+  }
+
+  // citation — compact sponsored source, sits inline in an answer.
+  function renderCitation(el, ad) {
+    el.classList.add("lumi-citation");
+    el.innerHTML = "";
+    el.appendChild(makeDisclosure(ad));
+    el.appendChild(document.createTextNode(" "));
+    const t = document.createElement("span");
+    t.className = "lumi-citation__title";
+    t.textContent = ad.headline;
+    el.appendChild(t);
+    el.appendChild(document.createTextNode(" "));
+    const a = buildCta(ad, el, "lumi-citation__cta");
+    a.textContent = ad.ctaLabel + " ↗";
+    el.appendChild(a);
+  }
+
+  // chip — suggested-action pill. The whole pill is the click target.
+  function renderChip(el, ad) {
+    el.innerHTML = "";
+    const chip = document.createElement("a");
+    chip.className = "lumi-chip";
+    chip.href = ad.ctaUrl;
+    chip.target = "_blank";
+    chip.rel = "noopener sponsored";
+    const dot = document.createElement("span");
+    dot.className = "lumi-chip__dot";
+    const label = document.createElement("span");
+    label.textContent = ad.ctaLabel || ad.headline;
+    const tag = document.createElement("span");
+    tag.className = "lumi-chip__tag";
+    tag.textContent = "Ad";
+    chip.appendChild(dot);
+    chip.appendChild(label);
+    chip.appendChild(tag);
+    chip.addEventListener("click", function () {
+      beacon(ad.tracking && ad.tracking.click);
+      dispatch("click", { adId: ad.adId, auctionId: ad.auctionId, slot: el });
+    });
+    el.appendChild(chip);
   }
 
   function renderAdIntoSlot(el, ad) {
-    const format = el.getAttribute("data-lumi-slot");
+    const format = normalizeFormat(el.getAttribute("data-lumi-slot"));
     injectStyles();
-    if (format === "sidebar")           renderSidebar(el, ad);
-    else if (format === "inline")       renderInline(el, ad);
-    else if (format === "interstitial") renderInterstitial(el, ad);
-    else                                renderBanner(el, ad);   // banner is the default
+    if (format === "corner")        renderCorner(el, ad);
+    else if (format === "loading")  renderLoading(el, ad);
+    else if (format === "citation") renderCitation(el, ad);
+    else if (format === "chip")     renderChip(el, ad);
+    else                            renderCard(el, ad);   // card is the default
 
-    fireImpressionBeacon(ad);
+    beacon(ad.tracking && ad.tracking.impression);
     dispatch("impression", {
       adId: ad.adId, auctionId: ad.auctionId,
       slot: el, format, sandbox: ad.isSandbox,
@@ -455,7 +509,7 @@
   async function mountSlot(el) {
     if (slots.has(el) && slots.get(el).mounted) return;   // already done
 
-    const format    = el.getAttribute("data-lumi-slot") || "banner";
+    const format    = normalizeFormat(el.getAttribute("data-lumi-slot"));
     const context   = deriveContext(el);
     const frequency = (el.getAttribute("data-lumi-frequency") || "session").toLowerCase();
     const fallback  = el.getAttribute("data-lumi-fallback");
@@ -491,7 +545,7 @@
     if (!slot) return;
     if (slot.backdrop && slot.backdrop.parentNode) slot.backdrop.parentNode.removeChild(slot.backdrop);
     el.innerHTML = "";
-    el.classList.remove("lumi-card", "lumi-banner", "lumi-sidebar", "lumi-inline", "lumi-interstitial");
+    el.classList.remove("lumi-cardbox", "lumi-loading", "lumi-citation");
     el.style.display = "";
     slots.delete(el);
   }
