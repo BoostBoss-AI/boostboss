@@ -6153,7 +6153,7 @@
                         <button id="aSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
                     </div>
                     <div style="display:flex;flex:1;min-height:0;">
-                        <nav id="aSetNav" style="width:178px;flex-shrink:0;border-right:1px solid #F0F0F2;padding:14px 10px;display:flex;flex-direction:column;gap:2px;"></nav>
+                        <nav id="aSetNav" style="width:178px;flex-shrink:0;border-right:1px solid #F0F0F2;padding:14px 10px;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;"></nav>
                         <div id="aSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
                     </div>
                     <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
@@ -6251,7 +6251,7 @@
                 const nav = settingsModal.querySelector('#aSetNav');
                 nav.innerHTML = SECTIONS.map((s) => {
                     const on = s.key === activeSection;
-                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;width:100%;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${s.label}</button>`;
+                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${s.label}</button>`;
                 }).join('');
                 nav.querySelectorAll('.aSetNavBtn').forEach((b) => {
                     b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
