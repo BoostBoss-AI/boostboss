@@ -787,6 +787,13 @@
         .tier-option .tier-name { font-size: 13px; font-weight: 700; color: var(--text); }
         .tier-option .tier-ecpm { font-size: 12px; font-weight: 700; color: #FF2D78; }
         .tier-option .tier-blurb { font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-top: 2px; }
+        /* ═══ Format-tier groups (5 cards under 3 tier headers) ═══════════ */
+        .ftg-group { margin-bottom: 16px; }
+        .ftg-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+        .ftg-name { font-size: 13px; font-weight: 700; color: var(--text); }
+        .ftg-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 2px 7px; border-radius: 4px; }
+        .ftg-badge.standard { color: #1D9E75; background: #E1F5EE; }
+        .ftg-badge.optin { color: #BA7517; background: #FAEEDA; }
         .format-card input[type="radio"] {
             position: absolute;
             opacity: 0;
@@ -2960,52 +2967,12 @@
                         <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
                     </div>
 
-                    <!-- Format Selector — visual thumbnail cards -->
+                    <!-- Placement Tier & Format — 5 formats grouped by the 3 tiers -->
                     <div class="form-group">
-                        <label class="form-label">Creative Format</label>
-                        <div class="format-cards">
-                            <label class="format-card" data-format="native">
-                                <input type="radio" name="format" value="native" required>
-                                <div class="fc-thumb">
-                                    <div class="fc-thumb-label">SPONSORED</div>
-                                    <div class="fc-thumb-title"></div>
-                                    <div class="fc-thumb-sub"></div>
-                                    <div class="fc-thumb-cta"></div>
-                                </div>
-                                <div class="fc-name">Native</div>
-                                <div class="fc-desc">Text + CTA inline with AI response. Least intrusive.</div>
-                                <div class="fc-reach">~100% reach</div>
-                                <div class="fc-family">AI-native · ~$4.50 eCPM · <span class="fc-tier standard">Standard</span></div>
-                            </label>
-                            <label class="format-card selected" data-format="image">
-                                <input type="radio" name="format" value="image" required checked>
-                                <div class="fc-thumb">
-                                    <div class="fc-thumb-label">SPONSORED</div>
-                                    <div class="fc-thumb-media"></div>
-                                    <div class="fc-thumb-title"></div>
-                                    <div class="fc-thumb-cta"></div>
-                                </div>
-                                <div class="fc-name">Image</div>
-                                <div class="fc-desc">Full media card with headline, subtext, CTA.</div>
-                                <div class="fc-reach">~95% reach</div>
-                                <div class="fc-family">Display · ~$6.00 eCPM · <span class="fc-tier standard">Standard</span></div>
-                            </label>
-                            <label class="format-card" data-format="video">
-                                <input type="radio" name="format" value="video" required>
-                                <div class="fc-thumb">
-                                    <div class="fc-thumb-label">SPONSORED</div>
-                                    <div class="fc-thumb-media play"></div>
-                                    <div class="fc-thumb-title"></div>
-                                    <div class="fc-thumb-cta"></div>
-                                </div>
-                                <div class="fc-name">Video</div>
-                                <div class="fc-desc">Playable video with skip. Highest engagement.</div>
-                                <div class="fc-reach">~70% reach</div>
-                                <div class="fc-family">Interruptive · ~$15.00 eCPM · <span class="fc-tier optin">Opt-in</span></div>
-                            </label>
-                        </div>
+                        <label class="form-label">Placement Tier &amp; Format</label>
+                        <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
                         <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">
-                            Reach shows the share of publishers who currently accept that format. Higher formats = richer CPM but narrower inventory. You'll pick the placement tier — and see the cost — in the Budget step.
+                            Pick one card. The tier (the group) sets which inventory your budget buys and the eCPM you pay; the card is what your ad looks like.
                         </div>
                     </div>
 
@@ -3354,13 +3321,10 @@
                         </div>
                     </div>
 
-                    <!-- Placement tier — which inventory class this budget buys -->
+                    <!-- Estimated cost for the selected placement tier -->
                     <div class="form-group">
-                        <label class="form-label">Placement Tier <span style="font-size:11px;color:#9CA3AF;font-weight:400;">— which inventory your budget buys</span></label>
-                        <div id="tierSelector" class="tier-selector">
-                            <!-- rendered by renderTierSelector() — options depend on the creative format -->
-                        </div>
-                        <div id="formatCostEstimate" style="margin-top: 10px; padding: 10px 12px; background: #FAFAF7; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 12px; color: #6B7280; line-height: 1.6;">
+                        <label class="form-label">Estimated Cost</label>
+                        <div id="formatCostEstimate" style="padding: 10px 12px; background: #FAFAF7; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 12px; color: #6B7280; line-height: 1.6;">
                             <!-- populated by updateFormatEstimate() -->
                         </div>
                     </div>
@@ -4611,67 +4575,84 @@
         // into per_door_creatives on campaign submit.
         const doorOverrides = { 'mcp': {}, 'js-snippet': {}, 'npm-sdk': {}, 'rest-api': {} };
 
-        // The three placement tiers — the inventory class the advertiser's
-        // budget buys. eCPM is what the advertiser pays per 1,000 impressions.
-        const TIER_INFO = {
-            'ai-native':    { label: 'AI-native',            ecpm: 4.50,  blurb: 'Sponsored lines woven into AI responses. Cheapest, widest reach — runs on every door including MCP.' },
-            'display':      { label: 'Display',              ecpm: 7.00,  blurb: 'Image / corner cards alongside content. Standard inventory on Lumi Web and Extension.' },
-            'interruptive': { label: 'Interruptive & gated', ecpm: 18.00, blurb: 'Video / fullscreen units. Richest eCPM — opt-in inventory on Lumi Web and Extension.' },
-        };
-        // Which tiers a given creative format can run in. A video can only
-        // be Interruptive; a text/native creative can't be Interruptive.
-        const FORMAT_TIERS = {
-            native: ['ai-native', 'display'],
-            image:  ['display', 'interruptive'],
-            video:  ['interruptive'],
-        };
+        // The 3 placement tiers and the 5 creative formats grouped under
+        // them. eCPM is what the advertiser pays per 1,000 impressions. The
+        // advertiser picks ONE format card; the tier (its group) is implied.
+        const ADV_TIERS = [
+            { key: 'ai-native',    label: 'AI-native placements', badge: 'standard', note: 'Gentle — runs on every door, including MCP.' },
+            { key: 'display',      label: 'Display placements',   badge: 'standard', note: 'Standard inventory on Lumi Web and Extension.' },
+            { key: 'interruptive', label: 'Interruptive & gated', badge: 'optin',    note: 'Richest eCPM — opt-in inventory on Web and Extension.' },
+        ];
+        const ADV_FORMATS = [
+            { key: 'native',     tier: 'ai-native',    name: 'Native',     ecpm: 4.50,  thumb: 'native', desc: 'Text + CTA inline with the AI response.' },
+            { key: 'image',      tier: 'display',      name: 'Image',      ecpm: 6.00,  thumb: 'media',  desc: 'Full media card with headline + CTA.' },
+            { key: 'corner',     tier: 'display',      name: 'Corner',     ecpm: 8.50,  thumb: 'media',  desc: 'Floating dismissable card. Non-blocking.' },
+            { key: 'video',      tier: 'interruptive', name: 'Video',      ecpm: 15.00, thumb: 'video',  desc: 'Playable video with skip. High engagement.' },
+            { key: 'fullscreen', tier: 'interruptive', name: 'Fullscreen', ecpm: 22.00, thumb: 'media',  desc: 'Interstitial modal. Maximum attention.' },
+        ];
+        // Format → tier. Used to derive placement_tier from the picked card.
+        const FORMAT_TO_TIER = { native: 'ai-native', image: 'display', corner: 'display', video: 'interruptive', fullscreen: 'interruptive' };
 
-        // Renders the placement-tier radio cards for the currently-selected
-        // creative format. Keeps the current pick if it's still valid for the
-        // new format, else defaults to the first valid tier.
-        function renderTierSelector() {
-            const container = document.getElementById('tierSelector');
+        // Tiny visual thumbnail for a format card.
+        function advThumb(kind) {
+            if (kind === 'native') return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-title"></div><div class="fc-thumb-sub"></div><div class="fc-thumb-cta"></div></div>`;
+            if (kind === 'video')  return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-media play"></div><div class="fc-thumb-title"></div><div class="fc-thumb-cta"></div></div>`;
+            return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-media"></div><div class="fc-thumb-title"></div><div class="fc-thumb-cta"></div></div>`;
+        }
+
+        // Renders the 5 format cards grouped under the 3 tier headers. The
+        // advertiser picks one card — that sets the campaign's format, and
+        // the placement tier is derived from the card's group at submit.
+        function renderFormatTierGroups() {
+            const container = document.getElementById('formatTierGroups');
             if (!container) return;
-            const fmtEl = campaignForm.querySelector('input[name="format"]:checked');
-            const fmt = fmtEl ? fmtEl.value : 'image';
-            const valid = FORMAT_TIERS[fmt] || FORMAT_TIERS.image;
-            const prev = (campaignForm.querySelector('input[name="placement_tier"]:checked') || {}).value;
-            const selected = valid.includes(prev) ? prev : valid[0];
-            container.innerHTML = valid.map((t) => {
-                const info = TIER_INFO[t];
-                const sel = t === selected;
-                return `<label class="tier-option${sel ? ' selected' : ''}">
-                    <input type="radio" name="placement_tier" value="${t}" ${sel ? 'checked' : ''}>
-                    <div>
-                        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
-                            <span class="tier-name">${info.label}</span>
-                            <span class="tier-ecpm">~$${info.ecpm.toFixed(2)} eCPM</span>
-                        </div>
-                        <div class="tier-blurb">${info.blurb}</div>
+            const current = (campaignForm.querySelector('input[name="format"]:checked') || {}).value || 'image';
+            container.innerHTML = ADV_TIERS.map((tier) => {
+                const cards = ADV_FORMATS.filter((f) => f.tier === tier.key);
+                return `<div class="ftg-group">
+                    <div class="ftg-head">
+                        <span class="ftg-name">${tier.label}</span>
+                        <span class="ftg-badge ${tier.badge}">${tier.badge === 'optin' ? 'Opt-in' : 'Standard'}</span>
+                        <span style="font-size:11px;color:#9CA3AF;">${tier.note}</span>
                     </div>
-                </label>`;
+                    <div class="format-cards">
+                        ${cards.map((f) => `
+                            <label class="format-card${f.key === current ? ' selected' : ''}" data-format="${f.key}">
+                                <input type="radio" name="format" value="${f.key}" ${f.key === current ? 'checked' : ''} required>
+                                ${advThumb(f.thumb)}
+                                <div class="fc-name">${f.name}</div>
+                                <div class="fc-desc">${f.desc}</div>
+                                <div class="fc-family">~$${f.ecpm.toFixed(2)} eCPM</div>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>`;
             }).join('');
-            container.querySelectorAll('input[name="placement_tier"]').forEach((radio) => {
-                radio.addEventListener('change', () => {
-                    container.querySelectorAll('.tier-option').forEach(o => o.classList.remove('selected'));
-                    radio.closest('.tier-option').classList.add('selected');
+            container.querySelectorAll('.format-card').forEach((card) => {
+                card.addEventListener('click', () => {
+                    const radio = card.querySelector('input[type="radio"]');
+                    if (!radio) return;
+                    radio.checked = true;
+                    container.querySelectorAll('.format-card').forEach((c) => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    renderDoorPreviews();
                     updateFormatEstimate();
                 });
             });
-            updateFormatEstimate();
         }
 
-        // Refreshes the cost-estimate panel from the selected placement tier
+        // Refreshes the cost-estimate panel from the selected format's tier
         // and (if entered) the Total Budget field.
         function updateFormatEstimate() {
             const el = document.getElementById('formatCostEstimate');
             if (!el) return;
-            const tierEl = campaignForm.querySelector('input[name="placement_tier"]:checked');
-            const info = TIER_INFO[tierEl ? tierEl.value : 'display'] || TIER_INFO.display;
+            const fmtEl = campaignForm.querySelector('input[name="format"]:checked');
+            const f = ADV_FORMATS.find((x) => x.key === (fmtEl ? fmtEl.value : 'image')) || ADV_FORMATS[1];
+            const tier = ADV_TIERS.find((t) => t.key === f.tier) || ADV_TIERS[1];
             const budget = parseFloat((campaignForm.querySelector('[name="total_budget"]') || {}).value) || 0;
-            let line = `<strong style="color:#1A1A2E;">${info.label} placement</strong> · est. <strong style="color:#FF2D78;">~$${info.ecpm.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
+            let line = `<strong style="color:#1A1A2E;">${tier.label}</strong> · ${f.name} format · est. <strong style="color:#FF2D78;">~$${f.ecpm.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
             if (budget > 0) {
-                const impressions = Math.round((budget / info.ecpm) * 1000);
+                const impressions = Math.round((budget / f.ecpm) * 1000);
                 line += `<br>At your $${budget.toLocaleString()} total budget ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} impressions</strong>.`;
             } else {
                 line += `<br>Enter a Total Budget below to project how many impressions you'll get.`;
@@ -4680,29 +4661,11 @@
         }
 
         function initFormatCardsAndLivePreview() {
-            const cards = document.querySelectorAll('.format-card');
             const form = campaignForm;
 
-            // Card click → select radio + visual state.
-            cards.forEach((card) => {
-                const radio = card.querySelector('input[type="radio"]');
-                card.addEventListener('click', () => {
-                    if (!radio) return;
-                    radio.checked = true;
-                    cards.forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    renderDoorPreviews();
-                    renderTierSelector();
-                });
-                radio?.addEventListener('change', () => {
-                    if (radio.checked) {
-                        cards.forEach(c => c.classList.remove('selected'));
-                        card.classList.add('selected');
-                        renderDoorPreviews();
-                        renderTierSelector();
-                    }
-                });
-            });
+            // Render the 5-card / 3-tier format selector (wires its own
+            // per-card click handlers).
+            renderFormatTierGroups();
 
             // Any form-field change refreshes the previews.
             ['headline', 'subtext', 'cta_text', 'cta_url'].forEach((fieldName) => {
@@ -4721,7 +4684,7 @@
             initUrlAutofill();
 
             renderDoorPreviews();
-            renderTierSelector();
+            updateFormatEstimate();
         }
 
         // ── Phase E.5 — URL autofill ─────────────────────────────────────
@@ -4979,7 +4942,7 @@
                 advertiser_id: currentUserData.user_id,
                 name: formData.get('name'),
                 format: formData.get('format'),
-                placement_tier: formData.get('placement_tier') || null,
+                placement_tier: FORMAT_TO_TIER[formData.get('format')] || null,
                 headline: formData.get('headline'),
                 subtext: formData.get('subtext') || '',
                 media_url: mediaUrl,
@@ -5227,14 +5190,20 @@
                 form.querySelector('[name="daily_budget"]').value = c.daily_budget || '';
                 form.querySelector('[name="total_budget"]').value = c.total_budget || '';
                 if (form.querySelector('[name="bid_amount"]')) form.querySelector('[name="bid_amount"]').value = c.bid_amount || '';
-                // Restore the saved placement tier (best-effort): rebuild the
-                // tier selector, then check the campaign's stored tier.
-                if (typeof renderTierSelector === 'function') {
-                    renderTierSelector();
-                    if (c.placement_tier) {
-                        const tierRadio = form.querySelector(`input[name="placement_tier"][value="${c.placement_tier}"]`);
-                        if (tierRadio) { tierRadio.checked = true; tierRadio.dispatchEvent(new Event('change')); }
+                // Restore the saved format card — rebuild the grouped
+                // selector, check the campaign's format, refresh estimate +
+                // previews. The placement tier is derived from the format.
+                if (typeof renderFormatTierGroups === 'function') {
+                    renderFormatTierGroups();
+                    const fmtKey = c.format || 'image';
+                    const r = form.querySelector(`input[name="format"][value="${fmtKey}"]`);
+                    if (r) {
+                        r.checked = true;
+                        document.querySelectorAll('#formatTierGroups .format-card').forEach((cd) =>
+                            cd.classList.toggle('selected', cd.dataset.format === fmtKey));
                     }
+                    if (typeof updateFormatEstimate === 'function') updateFormatEstimate();
+                    if (typeof renderDoorPreviews === 'function') renderDoorPreviews();
                 }
                 if (form.querySelector('[name="billing_model"]')) {
                     const radio = form.querySelector(`[name="billing_model"][value="${c.billing_model || 'cpm'}"]`);
@@ -5318,7 +5287,7 @@
                     id: editingCampaignId,
                     name: formData.get('name'),
                     format: formData.get('format'),
-                    placement_tier: formData.get('placement_tier') || null,
+                    placement_tier: FORMAT_TO_TIER[formData.get('format')] || null,
                     headline: formData.get('headline'),
                     cta_url: formData.get('cta_url'),
                     target_keywords: intents,
