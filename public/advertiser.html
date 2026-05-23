@@ -6185,6 +6185,7 @@
                 { key: 'billing', label: 'Billing & funds' },
                 { key: 'api',     label: 'API access' },
                 { key: 'notifs',  label: 'Notifications' },
+                { key: 'security', label: 'Security' },
             ];
             let activeSection = 'account';
 
@@ -6265,6 +6266,25 @@
                     ${toggle('weekly_report', 'Weekly performance summary', 'A once-a-week recap of impressions, clicks, spend, and conversions.')}`;
             }
 
+            function sectionSecurity() {
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">Current password</label>
+                        <input id="aSetPwCurrent" type="password" autocomplete="current-password" style="${FLD}">
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">New password</label>
+                        <input id="aSetPwNew" type="password" autocomplete="new-password" style="${FLD}">
+                        <div style="${HINT}">At least 8 characters.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Confirm new password</label>
+                        <input id="aSetPwConfirm" type="password" autocomplete="new-password" style="${FLD}">
+                    </div>
+                    <div id="aSetPwMsg" style="font-size:12px;margin-bottom:10px;display:none;line-height:1.5;"></div>
+                    <button id="aSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">Change password</button>`;
+            }
+
             function renderNav() {
                 const nav = settingsModal.querySelector('#aSetNav');
                 nav.innerHTML = SECTIONS.map((s) => {
@@ -6278,7 +6298,7 @@
 
             function renderBody() {
                 const body = settingsModal.querySelector('#aSetBody');
-                const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs };
+                const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {
@@ -6306,6 +6326,36 @@
                         prefs[cb.dataset.notif] = cb.checked;
                         saveNotifPrefs(prefs);
                     });
+                });
+                // Security — change password.
+                const pwSave = settingsModal.querySelector('#aSetPwSave');
+                if (pwSave) pwSave.addEventListener('click', async () => {
+                    const cur = (settingsModal.querySelector('#aSetPwCurrent') || {}).value || '';
+                    const nw  = (settingsModal.querySelector('#aSetPwNew') || {}).value || '';
+                    const cf  = (settingsModal.querySelector('#aSetPwConfirm') || {}).value || '';
+                    const msg = settingsModal.querySelector('#aSetPwMsg');
+                    const showMsg = (text, ok) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; msg.style.color = ok ? '#1D9E75' : '#E24B4A'; } };
+                    if (!cur || !nw) { showMsg('Enter your current and new password.', false); return; }
+                    if (nw.length < 8) { showMsg('New password must be at least 8 characters.', false); return; }
+                    if (nw !== cf) { showMsg('New passwords do not match.', false); return; }
+                    pwSave.disabled = true; pwSave.textContent = 'Changing…';
+                    try {
+                        const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=change_password`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': `Bearer ${tok}` } : {}) },
+                            body: JSON.stringify({ current_password: cur, new_password: nw }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || 'Could not change password');
+                        showMsg('Password changed successfully.', true);
+                        ['#aSetPwCurrent', '#aSetPwNew', '#aSetPwConfirm'].forEach((s) => { const e = settingsModal.querySelector(s); if (e) e.value = ''; });
+                        if (typeof showToast === 'function') showToast('Password changed', 'success');
+                    } catch (e) {
+                        showMsg(e.message || 'Could not change password', false);
+                    } finally {
+                        pwSave.disabled = false; pwSave.textContent = 'Change password';
+                    }
                 });
             }
 

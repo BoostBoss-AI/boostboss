@@ -4937,6 +4937,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 { key: 'api',     label: 'API & Integration' },
                 { key: 'brand',   label: 'Brand safety' },
                 { key: 'notifs',  label: 'Notifications' },
+                { key: 'security', label: 'Security' },
             ];
             // Common IAB advertiser categories the publisher can block.
             const IAB_CATS = [
@@ -5078,6 +5079,25 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     ${toggle('product_updates', 'Product updates', 'Occasional news on new Boost Boss features and ad formats.')}`;
             }
 
+            function sectionSecurity() {
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">Current password</label>
+                        <input id="sSetPwCurrent" type="password" autocomplete="current-password" style="${FLD}">
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">New password</label>
+                        <input id="sSetPwNew" type="password" autocomplete="new-password" style="${FLD}">
+                        <div style="${HINT}">At least 8 characters.</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Confirm new password</label>
+                        <input id="sSetPwConfirm" type="password" autocomplete="new-password" style="${FLD}">
+                    </div>
+                    <div id="sSetPwMsg" style="font-size:12px;margin-bottom:10px;display:none;line-height:1.5;"></div>
+                    <button id="sSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">Change password</button>`;
+            }
+
             function renderNav() {
                 const nav = document.getElementById('sSetNav');
                 nav.innerHTML = SECTIONS.map((s) => {
@@ -5091,7 +5111,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             function renderBody() {
                 const body = document.getElementById('sSetBody');
-                const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, brand: sectionBrandSafety, notifs: sectionNotifs };
+                const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, brand: sectionBrandSafety, notifs: sectionNotifs, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
                 // Copy buttons
                 body.querySelectorAll('.sSetCopy').forEach((btn) => {
@@ -5152,6 +5172,37 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         }
                     } catch (_) {}
                     if (typeof showToast === 'function') showToast('Brand safety saved', 'success');
+                });
+                // Security — change password.
+                const pwSave = document.getElementById('sSetPwSave');
+                if (pwSave) pwSave.addEventListener('click', async () => {
+                    const cur = (document.getElementById('sSetPwCurrent') || {}).value || '';
+                    const nw  = (document.getElementById('sSetPwNew') || {}).value || '';
+                    const cf  = (document.getElementById('sSetPwConfirm') || {}).value || '';
+                    const msg = document.getElementById('sSetPwMsg');
+                    const showMsg = (text, ok) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; msg.style.color = ok ? '#1D9E75' : '#E24B4A'; } };
+                    if (!cur || !nw) { showMsg('Enter your current and new password.', false); return; }
+                    if (nw.length < 8) { showMsg('New password must be at least 8 characters.', false); return; }
+                    if (nw !== cf) { showMsg('New passwords do not match.', false); return; }
+                    pwSave.disabled = true; pwSave.textContent = 'Changing…';
+                    try {
+                        const sessionRaw = localStorage.getItem('bb_dev_session');
+                        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=change_password`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(session && session.token ? { 'Authorization': `Bearer ${session.token}` } : {}) },
+                            body: JSON.stringify({ current_password: cur, new_password: nw }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || 'Could not change password');
+                        showMsg('Password changed successfully.', true);
+                        ['sSetPwCurrent', 'sSetPwNew', 'sSetPwConfirm'].forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; });
+                        if (typeof showToast === 'function') showToast('Password changed', 'success');
+                    } catch (e) {
+                        showMsg(e.message || 'Could not change password', false);
+                    } finally {
+                        pwSave.disabled = false; pwSave.textContent = 'Change password';
+                    }
                 });
             }
 

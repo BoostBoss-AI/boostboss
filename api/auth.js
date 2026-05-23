@@ -276,6 +276,10 @@ function demoHandler(action, body, req, res) {
     return res.json({ success: true, mode: "demo", blocked_categories: cats || [], blocked_advertiser_domains: doms || [] });
   }
 
+  if (action === "change_password") {
+    return res.status(400).json({ error: "Password change requires a real account — not available in demo mode." });
+  }
+
   if (action === "oauth_sync") {
     // Demo mode has no Supabase; OAuth isn't available here.
     return res.status(501).json({ error: "Google sign-in requires Supabase — demo mode doesn't support OAuth. Use email + password or try the demo." });
@@ -568,7 +572,32 @@ async function supabaseHandler(action, body, req, res) {
     });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_notif_prefs, update_brand_safety" });
+  // Change account password — re-verifies the current password, then sets
+  // the new one via the Supabase admin API. Role-agnostic (auth is shared).
+  if (action === "change_password") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
+    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
+    const currentPassword = body && body.current_password;
+    const newPassword = body && body.new_password;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "current_password and new_password are required" });
+    }
+    if (String(newPassword).length < 8) {
+      return res.status(400).json({ error: "New password must be at least 8 characters" });
+    }
+    // Re-verify the current password before allowing the change.
+    const { error: signInErr } = await supabaseAnon.auth.signInWithPassword({
+      email: user.email, password: currentPassword,
+    });
+    if (signInErr) return res.status(401).json({ error: "Current password is incorrect" });
+    const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(user.id, { password: newPassword });
+    if (updErr) return res.status(500).json({ error: updErr.message });
+    return res.json({ success: true, mode: "supabase" });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_notif_prefs, update_brand_safety, change_password" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
