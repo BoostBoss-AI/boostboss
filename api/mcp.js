@@ -109,6 +109,15 @@ async function resolveCampaignCreative(campaignId, door) {
   return row;
 }
 
+// Placement-tier → publisher format family. A campaign's placement_tier
+// only clears the auction's tier gate if the publisher accepts at least
+// one format in the matching family. See the tier gate in the filter chain.
+const TIER_FAMILY = {
+  "ai-native":    ["native"],
+  "display":      ["image", "corner"],
+  "interruptive": ["video", "fullscreen"],
+};
+
 // ── Context derivation (MCP args → Benna bid context) ──────────────────
 function deriveBennaContext(args) {
   const ctxText = (args.context_summary || "").toLowerCase();
@@ -536,7 +545,17 @@ async function handleGetSponsoredContent(body, args, res) {
     const fmt = c.format || "native";
     return developerFormats[fmt] !== false;
   });
-  const afterPlacementFormat = afterFormatToggle.filter((c) => !placement || (c.format || "native") === placement.format);
+  // Tier gate — a campaign with a placement_tier only competes if the
+  // publisher has at least one format from that tier's family switched on
+  // (ai-native=native, display=image|corner, interruptive=video|fullscreen).
+  // NULL tier, or no publisher format prefs = unrestricted (back-compat).
+  const afterTierGate        = afterFormatToggle.filter((c) => {
+    if (!c.placement_tier || !developerFormats) return true;
+    const fams = TIER_FAMILY[c.placement_tier];
+    if (!fams) return true;
+    return fams.some((f) => developerFormats[f] !== false);
+  });
+  const afterPlacementFormat = afterTierGate.filter((c) => !placement || (c.format || "native") === placement.format);
   const afterBlocklistCat    = afterPlacementFormat.filter((c) => !overlapsArr(c.iab_cat, excludedCats));
   const afterBlocklistAdv    = afterBlocklistCat.filter((c) => !overlapsArr(c.adomain, excludedAdv));
   // Door filter — campaigns can opt into specific publisher integration
@@ -626,6 +645,7 @@ async function handleGetSponsoredContent(body, args, res) {
     pool_size:              campaigns.length,
     after_eligible:         afterEligible.length,
     after_format_toggle:    afterFormatToggle.length,
+    after_tier_gate:        afterTierGate.length,
     after_placement_format: afterPlacementFormat.length,
     after_blocklist_cat:    afterBlocklistCat.length,
     after_blocklist_adv:    afterBlocklistAdv.length,
@@ -635,7 +655,8 @@ async function handleGetSponsoredContent(body, args, res) {
     drop_reasons: {
       eligible:         campaigns.length            - afterEligible.length,
       format_toggle:    afterEligible.length        - afterFormatToggle.length,
-      placement_format: afterFormatToggle.length    - afterPlacementFormat.length,
+      tier_gate:        afterFormatToggle.length    - afterTierGate.length,
+      placement_format: afterTierGate.length        - afterPlacementFormat.length,
       blocklist_cat:    afterPlacementFormat.length - afterBlocklistCat.length,
       blocklist_adv:    afterBlocklistCat.length    - afterBlocklistAdv.length,
       door:             afterBlocklistAdv.length    - afterDoor.length,

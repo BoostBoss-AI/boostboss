@@ -403,6 +403,11 @@ async function handleCreate(req, res) {
     name: b.name || b.headline.slice(0, 40),
     status: "in_review", // always starts in review
     format: b.format || "native",
+    // Placement tier — which inventory class this campaign's budget buys
+    // (ai-native | display | interruptive). One tier per campaign. NULL =
+    // unrestricted (back-compat for campaigns created before this field).
+    placement_tier: ["ai-native", "display", "interruptive"].includes(b.placement_tier)
+      ? b.placement_tier : null,
     headline: b.headline,
     subtext: b.subtext || "",
     media_url: b.media_url || "",
@@ -567,7 +572,7 @@ async function handleUpdate(req, res) {
 
   const allowed = [
     "name", "headline", "subtext", "media_url", "poster_url",
-    "cta_label", "cta_url", "adomain", "iab_cat", "format",
+    "cta_label", "cta_url", "adomain", "iab_cat", "format", "placement_tier",
     "target_keywords", "target_regions", "target_languages",
     "target_cpa", "billing_model", "bid_amount",
     "daily_budget", "total_budget", "status", "skippable_after_sec",
@@ -585,6 +590,12 @@ async function handleUpdate(req, res) {
   if (Array.isArray(updates.target_integration_methods)) {
     updates.target_integration_methods = updates.target_integration_methods
       .filter((m) => ["mcp","js-snippet","npm-sdk","rest-api"].includes(m));
+  }
+  // Validate placement_tier if it was updated — only the 3 known tiers or
+  // null. An unrecognised value is coerced to null (unrestricted).
+  if (updates.placement_tier !== undefined
+      && !["ai-native", "display", "interruptive"].includes(updates.placement_tier)) {
+    updates.placement_tier = null;
   }
   updates.updated_at = new Date().toISOString();
 
