@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumi SDK script tag — Boost Boss Docs</title>
-<meta name="description" content="Lumi SDK script tag — drop-in browser SDK for AI apps and websites. One async script tag, slot placement via data-lumi-slot, CSS-variable theming. No backend changes.">
+<meta name="description" content="Lumi Web SDK — drop-in browser SDK for AI apps. One async script tag, five ad placements (corner, card, loading, citation, chip), context-aware serving, CSS-variable theming.">
 <meta property="og:title" content="Lumi SDK script tag — Boost Boss Docs">
 <meta property="og:url" content="https://boostboss.ai/docs/js-snippet">
 <link rel="canonical" href="https://boostboss.ai/docs/js-snippet">
@@ -68,179 +68,163 @@
     </div>
 
     <h1>Lumi SDK script tag</h1>
-    <p class="lede">One async <code>&lt;script&gt;</code> tag in your <code>&lt;head&gt;</code>, one or more <code>&lt;div data-lumi-slot&gt;</code> elements where you want ads. No backend changes. Works with any LLM provider (OpenAI, Anthropic, Gemini, open-source) and any framework (LangChain, Vercel AI SDK, CrewAI, plain React) — Lumi attaches at the rendering surface.</p>
+    <p class="lede">One async <code>&lt;script&gt;</code> tag, then call <code>BoostBoss.requestAd()</code> wherever you want an ad. No backend changes. Works with any LLM provider (OpenAI, Anthropic, Gemini, open-source) and any framework (LangChain, Vercel AI SDK, CrewAI, plain React) — the Web SDK attaches at the rendering surface.</p>
 
     <div class="callout info">
-      <strong>v0.1 — beta. Live on <code>boostboss.ai/lumi.js</code> today.</strong>
-      <p>The slot-based API documented on this page is shipped. <code>&lt;script src="https://boostboss.ai/lumi.js"&gt;</code> resolves and works against the live Boost Boss backend. Try the sandbox flow with <code>data-publisher-id="pub_test_demo"</code> — no signup required to verify integration end-to-end. The legacy <code>BoostBoss.init</code> API at <code>boostboss.ai/sdk.js</code> remains supported for backward compatibility. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
+      <strong>v1.1 — beta. Live on <code>boostboss.ai/sdk.js</code> today.</strong>
+      <p>This page documents the SDK as it actually ships. <code>&lt;script src="https://boostboss.ai/sdk.js"&gt;</code> resolves and works against the live Boost Boss backend. Verify integration end to end with the sandbox key <code>pub_test_demo</code> — no signup required. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until the Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="prerequisites">Prerequisites</h2>
     <ul>
       <li>A Boost Boss publisher account — <a href="/publish/signup">sign up</a> if you haven't.</li>
-      <li>A web app you control where you can edit the HTML <code>&lt;head&gt;</code> and place markup in templates/components.</li>
+      <li>A web app you control where you can edit the HTML <code>&lt;head&gt;</code> and run a line of JavaScript.</li>
       <li>Modern browsers (last 2 versions of Chrome, Safari, Firefox, Edge). No IE11.</li>
     </ul>
 
     <h2 id="installation">Installation</h2>
-    <p>Add the snippet to your <code>&lt;head&gt;</code>. Async; no impact on first paint.</p>
+    <p>Add the snippet to your <code>&lt;head&gt;</code>. It's async — no impact on first paint. The <code>data-api-key</code> attribute auto-initialises the SDK.</p>
 <pre><span class="tag">&lt;script</span> <span class="attr">async</span>
-  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
-  <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span><span class="tag">&gt;</span>
+  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/sdk.js"</span>
+  <span class="attr">data-api-key</span>=<span class="str">"bb_dev_xxx"</span><span class="tag">&gt;</span>
 <span class="tag">&lt;/script&gt;</span></pre>
-    <p>Replace <code>pub_xxx</code> with your publisher ID from the dashboard.</p>
+    <p>Replace <code>bb_dev_xxx</code> with your publisher key from the dashboard. The global <code>window.BoostBoss</code> is available as soon as the script loads.</p>
 
-    <h2 id="initialization">Slot placement</h2>
-    <p>Drop a <code>&lt;div&gt;</code> with <code>data-lumi-slot</code> wherever you want an ad. Lumi auto-discovers slots on page load and on DOM mutations (so SPA route changes work without ceremony).</p>
-<pre><span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"sidebar"</span><span class="tag">&gt;&lt;/div&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"inline"</span> <span class="attr">data-lumi-context</span>=<span class="str">"checkout flow"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
-
-    <h3>Slot data attributes</h3>
+    <h2 id="placements">Placements</h2>
+    <p>The Web door owns five placements. Each request names a placement and — for the four inline placements — a <code>mount</code> element to render into.</p>
     <table>
-      <thead><tr><th>Attribute</th><th>Values</th><th>Description</th></tr></thead>
+      <thead><tr><th>Placement</th><th>What it is</th><th>Mounts</th></tr></thead>
       <tbody>
-        <tr><td><code>data-lumi-slot</code></td><td><code>banner</code> · <code>sidebar</code> · <code>inline</code> · <code>interstitial</code></td><td>Ad format. Lumi picks creative dimensions accordingly.</td></tr>
-        <tr><td><code>data-lumi-context</code></td><td>any string</td><td>Context signal for matching. Defaults to page <code>&lt;h1&gt;</code> + URL path.</td></tr>
-        <tr><td><code>data-lumi-frequency</code></td><td><code>once</code> · <code>session</code> · <code>always</code></td><td>How often this slot refreshes. Default: <code>session</code>.</td></tr>
-        <tr><td><code>data-lumi-fallback</code></td><td>any HTML id</td><td>Element to show when no ad fills the slot (e.g. your own promo).</td></tr>
+        <tr><td><code>corner</code></td><td>Corner / sticky anchored unit. Image or video, with a skip countdown.</td><td>Self-mounts (fixed position)</td></tr>
+        <tr><td><code>card</code></td><td>Inline sponsored card — headline, optional image, CTA, dismiss button.</td><td>Into your <code>mount</code></td></tr>
+        <tr><td><code>loading</code></td><td>Loading / "thinking"-state ad — shown while your AI generates a response.</td><td>Into your <code>mount</code></td></tr>
+        <tr><td><code>citation</code></td><td>Sponsored source / citation — compact, sits inside a generated answer.</td><td>Into your <code>mount</code></td></tr>
+        <tr><td><code>chip</code></td><td>Sponsored suggested-action chip — a tappable quick-reply pill.</td><td>Into your <code>mount</code></td></tr>
       </tbody>
     </table>
 
-    <h2 id="theming">Theming</h2>
-    <p>Lumi reads CSS variables from the slot's computed style — set them once on <code>:root</code> or scope per slot.</p>
-<pre><span class="kw">:root</span> {
-  <span class="attr">--lumi-primary</span>:    <span class="str">#FF2D78</span>;        <span class="cm">/* CTA button color */</span>
-  <span class="attr">--lumi-text</span>:       <span class="str">#0F0F1A</span>;        <span class="cm">/* body text */</span>
-  <span class="attr">--lumi-muted</span>:      <span class="str">#6B7280</span>;        <span class="cm">/* sponsored label */</span>
-  <span class="attr">--lumi-bg</span>:         <span class="str">#FFFFFF</span>;        <span class="cm">/* card background */</span>
-  <span class="attr">--lumi-radius</span>:     <span class="str">12px</span>;           <span class="cm">/* corner radius */</span>
-  <span class="attr">--lumi-font</span>:       <span class="str">'Inter', sans-serif</span>;
-}</pre>
-    <p>The default look is neutral; styled themes match your brand without a CSS reset war.</p>
-
-    <h2 id="core-api">Programmatic API</h2>
-    <p>For SPA route changes or programmatic refreshes, use the global <code>window.Lumi</code> object. Available after the script loads (<code>lumi:ready</code> event fires).</p>
-
-    <h3 id="lumi-refresh"><code>Lumi.refresh(slotId?)</code></h3>
-    <p>Re-fetches and re-renders ads. Pass a slot element or selector to refresh just one slot; omit to refresh all.</p>
-<pre><span class="cm">// refresh all slots after a route change</span>
-router.<span class="fn">on</span>(<span class="str">'navigated'</span>, () =&gt; <span class="fn">Lumi.refresh</span>());
-
-<span class="cm">// refresh a specific slot</span>
-<span class="fn">Lumi.refresh</span>(<span class="str">'#main-banner'</span>);</pre>
-
-    <h3 id="lumi-destroy"><code>Lumi.destroy()</code></h3>
-    <p>Removes all rendered ads and disconnects observers. Call when you tear down a page section that contained Lumi slots.</p>
-
-    <h3 id="lumi-render"><code>Lumi.render(slotEl, opts)</code></h3>
-    <p>Manually mount a slot. Useful for slots created after page load that aren't auto-discovered (rare; the MutationObserver covers most cases).</p>
-<pre><span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">'late-bound-slot'</span>);
-<span class="fn">Lumi.render</span>(el, { format: <span class="str">'inline'</span>, context: <span class="str">'pricing page'</span> });</pre>
-
-    <h2 id="conversion-tracking">Conversion tracking</h2>
-    <p>For conventional advertiser-side conversions (the user clicks an ad, lands on a separate thank-you page, fires the conversion there) advertisers should install <a href="/pixel.js"><code>pixel.js</code></a> on their landing/thank-you page — see the <a href="/docs-api-reference#api-conversion">conversion beacon docs</a>.</p>
-    <p>For <strong>publisher-side</strong> conversions — when the user converts inside the same surface that hosted the ad (in-app signup, in-page checkout) — call <code>Lumi.trackConversion()</code>:</p>
-<pre><span class="cm">// After the user signs up / completes the action your ad promoted:</span>
-<span class="fn">Lumi.trackConversion</span>({
-  type:       <span class="str">'signup'</span>,           <span class="cm">// matches campaigns.conversion_event_types</span>
-  value:      29.99,              <span class="cm">// USD; required for ROAS / target_roas optimization</span>
-  currency:   <span class="str">'USD'</span>,             <span class="cm">// optional; defaults to 'USD'</span>
-  externalId: <span class="str">'order_98123'</span>,     <span class="cm">// optional — your order/user id for reconciliation</span>
-});</pre>
-    <p>Lumi auto-resolves the <code>adId</code> + <code>auctionId</code> from the most recent slot it rendered. To target a specific slot when multiple ads are on screen, pass <code>slot</code>:</p>
-<pre><span class="fn">Lumi.trackConversion</span>({ type: <span class="str">'purchase'</span>, slot: <span class="str">'#sidebar-ad'</span>, value: 49.0 });</pre>
-    <p>Failures emit a <code>lumi:error</code> event and are surfaced via the silent-failure observability endpoint.</p>
-
-    <h2 id="event-handling">Event handling</h2>
-    <p>Lumi dispatches DOM events on <code>window</code>. Listen for any of:</p>
-<pre>window.<span class="fn">addEventListener</span>(<span class="str">'lumi:ready'</span>, () =&gt; { <span class="cm">/* SDK loaded */</span> });
-
-window.<span class="fn">addEventListener</span>(<span class="str">'lumi:impression'</span>, (e) =&gt; {
-  <span class="kw">const</span> { adId, advertiserId, slot, format } = e.detail;
-  analytics.<span class="fn">track</span>(<span class="str">'ad_impression'</span>, { adId, format });
+    <h2 id="requesting">Requesting an ad</h2>
+    <p>Call <code>BoostBoss.requestAd()</code> with a placement, the request <code>context</code>, and (for inline placements) a <code>mount</code>. It returns a Promise that resolves to the ad object, or <code>null</code> on any error or no-fill.</p>
+<pre><span class="cm">// Inline sponsored card</span>
+<span class="kw">await</span> <span class="fn">BoostBoss.requestAd</span>({
+  placement: <span class="str">'card'</span>,
+  context:   <span class="str">'user is comparing CRM tools for a small sales team'</span>,
+  mount:     <span class="str">'#bb-slot'</span>,
 });
 
-window.<span class="fn">addEventListener</span>(<span class="str">'lumi:click'</span>,    (e) =&gt; { <span class="cm">/* user clicked */</span> });
-window.<span class="fn">addEventListener</span>(<span class="str">'lumi:close'</span>,    (e) =&gt; { <span class="cm">/* dismissed */</span> });
-window.<span class="fn">addEventListener</span>(<span class="str">'lumi:no_fill'</span>,  (e) =&gt; { <span class="cm">/* slot stayed empty */</span> });
-window.<span class="fn">addEventListener</span>(<span class="str">'lumi:error'</span>,    (e) =&gt; { <span class="cm">/* see e.detail.code */</span> });</pre>
+<span class="cm">// Corner unit — self-mounts, no mount needed</span>
+<span class="fn">BoostBoss.requestAd</span>({ placement: <span class="str">'corner'</span>, context: <span class="str">'reading a deployment guide'</span> });</pre>
 
-    <h2 id="ssr">SSR and SPA support</h2>
-    <p>Lumi is fully client-side — render the slot DOM server-side, the SDK hydrates on load. Specifics for popular frameworks:</p>
+    <h3 id="loading-state">Loading-state ads</h3>
+    <p>Request a <code>loading</code> ad when your AI starts generating, then tear it down with <code>clearLoading()</code> when the response is ready.</p>
+<pre><span class="fn">BoostBoss.requestAd</span>({ placement: <span class="str">'loading'</span>, context: query, mount: <span class="str">'#answer'</span> });
+<span class="kw">const</span> answer = <span class="kw">await</span> <span class="fn">generateAnswer</span>(query);
+<span class="fn">BoostBoss.clearLoading</span>();   <span class="cm">// silent — no dismiss event; engagement is the click</span>
+<span class="fn">renderAnswer</span>(answer);</pre>
 
-    <h4>Next.js (App Router)</h4>
-    <p>Add the script in <code>app/layout.tsx</code> via <code>next/script</code> with <code>strategy="afterInteractive"</code>. Slots can live in any server or client component.</p>
-<pre><span class="kw">import</span> Script <span class="kw">from</span> <span class="str">'next/script'</span>;
-<span class="kw">export default function</span> <span class="fn">RootLayout</span>({ children }) {
-  <span class="kw">return</span> (
-    <span class="tag">&lt;html&gt;</span><span class="tag">&lt;body&gt;</span>{children}
-      <span class="tag">&lt;Script</span> <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
-        <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span> <span class="attr">strategy</span>=<span class="str">"afterInteractive"</span> <span class="tag">/&gt;</span>
-    <span class="tag">&lt;/body&gt;&lt;/html&gt;</span>
-  );
-}</pre>
+    <h2 id="context">Context — why it matters</h2>
+    <p>The <code>context</code> string is the single most important argument you pass. It's what the user is currently doing, in plain language. Boost Boss derives a context fingerprint from it: the auction uses it to match relevant demand, and every resulting event — impression, click, skip, dismiss — is logged joined to that context. Vague context yields vague ads; specific context (<code>"user is comparing CRM tools for a small sales team"</code>) yields relevant ones. Pass the user's actual message or task, not a page label.</p>
 
-    <h4>Nuxt 3</h4>
-    <p>Use <code>useHead</code> in <code>app.vue</code> or a layout, with <code>defer: true</code>.</p>
+    <h2 id="theming">Theming</h2>
+    <p>Pass theme options to <code>init()</code>. The SDK styles itself with CSS variables internally, so it never fights your stylesheet.</p>
+<pre><span class="fn">BoostBoss.init</span>({
+  apiKey:   <span class="str">'bb_dev_xxx'</span>,
+  theme:    <span class="str">'light'</span>,        <span class="cm">// 'dark' (default) or 'light'</span>
+  accent:   <span class="str">'#6C5CE7'</span>,      <span class="cm">// CTA / brand accent colour</span>
+  position: <span class="str">'bottom-right'</span>, <span class="cm">// corner anchor: bottom/top + left/right</span>
+});</pre>
+    <p>When you auto-initialise via <code>data-api-key</code>, call <code>init()</code> again afterward to override theme defaults — it merges, it doesn't reset.</p>
 
-    <h4>Remix</h4>
-    <p>Add to <code>root.tsx</code> via <code>&lt;Scripts&gt;</code> sibling. No SSR-time fetch needed — Lumi only runs in the browser.</p>
+    <h2 id="core-api">Programmatic API</h2>
+    <p>Everything hangs off the global <code>window.BoostBoss</code>.</p>
 
-    <h4>SPA route changes</h4>
-    <p>Lumi's <code>MutationObserver</code> auto-detects slots that mount/unmount as you change routes. If you find specific slots aren't refreshing, call <code>Lumi.refresh()</code> explicitly in your route hook.</p>
+    <h3 id="bb-init"><code>BoostBoss.init(opts)</code></h3>
+    <p>Configure the SDK. Optional if you used <code>data-api-key</code> — but required to set theme, callbacks, or caps. Keys: <code>apiKey</code>, <code>theme</code>, <code>accent</code>, <code>position</code>, <code>payToRemovePrice</code>, <code>maxAdsPerSession</code> (default 10), <code>minIntervalMs</code> (default 180000 — applies to <code>corner</code> only), <code>debug</code>, and the callbacks below.</p>
+
+    <h3 id="bb-request"><code>BoostBoss.requestAd(opts)</code></h3>
+    <p>Request and render an ad. <code>opts.placement</code> (default <code>corner</code>), <code>opts.context</code>, <code>opts.mount</code> (CSS selector or element — required for every placement except <code>corner</code>), optional <code>opts.region</code> / <code>opts.language</code>. Resolves to the ad object or <code>null</code>.</p>
+
+    <h3 id="bb-clear"><code>BoostBoss.clearLoading()</code> · <code>BoostBoss.clear(placement)</code></h3>
+    <p><code>clearLoading()</code> removes the loading-state ad. <code>clear('card')</code> removes any rendered placement by name. <code>BoostBoss.close()</code> closes the corner / fullscreen popup.</p>
+
+    <h3 id="bb-debug"><code>BoostBoss.getLastError()</code> · <code>setDebug(on)</code> · <code>getStats()</code></h3>
+    <p><code>getLastError()</code> returns the last <code>{ code, message, detail, ts }</code> object or <code>null</code>. <code>setDebug(true)</code> logs every event to the console at runtime. <code>getStats()</code> returns the session id and ads-shown count.</p>
+
+    <h2 id="feedback">Feedback callbacks</h2>
+    <p>The SDK fires a context-joined tracking beacon for every impression, click, skip, close, and dismiss automatically — you don't wire anything for billing or optimisation to work. The callbacks below are for your own analytics.</p>
+<pre><span class="fn">BoostBoss.init</span>({
+  apiKey: <span class="str">'bb_dev_xxx'</span>,
+  onImpression: (ad) =&gt; analytics.<span class="fn">track</span>(<span class="str">'ad_impression'</span>, { id: ad.campaign_id }),
+  onClick:      (ad) =&gt; analytics.<span class="fn">track</span>(<span class="str">'ad_click'</span>,      { id: ad.campaign_id }),
+  onClose:      (ad, type) =&gt; { <span class="cm">/* type: 'close' | 'skip' | 'dismiss' */</span> },
+  onError:      (err) =&gt; console.<span class="fn">warn</span>(err.code, err.message),
+});</pre>
+
+    <h2 id="conversion-tracking">Conversion tracking</h2>
+    <p>When a user clicks an ad and converts on the advertiser's own site (a separate thank-you page), the <em>advertiser</em> installs <a href="/pixel.js"><code>pixel.js</code></a> on that page — see the <a href="/docs-api-reference#api-conversion">conversion beacon docs</a>. Publishers don't wire conversions; you're paid on the impressions and clicks the SDK already reports.</p>
 
     <h2 id="error-handling">Error handling</h2>
-    <p>The snippet never throws into your app. Failures resolve to a <code>lumi:error</code> event and the slot stays empty (or shows your <code>data-lumi-fallback</code> element if configured).</p>
+    <p>The SDK never throws into your app. Every failure resolves <code>requestAd()</code> to <code>null</code>, sets <code>getLastError()</code>, and invokes <code>onError</code>.</p>
     <table>
       <thead><tr><th>Error code</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td><code>BBX_AUTH</code></td><td>Publisher ID unknown or revoked. Check dashboard.</td></tr>
-        <tr><td><code>BBX_CSP</code></td><td>Content Security Policy blocks the script. See "CSP" below.</td></tr>
-        <tr><td><code>BBX_NETWORK</code></td><td>Network failure or CORS issue. Slot stays empty.</td></tr>
-        <tr><td><code>BBX_NO_FILL</code></td><td>No matching advertiser. Not an error per se — emitted as <code>lumi:no_fill</code> for clarity.</td></tr>
+        <tr><td><code>NO_API_KEY</code></td><td>No publisher key supplied. Set <code>data-api-key</code> or pass <code>apiKey</code> to <code>init()</code>.</td></tr>
+        <tr><td><code>BAD_PLACEMENT</code></td><td>Unknown placement name. Use one of: corner, card, loading, citation, chip.</td></tr>
+        <tr><td><code>NO_MOUNT</code></td><td>An inline placement was requested without a valid <code>mount</code> element.</td></tr>
+        <tr><td><code>NO_FILL</code></td><td>No matching advertiser right now. Not a misconfiguration — just empty demand.</td></tr>
+        <tr><td><code>RATE_LIMITED</code></td><td>A <code>corner</code> ad was requested inside the <code>minIntervalMs</code> window.</td></tr>
+        <tr><td><code>SESSION_CAP</code></td><td><code>maxAdsPerSession</code> reached for this session.</td></tr>
+        <tr><td><code>SERVER_ERROR</code> · <code>FETCH_ERROR</code></td><td>HTTP error, network failure, or the 8s request timeout.</td></tr>
+        <tr><td><code>EMPTY_RESPONSE</code> · <code>PARSE_ERROR</code></td><td>The auction returned no content or unparseable content.</td></tr>
+        <tr><td><code>RENDER_ERROR</code></td><td>The ad was fetched but the placement failed to render into the DOM.</td></tr>
       </tbody>
     </table>
 
     <h3>CSP (Content Security Policy)</h3>
-    <p>If your site uses CSP, allow Lumi's host:</p>
+    <p>If your site uses CSP, allow Boost Boss's host:</p>
 <pre>script-src  <span class="str">'self'</span> <span class="str">https://boostboss.ai</span>;
 connect-src <span class="str">'self'</span> <span class="str">https://boostboss.ai</span>;
 img-src     <span class="str">'self'</span> <span class="str">https://boostboss.ai</span> <span class="str">data:</span>;</pre>
 
+    <h2 id="ssr">SSR and SPA support</h2>
+    <p>The SDK is fully client-side — it only runs in the browser, so SSR needs no special handling. On SPA route changes, just call <code>requestAd()</code> again from your route hook (Next.js <code>useRouter</code>, Vue Router <code>afterEach</code>, React Router <code>useLocation</code>). Use <code>clear(placement)</code> to remove a previous ad before re-requesting.</p>
+
+    <h4>Next.js (App Router)</h4>
+    <p>Add the script in <code>app/layout.tsx</code> via <code>next/script</code> with <code>strategy="afterInteractive"</code>, then call <code>BoostBoss.requestAd()</code> from a client component.</p>
+<pre><span class="kw">import</span> Script <span class="kw">from</span> <span class="str">'next/script'</span>;
+<span class="tag">&lt;Script</span> <span class="attr">src</span>=<span class="str">"https://boostboss.ai/sdk.js"</span>
+  <span class="attr">data-api-key</span>=<span class="str">"bb_dev_xxx"</span> <span class="attr">strategy</span>=<span class="str">"afterInteractive"</span> <span class="tag">/&gt;</span></pre>
+
     <h2 id="testing">Testing</h2>
-    <p>Use <code>data-publisher-id="pub_test_demo"</code> in development. Sandbox always returns a fixed creative regardless of context, so you can verify slot rendering in dev without hitting real demand-side calls.</p>
+    <p>Use the sandbox key <code>pub_test_demo</code> in development. Sandbox returns a fixed creative regardless of context, so you can verify rendering without touching real demand. Add <code>data-debug</code> to log every event to the console.</p>
 <pre><span class="tag">&lt;script</span> <span class="attr">async</span>
-  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
-  <span class="attr">data-publisher-id</span>=<span class="str">"pub_test_demo"</span>
-  <span class="attr">data-debug</span>=<span class="str">"true"</span><span class="tag">&gt;</span>
+  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/sdk.js"</span>
+  <span class="attr">data-api-key</span>=<span class="str">"pub_test_demo"</span>
+  <span class="attr">data-debug</span><span class="tag">&gt;</span>
 <span class="tag">&lt;/script&gt;</span></pre>
-    <p>Set <code>data-debug="true"</code> to log every event to the console. Switch to your live publisher ID before deploying.</p>
+    <p>Switch to your live publisher key and remove <code>data-debug</code> before deploying.</p>
 
     <h2 id="going-live">Going live</h2>
     <ul>
-      <li>Replace sandbox publisher ID with your live <code>pub_xxx</code>.</li>
-      <li>Remove <code>data-debug="true"</code>.</li>
-      <li>Confirm Stripe Connect is set up.</li>
+      <li>Replace the sandbox key with your live <code>bb_dev_xxx</code>.</li>
+      <li>Remove <code>data-debug</code>.</li>
+      <li>Confirm Stripe Connect is set up for payouts.</li>
       <li>Add Boost Boss to your CSP if you have one (see above).</li>
       <li>Verify one impression appears in your dashboard within 60 seconds of going live.</li>
     </ul>
 
     <h2 id="troubleshooting">Troubleshooting</h2>
-    <h4>The slot is empty.</h4>
-    <p>Check the console for <code>lumi:no_fill</code> or <code>lumi:error</code> events. <code>no_fill</code> means there's no matched advertiser right now; <code>error</code> means something's misconfigured (auth, CSP, network).</p>
+    <h4>requestAd() resolves to null.</h4>
+    <p>Check <code>BoostBoss.getLastError()</code>. <code>NO_FILL</code> means there's no matched advertiser right now; any other code is a misconfiguration (key, mount, CSP, network).</p>
 
     <h4>The script blocks page load.</h4>
-    <p>It shouldn't — the snippet uses <code>async</code>. If you see a blocking warning in Lighthouse, double-check the <code>async</code> attribute is actually present on your <code>&lt;script&gt;</code> tag.</p>
-
-    <h4>Ads don't refresh between SPA routes.</h4>
-    <p>Most apps work without intervention thanks to <code>MutationObserver</code>. If yours doesn't, call <code>Lumi.refresh()</code> in your route-change hook (Next.js: <code>useRouter().events</code>; Vue Router: <code>router.afterEach</code>; React Router: <code>useLocation</code> with an effect).</p>
+    <p>It shouldn't — use the <code>async</code> attribute. If Lighthouse flags a blocking script, confirm <code>async</code> is actually present on the tag.</p>
 
     <h4>Theming doesn't apply.</h4>
-    <p>Make sure the CSS variables are set on a parent of the slot (most commonly <code>:root</code>). The slot reads <code>getComputedStyle</code> at mount time.</p>
+    <p>If you auto-initialised via <code>data-api-key</code>, call <code>BoostBoss.init({ theme, accent })</code> once more after load — the data attribute only sets the key.</p>
 
-    <h4>Ads pass page-speed budgets in dev but not production.</h4>
-    <p>Caching: lumi.js is cached aggressively. Bust it by appending <code>?v=YYYYMMDD</code> if you suspect stale SDK behavior. Most production issues are CDN-caching mismatches, not SDK regressions.</p>
+    <h4>Behaviour looks stale after a deploy.</h4>
+    <p><code>sdk.js</code> is cached aggressively at the CDN. Append <code>?v=YYYYMMDD</code> to bust it if you suspect a stale SDK.</p>
 
     <h2 id="changelog">Changelog</h2>
     <p>See the <a href="/docs/api-reference#changelog">API reference changelog</a> for SDK release notes.</p>

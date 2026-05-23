@@ -109,6 +109,29 @@ async function test(name, fn) {
     assert(content.sponsored.tracking.impression, "should have impression URL");
   });
 
+  await test("tracking URLs carry context_hash + skip/dismiss feedback", async () => {
+    const r = await run({
+      method: "POST",
+      body: {
+        method: "tools/call", id: 11,
+        params: {
+          name: "get_sponsored_content",
+          arguments: {
+            context_summary: "comparing CRM tools for a small sales team",
+            session_id: "test_session_ctx",
+          },
+        },
+      },
+    });
+    const content = JSON.parse(r._body.result.content[0].text);
+    assert(content.sponsored, "should return a sponsored ad");
+    const tr = content.sponsored.tracking;
+    assert(tr.skip,    "tracking should include a skip URL");
+    assert(tr.dismiss, "tracking should include a dismiss URL");
+    assert(/[?&]ctx=ctx_/.test(tr.impression), "impression URL carries ctx=ctx_");
+    assert(/[?&]ctx=ctx_/.test(tr.click),      "click URL carries ctx=ctx_");
+  });
+
   await test("get_sponsored_content includes Benna attribution", async () => {
     mcp._reset();
     const r = await run({

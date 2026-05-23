@@ -1074,14 +1074,51 @@ async function handleEmbedAction(action, req, res) {
       .limit(EMBED_MAX_PER_RUN);
     if (error) return res.status(500).json({ error: error.message });
     const tokens = (missRows || []).map((r) => r.token).filter(Boolean);
-    if (tokens.length === 0) return res.status(200).json({ drained: 0, promoted: 0, message: "miss queue empty" });
     let promoted = 0, failed = 0;
     for (let i = 0; i < tokens.length; i += EMBED_BATCH_SIZE) {
       const slice = tokens.slice(i, i + EMBED_BATCH_SIZE);
       try { promoted += await _embedPromote(sb, slice, await _voyageBatchEmbed(slice)); }
       catch (e) { console.error("[embed_drain] batch:", e.message); failed += slice.length; }
     }
-    return res.status(200).json({ drained: tokens.length, promoted, failed });
+
+    // ── Context fingerprint drain (Phase 0 — capture now, score later) ──
+    // Fill Voyage embeddings for context_fingerprints rows the auction has
+    // logged (db/19_context_fingerprints.sql). Runs every cron tick,
+    // independent of the token miss queue. Failures are non-fatal — an
+    // unembedded row is simply retried on the next run. This is the ONLY
+    // place context text is embedded: never on the bid path.
+    let contextDrained = 0, contextFailed = 0;
+    try {
+      const { data: ctxRows } = await sb.from("context_fingerprints")
+        .select("context_hash, context_text")
+        .is("embedding", null)
+        .not("context_text", "is", null)
+        .order("first_seen", { ascending: true })
+        .limit(EMBED_MAX_PER_RUN);
+      const rows = (ctxRows || []).filter((r) => r.context_text);
+      for (let i = 0; i < rows.length; i += EMBED_BATCH_SIZE) {
+        const slice = rows.slice(i, i + EMBED_BATCH_SIZE);
+        try {
+          const vecs = await _voyageBatchEmbed(slice.map((r) => r.context_text));
+          for (let j = 0; j < slice.length; j++) {
+            const { error: upErr } = await sb.from("context_fingerprints")
+              .update({ embedding: "[" + vecs[j].join(",") + "]" })
+              .eq("context_hash", slice[j].context_hash);
+            if (upErr) contextFailed++; else contextDrained++;
+          }
+        } catch (e) {
+          console.error("[embed_drain] context batch:", e.message);
+          contextFailed += slice.length;
+        }
+      }
+    } catch (e) {
+      console.error("[embed_drain] context drain:", e.message);
+    }
+
+    return res.status(200).json({
+      drained: tokens.length, promoted, failed,
+      context_drained: contextDrained, context_failed: contextFailed,
+    });
   }
 
   return res.status(400).json({ error: "Unknown embed action" });

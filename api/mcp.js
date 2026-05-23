@@ -21,6 +21,7 @@ const { lookupCachedEmbedding } = require("./_lib/embeddings.js");
 const { isSandboxCredential, buildSandboxResponse } = require("./_lib/sandbox.js");
 const auctionLog = require("./_lib/auction_log.js");
 const { getCampaignHistoryBatch } = require("./_lib/campaign_history.js");
+const { deriveContextHash, touchContextFingerprint } = require("./_lib/context.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -344,6 +345,20 @@ async function handleGetSponsoredContent(body, args, res) {
   const sessionId = args.session_id || "anon_" + Date.now();
   const auctionId = mintAuctionId();
   const t0 = Date.now();
+
+  // ── Context fingerprint (capture now, score later) ─────────────────────
+  // Derive a deterministic hash of the request context so every event this
+  // auction produces — including no-fill — can be joined back to its
+  // semantic context. The fingerprint upsert is fire-and-forget; the bid
+  // path never waits on it. Benna stays a stub — this is pure capture.
+  const contextHash = deriveContextHash(args.context_summary);
+  if (contextHash) {
+    touchContextFingerprint(supa(), {
+      contextHash,
+      contextText: args.context_summary,
+      surface: args.surface || "mcp",
+    }).catch(() => {});
+  }
 
   // Auction log scaffold — mutated as the auction progresses, emitted at
   // every exit point. Logging is fire-and-forget; callers never await.
@@ -738,6 +753,9 @@ async function handleGetSponsoredContent(body, args, res) {
   if (placement && placement.id) trackParams.set("placement", placement.id);
   if (effectiveSurface)          trackParams.set("surface", effectiveSurface);
   if (w.format)                  trackParams.set("format", String(w.format));
+  // Context fingerprint — joins every event from this auction back to the
+  // semantic context that produced it (db/19_context_fingerprints.sql).
+  if (contextHash)               trackParams.set("ctx", contextHash);
   const ims = winner.priced && winner.priced.factors && winner.priced.factors.intent_match_score;
   if (Number.isFinite(ims)) {
     trackParams.set("ims", ims.toFixed(4));
@@ -782,6 +800,8 @@ async function handleGetSponsoredContent(body, args, res) {
         impression:     `${track}&event=impression`,
         click:          `${track}&event=click`,
         close:          `${track}&event=close`,
+        skip:           `${track}&event=skip`,
+        dismiss:        `${track}&event=dismiss`,
         video_complete: `${track}&event=video_complete`,
       },
     },

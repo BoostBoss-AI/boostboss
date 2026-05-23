@@ -107,6 +107,11 @@ module.exports = async function handler(req, res) {
   const placementId = params.placement || params.placement_id || null;
   const surface     = params.surface || null;
   const format      = params.format  || null;
+  // Context fingerprint (db/19_context_fingerprints.sql). Minted by the
+  // auction (api/mcp.js) and carried on the `ctx` query key of every
+  // tracking URL, so this feedback event joins back to the semantic
+  // context that produced it. NULL for legacy callers — never required.
+  const contextHash = params.ctx || params.context_hash || null;
   const intentMatchScore = params.ims != null ? Number(params.ims)
                        : (params.intent_match_score != null ? Number(params.intent_match_score) : null);
 
@@ -254,6 +259,10 @@ module.exports = async function handler(req, res) {
     format:       format,
     intent_match_score: Number.isFinite(intentMatchScore) ? intentMatchScore : null,
     anonymous_id: anonymousId,
+    // Context fingerprint (db/19_context_fingerprints.sql). Joins this
+    // feedback event back to the semantic context of the originating
+    // request. NULL allowed; legacy callers without context still work.
+    context_hash: contextHash,
     // Conversion fields (db/05_bbx_conversions.sql). Only populated when
     // event === 'conversion'; null otherwise.
     conversion_type: event === "conversion" ? conversionType : null,
@@ -338,7 +347,18 @@ module.exports = async function handler(req, res) {
         }
       }
     }
-    const { error } = await sb.from("events").insert(record);
+    let { error } = await sb.from("events").insert(record);
+    // Deploy-ordering resilience: if migration 19 hasn't been applied yet,
+    // the events table has no context_hash column and PostgREST rejects the
+    // whole insert (PGRST204). track.js is the billing artery — it must
+    // never break on a code-before-migration deploy. Strip the new column
+    // and retry once so impressions/clicks keep flowing until the migration
+    // lands. Drop this guard after migration 19 is confirmed in production.
+    if (error && error.code === "PGRST204" && /context_hash/.test(error.message || "")) {
+      const { context_hash: _droppedCtx, ...legacyRecord } = record;
+      ({ error } = await sb.from("events").insert(legacyRecord));
+      res.setHeader("x-track-context-col-missing", "1");
+    }
     if (error) {
       // 23505 = unique_violation. If the partial unique index fired between
       // our pre-check and the insert (race), treat as deduplication, not error.
