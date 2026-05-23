@@ -465,9 +465,13 @@ async function handleGetSponsoredContent(body, args, res) {
   // the preference object for the filter step.
   let developerId = null;
   let developerFormats = null; // null = no filter (accept all, back-compat)
+  // Account-level brand-safety blocklists (db/18). Unioned with any
+  // per-placement exclusions in the auction filter chain below.
+  let developerBlockedCats = [];
+  let developerBlockedDomains = [];
   if (args.developer_api_key && sb) {
     const { data: dev } = await sb.from("developers")
-      .select("id, format_native, format_image, format_corner, format_video, format_fullscreen")
+      .select("id, format_native, format_image, format_corner, format_video, format_fullscreen, blocked_categories, blocked_advertiser_domains")
       .eq("api_key", args.developer_api_key).eq("status", "active").single();
     if (dev) {
       developerId = dev.id;
@@ -478,6 +482,8 @@ async function handleGetSponsoredContent(body, args, res) {
         video:      dev.format_video !== false,
         fullscreen: dev.format_fullscreen !== false,
       };
+      developerBlockedCats    = Array.isArray(dev.blocked_categories) ? dev.blocked_categories : [];
+      developerBlockedDomains = Array.isArray(dev.blocked_advertiser_domains) ? dev.blocked_advertiser_domains : [];
     }
   }
 
@@ -515,8 +521,17 @@ async function handleGetSponsoredContent(body, args, res) {
   ]);
 
   // Publisher-side brand-safety: refuse advertiser categories the publisher excluded.
-  const excludedCats = (placement && placement.excluded_categories) || [];
-  const excludedAdv  = (placement && placement.excluded_advertisers) || [];
+  // Brand-safety exclusions = per-placement exclusions ∪ the publisher's
+  // account-level blocklists (db/18). The auction's afterBlocklistCat /
+  // afterBlocklistAdv steps below enforce both in one pass.
+  const excludedCats = [
+    ...((placement && placement.excluded_categories) || []),
+    ...developerBlockedCats,
+  ];
+  const excludedAdv  = [
+    ...((placement && placement.excluded_advertisers) || []),
+    ...developerBlockedDomains,
+  ];
   const overlapsArr  = (a, b) => Array.isArray(a) && Array.isArray(b)
     && a.some((x) => b.includes(x));
 

@@ -3020,7 +3020,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         video: data.profile?.format_video !== false,
                         fullscreen: data.profile?.format_fullscreen !== false
                     },
-                    notification_prefs: data.profile?.notification_prefs || {}
+                    notification_prefs: data.profile?.notification_prefs || {},
+                    brand_safety: {
+                        blocked_categories: data.profile?.blocked_categories || [],
+                        blocked_advertiser_domains: data.profile?.blocked_advertiser_domains || []
+                    }
                 };
 
                 // Store session and user data
@@ -4931,7 +4935,21 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 { key: 'account', label: 'Account' },
                 { key: 'payouts', label: 'Payouts' },
                 { key: 'api',     label: 'API & Integration' },
+                { key: 'brand',   label: 'Brand safety' },
                 { key: 'notifs',  label: 'Notifications' },
+            ];
+            // Common IAB advertiser categories the publisher can block.
+            const IAB_CATS = [
+                { code: 'IAB1',  label: 'Arts & Entertainment' },
+                { code: 'IAB3',  label: 'Business' },
+                { code: 'IAB4',  label: 'Careers' },
+                { code: 'IAB5',  label: 'Education' },
+                { code: 'IAB7',  label: 'Health & Fitness' },
+                { code: 'IAB13', label: 'Personal Finance' },
+                { code: 'IAB17', label: 'Sports' },
+                { code: 'IAB19', label: 'Technology' },
+                { code: 'IAB20', label: 'Travel' },
+                { code: 'IAB22', label: 'Shopping' },
             ];
             let activeSection = 'account';
 
@@ -5019,6 +5037,29 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     </div>`;
             }
 
+            function sectionBrandSafety() {
+                const bs = (p().brand_safety) || {};
+                const cats = Array.isArray(bs.blocked_categories) ? bs.blocked_categories : [];
+                const doms = Array.isArray(bs.blocked_advertiser_domains) ? bs.blocked_advertiser_domains : [];
+                const boxes = IAB_CATS.map((c) => `
+                    <label style="display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;">
+                        <input type="checkbox" class="sSetBsCat" value="${c.code}" ${cats.includes(c.code) ? 'checked' : ''} style="width:15px;height:15px;accent-color:#FF2D78;flex-shrink:0;">
+                        <span style="font-size:13px;color:#111;">${c.label}</span>
+                    </label>`).join('');
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">Blocked advertiser categories</label>
+                        <div style="${HINT}margin-top:0;margin-bottom:8px;">Ads from these categories will never serve on any of your inventory.</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">${boxes}</div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">Blocked advertiser domains</label>
+                        <textarea id="sSetBsDomains" rows="4" placeholder="competitor.com&#10;spam-brand.io" style="${FLD}font-family:'JetBrains Mono',monospace;font-size:12.5px;resize:vertical;">${doms.join('\n')}</textarea>
+                        <div style="${HINT}">One domain per line. Any ad whose advertiser domain matches is blocked from your inventory.</div>
+                    </div>
+                    <button id="sSetBsSave" style="padding:9px 18px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">Save brand safety</button>`;
+            }
+
             function sectionNotifs() {
                 const n = getNotifPrefs();
                 const toggle = (key, title, desc) => `
@@ -5050,7 +5091,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             function renderBody() {
                 const body = document.getElementById('sSetBody');
-                const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, notifs: sectionNotifs };
+                const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, brand: sectionBrandSafety, notifs: sectionNotifs };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
                 // Copy buttons
                 body.querySelectorAll('.sSetCopy').forEach((btn) => {
@@ -5087,6 +5128,30 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         prefs[cb.dataset.notif] = cb.checked;
                         saveNotifPrefs(prefs);
                     });
+                });
+                // Brand safety — collect checkboxes + domains, persist.
+                const bsSave = document.getElementById('sSetBsSave');
+                if (bsSave) bsSave.addEventListener('click', () => {
+                    const cats = Array.from(body.querySelectorAll('.sSetBsCat:checked')).map((c) => c.value);
+                    const domsRaw = (document.getElementById('sSetBsDomains') || {}).value || '';
+                    const doms = domsRaw.split(/[\n,]+/)
+                        .map((s) => s.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, ''))
+                        .filter(Boolean);
+                    if (typeof userProfile !== 'undefined' && userProfile) {
+                        userProfile.brand_safety = { blocked_categories: cats, blocked_advertiser_domains: doms };
+                    }
+                    try {
+                        const sessionRaw = localStorage.getItem('bb_dev_session');
+                        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                        if (session && session.token) {
+                            fetch(`${API_BASE}/api/auth?action=update_brand_safety`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                                body: JSON.stringify({ blocked_categories: cats, blocked_advertiser_domains: doms }),
+                            }).catch(() => {});
+                        }
+                    } catch (_) {}
+                    if (typeof showToast === 'function') showToast('Brand safety saved', 'success');
                 });
             }
 

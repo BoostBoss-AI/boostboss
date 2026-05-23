@@ -253,6 +253,29 @@ function demoHandler(action, body, req, res) {
     return res.json({ success: true, mode: "demo", notification_prefs: prefs });
   }
 
+  // Update a publisher's account-level brand-safety blocklists.
+  if (action === "update_brand_safety") {
+    const cats = Array.isArray(body && body.blocked_categories) ? body.blocked_categories : null;
+    const doms = Array.isArray(body && body.blocked_advertiser_domains) ? body.blocked_advertiser_domains : null;
+    if (cats === null && doms === null) {
+      return res.status(400).json({ error: "Provide blocked_categories and/or blocked_advertiser_domains arrays" });
+    }
+    if (body.api_key) {
+      for (const user of DEMO_USERS.values()) {
+        if (user.profile && user.profile.api_key === body.api_key) {
+          if (cats) user.profile.blocked_categories = cats;
+          if (doms) user.profile.blocked_advertiser_domains = doms;
+          return res.json({
+            success: true, mode: "demo",
+            blocked_categories: user.profile.blocked_categories || [],
+            blocked_advertiser_domains: user.profile.blocked_advertiser_domains || [],
+          });
+        }
+      }
+    }
+    return res.json({ success: true, mode: "demo", blocked_categories: cats || [], blocked_advertiser_domains: doms || [] });
+  }
+
   if (action === "oauth_sync") {
     // Demo mode has no Supabase; OAuth isn't available here.
     return res.status(501).json({ error: "Google sign-in requires Supabase — demo mode doesn't support OAuth. Use email + password or try the demo." });
@@ -514,7 +537,38 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ success: true, mode: "supabase", notification_prefs: (data && data.notification_prefs) || prefs });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_notif_prefs" });
+  // Update a publisher's account-level brand-safety blocklists — token-verified.
+  if (action === "update_brand_safety") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
+    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
+    const updates = {};
+    if (Array.isArray(body && body.blocked_categories)) {
+      updates.blocked_categories = body.blocked_categories
+        .filter((s) => typeof s === "string" && s.length <= 32).slice(0, 100);
+    }
+    if (Array.isArray(body && body.blocked_advertiser_domains)) {
+      updates.blocked_advertiser_domains = body.blocked_advertiser_domains
+        .filter((s) => typeof s === "string")
+        .map((s) => s.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, ""))
+        .filter(Boolean).slice(0, 200);
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "Provide blocked_categories and/or blocked_advertiser_domains arrays" });
+    }
+    const { data, error: upErr } = await supabaseAdmin
+      .from("developers").update(updates).eq("id", user.id)
+      .select("blocked_categories, blocked_advertiser_domains").single();
+    if (upErr) return res.status(500).json({ error: upErr.message });
+    return res.json({
+      success: true, mode: "supabase",
+      blocked_categories: (data && data.blocked_categories) || [],
+      blocked_advertiser_domains: (data && data.blocked_advertiser_domains) || [],
+    });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_notif_prefs, update_brand_safety" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
