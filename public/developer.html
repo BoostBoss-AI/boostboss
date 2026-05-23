@@ -4892,7 +4892,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             modal.id = 'settingsModal';
             modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
             modal.innerHTML = `
-                <div style="background:#fff;border-radius:16px;width:700px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
+                <div style="background:#fff;border-radius:16px;width:860px;max-width:94vw;height:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
                         <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">Settings</h3>
                         <button id="sSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
@@ -4909,10 +4909,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             document.body.appendChild(modal);
 
             const SECTIONS = [
-                { key: 'account', icon: '👤', label: 'Account' },
-                { key: 'payouts', icon: '💸', label: 'Payouts' },
-                { key: 'api',     icon: '🔑', label: 'API & Integration' },
-                { key: 'notifs',  icon: '🔔', label: 'Notifications' },
+                { key: 'account', label: 'Account' },
+                { key: 'payouts', label: 'Payouts' },
+                { key: 'api',     label: 'API & Integration' },
+                { key: 'notifs',  label: 'Notifications' },
             ];
             let activeSection = 'account';
 
@@ -5022,8 +5022,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const nav = document.getElementById('sSetNav');
                 nav.innerHTML = SECTIONS.map((s) => {
                     const on = s.key === activeSection;
-                    return `<button class="sSetNavBtn" data-section="${s.key}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">
-                        <span style="font-size:14px;">${s.icon}</span>${s.label}</button>`;
+                    return `<button class="sSetNavBtn" data-section="${s.key}" style="display:block;width:100%;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${s.label}</button>`;
                 }).join('');
                 nav.querySelectorAll('.sSetNavBtn').forEach((b) => {
                     b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
