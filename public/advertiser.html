@@ -760,6 +760,20 @@
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
+        .fc-family {
+            margin-top: 5px;
+            font-size: 9.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .fc-family .fc-tier {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .fc-family .fc-tier.standard { color: #1D9E75; }
+        .fc-family .fc-tier.optin { color: #BA7517; }
         .format-card input[type="radio"] {
             position: absolute;
             opacity: 0;
@@ -2948,6 +2962,7 @@
                                 <div class="fc-name">Native</div>
                                 <div class="fc-desc">Text + CTA inline with AI response. Least intrusive.</div>
                                 <div class="fc-reach">~100% reach</div>
+                                <div class="fc-family">AI-native · ~$4.50 eCPM · <span class="fc-tier standard">Standard</span></div>
                             </label>
                             <label class="format-card selected" data-format="image">
                                 <input type="radio" name="format" value="image" required checked>
@@ -2960,6 +2975,7 @@
                                 <div class="fc-name">Image</div>
                                 <div class="fc-desc">Full media card with headline, subtext, CTA.</div>
                                 <div class="fc-reach">~95% reach</div>
+                                <div class="fc-family">Display · ~$6.00 eCPM · <span class="fc-tier standard">Standard</span></div>
                             </label>
                             <label class="format-card" data-format="video">
                                 <input type="radio" name="format" value="video" required>
@@ -2972,10 +2988,14 @@
                                 <div class="fc-name">Video</div>
                                 <div class="fc-desc">Playable video with skip. Highest engagement.</div>
                                 <div class="fc-reach">~70% reach</div>
+                                <div class="fc-family">Interruptive · ~$15.00 eCPM · <span class="fc-tier optin">Opt-in</span></div>
                             </label>
                         </div>
                         <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">
                             Reach shows the share of publishers who currently accept that format. Higher formats = richer CPM but narrower inventory.
+                        </div>
+                        <div id="formatCostEstimate" style="margin-top: 10px; padding: 10px 12px; background: #FAFAF7; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 12px; color: #6B7280; line-height: 1.6;">
+                            <!-- populated by updateFormatEstimate() -->
                         </div>
                     </div>
 
@@ -4570,6 +4590,36 @@
         // into per_door_creatives on campaign submit.
         const doorOverrides = { 'mcp': {}, 'js-snippet': {}, 'npm-sdk': {}, 'rest-api': {} };
 
+        // Each creative format maps to one placement family, its typical
+        // eCPM (what the advertiser pays per 1000 impressions), an inventory
+        // tier (Standard = publishers accept by default; Opt-in = publishers
+        // must switch it on), and which doors it can run on. Drives the
+        // estimate panel under the format cards.
+        const FORMAT_PLACEMENT = {
+            native: { family: 'AI-native',            ecpm: 4.50,  tier: 'Standard', doors: 'every door, including MCP servers' },
+            image:  { family: 'Display',              ecpm: 6.00,  tier: 'Standard', doors: 'Lumi Web and Lumi Extension' },
+            video:  { family: 'Interruptive & gated', ecpm: 15.00, tier: 'Opt-in',   doors: 'Lumi Web and Lumi Extension' },
+        };
+
+        // Refreshes the cost-estimate panel from the selected creative
+        // format and (if entered) the Total Budget field.
+        function updateFormatEstimate() {
+            const el = document.getElementById('formatCostEstimate');
+            if (!el) return;
+            const checked = campaignForm.querySelector('input[name="format"]:checked');
+            const fmt = checked ? checked.value : 'image';
+            const info = FORMAT_PLACEMENT[fmt] || FORMAT_PLACEMENT.image;
+            const budget = parseFloat((campaignForm.querySelector('[name="total_budget"]') || {}).value) || 0;
+            let line = `<strong style="color:#1A1A2E;">${info.family} placement</strong> · est. <strong style="color:#FF2D78;">~$${info.ecpm.toFixed(2)} eCPM</strong> · ${info.tier} inventory · runs on ${info.doors}.`;
+            if (budget > 0) {
+                const impressions = Math.round((budget / info.ecpm) * 1000);
+                line += `<br>At your $${budget.toLocaleString()} total budget ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} impressions</strong>.`;
+            } else {
+                line += `<br>Enter a Total Budget below to project reach.`;
+            }
+            el.innerHTML = line;
+        }
+
         function initFormatCardsAndLivePreview() {
             const cards = document.querySelectorAll('.format-card');
             const form = campaignForm;
@@ -4583,12 +4633,14 @@
                     cards.forEach(c => c.classList.remove('selected'));
                     card.classList.add('selected');
                     renderDoorPreviews();
+                    updateFormatEstimate();
                 });
                 radio?.addEventListener('change', () => {
                     if (radio.checked) {
                         cards.forEach(c => c.classList.remove('selected'));
                         card.classList.add('selected');
                         renderDoorPreviews();
+                        updateFormatEstimate();
                     }
                 });
             });
@@ -4602,10 +4654,15 @@
             const fileInput = document.getElementById('fileInput');
             if (fileInput) fileInput.addEventListener('change', renderDoorPreviews);
 
+            // Total Budget drives the impression projection in the estimate.
+            const budgetInput = form.querySelector('[name="total_budget"]');
+            if (budgetInput) budgetInput.addEventListener('input', updateFormatEstimate);
+
             // URL autofill wire-up (Phase E.5).
             initUrlAutofill();
 
             renderDoorPreviews();
+            updateFormatEstimate();
         }
 
         // ── Phase E.5 — URL autofill ─────────────────────────────────────
