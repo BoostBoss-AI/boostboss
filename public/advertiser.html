@@ -1078,6 +1078,29 @@
             align-self: flex-end;
         }
 
+        /* Placement preview gallery — one card per placement, click to select */
+        .pp-card {
+            background: var(--bg-primary);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+        }
+        .pp-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-1px);
+        }
+        .pp-card.pp-selected {
+            border-color: #FF2D78;
+            box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.12);
+        }
+        .pp-card .door-media { margin-bottom: 0; }
+
         .radio-option,
         .checkbox-option {
             display: flex;
@@ -2967,12 +2990,12 @@
                         <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
                     </div>
 
-                    <!-- Placement Tier & Format — 3 formats grouped by the 2 tiers -->
+                    <!-- Ad Placements — the deduped core placements, grouped by tier -->
                     <div class="form-group">
-                        <label class="form-label">Placement Tier &amp; Format</label>
+                        <label class="form-label">Ad Placements</label>
                         <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
                         <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">
-                            Pick one card. The tier (the group) sets which inventory your budget buys and the eCPM you pay; the card is what your ad looks like.
+                            Pick the placement your campaign runs in. The group is the tier — it sets which inventory your budget buys and the eCPM you pay. These mirror the placements publishers switch on in their dashboard.
                         </div>
                     </div>
 
@@ -3027,13 +3050,13 @@
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
                     </div>
 
-                    <!-- Live Preview — 4-door grid; per-door copy override (Phase E.5) -->
+                    <!-- Live Preview — one card per placement; click a card to select it -->
                     <div class="form-group">
-                        <label class="form-label">Live Preview <span style="font-size:11px;color:#9CA3AF;font-weight:400;">— how your ad renders across the 4 publisher doors</span></label>
+                        <label class="form-label">Live Preview <span style="font-size:11px;color:#9CA3AF;font-weight:400;">— how your ad renders in every placement</span></label>
                         <div class="live-preview">
-                            <div class="live-preview-header">Same creative, four contexts. Click "Edit" to customise copy per door.</div>
+                            <div class="live-preview-header">Same creative, every placement. Click any card to pick that placement.</div>
                             <div class="door-preview-grid" id="doorPreviewGrid">
-                                <!-- Each door card is built by renderDoorPreviews() in JS -->
+                                <!-- One placement card per entry, built by renderDoorPreviews() in JS -->
                             </div>
                         </div>
                     </div>
@@ -4557,39 +4580,54 @@
         }
 
         // Create campaign
-        // ── Format cards + Live Preview — Phase E.5: 4-door grid, per-door overrides.
-        // The four doors map to integration_method values (X-Lumi-Source).
-        // Aspect ratios reflect each door's natural canvas:
-        //   • mcp        → 1:1 square (MCP responses render text-first; image is supplemental thumbnail)
-        //   • js-snippet → 16:9 wide  (web pages, banner-style real estate)
-        //   • npm-sdk    → 9:16 tall  (in-app cards, mobile-shape)
-        //   • rest-api   → 1:1 square (generic JSON consumers; safest default)
-        const DOORS = [
-            { id: 'mcp',        label: 'MCP',        aspect: 'aspect-1x1',   note: 'Square · in-tool card' },
-            { id: 'js-snippet', label: 'JS Snippet', aspect: 'aspect-16x9',  note: 'Wide · website banner' },
-            { id: 'npm-sdk',    label: 'NPM SDK',    aspect: 'aspect-9x16',  note: 'Tall · mobile card'   },
-            { id: 'rest-api',   label: 'REST API',   aspect: 'aspect-1x1',   note: 'Square · JSON consumer'},
+        // ── Ad Placements + Live Preview ─────────────────────────────────
+        // The campaign builder mirrors the publisher dashboard's Ad
+        // Placements panel. The 16 core placements across the four doors
+        // collapse to these 8 once exact duplicates are removed — e.g.
+        // "Sponsored citation" appears on MCP, Web and Extension but is one
+        // card here. The advertiser picks ONE placement; its category is
+        // the tier (what the budget buys + the eCPM), its mock is the
+        // creative format the campaign stores.
+        const PLACEMENT_CATS = [
+            { key: 'ai-native', label: 'AI-native placements', badge: 'standard', note: 'Sponsored lines, sources and suggestions woven into the AI response. Runs on every door, including MCP.' },
+            { key: 'display',   label: 'Display placements',   badge: 'standard', note: 'Image cards and corner units shown alongside content. Lumi Web, Extension and Bot.' },
         ];
+        // eCPM is what the advertiser pays per 1,000 impressions (mirrors
+        // the publisher-side RPM). `mock` picks the creative format stored
+        // on the campaign + the preview visual.
+        const PLACEMENT_CATALOG = [
+            { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',       ecpm: 4.50, mock: 'native', desc: 'A sponsored source / citation woven into the AI answer.' },
+            { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         ecpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
+            { key: 'chip',     cat: 'ai-native', name: 'Suggested-action chip',    ecpm: 4.50, mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+            { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        ecpm: 4.00, mock: 'native', desc: 'A sponsored line in a bot welcome / onboarding message.' },
+            { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', ecpm: 4.50, mock: 'native', desc: 'Sponsored quick-reply buttons under the bot reply.' },
+            { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    ecpm: 6.00, mock: 'image',  desc: 'A sponsored media card rendered inline in the response.' },
+            { key: 'corner',   cat: 'display',   name: 'Corner unit',              ecpm: 8.50, mock: 'corner', desc: 'A sticky, dismissable card anchored to a screen corner.' },
+            { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',         ecpm: 9.00, mock: 'image',  desc: 'A hero unit on an extension new-tab / home screen.' },
+        ];
+        // placement key → { format, tier, ecpm } — the submit path derives
+        // the campaign's stored `format` + `placement_tier` from this.
+        const PLACEMENT_SPEC = {};
+        PLACEMENT_CATALOG.forEach((p) => {
+            PLACEMENT_SPEC[p.key] = { format: p.mock, tier: p.cat, ecpm: p.ecpm, name: p.name, cat: p.cat };
+        });
+        const DEFAULT_PLACEMENT = 'card';
 
-        // Per-door overrides live in a single object keyed by door id. Empty
-        // string ⇒ inherit from campaign-level copy. We serialise this map
-        // into per_door_creatives on campaign submit.
-        const doorOverrides = { 'mcp': {}, 'js-snippet': {}, 'npm-sdk': {}, 'rest-api': {} };
+        // The currently-checked placement radio (defaults if none yet).
+        function selectedPlacement() {
+            const el = campaignForm.querySelector('input[name="placement"]:checked');
+            return (el && el.value) || DEFAULT_PLACEMENT;
+        }
 
-        // The 3 placement tiers and the 5 creative formats grouped under
-        // them. eCPM is what the advertiser pays per 1,000 impressions. The
-        // advertiser picks ONE format card; the tier (its group) is implied.
-        const ADV_TIERS = [
-            { key: 'ai-native', label: 'AI-native placements', badge: 'standard', note: 'Gentle — runs on every door, including MCP.' },
-            { key: 'display',   label: 'Display placements',   badge: 'standard', note: 'Standard inventory on Lumi Web, Extension and Bot.' },
-        ];
-        const ADV_FORMATS = [
-            { key: 'native', tier: 'ai-native', name: 'Native', ecpm: 4.50, thumb: 'native', desc: 'Text + CTA inline with the AI response.' },
-            { key: 'image',  tier: 'display',   name: 'Image',  ecpm: 6.00, thumb: 'media',  desc: 'Full media card with headline + CTA.' },
-            { key: 'corner', tier: 'display',   name: 'Corner', ecpm: 8.50, thumb: 'media',  desc: 'Floating dismissable card. Non-blocking.' },
-        ];
-        // Format → tier. Used to derive placement_tier from the picked card.
-        const FORMAT_TO_TIER = { native: 'ai-native', image: 'display', corner: 'display' };
+        // Best-effort map a stored campaign (format + placement_tier) back
+        // to a placement key — for editing campaigns created before the
+        // placement selector existed (those rows carry only format + tier).
+        function placementFromCampaign(format, tier) {
+            const exact = PLACEMENT_CATALOG.find((p) => p.mock === format && p.cat === tier);
+            if (exact) return exact.key;
+            const byFmt = PLACEMENT_CATALOG.find((p) => p.mock === format);
+            return byFmt ? byFmt.key : DEFAULT_PLACEMENT;
+        }
 
         // Tiny visual thumbnail for a format card.
         function advThumb(kind) {
@@ -4597,29 +4635,30 @@
             return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-media"></div><div class="fc-thumb-title"></div><div class="fc-thumb-cta"></div></div>`;
         }
 
-        // Renders the 5 format cards grouped under the 3 tier headers. The
-        // advertiser picks one card — that sets the campaign's format, and
-        // the placement tier is derived from the card's group at submit.
+        // Renders the 8 deduped placement cards grouped under the 2 tier
+        // (category) headers. The advertiser picks one card — its category
+        // is the placement tier, its mock is the creative format; both are
+        // derived at submit. Mirrors the publisher dashboard's panel.
         function renderFormatTierGroups() {
             const container = document.getElementById('formatTierGroups');
             if (!container) return;
-            const current = (campaignForm.querySelector('input[name="format"]:checked') || {}).value || 'image';
-            container.innerHTML = ADV_TIERS.map((tier) => {
-                const cards = ADV_FORMATS.filter((f) => f.tier === tier.key);
+            const current = selectedPlacement();
+            container.innerHTML = PLACEMENT_CATS.map((cat) => {
+                const cards = PLACEMENT_CATALOG.filter((p) => p.cat === cat.key);
                 return `<div class="ftg-group">
                     <div class="ftg-head">
-                        <span class="ftg-name">${tier.label}</span>
-                        <span class="ftg-badge ${tier.badge}">${tier.badge === 'optin' ? 'Opt-in' : 'Standard'}</span>
-                        <span style="font-size:11px;color:#9CA3AF;">${tier.note}</span>
+                        <span class="ftg-name">${cat.label}</span>
+                        <span class="ftg-badge ${cat.badge}">${cat.badge === 'optin' ? 'Opt-in' : 'Standard'}</span>
+                        <span style="font-size:11px;color:#9CA3AF;">${cat.note}</span>
                     </div>
                     <div class="format-cards">
-                        ${cards.map((f) => `
-                            <label class="format-card${f.key === current ? ' selected' : ''}" data-format="${f.key}">
-                                <input type="radio" name="format" value="${f.key}" ${f.key === current ? 'checked' : ''} required>
-                                ${advThumb(f.thumb)}
-                                <div class="fc-name">${f.name}</div>
-                                <div class="fc-desc">${f.desc}</div>
-                                <div class="fc-family">~$${f.ecpm.toFixed(2)} eCPM</div>
+                        ${cards.map((p) => `
+                            <label class="format-card${p.key === current ? ' selected' : ''}" data-placement="${p.key}">
+                                <input type="radio" name="placement" value="${p.key}" ${p.key === current ? 'checked' : ''} required>
+                                ${advThumb(p.mock === 'native' ? 'native' : 'media')}
+                                <div class="fc-name">${p.name}</div>
+                                <div class="fc-desc">${p.desc}</div>
+                                <div class="fc-family">~$${p.ecpm.toFixed(2)} eCPM</div>
                             </label>
                         `).join('')}
                     </div>
@@ -4638,18 +4677,17 @@
             });
         }
 
-        // Refreshes the cost-estimate panel from the selected format's tier
-        // and (if entered) the Total Budget field.
+        // Refreshes the cost-estimate panel from the selected placement's
+        // tier + eCPM and (if entered) the Total Budget field.
         function updateFormatEstimate() {
             const el = document.getElementById('formatCostEstimate');
             if (!el) return;
-            const fmtEl = campaignForm.querySelector('input[name="format"]:checked');
-            const f = ADV_FORMATS.find((x) => x.key === (fmtEl ? fmtEl.value : 'image')) || ADV_FORMATS[1];
-            const tier = ADV_TIERS.find((t) => t.key === f.tier) || ADV_TIERS[1];
+            const p = PLACEMENT_SPEC[selectedPlacement()] || PLACEMENT_SPEC[DEFAULT_PLACEMENT];
+            const cat = PLACEMENT_CATS.find((t) => t.key === p.tier) || PLACEMENT_CATS[0];
             const budget = parseFloat((campaignForm.querySelector('[name="total_budget"]') || {}).value) || 0;
-            let line = `<strong style="color:#1A1A2E;">${tier.label}</strong> · ${f.name} format · est. <strong style="color:#FF2D78;">~$${f.ecpm.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
+            let line = `<strong style="color:#1A1A2E;">${p.name}</strong> · <strong style="color:#1A1A2E;">${cat.label}</strong> tier · est. <strong style="color:#FF2D78;">~$${p.ecpm.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
             if (budget > 0) {
-                const impressions = Math.round((budget / f.ecpm) * 1000);
+                const impressions = Math.round((budget / p.ecpm) * 1000);
                 line += `<br>At your $${budget.toLocaleString()} total budget ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} impressions</strong>.`;
             } else {
                 line += `<br>Enter a Total Budget below to project how many impressions you'll get.`;
@@ -4660,7 +4698,7 @@
         function initFormatCardsAndLivePreview() {
             const form = campaignForm;
 
-            // Render the 5-card / 3-tier format selector (wires its own
+            // Render the 8-card / 2-tier placement selector (wires its own
             // per-card click handlers).
             renderFormatTierGroups();
 
@@ -4753,12 +4791,12 @@
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); run(); } });
         }
 
-        // Read the "campaign-level" copy state into a single object the
-        // door renderer can override on a per-door basis.
+        // Read the campaign-level copy state into a single object the
+        // placement preview renderer consumes.
         function readCampaignCreativeState() {
             const form = campaignForm;
             const data = form ? new FormData(form) : new FormData();
-            const format = (data.get('format') || 'image').toString();
+            const format = (PLACEMENT_SPEC[selectedPlacement()] || {}).format || 'image';
             const fileInput = document.getElementById('fileInput');
             const file = fileInput?.files?.[0];
             // Local blob URL when the user just uploaded a file; fall back to
@@ -4777,137 +4815,79 @@
             };
         }
 
-        // Merge campaign-level state with the per-door override. Empty
-        // override fields fall through to campaign-level.
-        function effectiveCreativeForDoor(doorId, base) {
-            const o = doorOverrides[doorId] || {};
-            return {
-                headline:  o.headline  || base.headline,
-                subtext:   o.subtext   || base.subtext,
-                cta_label: o.cta_label || base.cta_label,
-                cta_url:   o.cta_url   || base.cta_url,
-                media_url: o.media_url || base.media_url,
-            };
-        }
-
-        function doorHasOverride(doorId) {
-            const o = doorOverrides[doorId] || {};
-            return ['headline','subtext','cta_label','cta_url','media_url'].some((k) => o[k]);
-        }
-
         function escapeHtml(s) {
             return String(s || '').replace(/[&<>"']/g, (ch) => ({
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[ch]));
         }
 
-        // Render all four door preview cards. Each card includes a small
-        // "Edit" button that toggles an inline override form.
+        // Renders the campaign creative in one placement's visual style.
+        // The 8 placements collapse to 3 mock templates (native / image /
+        // corner) — the same collapse the publisher dashboard uses.
+        function creativeMock(mock, c) {
+            const ph = 'https://placehold.co/600x338/F3F4F6/9CA3AF?text=' + encodeURIComponent('Add an image above');
+            const media    = escapeHtml(c.media_url || ph);
+            const headline = escapeHtml(c.headline  || 'Your headline goes here');
+            const subtext  = escapeHtml(c.subtext   || 'Describe what users get when they click.');
+            const cta      = escapeHtml(c.cta_label || 'Learn More');
+            const spons = '<div style="font-size:9px;font-weight:800;color:#FF2D78;letter-spacing:0.5px;">SPONSORED</div>';
+            const img = `<img class="door-media aspect-16x9" src="${media}" alt="" loading="lazy" onerror="this.src='${ph}'">`;
+            const body = `<div class="door-headline">${headline}</div>`
+                + `<div class="door-subtext">${subtext}</div>`
+                + `<a class="door-cta" href="#" onclick="return false;">${cta} →</a>`;
+            if (mock === 'native') {
+                return spons + body;
+            }
+            if (mock === 'corner') {
+                return `<div style="position:relative;border:1px solid #E5E7EB;border-radius:8px;padding:10px;background:#fff;display:flex;flex-direction:column;gap:6px;">`
+                    + `<span style="position:absolute;top:5px;right:8px;color:#9CA3AF;font-size:12px;line-height:1;">✕</span>`
+                    + spons + img + body + `</div>`;
+            }
+            return spons + img + body;
+        }
+
+        // Render one preview card per placement. Clicking a card selects
+        // that placement — keeping the gallery and the selector above in
+        // sync. Re-renders whenever copy / media / selection changes.
         function renderDoorPreviews() {
             const grid = document.getElementById('doorPreviewGrid');
             if (!grid) return;
             const base = readCampaignCreativeState();
+            const sel = selectedPlacement();
 
-            grid.innerHTML = DOORS.map((door) => {
-                const c = effectiveCreativeForDoor(door.id, base);
-                const edited = doorHasOverride(door.id);
-                const o = doorOverrides[door.id] || {};
-                const ph = 'https://placehold.co/600x600/F3F4F6/9CA3AF?text=' + encodeURIComponent('Upload an image or paste a URL above');
-                const mediaSrc = c.media_url || ph;
-                const headline  = escapeHtml(c.headline  || 'Your headline goes here');
-                const subtext   = escapeHtml(c.subtext   || 'Describe what users get when they click.');
-                const ctaLabel  = escapeHtml(c.cta_label || 'Learn More');
+            grid.innerHTML = PLACEMENT_CATALOG.map((p) => {
+                const isSel = p.key === sel;
+                const tierLabel = p.cat === 'ai-native' ? 'AI-native' : 'Display';
                 return `
-                    <div class="door-card" data-door="${door.id}">
+                    <div class="pp-card${isSel ? ' pp-selected' : ''}" data-placement="${p.key}">
                         <div class="door-card-head">
-                            <span>${escapeHtml(door.label)} <span class="door-badge ${edited ? 'edited' : ''}">${edited ? 'Edited' : 'Default'}</span></span>
-                            <button type="button" class="door-edit-btn" data-edit="${door.id}">${edited ? 'Edit' : 'Edit'}</button>
+                            <span>${escapeHtml(p.name)}</span>
+                            <span class="door-badge${isSel ? ' edited' : ''}">${isSel ? 'Selected' : tierLabel}</span>
                         </div>
-                        <img class="door-media ${door.aspect}" src="${escapeHtml(mediaSrc)}" alt="" loading="lazy" onerror="this.src='${ph}'">
-                        <div class="door-headline">${headline}</div>
-                        <div class="door-subtext">${subtext}</div>
-                        <a class="door-cta" href="#" onclick="return false;">${ctaLabel} →</a>
-                        <div style="font-size:10px;color:#9CA3AF;margin-top:auto;">${escapeHtml(door.note)}</div>
-                        <div class="door-override ${edited ? 'open' : ''}" data-override="${door.id}">
-                            <div class="door-override-label">Override copy for ${escapeHtml(door.label)}</div>
-                            <input type="text" data-field="headline"  placeholder="Headline (leave blank to inherit)"  value="${escapeHtml(o.headline  || '')}" maxlength="90">
-                            <textarea     data-field="subtext"   placeholder="Subtext (leave blank to inherit)"   maxlength="160">${escapeHtml(o.subtext || '')}</textarea>
-                            <input type="text" data-field="cta_label" placeholder="CTA label (leave blank to inherit)" value="${escapeHtml(o.cta_label || '')}" maxlength="32">
-                            <input type="url"  data-field="cta_url"   placeholder="CTA URL (leave blank to inherit)"   value="${escapeHtml(o.cta_url   || '')}">
-                            <input type="url"  data-field="media_url" placeholder="Media URL (leave blank to inherit)" value="${escapeHtml(o.media_url || '')}">
-                            <button type="button" class="door-override-reset" data-reset="${door.id}">Clear overrides</button>
-                        </div>
+                        ${creativeMock(p.mock, base)}
+                        <div style="font-size:10px;color:#9CA3AF;margin-top:auto;">~$${p.ecpm.toFixed(2)} eCPM · ${tierLabel} tier</div>
                     </div>
                 `;
             }).join('');
 
-            // Wire up per-card events. We re-query after the innerHTML reset.
-            grid.querySelectorAll('[data-edit]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const doorId = btn.getAttribute('data-edit');
-                    const panel = grid.querySelector(`[data-override="${doorId}"]`);
-                    if (panel) panel.classList.toggle('open');
-                });
-            });
-            grid.querySelectorAll('[data-override] input, [data-override] textarea').forEach((inp) => {
-                inp.addEventListener('input', () => {
-                    const doorId = inp.closest('[data-override]').getAttribute('data-override');
-                    const field  = inp.getAttribute('data-field');
-                    const v = (inp.value || '').trim();
-                    if (v) doorOverrides[doorId][field] = v;
-                    else   delete doorOverrides[doorId][field];
-                    // Re-render only the affected card body to avoid blowing away focus.
-                    updateDoorCard(doorId);
-                });
-            });
-            grid.querySelectorAll('[data-reset]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const doorId = btn.getAttribute('data-reset');
-                    doorOverrides[doorId] = {};
-                    renderDoorPreviews(); // full re-render acceptable on reset
+            // Clicking a preview card picks that placement.
+            grid.querySelectorAll('.pp-card').forEach((card) => {
+                card.addEventListener('click', () => {
+                    const key = card.getAttribute('data-placement');
+                    const radio = campaignForm.querySelector(`input[name="placement"][value="${key}"]`);
+                    if (radio) radio.checked = true;
+                    document.querySelectorAll('#formatTierGroups .format-card').forEach((c) =>
+                        c.classList.toggle('selected', c.dataset.placement === key));
+                    renderDoorPreviews();
+                    updateFormatEstimate();
                 });
             });
         }
 
-        // Update only the visible head + body of one door card, preserving
-        // focus inside the override panel. Avoids the full innerHTML
-        // re-render that would blur whatever the user is typing into.
-        function updateDoorCard(doorId) {
-            const grid = document.getElementById('doorPreviewGrid');
-            if (!grid) return;
-            const card = grid.querySelector(`[data-door="${doorId}"]`);
-            if (!card) return;
-            const base = readCampaignCreativeState();
-            const c = effectiveCreativeForDoor(doorId, base);
-            const edited = doorHasOverride(doorId);
-            const headline = card.querySelector('.door-headline');
-            const subtext  = card.querySelector('.door-subtext');
-            const cta      = card.querySelector('.door-cta');
-            const img      = card.querySelector('.door-media');
-            const badge    = card.querySelector('.door-badge');
-            const ph = 'https://placehold.co/600x600/F3F4F6/9CA3AF?text=' + encodeURIComponent('Upload an image or paste a URL above');
-            if (headline) headline.textContent = c.headline  || 'Your headline goes here';
-            if (subtext)  subtext.textContent  = c.subtext   || 'Describe what users get when they click.';
-            if (cta)      cta.textContent      = (c.cta_label || 'Learn More') + ' →';
-            if (img)      img.src              = c.media_url || ph;
-            if (badge) {
-                badge.textContent = edited ? 'Edited' : 'Default';
-                badge.classList.toggle('edited', edited);
-            }
-        }
-
-        // Build the per_door_creatives payload submitted to the backend.
-        // Only doors with at least one non-empty override get a row;
-        // backend writes the 'default' row from campaign-level fields.
-        function buildPerDoorCreativesPayload() {
-            const out = {};
-            for (const d of DOORS) {
-                if (doorHasOverride(d.id)) out[d.id] = { ...doorOverrides[d.id] };
-            }
-            return out;
-        }
-        // Expose for handleCreateCampaign.
-        window.__buildPerDoorCreatives = buildPerDoorCreativesPayload;
+        // Per-door creative overrides were removed with the per-placement
+        // preview rebuild — the backend still writes the 'default' row from
+        // campaign-level copy, so an empty map is the correct payload.
+        window.__buildPerDoorCreatives = function () { return {}; };
 
         async function handleCreateCampaign(e) {
             e.preventDefault();
@@ -4938,8 +4918,8 @@
             const campaignData = {
                 advertiser_id: currentUserData.user_id,
                 name: formData.get('name'),
-                format: formData.get('format'),
-                placement_tier: FORMAT_TO_TIER[formData.get('format')] || null,
+                format: (PLACEMENT_SPEC[selectedPlacement()] || {}).format || 'image',
+                placement_tier: (PLACEMENT_SPEC[selectedPlacement()] || {}).tier || null,
                 headline: formData.get('headline'),
                 subtext: formData.get('subtext') || '',
                 media_url: mediaUrl,
@@ -5179,7 +5159,6 @@
                 // Populate the form fields
                 const form = campaignForm;
                 form.querySelector('[name="name"]').value = c.name || '';
-                form.querySelector('[name="format"]').value = c.format || 'native';
                 form.querySelector('[name="headline"]').value = c.headline || '';
                 if (form.querySelector('[name="subtext"]')) form.querySelector('[name="subtext"]').value = c.subtext || '';
                 if (form.querySelector('[name="cta_text"]')) form.querySelector('[name="cta_text"]').value = c.cta_label || '';
@@ -5187,17 +5166,17 @@
                 form.querySelector('[name="daily_budget"]').value = c.daily_budget || '';
                 form.querySelector('[name="total_budget"]').value = c.total_budget || '';
                 if (form.querySelector('[name="bid_amount"]')) form.querySelector('[name="bid_amount"]').value = c.bid_amount || '';
-                // Restore the saved format card — rebuild the grouped
-                // selector, check the campaign's format, refresh estimate +
-                // previews. The placement tier is derived from the format.
+                // Restore the saved placement card. Campaign rows carry
+                // only format + placement_tier, so map those back to a
+                // placement key (best effort), then rebuild + select it.
                 if (typeof renderFormatTierGroups === 'function') {
+                    const plKey = placementFromCampaign(c.format || 'image', c.placement_tier || '');
                     renderFormatTierGroups();
-                    const fmtKey = c.format || 'image';
-                    const r = form.querySelector(`input[name="format"][value="${fmtKey}"]`);
+                    const r = form.querySelector(`input[name="placement"][value="${plKey}"]`);
                     if (r) {
                         r.checked = true;
                         document.querySelectorAll('#formatTierGroups .format-card').forEach((cd) =>
-                            cd.classList.toggle('selected', cd.dataset.format === fmtKey));
+                            cd.classList.toggle('selected', cd.dataset.placement === plKey));
                     }
                     if (typeof updateFormatEstimate === 'function') updateFormatEstimate();
                     if (typeof renderDoorPreviews === 'function') renderDoorPreviews();
@@ -5283,8 +5262,8 @@
                 const updateData = {
                     id: editingCampaignId,
                     name: formData.get('name'),
-                    format: formData.get('format'),
-                    placement_tier: FORMAT_TO_TIER[formData.get('format')] || null,
+                    format: (PLACEMENT_SPEC[selectedPlacement()] || {}).format || 'image',
+                    placement_tier: (PLACEMENT_SPEC[selectedPlacement()] || {}).tier || null,
                     headline: formData.get('headline'),
                     cta_url: formData.get('cta_url'),
                     target_keywords: intents,
