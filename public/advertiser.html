@@ -3008,15 +3008,6 @@
                         <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
                     </div>
 
-                    <!-- Ad Placements — the deduped core placements, grouped by tier -->
-                    <div class="form-group">
-                        <label class="form-label">Ad Placements</label>
-                        <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
-                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">
-                            Pick the placement your campaign runs in — each card is a live preview of your creative in that placement. The group is the tier: it sets which inventory your budget buys and the eCPM you pay. These mirror the placements publishers switch on in their dashboard.
-                        </div>
-                    </div>
-
                     <!-- File Upload -->
                     <div class="form-group">
                         <label class="form-label">Upload Creative</label>
@@ -3103,38 +3094,20 @@
                             <span class="ai-targeting-badge">Boost Boss AI</span>
                         </div>
 
-                        <!-- Doors — which publisher integrations to run on.
-                             Maps to target_integration_methods column
-                             (db/09_target_integration_methods.sql). All four
-                             selected by default = "run everywhere." -->
+                        <!-- Ad placement — the deduped core placements grouped
+                             by tier. Replaces the old Doors selector: the
+                             placement you pick already implies which surfaces
+                             render the ad, so a separate door toggle is
+                             redundant (target_integration_methods now defaults
+                             to all doors). #formatTierGroups is rendered by
+                             renderFormatTierGroups() — each card is a live
+                             preview of the campaign creative. -->
                         <div class="targeting-block">
                             <div class="targeting-label">
-                                Doors
-                                <span class="hint">— which publisher surfaces your ad runs on. All on = max reach.</span>
+                                Ad placement
+                                <span class="hint">— pick where your ad runs; each card is a live preview of your creative. The group is the tier you pay for.</span>
                             </div>
-                            <div id="doorsRow" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px;">
-                                <div class="door-card" data-value="mcp" data-active="true">
-                                    <div class="door-dot" style="background:#FF2D78;"></div>
-                                    <div class="door-name">MCP tools</div>
-                                    <div class="door-hint">Claude Desktop · Cursor · Cline</div>
-                                </div>
-                                <div class="door-card" data-value="js-snippet" data-active="true">
-                                    <div class="door-dot" style="background:#04BEFE;"></div>
-                                    <div class="door-name">AI apps</div>
-                                    <div class="door-hint">Web AI chat · agent UIs</div>
-                                </div>
-                                <div class="door-card" data-value="npm-sdk" data-active="true">
-                                    <div class="door-dot" style="background:#FFE600;"></div>
-                                    <div class="door-name">Extensions</div>
-                                    <div class="door-hint">Chrome · Edge · Firefox</div>
-                                </div>
-                                <div class="door-card" data-value="rest-api" data-active="true">
-                                    <div class="door-dot" style="background:#7C3AED;"></div>
-                                    <div class="door-name">Bots</div>
-                                    <div class="door-hint">Discord · Telegram · Slack</div>
-                                </div>
-                            </div>
-                            <div id="doorsSummary" style="font-size:11.5px;color:#6B7280;margin-top:8px;">All 4 doors selected · max reach</div>
+                            <div id="formatTierGroups" style="margin-top:8px;"><!-- rendered by renderFormatTierGroups() --></div>
                         </div>
 
                         <!-- Intent signals -->
