@@ -899,6 +899,65 @@
             position: absolute; top: 6px; right: 9px;
             color: #9CA3AF; font-size: 12px; line-height: 1;
         }
+
+        /* ── Campaign drafts dropdown ─────────────────────────────────── */
+        #draftsMenu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            width: 300px;
+            max-height: 340px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16);
+            z-index: 1500;
+            padding: 6px;
+        }
+        #draftsMenu.open { display: block; }
+        .draft-row {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 10px; border-radius: 8px; cursor: pointer;
+        }
+        .draft-row:hover { background: #FAFAF7; }
+        .draft-row-main { flex: 1; min-width: 0; }
+        .draft-row-name {
+            font-size: 13px; font-weight: 700; color: #1A1A2E;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .draft-row-meta { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .draft-row-del {
+            border: none; background: none; color: #9CA3AF;
+            font-size: 16px; cursor: pointer; padding: 2px 6px; flex-shrink: 0;
+        }
+        .draft-row-del:hover { color: #DC2626; }
+
+        /* ── Save-as-draft prompt ─────────────────────────────────────── */
+        .dp-overlay {
+            display: none; position: fixed; inset: 0; z-index: 3200;
+            background: rgba(0, 0, 0, 0.55);
+            align-items: center; justify-content: center;
+        }
+        .dp-overlay.active { display: flex; }
+        .dp-box {
+            background: #fff; border-radius: 14px;
+            width: 380px; max-width: 92vw;
+            padding: 22px 22px 18px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+        }
+        .dp-title { font-size: 16px; font-weight: 800; color: #1A1A2E; }
+        .dp-body { font-size: 13px; color: #6B7280; line-height: 1.5; margin: 8px 0 18px; }
+        .dp-actions { display: flex; flex-direction: column; gap: 8px; }
+        .dp-btn {
+            border: none; border-radius: 8px;
+            font-size: 13px; font-weight: 700;
+            padding: 10px; cursor: pointer; font-family: inherit;
+        }
+        .dp-btn.save { background: #FF2D78; color: #fff; }
+        .dp-btn.discard { background: #fff; color: #DC2626; border: 1px solid #F0C5C5; }
+        .dp-btn.keep { background: #F3F4F6; color: #374151; }
         .fc-name {
             font-size: 13px;
             font-weight: 700;
@@ -2595,6 +2654,14 @@
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                             font-family: inherit; color: #374151;
                         ">Compare</button>
+                        <div id="draftsWrap" style="position:relative;display:none;">
+                            <button type="button" id="draftsBtn" style="
+                                padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
+                                background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+                                font-family: inherit; color: #374151;
+                            ">Drafts <span id="draftsCount"></span> ▾</button>
+                            <div id="draftsMenu"></div>
+                        </div>
                         <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
                     </div>
                 </div>
@@ -3682,9 +3749,9 @@
 
             // Modal
             newCampaignBtn.addEventListener('click', openModal);
-            modalCloseBtn.addEventListener('click', closeModal);
+            modalCloseBtn.addEventListener('click', requestCloseCampaignModal);
             campaignModal.addEventListener('click', (e) => {
-                if (e.target === campaignModal) closeModal();
+                if (e.target === campaignModal) requestCloseCampaignModal();
             });
 
             // Campaign form
@@ -3763,17 +3830,22 @@
             });
             updateDoorsSummary();
 
-            // Escape key — close the in-context preview popup first if it's
-            // open, otherwise close the campaign modal.
+            // Escape key — close the topmost layer: draft prompt, then the
+            // in-context preview popup, then the campaign modal.
             document.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape') return;
+                const dp = document.getElementById('draftPrompt');
+                if (dp && dp.classList.contains('active')) {
+                    hideDraftPrompt();
+                    return;
+                }
                 const ppm = document.getElementById('placementPreviewModal');
                 if (ppm && ppm.classList.contains('active')) {
                     closePlacementContext();
                     return;
                 }
                 if (campaignModal.classList.contains('active')) {
-                    closeModal();
+                    requestCloseCampaignModal();
                 }
             });
         }
@@ -5251,6 +5323,9 @@
                 }
 
                 showToast('Campaign created successfully!', 'success');
+                // If this campaign was started from a saved draft, the draft
+                // has now become a real campaign — remove it.
+                if (loadedDraftId) deleteDraft(loadedDraftId);
                 closeModal();
                 loadCampaigns();
                 loadStats();
@@ -5285,6 +5360,7 @@
             authContainer.style.display = 'none';
             dashboardContainer.classList.add('active');
             companyDisplayName.textContent = currentUserData.company_name || 'Advertiser';
+            if (typeof renderDraftsUI === 'function') renderDraftsUI();
         }
 
         // ───────────── BILLING ─────────────
@@ -5572,6 +5648,235 @@
             if (modalTitle) modalTitle.textContent = 'Create New Campaign';
             _origClose();
         };
+
+        // ───────────── CAMPAIGN DRAFTS (localStorage) ─────────────
+        // Drafts are stored client-side, keyed per advertiser. Closing a
+        // new (unsaved) campaign with content prompts save-or-discard; a
+        // Drafts dropdown beside "New Campaign" re-opens any saved draft.
+        let loadedDraftId = null;
+
+        // Resetting the draft id belongs in closeModal — every close path
+        // (submit, ×, discard) should clear it so the next open is fresh.
+        const _closeBeforeDrafts = closeModal;
+        closeModal = function() {
+            loadedDraftId = null;
+            _closeBeforeDrafts();
+        };
+
+        function draftKey() {
+            const uid = (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.user_id) || 'anon';
+            return 'bb_campaign_drafts_' + uid;
+        }
+        function loadDrafts() {
+            try { return JSON.parse(localStorage.getItem(draftKey())) || []; }
+            catch (_) { return []; }
+        }
+        function saveDrafts(arr) {
+            try { localStorage.setItem(draftKey(), JSON.stringify(arr.slice(-20))); } catch (_) {}
+        }
+        function deleteDraft(id) {
+            saveDrafts(loadDrafts().filter((d) => d.id !== id));
+            renderDraftsUI();
+        }
+        function draftTimeAgo(ts) {
+            const s = Math.floor((Date.now() - ts) / 1000);
+            if (s < 60) return 'just now';
+            if (s < 3600) return Math.floor(s / 60) + 'm ago';
+            if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+            return Math.floor(s / 86400) + 'd ago';
+        }
+
+        // True when the New Campaign form has content worth keeping.
+        function isCampaignFormDirty() {
+            const fd = new FormData(campaignForm);
+            const fields = ['name', 'headline', 'subtext', 'cta_text', 'cta_url', 'adomain', 'total_budget', 'daily_budget'];
+            if (fields.some((f) => (fd.get(f) || '').toString().trim())) return true;
+            if (intentChips && intentChips.querySelector('.intent-chip')) return true;
+            if (campaignForm.dataset.fetchedMediaUrl) return true;
+            return false;
+        }
+
+        // Snapshot the New Campaign form into a draft object. Note: a
+        // directly-uploaded image file can't be persisted to localStorage;
+        // a URL-autofilled image (fetchedMediaUrl) is kept.
+        function captureCampaignDraft() {
+            const fd = new FormData(campaignForm);
+            const t = getTargetingSelections();
+            const og = document.getElementById('optimizationGoal');
+            const name = (fd.get('name') || '').toString().trim();
+            const headline = (fd.get('headline') || '').toString().trim();
+            return {
+                id: loadedDraftId || ('draft_' + Date.now()),
+                savedAt: Date.now(),
+                name: name || headline || 'Untitled draft',
+                data: {
+                    name: fd.get('name') || '', headline: fd.get('headline') || '',
+                    subtext: fd.get('subtext') || '', cta_text: fd.get('cta_text') || '',
+                    cta_url: fd.get('cta_url') || '', adomain: fd.get('adomain') || '',
+                    iab_cat: fd.get('iab_cat') || '', daily_budget: fd.get('daily_budget') || '',
+                    total_budget: fd.get('total_budget') || '', bid_amount: fd.get('bid_amount') || '',
+                    billing_model: fd.get('billing_model') || 'cpm',
+                    conversion_event_types: fd.get('conversion_event_types') || '',
+                    start_date: fd.get('start_date') || '', end_date: fd.get('end_date') || '',
+                    groups: Array.from(selectedGroups),
+                    intents: t.intents, hostApps: t.hostApps, mcpTools: t.mcpTools, aiModels: t.aiModels,
+                    surfaces: getSelectedSurfaces(),
+                    optimization_goal: og ? og.value : '',
+                    fetchedMediaUrl: campaignForm.dataset.fetchedMediaUrl || '',
+                },
+            };
+        }
+
+        // Persist the current form as a draft (updates in place if it was
+        // itself opened from a draft).
+        function saveCurrentDraft() {
+            const draft = captureCampaignDraft();
+            const drafts = loadDrafts().filter((d) => d.id !== draft.id);
+            drafts.push(draft);
+            saveDrafts(drafts);
+            renderDraftsUI();
+        }
+
+        // Load a saved draft back into a fresh New Campaign modal.
+        function applyCampaignDraft(d) {
+            closeModal();                 // clean slate (also clears edit state)
+            const data = (d && d.data) || {};
+            const form = campaignForm;
+            const set = (n, v) => { const el = form.querySelector('[name="' + n + '"]'); if (el) el.value = v || ''; };
+            set('name', data.name); set('headline', data.headline); set('subtext', data.subtext);
+            set('cta_text', data.cta_text); set('cta_url', data.cta_url); set('adomain', data.adomain);
+            set('iab_cat', data.iab_cat); set('daily_budget', data.daily_budget);
+            set('total_budget', data.total_budget); set('bid_amount', data.bid_amount);
+            set('conversion_event_types', data.conversion_event_types);
+            set('start_date', data.start_date); set('end_date', data.end_date);
+            const br = form.querySelector('[name="billing_model"][value="' + (data.billing_model || 'cpm') + '"]');
+            if (br) { br.checked = true; br.dispatchEvent(new Event('change', { bubbles: true })); }
+            selectedGroups = new Set((data.groups && data.groups.length) ? data.groups : ['ai-native', 'display']);
+            intentChips.innerHTML = '';
+            (data.intents || []).forEach(addIntentChip);
+            const restore = (rowSel, vals) => {
+                document.querySelectorAll(rowSel + ' .target-pill').forEach((p) =>
+                    p.classList.remove('selected', 'pink', 'cyan', 'yellow'));
+                (vals || []).forEach((v) => {
+                    const pill = document.querySelector(rowSel + ' .target-pill[data-value="' + v + '"]');
+                    if (pill) {
+                        pill.classList.add('selected');
+                        const col = pill.getAttribute('data-color');
+                        if (col) pill.classList.add(col);
+                    }
+                });
+            };
+            restore('#hostAppsRow', data.hostApps);
+            restore('#mcpToolsRow', data.mcpTools);
+            restore('#aiModelsRow', data.aiModels);
+            restore('#surfacesRow', data.surfaces);
+            if (data.fetchedMediaUrl) form.dataset.fetchedMediaUrl = data.fetchedMediaUrl;
+            if (data.optimization_goal) {
+                const tile = document.querySelector('.goal-tile[data-goal="' + data.optimization_goal + '"]');
+                if (tile) tile.click();
+            }
+            if (typeof renderFormatTierGroups === 'function') renderFormatTierGroups();
+            if (typeof updateFormatEstimate === 'function') updateFormatEstimate();
+            if (typeof updateReachEstimate === 'function') updateReachEstimate();
+            loadedDraftId = d.id;
+            openModal();
+        }
+
+        // ── Save / discard prompt on closing an unsaved New Campaign ──
+        function requestCloseCampaignModal() {
+            // Editing an existing campaign, or an empty form → just close.
+            if (editingCampaignId || !isCampaignFormDirty()) { closeModal(); return; }
+            showDraftPrompt();
+        }
+        function showDraftPrompt() {
+            let m = document.getElementById('draftPrompt');
+            if (!m) {
+                m = document.createElement('div');
+                m.id = 'draftPrompt';
+                m.className = 'dp-overlay';
+                m.innerHTML =
+                    '<div class="dp-box">' +
+                        '<div class="dp-title">Save this campaign as a draft?</div>' +
+                        '<div class="dp-body">You’ve started a campaign but haven’t launched it. Save it as a draft to finish later, or discard your changes.</div>' +
+                        '<div class="dp-actions">' +
+                            '<button type="button" class="dp-btn save">Save as draft</button>' +
+                            '<button type="button" class="dp-btn discard">Discard changes</button>' +
+                            '<button type="button" class="dp-btn keep">Keep editing</button>' +
+                        '</div>' +
+                    '</div>';
+                document.body.appendChild(m);
+                m.addEventListener('click', (e) => { if (e.target === m) hideDraftPrompt(); });
+                m.querySelector('.save').addEventListener('click', () => {
+                    saveCurrentDraft();
+                    hideDraftPrompt();
+                    closeModal();
+                    showToast('Draft saved', 'success');
+                });
+                m.querySelector('.discard').addEventListener('click', () => {
+                    hideDraftPrompt();
+                    closeModal();
+                });
+                m.querySelector('.keep').addEventListener('click', hideDraftPrompt);
+            }
+            m.classList.add('active');
+        }
+        function hideDraftPrompt() {
+            const m = document.getElementById('draftPrompt');
+            if (m) m.classList.remove('active');
+        }
+
+        // ── Drafts dropdown beside "+ New Campaign" ──
+        function renderDraftsUI() {
+            const wrap = document.getElementById('draftsWrap');
+            const menu = document.getElementById('draftsMenu');
+            const count = document.getElementById('draftsCount');
+            if (!wrap || !menu) return;
+            const drafts = loadDrafts().slice().sort((a, b) => b.savedAt - a.savedAt);
+            if (drafts.length === 0) {
+                wrap.style.display = 'none';
+                menu.classList.remove('open');
+                return;
+            }
+            wrap.style.display = '';
+            if (count) count.textContent = '(' + drafts.length + ')';
+            menu.innerHTML = drafts.map((d) =>
+                '<div class="draft-row" data-draft="' + d.id + '">' +
+                    '<div class="draft-row-main">' +
+                        '<div class="draft-row-name">' + escapeHtml(d.name) + '</div>' +
+                        '<div class="draft-row-meta">Saved ' + draftTimeAgo(d.savedAt) + '</div>' +
+                    '</div>' +
+                    '<button type="button" class="draft-row-del" data-del="' + d.id + '" title="Delete draft">×</button>' +
+                '</div>').join('');
+            menu.querySelectorAll('.draft-row').forEach((row) => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.closest('[data-del]')) return;
+                    const d = loadDrafts().find((x) => x.id === row.getAttribute('data-draft'));
+                    if (d) { menu.classList.remove('open'); applyCampaignDraft(d); }
+                });
+            });
+            menu.querySelectorAll('[data-del]').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteDraft(btn.getAttribute('data-del'));
+                });
+            });
+        }
+
+        // Wire the drafts button + close-on-outside-click.
+        (function initDraftsUI() {
+            const btn = document.getElementById('draftsBtn');
+            const menu = document.getElementById('draftsMenu');
+            if (btn && menu) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('open');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('#draftsWrap')) menu.classList.remove('open');
+                });
+            }
+            renderDraftsUI();
+        })();
 
         // ───────────── CAMPAIGN DETAIL SLIDE-OUT ─────────────
         const detailPanel = document.getElementById('campaignDetail');
