@@ -2299,31 +2299,20 @@ await message.reply({
                 </div>
             </div>
 
-            <!-- Ad Formats — creative formats grouped into families -->
+            <!-- Ad Placements — the door's placements, each a toggleable card -->
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <div class="section-title" style="margin-bottom: 0;">Ad Formats</div>
+                    <div class="section-title" style="margin-bottom: 0;">Ad Placements</div>
                     <div style="font-size: 12px; color: #6B7280;">
                         Est. monthly income: <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
                         <span style="color: #9CA3AF; font-size: 11px;">&nbsp;(at current volume)</span>
                     </div>
                 </div>
                 <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
-                    Choose which creative formats compete in your auction. Turning a family off removes those creative types. This is <em>what</em> the ad is — see Ad Placements below for <em>where</em> it renders.
-                </div>
-                <div id="adFormatsContainer">
-                    <!-- Dynamically populated — grouped by format family -->
-                </div>
-            </div>
-
-            <!-- Ad Placements — the door's render surfaces, each individually toggleable -->
-            <div class="section">
-                <div class="section-title">Ad Placements</div>
-                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
-                    Switch individual placements on or off. Each one is a render surface your installed door supports — turn it off and the auction stops serving that surface. Showing the door selected in the Integration section above.
+                    Every card below is a placement your installed door can render. Switch any one on or off — turning a placement off removes it from your auction. Showing the door selected in the Integration section above.
                 </div>
                 <div id="adPlacementsContainer">
-                    <!-- Dynamically populated — the selected door's placements -->
+                    <!-- Dynamically populated — the selected door's placement cards -->
                 </div>
             </div>
 
@@ -3167,7 +3156,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             markOnboardingStepDone(2);
         }
         function onboardScrollToFormats() {
-            const el = document.getElementById('adFormatsContainer');
+            const el = document.getElementById('adPlacementsContainer');
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             markOnboardingStepDone(3);
         }
@@ -3393,8 +3382,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 document.getElementById('chartContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No data yet</p>';
             }
 
-            // Render ad format + placement controls
-            renderAdFormats();
+            // Render the Ad Placements panel
             renderAdPlacements();
 
             // Render earnings table (handle empty data)
@@ -3603,7 +3591,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // re-themes in sync when the publisher tweaks a control.
             const targets = [
                 document.getElementById('adPreview'),
-                document.getElementById('adFormatsContainer'),
+                document.getElementById('adPlacementsContainer'),
             ];
             for (const el of targets) {
                 if (!el) continue;
@@ -3854,9 +3842,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             } catch (_) {}
-            // Re-render the Ad Formats + Ad Placements panels so they show
-            // what this door can render (MCP → AI-native only, etc.).
-            if (typeof renderAdFormats === 'function') renderAdFormats();
+            // Re-render the Ad Placements panel so it shows what this door
+            // can render (MCP → 3 placements, Web → 5, etc.).
             if (typeof renderAdPlacements === 'function') renderAdPlacements();
         }
         // Backward-compat alias for any older inline handlers that still
@@ -3905,34 +3892,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             });
         }
 
-        // Format catalog — RPM (revenue per 1000 impressions) reflects real-world
-        // ranges for AI-native inventory. Publisher gets 85% of whatever advertisers
-        // pay. These estimates help publishers pick formats intentionally rather than
-        // leaving all on and hoping for the best.
-        const AD_FORMAT_CATALOG = [
-            { key: 'native', name: 'Native In-Chat', description: 'Text + CTA inline with AI response. Least intrusive, highest trust.', rpm: 4.50 },
-            { key: 'image',  name: 'Image',          description: 'Inline card with prominent image. Richer than native.',               rpm: 6.00 },
-            { key: 'corner', name: 'Corner Popup',   description: 'Floating dismissable card (bottom-right). Attention without blocking.', rpm: 8.50 },
-        ];
-
-        // The two placement families. Each groups one or more catalog
-        // formats. This is the unit a publisher actually reasons about —
-        // "AI-native vs Display inventory" — rather than picking every
-        // format one by one. The underlying per-format toggles still
-        // exist as cards inside each family for granular control.
-        const PLACEMENT_FAMILIES = [
-            {
-                key: 'ai-native', name: 'AI-native placements', recommended: true,
-                desc: 'Sponsored lines, sources and suggestions woven into the AI response. Gentle — reads as part of the product.',
-                doors: 'Runs on every door, including MCP servers.',
-                formats: ['native'],
-            },
-            {
-                key: 'display', name: 'Display placements', recommended: true,
-                desc: 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.',
-                doors: 'Runs on Lumi Web, Extension and Bot.',
-                formats: ['image', 'corner'],
-            },
+        // Category metadata for the placement panel's family headers.
+        // Placements are grouped under these three categories for readability.
+        const PLACEMENT_CATS = [
+            { key: 'ai-native',    label: 'AI-native placements', badge: 'standard', desc: 'Sponsored lines, sources and suggestions woven into the AI response. Gentle — reads as part of the product.' },
+            { key: 'display',      label: 'Display placements',   badge: 'standard', desc: 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.' },
+            { key: 'interruptive', label: 'Interruptive & gated', badge: 'optin',    desc: 'Units that interrupt the user — richer eCPM, but spend UX goodwill carefully.' },
         ];
 
         // Per-format visual mockup. Returns HTML rendering a sample ad in
@@ -3970,16 +3935,6 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             return '';
         }
 
-        // Which placement families each integration door can physically
-        // render. The Ad Placements panel shows only the families relevant
-        // to the door selected in the Integration section — an MCP server
-        // renders text content blocks only, so it sees AI-native alone.
-        const DOOR_FAMILIES = {
-            'mcp':        ['ai-native'],
-            'js-snippet': ['ai-native', 'display'],
-            'npm-sdk':    ['ai-native', 'display'],
-            'rest-api':   ['ai-native', 'display'],
-        };
         const DOOR_LABELS = {
             'mcp': 'Lumi MCP', 'js-snippet': 'Lumi Web',
             'npm-sdk': 'Lumi Extension', 'rest-api': 'Lumi Bot',
@@ -3992,39 +3947,43 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // so the auction gate (api/mcp.js placementDisabled) is a plain
         // set-membership check. Empty disabled set = all placements on.
         const DOOR_SURFACE_PREFIX = { 'mcp': 'mcp', 'js-snippet': 'web', 'npm-sdk': 'ext', 'rest-api': 'bot' };
+        // Per-door placements. `mock` picks the card visual; `rpm` is the
+        // indicative revenue per 1000 impressions (publisher keeps 85%).
         const DOOR_PLACEMENTS = {
             'mcp': [
-                { key: 'card',     cat: 'display',   name: 'Inline sponsored card', desc: 'A sponsored card block appended to the tool response.' },
-                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',    desc: 'A sponsored source / citation inside the AI answer.' },
-                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',      desc: 'A "you might also try" sponsored tool recommendation.' },
+                { key: 'card',     cat: 'display',   name: 'Inline sponsored card', rpm: 6.00, mock: 'image',  desc: 'A sponsored card block appended to the tool response.' },
+                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',    rpm: 4.50, mock: 'native', desc: 'A sponsored source / citation inside the AI answer.' },
+                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',      rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
             ],
             'js-snippet': [
-                { key: 'corner',   cat: 'display',     name: 'Corner unit',           desc: 'Sticky dismissable card anchored to a screen corner.' },
-                { key: 'card',     cat: 'display',     name: 'Inline sponsored card', desc: 'Sponsored card rendered inline in your page flow.' },
-                { key: 'loading',  cat: 'interruptive',name: 'Loading-state ad',      desc: 'Shown while your AI is generating its response.' },
-                { key: 'citation', cat: 'ai-native',   name: 'Sponsored citation',    desc: 'Compact sponsored source inside a generated answer.' },
-                { key: 'chip',     cat: 'ai-native',   name: 'Suggested-action chip', desc: 'A tappable sponsored quick-reply pill.' },
+                { key: 'corner',   cat: 'display',     name: 'Corner unit',           rpm: 8.50, mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.' },
+                { key: 'card',     cat: 'display',     name: 'Inline sponsored card', rpm: 6.00, mock: 'image',  desc: 'Sponsored card rendered inline in your page flow.' },
+                { key: 'loading',  cat: 'interruptive',name: 'Loading-state ad',      rpm: 7.00, mock: 'native', desc: 'Shown while your AI is generating its response.' },
+                { key: 'citation', cat: 'ai-native',   name: 'Sponsored citation',    rpm: 4.50, mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
+                { key: 'chip',     cat: 'ai-native',   name: 'Suggested-action chip', rpm: 4.50, mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
             ],
             'npm-sdk': [
-                { key: 'corner',   cat: 'display',   name: 'Corner unit',         desc: 'Sticky dismissable card anchored to a screen corner.' },
-                { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',    desc: 'A hero unit on the extension new-tab / home screen.' },
-                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',  desc: 'Compact sponsored source inside a generated answer.' },
-                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',    desc: 'A "you might also try" sponsored tool recommendation.' },
+                { key: 'corner',   cat: 'display',   name: 'Corner unit',         rpm: 8.50, mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.' },
+                { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',    rpm: 9.00, mock: 'image',  desc: 'A hero unit on the extension new-tab / home screen.' },
+                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',  rpm: 4.50, mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
+                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',    rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
             ],
             'rest-api': [
-                { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    desc: 'Sponsored embed / card in the bot reply.' },
-                { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        desc: 'A sponsored line in the bot welcome / onboarding message.' },
-                { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', desc: 'Sponsored quick-reply buttons under the bot reply.' },
-                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         desc: 'A "you might also try" sponsored tool recommendation.' },
+                { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    rpm: 6.00, mock: 'image',  desc: 'Sponsored embed / card in the bot reply.' },
+                { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        rpm: 4.00, mock: 'native', desc: 'A sponsored line in the bot welcome / onboarding message.' },
+                { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', rpm: 4.50, mock: 'native', desc: 'Sponsored quick-reply buttons under the bot reply.' },
+                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
             ],
         };
-        const PLACEMENT_CAT_LABEL = { 'ai-native': 'AI-native', 'display': 'Display', 'interruptive': 'Interruptive & gated' };
 
-        // Renders the Ad Placements section: the selected door's placements,
-        // grouped by category, each an independent on/off toggle.
+        // Renders the Ad Placements panel: the selected door's placements as
+        // cards, grouped by category. Each card is an independent on/off
+        // toggle; each category header has a master toggle. Tailored to the
+        // door picked in the Integration section.
         function renderAdPlacements() {
             const container = document.getElementById('adPlacementsContainer');
             if (!container || typeof userProfile === 'undefined' || !userProfile) return;
+            container.className = '';
             container.innerHTML = '';
 
             const _sel = document.querySelector('.ic-card.ic-selected');
@@ -4035,34 +3994,66 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             const _ctx = document.createElement('div');
             _ctx.style.cssText = 'font-size:12px;color:#6B7280;margin-bottom:14px;line-height:1.5;';
-            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong> — ${placements.length} this door can render.`;
+            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong> — ${placements.length} this door renders. Switch doors in the Integration section above.`;
             container.appendChild(_ctx);
 
-            ['ai-native', 'display', 'interruptive'].forEach(cat => {
-                const inCat = placements.filter(p => p.cat === cat);
-                if (inCat.length === 0) return;
-                const head = document.createElement('div');
-                head.style.cssText = 'font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 8px;';
-                head.textContent = PLACEMENT_CAT_LABEL[cat];
-                container.appendChild(head);
-                inCat.forEach(p => {
-                    const surfaceKey = prefix + '-' + p.key;
-                    const isOn = disabled.indexOf(surfaceKey) === -1;
-                    const row = document.createElement('div');
-                    row.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin-bottom:8px;';
-                    row.innerHTML = `
-                        <div style="flex:1;">
-                            <div style="font-size:13px;font-weight:700;color:#1A1A2E;">${p.name}</div>
-                            <div style="font-size:11px;color:#6B7280;margin-top:3px;line-height:1.5;">${p.desc}</div>
+            PLACEMENT_CATS.forEach(cat => {
+                const cards = placements.filter(p => p.cat === cat.key);
+                if (cards.length === 0) return;
+                const allOn = cards.every(p => disabled.indexOf(prefix + '-' + p.key) === -1);
+
+                const section = document.createElement('div');
+                section.style.cssText = 'border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:14px;';
+
+                const badge = cat.badge === 'optin'
+                    ? '<span style="font-size:9px;font-weight:700;color:#854F0B;background:#FAEEDA;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">Opt-in</span>'
+                    : '<span style="font-size:9px;font-weight:700;color:#1D9E75;background:#E1F5EE;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">Standard</span>';
+
+                const header = document.createElement('div');
+                header.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px;';
+                header.innerHTML = `
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:14px;font-weight:700;color:#1A1A2E;">${cat.label}</span>
+                            ${badge}
                         </div>
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
-                            <input type="checkbox" ${isOn ? 'checked' : ''} onchange="togglePlacement('${surfaceKey}', this.checked)">
-                            <span style="font-size:12px;font-weight:600;color:${isOn ? '#1A1A2E' : '#9CA3AF'};">${isOn ? 'On' : 'Off'}</span>
+                        <div style="font-size:12px;color:#6B7280;margin-top:5px;line-height:1.5;">${cat.desc}</div>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
+                        <input type="checkbox" ${allOn ? 'checked' : ''} onchange="togglePlacementCategory('${cat.key}', this.checked)">
+                        <span style="font-size:12px;font-weight:600;color:${allOn ? '#1A1A2E' : '#9CA3AF'};">${allOn ? 'On' : 'Off'}</span>
+                    </label>
+                `;
+                section.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'format-gallery-grid';
+                cards.forEach(p => {
+                    const surfaceKey = prefix + '-' + p.key;
+                    const on = disabled.indexOf(surfaceKey) === -1;
+                    const card = document.createElement('div');
+                    card.className = 'format-card ' + (on ? 'fmt-enabled' : 'fmt-disabled');
+                    card.setAttribute('data-placement', surfaceKey);
+                    card.innerHTML = `
+                        <div class="format-card-head">
+                            <span class="format-card-name">${p.name}</span>
+                            <span class="format-card-rpm">~$${p.rpm.toFixed(2)} RPM</span>
+                        </div>
+                        <div class="format-card-preview">${formatMockup(p.mock)}</div>
+                        <div class="format-card-desc">${p.desc}</div>
+                        <label class="format-card-toggle">
+                            <input type="checkbox" ${on ? 'checked' : ''} onchange="togglePlacement('${surfaceKey}', this.checked)">
+                            <span>Accept this placement</span>
                         </label>
                     `;
-                    container.appendChild(row);
+                    grid.appendChild(card);
                 });
+                section.appendChild(grid);
+                container.appendChild(section);
             });
+
+            updateIncomeEstimate();
+            if (typeof applyThemePreview === 'function') applyThemePreview();
         }
 
         // Toggle one placement on/off. The disabled set holds door-qualified
@@ -4092,186 +4083,73 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             showToast(`Placement ${isOn ? 'enabled' : 'disabled'}`, 'success');
         }
 
-        // Renders the Ad Placements section: one block per placement family,
-        // each with a family header (name, description, per-door note, master
-        // toggle) and the per-format cards for that family inside. The set of
-        // families shown is tailored to the door selected above.
-        function renderAdFormats() {
-            const container = document.getElementById('adFormatsContainer');
-            if (!container || typeof userProfile === 'undefined' || !userProfile) return;
-            container.className = '';
-            container.innerHTML = '';
-
-            // Tailor to the door selected in the Integration section — show
-            // only the families that door can physically render.
+        // Category master toggle — flips every placement in that category for
+        // the current door at once, then persists + re-renders.
+        async function togglePlacementCategory(catKey, enabled) {
             const _sel = document.querySelector('.ic-card.ic-selected');
             const _door = (_sel && _sel.dataset.door) || 'mcp';
-            const _allowed = DOOR_FAMILIES[_door] || ['ai-native', 'display'];
-            const _families = PLACEMENT_FAMILIES.filter(f => _allowed.includes(f.key));
-
-            const _ctx = document.createElement('div');
-            _ctx.style.cssText = 'font-size:12px;color:#6B7280;margin-bottom:14px;line-height:1.5;';
-            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong>. Switch doors in the Integration section above to see each door's placements.`;
-            container.appendChild(_ctx);
-
-            _families.forEach(fam => {
-                const famFormats = AD_FORMAT_CATALOG.filter(f => fam.formats.includes(f.key));
-                const enabledCount = famFormats.filter(f => !!userProfile.formats?.[f.key]).length;
-                const allOn = enabledCount === famFormats.length;
-
-                const section = document.createElement('div');
-                section.style.cssText = 'border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:14px;';
-
-                const badge = fam.recommended
-                    ? '<span style="font-size:9px;font-weight:700;color:#1D9E75;background:#E1F5EE;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">On by default</span>'
-                    : '<span style="font-size:9px;font-weight:700;color:#854F0B;background:#FAEEDA;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">Opt-in</span>';
-
-                const header = document.createElement('div');
-                header.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px;';
-                header.innerHTML = `
-                    <div style="flex:1;">
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <span style="font-size:14px;font-weight:700;color:#1A1A2E;">${fam.name}</span>
-                            ${badge}
-                        </div>
-                        <div style="font-size:12px;color:#6B7280;margin-top:5px;line-height:1.5;">${fam.desc}</div>
-                        <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">${fam.doors}</div>
-                    </div>
-                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
-                        <input type="checkbox" ${allOn ? 'checked' : ''} onchange="toggleFamily('${fam.key}', this.checked)">
-                        <span style="font-size:12px;font-weight:600;color:${allOn ? '#1A1A2E' : '#9CA3AF'};">${allOn ? 'On' : 'Off'}</span>
-                    </label>
-                `;
-                section.appendChild(header);
-
-                const grid = document.createElement('div');
-                grid.className = 'format-gallery-grid';
-                famFormats.forEach(format => {
-                    const isEnabled = !!userProfile.formats?.[format.key];
-                    const card = document.createElement('div');
-                    card.className = 'format-card ' + (isEnabled ? 'fmt-enabled' : 'fmt-disabled');
-                    card.setAttribute('data-format', format.key);
-                    card.innerHTML = `
-                        <div class="format-card-head">
-                            <span class="format-card-name">${format.name}</span>
-                            <span class="format-card-rpm">~$${format.rpm.toFixed(2)} RPM</span>
-                        </div>
-                        <div class="format-card-preview">${formatMockup(format.key)}</div>
-                        <div class="format-card-desc">${format.description}</div>
-                        <label class="format-card-toggle">
-                            <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="updateAdFormat('${format.key}', this.checked)">
-                            <span>Accept this format</span>
-                        </label>
-                    `;
-                    grid.appendChild(card);
-                });
-                section.appendChild(grid);
-                container.appendChild(section);
+            const prefix = DOOR_SURFACE_PREFIX[_door] || 'web';
+            if (!userProfile.disabled_placements) userProfile.disabled_placements = [];
+            (DOOR_PLACEMENTS[_door] || []).filter(p => p.cat === catKey).forEach(p => {
+                const k = prefix + '-' + p.key;
+                const idx = userProfile.disabled_placements.indexOf(k);
+                if (enabled && idx !== -1) userProfile.disabled_placements.splice(idx, 1);
+                else if (!enabled && idx === -1) userProfile.disabled_placements.push(k);
             });
-
-            updateIncomeEstimate();
-            // Re-apply theme vars so the freshly-rendered mockups pick up
-            // the publisher's current color / radius / font.
-            if (typeof applyThemePreview === 'function') applyThemePreview();
-        }
-
-        // Family master toggle — flips every format in the family at once,
-        // persists via the same update_formats endpoint, then re-renders so
-        // the family header and the per-format cards stay in sync.
-        async function toggleFamily(familyKey, enabled) {
-            const fam = PLACEMENT_FAMILIES.find(f => f.key === familyKey);
-            if (!fam) return;
-            if (!userProfile.formats) userProfile.formats = {};
-            fam.formats.forEach(k => { userProfile.formats[k] = enabled; });
-            localStorage.setItem('bb_dev_formats', JSON.stringify(userProfile.formats));
+            localStorage.setItem('bb_dev_disabled_placements', JSON.stringify(userProfile.disabled_placements));
             try {
                 const sessionRaw = localStorage.getItem('bb_dev_session');
                 const session = sessionRaw ? JSON.parse(sessionRaw) : null;
                 if (userProfile.api_key) {
-                    await fetch(`${API_BASE}/api/auth?action=update_formats`, {
+                    await fetch(`${API_BASE}/api/auth?action=update_placements`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             ...(session?.token ? { 'Authorization': `Bearer ${session.token}` } : {}),
                         },
-                        body: JSON.stringify({ api_key: userProfile.api_key, formats: userProfile.formats }),
+                        body: JSON.stringify({ api_key: userProfile.api_key, disabled_placements: userProfile.disabled_placements }),
                     });
                 }
             } catch (e) { /* silent — localStorage fallback already happened */ }
-            renderAdFormats();
-            showToast(`${fam.name} ${enabled ? 'enabled' : 'disabled'}`, 'success');
+            renderAdPlacements();
+            const cat = PLACEMENT_CATS.find(c => c.key === catKey);
+            showToast(`${cat ? cat.label : catKey} ${enabled ? 'enabled' : 'disabled'}`, 'success');
         }
 
-        // Monthly income estimate: takes the publisher's recent impression rate
-        // and projects based on the blended RPM of currently-enabled formats.
-        // Conservative: uses 30-day impressions observed; if < 100, assumes 10k
-        // baseline so new publishers see a meaningful number.
+        // Monthly income estimate for the currently-selected door, projected
+        // from the blended RPM of that door's currently-enabled placements.
+        // Conservative: uses 30-day impressions observed; if < 10k, assumes a
+        // 10k baseline so new publishers see a meaningful number.
         function updateIncomeEstimate() {
             const el = document.getElementById('fmtIncomeEstimate');
-            if (!el || !userProfile) return;
+            if (!el || typeof userProfile === 'undefined' || !userProfile) return;
 
-            const enabled = AD_FORMAT_CATALOG.filter(f => userProfile.formats?.[f.key]);
+            const _sel = document.querySelector('.ic-card.ic-selected');
+            const _door = (_sel && _sel.dataset.door) || 'mcp';
+            const prefix = DOOR_SURFACE_PREFIX[_door] || 'web';
+            const disabled = userProfile.disabled_placements || [];
+            const enabled = (DOOR_PLACEMENTS[_door] || []).filter(
+                p => disabled.indexOf(prefix + '-' + p.key) === -1
+            );
+
             if (enabled.length === 0) {
                 el.textContent = '$0';
                 el.style.color = '#9CA3AF';
                 return;
             }
-            // Blended RPM assumes Boost Boss rotates formats proportionally.
+            // Blended RPM assumes Boost Boss rotates placements proportionally.
             // In reality advertiser mix tilts this; this is a fair first estimate.
-            const blendedRpm = enabled.reduce((s, f) => s + f.rpm, 0) / enabled.length;
+            const blendedRpm = enabled.reduce((s, p) => s + p.rpm, 0) / enabled.length;
 
             // Assume 30-day impression volume; fall back to 10k baseline for newcomers.
             const monthlyImpressions = Math.max(10000, (userProfile._monthly_impressions || 0));
-            const monthlyRevenue = (monthlyImpressions / 1000) * blendedRpm;
-            const publisherShare = monthlyRevenue * 0.85;
+            const publisherShare = (monthlyImpressions / 1000) * blendedRpm * 0.85;
 
             el.textContent = '$' + publisherShare.toLocaleString('en-US', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             });
             el.style.color = '#FF2D78';
-        }
-
-        async function updateAdFormat(format, enabled) {
-            if (!userProfile.formats) userProfile.formats = {};
-            userProfile.formats[format] = enabled;
-            localStorage.setItem('bb_dev_formats', JSON.stringify(userProfile.formats));
-
-            // Persist to DB so the auction respects this publisher's format prefs.
-            try {
-                const sessionRaw = localStorage.getItem('bb_dev_session');
-                const session = sessionRaw ? JSON.parse(sessionRaw) : null;
-                if (userProfile.api_key) {
-                    await fetch(`${API_BASE}/api/auth?action=update_formats`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...(session?.token ? { 'Authorization': `Bearer ${session.token}` } : {}),
-                        },
-                        body: JSON.stringify({
-                            api_key: userProfile.api_key,
-                            formats: userProfile.formats,
-                        }),
-                    });
-                }
-            } catch (e) { /* silent — localStorage fallback already happened */ }
-
-            const catalog = AD_FORMAT_CATALOG.find(f => f.key === format);
-            // Full re-render so the family master toggle re-syncs with the
-            // new per-format state. The onchange that triggered this has
-            // already finished, so recreating the checkbox is safe.
-            renderAdFormats();
-            showToast(`${catalog?.name || format} ${enabled ? 'enabled' : 'disabled'}`, 'success');
-        }
-
-        // Restore saved format preferences on load
-        function restoreSavedFormats() {
-            try {
-                const saved = JSON.parse(localStorage.getItem('bb_dev_formats'));
-                if (saved && userProfile) {
-                    userProfile.formats = { ...userProfile.formats, ...saved };
-                }
-            } catch (_) {}
         }
 
         function renderEarningsTable(dailyStats) {
