@@ -4952,7 +4952,7 @@
                 case 'toolrec':
                     return chat(`<div class="ctx-card"><span class="ctx-spons">SPONSORED · YOU MIGHT ALSO TRY</span><div class="ctx-card-title">${v.headline}</div><div class="ctx-card-sub">${v.subtext}</div><span class="ctx-cta">${v.cta} →</span></div>`, 3, 0);
                 case 'chip':
-                    return chat(`<div class="ctx-chip-row"><span class="wf-chip"></span><span class="ctx-chip">${v.cta}</span><span class="wf-chip"></span></div>`, 2, 0);
+                    return chat(`<div><div style="font-size:11.5px;line-height:1.5;margin-bottom:6px;"><span class="ctx-spons">SPONSORED</span> <span style="color:#1A1A2E;font-weight:600;">${v.headline}</span></div><div class="ctx-chip-row"><span class="wf-chip"></span><span class="ctx-chip">${v.cta}</span><span class="wf-chip"></span></div></div>`, 2, 0);
                 case 'card':
                     return chat(adCard(true), 2, 1);
                 case 'welcome':
@@ -4960,7 +4960,7 @@
                         <div class="ctx-cite"><span><span class="ctx-spons">SPONSORED</span> <span class="ctx-cite-text">${v.headline}</span> · <a class="ctx-link">${v.cta} →</a></span></div>`);
                 case 'buttons':
                     return bot(`<div class="wf-line"></div><div class="wf-line med"></div>
-                        <div style="margin-top:4px;"><span class="ctx-spons">SPONSORED</span></div>
+                        <div style="margin-top:6px;font-size:12px;line-height:1.5;"><span class="ctx-spons">SPONSORED</span> <span style="color:#1A1A2E;font-weight:600;">${v.headline}</span></div>
                         <div class="ctx-btn-row"><button type="button" class="ctx-btn">${v.cta}</button><button type="button" class="ctx-btn ghost">Maybe later</button></div>`);
                 case 'corner':
                     return `
