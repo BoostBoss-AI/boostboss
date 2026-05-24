@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Boost Boss Lumi SDK for MCP servers — earn revenue from sponsored content rendered in your MCP tool responses.",
   "license": "Apache-2.0",
   "author": "Boost Boss <hello@boostboss.ai> (https://boostboss.ai)",

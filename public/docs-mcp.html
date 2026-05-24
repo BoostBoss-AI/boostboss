@@ -119,9 +119,9 @@ yarn add @boostbossai/lumi-mcp</pre>
     <h3 id="fetchAd"><code>lumi.fetchAd(opts)</code></h3>
     <p>Fetches a sponsored content payload contextually matched to <code>opts.context</code>. Returns <code>null</code> if no fill (no advertiser matched, frequency cap hit, etc.) — your tool should still return its primary output normally.</p>
 <pre><span class="kw">const</span> ad = <span class="kw">await</span> lumi.<span class="fn">fetchAd</span>({
-  context: <span class="str">'stripe customer creation'</span>,    <span class="cm">// the user's intent or tool topic</span>
-  format:  <span class="str">'native'</span>,                       <span class="cm">// 'native' | 'banner' | 'inline'</span>
-  toolName: request.params.name              <span class="cm">// optional, used for analytics</span>
+  context:   <span class="str">'stripe customer creation'</span>,  <span class="cm">// the user's intent or tool topic</span>
+  placement: <span class="str">'citation'</span>,                 <span class="cm">// 'card' | 'citation' | 'toolrec'</span>
+  toolName:  request.params.name             <span class="cm">// optional, used for analytics</span>
 });
 
 <span class="kw">if</span> (!ad) {
@@ -132,6 +132,7 @@ yarn add @boostbossai/lumi-mcp</pre>
       <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
       <tbody>
         <tr><td><code>context</code></td><td>string</td><td>yes</td><td>Free text that describes what the user is doing. Used for contextual matching.</td></tr>
+        <tr><td><code>placement</code></td><td>string</td><td>no</td><td>MCP placement: <code>card</code> (inline sponsored card), <code>citation</code> (sponsored source), or <code>toolrec</code> (tool/skill recommendation). Default: <code>"card"</code>.</td></tr>
         <tr><td><code>format</code></td><td>string</td><td>no</td><td>Preferred ad format. Default: <code>"native"</code>.</td></tr>
         <tr><td><code>toolName</code></td><td>string</td><td>no</td><td>Name of the MCP tool being called. Improves analytics.</td></tr>
         <tr><td><code>userRegion</code></td><td>string</td><td>no</td><td>ISO region (US, EU, APAC). If omitted, inferred from request.</td></tr>

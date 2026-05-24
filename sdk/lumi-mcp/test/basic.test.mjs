@@ -176,3 +176,57 @@ test("Ad.toMCPBlock includes disclosure label and CTA", async () => {
   assert.equal(block._meta.boostboss.adId, "c1");
   assert.equal(block._meta.boostboss.auctionId, "a1");
 });
+
+// ── Phase 4: redirecting click URL + placement framing ──
+
+test("toMCPBlock renders the redirecting click tracker, not the raw cta_url", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text",
+      text: JSON.stringify({
+        sponsored: {
+          campaign_id: "c2", headline: "H", cta_label: "Go", cta_url: "https://adv.example/landing",
+          disclosure_label: "Sponsored",
+          tracking: {
+            impression: "https://boostboss.ai/api/track?event=impression&ctx=ctx_m",
+            click:      "https://boostboss.ai/api/track?event=click&ctx=ctx_m",
+          },
+        },
+        auction: { auction_id: "a2" },
+      }) }] } } }],
+    ["*", { body: { ok: true } }],
+  ]);
+  const lumi = new LumiMCP({ publisherId: "pub_test", apiKey: "sk_test" });
+  const ad = await lumi.fetchAd({ context: "x" });
+  const block = ad.toMCPBlock();
+  // The user-facing link is the tracker: it carries the context fingerprint
+  // and a `to` redirect, so the MCP click is recorded before the user lands.
+  assert.match(block.text, /\/api\/track\?event=click/);
+  assert.match(block.text, /ctx=ctx_m/);
+  assert.match(block.text, /to=https%3A%2F%2Fadv\.example/);
+});
+
+test("placement framing — citation and toolrec change the eyebrow line", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { body: { jsonrpc: "2.0", id: 1, result: { content: [{ type: "text",
+      text: JSON.stringify({
+        sponsored: { campaign_id: "c3", headline: "H", cta_url: "https://e.com", disclosure_label: "Sponsored" },
+        auction: { auction_id: "a3" },
+      }) }] } } }],
+  ]);
+  const lumi = new LumiMCP({ publisherId: "pub_test", apiKey: "sk_test" });
+  const cite = await lumi.fetchAd({ context: "x", placement: "citation" });
+  assert.match(cite.toMCPBlock().text, /Sponsored · source/);
+  const rec = await lumi.fetchAd({ context: "x", placement: "toolrec" });
+  assert.match(rec.toMCPBlock().text, /Sponsored · recommended/);
+});
+
+test("fetchAd tags the auction surface with the placement", async () => {
+  mockResponses = new Map([
+    ["https://boostboss.ai/api/mcp", { body: { jsonrpc: "2.0", id: 1,
+      result: { content: [{ type: "text", text: JSON.stringify({ sponsored: null }) }] } } }],
+  ]);
+  const lumi = new LumiMCP({ publisherId: "pub_test", apiKey: "sk_test" });
+  await lumi.fetchAd({ context: "x", placement: "toolrec" });
+  const args = JSON.parse(lastRequest.init.body).params.arguments;
+  assert.equal(args.surface, "mcp-toolrec");
+});

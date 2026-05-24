@@ -18,9 +18,15 @@ export interface LumiMCPOptions {
   apiBase?: string;
 }
 
+/** The three placements the MCP door owns. */
+export type PlacementFormat = "card" | "citation" | "toolrec";
+
 export interface FetchAdRequest {
   /** Free-form text describing what the user is doing. Used for contextual matching. */
   context: string;
+  /** MCP placement: "card" (inline sponsored card), "citation" (sponsored
+   *  source), or "toolrec" (tool/skill recommendation). Default: "card". */
+  placement?: PlacementFormat;
   /** Preferred ad format. Default: "native". */
   format?: "native" | "banner" | "inline";
   /** Name of the MCP tool being called. Improves analytics. */
@@ -52,7 +58,8 @@ export interface AdPayload {
   mediaUrl?: string;
   /** Call-to-action label. */
   ctaLabel?: string;
-  /** Click-through URL — already a tracking redirect. */
+  /** The advertiser's destination URL. Put Ad.clickThroughUrl() — not this —
+   *  in user-facing text, so the click is recorded. */
   ctaUrl: string;
   /** Required disclosure label (e.g. "Sponsored"). Locale-aware. */
   disclosureLabel: string;

@@ -4,7 +4,7 @@ Boost Boss Lumi SDK for MCP servers. Earn revenue from sponsored content rendere
 
 [Full docs → boostboss.ai/docs/mcp](https://boostboss.ai/docs/mcp) · [Become a publisher](https://boostboss.ai/publish)
 
-> **Status:** v0.1 beta — published to npm. Wire-compatible with the live Boost Boss MCP backend. Sandbox mode works without signup (`publisherId: "pub_test_demo"`, `apiKey: "sk_test_demo"`). Email hello@boostboss.ai to join the Founding Publisher cohort for live inventory.
+> **Status:** v0.2 beta — published to npm. Wire-compatible with the live Boost Boss MCP backend. Sandbox mode works without signup (`publisherId: "pub_test_demo"`, `apiKey: "sk_test_demo"`). Email hello@boostboss.ai to join the Founding Publisher cohort for live inventory.
 
 ## Install
 
@@ -23,7 +23,10 @@ const lumi = new LumiMCP({
 });
 
 // Inside any existing MCP tool handler:
-const ad = await lumi.fetchAd({ context: request.params.name });
+const ad = await lumi.fetchAd({
+  context:   request.params.name,
+  placement: "citation",   // "card" | "citation" | "toolrec"
+});
 if (!ad) return { content: result };
 
 return {
@@ -39,10 +42,10 @@ return {
 | Method | Returns | Notes |
 | --- | --- | --- |
 | `new LumiMCP(opts)` | LumiMCP | `publisherId` and `apiKey` required. |
-| `lumi.fetchAd({ context, ... })` | `Ad \| null` | `null` on no-fill or error. Never throws. |
-| `ad.toMCPBlock()` | MCPContentBlock | Single text block with disclosure baked in. |
-| `lumi.trackImpression(ad)` | Promise<void> | Manual fire — automatic via `toMCPBlock()`. |
-| `lumi.trackClick(ad)` | Promise<void> | Manual fire — automatic via the cta_url redirect. |
+| `lumi.fetchAd({ context, placement, ... })` | `Ad \| null` | `placement`: `card` · `citation` · `toolrec`. `null` on no-fill/error. Never throws. |
+| `ad.toMCPBlock()` | MCPContentBlock | Single text block, disclosure baked in. The CTA link is a click tracker that redirects to the advertiser. |
+| `lumi.trackImpression(ad)` | Promise<void> | Manual fire — automatic via `fetchAd()`. |
+| `lumi.trackClick(ad)` | Promise<void> | Manual fire — automatic when the user clicks the `toMCPBlock()` link. |
 | `lumi.on(event, handler)` | void | Events: `impression`, `click`, `no_fill`, `error`. |
 
 See [boostboss.ai/docs/mcp](https://boostboss.ai/docs/mcp) for the full reference.

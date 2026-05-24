@@ -25,6 +25,7 @@ import { ERROR_CODES } from "./errors.js";
 import type {
   LumiMCPOptions,
   FetchAdRequest,
+  PlacementFormat,
   AdPayload,
   LumiEventName,
   LumiHandler,
@@ -33,6 +34,7 @@ import type {
 export type {
   LumiMCPOptions,
   FetchAdRequest,
+  PlacementFormat,
   AdPayload,
   MCPContentBlock,
   LumiEventName,
@@ -97,10 +99,12 @@ export class LumiMCP {
       return null;
     }
 
+    const placement: PlacementFormat = opts.placement ?? "card";
     const args: Record<string, unknown> = {
       context_summary: context,
       developer_api_key: this.apiKey,
       format_preference: opts.format ?? "native",
+      surface: "mcp-" + placement,
     };
     if (opts.toolName)     args.tool_name      = opts.toolName;
     if (opts.userRegion)   args.user_region    = opts.userRegion;
@@ -129,7 +133,7 @@ export class LumiMCP {
       return null;
     }
 
-    const ad = adFromWire(payload.sponsored, payload.auction);
+    const ad = adFromWire(payload.sponsored, payload.auction, placement);
     this.emitter.emit("impression", {
       adId: ad.adId,
       auctionId: ad.auctionId,
@@ -257,7 +261,7 @@ function unwrapToolText<T>(raw: unknown): T | null {
   }
 }
 
-function adFromWire(s: SponsoredWire, a?: AuctionWire): Ad {
+function adFromWire(s: SponsoredWire, a?: AuctionWire, placement: PlacementFormat = "card"): Ad {
   const auctionId = a?.auction_id ?? "";
   return new Ad(
     {
@@ -276,6 +280,7 @@ function adFromWire(s: SponsoredWire, a?: AuctionWire): Ad {
       trackingImpression: s.tracking?.impression ?? null,
       trackingClick:      s.tracking?.click ?? null,
     },
+    placement,
   );
 }
 
