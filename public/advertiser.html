@@ -755,6 +755,150 @@
             overflow: hidden;
         }
         .fc-preview .door-media { margin-bottom: 0; }
+
+        /* ── Group (panel) selection ─────────────────────────────────── */
+        .ftg-head {
+            cursor: pointer;
+            user-select: none;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+        }
+        .ftg-head:hover { background: #FAFAF7; }
+        .ftg-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px; height: 18px;
+            border-radius: 5px;
+            border: 1.5px solid #C9C9D4;
+            background: #fff;
+            font-size: 12px; font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .ftg-check.on { background: #FF2D78; border-color: #FF2D78; }
+        .ftg-note { font-size: 11px; color: #9CA3AF; }
+        .ftg-group.ftg-selected > .ftg-head { background: #FFF5F9; border-color: #FFD3E4; }
+        .ftg-group:not(.ftg-selected) .format-cards { opacity: 0.5; }
+        .format-card { cursor: pointer; }
+        .fc-expand {
+            margin-top: 6px;
+            font-size: 10px; font-weight: 700;
+            color: #FF2D78;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Placement in-context preview popup ──────────────────────── */
+        .ppm-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            z-index: 3000;
+            background: rgba(0, 0, 0, 0.62);
+            backdrop-filter: blur(3px);
+            align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        .ppm-overlay.active { display: flex; }
+        .ppm-box {
+            background: #fff;
+            border-radius: 14px;
+            width: 640px; max-width: 94vw;
+            max-height: 88vh; overflow-y: auto;
+            position: relative;
+            padding: 22px 24px 26px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+        }
+        .ppm-close {
+            position: absolute; top: 12px; right: 14px;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: #F3F4F6; color: #6B7280;
+            font-size: 20px; line-height: 1;
+            cursor: pointer;
+        }
+        .ppm-close:hover { background: #E5E7EB; color: #1A1A2E; }
+        .ppm-title { font-size: 16px; font-weight: 800; color: #1A1A2E; }
+        .ppm-sub { font-size: 12px; color: #6B7280; margin-top: 3px; }
+        .ppm-stage { margin-top: 16px; }
+
+        /* Grey wireframe — the publisher's product sketch */
+        .wf-window { border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; background: #FBFBFC; }
+        .wf-topbar { background: #F3F4F6; padding: 8px 10px; display: flex; gap: 5px; border-bottom: 1px solid #E5E7EB; }
+        .wf-dot { width: 9px; height: 9px; border-radius: 50%; background: #D1D5DB; }
+        .wf-navbar { background: #F3F4F6; padding: 8px 12px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #E5E7EB; }
+        .wf-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .wf-msg { display: flex; gap: 10px; }
+        .wf-avatar { width: 26px; height: 26px; border-radius: 50%; background: #D1D5DB; flex-shrink: 0; }
+        .wf-avatar.pink { background: #FF2D78; }
+        .wf-msg-body { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+        .wf-line { height: 9px; border-radius: 4px; background: #E5E7EB; }
+        .wf-line.short { width: 52%; }
+        .wf-line.med { width: 78%; }
+        .wf-input { height: 34px; border-radius: 8px; border: 1px solid #E5E7EB; background: #fff; }
+        .wf-chip { display: inline-block; width: 62px; height: 26px; border-radius: 13px; background: #E5E7EB; }
+        .wf-shortcut { height: 52px; border-radius: 8px; background: #ECECEF; }
+        .wf-block { background: #ECECEF; border-radius: 8px; }
+
+        /* The live ad creative, rendered inside the wireframe */
+        .ctx-spons { font-size: 8.5px; font-weight: 800; color: #FF2D78; letter-spacing: 0.5px; }
+        .ctx-cite {
+            display: flex; align-items: baseline; gap: 7px;
+            font-size: 12px; line-height: 1.5;
+            padding: 8px 10px;
+            background: #FFF5F9; border: 1px solid #FFD3E4; border-radius: 7px;
+        }
+        .ctx-cite-num {
+            width: 15px; height: 15px; border-radius: 4px;
+            background: #FF2D78; color: #fff;
+            font-size: 9px; font-weight: 800;
+            display: inline-flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .ctx-cite-text { color: #1A1A2E; font-weight: 600; }
+        .ctx-link { color: #FF2D78; font-weight: 700; text-decoration: none; white-space: nowrap; }
+        .ctx-card {
+            border: 1px solid #FFD3E4; background: #FFF5F9;
+            border-radius: 9px; padding: 11px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .ctx-card-title { font-size: 13px; font-weight: 700; color: #1A1A2E; }
+        .ctx-card-sub { font-size: 11.5px; color: #6B7280; line-height: 1.45; }
+        .ctx-cta {
+            align-self: flex-start;
+            background: #FF2D78; color: #fff;
+            font-size: 11px; font-weight: 700;
+            padding: 5px 11px; border-radius: 6px;
+        }
+        .ctx-media {
+            width: 100%; aspect-ratio: 16 / 9;
+            object-fit: cover; border-radius: 6px;
+            background: #E5E7EB; display: block;
+        }
+        .ctx-chip-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+        .ctx-chip {
+            background: #FF2D78; color: #fff;
+            font-size: 11px; font-weight: 700;
+            padding: 7px 13px; border-radius: 13px;
+        }
+        .ctx-btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ctx-btn {
+            background: #FF2D78; color: #fff; border: none;
+            font-size: 11px; font-weight: 700;
+            padding: 8px 13px; border-radius: 7px;
+        }
+        .ctx-btn.ghost { background: #E5E7EB; color: #9CA3AF; }
+        .ctx-corner {
+            position: absolute; right: 14px; bottom: 14px;
+            width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+        }
+        .ctx-corner-x {
+            position: absolute; top: 6px; right: 9px;
+            color: #9CA3AF; font-size: 12px; line-height: 1;
+        }
         .fc-name {
             font-size: 13px;
             font-weight: 700;
@@ -3105,7 +3249,7 @@
                         <div class="targeting-block">
                             <div class="targeting-label">
                                 Ad placement
-                                <span class="hint">— pick where your ad runs; each card is a live preview of your creative. The group is the tier you pay for.</span>
+                                <span class="hint">— select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher's product.</span>
                             </div>
                             <div id="formatTierGroups" style="margin-top:8px;"><!-- rendered by renderFormatTierGroups() --></div>
                         </div>
@@ -3614,9 +3758,16 @@
             });
             updateDoorsSummary();
 
-            // Escape key to close modal
+            // Escape key — close the in-context preview popup first if it's
+            // open, otherwise close the campaign modal.
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && campaignModal.classList.contains('active')) {
+                if (e.key !== 'Escape') return;
+                const ppm = document.getElementById('placementPreviewModal');
+                if (ppm && ppm.classList.contains('active')) {
+                    closePlacementContext();
+                    return;
+                }
+                if (campaignModal.classList.contains('active')) {
                     closeModal();
                 }
             });
@@ -4591,83 +4742,254 @@
         PLACEMENT_CATALOG.forEach((p) => {
             PLACEMENT_SPEC[p.key] = { format: p.mock, tier: p.cat, ecpm: p.ecpm, name: p.name, cat: p.cat };
         });
-        const DEFAULT_PLACEMENT = 'card';
+        // ── Group selection ─────────────────────────────────────────────
+        // Advertisers select at the GROUP level, not individual cards. A
+        // group is a tier panel (ai-native / display). Selecting a group
+        // includes every placement in it. Valid states: one group, or
+        // both — at least one is always selected.
+        let selectedGroups = new Set(['ai-native', 'display']);
 
-        // The currently-checked placement radio (defaults if none yet).
-        function selectedPlacement() {
-            const el = campaignForm.querySelector('input[name="placement"]:checked');
-            return (el && el.value) || DEFAULT_PLACEMENT;
+        // placement_tier stored on the campaign: a single group → that
+        // tier; both groups → null (no tier preference, runs everywhere).
+        function placementTierFromGroups() {
+            const ai = selectedGroups.has('ai-native');
+            const dp = selectedGroups.has('display');
+            if (ai && dp) return null;
+            return ai ? 'ai-native' : 'display';
+        }
+        // The campaign's stored creative format. AI-native inventory is
+        // text-native; Display leans on the image card.
+        function formatFromGroups() {
+            return selectedGroups.has('ai-native') ? 'native' : 'image';
+        }
+        // Rehydrate the group set when editing a saved campaign — those
+        // rows carry only placement_tier.
+        function groupsFromCampaign(tier) {
+            if (tier === 'ai-native') return new Set(['ai-native']);
+            if (tier === 'display')   return new Set(['display']);
+            return new Set(['ai-native', 'display']);
+        }
+        // Toggle a group on/off — never leaving zero groups selected.
+        function toggleGroup(catKey) {
+            if (selectedGroups.has(catKey)) {
+                if (selectedGroups.size === 1) {
+                    showToast('Keep at least one placement group selected', 'info');
+                    return;
+                }
+                selectedGroups.delete(catKey);
+            } else {
+                selectedGroups.add(catKey);
+            }
+            renderFormatTierGroups();
+            updateFormatEstimate();
         }
 
-        // Best-effort map a stored campaign (format + placement_tier) back
-        // to a placement key — for editing campaigns created before the
-        // placement selector existed (those rows carry only format + tier).
-        function placementFromCampaign(format, tier) {
-            const exact = PLACEMENT_CATALOG.find((p) => p.mock === format && p.cat === tier);
-            if (exact) return exact.key;
-            const byFmt = PLACEMENT_CATALOG.find((p) => p.mock === format);
-            return byFmt ? byFmt.key : DEFAULT_PLACEMENT;
-        }
-
-        // Renders the 8 deduped placement cards grouped under the 2 tier
-        // (category) headers. Each card is itself the live preview — it
-        // renders the campaign's current creative in that placement's
-        // style — so picking a placement and seeing how it looks are the
-        // same surface. Mirrors the publisher dashboard's panel.
+        // Renders the two placement groups. The group HEADER is the
+        // selectable control (a checkbox toggles the whole panel); the
+        // cards inside are not individually selectable — clicking a card
+        // opens the in-context preview popup. A card shows as selected
+        // whenever its group is selected.
         function renderFormatTierGroups() {
             const container = document.getElementById('formatTierGroups');
             if (!container) return;
-            const current = selectedPlacement();
             const base = readCampaignCreativeState();
             container.innerHTML = PLACEMENT_CATS.map((cat) => {
                 const cards = PLACEMENT_CATALOG.filter((p) => p.cat === cat.key);
-                return `<div class="ftg-group">
-                    <div class="ftg-head">
+                const on = selectedGroups.has(cat.key);
+                return `<div class="ftg-group${on ? ' ftg-selected' : ''}">
+                    <div class="ftg-head" data-group="${cat.key}" role="button" tabindex="0">
+                        <span class="ftg-check${on ? ' on' : ''}">${on ? '✓' : ''}</span>
                         <span class="ftg-name">${cat.label}</span>
                         <span class="ftg-badge ${cat.badge}">${cat.badge === 'optin' ? 'Opt-in' : 'Standard'}</span>
-                        <span style="font-size:11px;color:#9CA3AF;">${cat.note}</span>
+                        <span class="ftg-note">${cat.note}</span>
                     </div>
                     <div class="format-cards">
                         ${cards.map((p) => `
-                            <label class="format-card${p.key === current ? ' selected' : ''}" data-placement="${p.key}">
-                                <input type="radio" name="placement" value="${p.key}" ${p.key === current ? 'checked' : ''} required>
+                            <div class="format-card${on ? ' selected' : ''}" data-placement="${p.key}" role="button" tabindex="0">
                                 <div class="fc-preview">${creativeMock(p.mock, base)}</div>
                                 <div class="fc-name">${p.name}</div>
                                 <div class="fc-desc">${p.desc}</div>
                                 <div class="fc-family">~$${p.ecpm.toFixed(2)} eCPM</div>
-                            </label>
+                                <div class="fc-expand">Click to preview in context →</div>
+                            </div>
                         `).join('')}
                     </div>
                 </div>`;
             }).join('');
+            // Group header → selects / deselects the whole group.
+            container.querySelectorAll('.ftg-head').forEach((head) => {
+                head.addEventListener('click', () => toggleGroup(head.getAttribute('data-group')));
+            });
+            // Card → opens the in-context preview popup (not a selection).
             container.querySelectorAll('.format-card').forEach((card) => {
-                card.addEventListener('click', () => {
-                    const radio = card.querySelector('input[type="radio"]');
-                    if (!radio) return;
-                    radio.checked = true;
-                    container.querySelectorAll('.format-card').forEach((c) => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    updateFormatEstimate();
-                });
+                card.addEventListener('click', () => openPlacementContext(card.getAttribute('data-placement')));
             });
         }
 
-        // Refreshes the cost-estimate panel from the selected placement's
-        // tier + eCPM and (if entered) the Total Budget field.
+        // Refreshes the cost-estimate panel from the selected group(s) —
+        // an eCPM range across their placements + the Total Budget field.
         function updateFormatEstimate() {
             const el = document.getElementById('formatCostEstimate');
             if (!el) return;
-            const p = PLACEMENT_SPEC[selectedPlacement()] || PLACEMENT_SPEC[DEFAULT_PLACEMENT];
-            const cat = PLACEMENT_CATS.find((t) => t.key === p.tier) || PLACEMENT_CATS[0];
+            const groups = PLACEMENT_CATS.filter((c) => selectedGroups.has(c.key));
+            const pls = PLACEMENT_CATALOG.filter((p) => selectedGroups.has(p.cat));
+            if (pls.length === 0) { el.innerHTML = 'Select at least one placement group.'; return; }
+            const ecpms = pls.map((p) => p.ecpm);
+            const lo = Math.min.apply(null, ecpms);
+            const hi = Math.max.apply(null, ecpms);
+            const avg = ecpms.reduce((s, n) => s + n, 0) / ecpms.length;
             const budget = parseFloat((campaignForm.querySelector('[name="total_budget"]') || {}).value) || 0;
-            let line = `<strong style="color:#1A1A2E;">${p.name}</strong> · <strong style="color:#1A1A2E;">${cat.label}</strong> tier · est. <strong style="color:#FF2D78;">~$${p.ecpm.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
+            const names = groups.map((g) => g.label).join(' + ');
+            let line = `<strong style="color:#1A1A2E;">${names}</strong> · ${pls.length} placements · est. <strong style="color:#FF2D78;">~$${lo.toFixed(2)}–$${hi.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
             if (budget > 0) {
-                const impressions = Math.round((budget / p.ecpm) * 1000);
-                line += `<br>At your $${budget.toLocaleString()} total budget ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} impressions</strong>.`;
+                const impressions = Math.round((budget / avg) * 1000);
+                line += `<br>At your $${budget.toLocaleString()} total budget ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} impressions</strong> (blended).`;
             } else {
                 line += `<br>Enter a Total Budget below to project how many impressions you'll get.`;
             }
             el.innerHTML = line;
+        }
+
+        // ── In-context placement preview popup ───────────────────────────
+        // Clicking a placement card opens a modal that renders the live
+        // creative inside a grey wireframe of the publisher's product, so
+        // the advertiser sees how the ad actually appears in situ.
+        function ppmProductLabel(key) {
+            if (key === 'welcome' || key === 'buttons') return 'chat bot';
+            if (key === 'corner') return 'web page';
+            if (key === 'newtab') return 'browser new-tab page';
+            return 'AI chat';
+        }
+        function closePlacementContext() {
+            const m = document.getElementById('placementPreviewModal');
+            if (m) m.classList.remove('active');
+        }
+        function openPlacementContext(key) {
+            const p = PLACEMENT_CATALOG.find((x) => x.key === key);
+            if (!p) return;
+            let m = document.getElementById('placementPreviewModal');
+            if (!m) {
+                m = document.createElement('div');
+                m.id = 'placementPreviewModal';
+                m.className = 'ppm-overlay';
+                document.body.appendChild(m);
+                m.addEventListener('click', (e) => { if (e.target === m) closePlacementContext(); });
+            }
+            const c = readCampaignCreativeState();
+            m.innerHTML = `
+                <div class="ppm-box">
+                    <button type="button" class="ppm-close" aria-label="Close">&times;</button>
+                    <div class="ppm-head">
+                        <div class="ppm-title">${escapeHtml(p.name)}</div>
+                        <div class="ppm-sub">How your ad appears inside a ${ppmProductLabel(key)} — the grey areas are the publisher's product.</div>
+                    </div>
+                    <div class="ppm-stage">${placementContextMock(key, c)}</div>
+                </div>`;
+            m.querySelector('.ppm-close').addEventListener('click', closePlacementContext);
+            m.classList.add('active');
+        }
+        // Resolve the creative copy for the in-context mockups.
+        function ctxVals(c) {
+            const ph = 'https://placehold.co/600x338/E5E7EB/9CA3AF?text=+';
+            return {
+                ph,
+                media:    escapeHtml(c.media_url || ph),
+                headline: escapeHtml(c.headline  || 'Your headline goes here'),
+                subtext:  escapeHtml(c.subtext   || 'Describe what users get when they click.'),
+                cta:      escapeHtml(c.cta_label || 'Learn More'),
+            };
+        }
+        // Renders the live creative inside a grey wireframe of the host
+        // product. One template per placement (8 total).
+        function placementContextMock(key, c) {
+            const v = ctxVals(c);
+            const lines = (n) => Array.from({ length: n }, (_, i) =>
+                `<div class="wf-line${i === n - 1 ? ' short' : (i % 2 ? ' med' : '')}"></div>`).join('');
+            // AI-chat scaffold: a user query then the assistant answer, with
+            // `ad` slotted into the answer between `pre` and `post` lines.
+            const chat = (ad, pre, post) => `
+                <div class="wf-window">
+                    <div class="wf-topbar"><span class="wf-dot"></span><span class="wf-dot"></span><span class="wf-dot"></span></div>
+                    <div class="wf-body">
+                        <div class="wf-msg" style="flex-direction:row-reverse;">
+                            <div class="wf-avatar"></div>
+                            <div class="wf-msg-body" style="align-items:flex-end;"><div class="wf-line short"></div></div>
+                        </div>
+                        <div class="wf-msg">
+                            <div class="wf-avatar pink"></div>
+                            <div class="wf-msg-body">${lines(pre)}${ad}${lines(post)}</div>
+                        </div>
+                        <div class="wf-input"></div>
+                    </div>
+                </div>`;
+            // Bot scaffold: a messaging-app window with a bot message.
+            const bot = (inner) => `
+                <div class="wf-window">
+                    <div class="wf-navbar"><span class="wf-dot"></span><div class="wf-line" style="width:96px;"></div></div>
+                    <div class="wf-body">
+                        <div class="wf-msg"><div class="wf-avatar pink"></div><div class="wf-msg-body">${inner}</div></div>
+                        <div class="wf-input"></div>
+                    </div>
+                </div>`;
+
+            const adCard = (withMedia) => `
+                <div class="ctx-card">
+                    <span class="ctx-spons">SPONSORED</span>
+                    ${withMedia ? `<img class="ctx-media" src="${v.media}" alt="" onerror="this.src='${v.ph}'">` : ''}
+                    <div class="ctx-card-title">${v.headline}</div>
+                    <div class="ctx-card-sub">${v.subtext}</div>
+                    <span class="ctx-cta">${v.cta} →</span>
+                </div>`;
+
+            switch (key) {
+                case 'citation':
+                    return chat(`<div class="ctx-cite"><span class="ctx-cite-num">1</span><span><span class="ctx-spons">SPONSORED</span> <span class="ctx-cite-text">${v.headline}</span> · <a class="ctx-link">${v.cta} →</a></span></div>`, 3, 2);
+                case 'toolrec':
+                    return chat(`<div class="ctx-card"><span class="ctx-spons">SPONSORED · YOU MIGHT ALSO TRY</span><div class="ctx-card-title">${v.headline}</div><div class="ctx-card-sub">${v.subtext}</div><span class="ctx-cta">${v.cta} →</span></div>`, 3, 0);
+                case 'chip':
+                    return chat(`<div class="ctx-chip-row"><span class="wf-chip"></span><span class="ctx-chip">${v.cta}</span><span class="wf-chip"></span></div>`, 2, 0);
+                case 'card':
+                    return chat(adCard(true), 2, 1);
+                case 'welcome':
+                    return bot(`<div class="wf-line med"></div><div class="wf-line short"></div>
+                        <div class="ctx-cite"><span><span class="ctx-spons">SPONSORED</span> <span class="ctx-cite-text">${v.headline}</span> · <a class="ctx-link">${v.cta} →</a></span></div>`);
+                case 'buttons':
+                    return bot(`<div class="wf-line"></div><div class="wf-line med"></div>
+                        <div style="margin-top:4px;"><span class="ctx-spons">SPONSORED</span></div>
+                        <div class="ctx-btn-row"><button type="button" class="ctx-btn">${v.cta}</button><button type="button" class="ctx-btn ghost">Maybe later</button></div>`);
+                case 'corner':
+                    return `
+                        <div class="wf-window" style="position:relative;">
+                            <div class="wf-navbar"><span class="wf-dot"></span><span class="wf-dot"></span><div class="wf-line" style="width:150px;"></div></div>
+                            <div class="wf-body">
+                                ${lines(3)}
+                                <div class="wf-block" style="height:78px;"></div>
+                                ${lines(3)}
+                            </div>
+                            <div class="ctx-corner ctx-card">
+                                <span class="ctx-corner-x">✕</span>
+                                <span class="ctx-spons">SPONSORED</span>
+                                <div class="ctx-card-title" style="font-size:12px;">${v.headline}</div>
+                                <span class="ctx-cta">${v.cta} →</span>
+                            </div>
+                        </div>`;
+                case 'newtab':
+                    return `
+                        <div class="wf-window">
+                            <div class="wf-topbar"><span class="wf-dot"></span><span class="wf-dot"></span><span class="wf-dot"></span></div>
+                            <div class="wf-body" style="align-items:center;gap:14px;">
+                                <div class="wf-line" style="width:120px;height:14px;"></div>
+                                <div class="wf-input" style="width:84%;border-radius:18px;"></div>
+                                <div style="width:100%;">${adCard(true)}</div>
+                                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;">
+                                    <div class="wf-shortcut"></div><div class="wf-shortcut"></div>
+                                    <div class="wf-shortcut"></div><div class="wf-shortcut"></div>
+                                </div>
+                            </div>
+                        </div>`;
+                default:
+                    return adCard(true);
+            }
         }
 
         function initFormatCardsAndLivePreview() {
@@ -4772,7 +5094,7 @@
         function readCampaignCreativeState() {
             const form = campaignForm;
             const data = form ? new FormData(form) : new FormData();
-            const format = (PLACEMENT_SPEC[selectedPlacement()] || {}).format || 'image';
+            const format = formatFromGroups();
             const fileInput = document.getElementById('fileInput');
             const file = fileInput?.files?.[0];
             // Local blob URL when the user just uploaded a file; fall back to
@@ -4857,8 +5179,8 @@
             const campaignData = {
                 advertiser_id: currentUserData.user_id,
                 name: formData.get('name'),
-                format: (PLACEMENT_SPEC[selectedPlacement()] || {}).format || 'image',
-                placement_tier: (PLACEMENT_SPEC[selectedPlacement()] || {}).tier || null,
+                format: formatFromGroups(),
+                placement_tier: placementTierFromGroups(),
                 headline: formData.get('headline'),
                 subtext: formData.get('subtext') || '',
                 media_url: mediaUrl,
@@ -5105,21 +5427,11 @@
                 form.querySelector('[name="daily_budget"]').value = c.daily_budget || '';
                 form.querySelector('[name="total_budget"]').value = c.total_budget || '';
                 if (form.querySelector('[name="bid_amount"]')) form.querySelector('[name="bid_amount"]').value = c.bid_amount || '';
-                // Restore the saved placement card. Campaign rows carry
-                // only format + placement_tier, so map those back to a
-                // placement key (best effort), then rebuild + select it.
-                if (typeof renderFormatTierGroups === 'function') {
-                    const plKey = placementFromCampaign(c.format || 'image', c.placement_tier || '');
-                    renderFormatTierGroups();
-                    const r = form.querySelector(`input[name="placement"][value="${plKey}"]`);
-                    if (r) {
-                        r.checked = true;
-                        document.querySelectorAll('#formatTierGroups .format-card').forEach((cd) =>
-                            cd.classList.toggle('selected', cd.dataset.placement === plKey));
-                    }
-                    if (typeof updateFormatEstimate === 'function') updateFormatEstimate();
-                    if (typeof renderFormatTierGroups === 'function') renderFormatTierGroups();
-                }
+                // Restore the saved placement groups — campaign rows carry
+                // only placement_tier; map it back to the group set.
+                selectedGroups = groupsFromCampaign(c.placement_tier);
+                if (typeof renderFormatTierGroups === 'function') renderFormatTierGroups();
+                if (typeof updateFormatEstimate === 'function') updateFormatEstimate();
                 if (form.querySelector('[name="billing_model"]')) {
                     const radio = form.querySelector(`[name="billing_model"][value="${c.billing_model || 'cpm'}"]`);
                     if (radio) {
@@ -5201,8 +5513,8 @@
                 const updateData = {
                     id: editingCampaignId,
                     name: formData.get('name'),
-                    format: (PLACEMENT_SPEC[selectedPlacement()] || {}).format || 'image',
-                    placement_tier: (PLACEMENT_SPEC[selectedPlacement()] || {}).tier || null,
+                    format: formatFromGroups(),
+                    placement_tier: placementTierFromGroups(),
                     headline: formData.get('headline'),
                     cta_url: formData.get('cta_url'),
                     target_keywords: intents,
