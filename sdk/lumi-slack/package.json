@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-slack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Boost Boss Lumi helper for Slack bots — convert ad payloads from /v1/ad-request into Slack Block Kit objects.",
   "license": "Apache-2.0",
   "author": "Boost Boss <hello@boostboss.ai> (https://boostboss.ai)",

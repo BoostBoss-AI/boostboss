@@ -47,15 +47,26 @@ export interface TelegramMessage {
   };
 }
 
+/** Bot-door placement framings — matches the /v1/ad-request `placement` param. */
+export type Placement = "card" | "welcome" | "buttons" | "toolrec";
+
+/** Compose the disclosure line, adding placement framing to the legal base label. */
+function disclosureFor(ad: Ad, placement?: string): string {
+  const base = ad.disclosure_label || "Sponsored";
+  if (placement === "welcome") return base + " · Welcome";
+  if (placement === "toolrec") return base + " · Recommended";
+  return base;
+}
+
 /**
  * Convert ad → Telegram-shaped {text, options} pair. The text uses HTML
  * parse mode (Telegram's most reliable) with the disclosure label and
  * headline bolded. The CTA renders as an inline-keyboard URL button —
  * cleaner UX than a raw link in body text.
  */
-export function toTelegramMessage(ad: Ad): TelegramMessage {
+export function toTelegramMessage(ad: Ad, placement?: Placement): TelegramMessage {
   const lines: string[] = [];
-  lines.push(`<i>${escapeHtml(ad.disclosure_label || "Sponsored")}</i>`);
+  lines.push(`<i>${escapeHtml(disclosureFor(ad, placement))}</i>`);
   lines.push(`<b>${escapeHtml(ad.headline)}</b>`);
   if (ad.body) lines.push(escapeHtml(ad.body));
 

@@ -438,6 +438,47 @@ async function test(name, fn) {
     assert.strictEqual(track._rateLimitMap.size, 0);
   });
 
+  // ── Click redirect (Bot door) ──────────────────────────────────────
+  await test("GET click with ?to= redirects 302 to the destination", async () => {
+    track._reset();
+    const r = await run({
+      method: "GET",
+      query: { event: "click", campaign_id: "cam_redir", to: "https://acme.example/landing?x=1" },
+    });
+    assert.strictEqual(r._status, 302, "should 302");
+    assert.strictEqual(r._headers["location"], "https://acme.example/landing?x=1");
+  });
+
+  await test("GET click without ?to= still returns the 1x1 pixel", async () => {
+    track._reset();
+    const r = await run({
+      method: "GET",
+      query: { event: "click", campaign_id: "cam_pixel" },
+    });
+    assert.strictEqual(r._headers["content-type"], "image/gif");
+    assert.notStrictEqual(r._status, 302);
+  });
+
+  await test("GET click rejects a non-http(s) ?to= (no open-redirect XSS)", async () => {
+    track._reset();
+    const r = await run({
+      method: "GET",
+      query: { event: "click", campaign_id: "cam_evil", to: "javascript:alert(1)" },
+    });
+    assert.notStrictEqual(r._status, 302, "must not redirect to a javascript: URL");
+    assert.strictEqual(r._headers["content-type"], "image/gif", "falls back to the pixel");
+  });
+
+  await test("GET impression with ?to= also honours the redirect", async () => {
+    track._reset();
+    const r = await run({
+      method: "GET",
+      query: { event: "impression", campaign_id: "cam_imp_redir", to: "https://acme.example/x" },
+    });
+    assert.strictEqual(r._status, 302);
+    assert.strictEqual(r._headers["location"], "https://acme.example/x");
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

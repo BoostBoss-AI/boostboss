@@ -112,6 +112,35 @@ module.exports = async function handler(req, res) {
   // tracking URL, so this feedback event joins back to the semantic
   // context that produced it. NULL for legacy callers — never required.
   const contextHash = params.ctx || params.context_hash || null;
+
+  // ── Click redirect (Bot door) ───────────────────────────────────────
+  // A GET beacon may carry a `to` destination. Bot platforms (Discord /
+  // Telegram / Slack) give a link button exactly ONE URL and never notify
+  // the bot when it's tapped — so the tracking URL itself must both record
+  // the click and forward the user to the advertiser. http/https only,
+  // which blocks javascript:/data: redirect-based XSS.
+  let clickRedirectTo = null;
+  {
+    const raw = params.to || params.redirect || null;
+    if (raw) {
+      try {
+        const u = new URL(String(raw));
+        if (u.protocol === "http:" || u.protocol === "https:") clickRedirectTo = u.toString();
+      } catch (_e) { /* invalid URL — ignore, fall back to the pixel */ }
+    }
+  }
+  // Resolve a GET response: 302 to the destination when one was supplied,
+  // otherwise the 1×1 tracking pixel. Used at every GET exit point.
+  function endGetBeacon() {
+    if (clickRedirectTo) {
+      res.setHeader("Location", clickRedirectTo);
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(302).end();
+    }
+    res.setHeader("Content-Type", "image/gif");
+    res.setHeader("Cache-Control", "no-store");
+    return res.send(PIXEL_GIF);
+  }
   const intentMatchScore = params.ims != null ? Number(params.ims)
                        : (params.intent_match_score != null ? Number(params.intent_match_score) : null);
 
@@ -296,11 +325,7 @@ module.exports = async function handler(req, res) {
         .limit(1).maybeSingle();
       if (existing) {
         res.setHeader("x-track-deduplicated", "1");
-        if (req.method === "GET") {
-          res.setHeader("Content-Type", "image/gif");
-          res.setHeader("Cache-Control", "no-store");
-          return res.send(PIXEL_GIF);
-        }
+        if (req.method === "GET") return endGetBeacon();
         return res.json({
           tracked: true, deduplicated: true, event,
           campaign_id: campaignId, auction_id: auctionId,
@@ -425,11 +450,7 @@ module.exports = async function handler(req, res) {
     // Demo idempotency: scan the in-memory store for (auction_id, event_type).
     if (auctionId && DEMO_EVENTS.some((r) => r.auction_id === auctionId && r.event_type === event)) {
       res.setHeader("x-track-deduplicated", "1");
-      if (req.method === "GET") {
-        res.setHeader("Content-Type", "image/gif");
-        res.setHeader("Cache-Control", "no-store");
-        return res.send(PIXEL_GIF);
-      }
+      if (req.method === "GET") return endGetBeacon();
       return res.json({
         tracked: true, deduplicated: true, event,
         campaign_id: campaignId, auction_id: auctionId,
@@ -489,12 +510,8 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // GET requests return a pixel (from <img> beacons inside ad markup)
-  if (req.method === "GET") {
-    res.setHeader("Content-Type", "image/gif");
-    res.setHeader("Cache-Control", "no-store");
-    return res.send(PIXEL_GIF);
-  }
+  // GET → a 1×1 pixel, or a 302 to `to` when set (Bot-door click redirect).
+  if (req.method === "GET") return endGetBeacon();
 
   return res.json({
     tracked: true, event, campaign_id: campaignId,

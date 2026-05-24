@@ -62,14 +62,25 @@ export interface SlackAttachment {
 
 const SLACK_PRIMARY_COLOR = "#FF2D78";
 
+/** Bot-door placement framings — matches the /v1/ad-request `placement` param. */
+export type Placement = "card" | "welcome" | "buttons" | "toolrec";
+
+/** Compose the disclosure line, adding placement framing to the legal base label. */
+function disclosureFor(ad: Ad, placement?: string): string {
+  const base = ad.disclosure_label || "Sponsored";
+  if (placement === "welcome") return base + " · Welcome";
+  if (placement === "toolrec") return base + " · Recommended";
+  return base;
+}
+
 /**
  * Convert ad → array of Block Kit blocks. Order:
  *   1. Context (disclosure label, small grey text)
  *   2. Section (headline + body, with image accessory if present)
  *   3. Actions (CTA as a primary-style link button)
  */
-export function toSlackBlocks(ad: Ad): SlackBlock[] {
-  const disclosure = ad.disclosure_label || "Sponsored";
+export function toSlackBlocks(ad: Ad, placement?: Placement): SlackBlock[] {
+  const disclosure = disclosureFor(ad, placement);
   const blocks: SlackBlock[] = [];
 
   blocks.push({
@@ -112,7 +123,7 @@ export function toSlackBlocks(ad: Ad): SlackBlock[] {
  * incoming webhooks or older Slack integrations that don't render
  * Block Kit cleanly. Modern apps should prefer toSlackBlocks().
  */
-export function toSlackAttachment(ad: Ad): SlackAttachment {
+export function toSlackAttachment(ad: Ad, placement?: Placement): SlackAttachment {
   return {
     fallback:   ad.headline,
     color:      SLACK_PRIMARY_COLOR,
@@ -120,7 +131,7 @@ export function toSlackAttachment(ad: Ad): SlackAttachment {
     title_link: ad.click_url,
     text:       ad.body,
     image_url:  ad.image_url || undefined,
-    footer:     ad.disclosure_label || "Sponsored",
+    footer:     disclosureFor(ad, placement),
     ts:         Math.floor(Date.now() / 1000),
   };
 }

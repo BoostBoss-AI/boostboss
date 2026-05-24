@@ -63,17 +63,28 @@ export interface DiscordActionRow {
 
 const PINK_HEX = 0xFF2D78; // Boost Boss accent
 
+/** Bot-door placement framings — matches the /v1/ad-request `placement` param. */
+export type Placement = "card" | "welcome" | "buttons" | "toolrec";
+
+/** Compose the disclosure line, adding placement framing to the legal base label. */
+function disclosureFor(ad: Ad, placement?: string): string {
+  const base = ad.disclosure_label || "Sponsored";
+  if (placement === "welcome") return base + " · Welcome";
+  if (placement === "toolrec") return base + " · Recommended";
+  return base;
+}
+
 /**
  * Convert ad → Discord embed object. Pass to `message.reply({ embeds: [...] })`.
  * Disclosure label goes in the footer (Discord's standard pattern for
  * sponsorship attribution).
  */
-export function toDiscordEmbed(ad: Ad): DiscordEmbed {
+export function toDiscordEmbed(ad: Ad, placement?: Placement): DiscordEmbed {
   const embed: DiscordEmbed = {
     title:       truncate(ad.headline, 256),
     description: ad.body ? truncate(ad.body, 4096) : undefined,
     url:         ad.click_url,
-    footer:      { text: ad.disclosure_label || "Sponsored" },
+    footer:      { text: disclosureFor(ad, placement) },
     color:       PINK_HEX,
     timestamp:   new Date().toISOString(),
   };

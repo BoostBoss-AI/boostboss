@@ -16,6 +16,7 @@
  * Request body:
  *   {
  *     "format":        "embed" | "card" | "text" | "native" | "banner",
+ *     "placement":     "card" | "welcome" | "buttons" | "toolrec" (optional, bot framing),
  *     "context":       string (required),
  *     "platform":      "discord" | "telegram" | "slack" | string (optional, hint),
  *     "user_region":   "US" | "EU" | ... (optional),
@@ -80,6 +81,10 @@ module.exports = async function handler(req, res) {
     });
   }
   const formatPref = String(body.format || "native").trim().toLowerCase();
+  // Bot-door placement — inline card / sponsored welcome / suggested-action
+  // buttons / tool-skill rec. Tags the auction surface; the adapters frame
+  // the ad accordingly. Defaults to "card".
+  const placement  = String(body.placement || "card").trim().toLowerCase();
   const sessionId  = String(body.session_id || "rest_" + Math.random().toString(36).slice(2, 10) + "_" + Date.now());
 
   // ── Build the synthetic MCP JSON-RPC request and forward to mcp.js ──
@@ -105,7 +110,7 @@ module.exports = async function handler(req, res) {
           user_region:       body.user_region   ? String(body.user_region)   : undefined,
           user_language:     body.user_language ? String(body.user_language) : undefined,
           host_app:          body.platform      ? String(body.platform)      : "rest_api",
-          surface:           body.surface       ? String(body.surface)       : null,
+          surface:           body.surface ? String(body.surface) : ("bot-" + placement),
         },
       },
     },
@@ -165,6 +170,13 @@ module.exports = async function handler(req, res) {
   // ── Translate to flat REST shape ──
   const s = payload.sponsored;
   const a = payload.auction || {};
+  // Bot link buttons accept exactly one URL — so click_url is a tracker that
+  // records the click (context-joined via the ctx= fingerprint) AND 302s the
+  // user onward to the advertiser. /api/track honours the `to` param.
+  const trackClick = (s.tracking && s.tracking.click) || null;
+  const clickUrl = (trackClick && s.cta_url)
+    ? trackClick + (trackClick.includes("?") ? "&" : "?") + "to=" + encodeURIComponent(s.cta_url)
+    : (trackClick || s.cta_url);
   return res.status(200).json({
     ad: {
       ad_id:            s.campaign_id,
@@ -174,7 +186,7 @@ module.exports = async function handler(req, res) {
       body:             s.subtext  || "",
       image_url:        s.media_url || null,
       cta_label:        s.cta_label || "Learn more",
-      click_url:        (s.tracking && s.tracking.click)      || s.cta_url,
+      click_url:        clickUrl,
       impression_url:   (s.tracking && s.tracking.impression) || null,
       disclosure_label: s.disclosure_label || "Sponsored",
       sandbox:          a.sandbox === true,

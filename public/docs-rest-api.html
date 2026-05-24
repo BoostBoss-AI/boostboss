@@ -81,8 +81,9 @@ Authorization: Bearer ${API_KEY}
 Content-Type: application/json
 
 {
-  <span class="str">"format"</span>: <span class="str">"embed"</span>,                       <span class="cm">// "embed" | "card" | "text" | "native" | "banner"</span>
   <span class="str">"context"</span>: <span class="str">"user asked about Stripe billing"</span>,
+  <span class="str">"placement"</span>: <span class="str">"card"</span>,                     <span class="cm">// optional: "card" | "welcome" | "buttons" | "toolrec"</span>
+  <span class="str">"format"</span>: <span class="str">"embed"</span>,                       <span class="cm">// optional: "embed" | "card" | "text" | "native" | "banner"</span>
   <span class="str">"platform"</span>: <span class="str">"discord"</span>,                   <span class="cm">// optional: "discord" | "telegram" | "slack" | string</span>
   <span class="str">"user_region"</span>: <span class="str">"US"</span>,                      <span class="cm">// optional, ISO region</span>
   <span class="str">"user_language"</span>: <span class="str">"en"</span>,                    <span class="cm">// optional, ISO 639-1 code</span>
