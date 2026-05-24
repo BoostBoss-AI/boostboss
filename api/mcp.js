@@ -340,6 +340,13 @@ module.exports = async function handler(req, res) {
   });
 };
 
+// Per-placement publisher control (db/20_disabled_placements.sql). True when
+// the publisher has switched the requested door-qualified placement off
+// (the surface string: web-citation, ext-corner, mcp-card, bot-welcome, ...).
+function placementDisabled(disabledList, surface) {
+  return Array.isArray(disabledList) && !!surface && disabledList.indexOf(surface) !== -1;
+}
+
 // ── get_sponsored_content ───────────────────────────────────────────────
 async function handleGetSponsoredContent(body, args, res) {
   const sessionId = args.session_id || "anon_" + Date.now();
@@ -486,10 +493,20 @@ async function handleGetSponsoredContent(body, args, res) {
   let developerBlockedDomains = [];
   if (args.developer_api_key && sb) {
     const { data: dev } = await sb.from("developers")
-      .select("id, format_native, format_image, format_corner, format_video, format_fullscreen, blocked_categories, blocked_advertiser_domains")
+      .select("id, format_native, format_image, format_corner, format_video, format_fullscreen, blocked_categories, blocked_advertiser_domains, disabled_placements")
       .eq("api_key", args.developer_api_key).eq("status", "active").single();
     if (dev) {
       developerId = dev.id;
+      // Per-placement publisher control (db/20_disabled_placements.sql).
+      // The four-door SDKs send a door-qualified surface (web-citation,
+      // ext-corner, mcp-card, bot-welcome...); if the publisher switched
+      // that placement off in the dashboard, no-fill before the auction.
+      if (placementDisabled(dev.disabled_placements, args.surface)) {
+        emitLog("no_match", { no_fill_reason: "placement_disabled" });
+        return jsonRpc(res, body.id, {
+          sponsored: null, reason: "placement_disabled", auction_id: auctionId,
+        });
+      }
       developerFormats = {
         native:     dev.format_native !== false,
         image:      dev.format_image !== false,
@@ -939,6 +956,7 @@ function jsonRpc(res, id, result) {
 
 // ── Exports for testing ─────────────────────────────────────────────────
 module.exports.HAS_SUPABASE = HAS_SUPABASE;
+module.exports.placementDisabled = placementDisabled;
 module.exports._DEMO_EVENTS = DEMO_EVENTS;
 module.exports._reset = function () {
   DEMO_EVENTS.length = 0;

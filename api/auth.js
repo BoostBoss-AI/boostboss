@@ -234,6 +234,21 @@ function demoHandler(action, body, req, res) {
     return res.status(404).json({ error: "Developer not found" });
   }
 
+  // Update which placements the publisher has switched off (demo path).
+  if (action === "update_placements") {
+    const { api_key, disabled_placements } = body;
+    if (!api_key || !Array.isArray(disabled_placements)) {
+      return res.status(400).json({ error: "Missing api_key or disabled_placements[]" });
+    }
+    for (const user of DEMO_USERS.values()) {
+      if (user.profile?.api_key === api_key) {
+        user.profile.disabled_placements = disabled_placements.map(String);
+        return res.json({ success: true, mode: "demo", disabled_placements: user.profile.disabled_placements });
+      }
+    }
+    return res.status(404).json({ error: "Developer not found" });
+  }
+
   // Update a user's notification preferences (publisher or advertiser).
   // Demo mode: match by api_key when supplied; otherwise just acknowledge
   // (demo state is in-memory and ephemeral, so persistence isn't critical).
@@ -285,7 +300,7 @@ function demoHandler(action, body, req, res) {
     return res.status(501).json({ error: "Google sign-in requires Supabase — demo mode doesn't support OAuth. Use email + password or try the demo." });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats" });
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_placements" });
 }
 
 // ─────────────────── SUPABASE IMPLEMENTATION ────────────────────────
@@ -519,6 +534,26 @@ async function supabaseHandler(action, body, req, res) {
     });
   }
 
+  // Update which placements the publisher has switched off — db/20.
+  if (action === "update_placements") {
+    const { api_key, disabled_placements } = body;
+    if (!api_key || !Array.isArray(disabled_placements)) {
+      return res.status(400).json({ error: "Missing api_key or disabled_placements[]" });
+    }
+    const clean = [...new Set(disabled_placements.map(String).filter(Boolean))];
+    const { data: dev, error: lookupErr } = await supabaseAdmin
+      .from("developers").select("id").eq("api_key", api_key).single();
+    if (lookupErr || !dev) return res.status(404).json({ error: "Developer not found" });
+    const { data: updated, error: updateErr } = await supabaseAdmin
+      .from("developers")
+      .update({ disabled_placements: clean })
+      .eq("id", dev.id)
+      .select("disabled_placements")
+      .single();
+    if (updateErr) return res.status(500).json({ error: updateErr.message });
+    return res.json({ success: true, mode: "supabase", disabled_placements: updated.disabled_placements });
+  }
+
   // Update notification preferences — token-verified, works for both
   // publisher (developers) and advertiser (advertisers) accounts.
   if (action === "update_notif_prefs") {
@@ -597,7 +632,7 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ success: true, mode: "supabase" });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_notif_prefs, update_brand_safety, change_password" });
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {

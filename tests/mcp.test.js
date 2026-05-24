@@ -455,6 +455,22 @@ async function test(name, fn) {
     }
   });
 
+  // ── Per-placement publisher control (db/20) ─────────────────────────
+  await test("placementDisabled gate — exported helper", () => {
+    assert.strictEqual(typeof mcp.placementDisabled, "function");
+    // Disabled when the request's surface is in the publisher's off-set.
+    assert.strictEqual(mcp.placementDisabled(["web-corner", "mcp-card"], "web-corner"), true);
+    // Not disabled when the surface isn't listed.
+    assert.strictEqual(mcp.placementDisabled(["web-corner"], "web-citation"), false);
+    // Empty / missing off-set → never disabled (all placements on by default).
+    assert.strictEqual(mcp.placementDisabled([], "web-corner"), false);
+    assert.strictEqual(mcp.placementDisabled(null, "web-corner"), false);
+    assert.strictEqual(mcp.placementDisabled(undefined, "web-corner"), false);
+    // Missing surface → never disabled (legacy callers without a surface).
+    assert.strictEqual(mcp.placementDisabled(["web-corner"], null), false);
+    assert.strictEqual(mcp.placementDisabled(["web-corner"], undefined), false);
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }
