@@ -522,12 +522,6 @@
             height: 38px; border-radius: 4px; margin-bottom: 6px;
             background: repeating-linear-gradient(45deg, #EEF0F2 0 6px, #E2E5E9 6px 12px);
         }
-        .fmt-mock-video {
-            height: 38px; border-radius: 4px; margin-bottom: 6px;
-            background: #1A1A2E;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .fmt-mock-play { color: #fff; font-size: 13px; }
         .fmt-mock-headline {
             font-size: 9px; font-weight: 700; color: #1A1A2E;
             line-height: 1.3; margin-bottom: 3px;
@@ -538,8 +532,8 @@
             color: #fff; font-size: 7.5px; font-weight: 700;
             padding: 3px 8px; border-radius: 4px;
         }
-        /* Corner + fullscreen need a mini "app window" frame to show
-           WHERE the ad sits, not just what it contains. */
+        /* Corner needs a mini "app window" frame to show WHERE the
+           ad sits, not just what it contains. */
         .fmt-mock-window {
             width: 100%; height: 104px; background: #fff;
             border: 1px solid #E5E7EB; border-radius: 6px;
@@ -557,16 +551,6 @@
             border-left: 3px solid var(--lumi-primary, #FF2D78);
             border-radius: var(--lumi-radius, 8px); padding: 6px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
-        }
-        .fmt-mock-modal {
-            position: absolute; inset: 0;
-            background: rgba(15, 15, 26, 0.55);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .fmt-mock-modal-card {
-            width: 76%; background: #fff;
-            border-radius: var(--lumi-radius, 8px);
-            padding: 8px; text-align: center;
         }
         .verify-badge .verify-icon {
             font-size: 16px; line-height: 1; width: 20px;
@@ -1965,7 +1949,7 @@
                         <span class="ob-bullet">3</span>
                         <div class="ob-body">
                             <div class="ob-title">Pick which ad formats to accept</div>
-                            <div class="ob-desc">Toggle below. Higher-CPM formats (video, fullscreen) pay more but require more user attention.</div>
+                            <div class="ob-desc">Toggle the placement families below. Every placement shown is one your installed door renders natively.</div>
                         </div>
                         <button class="ob-cta" onclick="onboardScrollToFormats()">Set formats</button>
                     </div>
@@ -2224,7 +2208,6 @@ await message.reply({
                                 <select id="testFormat" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
                                     <option value="any">Any</option>
                                     <option value="image">Image</option>
-                                    <option value="video">Video</option>
                                     <option value="native">Native</option>
                                 </select>
                             </div>
@@ -2326,7 +2309,7 @@ await message.reply({
                     </div>
                 </div>
                 <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
-                    Choose which placement families run in your product. Turning a family off removes those ad types from your auction. Defaults are safe — the gentle families are on, the interruptive ones are opt-in.
+                    Choose which placement families run in your product. Turning a family off removes those ad types from your auction. Both families are on by default — every placement shown is one your installed door renders natively.
                 </div>
                 <div id="adFormatsContainer">
                     <!-- Dynamically populated — grouped by placement family -->
@@ -2436,7 +2419,6 @@ await message.reply({
                             ">
                                 <option value="native">Native</option>
                                 <option value="image">Image</option>
-                                <option value="video">Video</option>
                                 <option value="text_card">Text card</option>
                             </select>
                         </div>
@@ -2581,7 +2563,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 <span style="color:#9D7AFF;">const</span> ad = <span style="color:#04BEFE;">await</span> bb.<span style="color:#FF2D78;">getSponsoredContent</span>({
   context: <span style="color:#FFE600;">"user is debugging a python traceback"</span>,
   host:    <span style="color:#FFE600;">"your-app.com"</span>,
-  format:  <span style="color:#FFE600;">"native"</span>      <span style="color:#6B7280;">// "image" | "video" | "native"</span>
+  format:  <span style="color:#FFE600;">"native"</span>      <span style="color:#6B7280;">// "image" | "native"</span>
 });
 
 <span style="color:#6B7280;">// 3. Render and track. SDK fires the impression beacon for you.</span>
@@ -2880,7 +2862,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     ad_requests_30d: data.profile?.ad_requests_30d,
                     fill_rate: data.profile?.fill_rate,
                     is_demo: true,
-                    formats: { native: true, image: true, corner: true, video: false, fullscreen: false }
+                    formats: { native: true, image: true, corner: true }
                 };
                 localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
                 localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
@@ -2939,7 +2921,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     api_key: data.developer.api_key,
                     app_id: data.developer.app_id,
                     revenue_share_pct: data.developer.revenue_share_pct || 85,
-                    formats: data.developer.formats || { native: true, image: true, corner: true, video: false, fullscreen: false },
+                    formats: data.developer.formats || { native: true, image: true, corner: true },
                     api_key_login: true,
                 };
                 localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
@@ -3016,9 +2998,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     formats: {
                         native: data.profile?.format_native !== false,
                         image: data.profile?.format_image !== false,
-                        corner: data.profile?.format_corner !== false,
-                        video: data.profile?.format_video !== false,
-                        fullscreen: data.profile?.format_fullscreen !== false
+                        corner: data.profile?.format_corner !== false
                     },
                     notification_prefs: data.profile?.notification_prefs || {},
                     brand_safety: {
@@ -3916,17 +3896,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // pay. These estimates help publishers pick formats intentionally rather than
         // leaving all on and hoping for the best.
         const AD_FORMAT_CATALOG = [
-            { key: 'native',     name: 'Native In-Chat',  description: 'Text + CTA inline with AI response. Least intrusive, highest trust.', rpm: 4.50 },
-            { key: 'image',      name: 'Image',            description: 'Inline card with prominent image. Richer than native.',               rpm: 6.00 },
-            { key: 'corner',     name: 'Corner Popup',     description: 'Floating dismissable card (bottom-right). Attention without blocking.', rpm: 8.50 },
-            { key: 'video',      name: 'Video',            description: 'Playable video with skip-after-5s. Highest engagement, richest CPM.', rpm: 15.00 },
-            { key: 'fullscreen', name: 'Fullscreen',       description: 'Interstitial modal. Maximum attention but intrusive — use sparingly.', rpm: 22.00 },
+            { key: 'native', name: 'Native In-Chat', description: 'Text + CTA inline with AI response. Least intrusive, highest trust.', rpm: 4.50 },
+            { key: 'image',  name: 'Image',          description: 'Inline card with prominent image. Richer than native.',               rpm: 6.00 },
+            { key: 'corner', name: 'Corner Popup',   description: 'Floating dismissable card (bottom-right). Attention without blocking.', rpm: 8.50 },
         ];
 
-        // The three placement families. Each groups one or more catalog
+        // The two placement families. Each groups one or more catalog
         // formats. This is the unit a publisher actually reasons about —
-        // "do I want gentle ads or interruptive ads" — rather than picking
-        // five formats one by one. The underlying per-format toggles still
+        // "AI-native vs Display inventory" — rather than picking every
+        // format one by one. The underlying per-format toggles still
         // exist as cards inside each family for granular control.
         const PLACEMENT_FAMILIES = [
             {
@@ -3938,14 +3916,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             {
                 key: 'display', name: 'Display placements', recommended: true,
                 desc: 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.',
-                doors: 'Runs on Lumi Web and Lumi Extension.',
+                doors: 'Runs on Lumi Web, Extension and Bot.',
                 formats: ['image', 'corner'],
-            },
-            {
-                key: 'interruptive', name: 'Interruptive & gated', recommended: false,
-                desc: 'Video and fullscreen units that interrupt the user. Highest revenue — but they spend UX goodwill. Switch on when you are ready to trade some experience for more income.',
-                doors: 'Runs on Lumi Web and Lumi Extension only.',
-                formats: ['video', 'fullscreen'],
             },
         ];
 
@@ -3972,14 +3944,6 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     <span class="fmt-mock-cta">${CTA}</span>
                 </div></div>`;
             }
-            if (key === 'video') {
-                return `<div class="fmt-mock"><div class="fmt-mock-card">
-                    <div class="fmt-mock-disclosure">— Sponsored —</div>
-                    <div class="fmt-mock-video"><span class="fmt-mock-play">▶</span></div>
-                    <div class="fmt-mock-headline">${HEAD}</div>
-                    <span class="fmt-mock-cta">${CTA}</span>
-                </div></div>`;
-            }
             if (key === 'corner') {
                 return `<div class="fmt-mock"><div class="fmt-mock-window">
                     <div class="fmt-mock-corner">
@@ -3989,29 +3953,17 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     </div>
                 </div></div>`;
             }
-            if (key === 'fullscreen') {
-                return `<div class="fmt-mock"><div class="fmt-mock-window">
-                    <div class="fmt-mock-modal">
-                        <div class="fmt-mock-modal-card">
-                            <div class="fmt-mock-disclosure">Sponsored</div>
-                            <div class="fmt-mock-headline">DevTools Pro</div>
-                            <span class="fmt-mock-cta">${CTA}</span>
-                        </div>
-                    </div>
-                </div></div>`;
-            }
             return '';
         }
 
         // Which placement families each integration door can physically
         // render. The Ad Placements panel shows only the families relevant
         // to the door selected in the Integration section — an MCP server
-        // can't render Display or Interruptive, a chat bot can't render
-        // Interruptive, so those are hidden when that door is selected.
+        // renders text content blocks only, so it sees AI-native alone.
         const DOOR_FAMILIES = {
             'mcp':        ['ai-native'],
-            'js-snippet': ['ai-native', 'display', 'interruptive'],
-            'npm-sdk':    ['ai-native', 'display', 'interruptive'],
+            'js-snippet': ['ai-native', 'display'],
+            'npm-sdk':    ['ai-native', 'display'],
             'rest-api':   ['ai-native', 'display'],
         };
         const DOOR_LABELS = {
@@ -4033,7 +3985,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // only the families that door can physically render.
             const _sel = document.querySelector('.ic-card.ic-selected');
             const _door = (_sel && _sel.dataset.door) || 'mcp';
-            const _allowed = DOOR_FAMILIES[_door] || ['ai-native', 'display', 'interruptive'];
+            const _allowed = DOOR_FAMILIES[_door] || ['ai-native', 'display'];
             const _families = PLACEMENT_FAMILIES.filter(f => _allowed.includes(f.key));
 
             const _ctx = document.createElement('div');
@@ -4364,7 +4316,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                             api_key: profile.api_key || 'bb_dev_sk_' + user.id.replace(/-/g, '').substring(0, 18),
                             app_id: profile.app_id || 'app_' + user.id.substring(0, 8),
                             revenue_share_pct: profile.revenue_share_pct || 85,
-                            formats: { native: true, image: true, corner: true, video: false, fullscreen: false }
+                            formats: { native: true, image: true, corner: true }
                         };
                         localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
                         localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
@@ -4834,7 +4786,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     { icon: '📈', title: 'RPM up 14%',         body: 'Last 24h RPM climbed to $16.76 from $14.70 — above your 14-day avg.',    time: now - 86400e3,        unread: true },
                     { icon: '⚡', title: 'Benna optimization', body: 'Ad selection accuracy for your app improved by 6.2% after model refresh.', time: now - 86400e3 * 2,    unread: false },
                     { icon: '🔑', title: 'New API key live',   body: 'Your Lumi SDK key is now active across all placements.',                  time: now - 86400e3 * 3,    unread: false },
-                    { icon: '🧩', title: 'Format unlocked',    body: 'Corner video ads now available in your format mix.',                     time: now - 86400e3 * 5,    unread: false },
+                    { icon: '🧩', title: 'Format unlocked',    body: 'Corner units are now available in your format mix.',                     time: now - 86400e3 * 5,    unread: false },
                 ];
             }
             function render() {
