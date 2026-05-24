@@ -740,6 +740,21 @@
             border-radius: 3px;
             margin-top: 3px;
         }
+        /* Live preview box inside each placement card — renders the real
+           campaign creative in that placement's style. */
+        .fc-preview {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            overflow: hidden;
+        }
+        .fc-preview .door-media { margin-bottom: 0; }
         .fc-name {
             font-size: 13px;
             font-weight: 700;
@@ -2998,7 +3013,7 @@
                         <label class="form-label">Ad Placements</label>
                         <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
                         <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">
-                            Pick the placement your campaign runs in. The group is the tier — it sets which inventory your budget buys and the eCPM you pay. These mirror the placements publishers switch on in their dashboard.
+                            Pick the placement your campaign runs in — each card is a live preview of your creative in that placement. The group is the tier: it sets which inventory your budget buys and the eCPM you pay. These mirror the placements publishers switch on in their dashboard.
                         </div>
                     </div>
 
@@ -3051,17 +3066,6 @@
                     <div class="form-group">
                         <label class="form-label">CTA URL</label>
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
-                    </div>
-
-                    <!-- Live Preview — one card per placement; click a card to select it -->
-                    <div class="form-group">
-                        <label class="form-label">Live Preview <span style="font-size:11px;color:#9CA3AF;font-weight:400;">— how your ad renders in every placement</span></label>
-                        <div class="live-preview">
-                            <div class="live-preview-header">Same creative, every placement. Click any card to pick that placement.</div>
-                            <div class="door-preview-grid" id="doorPreviewGrid">
-                                <!-- One placement card per entry, built by renderDoorPreviews() in JS -->
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Advertiser Domain -->
@@ -4632,20 +4636,16 @@
             return byFmt ? byFmt.key : DEFAULT_PLACEMENT;
         }
 
-        // Tiny visual thumbnail for a format card.
-        function advThumb(kind) {
-            if (kind === 'native') return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-title"></div><div class="fc-thumb-sub"></div><div class="fc-thumb-cta"></div></div>`;
-            return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-media"></div><div class="fc-thumb-title"></div><div class="fc-thumb-cta"></div></div>`;
-        }
-
         // Renders the 8 deduped placement cards grouped under the 2 tier
-        // (category) headers. The advertiser picks one card — its category
-        // is the placement tier, its mock is the creative format; both are
-        // derived at submit. Mirrors the publisher dashboard's panel.
+        // (category) headers. Each card is itself the live preview — it
+        // renders the campaign's current creative in that placement's
+        // style — so picking a placement and seeing how it looks are the
+        // same surface. Mirrors the publisher dashboard's panel.
         function renderFormatTierGroups() {
             const container = document.getElementById('formatTierGroups');
             if (!container) return;
             const current = selectedPlacement();
+            const base = readCampaignCreativeState();
             container.innerHTML = PLACEMENT_CATS.map((cat) => {
                 const cards = PLACEMENT_CATALOG.filter((p) => p.cat === cat.key);
                 return `<div class="ftg-group">
@@ -4658,7 +4658,7 @@
                         ${cards.map((p) => `
                             <label class="format-card${p.key === current ? ' selected' : ''}" data-placement="${p.key}">
                                 <input type="radio" name="placement" value="${p.key}" ${p.key === current ? 'checked' : ''} required>
-                                ${advThumb(p.mock === 'native' ? 'native' : 'media')}
+                                <div class="fc-preview">${creativeMock(p.mock, base)}</div>
                                 <div class="fc-name">${p.name}</div>
                                 <div class="fc-desc">${p.desc}</div>
                                 <div class="fc-family">~$${p.ecpm.toFixed(2)} eCPM</div>
@@ -4674,7 +4674,6 @@
                     radio.checked = true;
                     container.querySelectorAll('.format-card').forEach((c) => c.classList.remove('selected'));
                     card.classList.add('selected');
-                    renderDoorPreviews();
                     updateFormatEstimate();
                 });
             });
@@ -4705,14 +4704,15 @@
             // per-card click handlers).
             renderFormatTierGroups();
 
-            // Any form-field change refreshes the previews.
+            // Any copy change re-renders the placement cards — each card is
+            // a live preview, so the previews update as the user types.
             ['headline', 'subtext', 'cta_text', 'cta_url'].forEach((fieldName) => {
                 const input = form.querySelector(`[name="${fieldName}"]`);
-                if (input) input.addEventListener('input', renderDoorPreviews);
+                if (input) input.addEventListener('input', renderFormatTierGroups);
             });
-            // File upload also updates previews (image source).
+            // File upload also updates the previews (image source).
             const fileInput = document.getElementById('fileInput');
-            if (fileInput) fileInput.addEventListener('change', renderDoorPreviews);
+            if (fileInput) fileInput.addEventListener('change', renderFormatTierGroups);
 
             // Total Budget drives the impression projection in the estimate.
             const budgetInput = form.querySelector('[name="total_budget"]');
@@ -4721,7 +4721,7 @@
             // URL autofill wire-up (Phase E.5).
             initUrlAutofill();
 
-            renderDoorPreviews();
+            renderFormatTierGroups();
             updateFormatEstimate();
         }
 
@@ -4781,7 +4781,7 @@
                         : 'No og:/meta tags found — fill the fields manually.';
                     status.className = found > 0 ? 'url-autofill-status ok' : 'url-autofill-status';
 
-                    renderDoorPreviews();
+                    renderFormatTierGroups();
                 } catch (e) {
                     status.textContent = 'Failed: ' + (e.message || 'fetch error');
                     status.className = 'url-autofill-status error';
@@ -4849,43 +4849,6 @@
             return spons + img + body;
         }
 
-        // Render one preview card per placement. Clicking a card selects
-        // that placement — keeping the gallery and the selector above in
-        // sync. Re-renders whenever copy / media / selection changes.
-        function renderDoorPreviews() {
-            const grid = document.getElementById('doorPreviewGrid');
-            if (!grid) return;
-            const base = readCampaignCreativeState();
-            const sel = selectedPlacement();
-
-            grid.innerHTML = PLACEMENT_CATALOG.map((p) => {
-                const isSel = p.key === sel;
-                const tierLabel = p.cat === 'ai-native' ? 'AI-native' : 'Display';
-                return `
-                    <div class="pp-card${isSel ? ' pp-selected' : ''}" data-placement="${p.key}">
-                        <div class="door-card-head">
-                            <span>${escapeHtml(p.name)}</span>
-                            <span class="door-badge${isSel ? ' edited' : ''}">${isSel ? 'Selected' : tierLabel}</span>
-                        </div>
-                        ${creativeMock(p.mock, base)}
-                        <div style="font-size:10px;color:#9CA3AF;margin-top:auto;">~$${p.ecpm.toFixed(2)} eCPM · ${tierLabel} tier</div>
-                    </div>
-                `;
-            }).join('');
-
-            // Clicking a preview card picks that placement.
-            grid.querySelectorAll('.pp-card').forEach((card) => {
-                card.addEventListener('click', () => {
-                    const key = card.getAttribute('data-placement');
-                    const radio = campaignForm.querySelector(`input[name="placement"][value="${key}"]`);
-                    if (radio) radio.checked = true;
-                    document.querySelectorAll('#formatTierGroups .format-card').forEach((c) =>
-                        c.classList.toggle('selected', c.dataset.placement === key));
-                    renderDoorPreviews();
-                    updateFormatEstimate();
-                });
-            });
-        }
 
         // Per-door creative overrides were removed with the per-placement
         // preview rebuild — the backend still writes the 'default' row from
@@ -5182,7 +5145,7 @@
                             cd.classList.toggle('selected', cd.dataset.placement === plKey));
                     }
                     if (typeof updateFormatEstimate === 'function') updateFormatEstimate();
-                    if (typeof renderDoorPreviews === 'function') renderDoorPreviews();
+                    if (typeof renderFormatTierGroups === 'function') renderFormatTierGroups();
                 }
                 if (form.querySelector('[name="billing_model"]')) {
                     const radio = form.querySelector(`[name="billing_model"][value="${c.billing_model || 'cpm'}"]`);
