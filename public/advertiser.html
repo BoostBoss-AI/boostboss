@@ -3228,30 +3228,35 @@
                         </select>
                     </div>
 
-                    <!-- AI Targeting Section -->
+                    <!-- AI Targeting Section — the section heading is now
+                         "Ad placement"; the "AI-native targeting" heading was
+                         moved down to sit above the intent / context signals. -->
                     <div class="ai-targeting-section">
-                        <div class="ai-targeting-header">
+                        <div class="ai-targeting-header" style="margin-bottom:6px;">
+                            <div class="ai-targeting-title">
+                                <span class="spark">✦</span>
+                                Ad placement
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:#6B7280;line-height:1.5;margin-bottom:1rem;">
+                            Select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher's product.
+                        </div>
+
+                        <!-- #formatTierGroups is rendered by
+                             renderFormatTierGroups() — each card is a live
+                             preview of the campaign creative. -->
+                        <div class="targeting-block">
+                            <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
+                        </div>
+
+                        <!-- AI-native targeting — intent / context signals.
+                             Heading moved here from the top of the section. -->
+                        <div class="ai-targeting-header" style="margin-top:1.5rem;border-top:1px solid #E5D9E0;padding-top:1.25rem;">
                             <div class="ai-targeting-title">
                                 <span class="spark">✦</span>
                                 AI-native targeting
                             </div>
                             <span class="ai-targeting-badge">Boost Boss AI</span>
-                        </div>
-
-                        <!-- Ad placement — the deduped core placements grouped
-                             by tier. Replaces the old Doors selector: the
-                             placement you pick already implies which surfaces
-                             render the ad, so a separate door toggle is
-                             redundant (target_integration_methods now defaults
-                             to all doors). #formatTierGroups is rendered by
-                             renderFormatTierGroups() — each card is a live
-                             preview of the campaign creative. -->
-                        <div class="targeting-block">
-                            <div class="targeting-label">
-                                Ad placement
-                                <span class="hint">— select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher's product.</span>
-                            </div>
-                            <div id="formatTierGroups" style="margin-top:8px;"><!-- rendered by renderFormatTierGroups() --></div>
                         </div>
 
                         <!-- Intent signals -->
