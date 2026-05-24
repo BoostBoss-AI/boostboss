@@ -2967,7 +2967,7 @@
                         <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
                     </div>
 
-                    <!-- Placement Tier & Format — 5 formats grouped by the 3 tiers -->
+                    <!-- Placement Tier & Format — 3 formats grouped by the 2 tiers -->
                     <div class="form-group">
                         <label class="form-label">Placement Tier &amp; Format</label>
                         <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
@@ -2984,7 +2984,7 @@
                             <div class="upload-text">Drag & drop your file here</div>
                             <div class="upload-subtext">or click to browse</div>
                         </div>
-                        <input type="file" class="file-input" id="fileInput" accept="image/*,video/*">
+                        <input type="file" class="file-input" id="fileInput" accept="image/*">
                     </div>
 
                     <!-- Headline -->
@@ -4580,24 +4580,20 @@
         // them. eCPM is what the advertiser pays per 1,000 impressions. The
         // advertiser picks ONE format card; the tier (its group) is implied.
         const ADV_TIERS = [
-            { key: 'ai-native',    label: 'AI-native placements', badge: 'standard', note: 'Gentle — runs on every door, including MCP.' },
-            { key: 'display',      label: 'Display placements',   badge: 'standard', note: 'Standard inventory on Lumi Web and Extension.' },
-            { key: 'interruptive', label: 'Interruptive & gated', badge: 'optin',    note: 'Richest eCPM — opt-in inventory on Web and Extension.' },
+            { key: 'ai-native', label: 'AI-native placements', badge: 'standard', note: 'Gentle — runs on every door, including MCP.' },
+            { key: 'display',   label: 'Display placements',   badge: 'standard', note: 'Standard inventory on Lumi Web, Extension and Bot.' },
         ];
         const ADV_FORMATS = [
-            { key: 'native',     tier: 'ai-native',    name: 'Native',     ecpm: 4.50,  thumb: 'native', desc: 'Text + CTA inline with the AI response.' },
-            { key: 'image',      tier: 'display',      name: 'Image',      ecpm: 6.00,  thumb: 'media',  desc: 'Full media card with headline + CTA.' },
-            { key: 'corner',     tier: 'display',      name: 'Corner',     ecpm: 8.50,  thumb: 'media',  desc: 'Floating dismissable card. Non-blocking.' },
-            { key: 'video',      tier: 'interruptive', name: 'Video',      ecpm: 15.00, thumb: 'video',  desc: 'Playable video with skip. High engagement.' },
-            { key: 'fullscreen', tier: 'interruptive', name: 'Fullscreen', ecpm: 22.00, thumb: 'media',  desc: 'Interstitial modal. Maximum attention.' },
+            { key: 'native', tier: 'ai-native', name: 'Native', ecpm: 4.50, thumb: 'native', desc: 'Text + CTA inline with the AI response.' },
+            { key: 'image',  tier: 'display',   name: 'Image',  ecpm: 6.00, thumb: 'media',  desc: 'Full media card with headline + CTA.' },
+            { key: 'corner', tier: 'display',   name: 'Corner', ecpm: 8.50, thumb: 'media',  desc: 'Floating dismissable card. Non-blocking.' },
         ];
         // Format → tier. Used to derive placement_tier from the picked card.
-        const FORMAT_TO_TIER = { native: 'ai-native', image: 'display', corner: 'display', video: 'interruptive', fullscreen: 'interruptive' };
+        const FORMAT_TO_TIER = { native: 'ai-native', image: 'display', corner: 'display' };
 
         // Tiny visual thumbnail for a format card.
         function advThumb(kind) {
             if (kind === 'native') return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-title"></div><div class="fc-thumb-sub"></div><div class="fc-thumb-cta"></div></div>`;
-            if (kind === 'video')  return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-media play"></div><div class="fc-thumb-title"></div><div class="fc-thumb-cta"></div></div>`;
             return `<div class="fc-thumb"><div class="fc-thumb-label">SPONSORED</div><div class="fc-thumb-media"></div><div class="fc-thumb-title"></div><div class="fc-thumb-cta"></div></div>`;
         }
 
