@@ -80,7 +80,16 @@
   .nav-links a { font-size: 14.5px; font-weight: 700; color: var(--ink); opacity: 0.92; transition: color 0.15s, opacity 0.15s; white-space: nowrap; }
   .nav-links a:hover { opacity: 1; color: var(--pink); }
   .nav-links a.active { opacity: 1; color: var(--pink); }
-  .nav-ctas { display: flex; gap: 10px; }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; }
+  .nav-lang-wrap { position: relative; }
+  .nav-lang { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; font-family: inherit; transition: background 0.15s, border-color 0.15s; }
+  .nav-lang:hover { border-color: var(--ink-soft); background: var(--bg-soft); }
+  .nav-lang svg { width: 16px; height: 16px; stroke-width: 1.8; }
+  .nav-lang-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 180px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14); z-index: 200; }
+  .nav-lang-wrap.open .nav-lang-menu { display: block; }
+  .nav-lang-menu a { display: block; padding: 11px 14px; border-radius: 8px; font-size: 14.5px; color: var(--ink); text-decoration: none; font-weight: 500; transition: background 0.1s, color 0.1s; }
+  .nav-lang-menu a:hover { background: var(--bg-soft); }
+  .nav-lang-menu a.active { color: var(--pink); font-weight: 700; }
   .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; padding: 9px 20px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .btn-ghost { color: var(--ink); background: transparent; border-color: rgba(15,15,26,0.18); }
   .btn-ghost:hover { background: rgba(15,15,26,0.04); border-color: rgba(15,15,26,0.32); }
@@ -188,6 +197,7 @@
     .code-block { padding: 22px 20px; font-size: 12.5px; }
   }
 </style>
+<script src="/i18n.js" defer></script>
 </head>
 <body>
 
@@ -207,7 +217,24 @@
       <a href="/publish/no-code">Custom GPTs</a>
     </div>
     <div class="nav-ctas">
-      <a class="btn btn-ghost" href="/publish">Overview</a>
+      <div class="nav-lang-wrap" id="navLangWrap">
+        <button class="nav-lang" aria-label="Change language" onclick="document.getElementById('navLangWrap').classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span>EN</span>
+        </button>
+        <div class="nav-lang-menu">
+          <a href="/en" data-lang="en" class="active">English</a>
+          <a href="/zh" data-lang="zh">简体中文</a>
+          <a href="/zh-TW" data-lang="zh-TW">繁體中文</a>
+          <a href="/ja" data-lang="ja">日本語</a>
+          <a href="/ko" data-lang="ko">한국어</a>
+          <a href="/vi" data-lang="vi">Tiếng Việt</a>
+        </div>
+      </div>
       <a class="btn btn-primary" href="/publish/signup">Start earning</a>
     </div>
   </div>
@@ -549,12 +576,14 @@
     var ctas = document.querySelector('.nav-ctas');
     if (!ctas) return;
     var esc = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); };
+    var lang = ctas.querySelector('.nav-lang-wrap');
     ctas.innerHTML =
       '<a href="/publish/dashboard" class="btn btn-ghost auth-pill" title="Go to your dashboard">' +
       '<span class="auth-avatar">' + esc(initial) + '</span>' +
       '<span class="auth-name">' + esc(name) + '</span>' +
       '<span class="auth-arrow">→</span>' +
       '</a>';
+    if (lang) ctas.insertBefore(lang, ctas.firstChild);
   })();
 </script>
 </body>
