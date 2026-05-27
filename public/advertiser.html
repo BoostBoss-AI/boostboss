@@ -3310,10 +3310,10 @@
                         <div class="ai-targeting-header" style="margin-bottom:6px;">
                             <div class="ai-targeting-title">
                                 <span class="spark">✦</span>
-                                Ad placement
+                                <span data-t="newc.placement">Ad placement</span>
                             </div>
                         </div>
-                        <div style="font-size:12px;color:#6B7280;line-height:1.5;margin-bottom:1rem;">
+                        <div style="font-size:12px;color:#6B7280;line-height:1.5;margin-bottom:1rem;" data-t="newc.placement_intro">
                             Select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher's product.
                         </div>
 
@@ -3329,32 +3329,32 @@
                         <div class="ai-targeting-header" style="margin-top:1.5rem;border-top:1px solid #E5D9E0;padding-top:1.25rem;">
                             <div class="ai-targeting-title">
                                 <span class="spark">✦</span>
-                                AI-native targeting
+                                <span data-t="newc.ai_target">AI-native targeting</span>
                             </div>
-                            <span class="ai-targeting-badge">Boost Boss AI</span>
+                            <span class="ai-targeting-badge" data-t="newc.bb_ai_badge">Boost Boss AI</span>
                         </div>
 
                         <!-- Intent signals -->
                         <div class="targeting-block">
                             <div class="targeting-label">
-                                Intent signals
-                                <span class="hint">— what users are trying to do</span>
+                                <span data-t="newc.intent">Intent signals</span>
+                                <span class="hint" data-t="newc.intent_hint">— what users are trying to do</span>
                             </div>
                             <div class="intent-input-row">
-                                <input type="text" id="intentInput" placeholder="e.g. debugging python, writing a pitch deck">
-                                <button type="button" class="target-pill" id="intentAddBtn">+ Add</button>
+                                <input type="text" id="intentInput" placeholder="e.g. debugging python, writing a pitch deck" data-t-placeholder="newc.intent_ph">
+                                <button type="button" class="target-pill" id="intentAddBtn" data-t="newc.intent_add">+ Add</button>
                             </div>
                             <div id="intentChips"></div>
                             <div class="target-pills-row" id="intentSuggestions" style="margin-top: 6px;">
-                                <span class="hint" style="font-size: 11px; color: #6B7280; width: 100%; margin-bottom: 4px;">Suggested:</span>
+                                <span class="hint" style="font-size: 11px; color: #6B7280; width: 100%; margin-bottom: 4px;" data-t="newc.suggested">Suggested:</span>
                             </div>
                         </div>
 
                         <!-- Host apps -->
                         <div class="targeting-block">
                             <div class="targeting-label">
-                                Host apps
-                                <span class="hint">— where your ad appears</span>
+                                <span data-t="newc.host_apps">Host apps</span>
+                                <span class="hint" data-t="newc.host_apps_hint">— where your ad appears</span>
                             </div>
                             <div class="target-pills-row" id="hostAppsRow">
                                 <div class="target-pill" data-value="claude" data-color="pink">Claude</div>
@@ -3369,8 +3369,8 @@
                         <!-- MCP tools -->
                         <div class="targeting-block">
                             <div class="targeting-label">
-                                Active MCP tools
-                                <span class="hint">— session context</span>
+                                <span data-t="newc.mcp_tools">Active MCP tools</span>
+                                <span class="hint" data-t="newc.mcp_tools_hint">— session context</span>
                             </div>
                             <div class="target-pills-row" id="mcpToolsRow">
                                 <div class="target-pill" data-value="filesystem" data-color="cyan">filesystem</div>
@@ -3387,8 +3387,8 @@
                         <!-- AI models -->
                         <div class="targeting-block">
                             <div class="targeting-label">
-                                AI model
-                                <span class="hint">— optional</span>
+                                <span data-t="newc.ai_model">AI model</span>
+                                <span class="hint" data-t="newc.ai_model_hint">— optional</span>
                             </div>
                             <div class="target-pills-row" id="aiModelsRow">
                                 <div class="target-pill" data-value="claude-opus" data-color="yellow">Claude Opus</div>
@@ -3403,31 +3403,31 @@
                              Empty selection = bid on every surface. -->
                         <div class="targeting-block">
                             <div class="targeting-label">
-                                Surfaces
-                                <span class="hint">— where the ad renders. Leave empty for any.</span>
+                                <span data-t="newc.surfaces">Surfaces</span>
+                                <span class="hint" data-t="newc.surfaces_hint">— where the ad renders. Leave empty for any.</span>
                             </div>
                             <div class="target-pills-row" id="surfacesRow">
-                                <div class="target-pill" data-value="chat" data-color="pink">Chat inline</div>
-                                <div class="target-pill" data-value="tool_response" data-color="pink">Tool response</div>
-                                <div class="target-pill" data-value="sidebar" data-color="pink">Sidebar</div>
-                                <div class="target-pill" data-value="loading_screen" data-color="pink">Loading screen</div>
-                                <div class="target-pill" data-value="status_line" data-color="pink">Status line</div>
-                                <div class="target-pill" data-value="web" data-color="pink">Web</div>
+                                <div class="target-pill" data-value="chat" data-color="pink" data-t="newc.surf_chat">Chat inline</div>
+                                <div class="target-pill" data-value="tool_response" data-color="pink" data-t="newc.surf_tool">Tool response</div>
+                                <div class="target-pill" data-value="sidebar" data-color="pink" data-t="newc.surf_sidebar">Sidebar</div>
+                                <div class="target-pill" data-value="loading_screen" data-color="pink" data-t="newc.surf_loading">Loading screen</div>
+                                <div class="target-pill" data-value="status_line" data-color="pink" data-t="newc.surf_status">Status line</div>
+                                <div class="target-pill" data-value="web" data-color="pink" data-t="newc.surf_web">Web</div>
                             </div>
                         </div>
 
                         <!-- Reach estimator -->
                         <div class="reach-estimator">
                             <div class="reach-stat">
-                                <div class="label">Daily reach</div>
+                                <div class="label" data-t="newc.reach_daily">Daily reach</div>
                                 <div class="value pink" id="reachDaily">420K–480K</div>
                             </div>
                             <div class="reach-stat">
-                                <div class="label">Match score</div>
-                                <div class="value cyan" id="reachMatch">Broad</div>
+                                <div class="label" data-t="newc.reach_match">Match score</div>
+                                <div class="value cyan" id="reachMatch" data-t="newc.match_broad">Broad</div>
                             </div>
                             <div class="reach-stat">
-                                <div class="label">Est. eCPA</div>
+                                <div class="label" data-t="newc.reach_ecpa">Est. eCPA</div>
                                 <div class="value" id="reachEcpa">$2.40</div>
                             </div>
                         </div>
@@ -3435,40 +3435,36 @@
 
                     <!-- Billing Model -->
                     <div class="form-group">
-                        <label class="form-label">Billing Model</label>
+                        <label class="form-label" data-t="newc.billing_model">Billing Model</label>
                         <div class="radio-group">
                             <div class="radio-option">
                                 <input type="radio" id="billing-cpm" name="billing_model" value="cpm" required checked>
-                                <label for="billing-cpm">CPM (Cost Per Mille)</label>
+                                <label for="billing-cpm" data-t="newc.bm_cpm">CPM (Cost Per Mille)</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" id="billing-cpc" name="billing_model" value="cpc" required>
-                                <label for="billing-cpc">CPC (Cost Per Click)</label>
+                                <label for="billing-cpc" data-t="newc.bm_cpc">CPC (Cost Per Click)</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" id="billing-cpv" name="billing_model" value="cpv" required>
-                                <label for="billing-cpv">CPV (Cost Per View)</label>
+                                <label for="billing-cpv" data-t="newc.bm_cpv">CPV (Cost Per View)</label>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" id="billing-cpa" name="billing_model" value="cpa" required>
-                                <label for="billing-cpa">CPA (Cost Per Acquisition)</label>
+                                <label for="billing-cpa" data-t="newc.bm_cpa">CPA (Cost Per Acquisition)</label>
                             </div>
                         </div>
-                        <!-- Conversion event types — only relevant when billing_model=cpa
-                             (or when using target_cpa optimization). Free-form CSV that
-                             becomes campaigns.conversion_event_types[]. Empty = any. -->
                         <div id="conversionTypesRow" style="margin-top:12px; display:none;">
                             <label for="conversionEventTypes" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
-                                Conversion event types
-                                <span style="font-weight:400; color:#6B7280;">(comma-separated, e.g. <code>signup, purchase</code>; empty = any)</span>
+                                <span data-t="newc.conv_types">Conversion event types</span>
+                                <span style="font-weight:400; color:#6B7280;"><span data-t="newc.conv_types_hint_a">(comma-separated, e.g.</span> <code>signup, purchase</code><span data-t="newc.conv_types_hint_b">; empty = any)</span></span>
                             </label>
                             <input type="text" id="conversionEventTypes" name="conversion_event_types"
-                                placeholder="signup, purchase, lead"
+                                placeholder="signup, purchase, lead" data-t-placeholder="newc.conv_types_ph"
                                 style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px;">
                             <p style="margin:6px 0 0; font-size:12px; color:#6B7280;">
-                                Only conversions whose <code>type</code> matches this list will be charged.
-                                Configure conversion firing in the
-                                <a href="/docs-api-reference#api-conversion" target="_blank" style="color:#2563EB;">conversion beacon docs</a>.
+                                <span data-t="newc.conv_charged_a">Only conversions whose</span> <code>type</code> <span data-t="newc.conv_charged_b">matches this list will be charged. Configure conversion firing in the</span>
+                                <a href="/docs-api-reference#api-conversion" target="_blank" style="color:#2563EB;" data-t="newc.conv_docs">conversion beacon docs</a>.
                             </p>
                         </div>
                     </div>
@@ -3479,53 +3475,53 @@
                             <div class="benna-title">
                                 <div class="benna-mark">B</div>
                                 <div>
-                                    <div>Benna optimization</div>
-                                    <div class="benna-subtitle">Set a goal. The engine handles bidding.</div>
+                                    <div data-t="newc.benna_opt">Benna optimization</div>
+                                    <div class="benna-subtitle" data-t="newc.benna_opt_sub">Set a goal. The engine handles bidding.</div>
                                 </div>
                             </div>
-                            <span class="benna-badge">Powered by Benna</span>
+                            <span class="benna-badge" data-t="newc.powered_by_benna">Powered by Benna</span>
                         </div>
 
                         <div class="goal-grid">
                             <div class="goal-tile recommended" data-goal="target_cpa">
                                 <span class="goal-kbd">1</span>
                                 <div class="goal-label">01 · tCPA</div>
-                                <div class="goal-name">Target CPA</div>
-                                <div class="goal-desc">Hit a cost per acquisition. Benna tunes bids in real time.</div>
+                                <div class="goal-name" data-t="newc.goal_tcpa_name">Target CPA</div>
+                                <div class="goal-desc" data-t="newc.goal_tcpa_desc">Hit a cost per acquisition. Benna tunes bids in real time.</div>
                             </div>
                             <div class="goal-tile" data-goal="target_roas">
                                 <span class="goal-kbd">2</span>
                                 <div class="goal-label">02 · tROAS</div>
-                                <div class="goal-name">Target ROAS</div>
-                                <div class="goal-desc">Optimize for return on ad spend. Ideal for revenue campaigns.</div>
+                                <div class="goal-name" data-t="newc.goal_troas_name">Target ROAS</div>
+                                <div class="goal-desc" data-t="newc.goal_troas_desc">Optimize for return on ad spend. Ideal for revenue campaigns.</div>
                             </div>
                             <div class="goal-tile" data-goal="max_conversions">
                                 <span class="goal-kbd">3</span>
                                 <div class="goal-label">03 · MaxConv</div>
-                                <div class="goal-name">Max Conversions</div>
-                                <div class="goal-desc">Spend the full budget on the highest-probability converters.</div>
+                                <div class="goal-name" data-t="newc.goal_maxconv_name">Max Conversions</div>
+                                <div class="goal-desc" data-t="newc.goal_maxconv_desc">Spend the full budget on the highest-probability converters.</div>
                             </div>
                             <div class="goal-tile" data-goal="manual">
                                 <span class="goal-kbd">4</span>
                                 <div class="goal-label">04 · Manual</div>
-                                <div class="goal-name">Manual bid</div>
-                                <div class="goal-desc">You set a fixed bid. Benna signals still applied to targeting.</div>
+                                <div class="goal-name" data-t="newc.goal_manual_name">Manual bid</div>
+                                <div class="goal-desc" data-t="newc.goal_manual_desc">You set a fixed bid. Benna signals still applied to targeting.</div>
                             </div>
                         </div>
 
                         <!-- Target value input (Target CPA) -->
                         <div class="goal-target-input active" id="goalTargetCpa">
-                            <label>Target CPA</label>
+                            <label data-t="newc.goal_tcpa_name">Target CPA</label>
                             <span class="dollar">$</span>
                             <input type="number" id="targetCpaValue" placeholder="4.50" step="0.01" min="0">
-                            <span class="unit">per conversion</span>
+                            <span class="unit" data-t="newc.per_conversion">per conversion</span>
                         </div>
 
                         <!-- Target value input (Target ROAS) -->
                         <div class="goal-target-input" id="goalTargetRoas">
-                            <label>Target ROAS</label>
+                            <label data-t="newc.goal_troas_name">Target ROAS</label>
                             <input type="number" id="targetRoasValue" placeholder="3.0" step="0.1" min="0" style="padding-left: 8px;">
-                            <span class="unit">× return on spend</span>
+                            <span class="unit" data-t="newc.return_on_spend">× return on spend</span>
                         </div>
 
                         <input type="hidden" id="optimizationGoal" name="optimization_goal" value="target_cpa">
@@ -3534,14 +3530,14 @@
                         <div class="benna-plan" id="bennaPlan">
                             <span class="pulse"></span>
                             <span>
-                                Benna will score every eligible impression against your targeting signals and auto-bid up to a ceiling that hits your <strong>target CPA of $4.50</strong>. Expect a <code>learning phase</code> of 48–72 hours while the engine calibrates on your conversion events, then steady optimization. Live adjustments viewable in the campaign dashboard.
+                                <span data-t="newc.benna_plan_a">Benna will score every eligible impression against your targeting signals and auto-bid up to a ceiling that hits your</span> <strong><span data-t="newc.benna_plan_target">target CPA of</span> $4.50</strong>. <span data-t="newc.benna_plan_b">Expect a</span> <code data-t="newc.learning_phase">learning phase</code> <span data-t="newc.benna_plan_c">of 48–72 hours while the engine calibrates on your conversion events, then steady optimization. Live adjustments viewable in the campaign dashboard.</span>
                             </span>
                         </div>
                     </div>
 
                     <!-- Bid Amount (only shown for Manual goal) -->
                     <div class="form-group manual-bid-wrap" id="manualBidWrap">
-                        <label class="form-label">Bid Amount</label>
+                        <label class="form-label" data-t="newc.bid_amount">Bid Amount</label>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="color: var(--text); font-weight: 600;">$</span>
                             <input type="number" class="form-input campaign-field" name="bid_amount" placeholder="0.00" min="0" step="0.01">
@@ -3550,7 +3546,7 @@
 
                     <!-- Estimated cost for the selected placement tier -->
                     <div class="form-group">
-                        <label class="form-label">Estimated Cost</label>
+                        <label class="form-label" data-t="newc.est_cost">Estimated Cost</label>
                         <div id="formatCostEstimate" style="padding: 10px 12px; background: #FAFAF7; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 12px; color: #6B7280; line-height: 1.6;">
                             <!-- populated by updateFormatEstimate() -->
                         </div>
@@ -3558,7 +3554,7 @@
 
                     <!-- Daily Budget -->
                     <div class="form-group">
-                        <label class="form-label">Daily Budget</label>
+                        <label class="form-label" data-t="newc.daily_budget">Daily Budget</label>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="color: var(--text); font-weight: 600;">$</span>
                             <input type="number" class="form-input campaign-field" name="daily_budget" placeholder="0.00" min="0" step="0.01" required>
@@ -3567,7 +3563,7 @@
 
                     <!-- Total Budget -->
                     <div class="form-group">
-                        <label class="form-label">Total Budget</label>
+                        <label class="form-label" data-t="newc.total_budget">Total Budget</label>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="color: var(--text); font-weight: 600;">$</span>
                             <input type="number" class="form-input campaign-field" name="total_budget" placeholder="0.00" min="0" step="0.01" required>
@@ -3576,21 +3572,21 @@
 
                     <!-- Schedule -->
                     <div class="form-group">
-                        <label class="form-label">Schedule (optional)</label>
+                        <label class="form-label" data-t="newc.schedule">Schedule (optional)</label>
                         <div style="display: flex; gap: 10px;">
                             <div style="flex: 1;">
-                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;">Start Date</label>
+                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;" data-t="newc.start_date">Start Date</label>
                                 <input type="date" class="form-input campaign-field" name="start_date" style="font-family: inherit;">
                             </div>
                             <div style="flex: 1;">
-                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;">End Date</label>
+                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;" data-t="newc.end_date">End Date</label>
                                 <input type="date" class="form-input campaign-field" name="end_date" style="font-family: inherit;">
                             </div>
                         </div>
                     </div>
 
                     <!-- Launch Button -->
-                    <button type="submit" class="launch-btn" id="launchCampaignBtn">Launch Campaign</button>
+                    <button type="submit" class="launch-btn" id="launchCampaignBtn" data-t="newc.launch">Launch Campaign</button>
                 </form>
             </div>
         </div>
@@ -4807,23 +4803,37 @@
         // card here. The advertiser picks ONE placement; its category is
         // the tier (what the budget buys + the eCPM), its mock is the
         // creative format the campaign stores.
+        // Placement category metadata. `label`/`note` are English defaults
+        // — renderFormatTierGroups() prefers t(labelKey)/t(noteKey) when
+        // present so the cards re-translate on language change.
         const PLACEMENT_CATS = [
-            { key: 'ai-native', label: 'AI-native placements', badge: 'standard', note: 'Sponsored lines, sources and suggestions woven into the AI response. Runs on every door, including MCP.' },
-            { key: 'display',   label: 'Display placements',   badge: 'standard', note: 'Image cards and corner units shown alongside content. Lumi Web, Extension and Bot.' },
+            { key: 'ai-native', label: 'AI-native placements', labelKey: 'newc.cat_ai_label', badge: 'standard', note: 'Sponsored lines, sources and suggestions woven into the AI response. Runs on every door, including MCP.', noteKey: 'newc.cat_ai_note' },
+            { key: 'display',   label: 'Display placements',   labelKey: 'newc.cat_display_label', badge: 'standard', note: 'Image cards and corner units shown alongside content. Lumi Web, Extension and Bot.', noteKey: 'newc.cat_display_note' },
         ];
         // eCPM is what the advertiser pays per 1,000 impressions (mirrors
         // the publisher-side RPM). `mock` picks the creative format stored
-        // on the campaign + the preview visual.
+        // on the campaign + the preview visual. `nameKey`/`descKey` let the
+        // renderer pull translated strings on every render.
         const PLACEMENT_CATALOG = [
-            { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',       ecpm: 4.50, mock: 'native', desc: 'A sponsored source / citation woven into the AI answer.' },
-            { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         ecpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
-            { key: 'chip',     cat: 'ai-native', name: 'Suggested-action chip',    ecpm: 4.50, mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
-            { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        ecpm: 4.00, mock: 'native', desc: 'A sponsored line in a bot welcome / onboarding message.' },
-            { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', ecpm: 4.50, mock: 'native', desc: 'Sponsored quick-reply buttons under the bot reply.' },
-            { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    ecpm: 6.00, mock: 'image',  desc: 'A sponsored media card rendered inline in the response.' },
-            { key: 'corner',   cat: 'display',   name: 'Corner unit',              ecpm: 8.50, mock: 'corner', desc: 'A sticky, dismissable card anchored to a screen corner.' },
-            { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',         ecpm: 9.00, mock: 'image',  desc: 'A hero unit on an extension new-tab / home screen.' },
+            { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',       nameKey: 'newc.plc_citation_name',  descKey: 'newc.plc_citation_desc',  ecpm: 4.50, mock: 'native', desc: 'A sponsored source / citation woven into the AI answer.' },
+            { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         nameKey: 'newc.plc_toolrec_name',   descKey: 'newc.plc_toolrec_desc',   ecpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
+            { key: 'chip',     cat: 'ai-native', name: 'Suggested-action chip',    nameKey: 'newc.plc_chip_name',      descKey: 'newc.plc_chip_desc',      ecpm: 4.50, mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+            { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        nameKey: 'newc.plc_welcome_name',   descKey: 'newc.plc_welcome_desc',   ecpm: 4.00, mock: 'native', desc: 'A sponsored line in a bot welcome / onboarding message.' },
+            { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', nameKey: 'newc.plc_buttons_name',   descKey: 'newc.plc_buttons_desc',   ecpm: 4.50, mock: 'native', desc: 'Sponsored quick-reply buttons under the bot reply.' },
+            { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    nameKey: 'newc.plc_card_name',      descKey: 'newc.plc_card_desc',      ecpm: 6.00, mock: 'image',  desc: 'A sponsored media card rendered inline in the response.' },
+            { key: 'corner',   cat: 'display',   name: 'Corner unit',              nameKey: 'newc.plc_corner_name',    descKey: 'newc.plc_corner_desc',    ecpm: 8.50, mock: 'corner', desc: 'A sticky, dismissable card anchored to a screen corner.' },
+            { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',         nameKey: 'newc.plc_newtab_name',    descKey: 'newc.plc_newtab_desc',    ecpm: 9.00, mock: 'image',  desc: 'A hero unit on an extension new-tab / home screen.' },
         ];
+        // Tiny helper: resolve a key via the dashboard t(), falling back
+        // to the literal English on miss so any not-yet-translated key
+        // renders gracefully instead of as "newc.foo".
+        function tt(key, fallback) {
+            try {
+                const v = (window.dashT && window.dashT(key)) || null;
+                if (v && v !== key) return v;
+            } catch (_) {}
+            return fallback;
+        }
         // placement key → { format, tier, ecpm } — the submit path derives
         // the campaign's stored `format` + `placement_tier` from this.
         const PLACEMENT_SPEC = {};
@@ -4881,26 +4891,35 @@
             const container = document.getElementById('formatTierGroups');
             if (!container) return;
             const base = readCampaignCreativeState();
+            const clickPreview  = tt('newc.click_preview',  'Click to preview in context →');
+            const badgeStd      = tt('newc.badge_standard', 'Standard');
+            const badgeOptIn    = tt('newc.badge_optin',    'Opt-in');
             container.innerHTML = PLACEMENT_CATS.map((cat) => {
                 const cards = PLACEMENT_CATALOG.filter((p) => p.cat === cat.key);
                 const on = selectedGroups.has(cat.key);
+                const catLabel = cat.labelKey ? tt(cat.labelKey, cat.label) : cat.label;
+                const catNote  = cat.noteKey  ? tt(cat.noteKey,  cat.note)  : cat.note;
                 return `<div class="ftg-group${on ? ' ftg-selected' : ''}">
                     <div class="ftg-head" data-group="${cat.key}" role="button" tabindex="0">
                         <span class="ftg-check${on ? ' on' : ''}">${on ? '✓' : ''}</span>
-                        <span class="ftg-name">${cat.label}</span>
-                        <span class="ftg-badge ${cat.badge}">${cat.badge === 'optin' ? 'Opt-in' : 'Standard'}</span>
-                        <span class="ftg-note">${cat.note}</span>
+                        <span class="ftg-name">${catLabel}</span>
+                        <span class="ftg-badge ${cat.badge}">${cat.badge === 'optin' ? badgeOptIn : badgeStd}</span>
+                        <span class="ftg-note">${catNote}</span>
                     </div>
                     <div class="format-cards">
-                        ${cards.map((p) => `
+                        ${cards.map((p) => {
+                            const pName = p.nameKey ? tt(p.nameKey, p.name) : p.name;
+                            const pDesc = p.descKey ? tt(p.descKey, p.desc) : p.desc;
+                            return `
                             <div class="format-card${on ? ' selected' : ''}" data-placement="${p.key}" role="button" tabindex="0">
                                 <div class="fc-preview">${creativeMock(p.mock, base)}</div>
-                                <div class="fc-name">${p.name}</div>
-                                <div class="fc-desc">${p.desc}</div>
+                                <div class="fc-name">${pName}</div>
+                                <div class="fc-desc">${pDesc}</div>
                                 <div class="fc-family">~$${p.ecpm.toFixed(2)} eCPM</div>
-                                <div class="fc-expand">Click to preview in context →</div>
+                                <div class="fc-expand">${clickPreview}</div>
                             </div>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </div>
                 </div>`;
             }).join('');
@@ -4921,19 +4940,26 @@
             if (!el) return;
             const groups = PLACEMENT_CATS.filter((c) => selectedGroups.has(c.key));
             const pls = PLACEMENT_CATALOG.filter((p) => selectedGroups.has(p.cat));
-            if (pls.length === 0) { el.innerHTML = 'Select at least one placement group.'; return; }
+            if (pls.length === 0) { el.innerHTML = tt('newc.est_select_group', 'Select at least one placement group.'); return; }
             const ecpms = pls.map((p) => p.ecpm);
             const lo = Math.min.apply(null, ecpms);
             const hi = Math.max.apply(null, ecpms);
             const avg = ecpms.reduce((s, n) => s + n, 0) / ecpms.length;
             const budget = parseFloat((campaignForm.querySelector('[name="total_budget"]') || {}).value) || 0;
-            const names = groups.map((g) => g.label).join(' + ');
-            let line = `<strong style="color:#1A1A2E;">${names}</strong> · ${pls.length} placements · est. <strong style="color:#FF2D78;">~$${lo.toFixed(2)}–$${hi.toFixed(2)} eCPM</strong> (what you pay per 1,000 impressions).`;
+            const names = groups.map((g) => g.labelKey ? tt(g.labelKey, g.label) : g.label).join(' + ');
+            const placementsWord = tt('newc.est_placements', 'placements');
+            const estWord        = tt('newc.est_est',        'est.');
+            const ecpmHint       = tt('newc.est_ecpm_hint',  '(what you pay per 1,000 impressions).');
+            let line = `<strong style="color:#1A1A2E;">${names}</strong> · ${pls.length} ${placementsWord} · ${estWord} <strong style="color:#FF2D78;">~$${lo.toFixed(2)}–$${hi.toFixed(2)} eCPM</strong> ${ecpmHint}`;
             if (budget > 0) {
                 const impressions = Math.round((budget / avg) * 1000);
-                line += `<br>At your $${budget.toLocaleString()} total budget ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} impressions</strong> (blended).`;
+                const atBudget  = tt('newc.est_at_budget',  'At your');
+                const totalBdg  = tt('newc.est_total_budget','total budget');
+                const imprWord  = tt('newc.est_impressions','impressions');
+                const blended   = tt('newc.est_blended',    '(blended).');
+                line += `<br>${atBudget} $${budget.toLocaleString()} ${totalBdg} ≈ <strong style="color:#1A1A2E;">${impressions.toLocaleString()} ${imprWord}</strong> ${blended}`;
             } else {
-                line += `<br>Enter a Total Budget below to project how many impressions you'll get.`;
+                line += `<br>${tt('newc.est_enter_budget', "Enter a Total Budget below to project how many impressions you'll get.")}`;
             }
             el.innerHTML = line;
         }
@@ -6855,6 +6881,101 @@
                     'security.new_hint': 'At least 8 characters.',
                     'security.confirm': 'Confirm new password',
                     'security.change_btn': 'Change password',
+                    'newc.placement_intro': 'Select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher\'s product.',
+                    'newc.bb_ai_badge': 'Boost Boss AI',
+                    'newc.intent': 'Intent signals',
+                    'newc.intent_hint': '— what users are trying to do',
+                    'newc.intent_ph': 'e.g. debugging python, writing a pitch deck',
+                    'newc.intent_add': '+ Add',
+                    'newc.suggested': 'Suggested:',
+                    'newc.host_apps': 'Host apps',
+                    'newc.host_apps_hint': '— where your ad appears',
+                    'newc.mcp_tools': 'Active MCP tools',
+                    'newc.mcp_tools_hint': '— session context',
+                    'newc.ai_model': 'AI model',
+                    'newc.ai_model_hint': '— optional',
+                    'newc.surfaces': 'Surfaces',
+                    'newc.surfaces_hint': '— where the ad renders. Leave empty for any.',
+                    'newc.surf_chat': 'Chat inline',
+                    'newc.surf_tool': 'Tool response',
+                    'newc.surf_sidebar': 'Sidebar',
+                    'newc.surf_loading': 'Loading screen',
+                    'newc.surf_status': 'Status line',
+                    'newc.surf_web': 'Web',
+                    'newc.reach_daily': 'Daily reach',
+                    'newc.reach_match': 'Match score',
+                    'newc.match_broad': 'Broad',
+                    'newc.reach_ecpa': 'Est. eCPA',
+                    'newc.billing_model': 'Billing Model',
+                    'newc.bm_cpm': 'CPM (Cost Per Mille)',
+                    'newc.bm_cpc': 'CPC (Cost Per Click)',
+                    'newc.bm_cpv': 'CPV (Cost Per View)',
+                    'newc.bm_cpa': 'CPA (Cost Per Acquisition)',
+                    'newc.conv_types': 'Conversion event types',
+                    'newc.conv_types_hint_a': '(comma-separated, e.g.',
+                    'newc.conv_types_hint_b': '; empty = any)',
+                    'newc.conv_types_ph': 'signup, purchase, lead',
+                    'newc.conv_charged_a': 'Only conversions whose',
+                    'newc.conv_charged_b': 'matches this list will be charged. Configure conversion firing in the',
+                    'newc.conv_docs': 'conversion beacon docs',
+                    'newc.benna_opt': 'Benna optimization',
+                    'newc.benna_opt_sub': 'Set a goal. The engine handles bidding.',
+                    'newc.powered_by_benna': 'Powered by Benna',
+                    'newc.goal_tcpa_name': 'Target CPA',
+                    'newc.goal_tcpa_desc': 'Hit a cost per acquisition. Benna tunes bids in real time.',
+                    'newc.goal_troas_name': 'Target ROAS',
+                    'newc.goal_troas_desc': 'Optimize for return on ad spend. Ideal for revenue campaigns.',
+                    'newc.goal_maxconv_name': 'Max Conversions',
+                    'newc.goal_maxconv_desc': 'Spend the full budget on the highest-probability converters.',
+                    'newc.goal_manual_name': 'Manual bid',
+                    'newc.goal_manual_desc': 'You set a fixed bid. Benna signals still applied to targeting.',
+                    'newc.per_conversion': 'per conversion',
+                    'newc.return_on_spend': '× return on spend',
+                    'newc.benna_plan_a': 'Benna will score every eligible impression against your targeting signals and auto-bid up to a ceiling that hits your',
+                    'newc.benna_plan_target': 'target CPA of',
+                    'newc.benna_plan_b': 'Expect a',
+                    'newc.learning_phase': 'learning phase',
+                    'newc.benna_plan_c': 'of 48–72 hours while the engine calibrates on your conversion events, then steady optimization. Live adjustments viewable in the campaign dashboard.',
+                    'newc.bid_amount': 'Bid Amount',
+                    'newc.est_cost': 'Estimated Cost',
+                    'newc.daily_budget': 'Daily Budget',
+                    'newc.total_budget': 'Total Budget',
+                    'newc.schedule': 'Schedule (optional)',
+                    'newc.start_date': 'Start Date',
+                    'newc.end_date': 'End Date',
+                    'newc.launch': 'Launch Campaign',
+                    'newc.cat_ai_label': 'AI-native placements',
+                    'newc.cat_ai_note': 'Sponsored lines, sources and suggestions woven into the AI response. Runs on every door, including MCP.',
+                    'newc.cat_display_label': 'Display placements',
+                    'newc.cat_display_note': 'Image cards and corner units shown alongside content. Lumi Web, Extension and Bot.',
+                    'newc.plc_citation_name': 'Sponsored citation',
+                    'newc.plc_citation_desc': 'A sponsored source / citation woven into the AI answer.',
+                    'newc.plc_toolrec_name': 'Tool / skill rec',
+                    'newc.plc_toolrec_desc': 'A "you might also try" sponsored tool recommendation.',
+                    'newc.plc_chip_name': 'Suggested-action chip',
+                    'newc.plc_chip_desc': 'A tappable sponsored quick-reply pill.',
+                    'newc.plc_welcome_name': 'Sponsored welcome',
+                    'newc.plc_welcome_desc': 'A sponsored line in a bot welcome / onboarding message.',
+                    'newc.plc_buttons_name': 'Suggested-action buttons',
+                    'newc.plc_buttons_desc': 'Sponsored quick-reply buttons under the bot reply.',
+                    'newc.plc_card_name': 'Inline sponsored card',
+                    'newc.plc_card_desc': 'A sponsored media card rendered inline in the response.',
+                    'newc.plc_corner_name': 'Corner unit',
+                    'newc.plc_corner_desc': 'A sticky, dismissable card anchored to a screen corner.',
+                    'newc.plc_newtab_name': 'New-tab takeover',
+                    'newc.plc_newtab_desc': 'A hero unit on an extension new-tab / home screen.',
+                    'newc.click_preview': 'Click to preview in context →',
+                    'newc.badge_standard': 'Standard',
+                    'newc.badge_optin': 'Opt-in',
+                    'newc.est_select_group': 'Select at least one placement group.',
+                    'newc.est_placements': 'placements',
+                    'newc.est_est': 'est.',
+                    'newc.est_ecpm_hint': '(what you pay per 1,000 impressions).',
+                    'newc.est_at_budget': 'At your',
+                    'newc.est_total_budget': 'total budget',
+                    'newc.est_impressions': 'impressions',
+                    'newc.est_blended': '(blended).',
+                    'newc.est_enter_budget': 'Enter a Total Budget below to project how many impressions you\'ll get.',
                 },
                 'zh': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
@@ -6934,6 +7055,101 @@
                     'security.new_hint': '至少 8 个字符。',
                     'security.confirm': '确认新密码',
                     'security.change_btn': '更改密码',
+                    'newc.placement_intro': '选择一个版位组;组内的每个版位都会包含在内。点击任意卡片以在发布商产品中预览您的广告。',
+                    'newc.bb_ai_badge': 'Boost Boss AI',
+                    'newc.intent': '意图信号',
+                    'newc.intent_hint': '— 用户正在尝试做什么',
+                    'newc.intent_ph': '例如 debugging python、writing a pitch deck',
+                    'newc.intent_add': '+ 添加',
+                    'newc.suggested': '推荐:',
+                    'newc.host_apps': '宿主应用',
+                    'newc.host_apps_hint': '— 您的广告在哪里展示',
+                    'newc.mcp_tools': '活跃 MCP 工具',
+                    'newc.mcp_tools_hint': '— 会话上下文',
+                    'newc.ai_model': 'AI 模型',
+                    'newc.ai_model_hint': '— 可选',
+                    'newc.surfaces': '版面',
+                    'newc.surfaces_hint': '— 广告渲染位置。留空则任意。',
+                    'newc.surf_chat': '聊天内嵌',
+                    'newc.surf_tool': '工具响应',
+                    'newc.surf_sidebar': '侧边栏',
+                    'newc.surf_loading': '加载屏',
+                    'newc.surf_status': '状态栏',
+                    'newc.surf_web': '网页',
+                    'newc.reach_daily': '每日触达',
+                    'newc.reach_match': '匹配分',
+                    'newc.match_broad': '广泛',
+                    'newc.reach_ecpa': '预计 eCPA',
+                    'newc.billing_model': '计费方式',
+                    'newc.bm_cpm': 'CPM(每千次展示成本)',
+                    'newc.bm_cpc': 'CPC(每次点击成本)',
+                    'newc.bm_cpv': 'CPV(每次观看成本)',
+                    'newc.bm_cpa': 'CPA(每次转化成本)',
+                    'newc.conv_types': '转化事件类型',
+                    'newc.conv_types_hint_a': '(逗号分隔,例如',
+                    'newc.conv_types_hint_b': ';留空 = 任意)',
+                    'newc.conv_types_ph': 'signup, purchase, lead',
+                    'newc.conv_charged_a': '只有其',
+                    'newc.conv_charged_b': '匹配此列表的转化才会计费。请在以下位置配置转化触发:',
+                    'newc.conv_docs': '转化信标文档',
+                    'newc.benna_opt': 'Benna 优化',
+                    'newc.benna_opt_sub': '设定目标,引擎自动出价。',
+                    'newc.powered_by_benna': '由 Benna 驱动',
+                    'newc.goal_tcpa_name': '目标 CPA',
+                    'newc.goal_tcpa_desc': '锁定每次转化成本。Benna 实时调整出价。',
+                    'newc.goal_troas_name': '目标 ROAS',
+                    'newc.goal_troas_desc': '优化广告支出回报率。适合营收类活动。',
+                    'newc.goal_maxconv_name': '最大化转化',
+                    'newc.goal_maxconv_desc': '将预算花在转化概率最高的用户上。',
+                    'newc.goal_manual_name': '手动出价',
+                    'newc.goal_manual_desc': '您设定固定出价。Benna 信号仍用于定向。',
+                    'newc.per_conversion': '每次转化',
+                    'newc.return_on_spend': '× 支出回报',
+                    'newc.benna_plan_a': 'Benna 将根据您的定向信号为每个符合条件的展示打分,并自动出价至命中您',
+                    'newc.benna_plan_target': '目标 CPA',
+                    'newc.benna_plan_b': '的上限。预计有',
+                    'newc.learning_phase': '学习期',
+                    'newc.benna_plan_c': '48–72 小时,期间引擎将基于您的转化事件进行校准,随后进入稳定优化。实时调整可在广告面板查看。',
+                    'newc.bid_amount': '出价金额',
+                    'newc.est_cost': '预估成本',
+                    'newc.daily_budget': '每日预算',
+                    'newc.total_budget': '总预算',
+                    'newc.schedule': '排程(可选)',
+                    'newc.start_date': '开始日期',
+                    'newc.end_date': '结束日期',
+                    'newc.launch': '启动广告',
+                    'newc.cat_ai_label': 'AI 原生版位',
+                    'newc.cat_ai_note': '编织进 AI 回答的赞助句、来源和建议。在每扇门上运行,包括 MCP。',
+                    'newc.cat_display_label': '展示版位',
+                    'newc.cat_display_note': '与内容并列展示的图片卡和角落单元。适用于 Lumi Web、Extension 和 Bot。',
+                    'newc.plc_citation_name': '赞助引用',
+                    'newc.plc_citation_desc': '编织进 AI 回答的赞助来源/引用。',
+                    'newc.plc_toolrec_name': '工具/技能推荐',
+                    'newc.plc_toolrec_desc': '"您可能还想试试"的赞助工具推荐。',
+                    'newc.plc_chip_name': '建议动作 chip',
+                    'newc.plc_chip_desc': '可点击的赞助快捷回复药丸。',
+                    'newc.plc_welcome_name': '赞助欢迎语',
+                    'newc.plc_welcome_desc': '机器人欢迎/引导消息中的赞助句。',
+                    'newc.plc_buttons_name': '建议动作按钮',
+                    'newc.plc_buttons_desc': '机器人回复下方的赞助快捷回复按钮。',
+                    'newc.plc_card_name': '内嵌赞助卡片',
+                    'newc.plc_card_desc': '在回答中内嵌渲染的赞助媒体卡片。',
+                    'newc.plc_corner_name': '角落单元',
+                    'newc.plc_corner_desc': '锚定到屏幕角落的粘性可关闭卡片。',
+                    'newc.plc_newtab_name': '新标签页接管',
+                    'newc.plc_newtab_desc': '扩展程序新标签页/主页上的英雄单元。',
+                    'newc.click_preview': '点击在上下文中预览 →',
+                    'newc.badge_standard': '标准',
+                    'newc.badge_optin': '需选入',
+                    'newc.est_select_group': '请至少选择一个版位组。',
+                    'newc.est_placements': '个版位',
+                    'newc.est_est': '预估',
+                    'newc.est_ecpm_hint': '(每 1,000 次展示您支付的金额)。',
+                    'newc.est_at_budget': '按您的',
+                    'newc.est_total_budget': '总预算',
+                    'newc.est_impressions': '次展示',
+                    'newc.est_blended': '(混合)。',
+                    'newc.est_enter_budget': '在下方输入总预算以预估您将获得多少次展示。',
                 },
                 'zh-TW': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
@@ -7013,6 +7229,101 @@
                     'security.new_hint': '至少 8 個字元。',
                     'security.confirm': '確認新密碼',
                     'security.change_btn': '更改密碼',
+                    'newc.placement_intro': '選擇一個版位群組;群組內的每個版位都會包含在內。點擊任意卡片以在發布商產品中預覽您的廣告。',
+                    'newc.bb_ai_badge': 'Boost Boss AI',
+                    'newc.intent': '意圖訊號',
+                    'newc.intent_hint': '— 使用者正在嘗試做什麼',
+                    'newc.intent_ph': '例如 debugging python、writing a pitch deck',
+                    'newc.intent_add': '+ 新增',
+                    'newc.suggested': '建議:',
+                    'newc.host_apps': '宿主應用',
+                    'newc.host_apps_hint': '— 您的廣告在哪裡顯示',
+                    'newc.mcp_tools': '活躍 MCP 工具',
+                    'newc.mcp_tools_hint': '— 工作階段內容',
+                    'newc.ai_model': 'AI 模型',
+                    'newc.ai_model_hint': '— 選用',
+                    'newc.surfaces': '版面',
+                    'newc.surfaces_hint': '— 廣告呈現位置。留空表示任意。',
+                    'newc.surf_chat': '聊天內嵌',
+                    'newc.surf_tool': '工具回應',
+                    'newc.surf_sidebar': '側邊欄',
+                    'newc.surf_loading': '載入畫面',
+                    'newc.surf_status': '狀態列',
+                    'newc.surf_web': '網頁',
+                    'newc.reach_daily': '每日觸及',
+                    'newc.reach_match': '匹配分',
+                    'newc.match_broad': '廣泛',
+                    'newc.reach_ecpa': '預估 eCPA',
+                    'newc.billing_model': '計費方式',
+                    'newc.bm_cpm': 'CPM(每千次曝光成本)',
+                    'newc.bm_cpc': 'CPC(每次點擊成本)',
+                    'newc.bm_cpv': 'CPV(每次觀看成本)',
+                    'newc.bm_cpa': 'CPA(每次轉換成本)',
+                    'newc.conv_types': '轉換事件類型',
+                    'newc.conv_types_hint_a': '(逗號分隔,例如',
+                    'newc.conv_types_hint_b': ';留空 = 任意)',
+                    'newc.conv_types_ph': 'signup, purchase, lead',
+                    'newc.conv_charged_a': '只有其',
+                    'newc.conv_charged_b': '符合此清單的轉換才會計費。請在以下位置設定轉換觸發:',
+                    'newc.conv_docs': '轉換信標文件',
+                    'newc.benna_opt': 'Benna 最佳化',
+                    'newc.benna_opt_sub': '設定目標,引擎自動出價。',
+                    'newc.powered_by_benna': '由 Benna 驅動',
+                    'newc.goal_tcpa_name': '目標 CPA',
+                    'newc.goal_tcpa_desc': '鎖定每次轉換成本。Benna 即時調整出價。',
+                    'newc.goal_troas_name': '目標 ROAS',
+                    'newc.goal_troas_desc': '最佳化廣告支出回報率。適合營收型活動。',
+                    'newc.goal_maxconv_name': '最大化轉換',
+                    'newc.goal_maxconv_desc': '把預算花在轉換機率最高的用戶上。',
+                    'newc.goal_manual_name': '手動出價',
+                    'newc.goal_manual_desc': '您設定固定出價。Benna 訊號仍用於鎖定目標。',
+                    'newc.per_conversion': '每次轉換',
+                    'newc.return_on_spend': '× 支出回報',
+                    'newc.benna_plan_a': 'Benna 會依您的鎖定訊號為每個合格曝光評分,並自動出價至命中您的',
+                    'newc.benna_plan_target': '目標 CPA',
+                    'newc.benna_plan_b': '上限。預計會有',
+                    'newc.learning_phase': '學習期',
+                    'newc.benna_plan_c': '48–72 小時,期間引擎會基於您的轉換事件進行校準,然後進入穩定最佳化。即時調整可在活動儀表板查看。',
+                    'newc.bid_amount': '出價金額',
+                    'newc.est_cost': '預估成本',
+                    'newc.daily_budget': '每日預算',
+                    'newc.total_budget': '總預算',
+                    'newc.schedule': '排程(選用)',
+                    'newc.start_date': '開始日期',
+                    'newc.end_date': '結束日期',
+                    'newc.launch': '啟動廣告',
+                    'newc.cat_ai_label': 'AI 原生版位',
+                    'newc.cat_ai_note': '編織進 AI 回答的贊助句、來源和建議。在每扇門上執行,包括 MCP。',
+                    'newc.cat_display_label': '展示版位',
+                    'newc.cat_display_note': '與內容並列顯示的圖片卡與角落單元。適用 Lumi Web、Extension 與 Bot。',
+                    'newc.plc_citation_name': '贊助引用',
+                    'newc.plc_citation_desc': '編織進 AI 回答的贊助來源/引用。',
+                    'newc.plc_toolrec_name': '工具/技能推薦',
+                    'newc.plc_toolrec_desc': '「您可能也想試試」的贊助工具推薦。',
+                    'newc.plc_chip_name': '建議動作 chip',
+                    'newc.plc_chip_desc': '可點擊的贊助快速回覆藥丸。',
+                    'newc.plc_welcome_name': '贊助歡迎詞',
+                    'newc.plc_welcome_desc': '機器人歡迎/引導訊息中的贊助句。',
+                    'newc.plc_buttons_name': '建議動作按鈕',
+                    'newc.plc_buttons_desc': '機器人回覆下方的贊助快速回覆按鈕。',
+                    'newc.plc_card_name': '內嵌贊助卡片',
+                    'newc.plc_card_desc': '在回答中內嵌呈現的贊助媒體卡片。',
+                    'newc.plc_corner_name': '角落單元',
+                    'newc.plc_corner_desc': '錨定螢幕角落的黏性可關閉卡片。',
+                    'newc.plc_newtab_name': '新分頁接管',
+                    'newc.plc_newtab_desc': '擴充功能新分頁/首頁上的主視覺單元。',
+                    'newc.click_preview': '點擊在情境中預覽 →',
+                    'newc.badge_standard': '標準',
+                    'newc.badge_optin': '需選入',
+                    'newc.est_select_group': '請至少選擇一個版位群組。',
+                    'newc.est_placements': '個版位',
+                    'newc.est_est': '預估',
+                    'newc.est_ecpm_hint': '(每 1,000 次曝光您支付的金額)。',
+                    'newc.est_at_budget': '依您的',
+                    'newc.est_total_budget': '總預算',
+                    'newc.est_impressions': '次曝光',
+                    'newc.est_blended': '(混合)。',
+                    'newc.est_enter_budget': '在下方輸入總預算以預估您將獲得多少次曝光。',
                 },
                 'ja': {
                     'chrome.back': 'SuperBoost Ads に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
@@ -7092,6 +7403,101 @@
                     'security.new_hint': '8 文字以上。',
                     'security.confirm': '新しいパスワード(確認)',
                     'security.change_btn': 'パスワードを変更',
+                    'newc.placement_intro': 'プレースメント グループを選択 — グループ内のすべてのプレースメントが含まれます。任意のカードをクリックすると、パブリッシャーの製品内で広告をプレビューできます。',
+                    'newc.bb_ai_badge': 'Boost Boss AI',
+                    'newc.intent': 'インテント シグナル',
+                    'newc.intent_hint': '— ユーザーが何をしようとしているか',
+                    'newc.intent_ph': '例:python のデバッグ、ピッチデッキ作成',
+                    'newc.intent_add': '+ 追加',
+                    'newc.suggested': 'おすすめ:',
+                    'newc.host_apps': 'ホストアプリ',
+                    'newc.host_apps_hint': '— 広告が表示される場所',
+                    'newc.mcp_tools': 'アクティブな MCP ツール',
+                    'newc.mcp_tools_hint': '— セッション コンテキスト',
+                    'newc.ai_model': 'AI モデル',
+                    'newc.ai_model_hint': '— 任意',
+                    'newc.surfaces': 'サーフェス',
+                    'newc.surfaces_hint': '— 広告のレンダリング場所。空欄は任意。',
+                    'newc.surf_chat': 'チャット インライン',
+                    'newc.surf_tool': 'ツールレスポンス',
+                    'newc.surf_sidebar': 'サイドバー',
+                    'newc.surf_loading': 'ロード画面',
+                    'newc.surf_status': 'ステータス行',
+                    'newc.surf_web': 'Web',
+                    'newc.reach_daily': '日次リーチ',
+                    'newc.reach_match': 'マッチ スコア',
+                    'newc.match_broad': 'ブロード',
+                    'newc.reach_ecpa': '推定 eCPA',
+                    'newc.billing_model': '課金モデル',
+                    'newc.bm_cpm': 'CPM(1,000 回表示あたりコスト)',
+                    'newc.bm_cpc': 'CPC(クリック単価)',
+                    'newc.bm_cpv': 'CPV(視聴単価)',
+                    'newc.bm_cpa': 'CPA(獲得単価)',
+                    'newc.conv_types': 'コンバージョン イベント タイプ',
+                    'newc.conv_types_hint_a': '(カンマ区切り、例:',
+                    'newc.conv_types_hint_b': ';空欄 = 任意)',
+                    'newc.conv_types_ph': 'signup, purchase, lead',
+                    'newc.conv_charged_a': 'その',
+                    'newc.conv_charged_b': 'がこのリストに一致するコンバージョンのみ課金されます。コンバージョン発火の設定はこちら:',
+                    'newc.conv_docs': 'コンバージョン ビーコン ドキュメント',
+                    'newc.benna_opt': 'Benna 最適化',
+                    'newc.benna_opt_sub': 'ゴールを設定。エンジンが入札を担当します。',
+                    'newc.powered_by_benna': 'Powered by Benna',
+                    'newc.goal_tcpa_name': 'ターゲット CPA',
+                    'newc.goal_tcpa_desc': '獲得単価を達成。Benna が入札をリアルタイム調整します。',
+                    'newc.goal_troas_name': 'ターゲット ROAS',
+                    'newc.goal_troas_desc': '広告費用対効果を最適化。収益キャンペーンに最適。',
+                    'newc.goal_maxconv_name': 'コンバージョン最大化',
+                    'newc.goal_maxconv_desc': '予算全額を最も成約確度の高いユーザーに費やします。',
+                    'newc.goal_manual_name': '手動入札',
+                    'newc.goal_manual_desc': '固定入札を設定。Benna のシグナルは引き続きターゲティングに利用されます。',
+                    'newc.per_conversion': '/ コンバージョン',
+                    'newc.return_on_spend': '× 広告費用対効果',
+                    'newc.benna_plan_a': 'Benna は適格なすべての表示をターゲティング シグナルに照らしてスコアリングし、',
+                    'newc.benna_plan_target': 'ターゲット CPA',
+                    'newc.benna_plan_b': 'の上限まで自動入札します。',
+                    'newc.learning_phase': '学習期間',
+                    'newc.benna_plan_c': 'は 48〜72 時間で、その間エンジンはコンバージョン イベントに基づいて調整され、その後安定した最適化に入ります。リアルタイム調整はキャンペーン ダッシュボードで確認できます。',
+                    'newc.bid_amount': '入札金額',
+                    'newc.est_cost': '推定コスト',
+                    'newc.daily_budget': '日次予算',
+                    'newc.total_budget': '総予算',
+                    'newc.schedule': 'スケジュール(任意)',
+                    'newc.start_date': '開始日',
+                    'newc.end_date': '終了日',
+                    'newc.launch': 'キャンペーン開始',
+                    'newc.cat_ai_label': 'AI ネイティブ プレースメント',
+                    'newc.cat_ai_note': 'AI 応答に織り込まれるスポンサー文、ソース、提案。MCP を含むあらゆる扉で配信。',
+                    'newc.cat_display_label': 'ディスプレイ プレースメント',
+                    'newc.cat_display_note': 'コンテンツの横に表示される画像カードとコーナーユニット。Lumi Web、Extension、Bot 対応。',
+                    'newc.plc_citation_name': 'スポンサー引用',
+                    'newc.plc_citation_desc': 'AI 回答に織り込まれるスポンサー ソース/引用。',
+                    'newc.plc_toolrec_name': 'ツール/スキル推薦',
+                    'newc.plc_toolrec_desc': '「こちらも試してみては」型のスポンサー ツール推薦。',
+                    'newc.plc_chip_name': '提案アクション チップ',
+                    'newc.plc_chip_desc': 'タップ可能なスポンサー クイック リプライ ピル。',
+                    'newc.plc_welcome_name': 'スポンサー ウェルカム',
+                    'newc.plc_welcome_desc': 'ボットのウェルカム/オンボーディング メッセージ内のスポンサー文。',
+                    'newc.plc_buttons_name': '提案アクション ボタン',
+                    'newc.plc_buttons_desc': 'ボット返信下のスポンサー クイック リプライ ボタン。',
+                    'newc.plc_card_name': 'インライン スポンサー カード',
+                    'newc.plc_card_desc': '応答内にインラインで表示されるスポンサー メディア カード。',
+                    'newc.plc_corner_name': 'コーナー ユニット',
+                    'newc.plc_corner_desc': '画面の角に固定される閉じ可能カード。',
+                    'newc.plc_newtab_name': '新規タブ ジャック',
+                    'newc.plc_newtab_desc': '拡張機能の新規タブ/ホーム画面のヒーロー ユニット。',
+                    'newc.click_preview': 'クリックして文脈内プレビュー →',
+                    'newc.badge_standard': '標準',
+                    'newc.badge_optin': 'オプトイン',
+                    'newc.est_select_group': 'プレースメント グループを少なくとも 1 つ選択してください。',
+                    'newc.est_placements': '配置',
+                    'newc.est_est': '推定',
+                    'newc.est_ecpm_hint': '(1,000 回表示あたりの支払い額)。',
+                    'newc.est_at_budget': 'あなたの',
+                    'newc.est_total_budget': '総予算',
+                    'newc.est_impressions': '表示',
+                    'newc.est_blended': '(ブレンド)。',
+                    'newc.est_enter_budget': '下に総予算を入力すると、見込み表示回数を予測できます。',
                 },
                 'ko': {
                     'chrome.back': 'SuperBoost Ads로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
@@ -7171,6 +7577,101 @@
                     'security.new_hint': '최소 8자.',
                     'security.confirm': '새 비밀번호 확인',
                     'security.change_btn': '비밀번호 변경',
+                    'newc.placement_intro': '플레이스먼트 그룹을 선택하세요 — 그룹 내 모든 플레이스먼트가 포함됩니다. 카드를 클릭하면 퍼블리셔의 제품 안에서 광고를 미리 볼 수 있습니다.',
+                    'newc.bb_ai_badge': 'Boost Boss AI',
+                    'newc.intent': '의도 시그널',
+                    'newc.intent_hint': '— 사용자가 무엇을 하려는지',
+                    'newc.intent_ph': '예: python 디버깅, 피치 덱 작성',
+                    'newc.intent_add': '+ 추가',
+                    'newc.suggested': '추천:',
+                    'newc.host_apps': '호스트 앱',
+                    'newc.host_apps_hint': '— 광고가 노출되는 곳',
+                    'newc.mcp_tools': '활성 MCP 도구',
+                    'newc.mcp_tools_hint': '— 세션 컨텍스트',
+                    'newc.ai_model': 'AI 모델',
+                    'newc.ai_model_hint': '— 선택 사항',
+                    'newc.surfaces': '서피스',
+                    'newc.surfaces_hint': '— 광고가 렌더링되는 곳. 비워두면 모두.',
+                    'newc.surf_chat': '채팅 인라인',
+                    'newc.surf_tool': '도구 응답',
+                    'newc.surf_sidebar': '사이드바',
+                    'newc.surf_loading': '로딩 화면',
+                    'newc.surf_status': '상태 표시줄',
+                    'newc.surf_web': '웹',
+                    'newc.reach_daily': '일일 도달',
+                    'newc.reach_match': '매치 스코어',
+                    'newc.match_broad': '광범위',
+                    'newc.reach_ecpa': '예상 eCPA',
+                    'newc.billing_model': '과금 모델',
+                    'newc.bm_cpm': 'CPM(1,000회 노출 비용)',
+                    'newc.bm_cpc': 'CPC(클릭당 비용)',
+                    'newc.bm_cpv': 'CPV(시청당 비용)',
+                    'newc.bm_cpa': 'CPA(획득당 비용)',
+                    'newc.conv_types': '전환 이벤트 유형',
+                    'newc.conv_types_hint_a': '(쉼표로 구분, 예:',
+                    'newc.conv_types_hint_b': '; 비우면 모두)',
+                    'newc.conv_types_ph': 'signup, purchase, lead',
+                    'newc.conv_charged_a': '해당',
+                    'newc.conv_charged_b': '이 이 목록과 일치하는 전환만 과금됩니다. 전환 발생 구성은 다음에서:',
+                    'newc.conv_docs': '전환 비콘 문서',
+                    'newc.benna_opt': 'Benna 최적화',
+                    'newc.benna_opt_sub': '목표를 설정하세요. 엔진이 입찰을 처리합니다.',
+                    'newc.powered_by_benna': 'Powered by Benna',
+                    'newc.goal_tcpa_name': '목표 CPA',
+                    'newc.goal_tcpa_desc': '획득당 비용을 달성하세요. Benna가 입찰을 실시간으로 조정합니다.',
+                    'newc.goal_troas_name': '목표 ROAS',
+                    'newc.goal_troas_desc': '광고 지출 대비 수익을 최적화. 수익 캠페인에 이상적.',
+                    'newc.goal_maxconv_name': '전환 최대화',
+                    'newc.goal_maxconv_desc': '전체 예산을 전환 가능성이 가장 높은 사용자에 사용합니다.',
+                    'newc.goal_manual_name': '수동 입찰',
+                    'newc.goal_manual_desc': '고정 입찰을 설정합니다. Benna 시그널은 여전히 타기팅에 적용됩니다.',
+                    'newc.per_conversion': '/ 전환',
+                    'newc.return_on_spend': '× 지출 대비 수익',
+                    'newc.benna_plan_a': 'Benna가 적격한 모든 노출을 타기팅 시그널에 따라 평가하고 자동 입찰합니다. 한도는',
+                    'newc.benna_plan_target': '목표 CPA',
+                    'newc.benna_plan_b': '에 맞춰집니다.',
+                    'newc.learning_phase': '학습 단계',
+                    'newc.benna_plan_c': '48–72시간 동안 엔진은 전환 이벤트에 따라 보정되며, 이후 안정적 최적화 단계로 진입합니다. 실시간 조정은 캠페인 대시보드에서 확인할 수 있습니다.',
+                    'newc.bid_amount': '입찰 금액',
+                    'newc.est_cost': '예상 비용',
+                    'newc.daily_budget': '일일 예산',
+                    'newc.total_budget': '총 예산',
+                    'newc.schedule': '스케줄(선택)',
+                    'newc.start_date': '시작일',
+                    'newc.end_date': '종료일',
+                    'newc.launch': '캠페인 시작',
+                    'newc.cat_ai_label': 'AI 네이티브 위치',
+                    'newc.cat_ai_note': 'AI 응답에 녹아드는 스폰서 문장, 출처, 제안. MCP 포함 모든 문에서 실행.',
+                    'newc.cat_display_label': '디스플레이 위치',
+                    'newc.cat_display_note': '콘텐츠와 함께 노출되는 이미지 카드와 코너 유닛. Lumi Web, Extension, Bot에 적용.',
+                    'newc.plc_citation_name': '스폰서 인용',
+                    'newc.plc_citation_desc': 'AI 응답에 녹아드는 스폰서 출처/인용.',
+                    'newc.plc_toolrec_name': '도구/스킬 추천',
+                    'newc.plc_toolrec_desc': '"이것도 해보세요" 식 스폰서 도구 추천.',
+                    'newc.plc_chip_name': '추천 액션 칩',
+                    'newc.plc_chip_desc': '탭 가능한 스폰서 빠른 응답 알약.',
+                    'newc.plc_welcome_name': '스폰서 환영 메시지',
+                    'newc.plc_welcome_desc': '봇 환영/온보딩 메시지의 스폰서 문장.',
+                    'newc.plc_buttons_name': '추천 액션 버튼',
+                    'newc.plc_buttons_desc': '봇 응답 아래의 스폰서 빠른 응답 버튼.',
+                    'newc.plc_card_name': '인라인 스폰서 카드',
+                    'newc.plc_card_desc': '응답 내에 인라인으로 렌더링되는 스폰서 미디어 카드.',
+                    'newc.plc_corner_name': '코너 유닛',
+                    'newc.plc_corner_desc': '화면 코너에 고정되는 닫을 수 있는 카드.',
+                    'newc.plc_newtab_name': '새 탭 점령',
+                    'newc.plc_newtab_desc': '확장 프로그램 새 탭/홈 화면의 히어로 유닛.',
+                    'newc.click_preview': '컨텍스트에서 미리보려면 클릭 →',
+                    'newc.badge_standard': '표준',
+                    'newc.badge_optin': '옵트인',
+                    'newc.est_select_group': '최소 하나의 위치 그룹을 선택하세요.',
+                    'newc.est_placements': '개 위치',
+                    'newc.est_est': '추정',
+                    'newc.est_ecpm_hint': '(1,000회 노출당 지불 금액).',
+                    'newc.est_at_budget': '귀하의',
+                    'newc.est_total_budget': '총 예산',
+                    'newc.est_impressions': '노출',
+                    'newc.est_blended': '(혼합).',
+                    'newc.est_enter_budget': '아래에 총 예산을 입력하면 예상 노출 수를 추정할 수 있습니다.',
                 },
                 'vi': {
                     'chrome.back': 'Quay lại SuperBoost Ads', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
@@ -7250,6 +7751,101 @@
                     'security.new_hint': 'Tối thiểu 8 ký tự.',
                     'security.confirm': 'Xác nhận mật khẩu mới',
                     'security.change_btn': 'Đổi mật khẩu',
+                    'newc.placement_intro': 'Chọn một nhóm placement — mọi placement trong nhóm sẽ được bao gồm. Bấm vào bất kỳ card nào để xem trước quảng cáo trong sản phẩm của publisher.',
+                    'newc.bb_ai_badge': 'Boost Boss AI',
+                    'newc.intent': 'Tín hiệu intent',
+                    'newc.intent_hint': '— người dùng đang cố làm gì',
+                    'newc.intent_ph': 'vd. debug python, viết pitch deck',
+                    'newc.intent_add': '+ Thêm',
+                    'newc.suggested': 'Gợi ý:',
+                    'newc.host_apps': 'Ứng dụng host',
+                    'newc.host_apps_hint': '— nơi quảng cáo xuất hiện',
+                    'newc.mcp_tools': 'Công cụ MCP đang hoạt động',
+                    'newc.mcp_tools_hint': '— ngữ cảnh phiên',
+                    'newc.ai_model': 'Mô hình AI',
+                    'newc.ai_model_hint': '— tùy chọn',
+                    'newc.surfaces': 'Bề mặt',
+                    'newc.surfaces_hint': '— nơi quảng cáo render. Bỏ trống = bất kỳ.',
+                    'newc.surf_chat': 'Chat inline',
+                    'newc.surf_tool': 'Tool response',
+                    'newc.surf_sidebar': 'Sidebar',
+                    'newc.surf_loading': 'Màn hình loading',
+                    'newc.surf_status': 'Status line',
+                    'newc.surf_web': 'Web',
+                    'newc.reach_daily': 'Reach hàng ngày',
+                    'newc.reach_match': 'Điểm match',
+                    'newc.match_broad': 'Rộng',
+                    'newc.reach_ecpa': 'Ước tính eCPA',
+                    'newc.billing_model': 'Mô hình thanh toán',
+                    'newc.bm_cpm': 'CPM (Chi phí trên 1000 impression)',
+                    'newc.bm_cpc': 'CPC (Chi phí mỗi click)',
+                    'newc.bm_cpv': 'CPV (Chi phí mỗi view)',
+                    'newc.bm_cpa': 'CPA (Chi phí mỗi acquisition)',
+                    'newc.conv_types': 'Loại sự kiện conversion',
+                    'newc.conv_types_hint_a': '(phân cách bằng dấu phẩy, vd.',
+                    'newc.conv_types_hint_b': '; bỏ trống = bất kỳ)',
+                    'newc.conv_types_ph': 'signup, purchase, lead',
+                    'newc.conv_charged_a': 'Chỉ những conversion mà',
+                    'newc.conv_charged_b': 'khớp danh sách này mới bị tính phí. Cấu hình kích hoạt conversion ở',
+                    'newc.conv_docs': 'tài liệu beacon conversion',
+                    'newc.benna_opt': 'Tối ưu Benna',
+                    'newc.benna_opt_sub': 'Đặt mục tiêu. Engine xử lý bidding.',
+                    'newc.powered_by_benna': 'Powered by Benna',
+                    'newc.goal_tcpa_name': 'Target CPA',
+                    'newc.goal_tcpa_desc': 'Đạt chi phí mỗi acquisition. Benna chỉnh bid theo thời gian thực.',
+                    'newc.goal_troas_name': 'Target ROAS',
+                    'newc.goal_troas_desc': 'Tối ưu return-on-ad-spend. Lý tưởng cho campaign doanh thu.',
+                    'newc.goal_maxconv_name': 'Max Conversions',
+                    'newc.goal_maxconv_desc': 'Dùng toàn bộ ngân sách cho người có xác suất chuyển đổi cao nhất.',
+                    'newc.goal_manual_name': 'Bid thủ công',
+                    'newc.goal_manual_desc': 'Bạn đặt bid cố định. Tín hiệu Benna vẫn áp dụng cho targeting.',
+                    'newc.per_conversion': '/ conversion',
+                    'newc.return_on_spend': '× return on spend',
+                    'newc.benna_plan_a': 'Benna sẽ chấm điểm mọi impression đủ điều kiện theo tín hiệu targeting và tự động bid lên đến trần đạt',
+                    'newc.benna_plan_target': 'target CPA là',
+                    'newc.benna_plan_b': 'Mong đợi một giai đoạn',
+                    'newc.learning_phase': 'học',
+                    'newc.benna_plan_c': '48–72 giờ trong khi engine hiệu chỉnh theo sự kiện conversion của bạn, sau đó tối ưu ổn định. Điều chỉnh trực tiếp xem được trên dashboard campaign.',
+                    'newc.bid_amount': 'Số tiền bid',
+                    'newc.est_cost': 'Chi phí ước tính',
+                    'newc.daily_budget': 'Ngân sách hàng ngày',
+                    'newc.total_budget': 'Tổng ngân sách',
+                    'newc.schedule': 'Lịch (tùy chọn)',
+                    'newc.start_date': 'Ngày bắt đầu',
+                    'newc.end_date': 'Ngày kết thúc',
+                    'newc.launch': 'Khởi chạy chiến dịch',
+                    'newc.cat_ai_label': 'Vị trí AI-native',
+                    'newc.cat_ai_note': 'Câu, nguồn và gợi ý được tài trợ đan vào phản hồi AI. Chạy trên mọi cánh cửa, bao gồm MCP.',
+                    'newc.cat_display_label': 'Vị trí Display',
+                    'newc.cat_display_note': 'Card hình ảnh và corner unit hiển thị cùng nội dung. Áp dụng Lumi Web, Extension và Bot.',
+                    'newc.plc_citation_name': 'Trích dẫn được tài trợ',
+                    'newc.plc_citation_desc': 'Một nguồn/trích dẫn được tài trợ đan vào câu trả lời AI.',
+                    'newc.plc_toolrec_name': 'Gợi ý công cụ / kỹ năng',
+                    'newc.plc_toolrec_desc': 'Gợi ý công cụ kiểu "có thể bạn cũng muốn thử".',
+                    'newc.plc_chip_name': 'Chip hành động gợi ý',
+                    'newc.plc_chip_desc': 'Pill phản hồi nhanh được tài trợ, có thể tap.',
+                    'newc.plc_welcome_name': 'Lời chào được tài trợ',
+                    'newc.plc_welcome_desc': 'Câu được tài trợ trong tin chào/onboarding của bot.',
+                    'newc.plc_buttons_name': 'Nút hành động gợi ý',
+                    'newc.plc_buttons_desc': 'Nút phản hồi nhanh được tài trợ dưới câu trả lời bot.',
+                    'newc.plc_card_name': 'Card được tài trợ inline',
+                    'newc.plc_card_desc': 'Card media được tài trợ render inline trong phản hồi.',
+                    'newc.plc_corner_name': 'Corner unit',
+                    'newc.plc_corner_desc': 'Card sticky, có thể đóng, neo ở góc màn hình.',
+                    'newc.plc_newtab_name': 'New-tab takeover',
+                    'newc.plc_newtab_desc': 'Hero unit trên trang new-tab/home của extension.',
+                    'newc.click_preview': 'Bấm để xem trước trong ngữ cảnh →',
+                    'newc.badge_standard': 'Tiêu chuẩn',
+                    'newc.badge_optin': 'Opt-in',
+                    'newc.est_select_group': 'Chọn ít nhất một nhóm placement.',
+                    'newc.est_placements': 'placement',
+                    'newc.est_est': 'ước tính',
+                    'newc.est_ecpm_hint': '(số tiền bạn trả cho mỗi 1.000 impression).',
+                    'newc.est_at_budget': 'Với',
+                    'newc.est_total_budget': 'tổng ngân sách',
+                    'newc.est_impressions': 'impression',
+                    'newc.est_blended': '(blended).',
+                    'newc.est_enter_budget': 'Nhập Tổng ngân sách bên dưới để dự đoán số impression bạn sẽ nhận được.',
                 },
             };
             function t(k) {
@@ -7274,6 +7870,9 @@
             // Expose to the broader script scope so other init code can
             // call it after dynamically inserting translatable elements.
             window.applyDashboardChrome = applyChrome;
+            // Expose t() so dynamic JS (e.g. renderFormatTierGroups,
+            // updateFormatEstimate) can read the same translations.
+            window.dashT = t;
             // Apply immediately on script run — DOM is already parsed
             // because this <script> sits at the end of <body>.
             applyChrome();
@@ -7418,6 +8017,11 @@
                     renderNav();
                     renderBody();
                     applyChrome();   // update the top nav / page chrome behind the modal
+                    // Re-render dynamic content that pulls from t() so the
+                    // New Campaign modal's placement cards + cost estimate
+                    // refresh in the chosen language.
+                    if (typeof renderFormatTierGroups === 'function') renderFormatTierGroups();
+                    if (typeof updateFormatEstimate    === 'function') updateFormatEstimate();
                 });
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {
