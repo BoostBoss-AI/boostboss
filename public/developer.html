@@ -4901,9 +4901,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 { code: 'ko',    label: '한국어 (Korean)' },
                 { code: 'vi',    label: 'Tiếng Việt (Vietnamese)' },
             ];
+            // NB: separate key from `bb_lang` (which controls the marketing
+            // site i18n). The dashboard preference applies to the dashboard
+            // UI only — and the dashboard itself isn't translated yet, so
+            // for now this just records the user's choice for later.
             function currentLang() {
                 try {
-                    var v = localStorage.getItem('bb_lang');
+                    var v = localStorage.getItem('bb_dashboard_lang');
                     if (v && LANGUAGES.some((l) => l.code === v)) return v;
                 } catch (_) {}
                 return 'en';
@@ -5054,10 +5058,14 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     `<option value="${l.code}" ${l.code === cur ? 'selected' : ''}>${esc(l.label)}</option>`
                 ).join('');
                 return `
+                    <div style="background:#FFF9E6;border:1px solid #F4D77A;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
+                        <div style="font-size:12.5px;font-weight:700;color:#8A6500;margin-bottom:3px;">Coming soon</div>
+                        <div style="font-size:12.5px;color:#6B5100;line-height:1.55;">Dashboard translations are in progress. Your preference is saved now and will apply automatically once the dashboard ships in your language.</div>
+                    </div>
                     <div style="${ROW}">
-                        <label style="${LB}">Display language</label>
+                        <label style="${LB}">Dashboard language</label>
                         <select id="sSetLanguage" style="${FLD}">${opts}</select>
-                        <div style="${HINT}">Sets the language for boostboss.ai marketing pages (publisher and advertiser landing, pricing, etc.). Saves immediately — close this modal and visit a marketing page to see it applied. The dashboard itself stays in English for now.</div>
+                        <div style="${HINT}">Applies only to the publisher dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav.</div>
                     </div>
                     <div id="sSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">✓ Saved</div>`;
             }
@@ -5096,17 +5104,19 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const body = document.getElementById('sSetBody');
                 const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, brand: sectionBrandSafety, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
-                // Language picker — save to localStorage on change so the
-                // marketing pages' i18n.js preload picks it up next visit.
+                // Language picker — saves to bb_dashboard_lang, a key
+                // separate from bb_lang (which controls the marketing
+                // site). Dashboard isn't translated yet, so this is just
+                // recording the preference for when it ships.
                 const langSel = body.querySelector('#sSetLanguage');
                 if (langSel) langSel.addEventListener('change', () => {
-                    try { localStorage.setItem('bb_lang', langSel.value); } catch (_) {}
+                    try { localStorage.setItem('bb_dashboard_lang', langSel.value); } catch (_) {}
                     const saved = body.querySelector('#sSetLangSaved');
                     if (saved) {
                         saved.style.display = 'block';
                         setTimeout(() => { saved.style.display = 'none'; }, 2000);
                     }
-                    if (typeof showToast === 'function') showToast('Language saved', 'success');
+                    if (typeof showToast === 'function') showToast('Dashboard language preference saved', 'success');
                 });
                 // Copy buttons
                 body.querySelectorAll('.sSetCopy').forEach((btn) => {
