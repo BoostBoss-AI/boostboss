@@ -4862,47 +4862,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) =>
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-            const modal = document.createElement('div');
-            modal.id = 'settingsModal';
-            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
-            function renderModalChrome() {
-                modal.innerHTML = `
-                <div style="background:#fff;border-radius:16px;width:860px;max-width:94vw;height:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
-                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">${esc(t('modal.title'))}</h3>
-                        <button id="sSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
-                    </div>
-                    <div style="display:flex;flex:1;min-height:0;">
-                        <nav id="sSetNav" style="width:178px;flex-shrink:0;border-right:1px solid #F0F0F2;padding:14px 10px;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;"></nav>
-                        <div id="sSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
-                    </div>
-                    <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
-                        <button id="sSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">${esc(t('modal.close'))}</button>
-                        <button id="sSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${esc(t('modal.save'))}</button>
-                    </div>
-                </div>`;
-                modal.querySelector('#sSetClose').addEventListener('click', closeModal);
-                modal.querySelector('#sSetCancel').addEventListener('click', closeModal);
-                modal.querySelector('#sSetSave').addEventListener('click', handleSave);
-            }
-            document.body.appendChild(modal);
-            function sectionList() {
-                return [
-                    { key: 'account',  label: t('nav.account') },
-                    { key: 'payouts',  label: t('nav.payouts') },
-                    { key: 'api',      label: t('nav.api') },
-                    { key: 'brand',    label: t('nav.brand') },
-                    { key: 'notifs',   label: t('nav.notifs') },
-                    { key: 'language', label: t('nav.language') },
-                    { key: 'security', label: t('nav.security') },
-                ];
-            }
-
-            // SECTIONS is no longer referenced — renderNav() uses sectionList()
-            // directly. Removed the `const SECTIONS = sectionList()` line that
-            // was here because it executed before LANGUAGES/DASH_T were
-            // initialized, hitting a TDZ ReferenceError that halted the IIFE
-            // and prevented settingsBtn's click listener from attaching.
+            // ─── Translation infrastructure ───
+            // Declared at the TOP of the IIFE so anything that references
+            // LANGUAGES / DASH_T / t() / currentLang() (renderModalChrome,
+            // sectionList, applyChrome, etc.) can do so without any
+            // temporal-dead-zone risk regardless of where in the IIFE it sits.
             // Supported languages — must match i18n.js SUPPORTED. Display
             // labels use each language's native name + an English gloss.
             const LANGUAGES = [
@@ -4924,7 +4888,6 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 } catch (_) {}
                 return 'en';
             }
-
             // ─── Publisher dashboard Settings translations (inline) ───
             const DASH_T = {
                 'en': {
@@ -5004,6 +4967,43 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 var d = DASH_T[currentLang()] || DASH_T.en;
                 return d[k] || DASH_T.en[k] || k;
             }
+
+            const modal = document.createElement('div');
+            modal.id = 'settingsModal';
+            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
+            function renderModalChrome() {
+                modal.innerHTML = `
+                <div style="background:#fff;border-radius:16px;width:860px;max-width:94vw;height:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
+                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">${esc(t('modal.title'))}</h3>
+                        <button id="sSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
+                    </div>
+                    <div style="display:flex;flex:1;min-height:0;">
+                        <nav id="sSetNav" style="width:178px;flex-shrink:0;border-right:1px solid #F0F0F2;padding:14px 10px;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;"></nav>
+                        <div id="sSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
+                        <button id="sSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">${esc(t('modal.close'))}</button>
+                        <button id="sSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${esc(t('modal.save'))}</button>
+                    </div>
+                </div>`;
+                modal.querySelector('#sSetClose').addEventListener('click', closeModal);
+                modal.querySelector('#sSetCancel').addEventListener('click', closeModal);
+                modal.querySelector('#sSetSave').addEventListener('click', handleSave);
+            }
+            document.body.appendChild(modal);
+            function sectionList() {
+                return [
+                    { key: 'account',  label: t('nav.account') },
+                    { key: 'payouts',  label: t('nav.payouts') },
+                    { key: 'api',      label: t('nav.api') },
+                    { key: 'brand',    label: t('nav.brand') },
+                    { key: 'notifs',   label: t('nav.notifs') },
+                    { key: 'language', label: t('nav.language') },
+                    { key: 'security', label: t('nav.security') },
+                ];
+            }
+
             function applyChrome() {
                 document.querySelectorAll('[data-t]').forEach((el) => {
                     var v = t(el.getAttribute('data-t')); if (v) el.textContent = v;
