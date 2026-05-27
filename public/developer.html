@@ -37,11 +37,19 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+            /* Font stack + rendering must match the advertiser dashboard
+               (public/advertiser.html). `-webkit-font-smoothing: antialiased`
+               renders glyphs LIGHTER on macOS Chrome/Safari — removing it
+               restores the default heavier rendering so the Settings modal
+               text (which inherits from body via font-family:inherit) looks
+               identical across both dashboards. "Roboto" was also dropped
+               since the advertiser doesn't list it — on macOS neither has
+               Roboto installed but keeping the stacks aligned avoids any
+               future divergence. */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background-color: var(--bg-light);
             color: var(--text-dark);
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
         }
 
         /* Auth Container */
