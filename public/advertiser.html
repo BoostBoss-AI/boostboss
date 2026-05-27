@@ -2395,7 +2395,7 @@
             <!-- Stats Row -->
             <div class="stats-row">
                 <div class="stat-card">
-                    <div class="stat-label">Total Impressions</div>
+                    <div class="stat-label" data-t="stats.impressions">Total Impressions</div>
                     <div class="stat-value" id="totalImpressions">0</div>
                     <div class="stat-trend positive">
                         <span class="trend-arrow">↑</span>
@@ -2403,7 +2403,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Total Clicks</div>
+                    <div class="stat-label" data-t="stats.clicks">Total Clicks</div>
                     <div class="stat-value" id="totalClicks">0</div>
                     <div class="stat-trend positive">
                         <span class="trend-arrow">↑</span>
@@ -2411,7 +2411,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Click-Through Rate</div>
+                    <div class="stat-label" data-t="stats.ctr">Click-Through Rate</div>
                     <div class="stat-value" id="ctrValue">0%</div>
                     <div class="stat-trend negative">
                         <span class="trend-arrow">↓</span>
@@ -2419,7 +2419,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Total Spend</div>
+                    <div class="stat-label" data-t="stats.spend">Total Spend</div>
                     <div class="stat-value" id="totalSpend">$0</div>
                     <div class="stat-trend positive">
                         <span class="trend-arrow">↑</span>
@@ -2427,7 +2427,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Account Balance</div>
+                    <div class="stat-label" data-t="stats.balance">Account Balance</div>
                     <div class="stat-value earnings" id="accountBalance">$0.00</div>
                     <button id="depositBtn" style="
                         padding: 5px 12px; background: var(--accent-primary); color: #fff;
@@ -2503,7 +2503,7 @@
             <!-- Performance Chart — directly after the stats row, matching
                  the publisher dashboard pattern (stats → trend chart). -->
             <div class="chart-section">
-                <div class="chart-title">Daily Impressions (Last 14 Days)</div>
+                <div class="chart-title" data-t="chart.daily_impressions">Daily Impressions (Last 14 Days)</div>
                 <div class="chart-container" id="chartContainer">
                     <div class="loading">Loading chart data...</div>
                 </div>
@@ -2514,8 +2514,8 @@
                  so they read as one section instead of two parallel cards. -->
             <section class="performance-group" aria-label="Performance">
               <div class="performance-group-header">
-                <div class="performance-group-title">Performance</div>
-                <div class="performance-group-sub">Engine status and auction signal · last 7 days</div>
+                <div class="performance-group-title" data-t="perf.title">Performance</div>
+                <div class="performance-group-sub" data-t="perf.sub">Engine status and auction signal · last 7 days</div>
               </div>
 
             <!-- Benna Engine — live panel (status strip at top of group) -->
@@ -2648,12 +2648,12 @@
                             padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                             font-family: inherit; color: #374151;
-                        ">Export CSV</button>
+                        " data-t="chrome.export_csv">Export CSV</button>
                         <button onclick="openCompareModal()" style="
                             padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                             font-family: inherit; color: #374151;
-                        ">Compare</button>
+                        " data-t="chrome.compare">Compare</button>
                         <div id="draftsWrap" style="position:relative;display:none;">
                             <button type="button" id="draftsBtn" style="
                                 padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
@@ -2683,42 +2683,42 @@
                             padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
                             font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
                             background: #111; color: #fff; transition: all 0.15s;
-                        ">All</button>
+                        " data-t="filter.all">All</button>
                         <button class="status-filter-btn" data-status="live" style="
                             padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
                             font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
                             background: #fff; color: #374151; transition: all 0.15s;
-                        ">Live</button>
+                        " data-t="filter.live">Live</button>
                         <button class="status-filter-btn" data-status="paused" style="
                             padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
                             font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
                             background: #fff; color: #374151; transition: all 0.15s;
-                        ">Paused</button>
+                        " data-t="filter.paused">Paused</button>
                         <button class="status-filter-btn" data-status="review" style="
                             padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
                             font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
                             background: #fff; color: #374151; transition: all 0.15s;
-                        ">In Review</button>
+                        " data-t="filter.in_review">In Review</button>
                     </div>
                 </div>
 
                 <table class="campaigns-table">
                     <thead>
                         <tr>
-                            <th>Campaign Name</th>
-                            <th>Status</th>
-                            <th>Benna</th>
-                            <th>Format</th>
-                            <th>Impressions</th>
-                            <th>Clicks</th>
-                            <th>CTR</th>
-                            <th>Spend</th>
-                            <th>Budget</th>
-                            <th>Actions</th>
+                            <th data-t="table.campaign_name">Campaign Name</th>
+                            <th data-t="table.status">Status</th>
+                            <th data-t="table.benna">Benna</th>
+                            <th data-t="table.format">Format</th>
+                            <th data-t="table.impressions">Impressions</th>
+                            <th data-t="table.clicks">Clicks</th>
+                            <th data-t="table.ctr">CTR</th>
+                            <th data-t="table.spend">Spend</th>
+                            <th data-t="table.budget">Budget</th>
+                            <th data-t="table.actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="campaignTableBody">
-                        <tr><td colspan="10" class="loading">Loading campaigns...</td></tr>
+                        <tr><td colspan="10" class="loading" data-t="empty.loading">Loading campaigns...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2726,7 +2726,7 @@
             <!-- Billing History -->
             <div class="campaigns-section" style="margin-top: 0;">
                 <div class="campaigns-header">
-                    <div class="campaigns-title">Billing History</div>
+                    <div class="campaigns-title" data-t="chrome.billing_history">Billing History</div>
                     <button id="exportBillingBtn" style="
                         padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                         background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -2755,7 +2755,7 @@
                  a single "Setup" header with two columns inside. -->
             <section class="setup-group" aria-label="Setup">
                 <div class="setup-group-header">
-                    <div class="setup-group-title">Setup</div>
+                    <div class="setup-group-title" data-t="chrome.setup">Setup</div>
                     <div class="setup-group-sub">One-time configuration · pixel and rules</div>
                 </div>
                 <div class="setup-group-grid">
@@ -4296,7 +4296,7 @@
                 renderCampaignTable(_cachedCampaigns);
             } catch (error) {
                 console.error('Error loading campaigns:', error);
-                campaignTableBody.innerHTML = '<tr><td colspan="10" class="loading">Error loading campaigns</td></tr>';
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="loading" data-t="empty.error">Error loading campaigns</td></tr>';
             }
         }
 
@@ -4305,12 +4305,12 @@
             campaignTableBody.innerHTML = '';
 
             if (allCampaigns.length === 0) {
-                campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state">No campaigns yet. Create one to get started!</td></tr>';
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state" data-t="empty.no_campaigns">No campaigns yet. Create one to get started!</td></tr>';
                 return;
             }
 
             if (campaigns.length === 0) {
-                campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state">No campaigns match your filters</td></tr>';
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state" data-t="empty.no_match">No campaigns match your filters</td></tr>';
                 return;
             }
 
@@ -4350,11 +4350,11 @@
                         <td>$${formatNumber(budget, true)}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="action-btn" data-action="${campaign.status === 'live' ? 'pause' : 'resume'}" data-campaign-id="${campaign.id}">
+                                <button class="action-btn" data-action="${campaign.status === 'live' ? 'pause' : 'resume'}" data-campaign-id="${campaign.id}" data-t="${campaign.status === 'live' ? 'action.pause' : 'action.resume'}">
                                     ${campaign.status === 'live' ? 'Pause' : 'Resume'}
                                 </button>
-                                <button class="action-btn" data-action="edit" data-campaign-id="${campaign.id}">Edit</button>
-                                <button class="action-btn" data-action="duplicate" data-campaign-id="${campaign.id}" style="color: #6B7280;">Dup</button>
+                                <button class="action-btn" data-action="edit" data-campaign-id="${campaign.id}" data-t="action.edit">Edit</button>
+                                <button class="action-btn" data-action="duplicate" data-campaign-id="${campaign.id}" style="color: #6B7280;" data-t="action.dup">Dup</button>
                             </div>
                         </td>
                     `;
@@ -4405,6 +4405,9 @@
 
                     campaignTableBody.appendChild(row);
                 });
+            // Re-run the chrome translator over the freshly-inserted rows so
+            // action buttons (Pause/Resume/Edit/Dup) render in the active language.
+            if (typeof window.applyDashboardChrome === 'function') window.applyDashboardChrome();
         }
 
         // Per-campaign Benna chip based on paused/live + inferred age
@@ -6770,6 +6773,19 @@
                     'chrome.settings_tip': 'Account Settings', 'chrome.logout': 'Logout', 'chrome.overview': 'Overview',
                     'chrome.campaigns': 'Campaigns', 'chrome.new_campaign': '+ New Campaign', 'chrome.add_funds': '+ Add Funds',
                     'chrome.search_campaigns': 'Search campaigns…',
+                    'stats.impressions': 'Total Impressions', 'stats.clicks': 'Total Clicks',
+                    'stats.ctr': 'Click-Through Rate', 'stats.spend': 'Total Spend', 'stats.balance': 'Account Balance',
+                    'chart.daily_impressions': 'Daily Impressions (Last 14 Days)',
+                    'perf.title': 'Performance', 'perf.sub': 'Engine status and auction signal · last 7 days',
+                    'filter.all': 'All', 'filter.live': 'Live', 'filter.paused': 'Paused', 'filter.in_review': 'In Review',
+                    'table.campaign_name': 'CAMPAIGN NAME', 'table.status': 'STATUS', 'table.benna': 'BENNA',
+                    'table.format': 'FORMAT', 'table.impressions': 'IMPRESSIONS', 'table.clicks': 'CLICKS',
+                    'table.ctr': 'CTR', 'table.spend': 'SPEND', 'table.budget': 'BUDGET', 'table.actions': 'ACTIONS',
+                    'chrome.export_csv': 'Export CSV', 'chrome.compare': 'Compare', 'chrome.billing_history': 'Billing History',
+                    'chrome.setup': 'Setup', 'chrome.email_report': 'Email Report',
+                    'action.pause': 'Pause', 'action.resume': 'Resume', 'action.edit': 'Edit', 'action.dup': 'Dup',
+                    'empty.loading': 'Loading campaigns...', 'empty.no_campaigns': 'No campaigns yet. Create one to get started!',
+                    'empty.no_match': 'No campaigns match your filters', 'empty.error': 'Error loading campaigns',
                     'modal.title': 'Settings',  'modal.close': 'Close',  'modal.save': 'Save changes',
                     'nav.account': 'Account',  'nav.billing': 'Billing & funds',  'nav.api': 'API access',
                     'nav.notifs': 'Notifications',  'nav.language': 'Language',  'nav.security': 'Security',
@@ -6811,6 +6827,19 @@
                     'chrome.settings_tip': '账户设置', 'chrome.logout': '退出登录', 'chrome.overview': '概览',
                     'chrome.campaigns': '广告', 'chrome.new_campaign': '+ 新建广告', 'chrome.add_funds': '+ 充值',
                     'chrome.search_campaigns': '搜索广告…',
+                    'stats.impressions': '总展示数', 'stats.clicks': '总点击数',
+                    'stats.ctr': '点击率', 'stats.spend': '总支出', 'stats.balance': '账户余额',
+                    'chart.daily_impressions': '每日展示数(近 14 天)',
+                    'perf.title': '效果表现', 'perf.sub': '引擎状态与拍卖信号 · 近 7 天',
+                    'filter.all': '全部', 'filter.live': '运行中', 'filter.paused': '已暂停', 'filter.in_review': '审核中',
+                    'table.campaign_name': '广告名称', 'table.status': '状态', 'table.benna': 'BENNA',
+                    'table.format': '格式', 'table.impressions': '展示数', 'table.clicks': '点击数',
+                    'table.ctr': '点击率', 'table.spend': '支出', 'table.budget': '预算', 'table.actions': '操作',
+                    'chrome.export_csv': '导出 CSV', 'chrome.compare': '对比', 'chrome.billing_history': '账单历史',
+                    'chrome.setup': '设置', 'chrome.email_report': '邮件报告',
+                    'action.pause': '暂停', 'action.resume': '恢复', 'action.edit': '编辑', 'action.dup': '复制',
+                    'empty.loading': '正在加载广告…', 'empty.no_campaigns': '还没有广告。创建一个开始吧!',
+                    'empty.no_match': '没有符合筛选的广告', 'empty.error': '加载广告失败',
                     'modal.title': '设置',  'modal.close': '关闭',  'modal.save': '保存更改',
                     'nav.account': '账户',  'nav.billing': '账单与资金',  'nav.api': 'API 访问',
                     'nav.notifs': '通知',  'nav.language': '语言',  'nav.security': '安全',
@@ -6852,6 +6881,19 @@
                     'chrome.settings_tip': '帳號設定', 'chrome.logout': '登出', 'chrome.overview': '總覽',
                     'chrome.campaigns': '廣告', 'chrome.new_campaign': '+ 新增廣告', 'chrome.add_funds': '+ 加值',
                     'chrome.search_campaigns': '搜尋廣告…',
+                    'stats.impressions': '總曝光數', 'stats.clicks': '總點擊數',
+                    'stats.ctr': '點擊率', 'stats.spend': '總支出', 'stats.balance': '帳戶餘額',
+                    'chart.daily_impressions': '每日曝光數(近 14 天)',
+                    'perf.title': '成效表現', 'perf.sub': '引擎狀態與競價訊號 · 近 7 天',
+                    'filter.all': '全部', 'filter.live': '進行中', 'filter.paused': '已暫停', 'filter.in_review': '審核中',
+                    'table.campaign_name': '廣告名稱', 'table.status': '狀態', 'table.benna': 'BENNA',
+                    'table.format': '格式', 'table.impressions': '曝光數', 'table.clicks': '點擊數',
+                    'table.ctr': '點擊率', 'table.spend': '支出', 'table.budget': '預算', 'table.actions': '操作',
+                    'chrome.export_csv': '匯出 CSV', 'chrome.compare': '比較', 'chrome.billing_history': '帳單歷史',
+                    'chrome.setup': '設定', 'chrome.email_report': '郵件報告',
+                    'action.pause': '暫停', 'action.resume': '恢復', 'action.edit': '編輯', 'action.dup': '複製',
+                    'empty.loading': '正在載入廣告…', 'empty.no_campaigns': '還沒有廣告。建立一個開始吧!',
+                    'empty.no_match': '沒有符合篩選的廣告', 'empty.error': '載入廣告失敗',
                     'modal.title': '設定',  'modal.close': '關閉',  'modal.save': '儲存變更',
                     'nav.account': '帳號',  'nav.billing': '帳單與資金',  'nav.api': 'API 存取',
                     'nav.notifs': '通知',  'nav.language': '語言',  'nav.security': '安全',
@@ -6893,6 +6935,19 @@
                     'chrome.settings_tip': 'アカウント設定', 'chrome.logout': 'ログアウト', 'chrome.overview': '概要',
                     'chrome.campaigns': 'キャンペーン', 'chrome.new_campaign': '+ 新規キャンペーン', 'chrome.add_funds': '+ 入金',
                     'chrome.search_campaigns': 'キャンペーンを検索…',
+                    'stats.impressions': '総インプレッション', 'stats.clicks': '総クリック',
+                    'stats.ctr': 'クリック率', 'stats.spend': '総支出', 'stats.balance': 'アカウント残高',
+                    'chart.daily_impressions': '日次インプレッション(過去 14 日)',
+                    'perf.title': 'パフォーマンス', 'perf.sub': 'エンジン状態とオークション信号 · 過去 7 日',
+                    'filter.all': 'すべて', 'filter.live': '実行中', 'filter.paused': '一時停止', 'filter.in_review': '審査中',
+                    'table.campaign_name': 'キャンペーン名', 'table.status': 'ステータス', 'table.benna': 'BENNA',
+                    'table.format': 'フォーマット', 'table.impressions': 'インプレッション', 'table.clicks': 'クリック',
+                    'table.ctr': 'CTR', 'table.spend': '支出', 'table.budget': '予算', 'table.actions': 'アクション',
+                    'chrome.export_csv': 'CSV エクスポート', 'chrome.compare': '比較', 'chrome.billing_history': '請求履歴',
+                    'chrome.setup': 'セットアップ', 'chrome.email_report': 'メールレポート',
+                    'action.pause': '一時停止', 'action.resume': '再開', 'action.edit': '編集', 'action.dup': '複製',
+                    'empty.loading': 'キャンペーン読み込み中…', 'empty.no_campaigns': 'まだキャンペーンがありません。作成して始めましょう!',
+                    'empty.no_match': 'フィルタに一致するキャンペーンがありません', 'empty.error': 'キャンペーン読み込みエラー',
                     'modal.title': '設定',  'modal.close': '閉じる',  'modal.save': '変更を保存',
                     'nav.account': 'アカウント',  'nav.billing': '請求 & 残高',  'nav.api': 'API アクセス',
                     'nav.notifs': '通知',  'nav.language': '言語',  'nav.security': 'セキュリティ',
@@ -6934,6 +6989,19 @@
                     'chrome.settings_tip': '계정 설정', 'chrome.logout': '로그아웃', 'chrome.overview': '개요',
                     'chrome.campaigns': '캠페인', 'chrome.new_campaign': '+ 새 캠페인', 'chrome.add_funds': '+ 자금 추가',
                     'chrome.search_campaigns': '캠페인 검색…',
+                    'stats.impressions': '총 임프레션', 'stats.clicks': '총 클릭',
+                    'stats.ctr': '클릭률', 'stats.spend': '총 지출', 'stats.balance': '계정 잔액',
+                    'chart.daily_impressions': '일별 임프레션 (최근 14일)',
+                    'perf.title': '퍼포먼스', 'perf.sub': '엔진 상태 및 옥션 시그널 · 최근 7일',
+                    'filter.all': '전체', 'filter.live': '실행중', 'filter.paused': '일시정지', 'filter.in_review': '심사중',
+                    'table.campaign_name': '캠페인 이름', 'table.status': '상태', 'table.benna': 'BENNA',
+                    'table.format': '포맷', 'table.impressions': '임프레션', 'table.clicks': '클릭',
+                    'table.ctr': 'CTR', 'table.spend': '지출', 'table.budget': '예산', 'table.actions': '작업',
+                    'chrome.export_csv': 'CSV 내보내기', 'chrome.compare': '비교', 'chrome.billing_history': '결제 내역',
+                    'chrome.setup': '설정', 'chrome.email_report': '이메일 리포트',
+                    'action.pause': '일시정지', 'action.resume': '재개', 'action.edit': '편집', 'action.dup': '복제',
+                    'empty.loading': '캠페인 로딩 중…', 'empty.no_campaigns': '아직 캠페인이 없습니다. 만들어 시작하세요!',
+                    'empty.no_match': '필터와 일치하는 캠페인이 없습니다', 'empty.error': '캠페인 로딩 실패',
                     'modal.title': '설정',  'modal.close': '닫기',  'modal.save': '변경 저장',
                     'nav.account': '계정',  'nav.billing': '결제 및 자금',  'nav.api': 'API 접근',
                     'nav.notifs': '알림',  'nav.language': '언어',  'nav.security': '보안',
@@ -6975,6 +7043,19 @@
                     'chrome.settings_tip': 'Cài đặt tài khoản', 'chrome.logout': 'Đăng xuất', 'chrome.overview': 'Tổng quan',
                     'chrome.campaigns': 'Chiến dịch', 'chrome.new_campaign': '+ Chiến dịch mới', 'chrome.add_funds': '+ Thêm tiền',
                     'chrome.search_campaigns': 'Tìm chiến dịch…',
+                    'stats.impressions': 'Tổng Impression', 'stats.clicks': 'Tổng Click',
+                    'stats.ctr': 'Tỷ lệ click', 'stats.spend': 'Tổng chi tiêu', 'stats.balance': 'Số dư tài khoản',
+                    'chart.daily_impressions': 'Impression hàng ngày (14 ngày gần nhất)',
+                    'perf.title': 'Hiệu suất', 'perf.sub': 'Trạng thái engine và tín hiệu đấu giá · 7 ngày gần nhất',
+                    'filter.all': 'Tất cả', 'filter.live': 'Đang chạy', 'filter.paused': 'Tạm dừng', 'filter.in_review': 'Đang duyệt',
+                    'table.campaign_name': 'TÊN CHIẾN DỊCH', 'table.status': 'TRẠNG THÁI', 'table.benna': 'BENNA',
+                    'table.format': 'ĐỊNH DẠNG', 'table.impressions': 'IMPRESSION', 'table.clicks': 'CLICK',
+                    'table.ctr': 'CTR', 'table.spend': 'CHI TIÊU', 'table.budget': 'NGÂN SÁCH', 'table.actions': 'THAO TÁC',
+                    'chrome.export_csv': 'Xuất CSV', 'chrome.compare': 'So sánh', 'chrome.billing_history': 'Lịch sử thanh toán',
+                    'chrome.setup': 'Thiết lập', 'chrome.email_report': 'Báo cáo email',
+                    'action.pause': 'Tạm dừng', 'action.resume': 'Tiếp tục', 'action.edit': 'Sửa', 'action.dup': 'Sao',
+                    'empty.loading': 'Đang tải chiến dịch…', 'empty.no_campaigns': 'Chưa có chiến dịch nào. Tạo một cái để bắt đầu!',
+                    'empty.no_match': 'Không có chiến dịch phù hợp với bộ lọc', 'empty.error': 'Lỗi tải chiến dịch',
                     'modal.title': 'Cài đặt',  'modal.close': 'Đóng',  'modal.save': 'Lưu thay đổi',
                     'nav.account': 'Tài khoản',  'nav.billing': 'Thanh toán & quỹ',  'nav.api': 'Truy cập API',
                     'nav.notifs': 'Thông báo',  'nav.language': 'Ngôn ngữ',  'nav.security': 'Bảo mật',
