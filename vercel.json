@@ -5,6 +5,12 @@
   "outputDirectory": "public",
   "redirects": [
     { "source": "/", "destination": "/en", "permanent": false },
+    { "source": "/publish",            "destination": "/en/publish",            "permanent": false },
+    { "source": "/publish/mcp",        "destination": "/en/publish/mcp",        "permanent": false },
+    { "source": "/publish/ai-apps",    "destination": "/en/publish/ai-apps",    "permanent": false },
+    { "source": "/publish/extensions", "destination": "/en/publish/extensions", "permanent": false },
+    { "source": "/publish/bots",       "destination": "/en/publish/bots",       "permanent": false },
+    { "source": "/publish/no-code",    "destination": "/en/publish/no-code",    "permanent": false },
     { "source": "/developer",  "destination": "/publish/dashboard", "permanent": false },
     { "source": "/advertiser", "destination": "/ads/dashboard",     "permanent": false }
   ],
