@@ -9,6 +9,23 @@
   var SUPPORTED   = ['en', 'zh', 'zh-TW', 'ja', 'ko', 'vi'];
   var DEFAULT     = 'en';
 
+  // Paths whose pages have been translated AND have /:lang/<path> rewrites
+  // in vercel.json. When the current page has a locale prefix, links to
+  // these paths get rewritten in-place so the user keeps their language
+  // selection across in-site navigation.
+  // Anything NOT in this list (e.g. /publish/signup, /docs, /trust) keeps
+  // its bare path and routes to the default locale — by design, since
+  // those pages don't have translations yet.
+  var LOCALIZED_PATHS = {
+    '/publish': 1,
+    '/publish/mcp': 1,
+    '/publish/ai-apps': 1,
+    '/publish/extensions': 1,
+    '/publish/bots': 1,
+    '/publish/no-code': 1,
+    '/ads': 1
+  };
+
   // Parse first path segment, e.g. "/en/foo" -> "en"
   function pathLang() {
     var seg = (window.location.pathname || '/').split('/')[1] || '';
@@ -40,6 +57,38 @@
     var rest = stripLocaleFromPath(window.location.pathname);
     var prefix = (rest === '/' || rest === '') ? ('/' + lang) : ('/' + lang + rest);
     return prefix + (window.location.search || '') + (window.location.hash || '');
+  }
+
+  // Rewrite every internal <a href="..."> on the page so that links pointing
+  // at a translated page get the current locale prefix. Skips the language
+  // dropdown (handled separately), already-prefixed links, and any link
+  // whose href isn't in LOCALIZED_PATHS.
+  function localizeNavLinks() {
+    var lang = pathLang();
+    if (!lang) return; // No locale in URL — leave everything alone
+    var anchors = document.querySelectorAll('a[href]');
+    for (var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // Skip language dropdown entries — apply() handles those
+      if (a.hasAttribute('data-lang')) continue;
+      if (a.closest && a.closest('.nav-lang-menu')) continue;
+      var href = a.getAttribute('href');
+      if (!href || href.charAt(0) !== '/') continue;
+      // Split off any query string and hash so the path lookup is clean
+      var qIdx = href.indexOf('?');
+      var hIdx = href.indexOf('#');
+      var cut = -1;
+      if (qIdx >= 0) cut = qIdx;
+      if (hIdx >= 0 && (cut < 0 || hIdx < cut)) cut = hIdx;
+      var pathOnly = (cut >= 0) ? href.substring(0, cut) : href;
+      var suffix   = (cut >= 0) ? href.substring(cut)    : '';
+      // If already locale-prefixed, leave it (idempotent)
+      var first = pathOnly.split('/')[1];
+      if (SUPPORTED.indexOf(first) !== -1) continue;
+      // Only rewrite known-translated paths
+      if (!LOCALIZED_PATHS[pathOnly]) continue;
+      a.setAttribute('href', '/' + lang + pathOnly + suffix);
+    }
   }
 
   function getText(dict, keyPath) {
@@ -106,6 +155,9 @@
 
   function init() {
     var lang = getLang();
+    // Rewrite internal nav links before the dict resolves — purely URL-based,
+    // doesn't depend on translation content.
+    localizeNavLinks();
     loadDict(lang).then(apply).catch(function (err) {
       console.error('[i18n init]', err);
     });
