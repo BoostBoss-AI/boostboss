@@ -7392,7 +7392,12 @@
                 const nav = settingsModal.querySelector('#aSetNav');
                 nav.innerHTML = sectionList().map((s) => {
                     const on = s.key === activeSection;
-                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${esc(s.label)}</button>`;
+                    // Inactive weight = 600 (semibold) — matches the
+                    // publisher dashboard. CJK fonts only ship Regular +
+                    // Bold variants, so 500 was rendering identically to
+                    // 400 in zh/zh-TW/ja/ko, making the sidebar look
+                    // anemic compared to the Latin fonts.
+                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '600'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${esc(s.label)}</button>`;
                 }).join('');
                 nav.querySelectorAll('.aSetNavBtn').forEach((b) => {
                     b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
