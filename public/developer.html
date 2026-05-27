@@ -1664,7 +1664,7 @@
         <!-- Navigation — mirrors /ads/dashboard header shape exactly -->
         <nav>
             <div class="nav-left">
-                <a href="/publish" class="logo" title="Back to Lumi SDK" style="text-decoration: none;">
+                <a href="/publish" class="logo" title="Back to Lumi SDK" data-t-title="chrome.back" style="text-decoration: none;">
                     <div class="logo-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
 <line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
 <line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
@@ -1681,35 +1681,35 @@
                     <span class="brand-name">Boost Boss</span>
                     <span class="logo-text"><span class="lumi-rainbow">Lumi SDK</span><span class="lumi-sparkle" aria-hidden="true">✦</span></span>
                 </a>
-                <div class="header-title">Dashboard</div>
-                <button class="search-actions-btn" title="Search actions" onclick="openCmdPalette()">
-                    <span>Search actions</span>
+                <div class="header-title" data-t="chrome.dashboard">Dashboard</div>
+                <button class="search-actions-btn" title="Search actions" data-t-title="chrome.search_actions" onclick="openCmdPalette()">
+                    <span data-t="chrome.search_actions">Search actions</span>
                     <kbd>⌘K</kbd>
                 </button>
             </div>
             <div class="nav-right">
                 <div class="account-info">
-                    <div class="account-label">Account</div>
+                    <div class="account-label" data-t="chrome.account">Account</div>
                     <div class="account-name" id="navAppName">Loading...</div>
                 </div>
                 <div style="position: relative;">
-                    <button class="header-icon-btn" id="notifBtn" title="Notifications" style="position: relative;">
+                    <button class="header-icon-btn" id="notifBtn" title="Notifications" data-t-title="chrome.notif_tip" style="position: relative;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         <span id="notifBadge" style="position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: #FF2D78; border-radius: 50%; display: none;"></span>
                     </button>
                     <div id="notifDropdown" style="display: none; position: absolute; top: 44px; right: 0; width: 340px; background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 100; overflow: hidden;">
                         <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 14px; font-weight: 700;">Notifications</span>
-                            <button id="notifMarkAll" style="font-size: 11px; color: #FF2D78; background: none; border: none; cursor: pointer; font-weight: 600;">Mark all read</button>
+                            <span style="font-size: 14px; font-weight: 700;" data-t="chrome.notif_title">Notifications</span>
+                            <button id="notifMarkAll" style="font-size: 11px; color: #FF2D78; background: none; border: none; cursor: pointer; font-weight: 600;" data-t="chrome.notif_mark_all">Mark all read</button>
                         </div>
                         <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
                         <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
-                            <span style="font-size: 12px; color: #9CA3AF;">Only showing last 7 days</span>
+                            <span style="font-size: 12px; color: #9CA3AF;" data-t="chrome.notif_recent">Only showing last 7 days</span>
                         </div>
                     </div>
                 </div>
-                <button class="header-icon-btn" id="settingsBtn" title="Account Settings">⚙</button>
-                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                <button class="header-icon-btn" id="settingsBtn" title="Account Settings" data-t-title="chrome.settings_tip">⚙</button>
+                <button class="logout-btn" onclick="handleLogout()" data-t="chrome.logout">Logout</button>
             </div>
         </nav>
 
@@ -4926,6 +4926,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // ─── Publisher dashboard Settings translations (inline) ───
             const DASH_T = {
                 'en': {
+                    'chrome.back': 'Back to Lumi SDK', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Search actions',
+                    'chrome.account': 'Account', 'chrome.notif_tip': 'Notifications', 'chrome.notif_title': 'Notifications',
+                    'chrome.notif_mark_all': 'Mark all read', 'chrome.notif_recent': 'Only showing last 7 days',
+                    'chrome.settings_tip': 'Account Settings', 'chrome.logout': 'Logout',
                     'modal.title': 'Settings', 'modal.close': 'Close', 'modal.save': 'Save changes',
                     'nav.account': 'Account', 'nav.payouts': 'Payouts', 'nav.api': 'API & Integration',
                     'nav.brand': 'Brand safety', 'nav.notifs': 'Notifications', 'nav.language': 'Language', 'nav.security': 'Security',
@@ -4934,6 +4938,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'language.hint': 'Applies only to the publisher dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav. Settings translate immediately; other surfaces are being rolled out.',
                 },
                 'zh': {
+                    'chrome.back': '返回 Lumi SDK', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
+                    'chrome.account': '账户', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': '全部标为已读', 'chrome.notif_recent': '仅显示最近 7 天',
+                    'chrome.settings_tip': '账户设置', 'chrome.logout': '退出登录',
                     'modal.title': '设置', 'modal.close': '关闭', 'modal.save': '保存更改',
                     'nav.account': '账户', 'nav.payouts': '打款', 'nav.api': 'API 与集成',
                     'nav.brand': '品牌安全', 'nav.notifs': '通知', 'nav.language': '语言', 'nav.security': '安全',
@@ -4942,6 +4950,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'language.hint': '仅作用于发布商面板。boostboss.ai 营销页面有自己的语言切换在顶部导航。设置立即翻译,其他界面正在逐步推出。',
                 },
                 'zh-TW': {
+                    'chrome.back': '返回 Lumi SDK', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
+                    'chrome.account': '帳號', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': '全部標為已讀', 'chrome.notif_recent': '僅顯示最近 7 天',
+                    'chrome.settings_tip': '帳號設定', 'chrome.logout': '登出',
                     'modal.title': '設定', 'modal.close': '關閉', 'modal.save': '儲存變更',
                     'nav.account': '帳號', 'nav.payouts': '撥款', 'nav.api': 'API 與整合',
                     'nav.brand': '品牌安全', 'nav.notifs': '通知', 'nav.language': '語言', 'nav.security': '安全',
@@ -4950,6 +4962,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'language.hint': '僅作用於發布商儀表板。boostboss.ai 行銷頁面有自己的語言切換在頂部導覽。設定立即翻譯,其他介面正逐步推出。',
                 },
                 'ja': {
+                    'chrome.back': 'Lumi SDK に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
+                    'chrome.account': 'アカウント', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': 'すべて既読にする', 'chrome.notif_recent': '過去 7 日間のみ表示',
+                    'chrome.settings_tip': 'アカウント設定', 'chrome.logout': 'ログアウト',
                     'modal.title': '設定', 'modal.close': '閉じる', 'modal.save': '変更を保存',
                     'nav.account': 'アカウント', 'nav.payouts': '支払い', 'nav.api': 'API・統合',
                     'nav.brand': 'ブランドセーフティ', 'nav.notifs': '通知', 'nav.language': '言語', 'nav.security': 'セキュリティ',
@@ -4958,6 +4974,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'language.hint': 'パブリッシャー ダッシュボードにのみ適用されます。boostboss.ai のマーケティングページには独自の言語切替がトップナビにあります。設定は即時翻訳、他のサーフェスは順次展開中です。',
                 },
                 'ko': {
+                    'chrome.back': 'Lumi SDK로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
+                    'chrome.account': '계정', 'chrome.notif_tip': '알림', 'chrome.notif_title': '알림',
+                    'chrome.notif_mark_all': '모두 읽음으로 표시', 'chrome.notif_recent': '최근 7일만 표시',
+                    'chrome.settings_tip': '계정 설정', 'chrome.logout': '로그아웃',
                     'modal.title': '설정', 'modal.close': '닫기', 'modal.save': '변경 저장',
                     'nav.account': '계정', 'nav.payouts': '정산', 'nav.api': 'API 및 통합',
                     'nav.brand': '브랜드 안전', 'nav.notifs': '알림', 'nav.language': '언어', 'nav.security': '보안',
@@ -4966,6 +4986,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'language.hint': '퍼블리셔 대시보드에만 적용됩니다. boostboss.ai 마케팅 페이지는 상단 내비에 자체 언어 토글이 있습니다. 설정은 즉시 번역되고 다른 표면은 점진적으로 적용됩니다.',
                 },
                 'vi': {
+                    'chrome.back': 'Quay lại Lumi SDK', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
+                    'chrome.account': 'Tài khoản', 'chrome.notif_tip': 'Thông báo', 'chrome.notif_title': 'Thông báo',
+                    'chrome.notif_mark_all': 'Đánh dấu tất cả đã đọc', 'chrome.notif_recent': 'Chỉ hiển thị 7 ngày gần nhất',
+                    'chrome.settings_tip': 'Cài đặt tài khoản', 'chrome.logout': 'Đăng xuất',
                     'modal.title': 'Cài đặt', 'modal.close': 'Đóng', 'modal.save': 'Lưu thay đổi',
                     'nav.account': 'Tài khoản', 'nav.payouts': 'Thanh toán', 'nav.api': 'API & Tích hợp',
                     'nav.brand': 'An toàn thương hiệu', 'nav.notifs': 'Thông báo', 'nav.language': 'Ngôn ngữ', 'nav.security': 'Bảo mật',
@@ -4978,6 +5002,19 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 var d = DASH_T[currentLang()] || DASH_T.en;
                 return d[k] || DASH_T.en[k] || k;
             }
+            function applyChrome() {
+                document.querySelectorAll('[data-t]').forEach((el) => {
+                    var v = t(el.getAttribute('data-t')); if (v) el.textContent = v;
+                });
+                document.querySelectorAll('[data-t-title]').forEach((el) => {
+                    var v = t(el.getAttribute('data-t-title')); if (v) el.title = v;
+                });
+                document.querySelectorAll('[data-t-placeholder]').forEach((el) => {
+                    var v = t(el.getAttribute('data-t-placeholder')); if (v) el.placeholder = v;
+                });
+            }
+            window.applyDashboardChrome = applyChrome;
+            applyChrome();
             // Common IAB advertiser categories the publisher can block.
             const IAB_CATS = [
                 { code: 'IAB1',  label: 'Arts & Entertainment' },
@@ -5167,13 +5204,14 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, brand: sectionBrandSafety, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
                 // Language picker — saves to bb_dashboard_lang and
-                // immediately re-renders the modal in the chosen language.
+                // immediately re-renders modal + dashboard chrome behind it.
                 const langSel = body.querySelector('#sSetLanguage');
                 if (langSel) langSel.addEventListener('change', () => {
                     try { localStorage.setItem('bb_dashboard_lang', langSel.value); } catch (_) {}
                     renderModalChrome();
                     renderNav();
                     renderBody();
+                    applyChrome();
                 });
                 // Copy buttons
                 body.querySelectorAll('.sSetCopy').forEach((btn) => {

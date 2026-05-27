@@ -2287,7 +2287,7 @@
     <div id="dashboardContainer" class="dashboard-container">
         <header>
             <div class="header-left">
-                <a href="/ads" class="logo" title="Back to SuperBoost Ads">
+                <a href="/ads" class="logo" title="Back to SuperBoost Ads" data-t-title="chrome.back">
                     <div class="logo-icon"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
 <line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
 <line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
@@ -2303,19 +2303,19 @@
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></div>
                     <div class="logo-text">Super<span style="color: #FF2D78;">Boost Ads</span></div>
                 </a>
-                <div class="header-title">Dashboard</div>
+                <div class="header-title" data-t="chrome.dashboard">Dashboard</div>
                 <button onclick="openCmdPalette()" style="
                     background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px;
                     padding: 6px 14px; font-size: 12px; color: #9CA3AF; cursor: pointer;
                     font-family: inherit; display: flex; align-items: center; gap: 8px;
                 ">
-                    <span>Search actions</span>
+                    <span data-t="chrome.search_actions">Search actions</span>
                     <kbd style="background: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #E5E7EB; color: #6B7280;">⌘K</kbd>
                 </button>
             </div>
             <div class="header-right">
                 <div class="account-info">
-                    <div class="account-label">Account</div>
+                    <div class="account-label" data-t="chrome.account">Account</div>
                     <div class="account-name" id="companyDisplayName">Loading...</div>
                 </div>
                 <div style="position: relative;">
@@ -2323,7 +2323,7 @@
                         background: #F3F4F6; border: none; width: 36px; height: 36px;
                         border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
                         display: flex; align-items: center; justify-content: center; position: relative;
-                    " title="Notifications">
+                    " title="Notifications" data-t-title="chrome.notif_tip">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         <span id="notifBadge" style="
                             position: absolute; top: 2px; right: 2px; width: 8px; height: 8px;
@@ -2336,12 +2336,12 @@
                         z-index: 100; overflow: hidden;
                     ">
                         <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 14px; font-weight: 700;">Notifications</span>
-                            <button id="notifMarkAll" style="font-size: 11px; color: var(--accent-primary); background: none; border: none; cursor: pointer; font-weight: 600;">Mark all read</button>
+                            <span style="font-size: 14px; font-weight: 700;" data-t="chrome.notif_title">Notifications</span>
+                            <button id="notifMarkAll" style="font-size: 11px; color: var(--accent-primary); background: none; border: none; cursor: pointer; font-weight: 600;" data-t="chrome.notif_mark_all">Mark all read</button>
                         </div>
                         <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
                         <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
-                            <span style="font-size: 12px; color: #9CA3AF;">Only showing last 7 days</span>
+                            <span style="font-size: 12px; color: #9CA3AF;" data-t="chrome.notif_recent">Only showing last 7 days</span>
                         </div>
                     </div>
                 </div>
@@ -2349,15 +2349,15 @@
                     background: #F3F4F6; border: none; width: 36px; height: 36px;
                     border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
                     display: flex; align-items: center; justify-content: center;
-                " title="Account Settings">⚙</button>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
+                " title="Account Settings" data-t-title="chrome.settings_tip">⚙</button>
+                <button class="logout-btn" id="logoutBtn" data-t="chrome.logout">Logout</button>
             </div>
         </header>
 
         <main>
             <!-- Date Range Picker + Stats Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-                <h2 style="font-size: 18px; font-weight: 700; color: #111; margin: 0;">Overview</h2>
+                <h2 style="font-size: 18px; font-weight: 700; color: #111; margin: 0;" data-t="chrome.overview">Overview</h2>
                 <div style="display: flex; gap: 6px; align-items: center;" id="dateRangePicker">
                     <button class="date-range-btn active" data-range="7d" style="
                         padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
@@ -2433,7 +2433,7 @@
                         padding: 5px 12px; background: var(--accent-primary); color: #fff;
                         border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
                         cursor: pointer; font-family: inherit; transition: all 0.15s;
-                    ">+ Add Funds</button>
+                    " data-t="chrome.add_funds">+ Add Funds</button>
                 </div>
             </div>
 
@@ -2642,7 +2642,7 @@
             <!-- Campaigns Section -->
             <div class="campaigns-section">
                 <div class="campaigns-header">
-                    <div class="campaigns-title">Campaigns</div>
+                    <div class="campaigns-title" data-t="chrome.campaigns">Campaigns</div>
                     <div style="display: flex; gap: 8px;">
                         <button onclick="exportCampaignsCSV()" style="
                             padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
@@ -2662,7 +2662,7 @@
                             ">Drafts <span id="draftsCount"></span> ▾</button>
                             <div id="draftsMenu"></div>
                         </div>
-                        <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
+                        <button class="new-campaign-btn" id="newCampaignBtn" data-t="chrome.new_campaign">+ New Campaign</button>
                     </div>
                 </div>
 
@@ -2671,7 +2671,7 @@
                     flex-wrap: wrap;
                 ">
                     <div style="position: relative; flex: 1; min-width: 200px;">
-                        <input type="text" id="campaignSearch" placeholder="Search campaigns…" style="
+                        <input type="text" id="campaignSearch" placeholder="Search campaigns…" data-t-placeholder="chrome.search_campaigns" style="
                             width: 100%; padding: 9px 12px 9px 34px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 13px; font-family: inherit;
                             background: #FAFAFA; outline: none; transition: border 0.15s;
@@ -6764,6 +6764,12 @@
             // English is the source-of-truth + fallback.
             const DASH_T = {
                 'en': {
+                    'chrome.back': 'Back to SuperBoost Ads', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Search actions',
+                    'chrome.account': 'Account', 'chrome.notif_tip': 'Notifications', 'chrome.notif_title': 'Notifications',
+                    'chrome.notif_mark_all': 'Mark all read', 'chrome.notif_recent': 'Only showing last 7 days',
+                    'chrome.settings_tip': 'Account Settings', 'chrome.logout': 'Logout', 'chrome.overview': 'Overview',
+                    'chrome.campaigns': 'Campaigns', 'chrome.new_campaign': '+ New Campaign', 'chrome.add_funds': '+ Add Funds',
+                    'chrome.search_campaigns': 'Search campaigns…',
                     'modal.title': 'Settings',  'modal.close': 'Close',  'modal.save': 'Save changes',
                     'nav.account': 'Account',  'nav.billing': 'Billing & funds',  'nav.api': 'API access',
                     'nav.notifs': 'Notifications',  'nav.language': 'Language',  'nav.security': 'Security',
@@ -6799,6 +6805,12 @@
                     'security.change_btn': 'Change password',
                 },
                 'zh': {
+                    'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
+                    'chrome.account': '账户', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': '全部标为已读', 'chrome.notif_recent': '仅显示最近 7 天',
+                    'chrome.settings_tip': '账户设置', 'chrome.logout': '退出登录', 'chrome.overview': '概览',
+                    'chrome.campaigns': '广告', 'chrome.new_campaign': '+ 新建广告', 'chrome.add_funds': '+ 充值',
+                    'chrome.search_campaigns': '搜索广告…',
                     'modal.title': '设置',  'modal.close': '关闭',  'modal.save': '保存更改',
                     'nav.account': '账户',  'nav.billing': '账单与资金',  'nav.api': 'API 访问',
                     'nav.notifs': '通知',  'nav.language': '语言',  'nav.security': '安全',
@@ -6834,6 +6846,12 @@
                     'security.change_btn': '更改密码',
                 },
                 'zh-TW': {
+                    'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
+                    'chrome.account': '帳號', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': '全部標為已讀', 'chrome.notif_recent': '僅顯示最近 7 天',
+                    'chrome.settings_tip': '帳號設定', 'chrome.logout': '登出', 'chrome.overview': '總覽',
+                    'chrome.campaigns': '廣告', 'chrome.new_campaign': '+ 新增廣告', 'chrome.add_funds': '+ 加值',
+                    'chrome.search_campaigns': '搜尋廣告…',
                     'modal.title': '設定',  'modal.close': '關閉',  'modal.save': '儲存變更',
                     'nav.account': '帳號',  'nav.billing': '帳單與資金',  'nav.api': 'API 存取',
                     'nav.notifs': '通知',  'nav.language': '語言',  'nav.security': '安全',
@@ -6869,6 +6887,12 @@
                     'security.change_btn': '更改密碼',
                 },
                 'ja': {
+                    'chrome.back': 'SuperBoost Ads に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
+                    'chrome.account': 'アカウント', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': 'すべて既読にする', 'chrome.notif_recent': '過去 7 日間のみ表示',
+                    'chrome.settings_tip': 'アカウント設定', 'chrome.logout': 'ログアウト', 'chrome.overview': '概要',
+                    'chrome.campaigns': 'キャンペーン', 'chrome.new_campaign': '+ 新規キャンペーン', 'chrome.add_funds': '+ 入金',
+                    'chrome.search_campaigns': 'キャンペーンを検索…',
                     'modal.title': '設定',  'modal.close': '閉じる',  'modal.save': '変更を保存',
                     'nav.account': 'アカウント',  'nav.billing': '請求 & 残高',  'nav.api': 'API アクセス',
                     'nav.notifs': '通知',  'nav.language': '言語',  'nav.security': 'セキュリティ',
@@ -6904,6 +6928,12 @@
                     'security.change_btn': 'パスワードを変更',
                 },
                 'ko': {
+                    'chrome.back': 'SuperBoost Ads로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
+                    'chrome.account': '계정', 'chrome.notif_tip': '알림', 'chrome.notif_title': '알림',
+                    'chrome.notif_mark_all': '모두 읽음으로 표시', 'chrome.notif_recent': '최근 7일만 표시',
+                    'chrome.settings_tip': '계정 설정', 'chrome.logout': '로그아웃', 'chrome.overview': '개요',
+                    'chrome.campaigns': '캠페인', 'chrome.new_campaign': '+ 새 캠페인', 'chrome.add_funds': '+ 자금 추가',
+                    'chrome.search_campaigns': '캠페인 검색…',
                     'modal.title': '설정',  'modal.close': '닫기',  'modal.save': '변경 저장',
                     'nav.account': '계정',  'nav.billing': '결제 및 자금',  'nav.api': 'API 접근',
                     'nav.notifs': '알림',  'nav.language': '언어',  'nav.security': '보안',
@@ -6939,6 +6969,12 @@
                     'security.change_btn': '비밀번호 변경',
                 },
                 'vi': {
+                    'chrome.back': 'Quay lại SuperBoost Ads', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
+                    'chrome.account': 'Tài khoản', 'chrome.notif_tip': 'Thông báo', 'chrome.notif_title': 'Thông báo',
+                    'chrome.notif_mark_all': 'Đánh dấu tất cả đã đọc', 'chrome.notif_recent': 'Chỉ hiển thị 7 ngày gần nhất',
+                    'chrome.settings_tip': 'Cài đặt tài khoản', 'chrome.logout': 'Đăng xuất', 'chrome.overview': 'Tổng quan',
+                    'chrome.campaigns': 'Chiến dịch', 'chrome.new_campaign': '+ Chiến dịch mới', 'chrome.add_funds': '+ Thêm tiền',
+                    'chrome.search_campaigns': 'Tìm chiến dịch…',
                     'modal.title': 'Cài đặt',  'modal.close': 'Đóng',  'modal.save': 'Lưu thay đổi',
                     'nav.account': 'Tài khoản',  'nav.billing': 'Thanh toán & quỹ',  'nav.api': 'Truy cập API',
                     'nav.notifs': 'Thông báo',  'nav.language': 'Ngôn ngữ',  'nav.security': 'Bảo mật',
@@ -6978,6 +7014,27 @@
                 var d = DASH_T[currentLang()] || DASH_T.en;
                 return d[k] || DASH_T.en[k] || k;
             }
+            // Walk the static dashboard HTML and apply translations to any
+            // element tagged with data-t / data-t-title / data-t-placeholder.
+            // Runs on initial load and re-runs whenever the language picker
+            // changes so the dashboard chrome updates in place.
+            function applyChrome() {
+                document.querySelectorAll('[data-t]').forEach((el) => {
+                    var v = t(el.getAttribute('data-t')); if (v) el.textContent = v;
+                });
+                document.querySelectorAll('[data-t-title]').forEach((el) => {
+                    var v = t(el.getAttribute('data-t-title')); if (v) el.title = v;
+                });
+                document.querySelectorAll('[data-t-placeholder]').forEach((el) => {
+                    var v = t(el.getAttribute('data-t-placeholder')); if (v) el.placeholder = v;
+                });
+            }
+            // Expose to the broader script scope so other init code can
+            // call it after dynamically inserting translatable elements.
+            window.applyDashboardChrome = applyChrome;
+            // Apply immediately on script run — DOM is already parsed
+            // because this <script> sits at the end of <body>.
+            applyChrome();
 
             function sectionAccount() {
                 const d = u();
@@ -7105,15 +7162,15 @@
                 const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
                 // Language picker — saves to bb_dashboard_lang and
-                // immediately re-renders the modal in the chosen language.
+                // immediately re-renders the modal in the chosen language,
+                // PLUS the dashboard chrome behind it.
                 const langSel = body.querySelector('#aSetLanguage');
                 if (langSel) langSel.addEventListener('change', () => {
                     try { localStorage.setItem('bb_dashboard_lang', langSel.value); } catch (_) {}
-                    // Re-render the full modal (chrome + nav + body) so every
-                    // translated string updates without closing the modal.
                     renderModalChrome();
                     renderNav();
                     renderBody();
+                    applyChrome();   // update the top nav / page chrome behind the modal
                 });
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {
