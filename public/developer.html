@@ -1717,9 +1717,9 @@
         <div class="container">
             <!-- Page Header -->
             <div class="page-header" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                <h1 style="margin: 0;">Publisher Dashboard</h1>
+                <h1 style="margin: 0;" data-t="dash.title">Publisher Dashboard</h1>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <label for="integrationFilter" style="font-size: 12.5px; font-weight: 600; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">View:</label>
+                    <label for="integrationFilter" style="font-size: 12.5px; font-weight: 600; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="dash.view">View:</label>
                     <select id="integrationFilter" onchange="applyIntegrationFilter()" style="
                         padding: 8px 30px 8px 12px;
                         font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
@@ -1729,11 +1729,11 @@
                         background-image: url('data:image/svg+xml;utf8,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22&gt;&lt;path fill=%22%236B7280%22 d=%22M4.5 6l3.5 4 3.5-4z%22/&gt;&lt;/svg&gt;');
                         background-repeat: no-repeat; background-position: right 8px center;
                     ">
-                        <option value="">All integrations</option>
-                        <option value="mcp">Lumi SDK for MCP</option>
-                        <option value="js-snippet">Lumi SDK script tag</option>
-                        <option value="npm-sdk">Lumi SDK for browser extensions</option>
-                        <option value="rest-api">Lumi API for Bots</option>
+                        <option value="" data-t="dash.filter_all">All integrations</option>
+                        <option value="mcp" data-t="dash.filter_mcp">Lumi SDK for MCP</option>
+                        <option value="js-snippet" data-t="dash.filter_js">Lumi SDK script tag</option>
+                        <option value="npm-sdk" data-t="dash.filter_npm">Lumi SDK for browser extensions</option>
+                        <option value="rest-api" data-t="dash.filter_rest">Lumi API for Bots</option>
                     </select>
                 </div>
             </div>
@@ -1741,32 +1741,32 @@
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Total Earnings</div>
+                    <div class="stat-label" data-t="stats.earnings">Total Earnings</div>
                     <div class="stat-value earnings" id="totalEarnings">$0.00</div>
-                    <div class="stat-trend" id="earningsTrend">↑ 0% from last month</div>
+                    <div class="stat-trend" id="earningsTrend" data-t="stats.trend_zero">↑ 0% from last month</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Impressions</div>
+                    <div class="stat-label" data-t="stats.impressions">Impressions</div>
                     <div class="stat-value default" id="totalImpressions">0</div>
-                    <div class="stat-trend" id="impressionsTrend">↑ 0% from last month</div>
+                    <div class="stat-trend" id="impressionsTrend" data-t="stats.trend_zero">↑ 0% from last month</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Your Share</div>
+                    <div class="stat-label" data-t="stats.your_share">Your Share</div>
                     <div class="stat-value default" id="revenueShare">85%</div>
                     <div class="stat-bar">
                         <div class="stat-bar-fill" id="shareBar" style="width: 85%"></div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">RPM</div>
+                    <div class="stat-label" data-t="stats.rpm">RPM</div>
                     <div class="stat-value default" id="rpmValue">$0.00</div>
-                    <div class="stat-trend" id="rpmTrend">↑ 0% from last month</div>
+                    <div class="stat-trend" id="rpmTrend" data-t="stats.trend_zero">↑ 0% from last month</div>
                 </div>
             </div>
 
             <!-- Revenue Chart -->
             <div class="section">
-                <div class="section-title">Revenue Over Last 14 Days</div>
+                <div class="section-title" data-t="chart.revenue_14d">Revenue Over Last 14 Days</div>
                 <div class="chart-container" id="chartContainer">
                     <!-- Dynamically populated -->
                 </div>
@@ -1774,14 +1774,14 @@
 
             <!-- Mediation / Waterfall — Lumi SDK equivalent -->
             <div class="section">
-                <div class="section-title">Mediation &amp; Waterfall</div>
+                <div class="section-title" data-t="med.title">Mediation &amp; Waterfall</div>
 
                 <div class="mediation-head">
-                    <div class="meta">Sources compete first-price per impression. Benna re-ranks on every bid.</div>
-                    <div class="benna-auto" id="bennaAutoToggle" title="Benna picks demand source order">
+                    <div class="meta" data-t="med.subtitle">Sources compete first-price per impression. Benna re-ranks on every bid.</div>
+                    <div class="benna-auto" id="bennaAutoToggle" title="Benna picks demand source order" data-t-title="med.auto_tip">
                         <span class="b-mark">B</span>
                         <span class="dot"></span>
-                        <span id="bennaAutoLabel">BENNA AUTO-ORDER · ON</span>
+                        <span id="bennaAutoLabel" data-t="med.auto_on">BENNA AUTO-ORDER · ON</span>
                     </div>
                 </div>
 
@@ -1792,16 +1792,16 @@
                         <div class="wf-source">
                             <div class="logo" style="background: linear-gradient(135deg, #04BEFE 0%, #7C3AED 100%);">BBX</div>
                             <div>
-                                <div class="name">Boost Boss Exchange</div>
-                                <div class="sub">direct MCP demand · real-time</div>
+                                <div class="name" data-t="med.bbx_name">Boost Boss Exchange</div>
+                                <div class="sub" data-t="med.bbx_sub">direct MCP demand · real-time</div>
                             </div>
                         </div>
                         <div class="wf-metric">
-                            <div class="l">ECPM (7d)</div>
+                            <div class="l" data-t="med.ecpm_label">ECPM (7d)</div>
                             <div class="v">$4.82</div>
                         </div>
                         <div class="wf-metric imps">
-                            <div class="l">FILL RATE</div>
+                            <div class="l" data-t="med.fill_label">FILL RATE</div>
                             <div class="v">94.2%</div>
                         </div>
                         <div class="wf-floor">
@@ -1817,16 +1817,16 @@
                         <div class="wf-source">
                             <div class="logo" style="background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);">DD</div>
                             <div>
-                                <div class="name">Direct Deals</div>
-                                <div class="sub">PMP · Anthropic, OpenAI, Vercel</div>
+                                <div class="name" data-t="med.direct_name">Direct Deals</div>
+                                <div class="sub" data-t="med.direct_sub">PMP · Anthropic, OpenAI, Vercel</div>
                             </div>
                         </div>
                         <div class="wf-metric">
-                            <div class="l">ECPM (7d)</div>
+                            <div class="l" data-t="med.ecpm_label">ECPM (7d)</div>
                             <div class="v">$6.14</div>
                         </div>
                         <div class="wf-metric imps">
-                            <div class="l">FILL RATE</div>
+                            <div class="l" data-t="med.fill_label">FILL RATE</div>
                             <div class="v">28.7%</div>
                         </div>
                         <div class="wf-floor">
@@ -1842,16 +1842,16 @@
                         <div class="wf-source">
                             <div class="logo" style="background: linear-gradient(135deg, #FFE600 0%, #FFB800 100%); color: #1A1A2E;">HO</div>
                             <div>
-                                <div class="name">House Ads</div>
-                                <div class="sub">backfill · your own promotions</div>
+                                <div class="name" data-t="med.house_name">House Ads</div>
+                                <div class="sub" data-t="med.house_sub">backfill · your own promotions</div>
                             </div>
                         </div>
                         <div class="wf-metric">
-                            <div class="l">ECPM (7d)</div>
+                            <div class="l" data-t="med.ecpm_label">ECPM (7d)</div>
                             <div class="v">$1.20</div>
                         </div>
                         <div class="wf-metric imps">
-                            <div class="l">FILL RATE</div>
+                            <div class="l" data-t="med.fill_label">FILL RATE</div>
                             <div class="v">100%</div>
                         </div>
                         <div class="wf-floor">
@@ -1867,16 +1867,16 @@
                         <div class="wf-source">
                             <div class="logo" style="background: linear-gradient(135deg, #6B6B83 0%, #9C9CB3 100%);">3P</div>
                             <div>
-                                <div class="name">3rd-party Networks</div>
-                                <div class="sub">off by default · enable to test</div>
+                                <div class="name" data-t="med.thirdparty_name">3rd-party Networks</div>
+                                <div class="sub" data-t="med.thirdparty_sub">off by default · enable to test</div>
                             </div>
                         </div>
                         <div class="wf-metric">
-                            <div class="l">ECPM (7d)</div>
+                            <div class="l" data-t="med.ecpm_label">ECPM (7d)</div>
                             <div class="v">—</div>
                         </div>
                         <div class="wf-metric imps">
-                            <div class="l">FILL RATE</div>
+                            <div class="l" data-t="med.fill_label">FILL RATE</div>
                             <div class="v">—</div>
                         </div>
                         <div class="wf-floor">
@@ -1890,26 +1890,26 @@
                 <div class="wf-summary">
                     <div class="item cyan">
                         <div class="v" id="wfBlendedEcpm">$4.98</div>
-                        <div class="l">blended eCPM</div>
+                        <div class="l" data-t="med.blended_ecpm">blended eCPM</div>
                     </div>
                     <div class="item">
                         <div class="v" id="wfFillRate">99.4%</div>
-                        <div class="l">overall fill</div>
+                        <div class="l" data-t="med.overall_fill">overall fill</div>
                     </div>
                     <div class="item">
                         <div class="v" id="wfAuctions">842k</div>
-                        <div class="l">auctions / 24h</div>
+                        <div class="l" data-t="med.auctions_24h">auctions / 24h</div>
                     </div>
                     <div class="item">
                         <div class="v" id="wfBennaLift">+18%</div>
-                        <div class="l">Benna vs manual order</div>
+                        <div class="l" data-t="med.benna_lift">Benna vs manual order</div>
                     </div>
                 </div>
 
                 <div class="wf-note">
                     <div>
-                        <strong>Benna auto-order is on.</strong>
-                        The engine re-ranks demand sources on each impression using MCP context (user intent, tool, host) to maximize your eCPM. Last 7 days: +18% vs fixed waterfall. Turn off to lock the order above.
+                        <strong data-t="med.note_strong">Benna auto-order is on.</strong>
+                        <span data-t="med.note_body">The engine re-ranks demand sources on each impression using MCP context (user intent, tool, host) to maximize your eCPM. Last 7 days: +18% vs fixed waterfall. Turn off to lock the order above.</span>
                     </div>
                 </div>
             </div>
@@ -1966,8 +1966,8 @@
 
             <!-- Integrations — unified section: state-aware cards as tab selectors + per-door install/code panels -->
             <div class="section integration-steps" id="integrationGuide">
-                <div class="section-title">Integrations</div>
-                <p style="color: #6B7280; font-size: 13px; margin: 0 0 16px 0;">One publisher account, four doors. Click the door you're setting up — the install + code sample appears below. Active doors show last 7 days; "Not started" doors are ready to set up. <a href="/publish" style="color: #FF2D78; text-decoration: none;">About each door →</a></p>
+                <div class="section-title" data-t="integ.title">Integrations</div>
+                <p style="color: #6B7280; font-size: 13px; margin: 0 0 16px 0;"><span data-t="integ.intro">One publisher account, four doors. Click the door you're setting up — the install + code sample appears below. Active doors show last 7 days; "Not started" doors are ready to set up.</span> <a href="/publish" style="color: #FF2D78; text-decoration: none;" data-t="integ.about_link">About each door →</a></p>
 
                 <!-- Cards-as-tabs: 4 cards carry state AND act as the tab UI. -->
                 <div class="integration-cards-grid" id="integrationCardsGrid" style="margin-bottom: 22px;">
@@ -1977,16 +1977,16 @@
                 <!-- Door 1: Lumi SDK for MCP -->
                 <div class="fw-panel" id="fw-mcp">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Install</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_install">1. Install</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp-install')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp-install')" data-t="common.copy">Copy</button>
                             <pre id="code-mcp-install">npm install @boostbossai/lumi-mcp</pre>
                         </div>
                     </div>
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Wire it into a tool handler</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_mcp_wire">2. Wire it into a tool handler</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp')" data-t="common.copy">Copy</button>
                             <pre id="code-mcp">// Inside your existing MCP server's tool handler
 import { LumiMCP } from '@boostbossai/lumi-mcp';
 
@@ -2011,7 +2011,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) =&gt; {
 });</pre>
                         </div>
                         <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">toMCPBlock()</code> bakes the disclosure label in. Try sandbox without signup: pass <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">publisherId: "pub_test_demo"</code>. <a href="/docs/mcp" style="color: #FF2D78;">Full reference →</a>
+                            <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">toMCPBlock()</code> <span data-t="integ.cap_mcp">bakes the disclosure label in. Try sandbox without signup: pass</span> <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">publisherId: "pub_test_demo"</code>. <a href="/docs/mcp" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
                         </div>
                     </div>
                 </div>
@@ -2019,27 +2019,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) =&gt; {
                 <!-- Door 2: Lumi SDK script tag -->
                 <div class="fw-panel" id="fw-js-snippet" style="display: none;">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Drop into your &lt;head&gt;</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_js_head">1. Drop into your &lt;head&gt;</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-tag')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-tag')" data-t="common.copy">Copy</button>
                             <pre id="code-snippet-tag">&lt;script async
   src="https://boostboss.ai/lumi.js"
   data-publisher-id="bb_dev_sk_loading"&gt;&lt;/script&gt;</pre>
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;">
-                            Async, zero impact on first paint. The publisher ID above is your live key — already filled in.
-                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;" data-t="integ.cap_js_async">Async, zero impact on first paint. The publisher ID above is your live key — already filled in.</div>
                     </div>
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Add slot divs where you want ads</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_js_slots">2. Add slot divs where you want ads</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-slot')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-slot')" data-t="common.copy">Copy</button>
                             <pre id="code-snippet-slot">&lt;div data-lumi-slot="banner"&gt;&lt;/div&gt;
 &lt;div data-lumi-slot="sidebar" data-lumi-context="checkout flow"&gt;&lt;/div&gt;
 &lt;div data-lumi-slot="inline"&gt;&lt;/div&gt;</pre>
                         </div>
                         <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            Lumi auto-discovers slots and rerenders on SPA route changes via MutationObserver. Theme via CSS variables (<code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-primary</code>, <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-radius</code>, etc.). <a href="/docs/js-snippet" style="color: #FF2D78;">Full reference →</a>
+                            <span data-t="integ.cap_js_slots">Lumi auto-discovers slots and rerenders on SPA route changes via MutationObserver. Theme via CSS variables (</span><code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-primary</code>, <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-radius</code><span data-t="integ.cap_js_slots_etc">, etc.).</span> <a href="/docs/js-snippet" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
                         </div>
                     </div>
                 </div>
@@ -2047,16 +2045,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) =&gt; {
                 <!-- Door 3: Lumi SDK for browser extensions -->
                 <div class="fw-panel" id="fw-npm-sdk" style="display: none;">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Install</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_install">1. Install</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-install')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-install')" data-t="common.copy">Copy</button>
                             <pre id="code-ext-install">npm install @boostbossai/lumi-sdk</pre>
                         </div>
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Render in your content script / sidepanel</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_ext_render">2. Render in your content script / sidepanel</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext')" data-t="common.copy">Copy</button>
                             <pre id="code-ext">import { Lumi } from '@boostbossai/lumi-sdk';
 
 const lumi = new Lumi({ publisherId: 'bb_dev_sk_loading' });
@@ -2071,9 +2069,9 @@ lumi.on('error',      (e) =&gt; console.warn(e.code, e.message));</pre>
                         </div>
                     </div>
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2b. React or Vue?</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_ext_react_vue">2b. React or Vue?</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-react')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-react')" data-t="common.copy">Copy</button>
                             <pre id="code-ext-react">// React
 import { LumiProvider, LumiSlot } from '@boostbossai/lumi-sdk/react';
 
@@ -2087,7 +2085,7 @@ provideLumi({ publisherId: 'bb_dev_sk_loading' });
 // &lt;LumiSlot format="sidebar" :context="docTitle" /&gt;</pre>
                         </div>
                         <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            Manifest v3 native — zero <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">eval</code>, zero remote code. Allow <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">https://boostboss.ai</code> in your extension's CSP. <a href="/docs/npm-sdk" style="color: #FF2D78;">Full reference →</a>
+                            <span data-t="integ.cap_ext_mv3">Manifest v3 native — zero</span> <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">eval</code><span data-t="integ.cap_ext_csp">, zero remote code. Allow</span> <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">https://boostboss.ai</code> <span data-t="integ.cap_ext_csp2">in your extension's CSP.</span> <a href="/docs/npm-sdk" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
                         </div>
                     </div>
                 </div>
@@ -2095,19 +2093,17 @@ provideLumi({ publisherId: 'bb_dev_sk_loading' });
                 <!-- Door 4: Lumi API for Bots -->
                 <div class="fw-panel" id="fw-rest-api" style="display: none;">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Add bearer token to env</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_rest_env">1. Add bearer token to env</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')" data-t="common.copy">Copy</button>
                             <pre id="code-rest-env">BB_API_KEY=bb_dev_sk_loading</pre>
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;">
-                            Server-side only — never ship the bearer to the browser. Use Vercel / Netlify / Render env-var settings.
-                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;" data-t="integ.cap_rest_env">Server-side only — never ship the bearer to the browser. Use Vercel / Netlify / Render env-var settings.</div>
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Direct REST call (Discord example)</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_rest_call">2. Direct REST call (Discord example)</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest')" data-t="common.copy">Copy</button>
                             <pre id="code-rest">// Inside your Discord bot's response handler:
 const { ad } = await fetch('https://boostboss.ai/v1/ad-request', {
   method: 'POST',
@@ -2129,9 +2125,9 @@ if (ad) {
                         </div>
                     </div>
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2b. Optional: per-platform helper library</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_rest_helper">2b. Optional: per-platform helper library</h4>
                         <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-helper')">Copy</button>
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-helper')" data-t="common.copy">Copy</button>
                             <pre id="code-rest-helper">// Discord — convenience wrappers around the Lumi API for Bots
 npm install @boostbossai/lumi-discord
 // or:  @boostbossai/lumi-telegram  ·  @boostbossai/lumi-slack
@@ -2145,7 +2141,7 @@ await message.reply({
 });</pre>
                         </div>
                         <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            Helper libraries are optional — they format the ad payload into each platform's native message type so you don't have to. <a href="/docs/rest-api" style="color: #FF2D78;">Full reference →</a>
+                            <span data-t="integ.cap_rest_helper">Helper libraries are optional — they format the ad payload into each platform's native message type so you don't have to.</span> <a href="/docs/rest-api" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
                         </div>
                     </div>
                 </div>
@@ -2160,8 +2156,8 @@ await message.reply({
                        (d) Test result metrics + raw response (hidden until run) -->
                 <div id="integrationVerifyPanel" style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #E5E7EB;">
                     <div style="margin-bottom: 14px;">
-                        <div style="font-weight: 700; font-size: 14px; color: #1A1A2E;">Verify your integration</div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">
+                        <div style="font-weight: 700; font-size: 14px; color: #1A1A2E;" data-t="verify.title">Verify your integration</div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 2px;" data-t="verify.subtitle">
                             Fire a synthetic ad request to confirm your setup is wired correctly. Per-door badges auto-update as soon as a real event for that door arrives.
                         </div>
                     </div>
@@ -2171,22 +2167,22 @@ await message.reply({
                         <div class="verify-badge" data-door="mcp">
                             <span class="verify-icon">○</span>
                             <span class="verify-name">MCP</span>
-                            <span class="verify-status">Not started</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
                         </div>
                         <div class="verify-badge" data-door="js-snippet">
                             <span class="verify-icon">○</span>
                             <span class="verify-name">JS Snippet</span>
-                            <span class="verify-status">Not started</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
                         </div>
                         <div class="verify-badge" data-door="npm-sdk">
                             <span class="verify-icon">○</span>
                             <span class="verify-name">NPM SDK</span>
-                            <span class="verify-status">Not started</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
                         </div>
                         <div class="verify-badge" data-door="rest-api">
                             <span class="verify-icon">○</span>
                             <span class="verify-name">REST API</span>
-                            <span class="verify-status">Not started</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
                         </div>
                     </div>
 
@@ -2197,26 +2193,26 @@ await message.reply({
                          The preview pane updates live with theme changes AND
                          shows the actual ad data from the last test run. -->
                     <div style="background:#FAFAFA; border:1px solid #E5E7EB; border-radius:12px; padding:16px 20px;">
-                        <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">Run a synthetic test</div>
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;" data-t="verify.run_test_header">Run a synthetic test</div>
                         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;">
                             <div style="flex:1;min-width:200px;">
-                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Context</label>
-                                <input type="text" id="testContext" value="user is debugging a python traceback" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
+                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="verify.context_label">Context</label>
+                                <input type="text" id="testContext" value="user is debugging a python traceback" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;" data-t-placeholder="verify.context_placeholder">
                             </div>
                             <div style="min-width:120px;">
-                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Format</label>
+                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="verify.format_label">Format</label>
                                 <select id="testFormat" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
-                                    <option value="any">Any</option>
-                                    <option value="image">Image</option>
-                                    <option value="native">Native</option>
+                                    <option value="any" data-t="verify.format_any">Any</option>
+                                    <option value="image" data-t="verify.format_image">Image</option>
+                                    <option value="native" data-t="verify.format_native">Native</option>
                                 </select>
                             </div>
                             <div style="display:flex;gap:8px;align-items:center;">
-                                <label style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;cursor:pointer;" title="Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live.">
+                                <label style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;cursor:pointer;" title="Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live." data-t-title="verify.sandbox_tip">
                                     <input type="checkbox" id="testSandboxToggle" checked style="margin:0;">
-                                    <span>Sandbox</span>
+                                    <span data-t="verify.sandbox">Sandbox</span>
                                 </label>
-                                <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:9px 20px;background:#FF2D78;color:#fff;border:1.5px solid #1A1A2E;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:2px 2px 0 #1A1A2E;">▶ Run Test</button>
+                                <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:9px 20px;background:#FF2D78;color:#fff;border:1.5px solid #1A1A2E;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:2px 2px 0 #1A1A2E;" data-t="verify.run_btn">▶ Run Test</button>
                             </div>
                         </div>
 
@@ -2227,36 +2223,36 @@ await message.reply({
                         <div style="display:grid;grid-template-columns:240px 1fr;gap:24px;margin-top:18px;padding-top:18px;border-top:1px dashed #E5E7EB;" class="theme-preview-grid">
                             <!-- Theme controls -->
                             <div>
-                                <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;">Theme</div>
+                                <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;" data-t="theme.header">Theme</div>
                                 <div style="margin-bottom:14px;">
-                                    <label for="themePrimary" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Primary color</label>
+                                    <label for="themePrimary" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="theme.primary_color">Primary color</label>
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <input type="color" id="themePrimary" value="#FF2D78" style="width:36px;height:30px;border:1px solid #E5E7EB;border-radius:6px;padding:2px;cursor:pointer;background:#fff;">
                                         <code id="themePrimaryLabel" style="font-size:11px;color:#1A1A2E;font-family:'SFMono-Regular',monospace;">#FF2D78</code>
                                     </div>
                                 </div>
                                 <div style="margin-bottom:14px;">
-                                    <label for="themeRadius" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Border radius <span id="themeRadiusLabel" style="font-family:'SFMono-Regular',monospace;color:#1A1A2E;">12px</span></label>
+                                    <label for="themeRadius" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;"><span data-t="theme.border_radius">Border radius</span> <span id="themeRadiusLabel" style="font-family:'SFMono-Regular',monospace;color:#1A1A2E;">12px</span></label>
                                     <input type="range" id="themeRadius" min="0" max="24" value="12" style="width:100%;">
                                 </div>
                                 <div style="margin-bottom:14px;">
-                                    <label for="themeFont" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Font</label>
+                                    <label for="themeFont" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="theme.font">Font</label>
                                     <select id="themeFont" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:12px;background:#fff;">
                                         <option value="Inter, sans-serif">Inter</option>
-                                        <option value="system-ui, -apple-system, sans-serif">System UI</option>
-                                        <option value="'SFMono-Regular', Consolas, monospace">Monospace</option>
+                                        <option value="system-ui, -apple-system, sans-serif" data-t="theme.font_system">System UI</option>
+                                        <option value="'SFMono-Regular', Consolas, monospace" data-t="theme.font_mono">Monospace</option>
                                         <option value="Georgia, serif">Georgia</option>
                                     </select>
                                 </div>
-                                <button id="copyThemeBtn" onclick="copyThemeCss()" style="width:100%;padding:8px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Copy CSS snippet</button>
-                                <div style="font-size:10.5px;color:#9CA3AF;margin-top:6px;line-height:1.4;">Paste into your stylesheet's <code>:root</code> block to apply this theme to all Lumi ads in your app.</div>
+                                <button id="copyThemeBtn" onclick="copyThemeCss()" style="width:100%;padding:8px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;" data-t="theme.copy_css">Copy CSS snippet</button>
+                                <div style="font-size:10.5px;color:#9CA3AF;margin-top:6px;line-height:1.4;"><span data-t="theme.paste_into_a">Paste into your stylesheet's</span> <code>:root</code> <span data-t="theme.paste_into_b">block to apply this theme to all Lumi ads in your app.</span></div>
                             </div>
 
                             <!-- Live preview pane -->
                             <div>
                                 <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-                                    <span>Live preview</span>
-                                    <span id="adPreviewStatus" style="font-size:10px;color:#9CA3AF;font-weight:500;text-transform:none;letter-spacing:0;">placeholder · run a test to see a real ad</span>
+                                    <span data-t="theme.live_preview">Live preview</span>
+                                    <span id="adPreviewStatus" style="font-size:10px;color:#9CA3AF;font-weight:500;text-transform:none;letter-spacing:0;" data-t="theme.placeholder_status">placeholder · run a test to see a real ad</span>
                                 </div>
                                 <div id="adPreview" style="
                                     background: #fff;
@@ -2269,12 +2265,12 @@ await message.reply({
                                 ">
                                     <div style="font-size:10px;color:var(--lumi-primary,#FF2D78);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
                                         <span style="background:var(--lumi-primary,#FF2D78);color:#fff;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:900;">BB</span>
-                                        <span>Sponsored · via Boost Boss</span>
+                                        <span data-t="theme.sponsored_via">Sponsored · via Boost Boss</span>
                                     </div>
                                     <img id="adPreviewImg" src="" alt="" style="width:100%;border-radius:6px;margin-bottom:10px;display:none;max-height:200px;object-fit:cover;">
-                                    <div id="adPreviewHeadline" style="font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:4px;">Your headline appears here</div>
-                                    <div id="adPreviewSubtext" style="font-size:12px;color:#6B7280;margin-bottom:10px;line-height:1.5;">Run a synthetic test to see a real ad rendered with your theme settings.</div>
-                                    <a id="adPreviewCta" href="#" onclick="return false;" style="display:inline-block;background:var(--lumi-primary,#FF2D78);color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;">Try Free →</a>
+                                    <div id="adPreviewHeadline" style="font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:4px;" data-t="theme.headline_placeholder">Your headline appears here</div>
+                                    <div id="adPreviewSubtext" style="font-size:12px;color:#6B7280;margin-bottom:10px;line-height:1.5;" data-t="theme.subtext_placeholder">Run a synthetic test to see a real ad rendered with your theme settings.</div>
+                                    <a id="adPreviewCta" href="#" onclick="return false;" style="display:inline-block;background:var(--lumi-primary,#FF2D78);color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;" data-t="theme.cta_try">Try Free →</a>
                                 </div>
                             </div>
                         </div>
@@ -2302,13 +2298,13 @@ await message.reply({
             <!-- Ad Placements — the door's placements, each a toggleable card -->
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <div class="section-title" style="margin-bottom: 0;">Ad Placements</div>
+                    <div class="section-title" style="margin-bottom: 0;" data-t="ap.title">Ad Placements</div>
                     <div style="font-size: 12px; color: #6B7280;">
-                        Est. monthly income: <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
-                        <span style="color: #9CA3AF; font-size: 11px;">&nbsp;(at current volume)</span>
+                        <span data-t="ap.est_income">Est. monthly income:</span> <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
+                        <span style="color: #9CA3AF; font-size: 11px;" data-t="ap.at_current_volume">&nbsp;(at current volume)</span>
                     </div>
                 </div>
-                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;">
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;" data-t="ap.intro">
                     Every card below is a placement your installed door can render. Switch any one on or off — turning a placement off removes it from your auction. Showing the door selected in the Integration section above.
                 </div>
                 <div id="adPlacementsContainer">
@@ -2318,51 +2314,51 @@ await message.reply({
 
             <!-- API Keys Section -->
             <div class="section">
-                <div class="section-title">API Keys & Credentials</div>
+                <div class="section-title" data-t="apikeys.title">API Keys & Credentials</div>
                 <div class="key-item">
                     <div class="key-info">
-                        <div class="key-label">API Key</div>
+                        <div class="key-label" data-t="apikeys.api_key">API Key</div>
                         <div class="key-value masked" id="api-key">bb_dev_sk••••••••••••••••••</div>
                     </div>
-                    <button class="reveal-btn" onclick="toggleAPIKey()">Reveal</button>
+                    <button class="reveal-btn" onclick="toggleAPIKey()" data-t="apikeys.reveal">Reveal</button>
                 </div>
                 <div class="key-item">
                     <div class="key-info">
-                        <div class="key-label">App ID</div>
+                        <div class="key-label" data-t="apikeys.app_id">App ID</div>
                         <div class="key-value" id="app-id">app_loading</div>
                     </div>
-                    <button class="reveal-btn" onclick="copyValue(document.getElementById('app-id').textContent)">Copy</button>
+                    <button class="reveal-btn" onclick="copyValue(document.getElementById('app-id').textContent)" data-t="common.copy">Copy</button>
                 </div>
                 <div class="key-item">
                     <div class="key-info">
-                        <div class="key-label">MCP Endpoint URL</div>
+                        <div class="key-label" data-t="apikeys.mcp_endpoint">MCP Endpoint URL</div>
                         <div class="key-value">https://api.boostboss.ai/mcp</div>
                     </div>
-                    <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')">Copy</button>
+                    <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')" data-t="common.copy">Copy</button>
                 </div>
-                <button class="regenerate-btn" onclick="regenerateKey()">Regenerate API Key</button>
+                <button class="regenerate-btn" onclick="regenerateKey()" data-t="apikeys.regenerate">Regenerate API Key</button>
             </div>
 
             <!-- BBX Placements Breakdown — per-slot economics from placement_daily_stats -->
             <div class="section" data-panel="earnings">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 10px; flex-wrap: wrap;">
-                    <div class="section-title" style="margin-bottom: 0;">Placements</div>
+                    <div class="section-title" style="margin-bottom: 0;" data-t="placements.title">Placements</div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div style="font-size: 12px; color: #6B7280;">
-                            Last 30 days · grouped by <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">placement_id</code>
+                            <span data-t="placements.last_30">Last 30 days · grouped by</span> <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">placement_id</code>
                         </div>
                         <button id="newPlacementBtn" type="button" style="
                             padding: 7px 14px; background: var(--accent-primary, #FF2D78); color: #fff;
                             border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
                             cursor: pointer; font-family: inherit;
-                        ">+ New Placement</button>
+                        " data-t="placements.new_btn">+ New Placement</button>
                     </div>
                 </div>
                 <div id="placementsContainer" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
-                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>
+                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;" data-t="common.loading">Loading…</div>
                 </div>
                 <div style="font-size: 11px; color: #9CA3AF; margin-top: 10px; line-height: 1.5;">
-                    Each row is one slot inside your app. Pass the <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">placement_id</code> to <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">getSponsoredContent()</code> to enable per-slot floors, frequency caps, and reporting. Higher <strong>Intent</strong> means Benna is matching the right ads to that placement's context.
+                    <span data-t="placements.hint_a">Each row is one slot inside your app. Pass the</span> <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">placement_id</code> <span data-t="placements.hint_b">to</span> <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">getSponsoredContent()</code> <span data-t="placements.hint_c">to enable per-slot floors, frequency caps, and reporting. Higher</span> <strong data-t="placements.intent">Intent</strong> <span data-t="placements.hint_d">means Benna is matching the right ads to that placement's context.</span>
                 </div>
             </div>
 
@@ -2489,47 +2485,36 @@ await message.reply({
 
             <!-- Payout Section -->
             <div class="section">
-                <div class="section-title">Payout Settings</div>
-                <!-- Friend-onboarding audit (2026-05-13): publishers consistently
-                     confused about when their first payout actually arrives.
-                     Spell out the rule once, plainly, above the cards. -->
-                <p style="font-size:13px;color:#6B7280;margin:0 0 14px;line-height:1.55;">
+                <div class="section-title" data-t="payout.title">Payout Settings</div>
+                <p style="font-size:13px;color:#6B7280;margin:0 0 14px;line-height:1.55;" data-t="payout.intro">
                     Earn at least $25 in publisher accruals, connect Stripe, and the next Friday
                     cron pays you out automatically. Most publishers see their first payout 1–3 weeks
                     after installation, depending on traffic.
                 </p>
                 <div class="payout-grid">
                     <div class="payout-card">
-                        <div class="key-label">Next Payout Date</div>
+                        <div class="key-label" data-t="payout.next_date">Next Payout Date</div>
                         <div class="key-value" id="nextPayoutDate">—</div>
                     </div>
                     <div class="payout-card">
-                        <div class="key-label">Pending Payout</div>
+                        <div class="key-label" data-t="payout.pending">Pending Payout</div>
                         <div class="key-value" id="pendingPayout">$0.00</div>
                     </div>
                     <div class="payout-card">
-                        <div class="key-label">Minimum Threshold</div>
-                        <!-- Static default matches the actual policy ($25, Phase E Day 6 Decision 3).
-                             JS in loadPayoutStatus() reconfirms this on every load — but seeding
-                             with $25 (not the legacy $100) avoids a flash-of-incorrect-content
-                             on first paint for every new publisher. -->
+                        <div class="key-label" data-t="payout.min_threshold">Minimum Threshold</div>
                         <div class="key-value" id="payoutThreshold">$25.00</div>
                     </div>
                 </div>
-                <!-- Phase E Day 1 — Stripe Connect status banner.
-                     Renders 'setup_required' (no account), 'pending'
-                     (account created, requirements outstanding),
-                     'blocked' (Tier-2 failure), or 'enabled' (ready). -->
                 <div id="payoutStatusBanner" style="display:none; margin-bottom: 16px; padding: 14px 16px; border-radius: 10px; font-size: 13px; line-height: 1.5;"></div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically every Friday when your balance reaches $25 and Stripe Connect is linked">Request Payout</button>
+                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically every Friday when your balance reaches $25 and Stripe Connect is linked" data-t="payout.request_btn" data-t-title="payout.request_tip">Request Payout</button>
                     <button id="connectStripeBtn" onclick="connectStripe()" style="
                         padding: 12px 24px; background: #635BFF; color: #fff;
                         border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px;
                     ">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-                        <span id="connectStripeLabel">Connect Stripe</span>
+                        <span id="connectStripeLabel" data-t="payout.connect_stripe">Connect Stripe</span>
                     </button>
                 </div>
             </div>
@@ -2542,7 +2527,7 @@ await message.reply({
 
             <!-- SDK Quick Start -->
             <div class="section">
-                <div class="section-title">Quick Start</div>
+                <div class="section-title" data-t="qs.title">Quick Start</div>
                 <div style="
                     background: #0A0A14; border-radius: 12px; padding: 20px; color: #B0B0C7;
                     font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
@@ -2553,7 +2538,7 @@ await message.reply({
                         background: rgba(255,255,255,0.1); border: none;
                         padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
                         font-size: 11px; cursor: pointer; font-family: inherit;
-                    " id="copyQsBtn">Copy</button>
+                    " id="copyQsBtn" data-t="common.copy">Copy</button>
                     <pre id="quickStartCode" style="margin: 0; white-space: pre-wrap;"><span style="color:#9D7AFF;">const</span> bb = <span style="color:#9D7AFF;">require</span>(<span style="color:#FFE600;">"@boostbossai/lumi-sdk"</span>);
 
 <span style="color:#6B7280;">// 1. Authenticate so impressions are attributed to your account.</span>
@@ -2577,17 +2562,17 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         padding: 8px 16px; background: var(--pink); color: #fff;
                         border-radius: 8px; font-size: 13px; font-weight: 600;
                         text-decoration: none; display: inline-block;
-                    ">Full Documentation</a>
+                    " data-t="qs.full_docs">Full Documentation</a>
                     <a href="/playground" style="
                         padding: 8px 16px; border: 1px solid #E5E7EB;
                         border-radius: 8px; font-size: 13px; font-weight: 600;
                         text-decoration: none; color: #374151; display: inline-block;
-                    ">Try in Playground</a>
+                    " data-t="qs.try_playground">Try in Playground</a>
                     <a href="https://www.npmjs.com/package/@boostbossai/lumi-sdk" target="_blank" style="
                         padding: 8px 16px; border: 1px solid #E5E7EB;
                         border-radius: 8px; font-size: 13px; font-weight: 600;
                         text-decoration: none; color: #374151; display: inline-block;
-                    ">npm Package</a>
+                    " data-t="qs.npm_pkg">npm Package</a>
                 </div>
             </div>
         </div>
@@ -2653,11 +2638,18 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             let bennaAuto = true;
 
+            // dashT(): pull from publisher dashboard translations (set by the
+            // Settings IIFE on window.dashT). Falls back to literal English so
+            // toggling never breaks before translations are wired.
+            const dashT = (k, fallback) => (window.dashT && window.dashT(k)) || fallback;
             bennaToggle.addEventListener('click', () => {
                 bennaAuto = !bennaAuto;
+                // Keep data-t in sync so language switches re-translate too.
+                const key = bennaAuto ? 'med.auto_on' : 'med.auto_off';
+                bennaLabel.setAttribute('data-t', key);
                 bennaLabel.textContent = bennaAuto
-                    ? 'BENNA AUTO-ORDER · ON'
-                    : 'BENNA AUTO-ORDER · OFF';
+                    ? dashT('med.auto_on',  'BENNA AUTO-ORDER · ON')
+                    : dashT('med.auto_off', 'BENNA AUTO-ORDER · OFF');
                 bennaToggle.style.opacity = bennaAuto ? '1' : '0.55';
                 document.querySelectorAll('.wf-rank').forEach((el, i) => {
                     if (el.textContent.trim() === '—') return;
@@ -4890,541 +4882,1231 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
             // ─── Publisher dashboard Settings translations (inline) ───
             const DASH_T = {
-                            'en': {
-                                'chrome.back': 'Back to Lumi SDK',
-                                'chrome.dashboard': 'Dashboard',
-                                'chrome.search_actions': 'Search actions',
-                                'chrome.account': 'Account',
-                                'chrome.notif_tip': 'Notifications',
-                                'chrome.notif_title': 'Notifications',
-                                'chrome.notif_mark_all': 'Mark all read',
-                                'chrome.notif_recent': 'Only showing last 7 days',
-                                'chrome.settings_tip': 'Account Settings',
-                                'chrome.logout': 'Logout',
-                                'modal.title': 'Settings',
-                                'modal.close': 'Close',
-                                'modal.save': 'Save changes',
-                                'nav.account': 'Account',
-                                'nav.payouts': 'Payouts',
-                                'nav.api': 'API & Integration',
-                                'nav.brand': 'Brand safety',
-                                'nav.notifs': 'Notifications',
-                                'nav.language': 'Language',
-                                'nav.security': 'Security',
-                                'common.copy': 'Copy',
-                                'common.show': 'Show',
-                                'common.hide': 'Hide',
-                                'common.saved': '✓ Saved',
-                                'language.label': 'Dashboard language',
-                                'language.hint': 'Applies only to the publisher dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav. Settings translate immediately; other surfaces are being rolled out.',
-                                'account.app_name': 'App name',
-                                'account.app_name_hint': 'Shown to advertisers and on your publisher profile.',
-                                'account.email': 'Contact email',
-                                'account.email_hint': 'Used for payout and account notifications.',
-                                'account.dev_id': 'Developer ID',
-                                'account.revenue': 'Revenue share',
-                                'account.revenue_value': 'You keep 85% · Boost Boss takes 15%',
-                                'account.revenue_hint': 'Applied to every cleared impression on your inventory.',
-                                'payouts.how_title': 'How payouts work',
-                                'payouts.how_body_html': 'Earn at least <strong>$25</strong> in publisher accruals, connect Stripe, and the next Friday cron pays you automatically — no manual request needed.',
-                                'payouts.threshold': 'Payout threshold',
-                                'payouts.threshold_value': '$25.00 minimum',
-                                'payouts.schedule': 'Schedule',
-                                'payouts.schedule_value': 'Weekly · every Friday',
-                                'payouts.manage_btn': 'Manage Stripe connection & payouts →',
-                                'payouts.manage_hint': 'Opens the full Payout Settings panel on your dashboard.',
-                                'api.key': 'Lumi SDK API key',
-                                'api.key_hint': 'Authenticates every ad request from your integration. Keep it secret.',
-                                'api.app_id': 'App ID',
-                                'api.mcp_endpoint': 'MCP endpoint',
-                                'api.regen_title': 'Regenerate API key',
-                                'api.regen_hint': 'Issues a new key and immediately invalidates the old one. Update your integration right after.',
-                                'api.regen_btn': 'Regenerate key',
-                                'brand.cats_label': 'Blocked advertiser categories',
-                                'brand.cats_hint': 'Ads from these categories will never serve on any of your inventory.',
-                                'brand.doms_label': 'Blocked advertiser domains',
-                                'brand.doms_hint': 'One domain per line. Any ad whose advertiser domain matches is blocked from your inventory.',
-                                'brand.save_btn': 'Save brand safety',
-                                'brand.iab1': 'Arts & Entertainment',
-                                'brand.iab3': 'Business',
-                                'brand.iab4': 'Careers',
-                                'brand.iab5': 'Education',
-                                'brand.iab7': 'Health & Fitness',
-                                'brand.iab13': 'Personal Finance',
-                                'brand.iab17': 'Sports',
-                                'brand.iab19': 'Technology',
-                                'brand.iab20': 'Travel',
-                                'brand.iab22': 'Shopping',
-                                'notifs.intro': 'Email me when…',
-                                'notifs.payout_sent_title': 'A payout is sent',
-                                'notifs.payout_sent_desc': 'Confirmation each time a payout reaches your Stripe account.',
-                                'notifs.payout_failed_title': 'A payout fails',
-                                'notifs.payout_failed_desc': 'Alerts if a payout could not be completed so you can fix it fast.',
-                                'notifs.monthly_title': 'Monthly earnings summary',
-                                'notifs.monthly_desc': 'A once-a-month recap of impressions, fill rate, and earnings.',
-                                'notifs.product_title': 'Product updates',
-                                'notifs.product_desc': 'Occasional news on new Boost Boss features and ad formats.',
-                                'security.cur_pw': 'Current password',
-                                'security.new_pw': 'New password',
-                                'security.new_pw_hint': 'At least 8 characters.',
-                                'security.confirm_pw': 'Confirm new password',
-                                'security.change_btn': 'Change password',
-                                'security.changing': 'Changing…',
-                                'security.err_required': 'Enter your current and new password.',
-                                'security.err_short': 'New password must be at least 8 characters.',
-                                'security.err_mismatch': 'New passwords do not match.',
-                                'security.ok_changed': 'Password changed successfully.',
-                                'security.err_generic': 'Could not change password',
-                                'toast.copied': 'Copied',
-                                'toast.brand_saved': 'Brand safety saved',
-                                'toast.pw_changed': 'Password changed',
-                            },
-                            'zh': {
-                                'chrome.back': '返回 Lumi SDK',
-                                'chrome.dashboard': '面板',
-                                'chrome.search_actions': '搜索操作',
-                                'chrome.account': '账户',
-                                'chrome.notif_tip': '通知',
-                                'chrome.notif_title': '通知',
-                                'chrome.notif_mark_all': '全部标为已读',
-                                'chrome.notif_recent': '仅显示最近 7 天',
-                                'chrome.settings_tip': '账户设置',
-                                'chrome.logout': '退出登录',
-                                'modal.title': '设置',
-                                'modal.close': '关闭',
-                                'modal.save': '保存更改',
-                                'nav.account': '账户',
-                                'nav.payouts': '打款',
-                                'nav.api': 'API 与集成',
-                                'nav.brand': '品牌安全',
-                                'nav.notifs': '通知',
-                                'nav.language': '语言',
-                                'nav.security': '安全',
-                                'common.copy': '复制',
-                                'common.show': '显示',
-                                'common.hide': '隐藏',
-                                'common.saved': '✓ 已保存',
-                                'language.label': '面板语言',
-                                'language.hint': '仅作用于发布商面板。boostboss.ai 营销页面有自己的语言切换在顶部导航。设置立即翻译,其他界面正在逐步推出。',
-                                'account.app_name': '应用名称',
-                                'account.app_name_hint': '显示给广告主和您的发布商档案。',
-                                'account.email': '联系邮箱',
-                                'account.email_hint': '用于打款和账户通知。',
-                                'account.dev_id': '开发者 ID',
-                                'account.revenue': '收入分成',
-                                'account.revenue_value': '您获得 85% · Boost Boss 收取 15%',
-                                'account.revenue_hint': '应用于您库存中每一次结算曝光。',
-                                'payouts.how_title': '打款如何运作',
-                                'payouts.how_body_html': '累计至少 <strong>$25</strong> 的发布商收益,连接 Stripe,下一个周五的定时任务将自动向您打款 — 无需手动申请。',
-                                'payouts.threshold': '打款门槛',
-                                'payouts.threshold_value': '最低 $25.00',
-                                'payouts.schedule': '打款周期',
-                                'payouts.schedule_value': '每周 · 每个周五',
-                                'payouts.manage_btn': '管理 Stripe 连接和打款 →',
-                                'payouts.manage_hint': '打开面板上完整的打款设置区域。',
-                                'api.key': 'Lumi SDK API 密钥',
-                                'api.key_hint': '验证您集成的每一次广告请求。请妥善保密。',
-                                'api.app_id': '应用 ID',
-                                'api.mcp_endpoint': 'MCP 端点',
-                                'api.regen_title': '重新生成 API 密钥',
-                                'api.regen_hint': '生成新密钥并立即作废旧密钥。请立刻更新您的集成。',
-                                'api.regen_btn': '重新生成密钥',
-                                'brand.cats_label': '屏蔽的广告主类目',
-                                'brand.cats_hint': '这些类目的广告永远不会在您的任何库存上展示。',
-                                'brand.doms_label': '屏蔽的广告主域名',
-                                'brand.doms_hint': '每行一个域名。任何广告主域名匹配的广告都会被屏蔽。',
-                                'brand.save_btn': '保存品牌安全',
-                                'brand.iab1': '艺术与娱乐',
-                                'brand.iab3': '商业',
-                                'brand.iab4': '职业',
-                                'brand.iab5': '教育',
-                                'brand.iab7': '健康与健身',
-                                'brand.iab13': '个人理财',
-                                'brand.iab17': '体育',
-                                'brand.iab19': '科技',
-                                'brand.iab20': '旅游',
-                                'brand.iab22': '购物',
-                                'notifs.intro': '在以下情况给我发邮件…',
-                                'notifs.payout_sent_title': '已发出打款',
-                                'notifs.payout_sent_desc': '每次打款到达您的 Stripe 账户时的确认邮件。',
-                                'notifs.payout_failed_title': '打款失败',
-                                'notifs.payout_failed_desc': '如果打款无法完成,会发送提醒以便您快速处理。',
-                                'notifs.monthly_title': '月度收益摘要',
-                                'notifs.monthly_desc': '每月一次的曝光量、填充率和收益回顾。',
-                                'notifs.product_title': '产品更新',
-                                'notifs.product_desc': '关于 Boost Boss 新功能和广告形式的不定期资讯。',
-                                'security.cur_pw': '当前密码',
-                                'security.new_pw': '新密码',
-                                'security.new_pw_hint': '至少 8 个字符。',
-                                'security.confirm_pw': '确认新密码',
-                                'security.change_btn': '修改密码',
-                                'security.changing': '正在修改…',
-                                'security.err_required': '请输入当前密码和新密码。',
-                                'security.err_short': '新密码至少 8 个字符。',
-                                'security.err_mismatch': '两次输入的新密码不一致。',
-                                'security.ok_changed': '密码修改成功。',
-                                'security.err_generic': '无法修改密码',
-                                'toast.copied': '已复制',
-                                'toast.brand_saved': '品牌安全已保存',
-                                'toast.pw_changed': '密码已修改',
-                            },
-                            'zh-TW': {
-                                'chrome.back': '返回 Lumi SDK',
-                                'chrome.dashboard': '儀表板',
-                                'chrome.search_actions': '搜尋動作',
-                                'chrome.account': '帳號',
-                                'chrome.notif_tip': '通知',
-                                'chrome.notif_title': '通知',
-                                'chrome.notif_mark_all': '全部標為已讀',
-                                'chrome.notif_recent': '僅顯示最近 7 天',
-                                'chrome.settings_tip': '帳號設定',
-                                'chrome.logout': '登出',
-                                'modal.title': '設定',
-                                'modal.close': '關閉',
-                                'modal.save': '儲存變更',
-                                'nav.account': '帳號',
-                                'nav.payouts': '撥款',
-                                'nav.api': 'API 與整合',
-                                'nav.brand': '品牌安全',
-                                'nav.notifs': '通知',
-                                'nav.language': '語言',
-                                'nav.security': '安全',
-                                'common.copy': '複製',
-                                'common.show': '顯示',
-                                'common.hide': '隱藏',
-                                'common.saved': '✓ 已儲存',
-                                'language.label': '儀表板語言',
-                                'language.hint': '僅作用於發布商儀表板。boostboss.ai 行銷頁面有自己的語言切換在頂部導覽。設定立即翻譯,其他介面正逐步推出。',
-                                'account.app_name': '應用程式名稱',
-                                'account.app_name_hint': '顯示給廣告主和您的發布商檔案。',
-                                'account.email': '聯絡 Email',
-                                'account.email_hint': '用於撥款和帳號通知。',
-                                'account.dev_id': '開發者 ID',
-                                'account.revenue': '收益分潤',
-                                'account.revenue_value': '您獲得 85% · Boost Boss 收取 15%',
-                                'account.revenue_hint': '套用於您庫存中每一次結算的曝光。',
-                                'payouts.how_title': '撥款如何運作',
-                                'payouts.how_body_html': '累計至少 <strong>$25</strong> 的發布商收益,連接 Stripe,下一個週五的排程任務會自動撥款給您 — 無需手動申請。',
-                                'payouts.threshold': '撥款門檻',
-                                'payouts.threshold_value': '最低 $25.00',
-                                'payouts.schedule': '撥款週期',
-                                'payouts.schedule_value': '每週 · 每個週五',
-                                'payouts.manage_btn': '管理 Stripe 連接與撥款 →',
-                                'payouts.manage_hint': '開啟儀表板上完整的撥款設定區。',
-                                'api.key': 'Lumi SDK API 金鑰',
-                                'api.key_hint': '驗證您整合的每一次廣告請求。請妥善保密。',
-                                'api.app_id': '應用程式 ID',
-                                'api.mcp_endpoint': 'MCP 端點',
-                                'api.regen_title': '重新產生 API 金鑰',
-                                'api.regen_hint': '產生新金鑰並立即作廢舊金鑰。請立刻更新您的整合。',
-                                'api.regen_btn': '重新產生金鑰',
-                                'brand.cats_label': '封鎖的廣告主類別',
-                                'brand.cats_hint': '這些類別的廣告永遠不會在您的任何庫存上播放。',
-                                'brand.doms_label': '封鎖的廣告主網域',
-                                'brand.doms_hint': '每行一個網域。任何廣告主網域相符的廣告都會被封鎖。',
-                                'brand.save_btn': '儲存品牌安全',
-                                'brand.iab1': '藝術與娛樂',
-                                'brand.iab3': '商業',
-                                'brand.iab4': '職涯',
-                                'brand.iab5': '教育',
-                                'brand.iab7': '健康與健身',
-                                'brand.iab13': '個人理財',
-                                'brand.iab17': '運動',
-                                'brand.iab19': '科技',
-                                'brand.iab20': '旅遊',
-                                'brand.iab22': '購物',
-                                'notifs.intro': '在以下情況寄 Email 給我…',
-                                'notifs.payout_sent_title': '撥款已寄出',
-                                'notifs.payout_sent_desc': '每次撥款到達您的 Stripe 帳戶時的確認 Email。',
-                                'notifs.payout_failed_title': '撥款失敗',
-                                'notifs.payout_failed_desc': '如果撥款無法完成,會發送提醒以便您快速處理。',
-                                'notifs.monthly_title': '月度收益摘要',
-                                'notifs.monthly_desc': '每月一次的曝光、填充率和收益回顧。',
-                                'notifs.product_title': '產品更新',
-                                'notifs.product_desc': '關於 Boost Boss 新功能和廣告版位的不定期消息。',
-                                'security.cur_pw': '目前密碼',
-                                'security.new_pw': '新密碼',
-                                'security.new_pw_hint': '至少 8 個字元。',
-                                'security.confirm_pw': '確認新密碼',
-                                'security.change_btn': '變更密碼',
-                                'security.changing': '正在變更…',
-                                'security.err_required': '請輸入目前密碼和新密碼。',
-                                'security.err_short': '新密碼至少 8 個字元。',
-                                'security.err_mismatch': '兩次輸入的新密碼不一致。',
-                                'security.ok_changed': '密碼變更成功。',
-                                'security.err_generic': '無法變更密碼',
-                                'toast.copied': '已複製',
-                                'toast.brand_saved': '品牌安全已儲存',
-                                'toast.pw_changed': '密碼已變更',
-                            },
-                            'ja': {
-                                'chrome.back': 'Lumi SDK に戻る',
-                                'chrome.dashboard': 'ダッシュボード',
-                                'chrome.search_actions': 'アクション検索',
-                                'chrome.account': 'アカウント',
-                                'chrome.notif_tip': '通知',
-                                'chrome.notif_title': '通知',
-                                'chrome.notif_mark_all': 'すべて既読にする',
-                                'chrome.notif_recent': '過去 7 日間のみ表示',
-                                'chrome.settings_tip': 'アカウント設定',
-                                'chrome.logout': 'ログアウト',
-                                'modal.title': '設定',
-                                'modal.close': '閉じる',
-                                'modal.save': '変更を保存',
-                                'nav.account': 'アカウント',
-                                'nav.payouts': '支払い',
-                                'nav.api': 'API・統合',
-                                'nav.brand': 'ブランドセーフティ',
-                                'nav.notifs': '通知',
-                                'nav.language': '言語',
-                                'nav.security': 'セキュリティ',
-                                'common.copy': 'コピー',
-                                'common.show': '表示',
-                                'common.hide': '非表示',
-                                'common.saved': '✓ 保存しました',
-                                'language.label': 'ダッシュボード言語',
-                                'language.hint': 'パブリッシャー ダッシュボードにのみ適用されます。boostboss.ai のマーケティングページには独自の言語切替がトップナビにあります。設定は即時翻訳、他のサーフェスは順次展開中です。',
-                                'account.app_name': 'アプリ名',
-                                'account.app_name_hint': '広告主とパブリッシャー プロフィールに表示されます。',
-                                'account.email': '連絡先メール',
-                                'account.email_hint': '支払いとアカウント通知に使用されます。',
-                                'account.dev_id': 'デベロッパー ID',
-                                'account.revenue': 'レベニューシェア',
-                                'account.revenue_value': 'あなたが 85% を獲得 · Boost Boss が 15% を取得',
-                                'account.revenue_hint': 'インベントリ上のすべての確定インプレッションに適用されます。',
-                                'payouts.how_title': '支払いの仕組み',
-                                'payouts.how_body_html': 'パブリッシャー残高で少なくとも <strong>$25</strong> を稼ぎ、Stripe を接続すれば、次の金曜日の自動処理であなたに自動的に支払われます — 手動申請は不要です。',
-                                'payouts.threshold': '支払いしきい値',
-                                'payouts.threshold_value': '$25.00 最低',
-                                'payouts.schedule': 'スケジュール',
-                                'payouts.schedule_value': '毎週 · 毎週金曜日',
-                                'payouts.manage_btn': 'Stripe 接続と支払いを管理 →',
-                                'payouts.manage_hint': 'ダッシュボードの完全な支払い設定パネルを開きます。',
-                                'api.key': 'Lumi SDK API キー',
-                                'api.key_hint': '統合からのすべての広告リクエストを認証します。秘密にしてください。',
-                                'api.app_id': 'アプリ ID',
-                                'api.mcp_endpoint': 'MCP エンドポイント',
-                                'api.regen_title': 'API キーを再生成',
-                                'api.regen_hint': '新しいキーを発行し、古いキーを即座に無効化します。直後に統合を更新してください。',
-                                'api.regen_btn': 'キーを再生成',
-                                'brand.cats_label': 'ブロック対象の広告主カテゴリ',
-                                'brand.cats_hint': 'これらのカテゴリの広告は、あなたのインベントリでは決して配信されません。',
-                                'brand.doms_label': 'ブロック対象の広告主ドメイン',
-                                'brand.doms_hint': '1 行に 1 ドメイン。広告主ドメインが一致する広告はインベントリから除外されます。',
-                                'brand.save_btn': 'ブランドセーフティを保存',
-                                'brand.iab1': 'アート・エンタメ',
-                                'brand.iab3': 'ビジネス',
-                                'brand.iab4': 'キャリア',
-                                'brand.iab5': '教育',
-                                'brand.iab7': 'ヘルス・フィットネス',
-                                'brand.iab13': '個人金融',
-                                'brand.iab17': 'スポーツ',
-                                'brand.iab19': 'テクノロジー',
-                                'brand.iab20': '旅行',
-                                'brand.iab22': 'ショッピング',
-                                'notifs.intro': '次の場合にメール通知…',
-                                'notifs.payout_sent_title': '支払いが送信された',
-                                'notifs.payout_sent_desc': '支払いが Stripe アカウントに届くたびに送信される確認メール。',
-                                'notifs.payout_failed_title': '支払いに失敗した',
-                                'notifs.payout_failed_desc': '支払いが完了できなかった場合、迅速に対処できるよう通知します。',
-                                'notifs.monthly_title': '月次収益サマリー',
-                                'notifs.monthly_desc': '月 1 回のインプレッション・フィルレート・収益の総括。',
-                                'notifs.product_title': 'プロダクト アップデート',
-                                'notifs.product_desc': 'Boost Boss の新機能や広告フォーマットに関する不定期ニュース。',
-                                'security.cur_pw': '現在のパスワード',
-                                'security.new_pw': '新しいパスワード',
-                                'security.new_pw_hint': '少なくとも 8 文字以上。',
-                                'security.confirm_pw': '新しいパスワードを確認',
-                                'security.change_btn': 'パスワードを変更',
-                                'security.changing': '変更中…',
-                                'security.err_required': '現在のパスワードと新しいパスワードを入力してください。',
-                                'security.err_short': '新しいパスワードは 8 文字以上にしてください。',
-                                'security.err_mismatch': '新しいパスワードが一致しません。',
-                                'security.ok_changed': 'パスワードを変更しました。',
-                                'security.err_generic': 'パスワードを変更できませんでした',
-                                'toast.copied': 'コピーしました',
-                                'toast.brand_saved': 'ブランドセーフティを保存しました',
-                                'toast.pw_changed': 'パスワードを変更しました',
-                            },
-                            'ko': {
-                                'chrome.back': 'Lumi SDK로 돌아가기',
-                                'chrome.dashboard': '대시보드',
-                                'chrome.search_actions': '작업 검색',
-                                'chrome.account': '계정',
-                                'chrome.notif_tip': '알림',
-                                'chrome.notif_title': '알림',
-                                'chrome.notif_mark_all': '모두 읽음으로 표시',
-                                'chrome.notif_recent': '최근 7일만 표시',
-                                'chrome.settings_tip': '계정 설정',
-                                'chrome.logout': '로그아웃',
-                                'modal.title': '설정',
-                                'modal.close': '닫기',
-                                'modal.save': '변경 저장',
-                                'nav.account': '계정',
-                                'nav.payouts': '정산',
-                                'nav.api': 'API 및 통합',
-                                'nav.brand': '브랜드 안전',
-                                'nav.notifs': '알림',
-                                'nav.language': '언어',
-                                'nav.security': '보안',
-                                'common.copy': '복사',
-                                'common.show': '표시',
-                                'common.hide': '숨기기',
-                                'common.saved': '✓ 저장됨',
-                                'language.label': '대시보드 언어',
-                                'language.hint': '퍼블리셔 대시보드에만 적용됩니다. boostboss.ai 마케팅 페이지는 상단 내비에 자체 언어 토글이 있습니다. 설정은 즉시 번역되고 다른 표면은 점진적으로 적용됩니다.',
-                                'account.app_name': '앱 이름',
-                                'account.app_name_hint': '광고주와 퍼블리셔 프로필에 표시됩니다.',
-                                'account.email': '연락 이메일',
-                                'account.email_hint': '정산 및 계정 알림에 사용됩니다.',
-                                'account.dev_id': '개발자 ID',
-                                'account.revenue': '수익 분배',
-                                'account.revenue_value': '귀하 85% · Boost Boss 15%',
-                                'account.revenue_hint': '인벤토리의 모든 정산 노출에 적용됩니다.',
-                                'payouts.how_title': '정산 작동 방식',
-                                'payouts.how_body_html': '퍼블리셔 적립금으로 최소 <strong>$25</strong>을 벌고 Stripe를 연결하면, 다음 금요일 cron이 자동으로 정산해 드립니다 — 수동 요청 불필요.',
-                                'payouts.threshold': '정산 임계값',
-                                'payouts.threshold_value': '$25.00 최소',
-                                'payouts.schedule': '일정',
-                                'payouts.schedule_value': '매주 · 매주 금요일',
-                                'payouts.manage_btn': 'Stripe 연결 및 정산 관리 →',
-                                'payouts.manage_hint': '대시보드의 전체 정산 설정 패널을 엽니다.',
-                                'api.key': 'Lumi SDK API 키',
-                                'api.key_hint': '통합에서 오는 모든 광고 요청을 인증합니다. 비밀로 유지하세요.',
-                                'api.app_id': '앱 ID',
-                                'api.mcp_endpoint': 'MCP 엔드포인트',
-                                'api.regen_title': 'API 키 재생성',
-                                'api.regen_hint': '새 키를 발급하고 이전 키를 즉시 무효화합니다. 직후 통합을 업데이트하세요.',
-                                'api.regen_btn': '키 재생성',
-                                'brand.cats_label': '차단된 광고주 카테고리',
-                                'brand.cats_hint': '이 카테고리의 광고는 어떤 인벤토리에서도 절대 노출되지 않습니다.',
-                                'brand.doms_label': '차단된 광고주 도메인',
-                                'brand.doms_hint': '한 줄에 도메인 하나. 광고주 도메인이 일치하는 광고는 인벤토리에서 차단됩니다.',
-                                'brand.save_btn': '브랜드 안전 저장',
-                                'brand.iab1': '예술 및 엔터테인먼트',
-                                'brand.iab3': '비즈니스',
-                                'brand.iab4': '커리어',
-                                'brand.iab5': '교육',
-                                'brand.iab7': '건강 및 피트니스',
-                                'brand.iab13': '개인 금융',
-                                'brand.iab17': '스포츠',
-                                'brand.iab19': '기술',
-                                'brand.iab20': '여행',
-                                'brand.iab22': '쇼핑',
-                                'notifs.intro': '다음 경우 이메일 알림…',
-                                'notifs.payout_sent_title': '정산이 전송됨',
-                                'notifs.payout_sent_desc': '정산이 Stripe 계정에 도달할 때마다 확인 이메일이 전송됩니다.',
-                                'notifs.payout_failed_title': '정산 실패',
-                                'notifs.payout_failed_desc': '정산이 완료되지 않으면 빠르게 조치할 수 있도록 알립니다.',
-                                'notifs.monthly_title': '월간 수익 요약',
-                                'notifs.monthly_desc': '월 1회 노출수, 채움률, 수익의 요약.',
-                                'notifs.product_title': '제품 업데이트',
-                                'notifs.product_desc': 'Boost Boss의 새 기능과 광고 형식에 대한 가끔의 소식.',
-                                'security.cur_pw': '현재 비밀번호',
-                                'security.new_pw': '새 비밀번호',
-                                'security.new_pw_hint': '8자 이상.',
-                                'security.confirm_pw': '새 비밀번호 확인',
-                                'security.change_btn': '비밀번호 변경',
-                                'security.changing': '변경 중…',
-                                'security.err_required': '현재 비밀번호와 새 비밀번호를 입력하세요.',
-                                'security.err_short': '새 비밀번호는 8자 이상이어야 합니다.',
-                                'security.err_mismatch': '새 비밀번호가 일치하지 않습니다.',
-                                'security.ok_changed': '비밀번호가 성공적으로 변경되었습니다.',
-                                'security.err_generic': '비밀번호를 변경할 수 없습니다',
-                                'toast.copied': '복사됨',
-                                'toast.brand_saved': '브랜드 안전 저장됨',
-                                'toast.pw_changed': '비밀번호 변경됨',
-                            },
-                            'vi': {
-                                'chrome.back': 'Quay lại Lumi SDK',
-                                'chrome.dashboard': 'Dashboard',
-                                'chrome.search_actions': 'Tìm hành động',
-                                'chrome.account': 'Tài khoản',
-                                'chrome.notif_tip': 'Thông báo',
-                                'chrome.notif_title': 'Thông báo',
-                                'chrome.notif_mark_all': 'Đánh dấu tất cả đã đọc',
-                                'chrome.notif_recent': 'Chỉ hiển thị 7 ngày gần nhất',
-                                'chrome.settings_tip': 'Cài đặt tài khoản',
-                                'chrome.logout': 'Đăng xuất',
-                                'modal.title': 'Cài đặt',
-                                'modal.close': 'Đóng',
-                                'modal.save': 'Lưu thay đổi',
-                                'nav.account': 'Tài khoản',
-                                'nav.payouts': 'Thanh toán',
-                                'nav.api': 'API & Tích hợp',
-                                'nav.brand': 'An toàn thương hiệu',
-                                'nav.notifs': 'Thông báo',
-                                'nav.language': 'Ngôn ngữ',
-                                'nav.security': 'Bảo mật',
-                                'common.copy': 'Sao chép',
-                                'common.show': 'Hiện',
-                                'common.hide': 'Ẩn',
-                                'common.saved': '✓ Đã lưu',
-                                'language.label': 'Ngôn ngữ dashboard',
-                                'language.hint': 'Chỉ áp dụng cho dashboard publisher. Trang marketing boostboss.ai có toggle ngôn ngữ riêng ở top nav. Settings dịch ngay, các bề mặt khác đang triển khai dần.',
-                                'account.app_name': 'Tên ứng dụng',
-                                'account.app_name_hint': 'Hiển thị cho nhà quảng cáo và trên hồ sơ publisher của bạn.',
-                                'account.email': 'Email liên hệ',
-                                'account.email_hint': 'Dùng cho thanh toán và thông báo tài khoản.',
-                                'account.dev_id': 'ID nhà phát triển',
-                                'account.revenue': 'Chia sẻ doanh thu',
-                                'account.revenue_value': 'Bạn giữ 85% · Boost Boss lấy 15%',
-                                'account.revenue_hint': 'Áp dụng cho mọi impression đã thanh toán trên kho của bạn.',
-                                'payouts.how_title': 'Thanh toán hoạt động thế nào',
-                                'payouts.how_body_html': 'Kiếm tối thiểu <strong>$25</strong> trong tích lũy publisher, kết nối Stripe, và cron thứ Sáu kế tiếp sẽ thanh toán tự động — không cần yêu cầu thủ công.',
-                                'payouts.threshold': 'Ngưỡng thanh toán',
-                                'payouts.threshold_value': 'Tối thiểu $25.00',
-                                'payouts.schedule': 'Lịch trình',
-                                'payouts.schedule_value': 'Hàng tuần · mỗi thứ Sáu',
-                                'payouts.manage_btn': 'Quản lý kết nối Stripe & thanh toán →',
-                                'payouts.manage_hint': 'Mở bảng Cài đặt Thanh toán đầy đủ trên dashboard.',
-                                'api.key': 'Khóa API Lumi SDK',
-                                'api.key_hint': 'Xác thực mọi yêu cầu quảng cáo từ tích hợp của bạn. Giữ bí mật.',
-                                'api.app_id': 'App ID',
-                                'api.mcp_endpoint': 'MCP endpoint',
-                                'api.regen_title': 'Tạo lại khóa API',
-                                'api.regen_hint': 'Phát hành khóa mới và lập tức vô hiệu hóa khóa cũ. Cập nhật tích hợp ngay sau đó.',
-                                'api.regen_btn': 'Tạo lại khóa',
-                                'brand.cats_label': 'Danh mục quảng cáo bị chặn',
-                                'brand.cats_hint': 'Quảng cáo của các danh mục này sẽ không bao giờ phục vụ trên bất kỳ kho nào của bạn.',
-                                'brand.doms_label': 'Tên miền nhà quảng cáo bị chặn',
-                                'brand.doms_hint': 'Mỗi dòng một tên miền. Bất kỳ quảng cáo nào có tên miền nhà quảng cáo trùng khớp sẽ bị chặn.',
-                                'brand.save_btn': 'Lưu an toàn thương hiệu',
-                                'brand.iab1': 'Nghệ thuật & Giải trí',
-                                'brand.iab3': 'Kinh doanh',
-                                'brand.iab4': 'Nghề nghiệp',
-                                'brand.iab5': 'Giáo dục',
-                                'brand.iab7': 'Sức khỏe & Thể hình',
-                                'brand.iab13': 'Tài chính cá nhân',
-                                'brand.iab17': 'Thể thao',
-                                'brand.iab19': 'Công nghệ',
-                                'brand.iab20': 'Du lịch',
-                                'brand.iab22': 'Mua sắm',
-                                'notifs.intro': 'Gửi email cho tôi khi…',
-                                'notifs.payout_sent_title': 'Đã gửi thanh toán',
-                                'notifs.payout_sent_desc': 'Email xác nhận mỗi lần thanh toán đến tài khoản Stripe của bạn.',
-                                'notifs.payout_failed_title': 'Thanh toán thất bại',
-                                'notifs.payout_failed_desc': 'Cảnh báo nếu thanh toán không thể hoàn tất để bạn xử lý nhanh.',
-                                'notifs.monthly_title': 'Tóm tắt doanh thu hàng tháng',
-                                'notifs.monthly_desc': 'Bản tóm tắt impressions, fill rate và doanh thu hàng tháng.',
-                                'notifs.product_title': 'Cập nhật sản phẩm',
-                                'notifs.product_desc': 'Tin tức không thường xuyên về tính năng mới và định dạng quảng cáo của Boost Boss.',
-                                'security.cur_pw': 'Mật khẩu hiện tại',
-                                'security.new_pw': 'Mật khẩu mới',
-                                'security.new_pw_hint': 'Ít nhất 8 ký tự.',
-                                'security.confirm_pw': 'Xác nhận mật khẩu mới',
-                                'security.change_btn': 'Đổi mật khẩu',
-                                'security.changing': 'Đang đổi…',
-                                'security.err_required': 'Nhập mật khẩu hiện tại và mật khẩu mới.',
-                                'security.err_short': 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-                                'security.err_mismatch': 'Mật khẩu mới không khớp.',
-                                'security.ok_changed': 'Đã đổi mật khẩu thành công.',
-                                'security.err_generic': 'Không thể đổi mật khẩu',
-                                'toast.copied': 'Đã sao chép',
-                                'toast.brand_saved': 'Đã lưu an toàn thương hiệu',
-                                'toast.pw_changed': 'Đã đổi mật khẩu',
-                            },
-                        };
+                'en': {
+                    'chrome.back': 'Back to Lumi SDK',
+                    'chrome.dashboard': 'Dashboard',
+                    'chrome.search_actions': 'Search actions',
+                    'chrome.account': 'Account',
+                    'chrome.notif_tip': 'Notifications',
+                    'chrome.notif_title': 'Notifications',
+                    'chrome.notif_mark_all': 'Mark all read',
+                    'chrome.notif_recent': 'Only showing last 7 days',
+                    'chrome.settings_tip': 'Account Settings',
+                    'chrome.logout': 'Logout',
+                    'modal.title': 'Settings',
+                    'modal.close': 'Close',
+                    'modal.save': 'Save changes',
+                    'nav.account': 'Account',
+                    'nav.payouts': 'Payouts',
+                    'nav.api': 'API & Integration',
+                    'nav.brand': 'Brand safety',
+                    'nav.notifs': 'Notifications',
+                    'nav.language': 'Language',
+                    'nav.security': 'Security',
+                    'common.copy': 'Copy',
+                    'common.show': 'Show',
+                    'common.hide': 'Hide',
+                    'common.saved': '✓ Saved',
+                    'language.label': 'Dashboard language',
+                    'language.hint': 'Applies only to the publisher dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav. Settings translate immediately; other surfaces are being rolled out.',
+                    'account.app_name': 'App name',
+                    'account.app_name_hint': 'Shown to advertisers and on your publisher profile.',
+                    'account.email': 'Contact email',
+                    'account.email_hint': 'Used for payout and account notifications.',
+                    'account.dev_id': 'Developer ID',
+                    'account.revenue': 'Revenue share',
+                    'account.revenue_value': 'You keep 85% · Boost Boss takes 15%',
+                    'account.revenue_hint': 'Applied to every cleared impression on your inventory.',
+                    'payouts.how_title': 'How payouts work',
+                    'payouts.how_body_html': 'Earn at least <strong>$25</strong> in publisher accruals, connect Stripe, and the next Friday cron pays you automatically — no manual request needed.',
+                    'payouts.threshold': 'Payout threshold',
+                    'payouts.threshold_value': '$25.00 minimum',
+                    'payouts.schedule': 'Schedule',
+                    'payouts.schedule_value': 'Weekly · every Friday',
+                    'payouts.manage_btn': 'Manage Stripe connection & payouts →',
+                    'payouts.manage_hint': 'Opens the full Payout Settings panel on your dashboard.',
+                    'api.key': 'Lumi SDK API key',
+                    'api.key_hint': 'Authenticates every ad request from your integration. Keep it secret.',
+                    'api.app_id': 'App ID',
+                    'api.mcp_endpoint': 'MCP endpoint',
+                    'api.regen_title': 'Regenerate API key',
+                    'api.regen_hint': 'Issues a new key and immediately invalidates the old one. Update your integration right after.',
+                    'api.regen_btn': 'Regenerate key',
+                    'brand.cats_label': 'Blocked advertiser categories',
+                    'brand.cats_hint': 'Ads from these categories will never serve on any of your inventory.',
+                    'brand.doms_label': 'Blocked advertiser domains',
+                    'brand.doms_hint': 'One domain per line. Any ad whose advertiser domain matches is blocked from your inventory.',
+                    'brand.save_btn': 'Save brand safety',
+                    'brand.iab1': 'Arts & Entertainment',
+                    'brand.iab3': 'Business',
+                    'brand.iab4': 'Careers',
+                    'brand.iab5': 'Education',
+                    'brand.iab7': 'Health & Fitness',
+                    'brand.iab13': 'Personal Finance',
+                    'brand.iab17': 'Sports',
+                    'brand.iab19': 'Technology',
+                    'brand.iab20': 'Travel',
+                    'brand.iab22': 'Shopping',
+                    'notifs.intro': 'Email me when…',
+                    'notifs.payout_sent_title': 'A payout is sent',
+                    'notifs.payout_sent_desc': 'Confirmation each time a payout reaches your Stripe account.',
+                    'notifs.payout_failed_title': 'A payout fails',
+                    'notifs.payout_failed_desc': 'Alerts if a payout could not be completed so you can fix it fast.',
+                    'notifs.monthly_title': 'Monthly earnings summary',
+                    'notifs.monthly_desc': 'A once-a-month recap of impressions, fill rate, and earnings.',
+                    'notifs.product_title': 'Product updates',
+                    'notifs.product_desc': 'Occasional news on new Boost Boss features and ad formats.',
+                    'security.cur_pw': 'Current password',
+                    'security.new_pw': 'New password',
+                    'security.new_pw_hint': 'At least 8 characters.',
+                    'security.confirm_pw': 'Confirm new password',
+                    'security.change_btn': 'Change password',
+                    'security.changing': 'Changing…',
+                    'security.err_required': 'Enter your current and new password.',
+                    'security.err_short': 'New password must be at least 8 characters.',
+                    'security.err_mismatch': 'New passwords do not match.',
+                    'security.ok_changed': 'Password changed successfully.',
+                    'security.err_generic': 'Could not change password',
+                    'toast.copied': 'Copied',
+                    'toast.brand_saved': 'Brand safety saved',
+                    'toast.pw_changed': 'Password changed',
+                    'dash.title': 'Publisher Dashboard',
+                    'dash.view': 'View:',
+                    'dash.filter_all': 'All integrations',
+                    'dash.filter_mcp': 'Lumi SDK for MCP',
+                    'dash.filter_js': 'Lumi SDK script tag',
+                    'dash.filter_npm': 'Lumi SDK for browser extensions',
+                    'dash.filter_rest': 'Lumi API for Bots',
+                    'stats.earnings': 'Total Earnings',
+                    'stats.impressions': 'Impressions',
+                    'stats.your_share': 'Your Share',
+                    'stats.rpm': 'RPM',
+                    'stats.trend_zero': '↑ 0% from last month',
+                    'chart.revenue_14d': 'Revenue Over Last 14 Days',
+                    'med.title': 'Mediation & Waterfall',
+                    'med.subtitle': 'Sources compete first-price per impression. Benna re-ranks on every bid.',
+                    'med.auto_tip': 'Benna picks demand source order',
+                    'med.auto_on': 'BENNA AUTO-ORDER · ON',
+                    'med.auto_off': 'BENNA AUTO-ORDER · OFF',
+                    'med.bbx_name': 'Boost Boss Exchange',
+                    'med.bbx_sub': 'direct MCP demand · real-time',
+                    'med.direct_name': 'Direct Deals',
+                    'med.direct_sub': 'PMP · Anthropic, OpenAI, Vercel',
+                    'med.house_name': 'House Ads',
+                    'med.house_sub': 'backfill · your own promotions',
+                    'med.thirdparty_name': '3rd-party Networks',
+                    'med.thirdparty_sub': 'off by default · enable to test',
+                    'med.ecpm_label': 'ECPM (7d)',
+                    'med.fill_label': 'FILL RATE',
+                    'med.blended_ecpm': 'blended eCPM',
+                    'med.overall_fill': 'overall fill',
+                    'med.auctions_24h': 'auctions / 24h',
+                    'med.benna_lift': 'Benna vs manual order',
+                    'med.note_strong': 'Benna auto-order is on.',
+                    'med.note_body': 'The engine re-ranks demand sources on each impression using MCP context (user intent, tool, host) to maximize your eCPM. Last 7 days: +18% vs fixed waterfall. Turn off to lock the order above.',
+                    'integ.title': 'Integrations',
+                    'integ.intro': 'One publisher account, four doors. Click the door you\'re setting up — the install + code sample appears below. Active doors show last 7 days; "Not started" doors are ready to set up.',
+                    'integ.about_link': 'About each door →',
+                    'integ.full_ref': 'Full reference →',
+                    'integ.step_install': '1. Install',
+                    'integ.step_mcp_wire': '2. Wire it into a tool handler',
+                    'integ.step_js_head': '1. Drop into your <head>',
+                    'integ.step_js_slots': '2. Add slot divs where you want ads',
+                    'integ.step_ext_render': '2. Render in your content script / sidepanel',
+                    'integ.step_ext_react_vue': '2b. React or Vue?',
+                    'integ.step_rest_env': '1. Add bearer token to env',
+                    'integ.step_rest_call': '2. Direct REST call (Discord example)',
+                    'integ.step_rest_helper': '2b. Optional: per-platform helper library',
+                    'integ.cap_mcp': 'bakes the disclosure label in. Try sandbox without signup: pass',
+                    'integ.cap_js_async': 'Async, zero impact on first paint. The publisher ID above is your live key — already filled in.',
+                    'integ.cap_js_slots': 'Lumi auto-discovers slots and rerenders on SPA route changes via MutationObserver. Theme via CSS variables (',
+                    'integ.cap_js_slots_etc': ', etc.).',
+                    'integ.cap_ext_mv3': 'Manifest v3 native — zero',
+                    'integ.cap_ext_csp': ', zero remote code. Allow',
+                    'integ.cap_ext_csp2': 'in your extension\'s CSP.',
+                    'integ.cap_rest_env': 'Server-side only — never ship the bearer to the browser. Use Vercel / Netlify / Render env-var settings.',
+                    'integ.cap_rest_helper': 'Helper libraries are optional — they format the ad payload into each platform\'s native message type so you don\'t have to.',
+                    'verify.title': 'Verify your integration',
+                    'verify.subtitle': 'Fire a synthetic ad request to confirm your setup is wired correctly. Per-door badges auto-update as soon as a real event for that door arrives.',
+                    'verify.not_started': 'Not started',
+                    'verify.run_test_header': 'Run a synthetic test',
+                    'verify.context_label': 'Context',
+                    'verify.context_placeholder': 'user is debugging a python traceback',
+                    'verify.format_label': 'Format',
+                    'verify.format_any': 'Any',
+                    'verify.format_image': 'Image',
+                    'verify.format_native': 'Native',
+                    'verify.sandbox': 'Sandbox',
+                    'verify.sandbox_tip': 'Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live.',
+                    'verify.run_btn': '▶ Run Test',
+                    'theme.header': 'Theme',
+                    'theme.primary_color': 'Primary color',
+                    'theme.border_radius': 'Border radius',
+                    'theme.font': 'Font',
+                    'theme.font_system': 'System UI',
+                    'theme.font_mono': 'Monospace',
+                    'theme.copy_css': 'Copy CSS snippet',
+                    'theme.paste_into_a': 'Paste into your stylesheet\'s',
+                    'theme.paste_into_b': 'block to apply this theme to all Lumi ads in your app.',
+                    'theme.live_preview': 'Live preview',
+                    'theme.placeholder_status': 'placeholder · run a test to see a real ad',
+                    'theme.sponsored_via': 'Sponsored · via Boost Boss',
+                    'theme.headline_placeholder': 'Your headline appears here',
+                    'theme.subtext_placeholder': 'Run a synthetic test to see a real ad rendered with your theme settings.',
+                    'theme.cta_try': 'Try Free →',
+                    'ap.title': 'Ad Placements',
+                    'ap.est_income': 'Est. monthly income:',
+                    'ap.at_current_volume': ' (at current volume)',
+                    'ap.intro': 'Every card below is a placement your installed door can render. Switch any one on or off — turning a placement off removes it from your auction. Showing the door selected in the Integration section above.',
+                    'apikeys.title': 'API Keys & Credentials',
+                    'apikeys.api_key': 'API Key',
+                    'apikeys.reveal': 'Reveal',
+                    'apikeys.app_id': 'App ID',
+                    'apikeys.mcp_endpoint': 'MCP Endpoint URL',
+                    'apikeys.regenerate': 'Regenerate API Key',
+                    'placements.title': 'Placements',
+                    'placements.last_30': 'Last 30 days · grouped by',
+                    'placements.new_btn': '+ New Placement',
+                    'placements.hint_a': 'Each row is one slot inside your app. Pass the',
+                    'placements.hint_b': 'to',
+                    'placements.hint_c': 'to enable per-slot floors, frequency caps, and reporting. Higher',
+                    'placements.intent': 'Intent',
+                    'placements.hint_d': 'means Benna is matching the right ads to that placement\'s context.',
+                    'payout.title': 'Payout Settings',
+                    'payout.intro': 'Earn at least $25 in publisher accruals, connect Stripe, and the next Friday cron pays you out automatically. Most publishers see their first payout 1–3 weeks after installation, depending on traffic.',
+                    'payout.next_date': 'Next Payout Date',
+                    'payout.pending': 'Pending Payout',
+                    'payout.min_threshold': 'Minimum Threshold',
+                    'payout.request_btn': 'Request Payout',
+                    'payout.request_tip': 'Payouts are processed automatically every Friday when your balance reaches $25 and Stripe Connect is linked',
+                    'payout.connect_stripe': 'Connect Stripe',
+                    'qs.title': 'Quick Start',
+                    'qs.full_docs': 'Full Documentation',
+                    'qs.try_playground': 'Try in Playground',
+                    'qs.npm_pkg': 'npm Package',
+                    'common.loading': 'Loading…',
+                },
+                'zh': {
+                    'chrome.back': '返回 Lumi SDK',
+                    'chrome.dashboard': '面板',
+                    'chrome.search_actions': '搜索操作',
+                    'chrome.account': '账户',
+                    'chrome.notif_tip': '通知',
+                    'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': '全部标为已读',
+                    'chrome.notif_recent': '仅显示最近 7 天',
+                    'chrome.settings_tip': '账户设置',
+                    'chrome.logout': '退出登录',
+                    'modal.title': '设置',
+                    'modal.close': '关闭',
+                    'modal.save': '保存更改',
+                    'nav.account': '账户',
+                    'nav.payouts': '打款',
+                    'nav.api': 'API 与集成',
+                    'nav.brand': '品牌安全',
+                    'nav.notifs': '通知',
+                    'nav.language': '语言',
+                    'nav.security': '安全',
+                    'common.copy': '复制',
+                    'common.show': '显示',
+                    'common.hide': '隐藏',
+                    'common.saved': '✓ 已保存',
+                    'language.label': '面板语言',
+                    'language.hint': '仅作用于发布商面板。boostboss.ai 营销页面有自己的语言切换在顶部导航。设置立即翻译,其他界面正在逐步推出。',
+                    'account.app_name': '应用名称',
+                    'account.app_name_hint': '显示给广告主和您的发布商档案。',
+                    'account.email': '联系邮箱',
+                    'account.email_hint': '用于打款和账户通知。',
+                    'account.dev_id': '开发者 ID',
+                    'account.revenue': '收入分成',
+                    'account.revenue_value': '您获得 85% · Boost Boss 收取 15%',
+                    'account.revenue_hint': '应用于您库存中每一次结算曝光。',
+                    'payouts.how_title': '打款如何运作',
+                    'payouts.how_body_html': '累计至少 <strong>$25</strong> 的发布商收益,连接 Stripe,下一个周五的定时任务将自动向您打款 — 无需手动申请。',
+                    'payouts.threshold': '打款门槛',
+                    'payouts.threshold_value': '最低 $25.00',
+                    'payouts.schedule': '打款周期',
+                    'payouts.schedule_value': '每周 · 每个周五',
+                    'payouts.manage_btn': '管理 Stripe 连接和打款 →',
+                    'payouts.manage_hint': '打开面板上完整的打款设置区域。',
+                    'api.key': 'Lumi SDK API 密钥',
+                    'api.key_hint': '验证您集成的每一次广告请求。请妥善保密。',
+                    'api.app_id': '应用 ID',
+                    'api.mcp_endpoint': 'MCP 端点',
+                    'api.regen_title': '重新生成 API 密钥',
+                    'api.regen_hint': '生成新密钥并立即作废旧密钥。请立刻更新您的集成。',
+                    'api.regen_btn': '重新生成密钥',
+                    'brand.cats_label': '屏蔽的广告主类目',
+                    'brand.cats_hint': '这些类目的广告永远不会在您的任何库存上展示。',
+                    'brand.doms_label': '屏蔽的广告主域名',
+                    'brand.doms_hint': '每行一个域名。任何广告主域名匹配的广告都会被屏蔽。',
+                    'brand.save_btn': '保存品牌安全',
+                    'brand.iab1': '艺术与娱乐',
+                    'brand.iab3': '商业',
+                    'brand.iab4': '职业',
+                    'brand.iab5': '教育',
+                    'brand.iab7': '健康与健身',
+                    'brand.iab13': '个人理财',
+                    'brand.iab17': '体育',
+                    'brand.iab19': '科技',
+                    'brand.iab20': '旅游',
+                    'brand.iab22': '购物',
+                    'notifs.intro': '在以下情况给我发邮件…',
+                    'notifs.payout_sent_title': '已发出打款',
+                    'notifs.payout_sent_desc': '每次打款到达您的 Stripe 账户时的确认邮件。',
+                    'notifs.payout_failed_title': '打款失败',
+                    'notifs.payout_failed_desc': '如果打款无法完成,会发送提醒以便您快速处理。',
+                    'notifs.monthly_title': '月度收益摘要',
+                    'notifs.monthly_desc': '每月一次的曝光量、填充率和收益回顾。',
+                    'notifs.product_title': '产品更新',
+                    'notifs.product_desc': '关于 Boost Boss 新功能和广告形式的不定期资讯。',
+                    'security.cur_pw': '当前密码',
+                    'security.new_pw': '新密码',
+                    'security.new_pw_hint': '至少 8 个字符。',
+                    'security.confirm_pw': '确认新密码',
+                    'security.change_btn': '修改密码',
+                    'security.changing': '正在修改…',
+                    'security.err_required': '请输入当前密码和新密码。',
+                    'security.err_short': '新密码至少 8 个字符。',
+                    'security.err_mismatch': '两次输入的新密码不一致。',
+                    'security.ok_changed': '密码修改成功。',
+                    'security.err_generic': '无法修改密码',
+                    'toast.copied': '已复制',
+                    'toast.brand_saved': '品牌安全已保存',
+                    'toast.pw_changed': '密码已修改',
+                    'dash.title': '发布商面板',
+                    'dash.view': '视图:',
+                    'dash.filter_all': '所有集成',
+                    'dash.filter_mcp': 'Lumi SDK for MCP',
+                    'dash.filter_js': 'Lumi SDK 脚本标签',
+                    'dash.filter_npm': 'Lumi SDK 浏览器扩展',
+                    'dash.filter_rest': 'Lumi API for Bots',
+                    'stats.earnings': '总收益',
+                    'stats.impressions': '曝光',
+                    'stats.your_share': '您的分成',
+                    'stats.rpm': 'RPM',
+                    'stats.trend_zero': '↑ 较上月 0%',
+                    'chart.revenue_14d': '过去 14 天收益',
+                    'med.title': '中介与瀑布流',
+                    'med.subtitle': '各广告源按每次曝光首价竞价。Benna 在每次出价时重新排序。',
+                    'med.auto_tip': 'Benna 选择需求源顺序',
+                    'med.auto_on': 'BENNA 自动排序 · 开启',
+                    'med.auto_off': 'BENNA 自动排序 · 关闭',
+                    'med.bbx_name': 'Boost Boss Exchange',
+                    'med.bbx_sub': '直接 MCP 需求 · 实时',
+                    'med.direct_name': '直接交易',
+                    'med.direct_sub': 'PMP · Anthropic、OpenAI、Vercel',
+                    'med.house_name': '自有广告',
+                    'med.house_sub': '补量 · 您自己的推广',
+                    'med.thirdparty_name': '第三方网络',
+                    'med.thirdparty_sub': '默认关闭 · 启用以测试',
+                    'med.ecpm_label': 'ECPM(7天)',
+                    'med.fill_label': '填充率',
+                    'med.blended_ecpm': '混合 eCPM',
+                    'med.overall_fill': '总填充',
+                    'med.auctions_24h': '24小时竞价',
+                    'med.benna_lift': 'Benna vs 手动排序',
+                    'med.note_strong': 'Benna 自动排序已开启。',
+                    'med.note_body': '引擎在每次曝光时使用 MCP 上下文(用户意图、工具、宿主)重新排序需求源以最大化您的 eCPM。最近 7 天:vs 固定瀑布流 +18%。关闭以锁定上方顺序。',
+                    'integ.title': '集成',
+                    'integ.intro': '一个发布商账户,四扇门。点击您要设置的门 — 安装步骤和代码示例会显示在下面。已启用的门显示最近 7 天;"未开始"的门可立即设置。',
+                    'integ.about_link': '各扇门介绍 →',
+                    'integ.full_ref': '完整参考 →',
+                    'integ.step_install': '1. 安装',
+                    'integ.step_mcp_wire': '2. 接入到工具处理器',
+                    'integ.step_js_head': '1. 放入您的 <head>',
+                    'integ.step_js_slots': '2. 添加广告位 div',
+                    'integ.step_ext_render': '2. 在内容脚本/侧边栏中渲染',
+                    'integ.step_ext_react_vue': '2b. 使用 React 或 Vue?',
+                    'integ.step_rest_env': '1. 将 bearer token 加入环境变量',
+                    'integ.step_rest_call': '2. 直接 REST 调用(Discord 示例)',
+                    'integ.step_rest_helper': '2b. 可选:针对平台的辅助库',
+                    'integ.cap_mcp': '已内置披露标签。免注册沙盒试用:传入',
+                    'integ.cap_js_async': '异步加载,对首屏绘制零影响。上方发布商 ID 是您的实时密钥 — 已自动填好。',
+                    'integ.cap_js_slots': 'Lumi 通过 MutationObserver 自动发现广告位并在 SPA 路由变更时重新渲染。通过 CSS 变量定制主题(',
+                    'integ.cap_js_slots_etc': ',等等)。',
+                    'integ.cap_ext_mv3': 'Manifest v3 原生 — 无',
+                    'integ.cap_ext_csp': ',无远程代码。在您扩展的 CSP 中允许',
+                    'integ.cap_ext_csp2': '。',
+                    'integ.cap_rest_env': '仅限服务端 — 切勿将 bearer 发送到浏览器。使用 Vercel / Netlify / Render 环境变量设置。',
+                    'integ.cap_rest_helper': '辅助库是可选的 — 它们将广告负载格式化为每个平台的原生消息类型,免去您手动转换的麻烦。',
+                    'verify.title': '验证您的集成',
+                    'verify.subtitle': '触发一次合成广告请求以确认设置已正确接入。每扇门的徽章会在真实事件到达时自动更新。',
+                    'verify.not_started': '未开始',
+                    'verify.run_test_header': '运行合成测试',
+                    'verify.context_label': '上下文',
+                    'verify.context_placeholder': '用户在调试 python traceback',
+                    'verify.format_label': '格式',
+                    'verify.format_any': '任意',
+                    'verify.format_image': '图片',
+                    'verify.format_native': '原生',
+                    'verify.sandbox': '沙盒',
+                    'verify.sandbox_tip': '使用 pub_test_demo — 必返填充,以便您在上线前端到端验证集成。',
+                    'verify.run_btn': '▶ 运行测试',
+                    'theme.header': '主题',
+                    'theme.primary_color': '主色',
+                    'theme.border_radius': '圆角',
+                    'theme.font': '字体',
+                    'theme.font_system': '系统 UI',
+                    'theme.font_mono': '等宽',
+                    'theme.copy_css': '复制 CSS 片段',
+                    'theme.paste_into_a': '粘贴到您样式表的',
+                    'theme.paste_into_b': '块以将此主题应用到您应用中的所有 Lumi 广告。',
+                    'theme.live_preview': '实时预览',
+                    'theme.placeholder_status': '占位 · 运行测试以查看真实广告',
+                    'theme.sponsored_via': '赞助 · 通过 Boost Boss',
+                    'theme.headline_placeholder': '您的标题会显示在这里',
+                    'theme.subtext_placeholder': '运行一次合成测试以使用您的主题设置查看真实广告。',
+                    'theme.cta_try': '免费试用 →',
+                    'ap.title': '广告版位',
+                    'ap.est_income': '预计月收入:',
+                    'ap.at_current_volume': ' (按当前流量)',
+                    'ap.intro': '下方每张卡片都是您安装的门可以渲染的一个版位。开关任一版位 — 关闭会将其从您的竞价中移除。显示上面"集成"部分所选门的版位。',
+                    'apikeys.title': 'API 密钥与凭证',
+                    'apikeys.api_key': 'API 密钥',
+                    'apikeys.reveal': '显示',
+                    'apikeys.app_id': '应用 ID',
+                    'apikeys.mcp_endpoint': 'MCP 端点 URL',
+                    'apikeys.regenerate': '重新生成 API 密钥',
+                    'placements.title': '版位',
+                    'placements.last_30': '最近 30 天 · 按以下分组',
+                    'placements.new_btn': '+ 新建版位',
+                    'placements.hint_a': '每一行是您应用内的一个广告位。将',
+                    'placements.hint_b': '传给',
+                    'placements.hint_c': '以启用每位的底价、频次上限和报告。更高的',
+                    'placements.intent': '意图',
+                    'placements.hint_d': '表示 Benna 正在为该版位的上下文匹配合适的广告。',
+                    'payout.title': '打款设置',
+                    'payout.intro': '累计至少 $25 的发布商收益,连接 Stripe,下一个周五的定时任务会自动打款给您。大多数发布商在安装后 1–3 周内收到首笔打款,具体取决于流量。',
+                    'payout.next_date': '下次打款日期',
+                    'payout.pending': '待处理打款',
+                    'payout.min_threshold': '最低门槛',
+                    'payout.request_btn': '申请打款',
+                    'payout.request_tip': '每个周五,当余额达到 $25 且已连接 Stripe Connect 时,会自动处理打款',
+                    'payout.connect_stripe': '连接 Stripe',
+                    'qs.title': '快速开始',
+                    'qs.full_docs': '完整文档',
+                    'qs.try_playground': '在 Playground 试用',
+                    'qs.npm_pkg': 'npm 包',
+                    'common.loading': '加载中…',
+                },
+                'zh-TW': {
+                    'chrome.back': '返回 Lumi SDK',
+                    'chrome.dashboard': '儀表板',
+                    'chrome.search_actions': '搜尋動作',
+                    'chrome.account': '帳號',
+                    'chrome.notif_tip': '通知',
+                    'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': '全部標為已讀',
+                    'chrome.notif_recent': '僅顯示最近 7 天',
+                    'chrome.settings_tip': '帳號設定',
+                    'chrome.logout': '登出',
+                    'modal.title': '設定',
+                    'modal.close': '關閉',
+                    'modal.save': '儲存變更',
+                    'nav.account': '帳號',
+                    'nav.payouts': '撥款',
+                    'nav.api': 'API 與整合',
+                    'nav.brand': '品牌安全',
+                    'nav.notifs': '通知',
+                    'nav.language': '語言',
+                    'nav.security': '安全',
+                    'common.copy': '複製',
+                    'common.show': '顯示',
+                    'common.hide': '隱藏',
+                    'common.saved': '✓ 已儲存',
+                    'language.label': '儀表板語言',
+                    'language.hint': '僅作用於發布商儀表板。boostboss.ai 行銷頁面有自己的語言切換在頂部導覽。設定立即翻譯,其他介面正逐步推出。',
+                    'account.app_name': '應用程式名稱',
+                    'account.app_name_hint': '顯示給廣告主和您的發布商檔案。',
+                    'account.email': '聯絡 Email',
+                    'account.email_hint': '用於撥款和帳號通知。',
+                    'account.dev_id': '開發者 ID',
+                    'account.revenue': '收益分潤',
+                    'account.revenue_value': '您獲得 85% · Boost Boss 收取 15%',
+                    'account.revenue_hint': '套用於您庫存中每一次結算的曝光。',
+                    'payouts.how_title': '撥款如何運作',
+                    'payouts.how_body_html': '累計至少 <strong>$25</strong> 的發布商收益,連接 Stripe,下一個週五的排程任務會自動撥款給您 — 無需手動申請。',
+                    'payouts.threshold': '撥款門檻',
+                    'payouts.threshold_value': '最低 $25.00',
+                    'payouts.schedule': '撥款週期',
+                    'payouts.schedule_value': '每週 · 每個週五',
+                    'payouts.manage_btn': '管理 Stripe 連接與撥款 →',
+                    'payouts.manage_hint': '開啟儀表板上完整的撥款設定區。',
+                    'api.key': 'Lumi SDK API 金鑰',
+                    'api.key_hint': '驗證您整合的每一次廣告請求。請妥善保密。',
+                    'api.app_id': '應用程式 ID',
+                    'api.mcp_endpoint': 'MCP 端點',
+                    'api.regen_title': '重新產生 API 金鑰',
+                    'api.regen_hint': '產生新金鑰並立即作廢舊金鑰。請立刻更新您的整合。',
+                    'api.regen_btn': '重新產生金鑰',
+                    'brand.cats_label': '封鎖的廣告主類別',
+                    'brand.cats_hint': '這些類別的廣告永遠不會在您的任何庫存上播放。',
+                    'brand.doms_label': '封鎖的廣告主網域',
+                    'brand.doms_hint': '每行一個網域。任何廣告主網域相符的廣告都會被封鎖。',
+                    'brand.save_btn': '儲存品牌安全',
+                    'brand.iab1': '藝術與娛樂',
+                    'brand.iab3': '商業',
+                    'brand.iab4': '職涯',
+                    'brand.iab5': '教育',
+                    'brand.iab7': '健康與健身',
+                    'brand.iab13': '個人理財',
+                    'brand.iab17': '運動',
+                    'brand.iab19': '科技',
+                    'brand.iab20': '旅遊',
+                    'brand.iab22': '購物',
+                    'notifs.intro': '在以下情況寄 Email 給我…',
+                    'notifs.payout_sent_title': '撥款已寄出',
+                    'notifs.payout_sent_desc': '每次撥款到達您的 Stripe 帳戶時的確認 Email。',
+                    'notifs.payout_failed_title': '撥款失敗',
+                    'notifs.payout_failed_desc': '如果撥款無法完成,會發送提醒以便您快速處理。',
+                    'notifs.monthly_title': '月度收益摘要',
+                    'notifs.monthly_desc': '每月一次的曝光、填充率和收益回顧。',
+                    'notifs.product_title': '產品更新',
+                    'notifs.product_desc': '關於 Boost Boss 新功能和廣告版位的不定期消息。',
+                    'security.cur_pw': '目前密碼',
+                    'security.new_pw': '新密碼',
+                    'security.new_pw_hint': '至少 8 個字元。',
+                    'security.confirm_pw': '確認新密碼',
+                    'security.change_btn': '變更密碼',
+                    'security.changing': '正在變更…',
+                    'security.err_required': '請輸入目前密碼和新密碼。',
+                    'security.err_short': '新密碼至少 8 個字元。',
+                    'security.err_mismatch': '兩次輸入的新密碼不一致。',
+                    'security.ok_changed': '密碼變更成功。',
+                    'security.err_generic': '無法變更密碼',
+                    'toast.copied': '已複製',
+                    'toast.brand_saved': '品牌安全已儲存',
+                    'toast.pw_changed': '密碼已變更',
+                    'dash.title': '發布商儀表板',
+                    'dash.view': '檢視:',
+                    'dash.filter_all': '所有整合',
+                    'dash.filter_mcp': 'Lumi SDK for MCP',
+                    'dash.filter_js': 'Lumi SDK 指令稿標籤',
+                    'dash.filter_npm': 'Lumi SDK 瀏覽器擴充功能',
+                    'dash.filter_rest': 'Lumi API for Bots',
+                    'stats.earnings': '總收益',
+                    'stats.impressions': '曝光',
+                    'stats.your_share': '您的分潤',
+                    'stats.rpm': 'RPM',
+                    'stats.trend_zero': '↑ 較上月 0%',
+                    'chart.revenue_14d': '過去 14 天收益',
+                    'med.title': '中介與瀑布流',
+                    'med.subtitle': '各廣告來源按每次曝光首價競價。Benna 在每次出價時重新排序。',
+                    'med.auto_tip': 'Benna 選擇需求來源順序',
+                    'med.auto_on': 'BENNA 自動排序 · 開啟',
+                    'med.auto_off': 'BENNA 自動排序 · 關閉',
+                    'med.bbx_name': 'Boost Boss Exchange',
+                    'med.bbx_sub': '直接 MCP 需求 · 即時',
+                    'med.direct_name': '直接交易',
+                    'med.direct_sub': 'PMP · Anthropic、OpenAI、Vercel',
+                    'med.house_name': '自有廣告',
+                    'med.house_sub': '補量 · 您自己的推廣',
+                    'med.thirdparty_name': '第三方網路',
+                    'med.thirdparty_sub': '預設關閉 · 啟用以測試',
+                    'med.ecpm_label': 'ECPM(7天)',
+                    'med.fill_label': '填充率',
+                    'med.blended_ecpm': '混合 eCPM',
+                    'med.overall_fill': '總填充',
+                    'med.auctions_24h': '24小時競價',
+                    'med.benna_lift': 'Benna vs 手動排序',
+                    'med.note_strong': 'Benna 自動排序已開啟。',
+                    'med.note_body': '引擎在每次曝光時使用 MCP 上下文(使用者意圖、工具、主機)重新排序需求來源以最大化您的 eCPM。最近 7 天:vs 固定瀑布流 +18%。關閉以鎖定上方順序。',
+                    'integ.title': '整合',
+                    'integ.intro': '一個發布商帳號,四扇門。點擊您要設定的門 — 安裝步驟和程式碼範例會顯示在下方。已啟用的門顯示最近 7 天;「未開始」的門可立即設定。',
+                    'integ.about_link': '各扇門介紹 →',
+                    'integ.full_ref': '完整參考 →',
+                    'integ.step_install': '1. 安裝',
+                    'integ.step_mcp_wire': '2. 接入到工具處理器',
+                    'integ.step_js_head': '1. 放入您的 <head>',
+                    'integ.step_js_slots': '2. 加入廣告版位 div',
+                    'integ.step_ext_render': '2. 在內容指令稿/側邊欄中渲染',
+                    'integ.step_ext_react_vue': '2b. 使用 React 或 Vue?',
+                    'integ.step_rest_env': '1. 將 bearer token 加入環境變數',
+                    'integ.step_rest_call': '2. 直接 REST 呼叫(Discord 範例)',
+                    'integ.step_rest_helper': '2b. 選用:平台專屬輔助程式庫',
+                    'integ.cap_mcp': '已內建披露標籤。免註冊沙盒試用:傳入',
+                    'integ.cap_js_async': '非同步載入,對首屏繪製零影響。上方發布商 ID 是您的正式金鑰 — 已自動填好。',
+                    'integ.cap_js_slots': 'Lumi 透過 MutationObserver 自動發現版位並在 SPA 路由變更時重新渲染。透過 CSS 變數套用主題(',
+                    'integ.cap_js_slots_etc': ',等等)。',
+                    'integ.cap_ext_mv3': 'Manifest v3 原生 — 無',
+                    'integ.cap_ext_csp': ',無遠端程式碼。在您擴充功能的 CSP 中允許',
+                    'integ.cap_ext_csp2': '。',
+                    'integ.cap_rest_env': '僅限伺服器端 — 切勿將 bearer 傳送到瀏覽器。使用 Vercel / Netlify / Render 環境變數設定。',
+                    'integ.cap_rest_helper': '輔助程式庫為選用 — 它們會把廣告負載格式化成各平台的原生訊息類型,省去您手動轉換的麻煩。',
+                    'verify.title': '驗證您的整合',
+                    'verify.subtitle': '觸發一次合成廣告請求以確認設定已正確接入。每扇門的徽章會在真實事件抵達時自動更新。',
+                    'verify.not_started': '未開始',
+                    'verify.run_test_header': '執行合成測試',
+                    'verify.context_label': '上下文',
+                    'verify.context_placeholder': '使用者在偵錯 python traceback',
+                    'verify.format_label': '格式',
+                    'verify.format_any': '任意',
+                    'verify.format_image': '圖片',
+                    'verify.format_native': '原生',
+                    'verify.sandbox': '沙盒',
+                    'verify.sandbox_tip': '使用 pub_test_demo — 保證回傳填充,讓您在正式上線前端到端驗證整合。',
+                    'verify.run_btn': '▶ 執行測試',
+                    'theme.header': '主題',
+                    'theme.primary_color': '主色',
+                    'theme.border_radius': '圓角',
+                    'theme.font': '字型',
+                    'theme.font_system': '系統 UI',
+                    'theme.font_mono': '等寬',
+                    'theme.copy_css': '複製 CSS 片段',
+                    'theme.paste_into_a': '貼到您樣式表的',
+                    'theme.paste_into_b': '區塊以將此主題套用到您應用中的所有 Lumi 廣告。',
+                    'theme.live_preview': '即時預覽',
+                    'theme.placeholder_status': '佔位 · 執行測試以查看真實廣告',
+                    'theme.sponsored_via': '贊助 · 透過 Boost Boss',
+                    'theme.headline_placeholder': '您的標題會顯示在這裡',
+                    'theme.subtext_placeholder': '執行一次合成測試以使用您的主題設定查看真實廣告。',
+                    'theme.cta_try': '免費試用 →',
+                    'ap.title': '廣告版位',
+                    'ap.est_income': '預估月收入:',
+                    'ap.at_current_volume': ' (依目前流量)',
+                    'ap.intro': '下方每張卡片都是您所安裝的門可以渲染的版位。開關任一版位 — 關閉會將其從您的競價中移除。顯示上方「整合」區段所選門的版位。',
+                    'apikeys.title': 'API 金鑰與憑證',
+                    'apikeys.api_key': 'API 金鑰',
+                    'apikeys.reveal': '顯示',
+                    'apikeys.app_id': '應用程式 ID',
+                    'apikeys.mcp_endpoint': 'MCP 端點 URL',
+                    'apikeys.regenerate': '重新產生 API 金鑰',
+                    'placements.title': '版位',
+                    'placements.last_30': '最近 30 天 · 依下列分組',
+                    'placements.new_btn': '+ 新增版位',
+                    'placements.hint_a': '每一列是您應用程式內的一個廣告版位。將',
+                    'placements.hint_b': '傳給',
+                    'placements.hint_c': '以啟用每位的底價、頻次上限和報告。較高的',
+                    'placements.intent': '意圖',
+                    'placements.hint_d': '表示 Benna 正在為該版位的情境匹配合適的廣告。',
+                    'payout.title': '撥款設定',
+                    'payout.intro': '累計至少 $25 的發布商收益,連接 Stripe,下一個週五的排程任務會自動撥款給您。多數發布商會在安裝後 1–3 週內收到首筆撥款,實際取決於流量。',
+                    'payout.next_date': '下次撥款日期',
+                    'payout.pending': '待處理撥款',
+                    'payout.min_threshold': '最低門檻',
+                    'payout.request_btn': '申請撥款',
+                    'payout.request_tip': '每個週五,當餘額達到 $25 且已連接 Stripe Connect 時,會自動處理撥款',
+                    'payout.connect_stripe': '連接 Stripe',
+                    'qs.title': '快速開始',
+                    'qs.full_docs': '完整文件',
+                    'qs.try_playground': '在 Playground 試用',
+                    'qs.npm_pkg': 'npm 套件',
+                    'common.loading': '載入中…',
+                },
+                'ja': {
+                    'chrome.back': 'Lumi SDK に戻る',
+                    'chrome.dashboard': 'ダッシュボード',
+                    'chrome.search_actions': 'アクション検索',
+                    'chrome.account': 'アカウント',
+                    'chrome.notif_tip': '通知',
+                    'chrome.notif_title': '通知',
+                    'chrome.notif_mark_all': 'すべて既読にする',
+                    'chrome.notif_recent': '過去 7 日間のみ表示',
+                    'chrome.settings_tip': 'アカウント設定',
+                    'chrome.logout': 'ログアウト',
+                    'modal.title': '設定',
+                    'modal.close': '閉じる',
+                    'modal.save': '変更を保存',
+                    'nav.account': 'アカウント',
+                    'nav.payouts': '支払い',
+                    'nav.api': 'API・統合',
+                    'nav.brand': 'ブランドセーフティ',
+                    'nav.notifs': '通知',
+                    'nav.language': '言語',
+                    'nav.security': 'セキュリティ',
+                    'common.copy': 'コピー',
+                    'common.show': '表示',
+                    'common.hide': '非表示',
+                    'common.saved': '✓ 保存しました',
+                    'language.label': 'ダッシュボード言語',
+                    'language.hint': 'パブリッシャー ダッシュボードにのみ適用されます。boostboss.ai のマーケティングページには独自の言語切替がトップナビにあります。設定は即時翻訳、他のサーフェスは順次展開中です。',
+                    'account.app_name': 'アプリ名',
+                    'account.app_name_hint': '広告主とパブリッシャー プロフィールに表示されます。',
+                    'account.email': '連絡先メール',
+                    'account.email_hint': '支払いとアカウント通知に使用されます。',
+                    'account.dev_id': 'デベロッパー ID',
+                    'account.revenue': 'レベニューシェア',
+                    'account.revenue_value': 'あなたが 85% を獲得 · Boost Boss が 15% を取得',
+                    'account.revenue_hint': 'インベントリ上のすべての確定インプレッションに適用されます。',
+                    'payouts.how_title': '支払いの仕組み',
+                    'payouts.how_body_html': 'パブリッシャー残高で少なくとも <strong>$25</strong> を稼ぎ、Stripe を接続すれば、次の金曜日の自動処理であなたに自動的に支払われます — 手動申請は不要です。',
+                    'payouts.threshold': '支払いしきい値',
+                    'payouts.threshold_value': '$25.00 最低',
+                    'payouts.schedule': 'スケジュール',
+                    'payouts.schedule_value': '毎週 · 毎週金曜日',
+                    'payouts.manage_btn': 'Stripe 接続と支払いを管理 →',
+                    'payouts.manage_hint': 'ダッシュボードの完全な支払い設定パネルを開きます。',
+                    'api.key': 'Lumi SDK API キー',
+                    'api.key_hint': '統合からのすべての広告リクエストを認証します。秘密にしてください。',
+                    'api.app_id': 'アプリ ID',
+                    'api.mcp_endpoint': 'MCP エンドポイント',
+                    'api.regen_title': 'API キーを再生成',
+                    'api.regen_hint': '新しいキーを発行し、古いキーを即座に無効化します。直後に統合を更新してください。',
+                    'api.regen_btn': 'キーを再生成',
+                    'brand.cats_label': 'ブロック対象の広告主カテゴリ',
+                    'brand.cats_hint': 'これらのカテゴリの広告は、あなたのインベントリでは決して配信されません。',
+                    'brand.doms_label': 'ブロック対象の広告主ドメイン',
+                    'brand.doms_hint': '1 行に 1 ドメイン。広告主ドメインが一致する広告はインベントリから除外されます。',
+                    'brand.save_btn': 'ブランドセーフティを保存',
+                    'brand.iab1': 'アート・エンタメ',
+                    'brand.iab3': 'ビジネス',
+                    'brand.iab4': 'キャリア',
+                    'brand.iab5': '教育',
+                    'brand.iab7': 'ヘルス・フィットネス',
+                    'brand.iab13': '個人金融',
+                    'brand.iab17': 'スポーツ',
+                    'brand.iab19': 'テクノロジー',
+                    'brand.iab20': '旅行',
+                    'brand.iab22': 'ショッピング',
+                    'notifs.intro': '次の場合にメール通知…',
+                    'notifs.payout_sent_title': '支払いが送信された',
+                    'notifs.payout_sent_desc': '支払いが Stripe アカウントに届くたびに送信される確認メール。',
+                    'notifs.payout_failed_title': '支払いに失敗した',
+                    'notifs.payout_failed_desc': '支払いが完了できなかった場合、迅速に対処できるよう通知します。',
+                    'notifs.monthly_title': '月次収益サマリー',
+                    'notifs.monthly_desc': '月 1 回のインプレッション・フィルレート・収益の総括。',
+                    'notifs.product_title': 'プロダクト アップデート',
+                    'notifs.product_desc': 'Boost Boss の新機能や広告フォーマットに関する不定期ニュース。',
+                    'security.cur_pw': '現在のパスワード',
+                    'security.new_pw': '新しいパスワード',
+                    'security.new_pw_hint': '少なくとも 8 文字以上。',
+                    'security.confirm_pw': '新しいパスワードを確認',
+                    'security.change_btn': 'パスワードを変更',
+                    'security.changing': '変更中…',
+                    'security.err_required': '現在のパスワードと新しいパスワードを入力してください。',
+                    'security.err_short': '新しいパスワードは 8 文字以上にしてください。',
+                    'security.err_mismatch': '新しいパスワードが一致しません。',
+                    'security.ok_changed': 'パスワードを変更しました。',
+                    'security.err_generic': 'パスワードを変更できませんでした',
+                    'toast.copied': 'コピーしました',
+                    'toast.brand_saved': 'ブランドセーフティを保存しました',
+                    'toast.pw_changed': 'パスワードを変更しました',
+                    'dash.title': 'パブリッシャー ダッシュボード',
+                    'dash.view': '表示:',
+                    'dash.filter_all': 'すべての統合',
+                    'dash.filter_mcp': 'Lumi SDK for MCP',
+                    'dash.filter_js': 'Lumi SDK スクリプトタグ',
+                    'dash.filter_npm': 'Lumi SDK ブラウザ拡張機能',
+                    'dash.filter_rest': 'Lumi API for Bots',
+                    'stats.earnings': '総収益',
+                    'stats.impressions': 'インプレッション',
+                    'stats.your_share': 'あなたの取り分',
+                    'stats.rpm': 'RPM',
+                    'stats.trend_zero': '↑ 先月比 0%',
+                    'chart.revenue_14d': '過去 14 日間の収益',
+                    'med.title': 'メディエーション & ウォーターフォール',
+                    'med.subtitle': '各ソースがインプレッションごとに第一価格で競争。Benna が入札ごとに再ランクします。',
+                    'med.auto_tip': 'Benna が需要ソース順を選びます',
+                    'med.auto_on': 'BENNA 自動オーダー · ON',
+                    'med.auto_off': 'BENNA 自動オーダー · OFF',
+                    'med.bbx_name': 'Boost Boss Exchange',
+                    'med.bbx_sub': 'ダイレクト MCP 需要 · リアルタイム',
+                    'med.direct_name': 'ダイレクトディール',
+                    'med.direct_sub': 'PMP · Anthropic, OpenAI, Vercel',
+                    'med.house_name': 'ハウス広告',
+                    'med.house_sub': 'バックフィル · 自社プロモーション',
+                    'med.thirdparty_name': 'サードパーティ ネットワーク',
+                    'med.thirdparty_sub': 'デフォルトでオフ · テスト時に有効化',
+                    'med.ecpm_label': 'ECPM(7日間)',
+                    'med.fill_label': 'フィル率',
+                    'med.blended_ecpm': 'ブレンド eCPM',
+                    'med.overall_fill': '全体フィル',
+                    'med.auctions_24h': '24時間オークション',
+                    'med.benna_lift': 'Benna vs 手動順',
+                    'med.note_strong': 'Benna 自動オーダーは ON です。',
+                    'med.note_body': 'エンジンは MCP コンテキスト(ユーザー意図、ツール、ホスト)を使い、各インプレッションで需要ソースを再ランクして eCPM を最大化します。直近 7 日間:固定ウォーターフォール比 +18%。OFF にすると上の順に固定されます。',
+                    'integ.title': '統合',
+                    'integ.intro': '1 つのパブリッシャー アカウントに 4 つの扉。セットアップする扉をクリックすると、インストール + コードサンプルが下に表示されます。アクティブな扉は直近 7 日間を表示します。「Not started」の扉はセットアップ可能です。',
+                    'integ.about_link': '各扉について →',
+                    'integ.full_ref': '完全リファレンス →',
+                    'integ.step_install': '1. インストール',
+                    'integ.step_mcp_wire': '2. ツールハンドラに組み込む',
+                    'integ.step_js_head': '1. <head> に挿入',
+                    'integ.step_js_slots': '2. 広告スロット div を追加',
+                    'integ.step_ext_render': '2. コンテンツスクリプト / サイドパネルでレンダリング',
+                    'integ.step_ext_react_vue': '2b. React や Vue?',
+                    'integ.step_rest_env': '1. bearer トークンを env に追加',
+                    'integ.step_rest_call': '2. 直接 REST 呼び出し(Discord 例)',
+                    'integ.step_rest_helper': '2b. オプション:プラットフォーム別ヘルパーライブラリ',
+                    'integ.cap_mcp': '開示ラベルを内蔵。サインアップなしのサンドボックスを試す:',
+                    'integ.cap_js_async': '非同期、ファーストペイントへの影響ゼロ。上のパブリッシャー ID はあなたのライブキーで、すでに入力済みです。',
+                    'integ.cap_js_slots': 'Lumi は MutationObserver を介してスロットを自動検出し、SPA ルート変更時に再レンダリングします。CSS 変数でテーマ設定(',
+                    'integ.cap_js_slots_etc': '、など)。',
+                    'integ.cap_ext_mv3': 'Manifest v3 ネイティブ — ',
+                    'integ.cap_ext_csp': 'なし、リモートコードなし。拡張機能の CSP で',
+                    'integ.cap_ext_csp2': 'を許可してください。',
+                    'integ.cap_rest_env': 'サーバーサイド限定 — bearer をブラウザに送らないでください。Vercel / Netlify / Render の環境変数設定を使用してください。',
+                    'integ.cap_rest_helper': 'ヘルパーライブラリはオプション — 広告ペイロードを各プラットフォームのネイティブメッセージ型に整形してくれるので、手動変換が不要になります。',
+                    'verify.title': '統合を検証',
+                    'verify.subtitle': '合成広告リクエストを発火してセットアップが正しく接続されているか確認。各扉のバッジはその扉の実イベントが届くと自動更新されます。',
+                    'verify.not_started': '未開始',
+                    'verify.run_test_header': '合成テストを実行',
+                    'verify.context_label': 'コンテキスト',
+                    'verify.context_placeholder': 'ユーザーが python の traceback をデバッグ中',
+                    'verify.format_label': 'フォーマット',
+                    'verify.format_any': '任意',
+                    'verify.format_image': '画像',
+                    'verify.format_native': 'ネイティブ',
+                    'verify.sandbox': 'サンドボックス',
+                    'verify.sandbox_tip': 'pub_test_demo を使用 — 必ずフィルが返るので、本番前にエンドツーエンドで統合を検証できます。',
+                    'verify.run_btn': '▶ テスト実行',
+                    'theme.header': 'テーマ',
+                    'theme.primary_color': 'プライマリカラー',
+                    'theme.border_radius': '角丸',
+                    'theme.font': 'フォント',
+                    'theme.font_system': 'システム UI',
+                    'theme.font_mono': '等幅',
+                    'theme.copy_css': 'CSS スニペットをコピー',
+                    'theme.paste_into_a': 'スタイルシートの',
+                    'theme.paste_into_b': 'ブロックに貼り付けると、このテーマがアプリ内のすべての Lumi 広告に適用されます。',
+                    'theme.live_preview': 'ライブプレビュー',
+                    'theme.placeholder_status': 'プレースホルダー · テスト実行で実際の広告を表示',
+                    'theme.sponsored_via': 'スポンサー · Boost Boss 経由',
+                    'theme.headline_placeholder': 'ヘッドラインがここに表示されます',
+                    'theme.subtext_placeholder': '合成テストを実行して、テーマ設定で実際の広告を表示してください。',
+                    'theme.cta_try': '無料で試す →',
+                    'ap.title': '広告配置',
+                    'ap.est_income': '推定月収:',
+                    'ap.at_current_volume': ' (現在のボリュームで)',
+                    'ap.intro': '下の各カードはインストール済みの扉がレンダリングできる配置です。任意の配置をオン/オフ — オフにすると、その配置はあなたのオークションから外れます。上の「統合」セクションで選択した扉の配置を表示します。',
+                    'apikeys.title': 'API キーと認証情報',
+                    'apikeys.api_key': 'API キー',
+                    'apikeys.reveal': '表示',
+                    'apikeys.app_id': 'アプリ ID',
+                    'apikeys.mcp_endpoint': 'MCP エンドポイント URL',
+                    'apikeys.regenerate': 'API キーを再生成',
+                    'placements.title': '配置',
+                    'placements.last_30': '過去 30 日間 · グループ化',
+                    'placements.new_btn': '+ 新規配置',
+                    'placements.hint_a': '各行はアプリ内のスロットです。',
+                    'placements.hint_b': 'を',
+                    'placements.hint_c': 'に渡すと、スロット単位の下限価格、フリークエンシーキャップ、レポートが有効になります。',
+                    'placements.intent': 'インテント',
+                    'placements.hint_d': 'が高いほど、Benna がその配置のコンテキストに合う広告をマッチしています。',
+                    'payout.title': '支払い設定',
+                    'payout.intro': 'パブリッシャー残高で少なくとも $25 を稼ぎ、Stripe を接続すると、次の金曜日の cron が自動的に支払います。多くのパブリッシャーは、トラフィックに応じてインストール後 1〜3 週間で初回支払いを受け取ります。',
+                    'payout.next_date': '次回支払日',
+                    'payout.pending': '保留中の支払い',
+                    'payout.min_threshold': '最低しきい値',
+                    'payout.request_btn': '支払いをリクエスト',
+                    'payout.request_tip': '残高が $25 に達し、Stripe Connect がリンクされている毎週金曜日に支払いが自動処理されます',
+                    'payout.connect_stripe': 'Stripe を接続',
+                    'qs.title': 'クイックスタート',
+                    'qs.full_docs': '完全ドキュメント',
+                    'qs.try_playground': 'Playground で試す',
+                    'qs.npm_pkg': 'npm パッケージ',
+                    'common.loading': '読み込み中…',
+                },
+                'ko': {
+                    'chrome.back': 'Lumi SDK로 돌아가기',
+                    'chrome.dashboard': '대시보드',
+                    'chrome.search_actions': '작업 검색',
+                    'chrome.account': '계정',
+                    'chrome.notif_tip': '알림',
+                    'chrome.notif_title': '알림',
+                    'chrome.notif_mark_all': '모두 읽음으로 표시',
+                    'chrome.notif_recent': '최근 7일만 표시',
+                    'chrome.settings_tip': '계정 설정',
+                    'chrome.logout': '로그아웃',
+                    'modal.title': '설정',
+                    'modal.close': '닫기',
+                    'modal.save': '변경 저장',
+                    'nav.account': '계정',
+                    'nav.payouts': '정산',
+                    'nav.api': 'API 및 통합',
+                    'nav.brand': '브랜드 안전',
+                    'nav.notifs': '알림',
+                    'nav.language': '언어',
+                    'nav.security': '보안',
+                    'common.copy': '복사',
+                    'common.show': '표시',
+                    'common.hide': '숨기기',
+                    'common.saved': '✓ 저장됨',
+                    'language.label': '대시보드 언어',
+                    'language.hint': '퍼블리셔 대시보드에만 적용됩니다. boostboss.ai 마케팅 페이지는 상단 내비에 자체 언어 토글이 있습니다. 설정은 즉시 번역되고 다른 표면은 점진적으로 적용됩니다.',
+                    'account.app_name': '앱 이름',
+                    'account.app_name_hint': '광고주와 퍼블리셔 프로필에 표시됩니다.',
+                    'account.email': '연락 이메일',
+                    'account.email_hint': '정산 및 계정 알림에 사용됩니다.',
+                    'account.dev_id': '개발자 ID',
+                    'account.revenue': '수익 분배',
+                    'account.revenue_value': '귀하 85% · Boost Boss 15%',
+                    'account.revenue_hint': '인벤토리의 모든 정산 노출에 적용됩니다.',
+                    'payouts.how_title': '정산 작동 방식',
+                    'payouts.how_body_html': '퍼블리셔 적립금으로 최소 <strong>$25</strong>을 벌고 Stripe를 연결하면, 다음 금요일 cron이 자동으로 정산해 드립니다 — 수동 요청 불필요.',
+                    'payouts.threshold': '정산 임계값',
+                    'payouts.threshold_value': '$25.00 최소',
+                    'payouts.schedule': '일정',
+                    'payouts.schedule_value': '매주 · 매주 금요일',
+                    'payouts.manage_btn': 'Stripe 연결 및 정산 관리 →',
+                    'payouts.manage_hint': '대시보드의 전체 정산 설정 패널을 엽니다.',
+                    'api.key': 'Lumi SDK API 키',
+                    'api.key_hint': '통합에서 오는 모든 광고 요청을 인증합니다. 비밀로 유지하세요.',
+                    'api.app_id': '앱 ID',
+                    'api.mcp_endpoint': 'MCP 엔드포인트',
+                    'api.regen_title': 'API 키 재생성',
+                    'api.regen_hint': '새 키를 발급하고 이전 키를 즉시 무효화합니다. 직후 통합을 업데이트하세요.',
+                    'api.regen_btn': '키 재생성',
+                    'brand.cats_label': '차단된 광고주 카테고리',
+                    'brand.cats_hint': '이 카테고리의 광고는 어떤 인벤토리에서도 절대 노출되지 않습니다.',
+                    'brand.doms_label': '차단된 광고주 도메인',
+                    'brand.doms_hint': '한 줄에 도메인 하나. 광고주 도메인이 일치하는 광고는 인벤토리에서 차단됩니다.',
+                    'brand.save_btn': '브랜드 안전 저장',
+                    'brand.iab1': '예술 및 엔터테인먼트',
+                    'brand.iab3': '비즈니스',
+                    'brand.iab4': '커리어',
+                    'brand.iab5': '교육',
+                    'brand.iab7': '건강 및 피트니스',
+                    'brand.iab13': '개인 금융',
+                    'brand.iab17': '스포츠',
+                    'brand.iab19': '기술',
+                    'brand.iab20': '여행',
+                    'brand.iab22': '쇼핑',
+                    'notifs.intro': '다음 경우 이메일 알림…',
+                    'notifs.payout_sent_title': '정산이 전송됨',
+                    'notifs.payout_sent_desc': '정산이 Stripe 계정에 도달할 때마다 확인 이메일이 전송됩니다.',
+                    'notifs.payout_failed_title': '정산 실패',
+                    'notifs.payout_failed_desc': '정산이 완료되지 않으면 빠르게 조치할 수 있도록 알립니다.',
+                    'notifs.monthly_title': '월간 수익 요약',
+                    'notifs.monthly_desc': '월 1회 노출수, 채움률, 수익의 요약.',
+                    'notifs.product_title': '제품 업데이트',
+                    'notifs.product_desc': 'Boost Boss의 새 기능과 광고 형식에 대한 가끔의 소식.',
+                    'security.cur_pw': '현재 비밀번호',
+                    'security.new_pw': '새 비밀번호',
+                    'security.new_pw_hint': '8자 이상.',
+                    'security.confirm_pw': '새 비밀번호 확인',
+                    'security.change_btn': '비밀번호 변경',
+                    'security.changing': '변경 중…',
+                    'security.err_required': '현재 비밀번호와 새 비밀번호를 입력하세요.',
+                    'security.err_short': '새 비밀번호는 8자 이상이어야 합니다.',
+                    'security.err_mismatch': '새 비밀번호가 일치하지 않습니다.',
+                    'security.ok_changed': '비밀번호가 성공적으로 변경되었습니다.',
+                    'security.err_generic': '비밀번호를 변경할 수 없습니다',
+                    'toast.copied': '복사됨',
+                    'toast.brand_saved': '브랜드 안전 저장됨',
+                    'toast.pw_changed': '비밀번호 변경됨',
+                    'dash.title': '퍼블리셔 대시보드',
+                    'dash.view': '보기:',
+                    'dash.filter_all': '모든 통합',
+                    'dash.filter_mcp': 'Lumi SDK for MCP',
+                    'dash.filter_js': 'Lumi SDK 스크립트 태그',
+                    'dash.filter_npm': 'Lumi SDK 브라우저 확장',
+                    'dash.filter_rest': 'Lumi API for Bots',
+                    'stats.earnings': '총 수익',
+                    'stats.impressions': '노출',
+                    'stats.your_share': '귀하의 분배',
+                    'stats.rpm': 'RPM',
+                    'stats.trend_zero': '↑ 지난 달 대비 0%',
+                    'chart.revenue_14d': '최근 14일 수익',
+                    'med.title': '미디에이션 & 워터폴',
+                    'med.subtitle': '각 소스가 노출마다 1차 가격으로 경쟁합니다. Benna가 입찰마다 재정렬합니다.',
+                    'med.auto_tip': 'Benna가 수요 소스 순서를 선택합니다',
+                    'med.auto_on': 'BENNA 자동 정렬 · 켜짐',
+                    'med.auto_off': 'BENNA 자동 정렬 · 꺼짐',
+                    'med.bbx_name': 'Boost Boss Exchange',
+                    'med.bbx_sub': '직접 MCP 수요 · 실시간',
+                    'med.direct_name': '직접 거래',
+                    'med.direct_sub': 'PMP · Anthropic, OpenAI, Vercel',
+                    'med.house_name': '하우스 광고',
+                    'med.house_sub': '백필 · 자체 프로모션',
+                    'med.thirdparty_name': '서드파티 네트워크',
+                    'med.thirdparty_sub': '기본 비활성 · 테스트하려면 활성화',
+                    'med.ecpm_label': 'ECPM(7일)',
+                    'med.fill_label': '채움률',
+                    'med.blended_ecpm': '혼합 eCPM',
+                    'med.overall_fill': '전체 채움',
+                    'med.auctions_24h': '24시간 경매',
+                    'med.benna_lift': 'Benna vs 수동 정렬',
+                    'med.note_strong': 'Benna 자동 정렬이 켜져 있습니다.',
+                    'med.note_body': '엔진이 MCP 컨텍스트(사용자 의도, 도구, 호스트)를 사용하여 각 노출에서 수요 소스를 재정렬해 eCPM을 최대화합니다. 최근 7일: 고정 워터폴 대비 +18%. 끄면 위 순서가 고정됩니다.',
+                    'integ.title': '통합',
+                    'integ.intro': '하나의 퍼블리셔 계정, 네 개의 문. 설정할 문을 클릭하면 설치 + 코드 샘플이 아래에 표시됩니다. 활성 문은 최근 7일을 표시합니다. "Not started" 문은 설정할 준비가 되어 있습니다.',
+                    'integ.about_link': '각 문에 대하여 →',
+                    'integ.full_ref': '전체 참조 →',
+                    'integ.step_install': '1. 설치',
+                    'integ.step_mcp_wire': '2. 도구 핸들러에 연결',
+                    'integ.step_js_head': '1. <head>에 추가',
+                    'integ.step_js_slots': '2. 광고 슬롯 div 추가',
+                    'integ.step_ext_render': '2. 콘텐츠 스크립트 / 사이드패널에서 렌더링',
+                    'integ.step_ext_react_vue': '2b. React 또는 Vue?',
+                    'integ.step_rest_env': '1. bearer 토큰을 환경 변수에 추가',
+                    'integ.step_rest_call': '2. 직접 REST 호출(Discord 예시)',
+                    'integ.step_rest_helper': '2b. 선택: 플랫폼별 헬퍼 라이브러리',
+                    'integ.cap_mcp': '공시 레이블이 내장되어 있습니다. 가입 없이 샌드박스 시도:',
+                    'integ.cap_js_async': '비동기, 첫 페인트 영향 없음. 위 퍼블리셔 ID는 실제 키이며 이미 채워져 있습니다.',
+                    'integ.cap_js_slots': 'Lumi는 MutationObserver를 통해 슬롯을 자동 발견하고 SPA 라우트 변경 시 다시 렌더링합니다. CSS 변수로 테마 설정(',
+                    'integ.cap_js_slots_etc': ', 등).',
+                    'integ.cap_ext_mv3': 'Manifest v3 네이티브 — ',
+                    'integ.cap_ext_csp': '없음, 원격 코드 없음. 확장의 CSP에서',
+                    'integ.cap_ext_csp2': '를 허용하세요.',
+                    'integ.cap_rest_env': '서버 사이드 전용 — bearer를 브라우저에 절대 전달하지 마세요. Vercel / Netlify / Render 환경 변수 설정을 사용하세요.',
+                    'integ.cap_rest_helper': '헬퍼 라이브러리는 선택 사항입니다 — 광고 페이로드를 각 플랫폼의 네이티브 메시지 타입으로 포맷해 주므로 수동 변환이 필요 없습니다.',
+                    'verify.title': '통합 확인',
+                    'verify.subtitle': '합성 광고 요청을 발생시켜 설정이 올바르게 연결되었는지 확인하세요. 각 문의 배지는 해당 문의 실제 이벤트가 도착하면 자동 업데이트됩니다.',
+                    'verify.not_started': '시작 안함',
+                    'verify.run_test_header': '합성 테스트 실행',
+                    'verify.context_label': '컨텍스트',
+                    'verify.context_placeholder': '사용자가 python traceback을 디버깅 중',
+                    'verify.format_label': '형식',
+                    'verify.format_any': '모두',
+                    'verify.format_image': '이미지',
+                    'verify.format_native': '네이티브',
+                    'verify.sandbox': '샌드박스',
+                    'verify.sandbox_tip': 'pub_test_demo 사용 — 항상 채움 반환, 라이브 전 통합을 엔드투엔드 검증할 수 있습니다.',
+                    'verify.run_btn': '▶ 테스트 실행',
+                    'theme.header': '테마',
+                    'theme.primary_color': '기본 색상',
+                    'theme.border_radius': '모서리 반경',
+                    'theme.font': '폰트',
+                    'theme.font_system': '시스템 UI',
+                    'theme.font_mono': '고정폭',
+                    'theme.copy_css': 'CSS 스니펫 복사',
+                    'theme.paste_into_a': '스타일시트의',
+                    'theme.paste_into_b': '블록에 붙여넣으면 앱의 모든 Lumi 광고에 이 테마가 적용됩니다.',
+                    'theme.live_preview': '실시간 미리보기',
+                    'theme.placeholder_status': '플레이스홀더 · 테스트를 실행하여 실제 광고 보기',
+                    'theme.sponsored_via': '협찬 · Boost Boss 통해',
+                    'theme.headline_placeholder': '헤드라인이 여기에 표시됩니다',
+                    'theme.subtext_placeholder': '합성 테스트를 실행하여 테마 설정으로 실제 광고를 확인하세요.',
+                    'theme.cta_try': '무료 체험 →',
+                    'ap.title': '광고 위치',
+                    'ap.est_income': '예상 월 수입:',
+                    'ap.at_current_volume': ' (현재 볼륨 기준)',
+                    'ap.intro': '아래 각 카드는 설치된 문이 렌더링할 수 있는 위치입니다. 어느 것이든 켜고 끄세요 — 끄면 경매에서 제외됩니다. 위 "통합" 섹션에서 선택한 문의 위치를 표시합니다.',
+                    'apikeys.title': 'API 키 및 자격 증명',
+                    'apikeys.api_key': 'API 키',
+                    'apikeys.reveal': '표시',
+                    'apikeys.app_id': '앱 ID',
+                    'apikeys.mcp_endpoint': 'MCP 엔드포인트 URL',
+                    'apikeys.regenerate': 'API 키 재생성',
+                    'placements.title': '위치',
+                    'placements.last_30': '최근 30일 · 그룹화 기준',
+                    'placements.new_btn': '+ 새 위치',
+                    'placements.hint_a': '각 행은 앱 내의 슬롯입니다.',
+                    'placements.hint_b': '를',
+                    'placements.hint_c': '에 전달하면 슬롯별 하한가, 빈도 제한, 리포트가 활성화됩니다. 더 높은',
+                    'placements.intent': '의도',
+                    'placements.hint_d': '는 Benna가 해당 위치의 컨텍스트에 맞는 광고를 매칭하고 있음을 의미합니다.',
+                    'payout.title': '정산 설정',
+                    'payout.intro': '퍼블리셔 적립금으로 최소 $25를 벌고 Stripe를 연결하면 다음 금요일 cron이 자동으로 정산합니다. 대부분 퍼블리셔는 트래픽에 따라 설치 후 1–3주 안에 첫 정산을 받습니다.',
+                    'payout.next_date': '다음 정산일',
+                    'payout.pending': '대기 중인 정산',
+                    'payout.min_threshold': '최소 임계값',
+                    'payout.request_btn': '정산 요청',
+                    'payout.request_tip': '잔액이 $25에 도달하고 Stripe Connect가 연결되면 매주 금요일 자동으로 정산됩니다',
+                    'payout.connect_stripe': 'Stripe 연결',
+                    'qs.title': '빠른 시작',
+                    'qs.full_docs': '전체 문서',
+                    'qs.try_playground': 'Playground에서 시도',
+                    'qs.npm_pkg': 'npm 패키지',
+                    'common.loading': '로딩 중…',
+                },
+                'vi': {
+                    'chrome.back': 'Quay lại Lumi SDK',
+                    'chrome.dashboard': 'Dashboard',
+                    'chrome.search_actions': 'Tìm hành động',
+                    'chrome.account': 'Tài khoản',
+                    'chrome.notif_tip': 'Thông báo',
+                    'chrome.notif_title': 'Thông báo',
+                    'chrome.notif_mark_all': 'Đánh dấu tất cả đã đọc',
+                    'chrome.notif_recent': 'Chỉ hiển thị 7 ngày gần nhất',
+                    'chrome.settings_tip': 'Cài đặt tài khoản',
+                    'chrome.logout': 'Đăng xuất',
+                    'modal.title': 'Cài đặt',
+                    'modal.close': 'Đóng',
+                    'modal.save': 'Lưu thay đổi',
+                    'nav.account': 'Tài khoản',
+                    'nav.payouts': 'Thanh toán',
+                    'nav.api': 'API & Tích hợp',
+                    'nav.brand': 'An toàn thương hiệu',
+                    'nav.notifs': 'Thông báo',
+                    'nav.language': 'Ngôn ngữ',
+                    'nav.security': 'Bảo mật',
+                    'common.copy': 'Sao chép',
+                    'common.show': 'Hiện',
+                    'common.hide': 'Ẩn',
+                    'common.saved': '✓ Đã lưu',
+                    'language.label': 'Ngôn ngữ dashboard',
+                    'language.hint': 'Chỉ áp dụng cho dashboard publisher. Trang marketing boostboss.ai có toggle ngôn ngữ riêng ở top nav. Settings dịch ngay, các bề mặt khác đang triển khai dần.',
+                    'account.app_name': 'Tên ứng dụng',
+                    'account.app_name_hint': 'Hiển thị cho nhà quảng cáo và trên hồ sơ publisher của bạn.',
+                    'account.email': 'Email liên hệ',
+                    'account.email_hint': 'Dùng cho thanh toán và thông báo tài khoản.',
+                    'account.dev_id': 'ID nhà phát triển',
+                    'account.revenue': 'Chia sẻ doanh thu',
+                    'account.revenue_value': 'Bạn giữ 85% · Boost Boss lấy 15%',
+                    'account.revenue_hint': 'Áp dụng cho mọi impression đã thanh toán trên kho của bạn.',
+                    'payouts.how_title': 'Thanh toán hoạt động thế nào',
+                    'payouts.how_body_html': 'Kiếm tối thiểu <strong>$25</strong> trong tích lũy publisher, kết nối Stripe, và cron thứ Sáu kế tiếp sẽ thanh toán tự động — không cần yêu cầu thủ công.',
+                    'payouts.threshold': 'Ngưỡng thanh toán',
+                    'payouts.threshold_value': 'Tối thiểu $25.00',
+                    'payouts.schedule': 'Lịch trình',
+                    'payouts.schedule_value': 'Hàng tuần · mỗi thứ Sáu',
+                    'payouts.manage_btn': 'Quản lý kết nối Stripe & thanh toán →',
+                    'payouts.manage_hint': 'Mở bảng Cài đặt Thanh toán đầy đủ trên dashboard.',
+                    'api.key': 'Khóa API Lumi SDK',
+                    'api.key_hint': 'Xác thực mọi yêu cầu quảng cáo từ tích hợp của bạn. Giữ bí mật.',
+                    'api.app_id': 'App ID',
+                    'api.mcp_endpoint': 'MCP endpoint',
+                    'api.regen_title': 'Tạo lại khóa API',
+                    'api.regen_hint': 'Phát hành khóa mới và lập tức vô hiệu hóa khóa cũ. Cập nhật tích hợp ngay sau đó.',
+                    'api.regen_btn': 'Tạo lại khóa',
+                    'brand.cats_label': 'Danh mục quảng cáo bị chặn',
+                    'brand.cats_hint': 'Quảng cáo của các danh mục này sẽ không bao giờ phục vụ trên bất kỳ kho nào của bạn.',
+                    'brand.doms_label': 'Tên miền nhà quảng cáo bị chặn',
+                    'brand.doms_hint': 'Mỗi dòng một tên miền. Bất kỳ quảng cáo nào có tên miền nhà quảng cáo trùng khớp sẽ bị chặn.',
+                    'brand.save_btn': 'Lưu an toàn thương hiệu',
+                    'brand.iab1': 'Nghệ thuật & Giải trí',
+                    'brand.iab3': 'Kinh doanh',
+                    'brand.iab4': 'Nghề nghiệp',
+                    'brand.iab5': 'Giáo dục',
+                    'brand.iab7': 'Sức khỏe & Thể hình',
+                    'brand.iab13': 'Tài chính cá nhân',
+                    'brand.iab17': 'Thể thao',
+                    'brand.iab19': 'Công nghệ',
+                    'brand.iab20': 'Du lịch',
+                    'brand.iab22': 'Mua sắm',
+                    'notifs.intro': 'Gửi email cho tôi khi…',
+                    'notifs.payout_sent_title': 'Đã gửi thanh toán',
+                    'notifs.payout_sent_desc': 'Email xác nhận mỗi lần thanh toán đến tài khoản Stripe của bạn.',
+                    'notifs.payout_failed_title': 'Thanh toán thất bại',
+                    'notifs.payout_failed_desc': 'Cảnh báo nếu thanh toán không thể hoàn tất để bạn xử lý nhanh.',
+                    'notifs.monthly_title': 'Tóm tắt doanh thu hàng tháng',
+                    'notifs.monthly_desc': 'Bản tóm tắt impressions, fill rate và doanh thu hàng tháng.',
+                    'notifs.product_title': 'Cập nhật sản phẩm',
+                    'notifs.product_desc': 'Tin tức không thường xuyên về tính năng mới và định dạng quảng cáo của Boost Boss.',
+                    'security.cur_pw': 'Mật khẩu hiện tại',
+                    'security.new_pw': 'Mật khẩu mới',
+                    'security.new_pw_hint': 'Ít nhất 8 ký tự.',
+                    'security.confirm_pw': 'Xác nhận mật khẩu mới',
+                    'security.change_btn': 'Đổi mật khẩu',
+                    'security.changing': 'Đang đổi…',
+                    'security.err_required': 'Nhập mật khẩu hiện tại và mật khẩu mới.',
+                    'security.err_short': 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+                    'security.err_mismatch': 'Mật khẩu mới không khớp.',
+                    'security.ok_changed': 'Đã đổi mật khẩu thành công.',
+                    'security.err_generic': 'Không thể đổi mật khẩu',
+                    'toast.copied': 'Đã sao chép',
+                    'toast.brand_saved': 'Đã lưu an toàn thương hiệu',
+                    'toast.pw_changed': 'Đã đổi mật khẩu',
+                    'dash.title': 'Dashboard Publisher',
+                    'dash.view': 'Xem:',
+                    'dash.filter_all': 'Tất cả tích hợp',
+                    'dash.filter_mcp': 'Lumi SDK for MCP',
+                    'dash.filter_js': 'Thẻ script Lumi SDK',
+                    'dash.filter_npm': 'Tiện ích trình duyệt Lumi SDK',
+                    'dash.filter_rest': 'Lumi API for Bots',
+                    'stats.earnings': 'Tổng doanh thu',
+                    'stats.impressions': 'Impression',
+                    'stats.your_share': 'Phần của bạn',
+                    'stats.rpm': 'RPM',
+                    'stats.trend_zero': '↑ 0% so với tháng trước',
+                    'chart.revenue_14d': 'Doanh thu 14 ngày qua',
+                    'med.title': 'Mediation & Waterfall',
+                    'med.subtitle': 'Các nguồn cạnh tranh first-price mỗi impression. Benna re-rank theo từng bid.',
+                    'med.auto_tip': 'Benna chọn thứ tự nguồn nhu cầu',
+                    'med.auto_on': 'BENNA TỰ ĐỘNG SẮP XẾP · BẬT',
+                    'med.auto_off': 'BENNA TỰ ĐỘNG SẮP XẾP · TẮT',
+                    'med.bbx_name': 'Boost Boss Exchange',
+                    'med.bbx_sub': 'nhu cầu MCP trực tiếp · thời gian thực',
+                    'med.direct_name': 'Direct Deals',
+                    'med.direct_sub': 'PMP · Anthropic, OpenAI, Vercel',
+                    'med.house_name': 'Quảng cáo nhà',
+                    'med.house_sub': 'backfill · khuyến mãi của bạn',
+                    'med.thirdparty_name': 'Mạng bên thứ ba',
+                    'med.thirdparty_sub': 'mặc định tắt · bật để thử',
+                    'med.ecpm_label': 'ECPM (7 ngày)',
+                    'med.fill_label': 'TỶ LỆ LẤP',
+                    'med.blended_ecpm': 'eCPM trộn',
+                    'med.overall_fill': 'tỷ lệ lấp tổng thể',
+                    'med.auctions_24h': 'đấu giá / 24h',
+                    'med.benna_lift': 'Benna vs thủ công',
+                    'med.note_strong': 'Benna tự động sắp xếp đang bật.',
+                    'med.note_body': 'Engine re-rank các nguồn nhu cầu trên mỗi impression bằng MCP context (intent người dùng, tool, host) để tối đa eCPM. 7 ngày qua: +18% so với waterfall cố định. Tắt để khóa thứ tự ở trên.',
+                    'integ.title': 'Tích hợp',
+                    'integ.intro': 'Một tài khoản publisher, bốn cánh cửa. Bấm vào cửa bạn đang cài đặt — bước cài + code mẫu hiện bên dưới. Cửa đang hoạt động hiển thị 7 ngày gần nhất; cửa "Not started" sẵn sàng để cài đặt.',
+                    'integ.about_link': 'Về mỗi cửa →',
+                    'integ.full_ref': 'Tham khảo đầy đủ →',
+                    'integ.step_install': '1. Cài đặt',
+                    'integ.step_mcp_wire': '2. Kết nối vào tool handler',
+                    'integ.step_js_head': '1. Thả vào <head>',
+                    'integ.step_js_slots': '2. Thêm slot div nơi muốn hiển thị quảng cáo',
+                    'integ.step_ext_render': '2. Render trong content script / sidepanel',
+                    'integ.step_ext_react_vue': '2b. Dùng React hay Vue?',
+                    'integ.step_rest_env': '1. Thêm bearer token vào env',
+                    'integ.step_rest_call': '2. Gọi REST trực tiếp (ví dụ Discord)',
+                    'integ.step_rest_helper': '2b. Tùy chọn: thư viện helper theo nền tảng',
+                    'integ.cap_mcp': 'tự gắn nhãn công bố. Thử sandbox không cần đăng ký: truyền',
+                    'integ.cap_js_async': 'Bất đồng bộ, không ảnh hưởng first paint. Publisher ID phía trên là khóa live của bạn — đã điền sẵn.',
+                    'integ.cap_js_slots': 'Lumi tự phát hiện slot và re-render khi route SPA thay đổi qua MutationObserver. Theme qua CSS variables (',
+                    'integ.cap_js_slots_etc': ', v.v.).',
+                    'integ.cap_ext_mv3': 'Manifest v3 native — không',
+                    'integ.cap_ext_csp': ', không code từ xa. Cho phép',
+                    'integ.cap_ext_csp2': 'trong CSP của extension.',
+                    'integ.cap_rest_env': 'Chỉ server-side — không bao giờ gửi bearer ra browser. Dùng cài đặt env-var của Vercel / Netlify / Render.',
+                    'integ.cap_rest_helper': 'Helper libraries là tùy chọn — chúng định dạng payload quảng cáo thành kiểu message native của từng nền tảng để bạn không phải làm thủ công.',
+                    'verify.title': 'Xác minh tích hợp',
+                    'verify.subtitle': 'Bắn một synthetic ad request để xác nhận setup đã đúng. Badge mỗi cửa tự cập nhật ngay khi event thật cho cửa đó đến.',
+                    'verify.not_started': 'Chưa bắt đầu',
+                    'verify.run_test_header': 'Chạy synthetic test',
+                    'verify.context_label': 'Context',
+                    'verify.context_placeholder': 'user đang debug python traceback',
+                    'verify.format_label': 'Định dạng',
+                    'verify.format_any': 'Bất kỳ',
+                    'verify.format_image': 'Hình ảnh',
+                    'verify.format_native': 'Native',
+                    'verify.sandbox': 'Sandbox',
+                    'verify.sandbox_tip': 'Dùng pub_test_demo — luôn trả fill để bạn xác minh tích hợp end-to-end trước khi go-live.',
+                    'verify.run_btn': '▶ Chạy Test',
+                    'theme.header': 'Theme',
+                    'theme.primary_color': 'Màu chính',
+                    'theme.border_radius': 'Bo góc',
+                    'theme.font': 'Font',
+                    'theme.font_system': 'System UI',
+                    'theme.font_mono': 'Monospace',
+                    'theme.copy_css': 'Sao chép đoạn CSS',
+                    'theme.paste_into_a': 'Dán vào khối',
+                    'theme.paste_into_b': 'của stylesheet để áp dụng theme này cho tất cả quảng cáo Lumi trong app.',
+                    'theme.live_preview': 'Xem trực tiếp',
+                    'theme.placeholder_status': 'placeholder · chạy test để xem ad thật',
+                    'theme.sponsored_via': 'Được tài trợ · qua Boost Boss',
+                    'theme.headline_placeholder': 'Tiêu đề của bạn xuất hiện ở đây',
+                    'theme.subtext_placeholder': 'Chạy synthetic test để xem ad thật được render với cài đặt theme của bạn.',
+                    'theme.cta_try': 'Dùng thử miễn phí →',
+                    'ap.title': 'Vị trí quảng cáo',
+                    'ap.est_income': 'Thu nhập tháng ước tính:',
+                    'ap.at_current_volume': ' (theo volume hiện tại)',
+                    'ap.intro': 'Mỗi card bên dưới là một placement mà cửa bạn cài có thể render. Bật/tắt bất kỳ — tắt sẽ loại khỏi đấu giá của bạn. Hiển thị placement của cửa được chọn ở mục "Tích hợp" phía trên.',
+                    'apikeys.title': 'Khóa API & Thông tin xác thực',
+                    'apikeys.api_key': 'Khóa API',
+                    'apikeys.reveal': 'Hiện',
+                    'apikeys.app_id': 'App ID',
+                    'apikeys.mcp_endpoint': 'URL MCP Endpoint',
+                    'apikeys.regenerate': 'Tạo lại Khóa API',
+                    'placements.title': 'Vị trí',
+                    'placements.last_30': '30 ngày qua · nhóm theo',
+                    'placements.new_btn': '+ Vị trí mới',
+                    'placements.hint_a': 'Mỗi hàng là một slot trong app. Truyền',
+                    'placements.hint_b': 'cho',
+                    'placements.hint_c': 'để bật floor riêng từng slot, frequency cap và báo cáo.',
+                    'placements.intent': 'Intent',
+                    'placements.hint_d': 'cao hơn có nghĩa Benna đang khớp đúng ad với context của placement đó.',
+                    'payout.title': 'Cài đặt thanh toán',
+                    'payout.intro': 'Kiếm tối thiểu $25 tích lũy publisher, kết nối Stripe, cron thứ Sáu kế tiếp sẽ tự động thanh toán cho bạn. Phần lớn publisher nhận thanh toán đầu tiên trong vòng 1–3 tuần sau cài đặt, tùy traffic.',
+                    'payout.next_date': 'Ngày thanh toán tiếp theo',
+                    'payout.pending': 'Thanh toán chờ xử lý',
+                    'payout.min_threshold': 'Ngưỡng tối thiểu',
+                    'payout.request_btn': 'Yêu cầu thanh toán',
+                    'payout.request_tip': 'Thanh toán xử lý tự động mỗi thứ Sáu khi số dư đạt $25 và Stripe Connect đã liên kết',
+                    'payout.connect_stripe': 'Kết nối Stripe',
+                    'qs.title': 'Bắt đầu nhanh',
+                    'qs.full_docs': 'Tài liệu đầy đủ',
+                    'qs.try_playground': 'Thử trên Playground',
+                    'qs.npm_pkg': 'Gói npm',
+                    'common.loading': 'Đang tải…',
+                },
+            };
             function t(k) {
                 var d = DASH_T[currentLang()] || DASH_T.en;
                 return d[k] || DASH_T.en[k] || k;
@@ -5478,6 +6160,10 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 });
             }
             window.applyDashboardChrome = applyChrome;
+            // Expose t() so other dashboard scripts (waterfall, integrations,
+            // ad placements, etc.) can use the same translation dictionary
+            // when they rebuild content dynamically.
+            window.dashT = t;
             applyChrome();
             // Common IAB advertiser categories the publisher can block.
             // IAB advertiser categories — labels resolved via t() at render
