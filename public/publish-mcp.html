@@ -210,11 +210,11 @@
       <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
     </a>
     <div class="nav-links">
-      <a href="/publish/mcp" class="active">MCP Servers</a>
-      <a href="/publish/ai-apps">AI Apps</a>
-      <a href="/publish/extensions">Extensions</a>
-      <a href="/publish/bots">Bots</a>
-      <a href="/publish/no-code">Custom GPTs</a>
+      <a href="/publish/mcp" class="active" data-i18n="subnav.mcp">MCP Servers</a>
+      <a href="/publish/ai-apps" data-i18n="subnav.ai_apps">AI Apps</a>
+      <a href="/publish/extensions" data-i18n="subnav.extensions">Extensions</a>
+      <a href="/publish/bots" data-i18n="subnav.bots">Bots</a>
+      <a href="/publish/no-code" data-i18n="subnav.no_code">Custom GPTs</a>
     </div>
     <div class="nav-ctas">
       <div class="nav-lang-wrap" id="navLangWrap">
@@ -235,7 +235,7 @@
           <a href="/vi" data-lang="vi">Tiếng Việt</a>
         </div>
       </div>
-      <a class="btn btn-primary" href="/publish/signup">Start earning</a>
+      <a class="btn btn-primary" href="/publish/signup" data-i18n="publish.cta.start_earning">Start earning</a>
     </div>
   </div>
 </nav>
@@ -243,19 +243,19 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow">For MCP Server Developers</span>
-    <h1>Earn revenue every time your <span class="grad">MCP tool</span> is called.</h1>
-    <p class="sub">Boost Boss is the only ad network built natively into the Model Context Protocol. Your server adds three lines. Claude Desktop, Cursor, Cline, and every MCP host renders the rest.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
+    <span class="eyebrow" data-i18n="publish.mcp.hero_eyebrow">For MCP Server Developers</span>
+    <h1 data-i18n="publish.mcp.hero_h1_html" data-i18n-html>Earn revenue every time your <span class="grad">MCP tool</span> is called.</h1>
+    <p class="sub" data-i18n="publish.mcp.hero_sub">Boost Boss is the only ad network built natively into the Model Context Protocol. Your server adds three lines. Claude Desktop, Cursor, Cline, and every MCP host renders the rest.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.mcp.hero_cta">Start as a publisher →</a>
   </div>
 </section>
 
 <!-- SEE IT APPEAR -->
 <section class="see-it">
   <div class="wrap">
-    <span class="section-eyebrow">See it appear</span>
-    <h2 class="section-h">When your tool runs, your output renders first.<br>The sponsored block slides in after.</h2>
-    <p class="section-sub">No interruption. No latency. The user always gets your tool result before they see the ad.</p>
+    <span class="section-eyebrow" data-i18n="publish.mcp.see_eyebrow">See it appear</span>
+    <h2 class="section-h" data-i18n="publish.mcp.see_h2_html" data-i18n-html>When your tool runs, your output renders first.<br>The sponsored block slides in after.</h2>
+    <p class="section-sub" data-i18n="publish.mcp.see_sub">No interruption. No latency. The user always gets your tool result before they see the ad.</p>
     <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored block slides into a Claude Desktop tool response">
       <!-- Phase G: real screenshot if /assets/publish/mcp-hero.png exists; SVG fallback otherwise. -->
       <img class="hero-mockup-real" src="/assets/publish/mcp-hero.png"
@@ -342,7 +342,7 @@
           <text x="646" y="357" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
         </g>
       </svg>
-      <div class="stage-caption">The sponsored block is a structured payload Boost Boss returns alongside your tool result. The host (Claude Desktop, Cursor, Cline) renders it natively — same chrome as the rest of the response, with a clear sponsorship label.</div>
+      <div class="stage-caption" data-i18n="publish.mcp.see_caption">The sponsored block is a structured payload Boost Boss returns alongside your tool result. The host (Claude Desktop, Cursor, Cline) renders it natively — same chrome as the rest of the response, with a clear sponsorship label.</div>
     </div>
   </div>
 </section>
@@ -350,23 +350,23 @@
 <!-- HOW IT WORKS -->
 <section>
   <div class="wrap">
-    <span class="section-eyebrow">How it works</span>
-    <h2 class="section-h">From <code>npm install</code> to first impression in under 10 minutes.</h2>
+    <span class="section-eyebrow" data-i18n="publish.mcp.how_eyebrow">How it works</span>
+    <h2 class="section-h" data-i18n="publish.mcp.how_h2_html" data-i18n-html>From <code>npm install</code> to first impression in under 10 minutes.</h2>
     <div class="how-grid">
       <div class="how-step">
         <div class="num">1</div>
-        <h4>Connect your MCP server</h4>
-        <p>Add three lines: install <code>@boostbossai/lumi-mcp</code>, init with your publisher ID, attach to a tool handler.</p>
+        <h4 data-i18n="publish.mcp.how1_h4">Connect your MCP server</h4>
+        <p data-i18n="publish.mcp.how1_p_html" data-i18n-html>Add three lines: install <code>@boostbossai/lumi-mcp</code>, init with your publisher ID, attach to a tool handler.</p>
       </div>
       <div class="how-step">
         <div class="num">2</div>
-        <h4>Tools keep working</h4>
-        <p>Your existing tool output is unchanged. Boost Boss appends a sponsored block — never replaces, never delays.</p>
+        <h4 data-i18n="publish.mcp.how2_h4">Tools keep working</h4>
+        <p data-i18n="publish.mcp.how2_p">Your existing tool output is unchanged. Boost Boss appends a sponsored block — never replaces, never delays.</p>
       </div>
       <div class="how-step">
         <div class="num">3</div>
-        <h4>Earn per call</h4>
-        <p>Boost Boss attaches relevant ads to tool responses. You earn on every impression and every click.</p>
+        <h4 data-i18n="publish.mcp.how3_h4">Earn per call</h4>
+        <p data-i18n="publish.mcp.how3_p">Boost Boss attaches relevant ads to tool responses. You earn on every impression and every click.</p>
       </div>
     </div>
   </div>
@@ -375,15 +375,15 @@
 <!-- INTEGRATION SNIPPET -->
 <section>
   <div class="wrap">
-    <span class="section-eyebrow">Integration snippet</span>
-    <h2 class="section-h">Three lines, one tool handler.</h2>
+    <span class="section-eyebrow" data-i18n="publish.mcp.snippet_eyebrow">Integration snippet</span>
+    <h2 class="section-h" data-i18n="publish.mcp.snippet_h2">Three lines, one tool handler.</h2>
 <pre class="code-block"><span class="kw">import</span> { LumiMCP } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-mcp'</span>;
 <span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">LumiMCP</span>({ publisherId: <span class="str">'pub_xxx'</span> });
 
 <span class="cm">// Inside any existing tool handler:</span>
 <span class="kw">const</span> ad = <span class="kw">await</span> lumi.<span class="fn">fetchAd</span>({ context: request.params.name });
 <span class="kw">return</span> { content: [...result, ad.<span class="fn">toMCPBlock</span>()] };</pre>
-    <p class="code-caption">That's it. The MCP host renders the ad payload natively. <a href="/docs/mcp">Full docs →</a></p>
+    <p class="code-caption" data-i18n="publish.mcp.snippet_caption_html" data-i18n-html>That's it. The MCP host renders the ad payload natively. <a href="/docs/mcp">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: Claude Desktop with sponsored block in tool response -->
     <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered inside a Claude Desktop tool response">
@@ -458,7 +458,7 @@
         <rect x="148" y="408" width="544" height="22" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
         <text x="160" y="423" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Reply to Claude…</text>
       </svg>
-      <div class="shot-caption">Real render. The sponsored block ships as a structured payload — the host (Claude Desktop, Cursor, Cline) draws the chrome.</div>
+      <div class="shot-caption" data-i18n="publish.mcp.snippet_shot_caption">Real render. The sponsored block ships as a structured payload — the host (Claude Desktop, Cursor, Cline) draws the chrome.</div>
     </div>
   </div>
 </section>
@@ -466,13 +466,13 @@
 <!-- WHO THIS IS FOR -->
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow">Who this is for</span>
-    <h2 class="section-h">If any of these sound like you, MCP is your path.</h2>
+    <span class="section-eyebrow" data-i18n="publish.mcp.who_eyebrow">Who this is for</span>
+    <h2 class="section-h" data-i18n="publish.mcp.who_h2">If any of these sound like you, MCP is your path.</h2>
     <ul>
-      <li><span class="check">✓</span><span>You ship an MCP server listed on <strong>mcp.so</strong>, <strong>Smithery</strong>, <strong>Glama</strong>, or <strong>PulseMCP</strong>.</span></li>
-      <li><span class="check">✓</span><span>Your server is called by users of Claude Desktop, Cursor, Cline, Continue, Zed AI, or Windsurf.</span></li>
-      <li><span class="check">✓</span><span>You'd like a real revenue stream beyond GitHub Sponsors.</span></li>
-      <li><span class="check">✓</span><span>You build for developer audiences and want premium CPMs that match the audience value.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li1_html" data-i18n-html>You ship an MCP server listed on <strong>mcp.so</strong>, <strong>Smithery</strong>, <strong>Glama</strong>, or <strong>PulseMCP</strong>.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li2">Your server is called by users of Claude Desktop, Cursor, Cline, Continue, Zed AI, or Windsurf.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li3">You'd like a real revenue stream beyond GitHub Sponsors.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li4">You build for developer audiences and want premium CPMs that match the audience value.</span></li>
     </ul>
   </div>
 </section>
@@ -480,15 +480,15 @@
 <!-- REVENUE EXAMPLE -->
 <section>
   <div class="wrap">
-    <span class="section-eyebrow">Revenue example</span>
-    <h2 class="section-h">What "earning per call" actually looks like.</h2>
+    <span class="section-eyebrow" data-i18n="publish.mcp.rev_eyebrow">Revenue example</span>
+    <h2 class="section-h" data-i18n="publish.mcp.rev_h2">What "earning per call" actually looks like.</h2>
     <div class="revenue-card">
-      <span class="label">Illustrative — not a guarantee</span>
-      <div class="rev-row"><span>Daily tool calls</span><span class="v">5,000</span></div>
-      <div class="rev-row"><span>Ad impressions per day (1 in 3 calls)</span><span class="v">~1,500</span></div>
-      <div class="rev-row"><span>Average CPM (developer audience premium)</span><span class="v">$12</span></div>
-      <div class="rev-row"><span>Monthly publisher revenue</span><span class="v">~$540</span></div>
-      <p class="disclaimer">Numbers are illustrative for a moderately active MCP server. Actual revenue depends on tool-call volume, fill rate, advertiser demand, and your audience composition. CPMs vary; developer-tooling traffic typically sits at the high end.</p>
+      <span class="label" data-i18n="publish.mcp.rev_label">Illustrative — not a guarantee</span>
+      <div class="rev-row"><span data-i18n="publish.mcp.rev_row1">Daily tool calls</span><span class="v">5,000</span></div>
+      <div class="rev-row"><span data-i18n="publish.mcp.rev_row2">Ad impressions per day (1 in 3 calls)</span><span class="v">~1,500</span></div>
+      <div class="rev-row"><span data-i18n="publish.mcp.rev_row3">Average CPM (developer audience premium)</span><span class="v">$12</span></div>
+      <div class="rev-row"><span data-i18n="publish.mcp.rev_row4">Monthly publisher revenue</span><span class="v">~$540</span></div>
+      <p class="disclaimer" data-i18n="publish.mcp.rev_disclaimer">Numbers are illustrative for a moderately active MCP server. Actual revenue depends on tool-call volume, fill rate, advertiser demand, and your audience composition. CPMs vary; developer-tooling traffic typically sits at the high end.</p>
     </div>
   </div>
 </section>
@@ -496,28 +496,28 @@
 <!-- FAQ -->
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow">Frequently asked</span>
-    <h2 class="section-h">The questions every MCP dev asks first.</h2>
+    <span class="section-eyebrow" data-i18n="publish.mcp.faq_eyebrow">Frequently asked</span>
+    <h2 class="section-h" data-i18n="publish.mcp.faq_h2">The questions every MCP dev asks first.</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <h4>Will ads break my MCP integration?</h4>
-        <p>No. Ads are appended, not substituted. Your tool's primary output is unchanged — the host renders your tool result first, the sponsored block second.</p>
+        <h4 data-i18n="publish.mcp.faq1_q">Will ads break my MCP integration?</h4>
+        <p data-i18n="publish.mcp.faq1_a">No. Ads are appended, not substituted. Your tool's primary output is unchanged — the host renders your tool result first, the sponsored block second.</p>
       </div>
       <div class="faq-item">
-        <h4>What does an MCP ad look like to the user?</h4>
-        <p>A clearly labeled sponsored block in the tool response, rendered by the host (Claude Desktop, Cursor, etc.). The user always sees both the answer and the disclosure — there's no hidden injection.</p>
+        <h4 data-i18n="publish.mcp.faq2_q">What does an MCP ad look like to the user?</h4>
+        <p data-i18n="publish.mcp.faq2_a">A clearly labeled sponsored block in the tool response, rendered by the host (Claude Desktop, Cursor, etc.). The user always sees both the answer and the disclosure — there's no hidden injection.</p>
       </div>
       <div class="faq-item">
-        <h4>Can I block specific advertisers?</h4>
-        <p>Yes. Category-level blocks (e.g., no recruiting ads) and domain-level blocks (e.g., never these specific competitors) — all controlled from your publisher dashboard.</p>
+        <h4 data-i18n="publish.mcp.faq3_q">Can I block specific advertisers?</h4>
+        <p data-i18n="publish.mcp.faq3_a">Yes. Category-level blocks (e.g., no recruiting ads) and domain-level blocks (e.g., never these specific competitors) — all controlled from your publisher dashboard.</p>
       </div>
       <div class="faq-item">
-        <h4>Does this work with stdio AND HTTP transports?</h4>
-        <p>Yes — both transports are supported. <code>@boostbossai/lumi-mcp</code> auto-detects which one your server uses; the SDK works identically across both.</p>
+        <h4 data-i18n="publish.mcp.faq4_q">Does this work with stdio AND HTTP transports?</h4>
+        <p data-i18n="publish.mcp.faq4_a_html" data-i18n-html>Yes — both transports are supported. <code>@boostbossai/lumi-mcp</code> auto-detects which one your server uses; the SDK works identically across both.</p>
       </div>
       <div class="faq-item">
-        <h4>Is this approved by Anthropic?</h4>
-        <p>Boost Boss operates within MCP's public protocol — we don't require Anthropic's approval. We follow MCP disclosure norms strictly: every sponsored block is labeled, never disguised as tool output.</p>
+        <h4 data-i18n="publish.mcp.faq5_q">Is this approved by Anthropic?</h4>
+        <p data-i18n="publish.mcp.faq5_a">Boost Boss operates within MCP's public protocol — we don't require Anthropic's approval. We follow MCP disclosure norms strictly: every sponsored block is labeled, never disguised as tool output.</p>
       </div>
     </div>
   </div>
@@ -526,10 +526,10 @@
 <!-- CTA FOOTER -->
 <section class="cta-footer">
   <div class="wrap">
-    <h2>Ready to monetize your MCP server?</h2>
-    <p>Three lines. Ten minutes. Weekly payouts.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup">Apply as a Founding Publisher →</a>
-    <div><span class="perk">⚡ First 20 MCP publishers get 90/10 revshare for 6 months</span></div>
+    <h2 data-i18n="publish.mcp.cta_h2">Ready to monetize your MCP server?</h2>
+    <p data-i18n="publish.mcp.cta_p">Three lines. Ten minutes. Weekly payouts.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.mcp.cta_btn">Apply as a Founding Publisher →</a>
+    <div><span class="perk" data-i18n="publish.mcp.cta_perk">⚡ First 20 MCP publishers get 90/10 revshare for 6 months</span></div>
   </div>
 </section>
 
@@ -541,15 +541,15 @@
       <span class="brand-name">Boost Boss</span>
     </a>
     <div class="footer-links">
-      <a href="/publish">Publishers</a>
+      <a href="/publish" data-i18n="pubfoot.publishers">Publishers</a>
       <a href="/publish/ai-apps">AI Apps</a>
       <a href="/publish/extensions">Extensions</a>
       <a href="/publish/bots">Bots</a>
       <a href="/publish/no-code">Custom GPTs</a>
-      <a href="/docs">Docs</a>
-      <a href="/trust">Trust</a>
+      <a href="/docs" data-i18n="pubfoot.docs">Docs</a>
+      <a href="/trust" data-i18n="pubfoot.trust">Trust</a>
     </div>
-    <div class="footer-copy">© 2026 Boost Boss</div>
+    <div class="footer-copy" data-i18n="pubfoot.copy">© 2026 Boost Boss</div>
   </div>
 </footer>
 <script>
