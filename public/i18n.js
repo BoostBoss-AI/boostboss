@@ -5,7 +5,7 @@
   'use strict';
 
   var DICT_VERSION = 'bb-20260421';
-  var SUPPORTED   = ['en', 'zh', 'ja', 'ko', 'vi'];
+  var SUPPORTED   = ['en', 'zh', 'zh-TW', 'ja', 'ko', 'vi'];
   var DEFAULT     = 'en';
 
   // Parse first path segment, e.g. "/en/foo" -> "en"

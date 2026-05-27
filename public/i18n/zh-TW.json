@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "publishers": "開發者",
+    "bbx": "BBX",
+    "live_demo": "線上演示 ↗",
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+  },
+  "hero": {
+    "badge": "基於 Model Context Protocol 已上線",
+    "h1_html": "為 <span class=\"accent-pink\">AI 應用</span> 打造的<br>廣告網路。",
+    "sub": "Boost Boss 協助 AI 開發者將應用變現,協助廣告主觸及 AI 原生使用者。一套 MCP 驅動的 API,零維運。",
+    "cta_monetize": "開始變現 →",
+    "cta_campaign": "投放廣告",
+    "mock_earnings": "收益(近 7 天)",
+    "mock_earnings_trend": "▲ 較上週 23%",
+    "mock_impressions": "曝光次數",
+    "mock_impressions_trend": "▲ 18%",
+    "mock_daily": "每日收益",
+    "mock_sponsored": "◆ 贊助 · 來自 Boost Boss",
+    "mock_ad_title": "寫出更好的程式碼,速度快 10 倍",
+    "mock_ad_body": "真正讀懂你程式碼庫的 AI 編程助手。已有 50,000+ 開發者在用。",
+    "mock_ad_cta": "免費試用 Cursor →"
+  },
+  "trusted": {
+    "label": "服務運行於以下 AI 應用"
+  },
+  "dev": {
+    "eyebrow": "面向發布商",
+    "h2": "一行程式碼,讓你的 AI 應用變現。",
+    "p": "整合 Boost Boss SDK,將免費使用者轉換成收入,且不破壞使用者體驗。原生化、情境感知的廣告版位,自然融入 AI 對話、智能體與助手之中。",
+    "b1_html": "<strong>原生廣告格式</strong> — 為對話而設計,而非橫幅廣告。",
+    "b2_html": "<strong>即時結算</strong> — 即時追蹤曝光、點擊與收益。",
+    "b3_html": "<strong>完整創意控制</strong> — 廣告何時何地出現,由你決定。",
+    "cta": "整合 SDK →"
+  },
+  "adv": {
+    "eyebrow": "面向廣告主",
+    "h2": "觸及正在用 AI 構築未來的使用者。",
+    "p": "我們的網路將你的廣告直接送入 AI 應用內 — 這裡是意圖最明確、價值最高的人群聚集之處。幾分鐘即可開始投放。",
+    "b1_html": "<strong>精準定向</strong> — 依應用類別、使用者意圖與情境。",
+    "b2_html": "<strong>效果計費</strong> — CPM、CPC、CPA。為成效付費。",
+    "b3_html": "<strong>透明數據分析</strong> — 每次曝光、歸因與 ROAS 完全透明。",
+    "cta": "投放廣告 →",
+    "camp1_title": "Q2 開發者工具推廣",
+    "camp2_title": "AI 學習者再行銷",
+    "camp3_title": "新使用者歡迎",
+    "pill_active": "進行中",
+    "pill_paused": "已暫停",
+    "stat_impressions": "曝光",
+    "stat_ctr": "點擊率",
+    "stat_cpc": "CPC"
+  },
+  "mcp": {
+    "eyebrow": "基於 MCP 打造",
+    "h2": "為新一代廣告而生的新協定。",
+    "p_html": "Model Context Protocol 讓任何 AI 智能體都能呼叫 Boost Boss 來取得、渲染並測量廣告 — 內建同意、透明與歸因機制。",
+    "card1_h": "毫秒級投放",
+    "card1_p": "80ms 內取得並渲染廣告 — 不卡頓、不破壞體驗。",
+    "card2_h": "情境感知",
+    "card2_p_html": "每次曝光皆由 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna</a> 評分 — 我們的 AI 優化引擎 — 讓廣告契合使用者正在做的事。",
+    "card3_h": "隱私優先",
+    "card3_p": "不使用第三方 Cookie,不做指紋識別。定向發生在你的應用內,而非外部。"
+  },
+  "benna": {
+    "eyebrow": "網路背後的引擎",
+    "title": "benna — 內建的 AI 優化。",
+    "p": "Benna 是 Boost Boss 網路上每個決策背後的優化層 — 即時預測每次曝光的轉換率、選出勝出的廣告,並在 5ms 內自動調價。廣告主設定目標,其餘交給 Benna。",
+    "cta": "前往 benna.ai 了解更多 →"
+  },
+  "stats": {
+    "label_calls": "月廣告呼叫量",
+    "label_apps": "網路內 AI 應用數",
+    "label_ctr": "平均點擊率",
+    "label_paid": "已支付給發布商"
+  },
+  "how": {
+    "h2": "10 分鐘內從零開始賺錢。",
+    "p": "無論你是 AI 應用開發者,或是想觸及他們的品牌,接入都很快。",
+    "s1_h": "取得你的 API 金鑰",
+    "s1_p": "以開發者或廣告主身分註冊。金鑰立即取得 — 免候補、免演示。",
+    "s2_h": "整合 SDK",
+    "s2_p": "一行匯入、一次函式呼叫,你的 AI 應用即接入整個 Boost Boss 網路。",
+    "s3_h": "上線賺錢",
+    "s3_p": "上線後即時追蹤成效,按週結算撥款 — 或投入預算擴大觸及。"
+  },
+  "cta_big": {
+    "h2_html": "打開盒子。<br>開始賺錢。",
+    "p": "加入已在 Boost Boss 變現的 AI 應用 — 以及觸及它們的品牌。",
+    "cta_dev": "以開發者身分開始",
+    "cta_adv": "以廣告主身分開始"
+  },
+  "foot": {
+    "tag": "為 AI 應用打造的 MCP 廣告網路。為開發者而建,為廣告主而生。",
+    "col_product": "產品",
+    "col_resources": "資源",
+    "col_company": "公司",
+    "col_trust": "信任與合規",
+    "l_publishers": "開發者",
+    "l_superboost": "SuperBoost",
+    "l_bbx": "BBX",
+    "l_live_demo": "線上演示",
+    "l_how_it_works": "運作原理",
+    "l_docs": "文件",
+    "l_api": "API 參考",
+    "l_sdk": "SDK",
+    "l_changelog": "更新日誌",
+    "l_about": "關於我們",
+    "l_blog": "部落格",
+    "l_careers": "徵才",
+    "l_contact": "聯絡我們",
+    "l_trust_center": "信任中心",
+    "l_compliance": "SOC 2 · GDPR · CCPA",
+    "l_security": "安全",
+    "l_privacy": "隱私",
+    "l_terms": "使用條款",
+    "copy": "© 2026 Boost Boss, Inc.",
+    "tagline": "為 AI 時代打造。"
+  }
+}
