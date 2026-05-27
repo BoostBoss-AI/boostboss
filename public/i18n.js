@@ -179,6 +179,10 @@
     var btnLabel = document.querySelector('.nav-lang span');
     if (btnLabel) btnLabel.textContent = active.toUpperCase();
     document.documentElement.lang = active;
+    // Reveal the page now that translations are in place. The inline
+    // preload in each page's <head> hid the body via visibility:hidden
+    // to prevent the English-flash before the dict resolves.
+    document.documentElement.classList.remove('bb-i18n-loading');
   }
 
   // Public API — switch language, keep the user on the same page.
@@ -208,6 +212,9 @@
     localizeNavLinks();
     loadDict(active).then(apply).catch(function (err) {
       console.error('[i18n init]', err);
+      // Don't leave the page hidden if the dict failed to load — show
+      // whatever the page has (English defaults from the HTML).
+      document.documentElement.classList.remove('bb-i18n-loading');
     });
 
     // Intercept dropdown clicks so we route cleanly (history push + reload)
