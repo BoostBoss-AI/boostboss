@@ -456,5 +456,168 @@
     "trust": "Trust",
     "copy": "© 2026 Boost Boss",
     "publishers": "Publishers"
+  },
+  "ads": {
+    "nav": {
+      "reach": "Your reach",
+      "targeting": "Targeting",
+      "bidding": "How it works",
+      "pricing": "Pricing",
+      "brand_deals": "Brand Deals",
+      "cta": "Launch a campaign"
+    },
+    "hero": {
+      "badge_html": "<span class=\"dot\"></span>Powered by <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;\">Benna AI</a> · One campaign, four AI surfaces",
+      "h1_html": "Reach <span class=\"accent-pink\">four AI surfaces</span><br>from one campaign.",
+      "sub": "SuperBoost Ads runs across MCP tools (Claude Desktop, Cursor), web AI chat, browser extensions, and chat bots — so your brand shows up wherever your audience is using AI. Bid in real time. Target by intent, not cookies. Pay only for real outcomes.",
+      "cta_primary": "Launch your first campaign →",
+      "cta_secondary": "See how bidding works",
+      "micro": "No setup fees · $100 starter credit · Live in under 10 minutes"
+    },
+    "reach": {
+      "eyebrow": "Your reach",
+      "h2": "Four AI surfaces. One campaign.",
+      "sub": "Your campaign automatically distributes across every AI surface where your audience lives — MCP tools, web AI apps, browser extensions, and chat bots. Targeting decides where it lands; the auction picks the moment.",
+      "d1_eyebrow": "Door 1 · MCP tools",
+      "d1_h4_html": "Inside Claude Desktop &amp; Cursor",
+      "d1_p": "Your ad renders alongside MCP tool results. Highest-intent surface — developers seeing your brand the moment they ask \"how do I deploy.\"",
+      "d2_eyebrow": "Door 2 · AI apps",
+      "d2_h4": "Inline in web AI chat",
+      "d2_p": "ChatGPT-likes, vertical AI tools, agent UIs. Your sponsored card renders inline, same chrome as the AI's own messages — never interruptive.",
+      "d3_eyebrow": "Door 3 · Extensions",
+      "d3_h4": "Browser side panels",
+      "d3_p": "Chrome, Edge, Firefox AI extensions — summarizers, writing assistants, sidebars. Contextual to whatever the user is reading. No surveillance, no cookies.",
+      "d4_eyebrow": "Door 4 · Bots",
+      "d4_h4": "Discord, Telegram, Slack",
+      "d4_p": "AI bots reply with your sponsored message in the platform's native format — Discord embed, Telegram card, Slack attachment. Same campaign, three formats."
+    },
+    "trusted": {
+      "label": "Your ads shown inside"
+    },
+    "targ": {
+      "eyebrow": "AI-native targeting · powered by Benna AI",
+      "h2_html": "Target by what users are <em>trying to do</em> — not who they are.",
+      "p_html": "Cookies are dead. Demographics are lazy. SuperBoost bids on real-time MCP signals — the intent, tools, and context of every AI session — so your ad lands the moment it's actually useful. Every bid is scored by <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;\">Benna AI</a>, our AI optimization engine — so you only pay when the signal actually predicts conversion.",
+      "li1_html": "<strong>Intent signals</strong> — bid on \"writing a pitch deck\" or \"debugging Python,\" not \"males 25–34.\"",
+      "li2_html": "<strong>Tool context</strong> — target by which MCP tools and models are active in session.",
+      "li3_html": "<strong>Benna AI auto-optimization</strong> — set a target CPA, the engine adjusts bids on every auction. <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 600;\">benna.ai ↗</a>",
+      "li4_html": "<strong>Zero PII</strong> — all signals anonymized and aggregated at the protocol layer.",
+      "cta": "Start targeting by intent →"
+    },
+    "dash": {
+      "eyebrow": "Performance dashboard",
+      "h2": "Every campaign. Every signal. One pane of glass.",
+      "p": "Launch, pause, clone, and optimize campaigns in seconds. Live spend, conversion, and eCPA data — no 24-hour attribution lag. Automated rules pause underperformers for you.",
+      "li1_html": "<strong>Sub-second reporting</strong> — every bid, impression, and conversion streams live.",
+      "li2_html": "<strong>Auto-optimization rules</strong> — set CPA targets, we shift budget automatically.",
+      "li3_html": "<strong>Creative A/B</strong> — rotate variants and let the bidder pick winners.",
+      "cta": "Open the dashboard →"
+    },
+    "why": {
+      "eyebrow": "Why SuperBoost Ads",
+      "h2": "Ad tech rebuilt for the agent era.",
+      "sub": "Google's stack was built for web pages. Facebook's was built for feeds. We built ours for AI sessions — the new primary surface.",
+      "c1_h3": "Context-aware bidding",
+      "c1_p": "Our auction sees the live session — what the user just asked, which tools fired, what came back. Bids go up when relevance goes up.",
+      "c2_h3": "Frictionless placements",
+      "c2_p": "Ads render as native cards inside AI chats and agent flows — not pop-ups, not banners. Users convert because the ad actually belongs there.",
+      "c3_h3": "Transparent economics",
+      "c3_p": "See exactly what you pay, who you reach, and what converted. No black-box attribution. No hidden arbitrage. One clean take rate."
+    },
+    "stats": {
+      "l1": "Monthly AI sessions",
+      "l2": "vs. traditional display CTR",
+      "l3": "Average eCPA",
+      "l4": "Median bid latency"
+    },
+    "bid": {
+      "h2": "From brief to bid in under 10 minutes.",
+      "sub": "No account managers. No minimum spend. No waitlist. Log in, set a goal, let the auction do the rest.",
+      "s1_h3": "Set your target",
+      "s1_p": "Pick an outcome — installs, signups, purchases — and a CPA goal. Upload creative or write copy inline.",
+      "s2_h3": "Bid in real time",
+      "s2_p": "Our auction evaluates every AI session against your targeting and bids on the ones most likely to convert.",
+      "s3_h3": "Scale what works",
+      "s3_p": "Live dashboards surface winning creatives and audiences. Auto-rules reallocate budget every 15 minutes."
+    },
+    "price": {
+      "eyebrow": "Pricing",
+      "h2": "Pay for outcomes. No agency tax.",
+      "sub": "Three ways to buy. All self-serve. All transparent. Your take rate is always posted on your dashboard.",
+      "cpm_tag": "Self-serve",
+      "cpm_sub": "Pay per thousand AI-native impressions. Best for awareness.",
+      "cpm_li1": "$100 minimum spend",
+      "cpm_li2": "All placements",
+      "cpm_li3": "Live reporting",
+      "cpm_cta": "Start with CPM",
+      "cpc_tag": "Most popular",
+      "cpc_unit": "/click",
+      "cpc_sub": "Pay only when an AI user actually clicks through.",
+      "cpc_li1": "$50 minimum spend",
+      "cpc_li2": "Auto-optimized bidding",
+      "cpc_li3": "Creative A/B built-in",
+      "cpc_li4": "$100 starter credit",
+      "cpc_cta": "Get $100 free credit",
+      "cpa_tag": "Performance",
+      "cpa_price": "target-based",
+      "cpa_sub": "Pay only on signup, install, or purchase. Machine-learned bidding.",
+      "cpa_li1": "$500 minimum spend",
+      "cpa_li2": "Conversion tracking SDK",
+      "cpa_li3": "Dedicated optimization",
+      "cpa_cta": "Talk to us",
+      "cpm_unit": "/k"
+    },
+    "brand": {
+      "eyebrow": "PREMIUM · DIRECT",
+      "h2": "Brand Deals — guaranteed AI-native placements.",
+      "sub": "For non-tech brands that want to be seen by AI-native users with purchasing power — developers, researchers, early adopters, knowledge workers. Negotiated directly. Priced on reach, not auction.",
+      "c1_h3": "Guaranteed inventory",
+      "c1_p": "Lock exclusive placement inside specific AI tools, workflows, or session contexts for a defined period. Your brand, no auction, no surprises.",
+      "c2_h3": "Fixed CPM pricing",
+      "c2_p": "Negotiated rates from $12 CPM. Predictable spend across the campaign window. Ideal for product launches, seasonal pushes, or category ownership.",
+      "c3_h3": "White-glove ops",
+      "c3_p": "Dedicated account manager, custom creative review, Benna AI audience match reports, and weekly performance readouts.",
+      "who_label": "WHO THIS IS FOR",
+      "who_p": "Consumer brands (Coca-Cola, Samsung, Nike), auto (BMW, Tesla), finance (Chase, AmEx), and premium services that want first-touch access to the highest-intent digital audience on the planet — users inside AI tools.",
+      "cta": "Talk to our brand team →",
+      "typical": "Typical deals: $50k–$2M · 30–90 day campaigns · Approvals in under 1 week"
+    },
+    "quote": {
+      "text_html": "\"Boost Boss Ads is the first platform where our cost-per-signup actually <span class=\"accent\">went down</span> as we scaled. AI-native targeting is the real thing — our pitch lands in the exact session a dev needs us.\"",
+      "attr_html": "<strong>Sarah Chen</strong> · Head of Growth, <span style=\"color: var(--pink); font-weight: 600;\">Cursor</span>"
+    },
+    "big": {
+      "h2_html": "Your next customer<br>is using an AI app right now.",
+      "p": "Launch your first SuperBoost Ads campaign in 10 minutes. $100 in starter credit when you sign up today.",
+      "cta1": "Claim $100 credit →",
+      "cta2": "How bidding works"
+    },
+    "foot": {
+      "tag": "The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.",
+      "col_product": "Product",
+      "col_resources": "Resources",
+      "col_company": "Company",
+      "col_trust": "Trust & legal",
+      "l_publishers": "Publishers",
+      "l_superboost": "SuperBoost",
+      "l_bbx": "BBX",
+      "l_live_demo": "Live demo",
+      "l_how": "How it works",
+      "l_docs": "Documentation",
+      "l_api": "API reference",
+      "l_sdk": "SDK",
+      "l_changelog": "Changelog",
+      "l_about": "About",
+      "l_blog": "Blog",
+      "l_careers": "Careers",
+      "l_contact": "Contact",
+      "l_trust_center": "Trust center",
+      "l_compliance": "SOC 2 · GDPR · CCPA",
+      "l_security": "Security",
+      "l_privacy": "Privacy",
+      "l_terms": "Terms",
+      "copy": "© 2026 Boost Boss, Inc.",
+      "tagline": "Made for the AI era."
+    }
   }
 }

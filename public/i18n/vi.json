@@ -456,5 +456,168 @@
     "trust": "Niềm tin",
     "copy": "© 2026 Boost Boss",
     "publishers": "Publisher"
+  },
+  "ads": {
+    "nav": {
+      "reach": "Phạm vi của bạn",
+      "targeting": "Targeting",
+      "bidding": "Cách hoạt động",
+      "pricing": "Giá",
+      "brand_deals": "Brand Deals",
+      "cta": "Chạy chiến dịch"
+    },
+    "hero": {
+      "badge_html": "<span class=\"dot\"></span>Powered by <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;\">Benna AI</a> · Một chiến dịch, bốn bề mặt AI",
+      "h1_html": "Tiếp cận <span class=\"accent-pink\">bốn bề mặt AI</span><br>từ một chiến dịch.",
+      "sub": "SuperBoost Ads chạy trên MCP tools (Claude Desktop, Cursor), web AI chat, tiện ích trình duyệt và chatbot — để thương hiệu của bạn xuất hiện ở mọi nơi audience đang dùng AI. Đấu giá thời gian thực. Target theo intent, không phải cookie. Chỉ trả cho kết quả thực.",
+      "cta_primary": "Chạy chiến dịch đầu tiên →",
+      "cta_secondary": "Xem cách đấu giá hoạt động",
+      "micro": "Không phí setup · $100 starter credit · Lên sóng trong 10 phút"
+    },
+    "reach": {
+      "eyebrow": "Phạm vi của bạn",
+      "h2": "Bốn bề mặt AI. Một chiến dịch.",
+      "sub": "Chiến dịch của bạn tự động phân phối trên mọi bề mặt AI mà audience đang sống — MCP tools, web AI apps, tiện ích trình duyệt, chatbot. Targeting quyết định nó hạ ở đâu; đấu giá chọn thời điểm.",
+      "d1_eyebrow": "Cửa 1 · MCP tools",
+      "d1_h4_html": "Bên trong Claude Desktop &amp; Cursor",
+      "d1_p": "Quảng cáo của bạn render cạnh kết quả MCP tool. Bề mặt intent cao nhất — developer thấy thương hiệu bạn ngay khi hỏi \"làm sao deploy\".",
+      "d2_eyebrow": "Cửa 2 · AI apps",
+      "d2_h4": "Inline trong web AI chat",
+      "d2_p": "Các sản phẩm dạng ChatGPT, công cụ AI chuyên ngành, agent UI. Thẻ sponsored render inline, cùng giao diện với tin nhắn AI — không bao giờ làm phiền.",
+      "d3_eyebrow": "Cửa 3 · Tiện ích",
+      "d3_h4": "Side panel trình duyệt",
+      "d3_p": "Tiện ích AI cho Chrome, Edge, Firefox — công cụ tóm tắt, trợ lý viết, sidebar. Theo ngữ cảnh nội dung user đang đọc. Không giám sát, không cookie.",
+      "d4_eyebrow": "Cửa 4 · Bots",
+      "d4_h4": "Discord, Telegram, Slack",
+      "d4_p": "AI bot trả lời với tin nhắn sponsored theo định dạng native của từng platform — Discord embed, Telegram card, Slack attachment. Cùng chiến dịch, ba định dạng."
+    },
+    "trusted": {
+      "label": "Quảng cáo của bạn xuất hiện trong"
+    },
+    "targ": {
+      "eyebrow": "Targeting AI-native · powered by Benna AI",
+      "h2_html": "Target theo <em>việc user đang làm</em> — không phải họ là ai.",
+      "p_html": "Cookie đã chết. Nhân khẩu học thì lười. SuperBoost đấu giá trên tín hiệu MCP thời gian thực — intent, công cụ và ngữ cảnh của mọi phiên AI — để quảng cáo của bạn hạ đúng lúc thật sự hữu ích. Mỗi lượt đấu giá được <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;\">Benna AI</a>(động cơ tối ưu AI của chúng tôi) chấm điểm — bạn chỉ trả khi tín hiệu thực sự dự đoán chuyển đổi.",
+      "li1_html": "<strong>Tín hiệu intent</strong> — đấu giá cho \"viết pitch deck\" hoặc \"debug Python\", không phải \"nam 25–34\".",
+      "li2_html": "<strong>Ngữ cảnh tool</strong> — target theo MCP tool và model đang hoạt động trong phiên.",
+      "li3_html": "<strong>Benna AI tự tối ưu</strong> — đặt target CPA, engine tự điều chỉnh giá thầu mỗi lần đấu. <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 600;\">benna.ai ↗</a>",
+      "li4_html": "<strong>Không PII</strong> — mọi tín hiệu đều ẩn danh và tổng hợp ở tầng protocol.",
+      "cta": "Bắt đầu target theo intent →"
+    },
+    "dash": {
+      "eyebrow": "Dashboard hiệu suất",
+      "h2": "Mọi chiến dịch. Mọi tín hiệu. Một màn hình.",
+      "p": "Khởi chạy, tạm dừng, nhân bản, tối ưu chiến dịch trong vài giây. Spend, conversion, eCPA thời gian thực — không trễ attribution 24 giờ. Quy tắc tự động tạm dừng những thứ không hiệu quả giúp bạn.",
+      "li1_html": "<strong>Báo cáo dưới 1 giây</strong> — mọi lượt đấu, impression, conversion được stream trực tiếp.",
+      "li2_html": "<strong>Quy tắc tự tối ưu</strong> — đặt mục tiêu CPA, chúng tôi tự dịch chuyển ngân sách.",
+      "li3_html": "<strong>Creative A/B</strong> — xoay các biến thể và để bidder chọn người thắng.",
+      "cta": "Mở dashboard →"
+    },
+    "why": {
+      "eyebrow": "Vì sao chọn SuperBoost Ads",
+      "h2": "Công nghệ quảng cáo xây lại cho kỷ nguyên agent.",
+      "sub": "Stack của Google xây cho web pages. Của Facebook xây cho feeds. Chúng tôi xây cho phiên AI — bề mặt chính mới.",
+      "c1_h3": "Đấu giá nhận biết ngữ cảnh",
+      "c1_p": "Đấu giá của chúng tôi thấy phiên trực tiếp — user vừa hỏi gì, tool nào kích hoạt, cái gì trả về. Relevance tăng thì giá thầu tăng.",
+      "c2_h3": "Vị trí không ma sát",
+      "c2_p": "Quảng cáo render dưới dạng thẻ native trong AI chat và agent flows — không popup, không banner. User chuyển đổi vì quảng cáo thật sự thuộc về đó.",
+      "c3_h3": "Kinh tế minh bạch",
+      "c3_p": "Thấy rõ bạn trả gì, ai bạn tiếp cận, ai đã chuyển đổi. Không attribution hộp đen. Không arbitrage ẩn. Một take rate sạch duy nhất."
+    },
+    "stats": {
+      "l1": "Phiên AI hàng tháng",
+      "l2": "so với CTR display truyền thống",
+      "l3": "eCPA trung bình",
+      "l4": "Độ trễ đấu giá trung vị"
+    },
+    "bid": {
+      "h2": "Từ brief đến đấu giá trong dưới 10 phút.",
+      "sub": "Không account manager. Không chi tiêu tối thiểu. Không waitlist. Đăng nhập, đặt mục tiêu, để đấu giá lo phần còn lại.",
+      "s1_h3": "Đặt mục tiêu",
+      "s1_p": "Chọn một kết quả — install, signup, mua — và mục tiêu CPA. Upload creative hoặc viết copy trực tiếp.",
+      "s2_h3": "Đấu giá thời gian thực",
+      "s2_p": "Đấu giá đánh giá mọi phiên AI dựa vào targeting của bạn và đặt giá cho những phiên có khả năng chuyển đổi cao nhất.",
+      "s3_h3": "Mở rộng cái gì hiệu quả",
+      "s3_p": "Dashboard thời gian thực làm nổi creative và audience thắng. Auto-rules phân bổ lại ngân sách mỗi 15 phút."
+    },
+    "price": {
+      "eyebrow": "Giá",
+      "h2": "Trả cho kết quả. Không thuế đại lý.",
+      "sub": "Ba cách mua. Tất cả self-serve. Tất cả minh bạch. Take rate của bạn luôn được công bố trên dashboard.",
+      "cpm_tag": "Self-serve",
+      "cpm_sub": "Trả mỗi nghìn impression AI-native. Tốt nhất cho awareness.",
+      "cpm_li1": "Chi tiêu tối thiểu $100",
+      "cpm_li2": "Tất cả vị trí",
+      "cpm_li3": "Báo cáo trực tiếp",
+      "cpm_cta": "Bắt đầu với CPM",
+      "cpc_tag": "Phổ biến nhất",
+      "cpc_unit": "/click",
+      "cpc_sub": "Chỉ trả khi user AI thật sự click qua.",
+      "cpc_li1": "Chi tiêu tối thiểu $50",
+      "cpc_li2": "Đấu giá tự tối ưu",
+      "cpc_li3": "Creative A/B tích hợp",
+      "cpc_li4": "$100 starter credit",
+      "cpc_cta": "Nhận $100 credit miễn phí",
+      "cpa_tag": "Hiệu suất",
+      "cpa_price": "theo mục tiêu",
+      "cpa_sub": "Chỉ trả khi signup, install hoặc mua. Đấu giá học máy.",
+      "cpa_li1": "Chi tiêu tối thiểu $500",
+      "cpa_li2": "SDK theo dõi chuyển đổi",
+      "cpa_li3": "Tối ưu chuyên trách",
+      "cpa_cta": "Liên hệ chúng tôi",
+      "cpm_unit": "/k"
+    },
+    "brand": {
+      "eyebrow": "PREMIUM · DIRECT",
+      "h2": "Brand Deals — vị trí AI-native được đảm bảo.",
+      "sub": "Cho các thương hiệu phi công nghệ muốn được người dùng AI-native có sức mua nhìn thấy — developer, nhà nghiên cứu, người dùng sớm, lao động tri thức. Thương lượng trực tiếp. Định giá theo reach, không theo đấu giá.",
+      "c1_h3": "Inventory được đảm bảo",
+      "c1_p": "Khoá vị trí độc quyền trong các AI tool, workflow hoặc ngữ cảnh phiên cụ thể trong khoảng thời gian xác định. Thương hiệu của bạn, không đấu giá, không bất ngờ.",
+      "c2_h3": "Định giá CPM cố định",
+      "c2_p": "Mức thương lượng từ $12 CPM. Chi tiêu dự đoán được suốt cửa sổ chiến dịch. Lý tưởng cho ra mắt sản phẩm, push theo mùa hoặc giữ category.",
+      "c3_h3": "Vận hành white-glove",
+      "c3_p": "Account manager riêng, review creative tùy biến, báo cáo audience match từ Benna AI và summary hiệu suất hàng tuần.",
+      "who_label": "Dành cho ai",
+      "who_p": "Các thương hiệu tiêu dùng (Coca-Cola, Samsung, Nike), ô tô (BMW, Tesla), tài chính (Chase, AmEx) và dịch vụ cao cấp muốn first-touch access đến audience kỹ thuật số có intent cao nhất hành tinh — user bên trong AI tools.",
+      "cta": "Liên hệ đội brand →",
+      "typical": "Quy mô điển hình: $50k–$2M · chiến dịch 30–90 ngày · phê duyệt trong dưới 1 tuần"
+    },
+    "quote": {
+      "text_html": "\"Boost Boss Ads là platform đầu tiên mà chi phí mỗi signup của chúng tôi thật sự <span class=\"accent\">giảm xuống</span> khi scale lên. AI-native targeting là thật — pitch của chúng tôi hạ đúng phiên mà một dev cần chúng tôi.\"",
+      "attr_html": "<strong>Sarah Chen</strong> · Head of Growth, <span style=\"color: var(--pink); font-weight: 600;\">Cursor</span>"
+    },
+    "big": {
+      "h2_html": "Khách hàng tiếp theo của bạn<br>đang dùng một ứng dụng AI ngay lúc này.",
+      "p": "Chạy chiến dịch SuperBoost Ads đầu tiên trong 10 phút. $100 starter credit khi đăng ký hôm nay.",
+      "cta1": "Nhận $100 credit →",
+      "cta2": "Cách đấu giá hoạt động"
+    },
+    "foot": {
+      "tag": "Mạng quảng cáo MCP cho ứng dụng AI. Xây cho developer. Thiết kế cho advertiser.",
+      "col_product": "Sản phẩm",
+      "col_resources": "Tài nguyên",
+      "col_company": "Công ty",
+      "col_trust": "Niềm tin & pháp lý",
+      "l_publishers": "Publisher",
+      "l_superboost": "SuperBoost",
+      "l_bbx": "BBX",
+      "l_live_demo": "Demo trực tiếp",
+      "l_how": "Cách hoạt động",
+      "l_docs": "Tài liệu",
+      "l_api": "API reference",
+      "l_sdk": "SDK",
+      "l_changelog": "Changelog",
+      "l_about": "Về chúng tôi",
+      "l_blog": "Blog",
+      "l_careers": "Tuyển dụng",
+      "l_contact": "Liên hệ",
+      "l_trust_center": "Trust center",
+      "l_compliance": "SOC 2 · GDPR · CCPA",
+      "l_security": "Bảo mật",
+      "l_privacy": "Riêng tư",
+      "l_terms": "Điều khoản",
+      "copy": "© 2026 Boost Boss, Inc.",
+      "tagline": "Tạo cho kỷ nguyên AI."
+    }
   }
 }

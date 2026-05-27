@@ -11,6 +11,7 @@
     { "source": "/publish/extensions", "destination": "/en/publish/extensions", "permanent": false },
     { "source": "/publish/bots",       "destination": "/en/publish/bots",       "permanent": false },
     { "source": "/publish/no-code",    "destination": "/en/publish/no-code",    "permanent": false },
+    { "source": "/ads",        "destination": "/en/ads",        "permanent": false },
     { "source": "/developer",  "destination": "/publish/dashboard", "permanent": false },
     { "source": "/advertiser", "destination": "/ads/dashboard",     "permanent": false }
   ],
@@ -22,6 +23,7 @@
     { "source": "/ko", "destination": "/index.html" },
     { "source": "/vi", "destination": "/index.html" },
     { "source": "/ads", "destination": "/ads.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/ads", "destination": "/ads.html" },
     { "source": "/ads/dashboard",     "destination": "/advertiser.html" },
     { "source": "/publish/dashboard", "destination": "/developer.html" },
     { "source": "/demo", "destination": "/demo.html" },

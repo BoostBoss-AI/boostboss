@@ -456,5 +456,168 @@
     "trust": "신뢰",
     "copy": "© 2026 Boost Boss",
     "publishers": "퍼블리셔"
+  },
+  "ads": {
+    "nav": {
+      "reach": "리치",
+      "targeting": "타겟팅",
+      "bidding": "동작 방식",
+      "pricing": "가격",
+      "brand_deals": "브랜드 딜",
+      "cta": "캠페인 시작"
+    },
+    "hero": {
+      "badge_html": "<span class=\"dot\"></span><a href=\"https://benna.ai\" target=\"_blank\" style=\"color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;\">Benna AI</a> 기반 · 한 캠페인, 4개의 AI 표면",
+      "h1_html": "한 캠페인으로 <span class=\"accent-pink\">4개의 AI 표면</span>에 도달.",
+      "sub": "SuperBoost Ads는 MCP 도구(Claude Desktop, Cursor), 웹 AI 채팅, 브라우저 확장, 챗봇에서 운영됩니다 — 오디언스가 AI를 쓰는 곳마다 당신의 브랜드가 등장합니다. 실시간 입찰. 쿠키가 아닌 인텐트로 타겟팅. 실제 성과에만 과금.",
+      "cta_primary": "첫 캠페인 시작 →",
+      "cta_secondary": "입찰 동작 보기",
+      "micro": "셋업 비용 없음 · $100 스타터 크레딧 · 10분 안에 라이브"
+    },
+    "reach": {
+      "eyebrow": "리치",
+      "h2": "4개의 AI 표면. 한 캠페인.",
+      "sub": "당신의 캠페인은 오디언스가 있는 모든 AI 표면 — MCP 도구, 웹 AI 앱, 브라우저 확장, 챗봇 — 으로 자동 분배됩니다. 타겟팅이 어디 닿을지 결정, 옥션이 그 순간을 고릅니다.",
+      "d1_eyebrow": "도어 1 · MCP 도구",
+      "d1_h4_html": "Claude Desktop &amp; Cursor 안에서",
+      "d1_p": "광고가 MCP 도구 결과와 나란히 렌더링됩니다. 최고 인텐트 표면 — 개발자가 \"어떻게 배포하지\" 묻는 순간 당신의 브랜드를 봅니다.",
+      "d2_eyebrow": "도어 2 · AI 앱",
+      "d2_h4": "웹 AI 채팅 인라인",
+      "d2_p": "ChatGPT 류, 버티컬 AI 도구, 에이전트 UI. 스폰서 카드가 AI 메시지와 같은 외관으로 인라인 렌더링 — 절대 방해하지 않음.",
+      "d3_eyebrow": "도어 3 · 확장",
+      "d3_h4": "브라우저 사이드 패널",
+      "d3_p": "Chrome, Edge, Firefox AI 확장 — 요약기, 글쓰기 어시스턴트, 사이드바. 사용자가 읽고 있는 것에 맞춘 컨텍스트. 감시 없음, 쿠키 없음.",
+      "d4_eyebrow": "도어 4 · 봇",
+      "d4_h4": "Discord, Telegram, Slack",
+      "d4_p": "AI 봇이 각 플랫폼 네이티브 포맷 — Discord embed, Telegram card, Slack attachment — 으로 당신의 스폰서 메시지를 답합니다. 동일 캠페인, 세 포맷."
+    },
+    "trusted": {
+      "label": "당신의 광고가 보여질 곳"
+    },
+    "targ": {
+      "eyebrow": "AI 네이티브 타겟팅 · Benna AI 기반",
+      "h2_html": "사용자가 <em>무엇을 하려 하는지</em>로 타겟 — 그들이 누구인지가 아니라.",
+      "p_html": "쿠키는 죽었습니다. 인구통계는 게으릅니다. SuperBoost는 실시간 MCP 시그널 — 모든 AI 세션의 인텐트, 도구, 컨텍스트 — 로 입찰해 당신의 광고가 정말 유용한 순간에 도달합니다. 모든 입찰은 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;\">Benna AI</a>(우리의 AI 최적화 엔진)가 스코어링 — 시그널이 실제로 전환을 예측할 때만 과금됩니다.",
+      "li1_html": "<strong>인텐트 시그널</strong> — \"피치덱 쓰기\" 또는 \"파이썬 디버깅\"으로 입찰, \"남성 25–34\"가 아니라.",
+      "li2_html": "<strong>도구 컨텍스트</strong> — 세션에서 활성화된 MCP 도구와 모델로 타겟팅.",
+      "li3_html": "<strong>Benna AI 자동 최적화</strong> — 목표 CPA를 설정하면 엔진이 모든 옥션에서 입찰을 조정. <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 600;\">benna.ai ↗</a>",
+      "li4_html": "<strong>PII 제로</strong> — 모든 시그널은 프로토콜 레이어에서 익명화·집계.",
+      "cta": "인텐트로 타겟팅 시작 →"
+    },
+    "dash": {
+      "eyebrow": "퍼포먼스 대시보드",
+      "h2": "모든 캠페인. 모든 시그널. 하나의 화면.",
+      "p": "초 단위로 캠페인을 시작, 일시정지, 복제, 최적화. 실시간 지출, 전환, eCPA — 24시간 어트리뷰션 지연 없음. 자동 규칙이 성과가 낮은 항목을 정지시킵니다.",
+      "li1_html": "<strong>1초 미만 리포팅</strong> — 모든 입찰, 임프레션, 전환이 실시간 스트리밍.",
+      "li2_html": "<strong>자동 최적화 규칙</strong> — CPA 목표를 설정하면 우리가 예산을 자동 조정.",
+      "li3_html": "<strong>크리에이티브 A/B</strong> — 변형을 로테이션하고 입찰기가 승자를 고르게.",
+      "cta": "대시보드 열기 →"
+    },
+    "why": {
+      "eyebrow": "왜 SuperBoost Ads인가",
+      "h2": "에이전트 시대를 위한 광고 기술의 재구축.",
+      "sub": "Google의 스택은 웹 페이지를 위해 만들어졌습니다. Facebook은 피드를 위해. 우리는 AI 세션 — 새로운 주요 표면 — 을 위해 만들었습니다.",
+      "c1_h3": "컨텍스트 인지 입찰",
+      "c1_p": "우리 옥션은 실시간 세션을 봅니다 — 사용자가 방금 무엇을 물었는지, 어떤 도구가 작동했는지, 무엇이 돌아왔는지. 관련도가 오르면 입찰도 오릅니다.",
+      "c2_h3": "마찰 없는 게재",
+      "c2_p": "광고는 AI 채팅과 에이전트 플로우 안에 네이티브 카드로 렌더링됩니다 — 팝업도, 배너도 아닙니다. 광고가 그 자리에 속하기 때문에 사용자가 전환합니다.",
+      "c3_h3": "투명한 경제 구조",
+      "c3_p": "정확히 얼마를 지불했고, 누구에게 도달했고, 무엇이 전환됐는지 보입니다. 블랙박스 어트리뷰션 없음, 숨겨진 차익 거래 없음. 깔끔한 단일 take rate."
+    },
+    "stats": {
+      "l1": "월간 AI 세션",
+      "l2": "기존 디스플레이 CTR 대비",
+      "l3": "평균 eCPA",
+      "l4": "입찰 지연 중앙값"
+    },
+    "bid": {
+      "h2": "브리프부터 입찰까지 10분 이내.",
+      "sub": "어카운트 매니저 불필요. 최소 지출 없음. 대기열 없음. 로그인하고 목표를 설정하면 나머지는 옥션이.",
+      "s1_h3": "목표 설정",
+      "s1_p": "성과를 선택 — 설치, 가입, 구매 — 그리고 CPA 목표. 크리에이티브를 업로드하거나 인라인으로 카피를 작성.",
+      "s2_h3": "실시간 입찰",
+      "s2_p": "우리 옥션이 모든 AI 세션을 당신의 타겟팅과 매칭해 전환 가능성이 가장 높은 곳에 입찰.",
+      "s3_h3": "되는 것을 확장",
+      "s3_p": "실시간 대시보드가 승리한 크리에이티브와 오디언스를 드러냅니다. 자동 규칙이 15분마다 예산을 재할당."
+    },
+    "price": {
+      "eyebrow": "가격",
+      "h2": "성과에 지불하세요. 에이전시 세금 없음.",
+      "sub": "세 가지 구매 방법. 모두 셀프 서브. 모두 투명. 당신의 take rate은 항상 대시보드에 표시.",
+      "cpm_tag": "셀프 서브",
+      "cpm_sub": "AI 네이티브 임프레션 1,000회당 지불. 인지에 최적.",
+      "cpm_li1": "최소 지출 $100",
+      "cpm_li2": "모든 게재 위치",
+      "cpm_li3": "실시간 리포팅",
+      "cpm_cta": "CPM으로 시작",
+      "cpc_tag": "가장 인기",
+      "cpc_unit": "/클릭",
+      "cpc_sub": "AI 사용자가 실제로 클릭할 때만 지불.",
+      "cpc_li1": "최소 지출 $50",
+      "cpc_li2": "자동 최적화 입찰",
+      "cpc_li3": "내장 크리에이티브 A/B",
+      "cpc_li4": "$100 스타터 크레딧",
+      "cpc_cta": "$100 무료 크레딧 받기",
+      "cpa_tag": "퍼포먼스",
+      "cpa_price": "목표 기반",
+      "cpa_sub": "가입, 설치, 구매 시에만 지불. 머신러닝 기반 입찰.",
+      "cpa_li1": "최소 지출 $500",
+      "cpa_li2": "전환 트래킹 SDK",
+      "cpa_li3": "전담 최적화",
+      "cpa_cta": "문의하기",
+      "cpm_unit": "/k"
+    },
+    "brand": {
+      "eyebrow": "프리미엄 · 다이렉트",
+      "h2": "브랜드 딜 — 보장된 AI 네이티브 게재.",
+      "sub": "구매력 있는 AI 네이티브 사용자 — 개발자, 연구자, 얼리어답터, 지식 노동자 — 에게 보이고 싶은 비테크 브랜드를 위해. 직접 협상. 옥션이 아닌 리치 기반 가격.",
+      "c1_h3": "보장 인벤토리",
+      "c1_p": "특정 AI 도구, 워크플로우 또는 세션 컨텍스트 안에서 정의된 기간 동안 독점 게재를 락. 당신의 브랜드, 옥션 없음, 예상 밖 없음.",
+      "c2_h3": "고정 CPM 가격",
+      "c2_p": "$12 CPM부터 협상된 요율. 캠페인 기간 동안 예측 가능한 지출. 제품 론칭, 시즌 푸시 또는 카테고리 점유에 이상적.",
+      "c3_h3": "화이트 글러브 운영",
+      "c3_p": "전담 어카운트 매니저, 커스텀 크리에이티브 검수, Benna AI 오디언스 매치 리포트, 주간 퍼포먼스 보고.",
+      "who_label": "이런 분에게",
+      "who_p": "소비재 브랜드(Coca-Cola, Samsung, Nike), 자동차(BMW, Tesla), 금융(Chase, AmEx), 그리고 지구상 가장 인텐트 높은 디지털 오디언스 — AI 도구 내 사용자 — 에게 첫 터치 액세스를 원하는 프리미엄 서비스.",
+      "cta": "브랜드 팀에 문의 →",
+      "typical": "전형적 규모: $50k–$2M · 30–90일 캠페인 · 1주 이내 승인"
+    },
+    "quote": {
+      "text_html": "\"Boost Boss Ads는 스케일이 커질수록 신규 고객 획득 비용이 <span class=\"accent\">오히려 내려간</span> 첫 플랫폼입니다. AI 네이티브 타겟팅은 진짜예요 — 우리 메시지가 개발자가 정말 우리를 필요로 하는 그 세션에 도달합니다.\"",
+      "attr_html": "<strong>Sarah Chen</strong> · Head of Growth, <span style=\"color: var(--pink); font-weight: 600;\">Cursor</span>"
+    },
+    "big": {
+      "h2_html": "당신의 다음 고객은<br>지금 AI 앱을 쓰고 있습니다.",
+      "p": "10분 안에 첫 SuperBoost Ads 캠페인을 시작하세요. 오늘 가입하면 $100 스타터 크레딧.",
+      "cta1": "$100 크레딧 받기 →",
+      "cta2": "입찰 동작 방식"
+    },
+    "foot": {
+      "tag": "AI 앱을 위한 MCP 기반 광고 네트워크. 개발자를 위해 만들고, 광고주를 위해 설계.",
+      "col_product": "프로덕트",
+      "col_resources": "리소스",
+      "col_company": "회사",
+      "col_trust": "신뢰 & 법적 고지",
+      "l_publishers": "퍼블리셔",
+      "l_superboost": "SuperBoost",
+      "l_bbx": "BBX",
+      "l_live_demo": "라이브 데모",
+      "l_how": "동작 방식",
+      "l_docs": "문서",
+      "l_api": "API 레퍼런스",
+      "l_sdk": "SDK",
+      "l_changelog": "변경 이력",
+      "l_about": "소개",
+      "l_blog": "블로그",
+      "l_careers": "채용",
+      "l_contact": "문의",
+      "l_trust_center": "트러스트 센터",
+      "l_compliance": "SOC 2 · GDPR · CCPA",
+      "l_security": "보안",
+      "l_privacy": "개인정보",
+      "l_terms": "이용약관",
+      "copy": "© 2026 Boost Boss, Inc.",
+      "tagline": "AI 시대를 위해."
+    }
   }
 }

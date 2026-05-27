@@ -456,5 +456,168 @@
     "trust": "信任",
     "copy": "© 2026 Boost Boss",
     "publishers": "发布商"
+  },
+  "ads": {
+    "nav": {
+      "reach": "你的覆盖",
+      "targeting": "定向",
+      "bidding": "工作原理",
+      "pricing": "价格",
+      "brand_deals": "品牌合作",
+      "cta": "投放广告"
+    },
+    "hero": {
+      "badge_html": "<span class=\"dot\"></span>由 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;\">Benna AI</a> 驱动 · 一个广告,四个 AI 界面",
+      "h1_html": "一个广告,触达 <span class=\"accent-pink\">四个 AI 界面</span>。",
+      "sub": "SuperBoost Ads 在 MCP 工具(Claude Desktop、Cursor)、网页 AI 聊天、浏览器扩展和聊天机器人中投放 — 让你的品牌出现在受众使用 AI 的每个地方。实时竞价。按意图定向,不靠 cookie。只为真实结果付费。",
+      "cta_primary": "投放你的第一个广告 →",
+      "cta_secondary": "看竞价怎么跑",
+      "micro": "零设置费 · $100 起始额度 · 10 分钟内上线"
+    },
+    "reach": {
+      "eyebrow": "你的覆盖",
+      "h2": "四个 AI 界面。一个广告。",
+      "sub": "你的广告自动分发到受众所在的每个 AI 界面 — MCP 工具、网页 AI 应用、浏览器扩展、聊天机器人。定向决定它落到哪里;拍卖决定哪一刻出现。",
+      "d1_eyebrow": "门 1 · MCP 工具",
+      "d1_h4_html": "Claude Desktop &amp; Cursor 内",
+      "d1_p": "广告与 MCP 工具结果并列渲染。最高意图界面 — 开发者一问“怎么部署”就看到你的品牌。",
+      "d2_eyebrow": "门 2 · AI 应用",
+      "d2_h4": "嵌在网页 AI 聊天里",
+      "d2_p": "ChatGPT 类产品、垂直 AI 工具、agent UI。赞助卡片与 AI 的回复同款外观,不打断。",
+      "d3_eyebrow": "门 3 · 扩展",
+      "d3_h4": "浏览器侧边栏",
+      "d3_p": "Chrome、Edge、Firefox AI 扩展 — 摘要器、写作助手、侧边栏。与用户正在读的内容上下文相关。不监控、不依赖 cookie。",
+      "d4_eyebrow": "门 4 · 机器人",
+      "d4_h4": "Discord、Telegram、Slack",
+      "d4_p": "AI bot 用各平台原生格式回复你的赞助消息 — Discord embed、Telegram card、Slack attachment。同一份广告,三种格式。"
+    },
+    "trusted": {
+      "label": "你的广告会出现在"
+    },
+    "targ": {
+      "eyebrow": "AI 原生定向 · 由 Benna AI 驱动",
+      "h2_html": "按用户<em>正在做什么</em>来定向 — 而不是他们是谁。",
+      "p_html": "Cookie 已死。人口统计太懒。SuperBoost 基于实时 MCP 信号竞价 — 每个 AI 会话的意图、工具、上下文 — 让你的广告恰好在它真正有用的时刻出现。每笔出价都由 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;\">Benna AI</a>(我们的 AI 优化引擎)评分 — 只在信号真正预测转化时才付费。",
+      "li1_html": "<strong>意图信号</strong> — 竞价“写一份 pitch deck”或“debug Python”,而不是“男性 25–34 岁”。",
+      "li2_html": "<strong>工具上下文</strong> — 按会话中活跃的 MCP 工具和模型定向。",
+      "li3_html": "<strong>Benna AI 自动优化</strong> — 设定目标 CPA,引擎在每次拍卖时调整出价。<a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 600;\">benna.ai ↗</a>",
+      "li4_html": "<strong>零 PII</strong> — 所有信号在协议层匿名化、聚合。",
+      "cta": "开始按意图定向 →"
+    },
+    "dash": {
+      "eyebrow": "效果面板",
+      "h2": "每个广告、每个信号。一块面板。",
+      "p": "几秒内启动、暂停、克隆、优化广告。实时支出、转化、eCPA — 没有 24 小时归因延迟。自动规则会替你暂停表现不佳的广告。",
+      "li1_html": "<strong>亚秒级报告</strong> — 每次出价、展示、转化都实时流入。",
+      "li2_html": "<strong>自动优化规则</strong> — 设定 CPA 目标,我们自动调整预算。",
+      "li3_html": "<strong>创意 A/B</strong> — 投放多个版本,让竞价器自选胜出者。",
+      "cta": "打开面板 →"
+    },
+    "why": {
+      "eyebrow": "为什么选 SuperBoost Ads",
+      "h2": "为 agent 时代重建的广告技术。",
+      "sub": "Google 的技术栈是为网页而建。Facebook 是为信息流而建。我们的是为 AI 会话而建 — 全新的主界面。",
+      "c1_h3": "上下文感知竞价",
+      "c1_p": "我们的拍卖看得到实时会话 — 用户刚问了什么、哪些工具被触发、返回了什么。相关性越高,出价越高。",
+      "c2_h3": "无摩擦版位",
+      "c2_p": "广告以原生卡片形式出现在 AI 聊天和 agent 流程中 — 不是弹窗、不是横幅。用户会转化,因为广告本就属于那里。",
+      "c3_h3": "透明的经济模型",
+      "c3_p": "你看得到具体付了多少、触达了谁、转化了什么。没有黑盒归因,没有隐藏套利。一份干净的 take rate。"
+    },
+    "stats": {
+      "l1": "月 AI 会话量",
+      "l2": "vs 传统展示 CTR",
+      "l3": "平均 eCPA",
+      "l4": "竞价延迟中位数"
+    },
+    "bid": {
+      "h2": "从 brief 到出价,不到 10 分钟。",
+      "sub": "不要 account manager。无最低投放。无候补。登录、设目标,剩下交给拍卖。",
+      "s1_h3": "设定目标",
+      "s1_p": "选一种结果 — 安装、注册、购买 — 再设 CPA 目标。上传素材或直接写文案。",
+      "s2_h3": "实时竞价",
+      "s2_p": "我们的拍卖把每个 AI 会话与你的定向比对,在最可能转化的会话上出价。",
+      "s3_h3": "放大有效的",
+      "s3_p": "实时面板显示胜出的创意和受众。自动规则每 15 分钟重新分配预算。"
+    },
+    "price": {
+      "eyebrow": "价格",
+      "h2": "为效果付费。没有代理税。",
+      "sub": "三种购买方式。全部自助。全部透明。你的 take rate 始终公开在面板上。",
+      "cpm_tag": "自助",
+      "cpm_sub": "每千次 AI 原生展示付费。最适合品牌曝光。",
+      "cpm_li1": "最低投放 $100",
+      "cpm_li2": "所有版位",
+      "cpm_li3": "实时报告",
+      "cpm_cta": "用 CPM 开始",
+      "cpc_tag": "最受欢迎",
+      "cpc_unit": "/点击",
+      "cpc_sub": "AI 用户真正点击时才付费。",
+      "cpc_li1": "最低投放 $50",
+      "cpc_li2": "自动优化出价",
+      "cpc_li3": "内建创意 A/B",
+      "cpc_li4": "$100 起始额度",
+      "cpc_cta": "拿 $100 免费额度",
+      "cpa_tag": "效果",
+      "cpa_price": "按目标",
+      "cpa_sub": "仅在注册、安装或购买时付费。机器学习驱动的竞价。",
+      "cpa_li1": "最低投放 $500",
+      "cpa_li2": "转化追踪 SDK",
+      "cpa_li3": "专属优化",
+      "cpa_cta": "联系我们",
+      "cpm_unit": "/千次"
+    },
+    "brand": {
+      "eyebrow": "高端 · 直签",
+      "h2": "品牌合作 — 有保障的 AI 原生版位。",
+      "sub": "面向想被有购买力的 AI 原生用户(开发者、研究者、早期采用者、知识工作者)看见的非科技品牌。直接谈,按覆盖定价,不进拍卖。",
+      "c1_h3": "保量库存",
+      "c1_p": "在指定的 AI 工具、工作流或会话上下文中,锁定一段时间的独家版位。你的品牌,不进拍卖,不出意外。",
+      "c2_h3": "固定 CPM 定价",
+      "c2_p": "从 $12 CPM 起的协商价。整段广告投放期可预期支出。适合产品发布、季节性推广,或品类占位。",
+      "c3_h3": "白手套运营",
+      "c3_p": "专属 account manager、定制创意审核、Benna AI 受众匹配报告、每周成效汇报。",
+      "who_label": "适合的对象",
+      "who_p": "消费品品牌(可口可乐、三星、Nike)、汽车(宝马、特斯拉)、金融(Chase、AmEx),以及希望首次接触地球上意图最强的数字受众 — AI 工具内用户 — 的高端服务。",
+      "cta": "联系我们的品牌团队 →",
+      "typical": "典型规模:$50k–$2M · 30–90 天广告周期 · 一周内审批"
+    },
+    "quote": {
+      "text_html": "“Boost Boss Ads 是第一个让我们的获客成本随规模 <span class=\"accent\">反而下降</span> 的平台。AI 原生定向是真的 — 我们的诉求落在开发者真正需要我们的会话里。”",
+      "attr_html": "<strong>Sarah Chen</strong> · 增长负责人,<span style=\"color: var(--pink); font-weight: 600;\">Cursor</span>"
+    },
+    "big": {
+      "h2_html": "你的下一个客户<br>正在用一个 AI 应用。",
+      "p": "10 分钟内投放你的第一个 SuperBoost Ads 广告。今天注册获 $100 起始额度。",
+      "cta1": "领取 $100 额度 →",
+      "cta2": "竞价怎么跑"
+    },
+    "foot": {
+      "tag": "为 AI 应用打造的 MCP 广告网络。为开发者而建,为广告主而生。",
+      "col_product": "产品",
+      "col_resources": "资源",
+      "col_company": "公司",
+      "col_trust": "信任与合规",
+      "l_publishers": "发布商",
+      "l_superboost": "SuperBoost",
+      "l_bbx": "BBX",
+      "l_live_demo": "在线演示",
+      "l_how": "工作原理",
+      "l_docs": "文档",
+      "l_api": "API 参考",
+      "l_sdk": "SDK",
+      "l_changelog": "更新日志",
+      "l_about": "关于我们",
+      "l_blog": "博客",
+      "l_careers": "招聘",
+      "l_contact": "联系我们",
+      "l_trust_center": "信任中心",
+      "l_compliance": "SOC 2 · GDPR · CCPA",
+      "l_security": "安全",
+      "l_privacy": "隐私",
+      "l_terms": "使用条款",
+      "copy": "© 2026 Boost Boss, Inc.",
+      "tagline": "为 AI 时代打造。"
+    }
   }
 }

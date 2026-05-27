@@ -93,6 +93,15 @@
   .nav-links a:hover { opacity: 1; color: var(--pink); }
   .nav-links a.active { opacity: 1; color: var(--pink); }
   .nav-ctas { display: flex; gap: 10px; align-items: center; }
+  .nav-lang-wrap { position: relative; }
+  .nav-lang { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; font-family: inherit; transition: background 0.15s, border-color 0.15s; }
+  .nav-lang:hover { border-color: var(--ink-soft); background: var(--bg-soft); }
+  .nav-lang svg { width: 16px; height: 16px; stroke-width: 1.8; }
+  .nav-lang-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 180px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14); z-index: 200; }
+  .nav-lang-wrap.open .nav-lang-menu { display: block; }
+  .nav-lang-menu a { display: block; padding: 11px 14px; border-radius: 8px; font-size: 14.5px; color: var(--ink); text-decoration: none; font-weight: 500; transition: background 0.1s, color 0.1s; }
+  .nav-lang-menu a:hover { background: var(--bg-soft); }
+  .nav-lang-menu a.active { color: var(--pink); font-weight: 700; }
 
   /* Logged-in advertiser pill — replaces "Sign in" / "Launch a campaign"
      when bb_adv_token is set in localStorage. Same shape as the publisher
@@ -1325,6 +1334,7 @@
 
 
 </style>
+<script src="/i18n.js" defer></script>
 </head>
 <body>
 
@@ -1348,15 +1358,32 @@
       <span class="brand-name">Super<span style="color: var(--pink);">Boost Ads</span></span>
     </a>
     <div class="nav-links">
-      <a href="#reach">Your reach</a>
-      <a href="#targeting">Targeting</a>
-      <a href="#bidding">How it works</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#brand-deals">Brand Deals</a>
+      <a href="#reach" data-i18n="ads.nav.reach">Your reach</a>
+      <a href="#targeting" data-i18n="ads.nav.targeting">Targeting</a>
+      <a href="#bidding" data-i18n="ads.nav.bidding">How it works</a>
+      <a href="#pricing" data-i18n="ads.nav.pricing">Pricing</a>
+      <a href="#brand-deals" data-i18n="ads.nav.brand_deals">Brand Deals</a>
     </div>
     <div class="nav-ctas">
-      <a class="btn btn-ghost" href="/ads/signin">Sign in</a>
-      <a class="btn btn-primary" href="/ads/signup">Launch a campaign</a>
+      <div class="nav-lang-wrap" id="navLangWrap">
+        <button class="nav-lang" aria-label="Change language" onclick="document.getElementById('navLangWrap').classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span>EN</span>
+        </button>
+        <div class="nav-lang-menu">
+          <a href="/en" data-lang="en" class="active">English</a>
+          <a href="/zh" data-lang="zh">简体中文</a>
+          <a href="/zh-TW" data-lang="zh-TW">繁體中文</a>
+          <a href="/ja" data-lang="ja">日本語</a>
+          <a href="/ko" data-lang="ko">한국어</a>
+          <a href="/vi" data-lang="vi">Tiếng Việt</a>
+        </div>
+      </div>
+      <a class="btn btn-primary" href="/ads/signup" data-i18n="ads.nav.cta">Launch a campaign</a>
     </div>
   </div>
 </nav>
@@ -1364,19 +1391,19 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div class="badge" data-reveal><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · One campaign, four AI surfaces</div>
-    <h1 data-reveal style="--reveal-delay:80ms">
+    <div class="badge" data-reveal data-i18n="ads.hero.badge_html" data-i18n-html><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · One campaign, four AI surfaces</div>
+    <h1 data-reveal style="--reveal-delay:80ms" data-i18n="ads.hero.h1_html" data-i18n-html>
       Reach <span class="accent-pink">four AI surfaces</span><br>
       from one campaign.
     </h1>
-    <p class="sub" data-reveal style="--reveal-delay:160ms">
+    <p class="sub" data-reveal style="--reveal-delay:160ms" data-i18n="ads.hero.sub">
       SuperBoost Ads runs across MCP tools (Claude Desktop, Cursor), web AI chat, browser extensions, and chat bots — so your brand shows up wherever your audience is using AI. Bid in real time. Target by intent, not cookies. Pay only for real outcomes.
     </p>
     <div class="hero-ctas" data-reveal style="--reveal-delay:240ms">
-      <a class="btn btn-primary btn-lg" href="/ads/signup">Launch your first campaign →</a>
-      <a class="btn btn-outline btn-lg" href="#bidding">See how bidding works</a>
+      <a class="btn btn-primary btn-lg" href="/ads/signup" data-i18n="ads.hero.cta_primary">Launch your first campaign →</a>
+      <a class="btn btn-outline btn-lg" href="#bidding" data-i18n="ads.hero.cta_secondary">See how bidding works</a>
     </div>
-    <div class="hero-micro" data-reveal style="--reveal-delay:320ms">No setup fees · $100 starter credit · Live in under 10 minutes</div>
+    <div class="hero-micro" data-reveal style="--reveal-delay:320ms" data-i18n="ads.hero.micro">No setup fees · $100 starter credit · Live in under 10 minutes</div>
   </div>
 </section>
 
@@ -1384,9 +1411,9 @@
 <section class="reach-section" id="reach">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow pink" data-reveal>Your reach</span>
-      <h2 data-reveal style="--reveal-delay:80ms">Four AI surfaces. One campaign.</h2>
-      <p>Your campaign automatically distributes across every AI surface where your audience lives — MCP tools, web AI apps, browser extensions, and chat bots. Targeting decides where it lands; the auction picks the moment.</p>
+      <span class="eyebrow pink" data-reveal data-i18n="ads.reach.eyebrow">Your reach</span>
+      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.reach.h2">Four AI surfaces. One campaign.</h2>
+      <p data-i18n="ads.reach.sub">Your campaign automatically distributes across every AI surface where your audience lives — MCP tools, web AI apps, browser extensions, and chat bots. Targeting decides where it lands; the auction picks the moment.</p>
     </div>
     <div class="reach-grid">
 
@@ -1419,9 +1446,9 @@
           </svg>
         </div>
         <div class="rc-body">
-          <span class="rc-eyebrow">Door 1 · MCP tools</span>
-          <h4>Inside Claude Desktop &amp; Cursor</h4>
-          <p>Your ad renders alongside MCP tool results. Highest-intent surface — developers seeing your brand the moment they ask "how do I deploy."</p>
+          <span class="rc-eyebrow" data-i18n="ads.reach.d1_eyebrow">Door 1 · MCP tools</span>
+          <h4 data-i18n="ads.reach.d1_h4_html" data-i18n-html>Inside Claude Desktop &amp; Cursor</h4>
+          <p data-i18n="ads.reach.d1_p">Your ad renders alongside MCP tool results. Highest-intent surface — developers seeing your brand the moment they ask "how do I deploy."</p>
           <div class="rc-foot">surface: tool_response</div>
         </div>
       </div>
@@ -1463,9 +1490,9 @@
           </svg>
         </div>
         <div class="rc-body">
-          <span class="rc-eyebrow">Door 2 · AI apps</span>
-          <h4>Inline in web AI chat</h4>
-          <p>ChatGPT-likes, vertical AI tools, agent UIs. Your sponsored card renders inline, same chrome as the AI's own messages — never interruptive.</p>
+          <span class="rc-eyebrow" data-i18n="ads.reach.d2_eyebrow">Door 2 · AI apps</span>
+          <h4 data-i18n="ads.reach.d2_h4">Inline in web AI chat</h4>
+          <p data-i18n="ads.reach.d2_p">ChatGPT-likes, vertical AI tools, agent UIs. Your sponsored card renders inline, same chrome as the AI's own messages — never interruptive.</p>
           <div class="rc-foot">surface: chat</div>
         </div>
       </div>
@@ -1510,9 +1537,9 @@
           </svg>
         </div>
         <div class="rc-body">
-          <span class="rc-eyebrow">Door 3 · Extensions</span>
-          <h4>Browser side panels</h4>
-          <p>Chrome, Edge, Firefox AI extensions — summarizers, writing assistants, sidebars. Contextual to whatever the user is reading. No surveillance, no cookies.</p>
+          <span class="rc-eyebrow" data-i18n="ads.reach.d3_eyebrow">Door 3 · Extensions</span>
+          <h4 data-i18n="ads.reach.d3_h4">Browser side panels</h4>
+          <p data-i18n="ads.reach.d3_p">Chrome, Edge, Firefox AI extensions — summarizers, writing assistants, sidebars. Contextual to whatever the user is reading. No surveillance, no cookies.</p>
           <div class="rc-foot">surface: sidebar</div>
         </div>
       </div>
@@ -1561,9 +1588,9 @@
           </svg>
         </div>
         <div class="rc-body">
-          <span class="rc-eyebrow">Door 4 · Bots</span>
-          <h4>Discord, Telegram, Slack</h4>
-          <p>AI bots reply with your sponsored message in the platform's native format — Discord embed, Telegram card, Slack attachment. Same campaign, three formats.</p>
+          <span class="rc-eyebrow" data-i18n="ads.reach.d4_eyebrow">Door 4 · Bots</span>
+          <h4 data-i18n="ads.reach.d4_h4">Discord, Telegram, Slack</h4>
+          <p data-i18n="ads.reach.d4_p">AI bots reply with your sponsored message in the platform's native format — Discord embed, Telegram card, Slack attachment. Same campaign, three formats.</p>
           <div class="rc-foot">surface: chat (bot)</div>
         </div>
       </div>
@@ -1770,7 +1797,7 @@
 <!-- TRUSTED BY -->
 <section class="trusted" data-reveal>
   <div class="wrap">
-    <p>Your ads shown inside</p>
+    <p data-i18n="ads.trusted.label">Your ads shown inside</p>
     <div class="trusted-row">
       <span>Claude</span>
       <span>ChatGPT</span>
@@ -1787,16 +1814,16 @@
   <div class="wrap">
     <div class="feature-grid">
       <div class="feature-text">
-        <span class="eyebrow pink" data-reveal>AI-native targeting · powered by Benna AI</span>
-        <h2 data-reveal style="--reveal-delay:80ms">Target by what users are <em>trying to do</em> — not who they are.</h2>
-        <p>Cookies are dead. Demographics are lazy. SuperBoost bids on real-time MCP signals — the intent, tools, and context of every AI session — so your ad lands the moment it's actually useful. Every bid is scored by <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">Benna AI</a>, our AI optimization engine — so you only pay when the signal actually predicts conversion.</p>
+        <span class="eyebrow pink" data-reveal data-i18n="ads.targ.eyebrow">AI-native targeting · powered by Benna AI</span>
+        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.targ.h2_html" data-i18n-html>Target by what users are <em>trying to do</em> — not who they are.</h2>
+        <p data-i18n="ads.targ.p_html" data-i18n-html>Cookies are dead. Demographics are lazy. SuperBoost bids on real-time MCP signals — the intent, tools, and context of every AI session — so your ad lands the moment it's actually useful. Every bid is scored by <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">Benna AI</a>, our AI optimization engine — so you only pay when the signal actually predicts conversion.</p>
         <ul class="bullet-list">
-          <li><span class="check">✓</span><span><strong>Intent signals</strong> — bid on "writing a pitch deck" or "debugging Python," not "males 25–34."</span></li>
-          <li><span class="check cyan">✓</span><span><strong>Tool context</strong> — target by which MCP tools and models are active in session.</span></li>
-          <li><span class="check yellow">✓</span><span><strong>Benna AI auto-optimization</strong> — set a target CPA, the engine adjusts bids on every auction. <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 600;">benna.ai ↗</a></span></li>
-          <li><span class="check">✓</span><span><strong>Zero PII</strong> — all signals anonymized and aggregated at the protocol layer.</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.targ.li1_html" data-i18n-html><strong>Intent signals</strong> — bid on "writing a pitch deck" or "debugging Python," not "males 25–34."</span></li>
+          <li><span class="check cyan">✓</span><span data-i18n="ads.targ.li2_html" data-i18n-html><strong>Tool context</strong> — target by which MCP tools and models are active in session.</span></li>
+          <li><span class="check yellow">✓</span><span data-i18n="ads.targ.li3_html" data-i18n-html><strong>Benna AI auto-optimization</strong> — set a target CPA, the engine adjusts bids on every auction. <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 600;">benna.ai ↗</a></span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.targ.li4_html" data-i18n-html><strong>Zero PII</strong> — all signals anonymized and aggregated at the protocol layer.</span></li>
         </ul>
-        <a class="btn btn-primary btn-lg" href="/ads/signup">Start targeting by intent →</a>
+        <a class="btn btn-primary btn-lg" href="/ads/signup" data-i18n="ads.targ.cta">Start targeting by intent →</a>
       </div>
       <div class="vis-card targeting-mock">
         <div class="heading">Campaign: <strong>Cursor — Q2 dev acquisition</strong></div>
@@ -1831,15 +1858,15 @@
   <div class="wrap">
     <div class="feature-grid reverse">
       <div class="feature-text">
-        <span class="eyebrow cyan" data-reveal>Performance dashboard</span>
-        <h2 data-reveal style="--reveal-delay:80ms">Every campaign. Every signal. One pane of glass.</h2>
-        <p>Launch, pause, clone, and optimize campaigns in seconds. Live spend, conversion, and eCPA data — no 24-hour attribution lag. Automated rules pause underperformers for you.</p>
+        <span class="eyebrow cyan" data-reveal data-i18n="ads.dash.eyebrow">Performance dashboard</span>
+        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.dash.h2">Every campaign. Every signal. One pane of glass.</h2>
+        <p data-i18n="ads.dash.p">Launch, pause, clone, and optimize campaigns in seconds. Live spend, conversion, and eCPA data — no 24-hour attribution lag. Automated rules pause underperformers for you.</p>
         <ul class="bullet-list">
-          <li><span class="check cyan">✓</span><span><strong>Sub-second reporting</strong> — every bid, impression, and conversion streams live.</span></li>
-          <li><span class="check">✓</span><span><strong>Auto-optimization rules</strong> — set CPA targets, we shift budget automatically.</span></li>
-          <li><span class="check yellow">✓</span><span><strong>Creative A/B</strong> — rotate variants and let the bidder pick winners.</span></li>
+          <li><span class="check cyan">✓</span><span data-i18n="ads.dash.li1_html" data-i18n-html><strong>Sub-second reporting</strong> — every bid, impression, and conversion streams live.</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.dash.li2_html" data-i18n-html><strong>Auto-optimization rules</strong> — set CPA targets, we shift budget automatically.</span></li>
+          <li><span class="check yellow">✓</span><span data-i18n="ads.dash.li3_html" data-i18n-html><strong>Creative A/B</strong> — rotate variants and let the bidder pick winners.</span></li>
         </ul>
-        <a class="btn btn-outline btn-lg" href="/ads/dashboard">Open the dashboard →</a>
+        <a class="btn btn-outline btn-lg" href="/ads/dashboard" data-i18n="ads.dash.cta">Open the dashboard →</a>
       </div>
       <div class="vis-card">
         <div class="campaign-mock">
@@ -1884,25 +1911,25 @@
 <section class="feature">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow yellow" data-reveal>Why SuperBoost Ads</span>
-      <h2 data-reveal style="--reveal-delay:80ms">Ad tech rebuilt for the agent era.</h2>
-      <p>Google's stack was built for web pages. Facebook's was built for feeds. We built ours for AI sessions — the new primary surface.</p>
+      <span class="eyebrow yellow" data-reveal data-i18n="ads.why.eyebrow">Why SuperBoost Ads</span>
+      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.why.h2">Ad tech rebuilt for the agent era.</h2>
+      <p data-i18n="ads.why.sub">Google's stack was built for web pages. Facebook's was built for feeds. We built ours for AI sessions — the new primary surface.</p>
     </div>
     <div class="three-cards">
       <div class="card-flat">
         <div class="icon-chip chip-pink">⚡</div>
-        <h3>Context-aware bidding</h3>
-        <p>Our auction sees the live session — what the user just asked, which tools fired, what came back. Bids go up when relevance goes up.</p>
+        <h3 data-i18n="ads.why.c1_h3">Context-aware bidding</h3>
+        <p data-i18n="ads.why.c1_p">Our auction sees the live session — what the user just asked, which tools fired, what came back. Bids go up when relevance goes up.</p>
       </div>
       <div class="card-flat">
         <div class="icon-chip chip-cyan">🎯</div>
-        <h3>Frictionless placements</h3>
-        <p>Ads render as native cards inside AI chats and agent flows — not pop-ups, not banners. Users convert because the ad actually belongs there.</p>
+        <h3 data-i18n="ads.why.c2_h3">Frictionless placements</h3>
+        <p data-i18n="ads.why.c2_p">Ads render as native cards inside AI chats and agent flows — not pop-ups, not banners. Users convert because the ad actually belongs there.</p>
       </div>
       <div class="card-flat">
         <div class="icon-chip chip-yellow">📈</div>
-        <h3>Transparent economics</h3>
-        <p>See exactly what you pay, who you reach, and what converted. No black-box attribution. No hidden arbitrage. One clean take rate.</p>
+        <h3 data-i18n="ads.why.c3_h3">Transparent economics</h3>
+        <p data-i18n="ads.why.c3_p">See exactly what you pay, who you reach, and what converted. No black-box attribution. No hidden arbitrage. One clean take rate.</p>
       </div>
     </div>
   </div>
@@ -1912,10 +1939,10 @@
 <section class="stats-bar">
   <div class="wrap">
     <div class="stats-row" data-reveal>
-      <div class="stat" data-reveal style="--reveal-delay:0ms"><div class="n pink" data-count="1.2" data-decimals="1" data-suffix="B">0</div><div class="l">Monthly AI sessions</div></div>
-      <div class="stat" data-reveal style="--reveal-delay:80ms"><div class="n cyan" data-count="3.8" data-decimals="1" data-suffix="×">0</div><div class="l">vs. traditional display CTR</div></div>
-      <div class="stat" data-reveal style="--reveal-delay:160ms"><div class="n yellow" data-count="1.93" data-decimals="2" data-prefix="$">$0</div><div class="l">Average eCPA</div></div>
-      <div class="stat" data-reveal style="--reveal-delay:240ms"><div class="n" data-count="47" data-decimals="0" data-suffix="ms">0</div><div class="l">Median bid latency</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:0ms"><div class="n pink" data-count="1.2" data-decimals="1" data-suffix="B">0</div><div class="l" data-i18n="ads.stats.l1">Monthly AI sessions</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:80ms"><div class="n cyan" data-count="3.8" data-decimals="1" data-suffix="×">0</div><div class="l" data-i18n="ads.stats.l2">vs. traditional display CTR</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:160ms"><div class="n yellow" data-count="1.93" data-decimals="2" data-prefix="$">$0</div><div class="l" data-i18n="ads.stats.l3">Average eCPA</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:240ms"><div class="n" data-count="47" data-decimals="0" data-suffix="ms">0</div><div class="l" data-i18n="ads.stats.l4">Median bid latency</div></div>
     </div>
   </div>
 </section>
@@ -1928,27 +1955,27 @@
 <section class="how" id="bidding">
   <div class="wrap">
     <div class="section-header">
-      <h2 data-reveal>From brief to bid in under 10 minutes.</h2>
-      <p>No account managers. No minimum spend. No waitlist. Log in, set a goal, let the auction do the rest.</p>
+      <h2 data-reveal data-i18n="ads.bid.h2">From brief to bid in under 10 minutes.</h2>
+      <p data-i18n="ads.bid.sub">No account managers. No minimum spend. No waitlist. Log in, set a goal, let the auction do the rest.</p>
     </div>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <div class="icon-chip chip-pink">🎯</div>
-        <h3>Set your target</h3>
-        <p>Pick an outcome — installs, signups, purchases — and a CPA goal. Upload creative or write copy inline.</p>
+        <h3 data-i18n="ads.bid.s1_h3">Set your target</h3>
+        <p data-i18n="ads.bid.s1_p">Pick an outcome — installs, signups, purchases — and a CPA goal. Upload creative or write copy inline.</p>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="icon-chip chip-cyan">⚡</div>
-        <h3>Bid in real time</h3>
-        <p>Our auction evaluates every AI session against your targeting and bids on the ones most likely to convert.</p>
+        <h3 data-i18n="ads.bid.s2_h3">Bid in real time</h3>
+        <p data-i18n="ads.bid.s2_p">Our auction evaluates every AI session against your targeting and bids on the ones most likely to convert.</p>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="icon-chip chip-yellow">📊</div>
-        <h3>Scale what works</h3>
-        <p>Live dashboards surface winning creatives and audiences. Auto-rules reallocate budget every 15 minutes.</p>
+        <h3 data-i18n="ads.bid.s3_h3">Scale what works</h3>
+        <p data-i18n="ads.bid.s3_p">Live dashboards surface winning creatives and audiences. Auto-rules reallocate budget every 15 minutes.</p>
       </div>
     </div>
   </div>
@@ -1958,47 +1985,47 @@
 <section class="pricing" id="pricing">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow cyan" data-reveal>Pricing</span>
-      <h2 data-reveal style="--reveal-delay:80ms">Pay for outcomes. No agency tax.</h2>
-      <p>Three ways to buy. All self-serve. All transparent. Your take rate is always posted on your dashboard.</p>
+      <span class="eyebrow cyan" data-reveal data-i18n="ads.price.eyebrow">Pricing</span>
+      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.price.h2">Pay for outcomes. No agency tax.</h2>
+      <p data-i18n="ads.price.sub">Three ways to buy. All self-serve. All transparent. Your take rate is always posted on your dashboard.</p>
     </div>
     <div class="price-grid">
       <div class="price-card">
-        <span class="price-tag pink">Self-serve</span>
+        <span class="price-tag pink" data-i18n="ads.price.cpm_tag">Self-serve</span>
         <h3>CPM</h3>
-        <div class="price">$2.40<span style="font-size: 16px; color: var(--muted); font-weight: 500;">/k</span></div>
-        <div class="price-sub">Pay per thousand AI-native impressions. Best for awareness.</div>
+        <div class="price">$2.40<span style="font-size: 16px; color: var(--muted); font-weight: 500;" data-i18n="ads.price.cpm_unit">/k</span></div>
+        <div class="price-sub" data-i18n="ads.price.cpm_sub">Pay per thousand AI-native impressions. Best for awareness.</div>
         <ul class="bullet-list" style="margin-bottom: 28px;">
-          <li><span class="check">✓</span><span>$100 minimum spend</span></li>
-          <li><span class="check">✓</span><span>All placements</span></li>
-          <li><span class="check">✓</span><span>Live reporting</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpm_li1">$100 minimum spend</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpm_li2">All placements</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpm_li3">Live reporting</span></li>
         </ul>
-        <a class="btn btn-outline" href="/ads/signup">Start with CPM</a>
+        <a class="btn btn-outline" href="/ads/signup" data-i18n="ads.price.cpm_cta">Start with CPM</a>
       </div>
       <div class="price-card featured">
-        <span class="price-tag dark">Most popular</span>
+        <span class="price-tag dark" data-i18n="ads.price.cpc_tag">Most popular</span>
         <h3>CPC</h3>
-        <div class="price">$0.38<span style="font-size: 16px; color: #A0A0B0; font-weight: 500;">/click</span></div>
-        <div class="price-sub">Pay only when an AI user actually clicks through.</div>
+        <div class="price">$0.38<span style="font-size: 16px; color: #A0A0B0; font-weight: 500;" data-i18n="ads.price.cpc_unit">/click</span></div>
+        <div class="price-sub" data-i18n="ads.price.cpc_sub">Pay only when an AI user actually clicks through.</div>
         <ul class="bullet-list" style="margin-bottom: 28px;">
-          <li><span class="check">✓</span><span>$50 minimum spend</span></li>
-          <li><span class="check">✓</span><span>Auto-optimized bidding</span></li>
-          <li><span class="check">✓</span><span>Creative A/B built-in</span></li>
-          <li><span class="check">✓</span><span>$100 starter credit</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li1">$50 minimum spend</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li2">Auto-optimized bidding</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li3">Creative A/B built-in</span></li>
+          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li4">$100 starter credit</span></li>
         </ul>
-        <a class="btn btn-primary" href="/ads/signup">Get $100 free credit</a>
+        <a class="btn btn-primary" href="/ads/signup" data-i18n="ads.price.cpc_cta">Get $100 free credit</a>
       </div>
       <div class="price-card">
-        <span class="price-tag cyan">Performance</span>
+        <span class="price-tag cyan" data-i18n="ads.price.cpa_tag">Performance</span>
         <h3>CPA</h3>
-        <div class="price">target-based</div>
-        <div class="price-sub">Pay only on signup, install, or purchase. Machine-learned bidding.</div>
+        <div class="price" data-i18n="ads.price.cpa_price">target-based</div>
+        <div class="price-sub" data-i18n="ads.price.cpa_sub">Pay only on signup, install, or purchase. Machine-learned bidding.</div>
         <ul class="bullet-list" style="margin-bottom: 28px;">
-          <li><span class="check cyan">✓</span><span>$500 minimum spend</span></li>
-          <li><span class="check cyan">✓</span><span>Conversion tracking SDK</span></li>
-          <li><span class="check cyan">✓</span><span>Dedicated optimization</span></li>
+          <li><span class="check cyan">✓</span><span data-i18n="ads.price.cpa_li1">$500 minimum spend</span></li>
+          <li><span class="check cyan">✓</span><span data-i18n="ads.price.cpa_li2">Conversion tracking SDK</span></li>
+          <li><span class="check cyan">✓</span><span data-i18n="ads.price.cpa_li3">Dedicated optimization</span></li>
         </ul>
-        <a class="btn btn-outline" href="/ads/signup">Talk to us</a>
+        <a class="btn btn-outline" href="/ads/signup" data-i18n="ads.price.cpa_cta">Talk to us</a>
       </div>
     </div>
   </div>
@@ -2008,32 +2035,32 @@
 <section class="feature" id="brand-deals" style="background: var(--ink); color: #fff; padding: 96px 0;">
   <div class="wrap">
     <div class="section-header" style="text-align: center; margin-bottom: 56px;">
-      <span class="eyebrow" data-reveal style="background: var(--yellow); color: var(--ink); padding: 6px 12px; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em; font-size: 12px;">PREMIUM · DIRECT</span>
-      <h2 style="color: #fff; margin-top: 18px;">Brand Deals — guaranteed AI-native placements.</h2>
-      <p style="color: #B0B0C0; max-width: 720px; margin: 16px auto 0;">For non-tech brands that want to be seen by AI-native users with purchasing power — developers, researchers, early adopters, knowledge workers. Negotiated directly. Priced on reach, not auction.</p>
+      <span class="eyebrow" data-reveal style="background: var(--yellow); color: var(--ink); padding: 6px 12px; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em; font-size: 12px;" data-i18n="ads.brand.eyebrow">PREMIUM · DIRECT</span>
+      <h2 style="color: #fff; margin-top: 18px;" data-i18n="ads.brand.h2">Brand Deals — guaranteed AI-native placements.</h2>
+      <p style="color: #B0B0C0; max-width: 720px; margin: 16px auto 0;" data-i18n="ads.brand.sub">For non-tech brands that want to be seen by AI-native users with purchasing power — developers, researchers, early adopters, knowledge workers. Negotiated directly. Priced on reach, not auction.</p>
     </div>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px;">
       <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 28px;">
         <div style="font-size: 28px; margin-bottom: 12px;">🎯</div>
-        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;">Guaranteed inventory</h3>
-        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;">Lock exclusive placement inside specific AI tools, workflows, or session contexts for a defined period. Your brand, no auction, no surprises.</p>
+        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;" data-i18n="ads.brand.c1_h3">Guaranteed inventory</h3>
+        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;" data-i18n="ads.brand.c1_p">Lock exclusive placement inside specific AI tools, workflows, or session contexts for a defined period. Your brand, no auction, no surprises.</p>
       </div>
       <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 28px;">
         <div style="font-size: 28px; margin-bottom: 12px;">💎</div>
-        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;">Fixed CPM pricing</h3>
-        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;">Negotiated rates from $12 CPM. Predictable spend across the campaign window. Ideal for product launches, seasonal pushes, or category ownership.</p>
+        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;" data-i18n="ads.brand.c2_h3">Fixed CPM pricing</h3>
+        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;" data-i18n="ads.brand.c2_p">Negotiated rates from $12 CPM. Predictable spend across the campaign window. Ideal for product launches, seasonal pushes, or category ownership.</p>
       </div>
       <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 28px;">
         <div style="font-size: 28px; margin-bottom: 12px;">🤝</div>
-        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;">White-glove ops</h3>
-        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;">Dedicated account manager, custom creative review, Benna AI audience match reports, and weekly performance readouts.</p>
+        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;" data-i18n="ads.brand.c3_h3">White-glove ops</h3>
+        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;" data-i18n="ads.brand.c3_p">Dedicated account manager, custom creative review, Benna AI audience match reports, and weekly performance readouts.</p>
       </div>
     </div>
     <div style="background: linear-gradient(135deg, rgba(255,45,120,0.1), rgba(4,190,254,0.08)); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 40px; text-align: center;">
-      <div style="font-size: 14px; color: var(--yellow); font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px;">WHO THIS IS FOR</div>
-      <p style="color: #E0E0E8; font-size: 17px; max-width: 680px; margin: 0 auto 28px; line-height: 1.6;">Consumer brands (Coca-Cola, Samsung, Nike), auto (BMW, Tesla), finance (Chase, AmEx), and premium services that want first-touch access to the highest-intent digital audience on the planet — users inside AI tools.</p>
-      <a class="btn btn-primary btn-lg" href="mailto:brand-deals@boostboss.ai?subject=Brand%20Deal%20Inquiry" style="background: var(--pink); color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: 700; display: inline-block;">Talk to our brand team →</a>
-      <div style="margin-top: 16px; font-size: 13px; color: #808090;">Typical deals: $50k–$2M · 30–90 day campaigns · Approvals in under 1 week</div>
+      <div style="font-size: 14px; color: var(--yellow); font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px;" data-i18n="ads.brand.who_label">WHO THIS IS FOR</div>
+      <p style="color: #E0E0E8; font-size: 17px; max-width: 680px; margin: 0 auto 28px; line-height: 1.6;" data-i18n="ads.brand.who_p">Consumer brands (Coca-Cola, Samsung, Nike), auto (BMW, Tesla), finance (Chase, AmEx), and premium services that want first-touch access to the highest-intent digital audience on the planet — users inside AI tools.</p>
+      <a class="btn btn-primary btn-lg" href="mailto:brand-deals@boostboss.ai?subject=Brand%20Deal%20Inquiry" style="background: var(--pink); color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: 700; display: inline-block;" data-i18n="ads.brand.cta">Talk to our brand team →</a>
+      <div style="margin-top: 16px; font-size: 13px; color: #808090;" data-i18n="ads.brand.typical">Typical deals: $50k–$2M · 30–90 day campaigns · Approvals in under 1 week</div>
     </div>
   </div>
 </section>
@@ -2041,10 +2068,10 @@
 <!-- TESTIMONIAL -->
 <section class="quote">
   <div class="wrap">
-    <blockquote>
+    <blockquote data-i18n="ads.quote.text_html" data-i18n-html>
       "Boost Boss Ads is the first platform where our cost-per-signup actually <span class="accent">went down</span> as we scaled. AI-native targeting is the real thing — our pitch lands in the exact session a dev needs us."
     </blockquote>
-    <div class="attr"><strong>Sarah Chen</strong> · Head of Growth, <span style="color: var(--pink); font-weight: 600;">Cursor</span></div>
+    <div class="attr" data-i18n="ads.quote.attr_html" data-i18n-html><strong>Sarah Chen</strong> · Head of Growth, <span style="color: var(--pink); font-weight: 600;">Cursor</span></div>
   </div>
 </section>
 
@@ -2053,11 +2080,11 @@
   <div class="big-cta-box">
     <div class="deco-sparkle s1">✦</div>
     <div class="deco-sparkle s2">✦</div>
-    <h2 data-reveal>Your next customer<br>is using an AI app right now.</h2>
-    <p>Launch your first SuperBoost Ads campaign in 10 minutes. $100 in starter credit when you sign up today.</p>
+    <h2 data-reveal data-i18n="ads.big.h2_html" data-i18n-html>Your next customer<br>is using an AI app right now.</h2>
+    <p data-i18n="ads.big.p">Launch your first SuperBoost Ads campaign in 10 minutes. $100 in starter credit when you sign up today.</p>
     <div class="hero-ctas">
-      <a class="btn btn-lg" href="/ads/signup">Claim $100 credit →</a>
-      <a class="btn btn-lg outline-white" href="#bidding">How bidding works</a>
+      <a class="btn btn-lg" href="/ads/signup" data-i18n="ads.big.cta1">Claim $100 credit →</a>
+      <a class="btn btn-lg outline-white" href="#bidding" data-i18n="ads.big.cta2">How bidding works</a>
     </div>
   </div>
 </section>
@@ -2083,42 +2110,42 @@
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
           <span class="brand-name">Boost Boss</span>
         </div>
-        <p class="foot-tag">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
+        <p class="foot-tag" data-i18n="ads.foot.tag">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
       </div>
       <div class="foot-col">
-        <h4>Product</h4>
+        <h4 data-i18n="ads.foot.col_product">Product</h4>
         <ul>
-          <li><a href="/publish">Publishers</a></li>
-          <li><a href="/ads">SuperBoost</a></li>
-          <li><a href="/exchange">BBX</a></li>
-          <li><a href="/demo">Live demo</a></li>
-          <li><a href="#how">How it works</a></li>
+          <li><a href="/publish" data-i18n="ads.foot.l_publishers">Publishers</a></li>
+          <li><a href="/ads" data-i18n="ads.foot.l_superboost">SuperBoost</a></li>
+          <li><a href="/exchange" data-i18n="ads.foot.l_bbx">BBX</a></li>
+          <li><a href="/demo" data-i18n="ads.foot.l_live_demo">Live demo</a></li>
+          <li><a href="#how" data-i18n="ads.foot.l_how">How it works</a></li>
         </ul>
       </div>
       <div class="foot-col">
-        <h4>Resources</h4>
+        <h4 data-i18n="ads.foot.col_resources">Resources</h4>
         <ul>
-          <li><a href="/docs">Documentation</a></li>
-          <li><a href="/docs/api-reference">API reference</a></li>
-          <li><a href="/docs/api-reference#sdks">SDK</a></li>
-          <li><a href="/docs">Changelog</a></li>
+          <li><a href="/docs" data-i18n="ads.foot.l_docs">Documentation</a></li>
+          <li><a href="/docs/api-reference" data-i18n="ads.foot.l_api">API reference</a></li>
+          <li><a href="/docs/api-reference#sdks" data-i18n="ads.foot.l_sdk">SDK</a></li>
+          <li><a href="/docs" data-i18n="ads.foot.l_changelog">Changelog</a></li>
         </ul>
       </div>
       <div class="foot-col">
-        <h4>Company</h4>
+        <h4 data-i18n="ads.foot.col_company">Company</h4>
         <ul>
-          <li><a href="/">About</a></li>
-          <li><a href="/docs">Blog</a></li>
-          <li><a href="mailto:careers@boostboss.ai">Careers</a></li>
-          <li><a href="mailto:hello@boostboss.ai">Contact</a></li>
+          <li><a href="/" data-i18n="ads.foot.l_about">About</a></li>
+          <li><a href="/docs" data-i18n="ads.foot.l_blog">Blog</a></li>
+          <li><a href="mailto:careers@boostboss.ai" data-i18n="ads.foot.l_careers">Careers</a></li>
+          <li><a href="mailto:hello@boostboss.ai" data-i18n="ads.foot.l_contact">Contact</a></li>
         </ul>
       </div>
       <div class="foot-col">
-        <h4>Trust &amp; legal</h4>
+        <h4 data-i18n="ads.foot.col_trust">Trust &amp; legal</h4>
         <ul>
-          <li><a href="/trust">Trust center</a></li>
-          <li><a href="/trust.html#compliance">SOC 2 · GDPR · CCPA</a></li>
-          <li><a href="/trust.html#security">Security</a></li>
+          <li><a href="/trust" data-i18n="ads.foot.l_trust_center">Trust center</a></li>
+          <li><a href="/trust.html#compliance" data-i18n="ads.foot.l_compliance">SOC 2 · GDPR · CCPA</a></li>
+          <li><a href="/trust.html#security" data-i18n="ads.foot.l_security">Security</a></li>
           <li><a href="/sellers.json">sellers.json</a></li>
           <li><a href="/ads.txt">ads.txt</a></li>
           <li><a href="/trust">Privacy</a></li>
@@ -2127,8 +2154,8 @@
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 Boost Boss, Inc.</span>
-      <span>Made for the AI era.</span>
+      <span data-i18n="ads.foot.copy">© 2026 Boost Boss, Inc.</span>
+      <span data-i18n="ads.foot.tagline">Made for the AI era.</span>
     </div>
   </div>
 </footer>
@@ -2385,12 +2412,14 @@
           });
         };
         var initial = String(name).trim().charAt(0).toUpperCase() || 'A';
+        var lang = ctas.querySelector('.nav-lang-wrap');
         ctas.innerHTML =
           '<a href="' + dashUrl + '" class="btn btn-ghost auth-pill" title="Go to your dashboard">' +
           '<span class="auth-avatar">' + esc(initial) + '</span>' +
           '<span class="auth-name">' + esc(name) + '</span>' +
           '<span class="auth-arrow">→</span>' +
           '</a>';
+        if (lang) ctas.insertBefore(lang, ctas.firstChild);
       } catch (e) { console.error("[initAuthNav]", e); }
     }
 
