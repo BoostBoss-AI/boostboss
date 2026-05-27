@@ -2527,43 +2527,43 @@
                     <div class="benna-engine-brand">
                         <div class="mark">B</div>
                         <div>
-                            <div class="label">Optimization engine · live</div>
-                            <div class="title">Benna is running your campaigns</div>
+                            <div class="label" data-t="benna.opt_engine_live">Optimization engine · live</div>
+                            <div class="title" data-t="benna.running">Benna is running your campaigns</div>
                         </div>
                     </div>
                     <div class="benna-engine-status">
                         <span class="status-dot"></span>
-                        <span id="bennaStatusLabel">OPTIMIZING · 2 campaigns</span>
+                        <span id="bennaStatusLabel" data-t="benna.status_optimizing">OPTIMIZING · 2 campaigns</span>
                     </div>
                 </div>
 
                 <div class="benna-engine-grid">
                     <!-- Column A: Metrics -->
                     <div class="bcol">
-                        <div class="bcol-label">Engine metrics</div>
+                        <div class="bcol-label" data-t="benna.engine_metrics">Engine metrics</div>
                         <div class="b-metrics-grid">
                             <div class="b-metric">
                                 <div class="v" id="bMetricDecisions">1.24M</div>
-                                <div class="l">decisions / 24h</div>
+                                <div class="l" data-t="benna.metric_decisions">decisions / 24h</div>
                             </div>
                             <div class="b-metric">
                                 <div class="v" id="bMetricLatency">4.2ms</div>
-                                <div class="l">p50 inference</div>
+                                <div class="l" data-t="benna.metric_p50">p50 inference</div>
                             </div>
                             <div class="b-metric">
                                 <div class="v" id="bMetricLift">−38%</div>
-                                <div class="l">eCPA vs manual</div>
+                                <div class="l" data-t="benna.metric_lift">eCPA vs manual</div>
                             </div>
                             <div class="b-metric">
                                 <div class="v" id="bMetricLearning">1</div>
-                                <div class="l">in learning phase</div>
+                                <div class="l" data-t="benna.metric_learning">in learning phase</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Column B: Top signals -->
                     <div class="bcol">
-                        <div class="bcol-label">Top weighted signals</div>
+                        <div class="bcol-label" data-t="benna.top_signals">Top weighted signals</div>
                         <div id="bSignals">
                             <div class="b-signal">
                                 <div class="name">intent=debug_py</div>
@@ -2595,7 +2595,7 @@
 
                     <!-- Column C: Recent auto-adjustments -->
                     <div class="bcol">
-                        <div class="bcol-label">Recent auto-adjustments</div>
+                        <div class="bcol-label" data-t="benna.recent_adj">Recent auto-adjustments</div>
                         <div class="b-log" id="bLog">
                             <div class="b-log-entry">
                                 <span class="time">14:23</span>
@@ -2631,11 +2631,11 @@
                  renderAuctionSummary() from stats.auction_summary. -->
             <div class="performance-data" id="bbxAuctionSummaryWrap">
                 <div class="performance-subhead">
-                    <span class="performance-subhead-title">Auction intelligence</span>
+                    <span class="performance-subhead-title" data-t="auc.title">Auction intelligence</span>
                     <span class="performance-subhead-sub" data-t="auc.sub">intent histogram · top surfaces · per-door spend · recent impressions</span>
                 </div>
                 <div id="bbxAuctionSummary" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px;">
-                    <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:14px 0;">
+                    <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:14px 0;" data-t="auc.placeholder">
                         Run a campaign to populate this panel — surfaces, intent-match histogram, and recent impressions appear here automatically.
                     </div>
                 </div>
@@ -4048,7 +4048,13 @@
                 // chart-rendering error can't suppress it. Each render is
                 // wrapped in try/catch so one bug can't take out the rest.
                 if (stats.auction_summary) {
-                    try { renderAuctionSummary(stats.auction_summary); }
+                    try {
+                        // Cache so the language toggle can re-render this
+                        // panel in the new locale without waiting for the
+                        // next /api/stats fetch.
+                        window._lastAuctionSummary = stats.auction_summary;
+                        renderAuctionSummary(stats.auction_summary);
+                    }
                     catch (e) { console.error('renderAuctionSummary failed:', e); }
                 }
 
@@ -4076,10 +4082,14 @@
             // account than a single placeholder line, especially during
             // walkthroughs where the layout itself is the proof.
             const conv = s.conversions || { count: 0, value: 0, by_type: {}, cvr: null, roas: null, cpa: null };
-            // Update the live Benna panel status label with real intent stats
+            // Update the live Benna panel status label with real intent stats.
+            // Resolve translated chunks at call time so the language toggle
+            // can drive re-renders.
             const label = document.getElementById('bennaStatusLabel');
             if (label && s.avg_intent_match != null) {
-                label.textContent = `OPTIMIZING · avg intent match ${s.avg_intent_match.toFixed(2)}`;
+                const optStr  = tt('benna.optimizing',         'OPTIMIZING');
+                const intStr  = tt('benna.avg_intent_match',   'avg intent match');
+                label.textContent = `${optStr} · ${intStr} ${s.avg_intent_match.toFixed(2)}`;
             }
             // If a host element exists for the auction-summary block, populate it.
             const host = document.getElementById('bbxAuctionSummary');
@@ -4096,11 +4106,11 @@
             // The advertiser sees "where my spend went" grouped by surface
             // family rather than the lower-level surface flag.
             const DOOR_LABELS = {
-                'mcp':        { label: 'MCP tools',  hint: 'Claude Desktop · Cursor', color: '#FF2D78' },
-                'js-snippet': { label: 'AI apps',    hint: 'Web AI chat',             color: '#04BEFE' },
-                'npm-sdk':    { label: 'Extensions', hint: 'Chrome · Edge · Firefox', color: '#FFE600' },
-                'rest-api':   { label: 'Bots',       hint: 'Discord · Telegram · Slack', color: '#7C3AED' },
-                'untagged':   { label: 'Untagged',   hint: 'Pre-tag legacy traffic',  color: '#9CA3AF' },
+                'mcp':        { label: tt('auc.door_mcp',        'MCP tools'),  hint: tt('auc.door_mcp_hint',        'Claude Desktop · Cursor'),    color: '#FF2D78' },
+                'js-snippet': { label: tt('auc.door_js',         'AI apps'),    hint: tt('auc.door_js_hint',         'Web AI chat'),                color: '#04BEFE' },
+                'npm-sdk':    { label: tt('auc.door_ext',        'Extensions'), hint: tt('auc.door_ext_hint',        'Chrome · Edge · Firefox'),    color: '#FFE600' },
+                'rest-api':   { label: tt('auc.door_bots',       'Bots'),       hint: tt('auc.door_bots_hint',       'Discord · Telegram · Slack'), color: '#7C3AED' },
+                'untagged':   { label: tt('auc.door_untagged',   'Untagged'),   hint: tt('auc.door_untagged_hint',   'Pre-tag legacy traffic'),     color: '#9CA3AF' },
             };
             const byMethod = s.by_integration_method || {};
             const doorEntries = Object.entries(byMethod)
@@ -4127,72 +4137,93 @@
             const convTypeRows = Object.entries(conv.by_type || {})
                 .sort((a, b) => b[1] - a[1])
                 .map(([k, n]) => `<span style="background:#EFF6FF;color:#1D4ED8;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:500;margin-right:6px;">${escapeHtmlA(k)} · ${n}</span>`).join('');
+            // Translated labels for the conversion KPI strip + empty hint.
+            const convL7  = tt('auc.conv_last7',     'Conversions · last 7 days');
+            const totVal  = tt('auc.total_value',    'Total value');
+            const lblCVR  = tt('auc.cvr',            'CVR');
+            const lblCPA  = tt('auc.cpa',            'CPA');
+            const lblROAS = tt('auc.roas',           'ROAS');
+            const convHd  = tt('auc.conversions',    'Conversions');
+            const pix1    = tt('auc.pixel_a',        'Install the Boost Boss pixel on your conversion page to track ROAS. Forward');
+            const pix2    = tt('auc.pixel_b',        'from your CTA URL into a POST to');
+            const pix3    = tt('auc.pixel_c',        'with');
             const convBlock = conv.count > 0 ? `
                 <div style="border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:16px;background:#FAFAF7;">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
                         <div>
-                            <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Conversions · last 7 days</div>
+                            <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">${convL7}</div>
                             <div style="font-size:24px;font-weight:700;color:#111;line-height:1;">${conv.count.toLocaleString()}</div>
-                            <div style="font-size:12px;color:#6B7280;margin-top:4px;">Total value <strong style="color:#059669;">${fmt$(conv.value)}</strong></div>
+                            <div style="font-size:12px;color:#6B7280;margin-top:4px;">${totVal} <strong style="color:#059669;">${fmt$(conv.value)}</strong></div>
                             <div style="margin-top:8px;">${convTypeRows}</div>
                         </div>
                         <div style="display:grid;grid-template-columns:repeat(3,minmax(80px,auto));gap:14px;">
                             <div>
-                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">CVR</div>
+                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">${lblCVR}</div>
                                 <div style="font-size:18px;font-weight:700;color:#111;">${conv.cvr != null ? (conv.cvr * 100).toFixed(2) + '%' : '—'}</div>
                             </div>
                             <div>
-                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">CPA</div>
+                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">${lblCPA}</div>
                                 <div style="font-size:18px;font-weight:700;color:#111;">${conv.cpa != null ? fmt$(conv.cpa) : '—'}</div>
                             </div>
                             <div>
-                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">ROAS</div>
+                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">${lblROAS}</div>
                                 <div style="font-size:18px;font-weight:700;color:${conv.roas != null && conv.roas >= 1 ? '#059669' : '#111'};">${conv.roas != null ? conv.roas.toFixed(2) + '×' : '—'}</div>
                             </div>
                         </div>
                     </div>
                 </div>` : `
                 <div style="border:1px dashed #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:16px;background:#FAFAFA;">
-                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Conversions</div>
+                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">${convHd}</div>
                     <div style="font-size:13px;color:#6B7280;">
-                        Install the Boost Boss pixel on your conversion page to track ROAS.
-                        Forward <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">bbx_auc</code> from your CTA URL into a POST to
-                        <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">/api/track</code> with <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">event=conversion</code>.
+                        ${pix1}
+                        <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">bbx_auc</code> ${pix2}
+                        <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">/api/track</code> ${pix3} <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">event=conversion</code>.
                     </div>
                 </div>`;
 
+            const lblIntent   = tt('auc.intent_match',     'Intent match distribution');
+            const lblHigh     = tt('auc.intent_high',      'High');
+            const lblMid      = tt('auc.intent_mid',       'Mid');
+            const lblLow      = tt('auc.intent_low',       'Low');
+            const lblImprWInt = tt('auc.impr_w_intent',    'impressions w/ intent · avg');
+            const lblTopSurf  = tt('auc.top_surfaces',     'Top surfaces');
+            const lblNoData   = tt('auc.no_data',          'No data yet');
+            const lblImps     = tt('auc.imps_short',       'imps');
+            const lblSpendHdr = tt('auc.where_spend',      'Where your spend went');
+            const lblSpendSub = tt('auc.where_sub',        'By publisher integration · last 7 days');
+            const lblNoTagged = tt('auc.no_tagged',        "No tagged impressions yet — your campaign hasn't served on a tagged surface this week.");
             host.innerHTML = `
                 ${convBlock}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
                     <div>
-                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Intent match distribution</div>
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">${lblIntent}</div>
                         <div style="display:flex;gap:6px;align-items:center;font-size:13px;">
-                            <span style="background:#D1FAE5;color:#059669;padding:3px 10px;border-radius:100px;font-weight:600;">High ${pct(buckets.high)}</span>
-                            <span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-weight:600;">Mid ${pct(buckets.mid)}</span>
-                            <span style="background:#F3F4F6;color:#6B7280;padding:3px 10px;border-radius:100px;font-weight:600;">Low ${pct(buckets.low)}</span>
+                            <span style="background:#D1FAE5;color:#059669;padding:3px 10px;border-radius:100px;font-weight:600;">${lblHigh} ${pct(buckets.high)}</span>
+                            <span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-weight:600;">${lblMid} ${pct(buckets.mid)}</span>
+                            <span style="background:#F3F4F6;color:#6B7280;padding:3px 10px;border-radius:100px;font-weight:600;">${lblLow} ${pct(buckets.low)}</span>
                         </div>
                         <div style="font-size:11px;color:#9CA3AF;margin-top:6px;">
-                            ${total.toLocaleString()} impressions w/ intent · avg ${s.avg_intent_match != null ? s.avg_intent_match.toFixed(2) : '—'}
+                            ${total.toLocaleString()} ${lblImprWInt} ${s.avg_intent_match != null ? s.avg_intent_match.toFixed(2) : '—'}
                         </div>
                     </div>
                     <div>
-                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Top surfaces</div>
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">${lblTopSurf}</div>
                         ${surfaces.slice(0, 4).map(([k, v]) => `
                             <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;">
                                 <span style="color:#374151;">${escapeHtmlA(k)}</span>
-                                <span style="color:#6B7280;font-variant-numeric:tabular-nums;">${v.impressions.toLocaleString()} imps · $${Number(v.spend).toFixed(2)}</span>
-                            </div>`).join('') || '<div style="font-size:12px;color:#9CA3AF;">No data yet</div>'}
+                                <span style="color:#6B7280;font-variant-numeric:tabular-nums;">${v.impressions.toLocaleString()} ${lblImps} · $${Number(v.spend).toFixed(2)}</span>
+                            </div>`).join('') || `<div style="font-size:12px;color:#9CA3AF;">${lblNoData}</div>`}
                     </div>
                 </div>
 
                 <!-- WHERE YOUR SPEND WENT — per-door breakdown by integration_method -->
                 <div style="border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-bottom:16px;background:#FAFAF7;">
                     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Where your spend went</div>
-                        <div style="font-size:11px;color:#9CA3AF;">By publisher integration · last 7 days</div>
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">${lblSpendHdr}</div>
+                        <div style="font-size:11px;color:#9CA3AF;">${lblSpendSub}</div>
                     </div>
                     ${doorEntries.length === 0 ? `
-                        <div style="font-size:13px;color:#9CA3AF;padding:12px 0;text-align:center;">No tagged impressions yet — your campaign hasn't served on a tagged surface this week.</div>
+                        <div style="font-size:13px;color:#9CA3AF;padding:12px 0;text-align:center;">${lblNoTagged}</div>
                     ` : `
                         <!-- Stacked proportional bar -->
                         <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:#F3F4F6;margin-bottom:14px;">
@@ -4220,8 +4251,8 @@
                                             <span style="font-size:12px;font-weight:700;color:#111;">${escapeHtmlA(d.label)}</span>
                                         </div>
                                         <div style="font-size:18px;font-weight:700;color:#111;line-height:1;font-variant-numeric:tabular-nums;">$${Number(d.spend).toFixed(2)}</div>
-                                        <div style="font-size:10.5px;color:#9CA3AF;margin-top:2px;">${pct}% of spend</div>
-                                        <div style="font-size:11px;color:#6B7280;margin-top:6px;font-variant-numeric:tabular-nums;">${Number(d.impressions).toLocaleString()} imps · ${ctr} CTR</div>
+                                        <div style="font-size:10.5px;color:#9CA3AF;margin-top:2px;">${pct}% ${tt('auc.of_spend', 'of spend')}</div>
+                                        <div style="font-size:11px;color:#6B7280;margin-top:6px;font-variant-numeric:tabular-nums;">${Number(d.impressions).toLocaleString()} ${lblImps} · ${ctr} ${tt('auc.ctr', 'CTR')}</div>
                                         <div style="font-size:10.5px;color:#9CA3AF;margin-top:2px;">${escapeHtmlA(d.hint)}</div>
                                     </div>
                                 `;
@@ -4230,18 +4261,18 @@
                     `}
                 </div>
 
-                <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Recent impressions</div>
+                <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">${tt('auc.recent_impr', 'Recent impressions')}</div>
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr style="background:#FAFAFA;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;">
-                            <th style="padding:7px 12px;text-align:left;font-weight:600;">Time</th>
-                            <th style="padding:7px 12px;text-align:left;font-weight:600;">Surface</th>
-                            <th style="padding:7px 12px;text-align:left;font-weight:600;">Format</th>
-                            <th style="padding:7px 12px;text-align:right;font-weight:600;">Intent</th>
-                            <th style="padding:7px 12px;text-align:right;font-weight:600;">Cost</th>
+                            <th style="padding:7px 12px;text-align:left;font-weight:600;">${tt('auc.col_time',    'Time')}</th>
+                            <th style="padding:7px 12px;text-align:left;font-weight:600;">${tt('auc.col_surface', 'Surface')}</th>
+                            <th style="padding:7px 12px;text-align:left;font-weight:600;">${tt('auc.col_format',  'Format')}</th>
+                            <th style="padding:7px 12px;text-align:right;font-weight:600;">${tt('auc.col_intent', 'Intent')}</th>
+                            <th style="padding:7px 12px;text-align:right;font-weight:600;">${tt('auc.col_cost',   'Cost')}</th>
                         </tr>
                     </thead>
-                    <tbody>${recentRows || '<tr><td colspan="5" style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">No recent impressions</td></tr>'}</tbody>
+                    <tbody>${recentRows || `<tr><td colspan="5" style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">${tt('auc.no_recent', 'No recent impressions')}</td></tr>`}</tbody>
                 </table>`;
         }
         function escapeHtmlA(s) {
@@ -4293,6 +4324,9 @@
 
                 const data = await response.json();
                 _cachedCampaigns = data.campaigns || data || [];
+                // Mirror to window so the language change handler (inside
+                // the Settings IIFE) can re-render Benna + Auction panels.
+                window._cachedCampaigns = _cachedCampaigns;
 
                 // Update Benna header counters based on full campaign cohort
                 if (_cachedCampaigns.length > 0) updateBennaEngineCounters(_cachedCampaigns);
@@ -4460,9 +4494,15 @@
             const learnEl = document.getElementById('bMetricLearning');
             if (statusLabel) {
                 if (active.length === 0) {
-                    statusLabel.textContent = 'IDLE · awaiting campaigns';
+                    statusLabel.textContent = tt('benna.status_idle', 'IDLE · awaiting campaigns');
                 } else {
-                    statusLabel.textContent = `OPTIMIZING · ${active.length} campaign${active.length === 1 ? '' : 's'}`;
+                    const optStr = tt('benna.optimizing', 'OPTIMIZING');
+                    // "campaigns" is the same word regardless of count in most
+                    // CJK languages; English keeps the s/no-s distinction.
+                    const cWord  = (active.length === 1)
+                        ? tt('benna.campaign_one',  'campaign')
+                        : tt('benna.campaign_many', 'campaigns');
+                    statusLabel.textContent = `${optStr} · ${active.length} ${cWord}`;
                 }
             }
             if (learnEl) learnEl.textContent = String(learning);
@@ -6976,6 +7016,48 @@
                     'newc.est_impressions': 'impressions',
                     'newc.est_blended': '(blended).',
                     'newc.est_enter_budget': 'Enter a Total Budget below to project how many impressions you\'ll get.',
+                    'benna.opt_engine_live': 'Optimization engine · live',
+                    'benna.running': 'Benna is running your campaigns',
+                    'benna.status_optimizing': 'OPTIMIZING · 2 campaigns',
+                    'benna.status_idle': 'IDLE · awaiting campaigns',
+                    'benna.optimizing': 'OPTIMIZING',
+                    'benna.avg_intent_match': 'avg intent match',
+                    'benna.campaign_one': 'campaign',
+                    'benna.campaign_many': 'campaigns',
+                    'benna.engine_metrics': 'Engine metrics',
+                    'benna.top_signals': 'Top weighted signals',
+                    'benna.recent_adj': 'Recent auto-adjustments',
+                    'benna.metric_decisions': 'decisions / 24h',
+                    'benna.metric_p50': 'p50 inference',
+                    'benna.metric_lift': 'eCPA vs manual',
+                    'benna.metric_learning': 'in learning phase',
+                    'auc.placeholder': 'Run a campaign to populate this panel — surfaces, intent-match histogram, and recent impressions appear here automatically.',
+                    'auc.conv_last7': 'Conversions · last 7 days',
+                    'auc.total_value': 'Total value',
+                    'auc.cvr': 'CVR',
+                    'auc.cpa': 'CPA',
+                    'auc.roas': 'ROAS',
+                    'auc.conversions': 'Conversions',
+                    'auc.pixel_a': 'Install the Boost Boss pixel on your conversion page to track ROAS. Forward',
+                    'auc.pixel_b': 'from your CTA URL into a POST to',
+                    'auc.pixel_c': 'with',
+                    'auc.intent_high': 'High',
+                    'auc.intent_mid': 'Mid',
+                    'auc.intent_low': 'Low',
+                    'auc.impr_w_intent': 'impressions w/ intent · avg',
+                    'auc.imps_short': 'imps',
+                    'auc.of_spend': 'of spend',
+                    'auc.ctr': 'CTR',
+                    'auc.door_mcp': 'MCP tools',
+                    'auc.door_mcp_hint': 'Claude Desktop · Cursor',
+                    'auc.door_js': 'AI apps',
+                    'auc.door_js_hint': 'Web AI chat',
+                    'auc.door_ext': 'Extensions',
+                    'auc.door_ext_hint': 'Chrome · Edge · Firefox',
+                    'auc.door_bots': 'Bots',
+                    'auc.door_bots_hint': 'Discord · Telegram · Slack',
+                    'auc.door_untagged': 'Untagged',
+                    'auc.door_untagged_hint': 'Pre-tag legacy traffic',
                 },
                 'zh': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
@@ -7150,6 +7232,48 @@
                     'newc.est_impressions': '次展示',
                     'newc.est_blended': '(混合)。',
                     'newc.est_enter_budget': '在下方输入总预算以预估您将获得多少次展示。',
+                    'benna.opt_engine_live': '優化引擎 · 即時',
+                    'benna.running': 'Benna 正在執行您的活動',
+                    'benna.status_optimizing': '優化中 · 2 个活动',
+                    'benna.status_idle': '闲置 · 等待活动',
+                    'benna.optimizing': '优化中',
+                    'benna.avg_intent_match': '平均意图匹配',
+                    'benna.campaign_one': '个活动',
+                    'benna.campaign_many': '个活动',
+                    'benna.engine_metrics': '引擎指标',
+                    'benna.top_signals': '权重最高的信号',
+                    'benna.recent_adj': '最近自动调整',
+                    'benna.metric_decisions': '决策 / 24小时',
+                    'benna.metric_p50': 'p50 推理',
+                    'benna.metric_lift': 'eCPA vs 手动',
+                    'benna.metric_learning': '处于学习期',
+                    'auc.placeholder': '运行一次活动以填充此面板 — 版面、意图匹配直方图和近期曝光将自动显示在此。',
+                    'auc.conv_last7': '转化 · 近 7 天',
+                    'auc.total_value': '总价值',
+                    'auc.cvr': 'CVR',
+                    'auc.cpa': 'CPA',
+                    'auc.roas': 'ROAS',
+                    'auc.conversions': '转化',
+                    'auc.pixel_a': '在转化页面安装 Boost Boss 像素以跟踪 ROAS。将',
+                    'auc.pixel_b': '从您的 CTA URL 转发至以下端点的 POST:',
+                    'auc.pixel_c': '附带',
+                    'auc.intent_high': '高',
+                    'auc.intent_mid': '中',
+                    'auc.intent_low': '低',
+                    'auc.impr_w_intent': '次有意图的曝光 · 平均',
+                    'auc.imps_short': '次曝光',
+                    'auc.of_spend': '的支出',
+                    'auc.ctr': 'CTR',
+                    'auc.door_mcp': 'MCP 工具',
+                    'auc.door_mcp_hint': 'Claude Desktop · Cursor',
+                    'auc.door_js': 'AI 应用',
+                    'auc.door_js_hint': '网页 AI 聊天',
+                    'auc.door_ext': '浏览器扩展',
+                    'auc.door_ext_hint': 'Chrome · Edge · Firefox',
+                    'auc.door_bots': '机器人',
+                    'auc.door_bots_hint': 'Discord · Telegram · Slack',
+                    'auc.door_untagged': '未标记',
+                    'auc.door_untagged_hint': '标记前的旧流量',
                 },
                 'zh-TW': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
@@ -7324,6 +7448,48 @@
                     'newc.est_impressions': '次曝光',
                     'newc.est_blended': '(混合)。',
                     'newc.est_enter_budget': '在下方輸入總預算以預估您將獲得多少次曝光。',
+                    'benna.opt_engine_live': '最佳化引擎 · 即時',
+                    'benna.running': 'Benna 正在執行您的活動',
+                    'benna.status_optimizing': '最佳化中 · 2 個活動',
+                    'benna.status_idle': '閒置 · 等待活動',
+                    'benna.optimizing': '最佳化中',
+                    'benna.avg_intent_match': '平均意圖匹配',
+                    'benna.campaign_one': '個活動',
+                    'benna.campaign_many': '個活動',
+                    'benna.engine_metrics': '引擎指標',
+                    'benna.top_signals': '權重最高的訊號',
+                    'benna.recent_adj': '最近自動調整',
+                    'benna.metric_decisions': '決策 / 24小時',
+                    'benna.metric_p50': 'p50 推論',
+                    'benna.metric_lift': 'eCPA vs 手動',
+                    'benna.metric_learning': '處於學習期',
+                    'auc.placeholder': '執行一次活動以填充此面板 — 版位、意圖匹配直方圖和近期曝光會自動顯示於此。',
+                    'auc.conv_last7': '轉換 · 近 7 天',
+                    'auc.total_value': '總價值',
+                    'auc.cvr': 'CVR',
+                    'auc.cpa': 'CPA',
+                    'auc.roas': 'ROAS',
+                    'auc.conversions': '轉換',
+                    'auc.pixel_a': '在轉換頁面安裝 Boost Boss 像素以追蹤 ROAS。將',
+                    'auc.pixel_b': '從您的 CTA URL 轉發到以下端點的 POST:',
+                    'auc.pixel_c': '附帶',
+                    'auc.intent_high': '高',
+                    'auc.intent_mid': '中',
+                    'auc.intent_low': '低',
+                    'auc.impr_w_intent': '次有意圖的曝光 · 平均',
+                    'auc.imps_short': '次曝光',
+                    'auc.of_spend': '的支出',
+                    'auc.ctr': 'CTR',
+                    'auc.door_mcp': 'MCP 工具',
+                    'auc.door_mcp_hint': 'Claude Desktop · Cursor',
+                    'auc.door_js': 'AI 應用',
+                    'auc.door_js_hint': '網頁 AI 聊天',
+                    'auc.door_ext': '瀏覽器擴充功能',
+                    'auc.door_ext_hint': 'Chrome · Edge · Firefox',
+                    'auc.door_bots': '機器人',
+                    'auc.door_bots_hint': 'Discord · Telegram · Slack',
+                    'auc.door_untagged': '未標記',
+                    'auc.door_untagged_hint': '標記前的舊流量',
                 },
                 'ja': {
                     'chrome.back': 'SuperBoost Ads に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
@@ -7498,6 +7664,48 @@
                     'newc.est_impressions': '表示',
                     'newc.est_blended': '(ブレンド)。',
                     'newc.est_enter_budget': '下に総予算を入力すると、見込み表示回数を予測できます。',
+                    'benna.opt_engine_live': '最適化エンジン · ライブ',
+                    'benna.running': 'Benna があなたのキャンペーンを稼働中',
+                    'benna.status_optimizing': '最適化中 · 2 キャンペーン',
+                    'benna.status_idle': 'アイドル · キャンペーン待ち',
+                    'benna.optimizing': '最適化中',
+                    'benna.avg_intent_match': '平均インテント マッチ',
+                    'benna.campaign_one': 'キャンペーン',
+                    'benna.campaign_many': 'キャンペーン',
+                    'benna.engine_metrics': 'エンジン メトリクス',
+                    'benna.top_signals': '重み付け上位シグナル',
+                    'benna.recent_adj': '最近の自動調整',
+                    'benna.metric_decisions': '意思決定 / 24h',
+                    'benna.metric_p50': 'p50 推論',
+                    'benna.metric_lift': 'eCPA vs 手動',
+                    'benna.metric_learning': '学習中',
+                    'auc.placeholder': 'キャンペーンを実行するとこのパネルが埋まります — サーフェス、インテント マッチ ヒストグラム、最近のインプレッションが自動的に表示されます。',
+                    'auc.conv_last7': 'コンバージョン · 過去 7 日',
+                    'auc.total_value': '総額',
+                    'auc.cvr': 'CVR',
+                    'auc.cpa': 'CPA',
+                    'auc.roas': 'ROAS',
+                    'auc.conversions': 'コンバージョン',
+                    'auc.pixel_a': 'ROAS を追跡するためにコンバージョン ページに Boost Boss ピクセルを設置してください。CTA URL からの',
+                    'auc.pixel_b': 'を、次の POST へ転送:',
+                    'auc.pixel_c': '次の値を添えて:',
+                    'auc.intent_high': '高',
+                    'auc.intent_mid': '中',
+                    'auc.intent_low': '低',
+                    'auc.impr_w_intent': '件のインテント付き表示 · 平均',
+                    'auc.imps_short': '表示',
+                    'auc.of_spend': 'の支出',
+                    'auc.ctr': 'CTR',
+                    'auc.door_mcp': 'MCP ツール',
+                    'auc.door_mcp_hint': 'Claude Desktop · Cursor',
+                    'auc.door_js': 'AI アプリ',
+                    'auc.door_js_hint': 'Web AI チャット',
+                    'auc.door_ext': '拡張機能',
+                    'auc.door_ext_hint': 'Chrome · Edge · Firefox',
+                    'auc.door_bots': 'ボット',
+                    'auc.door_bots_hint': 'Discord · Telegram · Slack',
+                    'auc.door_untagged': '未タグ',
+                    'auc.door_untagged_hint': 'タグ前のレガシー トラフィック',
                 },
                 'ko': {
                     'chrome.back': 'SuperBoost Ads로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
@@ -7672,6 +7880,48 @@
                     'newc.est_impressions': '노출',
                     'newc.est_blended': '(혼합).',
                     'newc.est_enter_budget': '아래에 총 예산을 입력하면 예상 노출 수를 추정할 수 있습니다.',
+                    'benna.opt_engine_live': '최적화 엔진 · 라이브',
+                    'benna.running': 'Benna가 캠페인을 운영 중입니다',
+                    'benna.status_optimizing': '최적화 중 · 캠페인 2개',
+                    'benna.status_idle': '대기 · 캠페인 대기 중',
+                    'benna.optimizing': '최적화 중',
+                    'benna.avg_intent_match': '평균 의도 매치',
+                    'benna.campaign_one': '캠페인',
+                    'benna.campaign_many': '캠페인',
+                    'benna.engine_metrics': '엔진 지표',
+                    'benna.top_signals': '상위 가중치 시그널',
+                    'benna.recent_adj': '최근 자동 조정',
+                    'benna.metric_decisions': '결정 / 24시간',
+                    'benna.metric_p50': 'p50 추론',
+                    'benna.metric_lift': 'eCPA vs 수동',
+                    'benna.metric_learning': '학습 중',
+                    'auc.placeholder': '캠페인을 실행하면 이 패널이 채워집니다 — 서피스, 의도 매치 히스토그램, 최근 노출이 자동으로 표시됩니다.',
+                    'auc.conv_last7': '전환 · 최근 7일',
+                    'auc.total_value': '총 가치',
+                    'auc.cvr': 'CVR',
+                    'auc.cpa': 'CPA',
+                    'auc.roas': 'ROAS',
+                    'auc.conversions': '전환',
+                    'auc.pixel_a': 'ROAS 추적을 위해 전환 페이지에 Boost Boss 픽셀을 설치하세요. CTA URL의',
+                    'auc.pixel_b': '를 다음 POST로 전달:',
+                    'auc.pixel_c': '함께:',
+                    'auc.intent_high': '높음',
+                    'auc.intent_mid': '중간',
+                    'auc.intent_low': '낮음',
+                    'auc.impr_w_intent': '의도 노출 · 평균',
+                    'auc.imps_short': '노출',
+                    'auc.of_spend': '의 지출',
+                    'auc.ctr': 'CTR',
+                    'auc.door_mcp': 'MCP 도구',
+                    'auc.door_mcp_hint': 'Claude Desktop · Cursor',
+                    'auc.door_js': 'AI 앱',
+                    'auc.door_js_hint': '웹 AI 채팅',
+                    'auc.door_ext': '확장 프로그램',
+                    'auc.door_ext_hint': 'Chrome · Edge · Firefox',
+                    'auc.door_bots': '봇',
+                    'auc.door_bots_hint': 'Discord · Telegram · Slack',
+                    'auc.door_untagged': '태그 없음',
+                    'auc.door_untagged_hint': '태그 이전의 레거시 트래픽',
                 },
                 'vi': {
                     'chrome.back': 'Quay lại SuperBoost Ads', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
@@ -7846,6 +8096,48 @@
                     'newc.est_impressions': 'impression',
                     'newc.est_blended': '(blended).',
                     'newc.est_enter_budget': 'Nhập Tổng ngân sách bên dưới để dự đoán số impression bạn sẽ nhận được.',
+                    'benna.opt_engine_live': 'Engine tối ưu · live',
+                    'benna.running': 'Benna đang vận hành các chiến dịch của bạn',
+                    'benna.status_optimizing': 'ĐANG TỐI ƯU · 2 chiến dịch',
+                    'benna.status_idle': 'NHÀN RỖI · chờ chiến dịch',
+                    'benna.optimizing': 'ĐANG TỐI ƯU',
+                    'benna.avg_intent_match': 'trung bình intent match',
+                    'benna.campaign_one': 'chiến dịch',
+                    'benna.campaign_many': 'chiến dịch',
+                    'benna.engine_metrics': 'Metric của engine',
+                    'benna.top_signals': 'Tín hiệu có trọng số cao nhất',
+                    'benna.recent_adj': 'Tự động điều chỉnh gần đây',
+                    'benna.metric_decisions': 'quyết định / 24h',
+                    'benna.metric_p50': 'p50 inference',
+                    'benna.metric_lift': 'eCPA vs thủ công',
+                    'benna.metric_learning': 'đang trong giai đoạn học',
+                    'auc.placeholder': 'Chạy một chiến dịch để điền panel này — surfaces, biểu đồ intent-match, và impression gần đây sẽ tự động xuất hiện.',
+                    'auc.conv_last7': 'Conversion · 7 ngày qua',
+                    'auc.total_value': 'Tổng giá trị',
+                    'auc.cvr': 'CVR',
+                    'auc.cpa': 'CPA',
+                    'auc.roas': 'ROAS',
+                    'auc.conversions': 'Conversion',
+                    'auc.pixel_a': 'Cài Boost Boss pixel trên trang conversion để theo dõi ROAS. Chuyển tiếp',
+                    'auc.pixel_b': 'từ CTA URL vào POST tới',
+                    'auc.pixel_c': 'với',
+                    'auc.intent_high': 'Cao',
+                    'auc.intent_mid': 'Trung bình',
+                    'auc.intent_low': 'Thấp',
+                    'auc.impr_w_intent': 'impression có intent · trung bình',
+                    'auc.imps_short': 'imps',
+                    'auc.of_spend': 'của chi tiêu',
+                    'auc.ctr': 'CTR',
+                    'auc.door_mcp': 'Công cụ MCP',
+                    'auc.door_mcp_hint': 'Claude Desktop · Cursor',
+                    'auc.door_js': 'Ứng dụng AI',
+                    'auc.door_js_hint': 'Web AI chat',
+                    'auc.door_ext': 'Extension',
+                    'auc.door_ext_hint': 'Chrome · Edge · Firefox',
+                    'auc.door_bots': 'Bots',
+                    'auc.door_bots_hint': 'Discord · Telegram · Slack',
+                    'auc.door_untagged': 'Chưa tag',
+                    'auc.door_untagged_hint': 'Traffic legacy trước khi tag',
                 },
             };
             function t(k) {
@@ -8022,6 +8314,14 @@
                     // refresh in the chosen language.
                     if (typeof renderFormatTierGroups === 'function') renderFormatTierGroups();
                     if (typeof updateFormatEstimate    === 'function') updateFormatEstimate();
+                    // Re-render Benna engine + Auction Intelligence in the
+                    // newly-selected language using cached data.
+                    if (typeof updateBennaEngineCounters === 'function' && Array.isArray(window._cachedCampaigns)) {
+                        try { updateBennaEngineCounters(window._cachedCampaigns); } catch (_) {}
+                    }
+                    if (typeof renderAuctionSummary === 'function' && window._lastAuctionSummary) {
+                        try { renderAuctionSummary(window._lastAuctionSummary); } catch (_) {}
+                    }
                 });
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {

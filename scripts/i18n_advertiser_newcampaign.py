@@ -20,6 +20,276 @@ ANCHOR_PATTERN = re.compile(
     r"(\s+'security\.change_btn': '([^']|\\')*?',)",
 )
 
+# Benna live engine panel + Auction Intelligence dynamic strings.
+# Merged into the per-language dicts below so they ship in the same
+# pass as the newc.* keys.
+BENNA_AUC_EN = {
+    # Benna engine panel (static + dynamic status labels)
+    'benna.opt_engine_live':   'Optimization engine · live',
+    'benna.running':           'Benna is running your campaigns',
+    'benna.status_optimizing': 'OPTIMIZING · 2 campaigns',
+    'benna.status_idle':       'IDLE · awaiting campaigns',
+    'benna.optimizing':        'OPTIMIZING',
+    'benna.avg_intent_match':  'avg intent match',
+    'benna.campaign_one':      'campaign',
+    'benna.campaign_many':     'campaigns',
+    'benna.engine_metrics':    'Engine metrics',
+    'benna.top_signals':       'Top weighted signals',
+    'benna.recent_adj':        'Recent auto-adjustments',
+    'benna.metric_decisions':  'decisions / 24h',
+    'benna.metric_p50':        'p50 inference',
+    'benna.metric_lift':       'eCPA vs manual',
+    'benna.metric_learning':   'in learning phase',
+    # Auction Intelligence dynamic strings (renderAuctionSummary)
+    'auc.placeholder':         'Run a campaign to populate this panel — surfaces, intent-match histogram, and recent impressions appear here automatically.',
+    'auc.conv_last7':          'Conversions · last 7 days',
+    'auc.total_value':         'Total value',
+    'auc.cvr':                 'CVR',
+    'auc.cpa':                 'CPA',
+    'auc.roas':                'ROAS',
+    'auc.conversions':         'Conversions',
+    'auc.pixel_a':             'Install the Boost Boss pixel on your conversion page to track ROAS. Forward',
+    'auc.pixel_b':             'from your CTA URL into a POST to',
+    'auc.pixel_c':             'with',
+    'auc.intent_high':         'High',
+    'auc.intent_mid':          'Mid',
+    'auc.intent_low':          'Low',
+    'auc.impr_w_intent':       'impressions w/ intent · avg',
+    'auc.imps_short':          'imps',
+    'auc.of_spend':            'of spend',
+    'auc.ctr':                 'CTR',
+    'auc.door_mcp':            'MCP tools',
+    'auc.door_mcp_hint':       'Claude Desktop · Cursor',
+    'auc.door_js':             'AI apps',
+    'auc.door_js_hint':        'Web AI chat',
+    'auc.door_ext':            'Extensions',
+    'auc.door_ext_hint':       'Chrome · Edge · Firefox',
+    'auc.door_bots':           'Bots',
+    'auc.door_bots_hint':      'Discord · Telegram · Slack',
+    'auc.door_untagged':       'Untagged',
+    'auc.door_untagged_hint':  'Pre-tag legacy traffic',
+}
+BENNA_AUC_ZH = {
+    'benna.opt_engine_live':   '優化引擎 · 即時',
+    'benna.running':           'Benna 正在執行您的活動',
+    'benna.status_optimizing': '優化中 · 2 个活动',
+    'benna.status_idle':       '闲置 · 等待活动',
+    'benna.optimizing':        '优化中',
+    'benna.avg_intent_match':  '平均意图匹配',
+    'benna.campaign_one':      '个活动',
+    'benna.campaign_many':     '个活动',
+    'benna.engine_metrics':    '引擎指标',
+    'benna.top_signals':       '权重最高的信号',
+    'benna.recent_adj':        '最近自动调整',
+    'benna.metric_decisions':  '决策 / 24小时',
+    'benna.metric_p50':        'p50 推理',
+    'benna.metric_lift':       'eCPA vs 手动',
+    'benna.metric_learning':   '处于学习期',
+    'auc.placeholder':         '运行一次活动以填充此面板 — 版面、意图匹配直方图和近期曝光将自动显示在此。',
+    'auc.conv_last7':          '转化 · 近 7 天',
+    'auc.total_value':         '总价值',
+    'auc.cvr':                 'CVR',
+    'auc.cpa':                 'CPA',
+    'auc.roas':                'ROAS',
+    'auc.conversions':         '转化',
+    'auc.pixel_a':             '在转化页面安装 Boost Boss 像素以跟踪 ROAS。将',
+    'auc.pixel_b':             '从您的 CTA URL 转发至以下端点的 POST:',
+    'auc.pixel_c':             '附带',
+    'auc.intent_high':         '高',
+    'auc.intent_mid':          '中',
+    'auc.intent_low':          '低',
+    'auc.impr_w_intent':       '次有意图的曝光 · 平均',
+    'auc.imps_short':          '次曝光',
+    'auc.of_spend':            '的支出',
+    'auc.ctr':                 'CTR',
+    'auc.door_mcp':            'MCP 工具',
+    'auc.door_mcp_hint':       'Claude Desktop · Cursor',
+    'auc.door_js':             'AI 应用',
+    'auc.door_js_hint':        '网页 AI 聊天',
+    'auc.door_ext':            '浏览器扩展',
+    'auc.door_ext_hint':       'Chrome · Edge · Firefox',
+    'auc.door_bots':           '机器人',
+    'auc.door_bots_hint':      'Discord · Telegram · Slack',
+    'auc.door_untagged':       '未标记',
+    'auc.door_untagged_hint':  '标记前的旧流量',
+}
+BENNA_AUC_ZH_TW = {
+    'benna.opt_engine_live':   '最佳化引擎 · 即時',
+    'benna.running':           'Benna 正在執行您的活動',
+    'benna.status_optimizing': '最佳化中 · 2 個活動',
+    'benna.status_idle':       '閒置 · 等待活動',
+    'benna.optimizing':        '最佳化中',
+    'benna.avg_intent_match':  '平均意圖匹配',
+    'benna.campaign_one':      '個活動',
+    'benna.campaign_many':     '個活動',
+    'benna.engine_metrics':    '引擎指標',
+    'benna.top_signals':       '權重最高的訊號',
+    'benna.recent_adj':        '最近自動調整',
+    'benna.metric_decisions':  '決策 / 24小時',
+    'benna.metric_p50':        'p50 推論',
+    'benna.metric_lift':       'eCPA vs 手動',
+    'benna.metric_learning':   '處於學習期',
+    'auc.placeholder':         '執行一次活動以填充此面板 — 版位、意圖匹配直方圖和近期曝光會自動顯示於此。',
+    'auc.conv_last7':          '轉換 · 近 7 天',
+    'auc.total_value':         '總價值',
+    'auc.cvr':                 'CVR',
+    'auc.cpa':                 'CPA',
+    'auc.roas':                'ROAS',
+    'auc.conversions':         '轉換',
+    'auc.pixel_a':             '在轉換頁面安裝 Boost Boss 像素以追蹤 ROAS。將',
+    'auc.pixel_b':             '從您的 CTA URL 轉發到以下端點的 POST:',
+    'auc.pixel_c':             '附帶',
+    'auc.intent_high':         '高',
+    'auc.intent_mid':          '中',
+    'auc.intent_low':          '低',
+    'auc.impr_w_intent':       '次有意圖的曝光 · 平均',
+    'auc.imps_short':          '次曝光',
+    'auc.of_spend':            '的支出',
+    'auc.ctr':                 'CTR',
+    'auc.door_mcp':            'MCP 工具',
+    'auc.door_mcp_hint':       'Claude Desktop · Cursor',
+    'auc.door_js':             'AI 應用',
+    'auc.door_js_hint':        '網頁 AI 聊天',
+    'auc.door_ext':            '瀏覽器擴充功能',
+    'auc.door_ext_hint':       'Chrome · Edge · Firefox',
+    'auc.door_bots':           '機器人',
+    'auc.door_bots_hint':      'Discord · Telegram · Slack',
+    'auc.door_untagged':       '未標記',
+    'auc.door_untagged_hint':  '標記前的舊流量',
+}
+BENNA_AUC_JA = {
+    'benna.opt_engine_live':   '最適化エンジン · ライブ',
+    'benna.running':           'Benna があなたのキャンペーンを稼働中',
+    'benna.status_optimizing': '最適化中 · 2 キャンペーン',
+    'benna.status_idle':       'アイドル · キャンペーン待ち',
+    'benna.optimizing':        '最適化中',
+    'benna.avg_intent_match':  '平均インテント マッチ',
+    'benna.campaign_one':      'キャンペーン',
+    'benna.campaign_many':     'キャンペーン',
+    'benna.engine_metrics':    'エンジン メトリクス',
+    'benna.top_signals':       '重み付け上位シグナル',
+    'benna.recent_adj':        '最近の自動調整',
+    'benna.metric_decisions':  '意思決定 / 24h',
+    'benna.metric_p50':        'p50 推論',
+    'benna.metric_lift':       'eCPA vs 手動',
+    'benna.metric_learning':   '学習中',
+    'auc.placeholder':         'キャンペーンを実行するとこのパネルが埋まります — サーフェス、インテント マッチ ヒストグラム、最近のインプレッションが自動的に表示されます。',
+    'auc.conv_last7':          'コンバージョン · 過去 7 日',
+    'auc.total_value':         '総額',
+    'auc.cvr':                 'CVR',
+    'auc.cpa':                 'CPA',
+    'auc.roas':                'ROAS',
+    'auc.conversions':         'コンバージョン',
+    'auc.pixel_a':             'ROAS を追跡するためにコンバージョン ページに Boost Boss ピクセルを設置してください。CTA URL からの',
+    'auc.pixel_b':             'を、次の POST へ転送:',
+    'auc.pixel_c':             '次の値を添えて:',
+    'auc.intent_high':         '高',
+    'auc.intent_mid':          '中',
+    'auc.intent_low':          '低',
+    'auc.impr_w_intent':       '件のインテント付き表示 · 平均',
+    'auc.imps_short':          '表示',
+    'auc.of_spend':            'の支出',
+    'auc.ctr':                 'CTR',
+    'auc.door_mcp':            'MCP ツール',
+    'auc.door_mcp_hint':       'Claude Desktop · Cursor',
+    'auc.door_js':             'AI アプリ',
+    'auc.door_js_hint':        'Web AI チャット',
+    'auc.door_ext':            '拡張機能',
+    'auc.door_ext_hint':       'Chrome · Edge · Firefox',
+    'auc.door_bots':           'ボット',
+    'auc.door_bots_hint':      'Discord · Telegram · Slack',
+    'auc.door_untagged':       '未タグ',
+    'auc.door_untagged_hint':  'タグ前のレガシー トラフィック',
+}
+BENNA_AUC_KO = {
+    'benna.opt_engine_live':   '최적화 엔진 · 라이브',
+    'benna.running':           'Benna가 캠페인을 운영 중입니다',
+    'benna.status_optimizing': '최적화 중 · 캠페인 2개',
+    'benna.status_idle':       '대기 · 캠페인 대기 중',
+    'benna.optimizing':        '최적화 중',
+    'benna.avg_intent_match':  '평균 의도 매치',
+    'benna.campaign_one':      '캠페인',
+    'benna.campaign_many':     '캠페인',
+    'benna.engine_metrics':    '엔진 지표',
+    'benna.top_signals':       '상위 가중치 시그널',
+    'benna.recent_adj':        '최근 자동 조정',
+    'benna.metric_decisions':  '결정 / 24시간',
+    'benna.metric_p50':        'p50 추론',
+    'benna.metric_lift':       'eCPA vs 수동',
+    'benna.metric_learning':   '학습 중',
+    'auc.placeholder':         '캠페인을 실행하면 이 패널이 채워집니다 — 서피스, 의도 매치 히스토그램, 최근 노출이 자동으로 표시됩니다.',
+    'auc.conv_last7':          '전환 · 최근 7일',
+    'auc.total_value':         '총 가치',
+    'auc.cvr':                 'CVR',
+    'auc.cpa':                 'CPA',
+    'auc.roas':                'ROAS',
+    'auc.conversions':         '전환',
+    'auc.pixel_a':             'ROAS 추적을 위해 전환 페이지에 Boost Boss 픽셀을 설치하세요. CTA URL의',
+    'auc.pixel_b':             '를 다음 POST로 전달:',
+    'auc.pixel_c':             '함께:',
+    'auc.intent_high':         '높음',
+    'auc.intent_mid':          '중간',
+    'auc.intent_low':          '낮음',
+    'auc.impr_w_intent':       '의도 노출 · 평균',
+    'auc.imps_short':          '노출',
+    'auc.of_spend':            '의 지출',
+    'auc.ctr':                 'CTR',
+    'auc.door_mcp':            'MCP 도구',
+    'auc.door_mcp_hint':       'Claude Desktop · Cursor',
+    'auc.door_js':             'AI 앱',
+    'auc.door_js_hint':        '웹 AI 채팅',
+    'auc.door_ext':            '확장 프로그램',
+    'auc.door_ext_hint':       'Chrome · Edge · Firefox',
+    'auc.door_bots':           '봇',
+    'auc.door_bots_hint':      'Discord · Telegram · Slack',
+    'auc.door_untagged':       '태그 없음',
+    'auc.door_untagged_hint':  '태그 이전의 레거시 트래픽',
+}
+BENNA_AUC_VI = {
+    'benna.opt_engine_live':   'Engine tối ưu · live',
+    'benna.running':           'Benna đang vận hành các chiến dịch của bạn',
+    'benna.status_optimizing': 'ĐANG TỐI ƯU · 2 chiến dịch',
+    'benna.status_idle':       'NHÀN RỖI · chờ chiến dịch',
+    'benna.optimizing':        'ĐANG TỐI ƯU',
+    'benna.avg_intent_match':  'trung bình intent match',
+    'benna.campaign_one':      'chiến dịch',
+    'benna.campaign_many':     'chiến dịch',
+    'benna.engine_metrics':    'Metric của engine',
+    'benna.top_signals':       'Tín hiệu có trọng số cao nhất',
+    'benna.recent_adj':        'Tự động điều chỉnh gần đây',
+    'benna.metric_decisions':  'quyết định / 24h',
+    'benna.metric_p50':        'p50 inference',
+    'benna.metric_lift':       'eCPA vs thủ công',
+    'benna.metric_learning':   'đang trong giai đoạn học',
+    'auc.placeholder':         'Chạy một chiến dịch để điền panel này — surfaces, biểu đồ intent-match, và impression gần đây sẽ tự động xuất hiện.',
+    'auc.conv_last7':          'Conversion · 7 ngày qua',
+    'auc.total_value':         'Tổng giá trị',
+    'auc.cvr':                 'CVR',
+    'auc.cpa':                 'CPA',
+    'auc.roas':                'ROAS',
+    'auc.conversions':         'Conversion',
+    'auc.pixel_a':             'Cài Boost Boss pixel trên trang conversion để theo dõi ROAS. Chuyển tiếp',
+    'auc.pixel_b':             'từ CTA URL vào POST tới',
+    'auc.pixel_c':             'với',
+    'auc.intent_high':         'Cao',
+    'auc.intent_mid':          'Trung bình',
+    'auc.intent_low':          'Thấp',
+    'auc.impr_w_intent':       'impression có intent · trung bình',
+    'auc.imps_short':          'imps',
+    'auc.of_spend':            'của chi tiêu',
+    'auc.ctr':                 'CTR',
+    'auc.door_mcp':            'Công cụ MCP',
+    'auc.door_mcp_hint':       'Claude Desktop · Cursor',
+    'auc.door_js':             'Ứng dụng AI',
+    'auc.door_js_hint':        'Web AI chat',
+    'auc.door_ext':            'Extension',
+    'auc.door_ext_hint':       'Chrome · Edge · Firefox',
+    'auc.door_bots':           'Bots',
+    'auc.door_bots_hint':      'Discord · Telegram · Slack',
+    'auc.door_untagged':       'Chưa tag',
+    'auc.door_untagged_hint':  'Traffic legacy trước khi tag',
+}
+
 # Per-language translation maps. EN is the source of truth — other
 # languages MUST define the same key set.
 LANGS = {
@@ -610,33 +880,54 @@ LANGS = {
 # Sentinel marker for the en block (the line we insert AFTER).
 # Each language's block has its own anchor — we use a generic regex.
 def insert_keys_into_block(text: str, lang_code: str, keys: dict) -> tuple[str, int]:
-    """Insert any missing keys into the lang_code block of DASH_T."""
-    # Find the language block opener.
-    block_pat = re.compile(rf"('{lang_code}': \{{.*?'security\.change_btn': '([^']|\\')*?',)", re.DOTALL)
+    """Insert any missing keys into the lang_code block of DASH_T.
+
+    Scans the ENTIRE block (from `'<lang>': {` to its matching `},`) for
+    existing keys, so re-running after a previous run is a true no-op.
+    Inserts new keys just before the closing `},`.
+    """
+    # Match the language block: opener, body, closing `\n<ws>},`.
+    block_pat = re.compile(
+        rf"('{re.escape(lang_code)}': \{{)([\s\S]*?)(\n\s+\}},)",
+        re.MULTILINE,
+    )
     m = block_pat.search(text)
     if not m:
         print(f"!! Could not locate '{lang_code}' block. Skipping.")
         return text, 0
+    head, body, tail = m.group(1), m.group(2), m.group(3)
     inserted = 0
     additions = []
     for k, v in keys.items():
-        # Skip if already in this language block (anywhere before 'security.change_btn').
-        if f"'{k}':" in m.group(1):
+        if f"'{k}':" in body:
             continue
-        # Escape single quotes in v for JS string literal.
         v_js = v.replace('\\', '\\\\').replace("'", "\\'")
         additions.append(f"                    '{k}': '{v_js}',")
         inserted += 1
     if not additions:
         return text, 0
-    insertion = '\n' + '\n'.join(additions)
-    new_block = m.group(1) + insertion
-    return text[:m.start(1)] + new_block + text[m.end(1):], inserted
+    new_body = body.rstrip('\n') + '\n' + '\n'.join(additions)
+    new_block = head + new_body + tail
+    return text[:m.start()] + new_block + text[m.end():], inserted
+
+
+EXTRAS = {
+    'en':    BENNA_AUC_EN,
+    'zh':    BENNA_AUC_ZH,
+    'zh-TW': BENNA_AUC_ZH_TW,
+    'ja':    BENNA_AUC_JA,
+    'ko':    BENNA_AUC_KO,
+    'vi':    BENNA_AUC_VI,
+}
 
 
 def main():
     text = ADV.read_text(encoding='utf-8')
     total = 0
+    # Merge each language's extras (benna.* + auc.*) into its main map so
+    # they get inserted alongside the newc.* keys in a single pass.
+    for lang_code in LANGS:
+        LANGS[lang_code] = {**LANGS[lang_code], **EXTRAS[lang_code]}
     for lang_code, keys in LANGS.items():
         text, n = insert_keys_into_block(text, lang_code, keys)
         if n:
