@@ -8,6 +8,7 @@
   var DICT_VERSION = 'bb-20260421';
   var SUPPORTED   = ['en', 'zh', 'zh-TW', 'ja', 'ko', 'vi'];
   var DEFAULT     = 'en';
+  var STORAGE_KEY = 'bb_lang';   // localStorage key for saved language preference
 
   // Paths whose pages have been translated AND have /:lang/<path> rewrites
   // in vercel.json. When the current page has a locale prefix, links to
@@ -57,6 +58,40 @@
     var rest = stripLocaleFromPath(window.location.pathname);
     var prefix = (rest === '/' || rest === '') ? ('/' + lang) : ('/' + lang + rest);
     return prefix + (window.location.search || '') + (window.location.hash || '');
+  }
+
+  // Save / load the user's preferred language. localStorage may throw in
+  // private-browsing modes or storage-disabled embeds — wrap everything.
+  function savePref(lang) {
+    if (SUPPORTED.indexOf(lang) === -1) return;
+    try { window.localStorage.setItem(STORAGE_KEY, lang); } catch (_) {}
+  }
+  function loadPref() {
+    try {
+      var v = window.localStorage.getItem(STORAGE_KEY);
+      return (v && SUPPORTED.indexOf(v) !== -1) ? v : null;
+    } catch (_) { return null; }
+  }
+
+  // If the current URL has no locale prefix but the user has a saved
+  // preference (and the path has a locale-prefixed equivalent), redirect
+  // to the user's preferred-language URL. Replaces history so the back
+  // button doesn't loop. Returns true if a redirect was kicked off, so
+  // the caller can short-circuit any further work.
+  function maybeRedirectToSavedLang() {
+    if (pathLang()) return false;          // URL already has a locale — URL wins
+    var saved = loadPref();
+    if (!saved || saved === DEFAULT) return false;
+    // Only auto-redirect on pages that have a translated equivalent.
+    // Strip query/hash before checking the path.
+    var p = window.location.pathname;
+    var q = p.indexOf('?'); if (q >= 0) p = p.substring(0, q);
+    var h = p.indexOf('#'); if (h >= 0) p = p.substring(0, h);
+    if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
+    if (!LOCALIZED_PATHS[p]) return false;
+    var target = '/' + saved + p + (window.location.search || '') + (window.location.hash || '');
+    window.location.replace(target);
+    return true;
   }
 
   // Rewrite every internal <a href="..."> on the page so that links pointing
@@ -147,18 +182,31 @@
   }
 
   // Public API — switch language, keep the user on the same page.
+  // Also remembers the choice in localStorage so future visits land in
+  // the same language by default.
   window.setBBLang = function (lang) {
     if (SUPPORTED.indexOf(lang) === -1) return;
     if (lang === getLang()) return;
+    savePref(lang);
     window.location.href = targetForLang(lang);
   };
 
   function init() {
-    var lang = getLang();
+    // Saved-language redirect runs first. If we navigate away, nothing
+    // else should fire (the page is about to be replaced).
+    if (maybeRedirectToSavedLang()) return;
+
+    var lang = pathLang();
+    // If the URL has an explicit locale, treat it as the user's choice and
+    // remember it for next time. Doesn't fire for bare paths that fell back
+    // to DEFAULT — those weren't explicit.
+    if (lang) savePref(lang);
+
+    var active = lang || DEFAULT;
     // Rewrite internal nav links before the dict resolves — purely URL-based,
     // doesn't depend on translation content.
     localizeNavLinks();
-    loadDict(lang).then(apply).catch(function (err) {
+    loadDict(active).then(apply).catch(function (err) {
       console.error('[i18n init]', err);
     });
 
