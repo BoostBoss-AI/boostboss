@@ -6722,9 +6722,28 @@
                 { key: 'billing', label: 'Billing & funds' },
                 { key: 'api',     label: 'API access' },
                 { key: 'notifs',  label: 'Notifications' },
+                { key: 'language', label: 'Language' },
                 { key: 'security', label: 'Security' },
             ];
             let activeSection = 'account';
+
+            // Supported languages — must match i18n.js SUPPORTED. Display
+            // labels use each language's native name + an English gloss.
+            const LANGUAGES = [
+                { code: 'en',    label: 'English' },
+                { code: 'zh',    label: '简体中文 (Simplified Chinese)' },
+                { code: 'zh-TW', label: '繁體中文 (Traditional Chinese)' },
+                { code: 'ja',    label: '日本語 (Japanese)' },
+                { code: 'ko',    label: '한국어 (Korean)' },
+                { code: 'vi',    label: 'Tiếng Việt (Vietnamese)' },
+            ];
+            function currentLang() {
+                try {
+                    var v = localStorage.getItem('bb_lang');
+                    if (v && LANGUAGES.some((l) => l.code === v)) return v;
+                } catch (_) {}
+                return 'en';
+            }
 
             function sectionAccount() {
                 const d = u();
@@ -6803,6 +6822,20 @@
                     ${toggle('weekly_report', 'Weekly performance summary', 'A once-a-week recap of impressions, clicks, spend, and conversions.')}`;
             }
 
+            function sectionLanguage() {
+                const cur = currentLang();
+                const opts = LANGUAGES.map((l) =>
+                    `<option value="${l.code}" ${l.code === cur ? 'selected' : ''}>${esc(l.label)}</option>`
+                ).join('');
+                return `
+                    <div style="${ROW}">
+                        <label style="${LB}">Display language</label>
+                        <select id="aSetLanguage" style="${FLD}">${opts}</select>
+                        <div style="${HINT}">Sets the language for boostboss.ai marketing pages (publisher and advertiser landing, pricing, etc.). Saves immediately — close this modal and visit a marketing page to see it applied. The dashboard itself stays in English for now.</div>
+                    </div>
+                    <div id="aSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">✓ Saved</div>`;
+            }
+
             function sectionSecurity() {
                 return `
                     <div style="${ROW}">
@@ -6835,8 +6868,20 @@
 
             function renderBody() {
                 const body = settingsModal.querySelector('#aSetBody');
-                const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs, security: sectionSecurity };
+                const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
+                // Language picker — save to localStorage on change so the
+                // marketing pages' i18n.js preload picks it up next visit.
+                const langSel = body.querySelector('#aSetLanguage');
+                if (langSel) langSel.addEventListener('change', () => {
+                    try { localStorage.setItem('bb_lang', langSel.value); } catch (_) {}
+                    const saved = body.querySelector('#aSetLangSaved');
+                    if (saved) {
+                        saved.style.display = 'block';
+                        setTimeout(() => { saved.style.display = 'none'; }, 2000);
+                    }
+                    if (typeof showToast === 'function') showToast('Language saved', 'success');
+                });
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {
                         const v = btn.dataset.copy || '';
