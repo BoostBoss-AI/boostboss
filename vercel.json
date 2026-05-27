@@ -43,6 +43,12 @@
     { "source": "/publish/extensions", "destination": "/publish-extensions.html" },
     { "source": "/publish/bots", "destination": "/publish-bots.html" },
     { "source": "/publish/no-code", "destination": "/publish-no-code.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish", "destination": "/publish.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/mcp", "destination": "/publish-mcp.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/ai-apps", "destination": "/publish-ai-apps.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/extensions", "destination": "/publish-extensions.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/bots", "destination": "/publish-bots.html" },
+    { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/no-code", "destination": "/publish-no-code.html" },
     { "source": "/test/lumi-snippet-test", "destination": "/test/lumi-snippet-test.html" },
     { "source": "/trust", "destination": "/trust.html" }
   ],

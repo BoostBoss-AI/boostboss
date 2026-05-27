@@ -1,6 +1,7 @@
-// Boost Boss i18n — URL-based language routing (/en, /zh, /ja, /ko, /vi)
-// Reads lang from window.location.pathname's first segment.
-// When user picks a language, navigates to /<lang> so the URL reflects state.
+// Boost Boss i18n — URL-based language routing.
+// Locale lives in the first path segment, e.g. /zh-TW/publish/mcp.
+// When the user switches language, we preserve the rest of the path —
+// /publish/mcp → /zh-TW/publish/mcp, /zh/publish → /ja/publish, etc.
 (function () {
   'use strict';
 
@@ -16,6 +17,29 @@
 
   function getLang() {
     return pathLang() || DEFAULT;
+  }
+
+  // Remove leading locale segment from a path, if present.
+  // "/zh-TW/publish/mcp" -> "/publish/mcp"
+  // "/publish/mcp"       -> "/publish/mcp"  (untouched)
+  // "/zh-TW"             -> "/"
+  function stripLocaleFromPath(pathname) {
+    var parts = (pathname || '/').split('/');
+    if (parts.length > 1 && SUPPORTED.indexOf(parts[1]) !== -1) {
+      parts.splice(1, 1);
+      var stripped = parts.join('/');
+      return stripped || '/';
+    }
+    return pathname || '/';
+  }
+
+  // Build the URL to navigate to when switching to `lang`, preserving the
+  // current page path. Includes window.location.search/hash so query params
+  // and anchors survive the locale switch.
+  function targetForLang(lang) {
+    var rest = stripLocaleFromPath(window.location.pathname);
+    var prefix = (rest === '/' || rest === '') ? ('/' + lang) : ('/' + lang + rest);
+    return prefix + (window.location.search || '') + (window.location.hash || '');
   }
 
   function getText(dict, keyPath) {
@@ -64,19 +88,20 @@
     for (var m = 0; m < menuLinks.length; m++) {
       var lang = menuLinks[m].getAttribute('data-lang');
       menuLinks[m].classList.toggle('active', lang === active);
-      // Point each menu link at /<lang> so right-click/"open in new tab" works too
-      menuLinks[m].setAttribute('href', '/' + lang);
+      // Point each menu link at the locale-prefixed version of the CURRENT
+      // page so right-click / "open in new tab" preserves context.
+      menuLinks[m].setAttribute('href', targetForLang(lang));
     }
     var btnLabel = document.querySelector('.nav-lang span');
     if (btnLabel) btnLabel.textContent = active.toUpperCase();
     document.documentElement.lang = active;
   }
 
-  // Public API — navigate to /<lang>
+  // Public API — switch language, keep the user on the same page.
   window.setBBLang = function (lang) {
     if (SUPPORTED.indexOf(lang) === -1) return;
     if (lang === getLang()) return;
-    window.location.href = '/' + lang;
+    window.location.href = targetForLang(lang);
   };
 
   function init() {
