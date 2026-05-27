@@ -4865,10 +4865,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const modal = document.createElement('div');
             modal.id = 'settingsModal';
             modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
-            modal.innerHTML = `
+            function renderModalChrome() {
+                modal.innerHTML = `
                 <div style="background:#fff;border-radius:16px;width:860px;max-width:94vw;height:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
-                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">Settings</h3>
+                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">${esc(t('modal.title'))}</h3>
                         <button id="sSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
                     </div>
                     <div style="display:flex;flex:1;min-height:0;">
@@ -4876,21 +4877,30 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         <div id="sSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
                     </div>
                     <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
-                        <button id="sSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">Close</button>
-                        <button id="sSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">Save changes</button>
+                        <button id="sSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">${esc(t('modal.close'))}</button>
+                        <button id="sSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${esc(t('modal.save'))}</button>
                     </div>
                 </div>`;
+                modal.querySelector('#sSetClose').addEventListener('click', closeModal);
+                modal.querySelector('#sSetCancel').addEventListener('click', closeModal);
+                modal.querySelector('#sSetSave').addEventListener('click', handleSave);
+            }
             document.body.appendChild(modal);
+            function sectionList() {
+                return [
+                    { key: 'account',  label: t('nav.account') },
+                    { key: 'payouts',  label: t('nav.payouts') },
+                    { key: 'api',      label: t('nav.api') },
+                    { key: 'brand',    label: t('nav.brand') },
+                    { key: 'notifs',   label: t('nav.notifs') },
+                    { key: 'language', label: t('nav.language') },
+                    { key: 'security', label: t('nav.security') },
+                ];
+            }
 
-            const SECTIONS = [
-                { key: 'account', label: 'Account' },
-                { key: 'payouts', label: 'Payouts' },
-                { key: 'api',     label: 'API & Integration' },
-                { key: 'brand',   label: 'Brand safety' },
-                { key: 'notifs',  label: 'Notifications' },
-                { key: 'language', label: 'Language' },
-                { key: 'security', label: 'Security' },
-            ];
+            // SECTIONS kept as English fallback for any code that still
+            // references it; live nav rendering uses sectionList() (translated).
+            const SECTIONS = sectionList();
             // Supported languages — must match i18n.js SUPPORTED. Display
             // labels use each language's native name + an English gloss.
             const LANGUAGES = [
@@ -4901,16 +4911,72 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 { code: 'ko',    label: '한국어 (Korean)' },
                 { code: 'vi',    label: 'Tiếng Việt (Vietnamese)' },
             ];
-            // NB: separate key from `bb_lang` (which controls the marketing
+            // Separate key from `bb_lang` (which controls the marketing
             // site i18n). The dashboard preference applies to the dashboard
-            // UI only — and the dashboard itself isn't translated yet, so
-            // for now this just records the user's choice for later.
+            // UI — currently the Settings modal is fully translated; other
+            // dashboard surfaces are being translated incrementally.
             function currentLang() {
                 try {
                     var v = localStorage.getItem('bb_dashboard_lang');
                     if (v && LANGUAGES.some((l) => l.code === v)) return v;
                 } catch (_) {}
                 return 'en';
+            }
+
+            // ─── Publisher dashboard Settings translations (inline) ───
+            const DASH_T = {
+                'en': {
+                    'modal.title': 'Settings', 'modal.close': 'Close', 'modal.save': 'Save changes',
+                    'nav.account': 'Account', 'nav.payouts': 'Payouts', 'nav.api': 'API & Integration',
+                    'nav.brand': 'Brand safety', 'nav.notifs': 'Notifications', 'nav.language': 'Language', 'nav.security': 'Security',
+                    'common.copy': 'Copy', 'common.show': 'Show', 'common.hide': 'Hide', 'common.saved': '✓ Saved',
+                    'language.label': 'Dashboard language',
+                    'language.hint': 'Applies only to the publisher dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav. Settings translate immediately; other surfaces are being rolled out.',
+                },
+                'zh': {
+                    'modal.title': '设置', 'modal.close': '关闭', 'modal.save': '保存更改',
+                    'nav.account': '账户', 'nav.payouts': '打款', 'nav.api': 'API 与集成',
+                    'nav.brand': '品牌安全', 'nav.notifs': '通知', 'nav.language': '语言', 'nav.security': '安全',
+                    'common.copy': '复制', 'common.show': '显示', 'common.hide': '隐藏', 'common.saved': '✓ 已保存',
+                    'language.label': '面板语言',
+                    'language.hint': '仅作用于发布商面板。boostboss.ai 营销页面有自己的语言切换在顶部导航。设置立即翻译,其他界面正在逐步推出。',
+                },
+                'zh-TW': {
+                    'modal.title': '設定', 'modal.close': '關閉', 'modal.save': '儲存變更',
+                    'nav.account': '帳號', 'nav.payouts': '撥款', 'nav.api': 'API 與整合',
+                    'nav.brand': '品牌安全', 'nav.notifs': '通知', 'nav.language': '語言', 'nav.security': '安全',
+                    'common.copy': '複製', 'common.show': '顯示', 'common.hide': '隱藏', 'common.saved': '✓ 已儲存',
+                    'language.label': '儀表板語言',
+                    'language.hint': '僅作用於發布商儀表板。boostboss.ai 行銷頁面有自己的語言切換在頂部導覽。設定立即翻譯,其他介面正逐步推出。',
+                },
+                'ja': {
+                    'modal.title': '設定', 'modal.close': '閉じる', 'modal.save': '変更を保存',
+                    'nav.account': 'アカウント', 'nav.payouts': '支払い', 'nav.api': 'API・統合',
+                    'nav.brand': 'ブランドセーフティ', 'nav.notifs': '通知', 'nav.language': '言語', 'nav.security': 'セキュリティ',
+                    'common.copy': 'コピー', 'common.show': '表示', 'common.hide': '非表示', 'common.saved': '✓ 保存しました',
+                    'language.label': 'ダッシュボード言語',
+                    'language.hint': 'パブリッシャー ダッシュボードにのみ適用されます。boostboss.ai のマーケティングページには独自の言語切替がトップナビにあります。設定は即時翻訳、他のサーフェスは順次展開中です。',
+                },
+                'ko': {
+                    'modal.title': '설정', 'modal.close': '닫기', 'modal.save': '변경 저장',
+                    'nav.account': '계정', 'nav.payouts': '정산', 'nav.api': 'API 및 통합',
+                    'nav.brand': '브랜드 안전', 'nav.notifs': '알림', 'nav.language': '언어', 'nav.security': '보안',
+                    'common.copy': '복사', 'common.show': '표시', 'common.hide': '숨기기', 'common.saved': '✓ 저장됨',
+                    'language.label': '대시보드 언어',
+                    'language.hint': '퍼블리셔 대시보드에만 적용됩니다. boostboss.ai 마케팅 페이지는 상단 내비에 자체 언어 토글이 있습니다. 설정은 즉시 번역되고 다른 표면은 점진적으로 적용됩니다.',
+                },
+                'vi': {
+                    'modal.title': 'Cài đặt', 'modal.close': 'Đóng', 'modal.save': 'Lưu thay đổi',
+                    'nav.account': 'Tài khoản', 'nav.payouts': 'Thanh toán', 'nav.api': 'API & Tích hợp',
+                    'nav.brand': 'An toàn thương hiệu', 'nav.notifs': 'Thông báo', 'nav.language': 'Ngôn ngữ', 'nav.security': 'Bảo mật',
+                    'common.copy': 'Sao chép', 'common.show': 'Hiện', 'common.hide': 'Ẩn', 'common.saved': '✓ Đã lưu',
+                    'language.label': 'Ngôn ngữ dashboard',
+                    'language.hint': 'Chỉ áp dụng cho dashboard publisher. Trang marketing boostboss.ai có toggle ngôn ngữ riêng ở top nav. Settings dịch ngay, các bề mặt khác đang triển khai dần.',
+                },
+            };
+            function t(k) {
+                var d = DASH_T[currentLang()] || DASH_T.en;
+                return d[k] || DASH_T.en[k] || k;
             }
             // Common IAB advertiser categories the publisher can block.
             const IAB_CATS = [
@@ -5058,16 +5124,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     `<option value="${l.code}" ${l.code === cur ? 'selected' : ''}>${esc(l.label)}</option>`
                 ).join('');
                 return `
-                    <div style="background:#FFF9E6;border:1px solid #F4D77A;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
-                        <div style="font-size:12.5px;font-weight:700;color:#8A6500;margin-bottom:3px;">Coming soon</div>
-                        <div style="font-size:12.5px;color:#6B5100;line-height:1.55;">Dashboard translations are in progress. Your preference is saved now and will apply automatically once the dashboard ships in your language.</div>
-                    </div>
                     <div style="${ROW}">
-                        <label style="${LB}">Dashboard language</label>
+                        <label style="${LB}">${esc(t('language.label'))}</label>
                         <select id="sSetLanguage" style="${FLD}">${opts}</select>
-                        <div style="${HINT}">Applies only to the publisher dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav.</div>
+                        <div style="${HINT}">${esc(t('language.hint'))}</div>
                     </div>
-                    <div id="sSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">✓ Saved</div>`;
+                    <div id="sSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">${esc(t('common.saved'))}</div>`;
             }
 
             function sectionSecurity() {
@@ -5091,9 +5153,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             function renderNav() {
                 const nav = document.getElementById('sSetNav');
-                nav.innerHTML = SECTIONS.map((s) => {
+                nav.innerHTML = sectionList().map((s) => {
                     const on = s.key === activeSection;
-                    return `<button class="sSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${s.label}</button>`;
+                    return `<button class="sSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${esc(s.label)}</button>`;
                 }).join('');
                 nav.querySelectorAll('.sSetNavBtn').forEach((b) => {
                     b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
@@ -5104,19 +5166,14 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const body = document.getElementById('sSetBody');
                 const map = { account: sectionAccount, payouts: sectionPayouts, api: sectionApi, brand: sectionBrandSafety, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
-                // Language picker — saves to bb_dashboard_lang, a key
-                // separate from bb_lang (which controls the marketing
-                // site). Dashboard isn't translated yet, so this is just
-                // recording the preference for when it ships.
+                // Language picker — saves to bb_dashboard_lang and
+                // immediately re-renders the modal in the chosen language.
                 const langSel = body.querySelector('#sSetLanguage');
                 if (langSel) langSel.addEventListener('change', () => {
                     try { localStorage.setItem('bb_dashboard_lang', langSel.value); } catch (_) {}
-                    const saved = body.querySelector('#sSetLangSaved');
-                    if (saved) {
-                        saved.style.display = 'block';
-                        setTimeout(() => { saved.style.display = 'none'; }, 2000);
-                    }
-                    if (typeof showToast === 'function') showToast('Dashboard language preference saved', 'success');
+                    renderModalChrome();
+                    renderNav();
+                    renderBody();
                 });
                 // Copy buttons
                 body.querySelectorAll('.sSetCopy').forEach((btn) => {
@@ -5211,14 +5268,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 });
             }
 
-            function openModal() { activeSection = 'account'; renderNav(); renderBody(); modal.style.display = 'flex'; }
+            function openModal() {
+                activeSection = 'account';
+                renderModalChrome();   // builds innerHTML + wires close/cancel/save
+                renderNav();
+                renderBody();
+                modal.style.display = 'flex';
+            }
             function closeModal() { modal.style.display = 'none'; }
-
-            settingsBtn.addEventListener('click', openModal);
-            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-            document.getElementById('sSetClose').addEventListener('click', closeModal);
-            document.getElementById('sSetCancel').addEventListener('click', closeModal);
-            document.getElementById('sSetSave').addEventListener('click', () => {
+            function handleSave() {
                 const appInput = document.getElementById('sSetApp');
                 const newApp = appInput ? appInput.value.trim() : '';
                 if (newApp && typeof userProfile !== 'undefined' && userProfile) {
@@ -5232,7 +5290,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 }
                 closeModal();
                 if (typeof showToast === 'function') showToast('Settings saved', 'success');
-            });
+            }
+
+            settingsBtn.addEventListener('click', openModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            // Close/Cancel/Save are wired inside renderModalChrome() since
+            // innerHTML is rebuilt on each openModal() and on language change.
         })();
 
         // ───────────── COMMAND PALETTE (⌘K) ─────────────

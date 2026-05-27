@@ -6701,10 +6701,11 @@
             const HINT = 'font-size:11px;color:#9CA3AF;margin-top:5px;line-height:1.5;';
 
             settingsModal.style.cssText = 'display:none;position:fixed;inset:0;z-index:950;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
-            settingsModal.innerHTML = `
+            function renderModalChrome() {
+                settingsModal.innerHTML = `
                 <div style="background:#fff;border-radius:16px;width:860px;max-width:94vw;height:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F0F2;">
-                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">Settings</h3>
+                        <h3 style="font-size:17px;font-weight:700;color:#111;margin:0;">${esc(t('modal.title'))}</h3>
                         <button id="aSetClose" style="background:none;border:none;font-size:24px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
                     </div>
                     <div style="display:flex;flex:1;min-height:0;">
@@ -6712,19 +6713,26 @@
                         <div id="aSetBody" style="flex:1;padding:24px 28px;overflow-y:auto;"></div>
                     </div>
                     <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #F0F0F2;background:#FAFAFA;">
-                        <button id="aSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">Close</button>
-                        <button id="aSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">Save changes</button>
+                        <button id="aSetCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">${esc(t('modal.close'))}</button>
+                        <button id="aSetSave" style="padding:9px 20px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${esc(t('modal.save'))}</button>
                     </div>
                 </div>`;
-
-            const SECTIONS = [
-                { key: 'account', label: 'Account' },
-                { key: 'billing', label: 'Billing & funds' },
-                { key: 'api',     label: 'API access' },
-                { key: 'notifs',  label: 'Notifications' },
-                { key: 'language', label: 'Language' },
-                { key: 'security', label: 'Security' },
-            ];
+                // Chrome buttons need re-wiring after innerHTML rewrite
+                settingsModal.querySelector('#aSetClose').addEventListener('click', closeModal);
+                settingsModal.querySelector('#aSetCancel').addEventListener('click', closeModal);
+                settingsModal.querySelector('#aSetSave').addEventListener('click', handleSave);
+            }
+            // Sections list is a function so labels re-render when language changes.
+            function sectionList() {
+                return [
+                    { key: 'account',  label: t('nav.account') },
+                    { key: 'billing',  label: t('nav.billing') },
+                    { key: 'api',      label: t('nav.api') },
+                    { key: 'notifs',   label: t('nav.notifs') },
+                    { key: 'language', label: t('nav.language') },
+                    { key: 'security', label: t('nav.security') },
+                ];
+            }
             let activeSection = 'account';
 
             // Supported languages — must match i18n.js SUPPORTED. Display
@@ -6737,10 +6745,10 @@
                 { code: 'ko',    label: '한국어 (Korean)' },
                 { code: 'vi',    label: 'Tiếng Việt (Vietnamese)' },
             ];
-            // NB: separate key from `bb_lang` (which controls the marketing
+            // Separate key from `bb_lang` (which controls the marketing
             // site i18n). The dashboard preference applies to the dashboard
-            // UI only — and the dashboard itself isn't translated yet, so
-            // for now this just records the user's choice for later.
+            // UI — currently the Settings modal is fully translated; other
+            // dashboard surfaces are being translated incrementally.
             function currentLang() {
                 try {
                     var v = localStorage.getItem('bb_dashboard_lang');
@@ -6749,24 +6757,246 @@
                 return 'en';
             }
 
+            // ─── Dashboard translation dictionary (Settings modal) ───
+            // Inline so it loads with the page — no async fetch. Keys group
+            // by surface: `modal.*` chrome, `nav.*` sidebar, `account.*`,
+            // `billing.*`, `api.*`, `notifs.*`, `language.*`, `security.*`.
+            // English is the source-of-truth + fallback.
+            const DASH_T = {
+                'en': {
+                    'modal.title': 'Settings',  'modal.close': 'Close',  'modal.save': 'Save changes',
+                    'nav.account': 'Account',  'nav.billing': 'Billing & funds',  'nav.api': 'API access',
+                    'nav.notifs': 'Notifications',  'nav.language': 'Language',  'nav.security': 'Security',
+                    'common.copy': 'Copy',  'common.show': 'Show',  'common.hide': 'Hide',  'common.saved': '✓ Saved',
+                    'account.company': 'Company name',
+                    'account.company_hint': 'Shown on your campaigns and billing receipts.',
+                    'account.email': 'Contact email',
+                    'account.email_hint': 'Used for campaign and billing notifications.',
+                    'account.id': 'Advertiser ID',
+                    'billing.balance_label': 'Account balance',
+                    'billing.balance_hint': 'Campaign spend is deducted from this balance as your ads run.',
+                    'billing.add_funds': '+ Add funds',
+                    'billing.add_funds_hint': 'Opens the Stripe-powered deposit flow.',
+                    'billing.history_title': 'Billing history',
+                    'billing.history_hint': 'A full transaction & receipt history is coming in the next settings update.',
+                    'api.key_label': 'API key',
+                    'api.key_hint': 'Authenticates programmatic campaign management via the REST API. Keep it secret.',
+                    'notifs.preamble': 'Email me when…',
+                    'notifs.campaign_status': 'A campaign changes status',
+                    'notifs.campaign_status_d': 'Approved, rejected, paused, or out of budget.',
+                    'notifs.budget_alert': 'A campaign nears its budget',
+                    'notifs.budget_alert_d': 'Heads-up before a campaign spends its daily or total cap.',
+                    'notifs.low_balance': 'My account balance runs low',
+                    'notifs.low_balance_d': 'So campaigns never stop unexpectedly for lack of funds.',
+                    'notifs.weekly_report': 'Weekly performance summary',
+                    'notifs.weekly_report_d': 'A once-a-week recap of impressions, clicks, spend, and conversions.',
+                    'language.label': 'Dashboard language',
+                    'language.hint': 'Applies only to the advertiser dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav. Settings translate immediately; other surfaces are being rolled out.',
+                    'security.current': 'Current password',
+                    'security.new': 'New password',
+                    'security.new_hint': 'At least 8 characters.',
+                    'security.confirm': 'Confirm new password',
+                    'security.change_btn': 'Change password',
+                },
+                'zh': {
+                    'modal.title': '设置',  'modal.close': '关闭',  'modal.save': '保存更改',
+                    'nav.account': '账户',  'nav.billing': '账单与资金',  'nav.api': 'API 访问',
+                    'nav.notifs': '通知',  'nav.language': '语言',  'nav.security': '安全',
+                    'common.copy': '复制',  'common.show': '显示',  'common.hide': '隐藏',  'common.saved': '✓ 已保存',
+                    'account.company': '公司名称',
+                    'account.company_hint': '显示在你的广告和账单收据上。',
+                    'account.email': '联系邮箱',
+                    'account.email_hint': '用于广告和账单通知。',
+                    'account.id': '广告主 ID',
+                    'billing.balance_label': '账户余额',
+                    'billing.balance_hint': '广告投放支出会从此余额扣除。',
+                    'billing.add_funds': '+ 充值',
+                    'billing.add_funds_hint': '打开 Stripe 充值流程。',
+                    'billing.history_title': '账单历史',
+                    'billing.history_hint': '完整的交易和收据历史将在下个版本中推出。',
+                    'api.key_label': 'API 密钥',
+                    'api.key_hint': '用于通过 REST API 管理广告。请妥善保管。',
+                    'notifs.preamble': '在以下情况给我发邮件…',
+                    'notifs.campaign_status': '广告状态变化时',
+                    'notifs.campaign_status_d': '已批准、被拒绝、暂停或预算用完。',
+                    'notifs.budget_alert': '广告接近预算上限时',
+                    'notifs.budget_alert_d': '在广告即将达到日预算或总预算前提醒。',
+                    'notifs.low_balance': '账户余额过低时',
+                    'notifs.low_balance_d': '避免广告因资金不足意外停止。',
+                    'notifs.weekly_report': '每周表现摘要',
+                    'notifs.weekly_report_d': '每周一次的展示、点击、支出和转化回顾。',
+                    'language.label': '面板语言',
+                    'language.hint': '仅作用于广告主面板。boostboss.ai 营销页面有自己的语言切换在顶部导航。设置立即翻译,其他界面正在逐步推出。',
+                    'security.current': '当前密码',
+                    'security.new': '新密码',
+                    'security.new_hint': '至少 8 个字符。',
+                    'security.confirm': '确认新密码',
+                    'security.change_btn': '更改密码',
+                },
+                'zh-TW': {
+                    'modal.title': '設定',  'modal.close': '關閉',  'modal.save': '儲存變更',
+                    'nav.account': '帳號',  'nav.billing': '帳單與資金',  'nav.api': 'API 存取',
+                    'nav.notifs': '通知',  'nav.language': '語言',  'nav.security': '安全',
+                    'common.copy': '複製',  'common.show': '顯示',  'common.hide': '隱藏',  'common.saved': '✓ 已儲存',
+                    'account.company': '公司名稱',
+                    'account.company_hint': '顯示於你的廣告與帳單收據。',
+                    'account.email': '聯絡電子郵件',
+                    'account.email_hint': '用於廣告與帳單通知。',
+                    'account.id': '廣告主 ID',
+                    'billing.balance_label': '帳戶餘額',
+                    'billing.balance_hint': '廣告支出將自此餘額扣除。',
+                    'billing.add_funds': '+ 加值',
+                    'billing.add_funds_hint': '開啟 Stripe 充值流程。',
+                    'billing.history_title': '帳單歷史',
+                    'billing.history_hint': '完整的交易與收據歷史將於下一個設定版本推出。',
+                    'api.key_label': 'API 金鑰',
+                    'api.key_hint': '透過 REST API 管理廣告的驗證。請妥善保管。',
+                    'notifs.preamble': '當下列情況發生時寄信給我…',
+                    'notifs.campaign_status': '廣告狀態變更',
+                    'notifs.campaign_status_d': '已核准、被拒絕、暫停或預算用盡。',
+                    'notifs.budget_alert': '廣告接近預算上限',
+                    'notifs.budget_alert_d': '在廣告即將達到每日或總預算前提醒。',
+                    'notifs.low_balance': '我的帳戶餘額過低',
+                    'notifs.low_balance_d': '避免廣告因資金不足意外停止。',
+                    'notifs.weekly_report': '每週成效摘要',
+                    'notifs.weekly_report_d': '每週一次的曝光、點擊、支出與轉換回顧。',
+                    'language.label': '儀表板語言',
+                    'language.hint': '僅作用於廣告主儀表板。boostboss.ai 行銷頁面有自己的語言切換在頂部導覽。設定立即翻譯,其他介面正逐步推出。',
+                    'security.current': '目前密碼',
+                    'security.new': '新密碼',
+                    'security.new_hint': '至少 8 個字元。',
+                    'security.confirm': '確認新密碼',
+                    'security.change_btn': '更改密碼',
+                },
+                'ja': {
+                    'modal.title': '設定',  'modal.close': '閉じる',  'modal.save': '変更を保存',
+                    'nav.account': 'アカウント',  'nav.billing': '請求 & 残高',  'nav.api': 'API アクセス',
+                    'nav.notifs': '通知',  'nav.language': '言語',  'nav.security': 'セキュリティ',
+                    'common.copy': 'コピー',  'common.show': '表示',  'common.hide': '非表示',  'common.saved': '✓ 保存しました',
+                    'account.company': '会社名',
+                    'account.company_hint': 'キャンペーンと請求書に表示されます。',
+                    'account.email': '連絡先メール',
+                    'account.email_hint': 'キャンペーンと請求の通知に使用します。',
+                    'account.id': '広告主 ID',
+                    'billing.balance_label': 'アカウント残高',
+                    'billing.balance_hint': 'キャンペーン支出はこの残高から差し引かれます。',
+                    'billing.add_funds': '+ 入金',
+                    'billing.add_funds_hint': 'Stripe による入金フローを開きます。',
+                    'billing.history_title': '請求履歴',
+                    'billing.history_hint': '完全な取引・領収書履歴は次回の設定アップデートで提供されます。',
+                    'api.key_label': 'API キー',
+                    'api.key_hint': 'REST API でキャンペーンを管理するための認証。秘密にしてください。',
+                    'notifs.preamble': '次の場合にメールで通知…',
+                    'notifs.campaign_status': 'キャンペーンのステータスが変わったとき',
+                    'notifs.campaign_status_d': '承認、却下、一時停止、または予算切れ。',
+                    'notifs.budget_alert': 'キャンペーンが予算に近づいたとき',
+                    'notifs.budget_alert_d': 'キャンペーンが日次または合計上限に達する前に通知。',
+                    'notifs.low_balance': 'アカウント残高が少なくなったとき',
+                    'notifs.low_balance_d': '資金不足でキャンペーンが予期せず停止しないように。',
+                    'notifs.weekly_report': '週次パフォーマンス サマリー',
+                    'notifs.weekly_report_d': 'インプレッション、クリック、支出、コンバージョンの週次レポート。',
+                    'language.label': 'ダッシュボード言語',
+                    'language.hint': '広告主ダッシュボードにのみ適用されます。boostboss.ai のマーケティングページには独自の言語切替がトップナビにあります。設定は即時翻訳、他のサーフェスは順次展開中です。',
+                    'security.current': '現在のパスワード',
+                    'security.new': '新しいパスワード',
+                    'security.new_hint': '8 文字以上。',
+                    'security.confirm': '新しいパスワード(確認)',
+                    'security.change_btn': 'パスワードを変更',
+                },
+                'ko': {
+                    'modal.title': '설정',  'modal.close': '닫기',  'modal.save': '변경 저장',
+                    'nav.account': '계정',  'nav.billing': '결제 및 자금',  'nav.api': 'API 접근',
+                    'nav.notifs': '알림',  'nav.language': '언어',  'nav.security': '보안',
+                    'common.copy': '복사',  'common.show': '표시',  'common.hide': '숨기기',  'common.saved': '✓ 저장됨',
+                    'account.company': '회사명',
+                    'account.company_hint': '캠페인 및 청구서에 표시됩니다.',
+                    'account.email': '연락처 이메일',
+                    'account.email_hint': '캠페인 및 청구 알림에 사용됩니다.',
+                    'account.id': '광고주 ID',
+                    'billing.balance_label': '계정 잔액',
+                    'billing.balance_hint': '캠페인 지출은 이 잔액에서 차감됩니다.',
+                    'billing.add_funds': '+ 자금 추가',
+                    'billing.add_funds_hint': 'Stripe 기반 입금 흐름을 엽니다.',
+                    'billing.history_title': '청구 내역',
+                    'billing.history_hint': '전체 거래 및 영수증 내역은 다음 설정 업데이트에서 제공됩니다.',
+                    'api.key_label': 'API 키',
+                    'api.key_hint': 'REST API로 캠페인을 관리하기 위한 인증. 비밀로 유지하세요.',
+                    'notifs.preamble': '다음 상황에서 이메일을 받음…',
+                    'notifs.campaign_status': '캠페인 상태가 변경됨',
+                    'notifs.campaign_status_d': '승인, 거부, 일시정지 또는 예산 소진.',
+                    'notifs.budget_alert': '캠페인이 예산에 근접함',
+                    'notifs.budget_alert_d': '캠페인이 일일 또는 총 한도에 도달하기 전 알림.',
+                    'notifs.low_balance': '계정 잔액이 부족함',
+                    'notifs.low_balance_d': '자금 부족으로 캠페인이 예기치 않게 중단되지 않도록.',
+                    'notifs.weekly_report': '주간 성과 요약',
+                    'notifs.weekly_report_d': '임프레션, 클릭, 지출, 전환의 주간 요약.',
+                    'language.label': '대시보드 언어',
+                    'language.hint': '광고주 대시보드에만 적용됩니다. boostboss.ai 마케팅 페이지는 상단 내비에 자체 언어 토글이 있습니다. 설정은 즉시 번역되고 다른 표면은 점진적으로 적용됩니다.',
+                    'security.current': '현재 비밀번호',
+                    'security.new': '새 비밀번호',
+                    'security.new_hint': '최소 8자.',
+                    'security.confirm': '새 비밀번호 확인',
+                    'security.change_btn': '비밀번호 변경',
+                },
+                'vi': {
+                    'modal.title': 'Cài đặt',  'modal.close': 'Đóng',  'modal.save': 'Lưu thay đổi',
+                    'nav.account': 'Tài khoản',  'nav.billing': 'Thanh toán & quỹ',  'nav.api': 'Truy cập API',
+                    'nav.notifs': 'Thông báo',  'nav.language': 'Ngôn ngữ',  'nav.security': 'Bảo mật',
+                    'common.copy': 'Sao chép',  'common.show': 'Hiện',  'common.hide': 'Ẩn',  'common.saved': '✓ Đã lưu',
+                    'account.company': 'Tên công ty',
+                    'account.company_hint': 'Hiển thị trên chiến dịch và hóa đơn thanh toán.',
+                    'account.email': 'Email liên hệ',
+                    'account.email_hint': 'Dùng cho thông báo chiến dịch và thanh toán.',
+                    'account.id': 'ID Advertiser',
+                    'billing.balance_label': 'Số dư tài khoản',
+                    'billing.balance_hint': 'Chi tiêu chiến dịch được trừ từ số dư này khi quảng cáo chạy.',
+                    'billing.add_funds': '+ Thêm tiền',
+                    'billing.add_funds_hint': 'Mở luồng nạp tiền qua Stripe.',
+                    'billing.history_title': 'Lịch sử thanh toán',
+                    'billing.history_hint': 'Lịch sử giao dịch & biên lai đầy đủ sẽ có trong bản cập nhật cài đặt tiếp theo.',
+                    'api.key_label': 'API key',
+                    'api.key_hint': 'Xác thực quản lý chiến dịch lập trình qua REST API. Giữ bí mật.',
+                    'notifs.preamble': 'Email cho tôi khi…',
+                    'notifs.campaign_status': 'Chiến dịch đổi trạng thái',
+                    'notifs.campaign_status_d': 'Được duyệt, từ chối, tạm dừng hoặc hết ngân sách.',
+                    'notifs.budget_alert': 'Chiến dịch gần đạt ngân sách',
+                    'notifs.budget_alert_d': 'Báo trước khi chiến dịch chạm trần hằng ngày hoặc tổng.',
+                    'notifs.low_balance': 'Số dư tài khoản gần hết',
+                    'notifs.low_balance_d': 'Để chiến dịch không dừng đột ngột vì thiếu tiền.',
+                    'notifs.weekly_report': 'Tóm tắt hiệu suất hàng tuần',
+                    'notifs.weekly_report_d': 'Bản tóm tắt impression, click, chi tiêu và chuyển đổi mỗi tuần.',
+                    'language.label': 'Ngôn ngữ dashboard',
+                    'language.hint': 'Chỉ áp dụng cho dashboard advertiser. Trang marketing boostboss.ai có toggle ngôn ngữ riêng ở top nav. Settings dịch ngay, các bề mặt khác đang triển khai dần.',
+                    'security.current': 'Mật khẩu hiện tại',
+                    'security.new': 'Mật khẩu mới',
+                    'security.new_hint': 'Tối thiểu 8 ký tự.',
+                    'security.confirm': 'Xác nhận mật khẩu mới',
+                    'security.change_btn': 'Đổi mật khẩu',
+                },
+            };
+            function t(k) {
+                var d = DASH_T[currentLang()] || DASH_T.en;
+                return d[k] || DASH_T.en[k] || k;
+            }
+
             function sectionAccount() {
                 const d = u();
                 return `
                     <div style="${ROW}">
-                        <label style="${LB}">Company name</label>
+                        <label style="${LB}">${esc(t('account.company'))}</label>
                         <input id="aSetCompany" type="text" value="${esc(d.company_name || '')}" style="${FLD}">
-                        <div style="${HINT}">Shown on your campaigns and billing receipts.</div>
+                        <div style="${HINT}">${esc(t('account.company_hint'))}</div>
                     </div>
                     <div style="${ROW}">
-                        <label style="${LB}">Contact email</label>
+                        <label style="${LB}">${esc(t('account.email'))}</label>
                         <input type="text" value="${esc(d.email || '')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;">
-                        <div style="${HINT}">Used for campaign and billing notifications.</div>
+                        <div style="${HINT}">${esc(t('account.email_hint'))}</div>
                     </div>
                     <div style="${ROW}margin-bottom:0;">
-                        <label style="${LB}">Advertiser ID</label>
+                        <label style="${LB}">${esc(t('account.id'))}</label>
                         <div style="display:flex;gap:8px;">
                             <input type="text" value="${esc(d.user_id || '—')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:monospace;font-size:12.5px;">
-                            <button class="aSetCopy" data-copy="${esc(d.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                            <button class="aSetCopy" data-copy="${esc(d.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">${esc(t('common.copy'))}</button>
                         </div>
                     </div>`;
             }
@@ -6776,15 +7006,15 @@
                 const bal = (typeof d.balance === 'number') ? '$' + d.balance.toFixed(2) : null;
                 return `
                     <div style="background:#FFF0F6;border:1px solid #F4C0D1;border-radius:10px;padding:16px;margin-bottom:18px;">
-                        <div style="font-size:11px;font-weight:700;color:#993556;text-transform:uppercase;letter-spacing:0.06em;">Account balance</div>
-                        <div style="font-size:26px;font-weight:800;color:#FF2D78;margin-top:4px;">${bal || 'See dashboard'}</div>
-                        <div style="font-size:12px;color:#993556;margin-top:4px;line-height:1.5;">Campaign spend is deducted from this balance as your ads run.</div>
+                        <div style="font-size:11px;font-weight:700;color:#993556;text-transform:uppercase;letter-spacing:0.06em;">${esc(t('billing.balance_label'))}</div>
+                        <div style="font-size:26px;font-weight:800;color:#FF2D78;margin-top:4px;">${bal || '—'}</div>
+                        <div style="font-size:12px;color:#993556;margin-top:4px;line-height:1.5;">${esc(t('billing.balance_hint'))}</div>
                     </div>
-                    <button id="aSetAddFunds" style="width:100%;padding:11px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">+ Add funds</button>
-                    <div style="${HINT}">Opens the Stripe-powered deposit flow.</div>
+                    <button id="aSetAddFunds" style="width:100%;padding:11px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${esc(t('billing.add_funds'))}</button>
+                    <div style="${HINT}">${esc(t('billing.add_funds_hint'))}</div>
                     <div style="border-top:1px solid #F0F0F2;margin-top:18px;padding-top:14px;">
-                        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px;">Billing history</div>
-                        <div style="font-size:11.5px;color:#9CA3AF;line-height:1.5;">A full transaction & receipt history is coming in the next settings update.</div>
+                        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px;">${esc(t('billing.history_title'))}</div>
+                        <div style="font-size:11.5px;color:#9CA3AF;line-height:1.5;">${esc(t('billing.history_hint'))}</div>
                     </div>`;
             }
 
@@ -6792,18 +7022,18 @@
                 const d = u();
                 return `
                     <div style="${ROW}">
-                        <label style="${LB}">API key</label>
+                        <label style="${LB}">${esc(t('api.key_label'))}</label>
                         <div style="display:flex;gap:8px;">
                             <input id="aSetKey" type="password" value="bb_live_••••••••••••" style="${FLD}font-family:monospace;font-size:12.5px;">
-                            <button id="aSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Show</button>
+                            <button id="aSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">${esc(t('common.show'))}</button>
                         </div>
-                        <div style="${HINT}">Authenticates programmatic campaign management via the REST API. Keep it secret.</div>
+                        <div style="${HINT}">${esc(t('api.key_hint'))}</div>
                     </div>
                     <div style="${ROW}margin-bottom:0;">
-                        <label style="${LB}">Advertiser ID</label>
+                        <label style="${LB}">${esc(t('account.id'))}</label>
                         <div style="display:flex;gap:8px;">
                             <input type="text" value="${esc(d.user_id || '—')}" disabled style="${FLD}background:#F9FAFB;color:#6B7280;font-family:monospace;font-size:12.5px;">
-                            <button class="aSetCopy" data-copy="${esc(d.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">Copy</button>
+                            <button class="aSetCopy" data-copy="${esc(d.user_id || '')}" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">${esc(t('common.copy'))}</button>
                         </div>
                     </div>`;
             }
@@ -6814,16 +7044,16 @@
                     <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #F3F4F6;cursor:pointer;">
                         <input type="checkbox" class="aSetNotif" data-notif="${key}" ${n[key] ? 'checked' : ''} style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:#FF2D78;">
                         <span>
-                            <span style="display:block;font-size:13.5px;font-weight:600;color:#111;">${title}</span>
-                            <span style="display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;">${desc}</span>
+                            <span style="display:block;font-size:13.5px;font-weight:600;color:#111;">${esc(title)}</span>
+                            <span style="display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;">${esc(desc)}</span>
                         </span>
                     </label>`;
                 return `
-                    <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">Email me when…</div>
-                    ${toggle('campaign_status', 'A campaign changes status', 'Approved, rejected, paused, or out of budget.')}
-                    ${toggle('budget_alert', 'A campaign nears its budget', 'Heads-up before a campaign spends its daily or total cap.')}
-                    ${toggle('low_balance', 'My account balance runs low', 'So campaigns never stop unexpectedly for lack of funds.')}
-                    ${toggle('weekly_report', 'Weekly performance summary', 'A once-a-week recap of impressions, clicks, spend, and conversions.')}`;
+                    <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">${esc(t('notifs.preamble'))}</div>
+                    ${toggle('campaign_status', t('notifs.campaign_status'), t('notifs.campaign_status_d'))}
+                    ${toggle('budget_alert',    t('notifs.budget_alert'),    t('notifs.budget_alert_d'))}
+                    ${toggle('low_balance',     t('notifs.low_balance'),     t('notifs.low_balance_d'))}
+                    ${toggle('weekly_report',   t('notifs.weekly_report'),   t('notifs.weekly_report_d'))}`;
             }
 
             function sectionLanguage() {
@@ -6832,42 +7062,38 @@
                     `<option value="${l.code}" ${l.code === cur ? 'selected' : ''}>${esc(l.label)}</option>`
                 ).join('');
                 return `
-                    <div style="background:#FFF9E6;border:1px solid #F4D77A;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
-                        <div style="font-size:12.5px;font-weight:700;color:#8A6500;margin-bottom:3px;">Coming soon</div>
-                        <div style="font-size:12.5px;color:#6B5100;line-height:1.55;">Dashboard translations are in progress. Your preference is saved now and will apply automatically once the dashboard ships in your language.</div>
-                    </div>
                     <div style="${ROW}">
-                        <label style="${LB}">Dashboard language</label>
+                        <label style="${LB}">${esc(t('language.label'))}</label>
                         <select id="aSetLanguage" style="${FLD}">${opts}</select>
-                        <div style="${HINT}">Applies only to the advertiser dashboard. Marketing pages on boostboss.ai have their own language toggle in the top nav.</div>
+                        <div style="${HINT}">${esc(t('language.hint'))}</div>
                     </div>
-                    <div id="aSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">✓ Saved</div>`;
+                    <div id="aSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">${esc(t('common.saved'))}</div>`;
             }
 
             function sectionSecurity() {
                 return `
                     <div style="${ROW}">
-                        <label style="${LB}">Current password</label>
+                        <label style="${LB}">${esc(t('security.current'))}</label>
                         <input id="aSetPwCurrent" type="password" autocomplete="current-password" style="${FLD}">
                     </div>
                     <div style="${ROW}">
-                        <label style="${LB}">New password</label>
+                        <label style="${LB}">${esc(t('security.new'))}</label>
                         <input id="aSetPwNew" type="password" autocomplete="new-password" style="${FLD}">
-                        <div style="${HINT}">At least 8 characters.</div>
+                        <div style="${HINT}">${esc(t('security.new_hint'))}</div>
                     </div>
                     <div style="${ROW}">
-                        <label style="${LB}">Confirm new password</label>
+                        <label style="${LB}">${esc(t('security.confirm'))}</label>
                         <input id="aSetPwConfirm" type="password" autocomplete="new-password" style="${FLD}">
                     </div>
                     <div id="aSetPwMsg" style="font-size:12px;margin-bottom:10px;display:none;line-height:1.5;"></div>
-                    <button id="aSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">Change password</button>`;
+                    <button id="aSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.change_btn'))}</button>`;
             }
 
             function renderNav() {
                 const nav = settingsModal.querySelector('#aSetNav');
-                nav.innerHTML = SECTIONS.map((s) => {
+                nav.innerHTML = sectionList().map((s) => {
                     const on = s.key === activeSection;
-                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${s.label}</button>`;
+                    return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '500'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${esc(s.label)}</button>`;
                 }).join('');
                 nav.querySelectorAll('.aSetNavBtn').forEach((b) => {
                     b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
@@ -6878,19 +7104,16 @@
                 const body = settingsModal.querySelector('#aSetBody');
                 const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
-                // Language picker — saves to bb_dashboard_lang, a key
-                // separate from bb_lang (which controls the marketing
-                // site). Dashboard isn't translated yet, so this is just
-                // recording the preference for when it ships.
+                // Language picker — saves to bb_dashboard_lang and
+                // immediately re-renders the modal in the chosen language.
                 const langSel = body.querySelector('#aSetLanguage');
                 if (langSel) langSel.addEventListener('change', () => {
                     try { localStorage.setItem('bb_dashboard_lang', langSel.value); } catch (_) {}
-                    const saved = body.querySelector('#aSetLangSaved');
-                    if (saved) {
-                        saved.style.display = 'block';
-                        setTimeout(() => { saved.style.display = 'none'; }, 2000);
-                    }
-                    if (typeof showToast === 'function') showToast('Dashboard language preference saved', 'success');
+                    // Re-render the full modal (chrome + nav + body) so every
+                    // translated string updates without closing the modal.
+                    renderModalChrome();
+                    renderNav();
+                    renderBody();
                 });
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {
@@ -6951,14 +7174,15 @@
                 });
             }
 
-            function openModal() { activeSection = 'account'; renderNav(); renderBody(); settingsModal.style.display = 'flex'; }
+            function openModal() {
+                activeSection = 'account';
+                renderModalChrome();   // builds innerHTML + wires close/cancel/save buttons
+                renderNav();
+                renderBody();
+                settingsModal.style.display = 'flex';
+            }
             function closeModal() { settingsModal.style.display = 'none'; }
-
-            settingsBtn.addEventListener('click', openModal);
-            settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(); });
-            settingsModal.querySelector('#aSetClose').addEventListener('click', closeModal);
-            settingsModal.querySelector('#aSetCancel').addEventListener('click', closeModal);
-            settingsModal.querySelector('#aSetSave').addEventListener('click', () => {
+            function handleSave() {
                 const companyInput = settingsModal.querySelector('#aSetCompany');
                 const newCompany = companyInput ? companyInput.value.trim() : '';
                 if (newCompany && typeof currentUserData !== 'undefined' && currentUserData) {
@@ -6968,7 +7192,12 @@
                 }
                 closeModal();
                 if (typeof showToast === 'function') showToast('Settings saved', 'success');
-            });
+            }
+
+            settingsBtn.addEventListener('click', openModal);
+            settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(); });
+            // Close/Cancel/Save are now bound inside renderModalChrome() since
+            // the innerHTML is rebuilt on each openModal() and on language change.
         })();
 
         // ───────────── COMMAND PALETTE (Cmd+K) ─────────────
