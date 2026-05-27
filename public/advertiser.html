@@ -2629,7 +2629,7 @@
             <div class="performance-data" id="bbxAuctionSummaryWrap">
                 <div class="performance-subhead">
                     <span class="performance-subhead-title">Auction intelligence</span>
-                    <span class="performance-subhead-sub">intent histogram · top surfaces · per-door spend · recent impressions</span>
+                    <span class="performance-subhead-sub" data-t="auc.sub">intent histogram · top surfaces · per-door spend · recent impressions</span>
                 </div>
                 <div id="bbxAuctionSummary" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px;">
                     <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:14px 0;">
@@ -2756,14 +2756,14 @@
             <section class="setup-group" aria-label="Setup">
                 <div class="setup-group-header">
                     <div class="setup-group-title" data-t="chrome.setup">Setup</div>
-                    <div class="setup-group-sub">One-time configuration · pixel and rules</div>
+                    <div class="setup-group-sub" data-t="setup.sub">One-time configuration · pixel and rules</div>
                 </div>
                 <div class="setup-group-grid">
                     <!-- Conversion Tracking column -->
                     <div class="setup-card" id="pixelSection">
                         <div class="setup-card-header">
-                            <div class="setup-card-title">Conversion tracking</div>
-                            <span class="setup-card-pill" id="pixelStatus">Not detected yet</span>
+                            <div class="setup-card-title" data-t="setup.conv_title">Conversion tracking</div>
+                            <span class="setup-card-pill" id="pixelStatus" data-t="setup.conv_not_detected">Not detected yet</span>
                         </div>
                         <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
                             Track conversions on your site to unlock Benna's CPA and ROAS optimization. Add this snippet before the closing <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> tag on your conversion page.
@@ -2794,12 +2794,12 @@
                     <!-- Automated Rules column -->
                     <div class="setup-card">
                         <div class="setup-card-header">
-                            <div class="setup-card-title">Automated rules</div>
+                            <div class="setup-card-title" data-t="setup.rules_title">Automated rules</div>
                             <button id="addRuleBtn" style="
                                 padding: 6px 12px; background: var(--accent-primary); color: #fff;
                                 border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
                                 cursor: pointer; font-family: inherit;
-                            ">+ Add rule</button>
+                            " data-t="setup.add_rule">+ Add rule</button>
                         </div>
                         <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
                             Trigger actions automatically when performance crosses thresholds — pause campaigns, shift budget, raise bids on winning audiences.
@@ -2810,8 +2810,8 @@
                                 background: #FAFAFA; border-radius: 10px; border: 1px dashed #E5E7EB;
                             ">
                                 <div style="font-size: 28px; margin-bottom: 6px;">🤖</div>
-                                <div style="font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 4px;">No rules yet</div>
-                                <div style="font-size: 12px;">Automate campaign actions based on performance</div>
+                                <div style="font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 4px;" data-t="setup.no_rules">No rules yet</div>
+                                <div style="font-size: 12px;" data-t="setup.no_rules_sub">Automate campaign actions based on performance</div>
                             </div>
                             <div id="rulesList"></div>
                         </div>
@@ -3198,59 +3198,59 @@
         <div id="campaignModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title">New Campaign</h2>
+                    <h2 class="modal-title" data-t="newc.title">New Campaign</h2>
                     <button class="modal-close" id="modalCloseBtn">×</button>
                 </div>
 
                 <form id="campaignForm">
                     <!-- Phase E.5 — Landing-page URL autofill -->
                     <div class="form-group">
-                        <label class="form-label">Landing Page URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(we'll autofill the headline, subtext, and image)</span></label>
+                        <label class="form-label"><span data-t="newc.url">Landing Page URL</span> <span style="font-size:11px;color:#9CA3AF;font-weight:400;" data-t="newc.url_hint">(we'll autofill the headline, subtext, and image)</span></label>
                         <div class="url-autofill">
-                            <input type="url" class="form-input" id="urlAutofillInput" placeholder="https://your-landing-page.com">
-                            <button type="button" class="url-autofill-btn" id="urlAutofillBtn">Fetch</button>
+                            <input type="url" class="form-input" id="urlAutofillInput" placeholder="https://your-landing-page.com" data-t-placeholder="newc.url_ph">
+                            <button type="button" class="url-autofill-btn" id="urlAutofillBtn" data-t="newc.fetch">Fetch</button>
                         </div>
                         <div class="url-autofill-status" id="urlAutofillStatus"></div>
                     </div>
 
                     <!-- Campaign Name -->
                     <div class="form-group">
-                        <label class="form-label">Campaign Name</label>
-                        <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
+                        <label class="form-label" data-t="newc.name">Campaign Name</label>
+                        <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" data-t-placeholder="newc.name_ph" required>
                     </div>
 
                     <!-- File Upload -->
                     <div class="form-group">
-                        <label class="form-label">Upload Creative</label>
+                        <label class="form-label" data-t="newc.upload">Upload Creative</label>
                         <div class="file-upload-area" id="uploadArea">
                             <div class="upload-icon">📁</div>
-                            <div class="upload-text">Drag & drop your file here</div>
-                            <div class="upload-subtext">or click to browse</div>
+                            <div class="upload-text" data-t="newc.upload_drop">Drag & drop your file here</div>
+                            <div class="upload-subtext" data-t="newc.upload_click">or click to browse</div>
                         </div>
                         <input type="file" class="file-input" id="fileInput" accept="image/*">
                     </div>
 
                     <!-- Headline -->
                     <div class="form-group">
-                        <label class="form-label">Headline</label>
-                        <input type="text" class="form-input campaign-field" name="headline" placeholder="Enter ad headline" required>
+                        <label class="form-label" data-t="newc.headline">Headline</label>
+                        <input type="text" class="form-input campaign-field" name="headline" placeholder="Enter ad headline" data-t-placeholder="newc.headline_ph" required>
                     </div>
 
                     <!-- Subtext -->
                     <div class="form-group">
-                        <label class="form-label">Subtext</label>
-                        <input type="text" class="form-input campaign-field" name="subtext" placeholder="Enter additional text">
+                        <label class="form-label" data-t="newc.subtext">Subtext</label>
+                        <input type="text" class="form-input campaign-field" name="subtext" placeholder="Enter additional text" data-t-placeholder="newc.subtext_ph">
                     </div>
 
                     <!-- A/B Variants -->
                     <div class="form-group">
                         <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>A/B Variants <span style="font-size: 11px; color: #9CA3AF; font-weight: 400;">(optional)</span></span>
+                            <span><span data-t="newc.ab">A/B Variants</span> <span style="font-size: 11px; color: #9CA3AF; font-weight: 400;" data-t="newc.ab_opt">(optional)</span></span>
                             <button type="button" id="addVariantBtn" style="
                                 font-size: 12px; color: var(--accent-primary); background: none;
                                 border: 1px dashed var(--accent-primary); padding: 4px 10px;
                                 border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit;
-                            ">+ Add Variant</button>
+                            " data-t="newc.add_variant">+ Add Variant</button>
                         </label>
                         <div id="variantContainer" style="margin-top: 8px;"></div>
                         <div style="font-size: 11px; color: #9CA3AF; margin-top: 6px;">
@@ -3260,26 +3260,26 @@
 
                     <!-- CTA Button Text -->
                     <div class="form-group">
-                        <label class="form-label">CTA Button Text</label>
-                        <input type="text" class="form-input campaign-field" name="cta_text" placeholder="e.g., Learn More, Shop Now" required>
+                        <label class="form-label" data-t="newc.cta_btn">CTA Button Text</label>
+                        <input type="text" class="form-input campaign-field" name="cta_text" placeholder="e.g., Learn More, Shop Now" data-t-placeholder="newc.cta_btn_ph" required>
                     </div>
 
                     <!-- CTA URL -->
                     <div class="form-group">
-                        <label class="form-label">CTA URL</label>
+                        <label class="form-label" data-t="newc.cta_url">CTA URL</label>
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
                     </div>
 
                     <!-- Advertiser Domain -->
                     <div class="form-group">
-                        <label class="form-label">Advertiser Domain</label>
+                        <label class="form-label" data-t="newc.adomain">Advertiser Domain</label>
                         <input type="text" class="form-input campaign-field" name="adomain" placeholder="e.g., example.com" style="font-size:13px;">
                         <div style="font-size:11px;color:#6B7280;margin-top:4px;">Used for brand safety checks. Enter your company domain.</div>
                     </div>
 
                     <!-- IAB Category -->
                     <div class="form-group">
-                        <label class="form-label">Content Category</label>
+                        <label class="form-label" data-t="newc.category">Content Category</label>
                         <select class="form-input campaign-field" name="iab_cat" style="font-size:13px;">
                             <option value="">Select category (optional)</option>
                             <option value="IAB3">Business</option>
@@ -3589,7 +3589,7 @@
 
         <!-- Footer -->
         <footer>
-            SuperBoost © 2026 · <a href="/ads" style="color: #FF2D78; text-decoration: none;">← Back to boostboss.ai/ads</a>
+            SuperBoost © 2026 · <a href="/ads" style="color: #FF2D78; text-decoration: none;" data-t="foot.back">← Back to boostboss.ai/ads</a>
         </footer>
     </div>
 
@@ -6786,6 +6786,31 @@
                     'action.pause': 'Pause', 'action.resume': 'Resume', 'action.edit': 'Edit', 'action.dup': 'Dup',
                     'empty.loading': 'Loading campaigns...', 'empty.no_campaigns': 'No campaigns yet. Create one to get started!',
                     'empty.no_match': 'No campaigns match your filters', 'empty.error': 'Error loading campaigns',
+                    'newc.title': 'New Campaign', 'newc.url': 'Landing Page URL',
+                    'newc.url_hint': '(we\'ll autofill the headline, subtext, and image)',
+                    'newc.url_ph': 'https://your-landing-page.com', 'newc.fetch': 'Fetch',
+                    'newc.name': 'Campaign Name', 'newc.name_ph': 'Enter campaign name',
+                    'newc.upload': 'Upload Creative', 'newc.upload_drop': 'Drag & drop your file here', 'newc.upload_click': 'or click to browse',
+                    'newc.headline': 'Headline', 'newc.headline_ph': 'Enter ad headline',
+                    'newc.subtext': 'Subtext', 'newc.subtext_ph': 'Enter additional text',
+                    'newc.ab': 'A/B Variants', 'newc.ab_opt': '(optional)', 'newc.add_variant': '+ Add Variant',
+                    'newc.cta_btn': 'CTA Button Text', 'newc.cta_btn_ph': 'e.g., Learn More, Shop Now',
+                    'newc.cta_url': 'CTA URL', 'newc.adomain': 'Advertiser Domain', 'newc.category': 'Content Category',
+                    'newc.placement': 'Ad placement', 'newc.ai_target': 'AI-native targeting',
+                    'auc.title': 'AUCTION INTELLIGENCE',
+                    'auc.sub': 'intent histogram · top surfaces · per-door spend · recent impressions',
+                    'auc.conv_title': 'CONVERSIONS', 'auc.intent_match': 'INTENT MATCH DISTRIBUTION',
+                    'auc.top_surfaces': 'TOP SURFACES', 'auc.no_data': 'No data yet',
+                    'auc.where_spend': 'WHERE YOUR SPEND WENT', 'auc.where_sub': 'By publisher integration · last 7 days',
+                    'auc.no_tagged': "No tagged impressions yet — your campaign hasn't served on a tagged surface this week.",
+                    'auc.recent_impr': 'RECENT IMPRESSIONS', 'auc.no_recent': 'No recent impressions',
+                    'auc.col_time': 'TIME', 'auc.col_surface': 'SURFACE', 'auc.col_format': 'FORMAT', 'auc.col_intent': 'INTENT', 'auc.col_cost': 'COST',
+                    'setup.sub': 'One-time configuration · pixel and rules',
+                    'setup.conv_title': 'Conversion tracking', 'setup.conv_not_detected': 'Not detected yet',
+                    'setup.copy': 'Copy', 'setup.test_end_to_end': 'Test end-to-end:',
+                    'setup.rules_title': 'Automated rules', 'setup.add_rule': '+ Add rule',
+                    'setup.no_rules': 'No rules yet', 'setup.no_rules_sub': 'Automate campaign actions based on performance',
+                    'foot.back': '← Back to boostboss.ai/ads', 'foot.data_live': 'Data is live', 'foot.updated_now': 'Updated just now',
                     'modal.title': 'Settings',  'modal.close': 'Close',  'modal.save': 'Save changes',
                     'nav.account': 'Account',  'nav.billing': 'Billing & funds',  'nav.api': 'API access',
                     'nav.notifs': 'Notifications',  'nav.language': 'Language',  'nav.security': 'Security',
@@ -6840,6 +6865,31 @@
                     'action.pause': '暂停', 'action.resume': '恢复', 'action.edit': '编辑', 'action.dup': '复制',
                     'empty.loading': '正在加载广告…', 'empty.no_campaigns': '还没有广告。创建一个开始吧!',
                     'empty.no_match': '没有符合筛选的广告', 'empty.error': '加载广告失败',
+                    'newc.title': '新建广告', 'newc.url': '落地页 URL',
+                    'newc.url_hint': '(我们会自动填充标题、副文案和图片)',
+                    'newc.url_ph': 'https://你的落地页.com', 'newc.fetch': '抓取',
+                    'newc.name': '广告名称', 'newc.name_ph': '输入广告名称',
+                    'newc.upload': '上传素材', 'newc.upload_drop': '把文件拖到这里', 'newc.upload_click': '或点击上传',
+                    'newc.headline': '标题', 'newc.headline_ph': '输入广告标题',
+                    'newc.subtext': '副文案', 'newc.subtext_ph': '输入补充文字',
+                    'newc.ab': 'A/B 变体', 'newc.ab_opt': '(可选)', 'newc.add_variant': '+ 添加变体',
+                    'newc.cta_btn': 'CTA 按钮文字', 'newc.cta_btn_ph': '例如:了解更多、立即购买',
+                    'newc.cta_url': 'CTA URL', 'newc.adomain': '广告主域名', 'newc.category': '内容类别',
+                    'newc.placement': '版位', 'newc.ai_target': 'AI 原生定向',
+                    'auc.title': '拍卖洞察',
+                    'auc.sub': '意图直方图 · 顶部版位 · 各门支出 · 最近展示',
+                    'auc.conv_title': '转化', 'auc.intent_match': '意图匹配分布',
+                    'auc.top_surfaces': '顶部版位', 'auc.no_data': '暂无数据',
+                    'auc.where_spend': '你的支出去向', 'auc.where_sub': '按发布商集成 · 近 7 天',
+                    'auc.no_tagged': '本周还没有带标记的展示 — 你的广告还没在带标记的版位上投放。',
+                    'auc.recent_impr': '最近展示', 'auc.no_recent': '暂无最近展示',
+                    'auc.col_time': '时间', 'auc.col_surface': '版位', 'auc.col_format': '格式', 'auc.col_intent': '意图', 'auc.col_cost': '成本',
+                    'setup.sub': '一次性配置 · 像素与规则',
+                    'setup.conv_title': '转化追踪', 'setup.conv_not_detected': '尚未检测到',
+                    'setup.copy': '复制', 'setup.test_end_to_end': '端到端测试:',
+                    'setup.rules_title': '自动化规则', 'setup.add_rule': '+ 添加规则',
+                    'setup.no_rules': '还没有规则', 'setup.no_rules_sub': '根据效果自动执行广告操作',
+                    'foot.back': '← 返回 boostboss.ai/ads', 'foot.data_live': '数据实时', 'foot.updated_now': '刚刚更新',
                     'modal.title': '设置',  'modal.close': '关闭',  'modal.save': '保存更改',
                     'nav.account': '账户',  'nav.billing': '账单与资金',  'nav.api': 'API 访问',
                     'nav.notifs': '通知',  'nav.language': '语言',  'nav.security': '安全',
@@ -6894,6 +6944,31 @@
                     'action.pause': '暫停', 'action.resume': '恢復', 'action.edit': '編輯', 'action.dup': '複製',
                     'empty.loading': '正在載入廣告…', 'empty.no_campaigns': '還沒有廣告。建立一個開始吧!',
                     'empty.no_match': '沒有符合篩選的廣告', 'empty.error': '載入廣告失敗',
+                    'newc.title': '新增廣告', 'newc.url': '到達網頁 URL',
+                    'newc.url_hint': '(我們會自動填入標題、副文案與圖片)',
+                    'newc.url_ph': 'https://你的到達網頁.com', 'newc.fetch': '抓取',
+                    'newc.name': '廣告名稱', 'newc.name_ph': '輸入廣告名稱',
+                    'newc.upload': '上傳素材', 'newc.upload_drop': '將檔案拖曳至此', 'newc.upload_click': '或點擊上傳',
+                    'newc.headline': '標題', 'newc.headline_ph': '輸入廣告標題',
+                    'newc.subtext': '副文案', 'newc.subtext_ph': '輸入補充文字',
+                    'newc.ab': 'A/B 變體', 'newc.ab_opt': '(選填)', 'newc.add_variant': '+ 新增變體',
+                    'newc.cta_btn': 'CTA 按鈕文字', 'newc.cta_btn_ph': '例如:了解更多、立即購買',
+                    'newc.cta_url': 'CTA URL', 'newc.adomain': '廣告主網域', 'newc.category': '內容類別',
+                    'newc.placement': '版位', 'newc.ai_target': 'AI 原生定向',
+                    'auc.title': '競價洞察',
+                    'auc.sub': '意圖直方圖 · 頂部版位 · 各門支出 · 近期曝光',
+                    'auc.conv_title': '轉換', 'auc.intent_match': '意圖比對分佈',
+                    'auc.top_surfaces': '頂部版位', 'auc.no_data': '尚無資料',
+                    'auc.where_spend': '你的支出流向', 'auc.where_sub': '依發布商整合 · 近 7 天',
+                    'auc.no_tagged': '本週尚無帶標記的曝光 — 你的廣告還沒在帶標記的版位上投放。',
+                    'auc.recent_impr': '近期曝光', 'auc.no_recent': '尚無近期曝光',
+                    'auc.col_time': '時間', 'auc.col_surface': '版位', 'auc.col_format': '格式', 'auc.col_intent': '意圖', 'auc.col_cost': '成本',
+                    'setup.sub': '一次性設定 · 像素與規則',
+                    'setup.conv_title': '轉換追蹤', 'setup.conv_not_detected': '尚未偵測到',
+                    'setup.copy': '複製', 'setup.test_end_to_end': '端對端測試:',
+                    'setup.rules_title': '自動化規則', 'setup.add_rule': '+ 新增規則',
+                    'setup.no_rules': '尚無規則', 'setup.no_rules_sub': '依成效自動執行廣告操作',
+                    'foot.back': '← 返回 boostboss.ai/ads', 'foot.data_live': '資料即時', 'foot.updated_now': '剛剛更新',
                     'modal.title': '設定',  'modal.close': '關閉',  'modal.save': '儲存變更',
                     'nav.account': '帳號',  'nav.billing': '帳單與資金',  'nav.api': 'API 存取',
                     'nav.notifs': '通知',  'nav.language': '語言',  'nav.security': '安全',
@@ -6948,6 +7023,31 @@
                     'action.pause': '一時停止', 'action.resume': '再開', 'action.edit': '編集', 'action.dup': '複製',
                     'empty.loading': 'キャンペーン読み込み中…', 'empty.no_campaigns': 'まだキャンペーンがありません。作成して始めましょう!',
                     'empty.no_match': 'フィルタに一致するキャンペーンがありません', 'empty.error': 'キャンペーン読み込みエラー',
+                    'newc.title': '新規キャンペーン', 'newc.url': 'ランディングページ URL',
+                    'newc.url_hint': '(見出し、サブテキスト、画像を自動入力します)',
+                    'newc.url_ph': 'https://あなたのランディングページ.com', 'newc.fetch': '取得',
+                    'newc.name': 'キャンペーン名', 'newc.name_ph': 'キャンペーン名を入力',
+                    'newc.upload': 'クリエイティブをアップロード', 'newc.upload_drop': 'ファイルをここにドラッグ&ドロップ', 'newc.upload_click': 'またはクリックして選択',
+                    'newc.headline': '見出し', 'newc.headline_ph': '広告見出しを入力',
+                    'newc.subtext': 'サブテキスト', 'newc.subtext_ph': '追加テキストを入力',
+                    'newc.ab': 'A/B バリアント', 'newc.ab_opt': '(任意)', 'newc.add_variant': '+ バリアント追加',
+                    'newc.cta_btn': 'CTA ボタンテキスト', 'newc.cta_btn_ph': '例: 詳しく見る、今すぐ購入',
+                    'newc.cta_url': 'CTA URL', 'newc.adomain': '広告主ドメイン', 'newc.category': 'コンテンツカテゴリ',
+                    'newc.placement': '広告プレースメント', 'newc.ai_target': 'AI ネイティブターゲティング',
+                    'auc.title': 'オークションインサイト',
+                    'auc.sub': 'インテントヒストグラム · トップサーフェス · ドア別支出 · 最近のインプレッション',
+                    'auc.conv_title': 'コンバージョン', 'auc.intent_match': 'インテントマッチ分布',
+                    'auc.top_surfaces': 'トップサーフェス', 'auc.no_data': 'データなし',
+                    'auc.where_spend': '支出の行き先', 'auc.where_sub': 'パブリッシャー統合別 · 過去 7 日',
+                    'auc.no_tagged': 'まだタグ付きインプレッションがありません — 今週、タグ付きサーフェスでキャンペーンが配信されていません。',
+                    'auc.recent_impr': '最近のインプレッション', 'auc.no_recent': '最近のインプレッションはありません',
+                    'auc.col_time': '時間', 'auc.col_surface': 'サーフェス', 'auc.col_format': 'フォーマット', 'auc.col_intent': 'インテント', 'auc.col_cost': 'コスト',
+                    'setup.sub': '一度きりの設定 · ピクセルとルール',
+                    'setup.conv_title': 'コンバージョン トラッキング', 'setup.conv_not_detected': 'まだ検出されていません',
+                    'setup.copy': 'コピー', 'setup.test_end_to_end': 'エンドツーエンドテスト:',
+                    'setup.rules_title': '自動化ルール', 'setup.add_rule': '+ ルール追加',
+                    'setup.no_rules': 'ルールがまだありません', 'setup.no_rules_sub': 'パフォーマンスに基づいてキャンペーンを自動化',
+                    'foot.back': '← boostboss.ai/ads に戻る', 'foot.data_live': 'データはライブです', 'foot.updated_now': '今更新しました',
                     'modal.title': '設定',  'modal.close': '閉じる',  'modal.save': '変更を保存',
                     'nav.account': 'アカウント',  'nav.billing': '請求 & 残高',  'nav.api': 'API アクセス',
                     'nav.notifs': '通知',  'nav.language': '言語',  'nav.security': 'セキュリティ',
@@ -7002,6 +7102,31 @@
                     'action.pause': '일시정지', 'action.resume': '재개', 'action.edit': '편집', 'action.dup': '복제',
                     'empty.loading': '캠페인 로딩 중…', 'empty.no_campaigns': '아직 캠페인이 없습니다. 만들어 시작하세요!',
                     'empty.no_match': '필터와 일치하는 캠페인이 없습니다', 'empty.error': '캠페인 로딩 실패',
+                    'newc.title': '새 캠페인', 'newc.url': '랜딩 페이지 URL',
+                    'newc.url_hint': '(헤드라인, 서브텍스트, 이미지를 자동 입력합니다)',
+                    'newc.url_ph': 'https://your-landing-page.com', 'newc.fetch': '가져오기',
+                    'newc.name': '캠페인 이름', 'newc.name_ph': '캠페인 이름 입력',
+                    'newc.upload': '크리에이티브 업로드', 'newc.upload_drop': '여기에 파일을 드래그 & 드롭', 'newc.upload_click': '또는 클릭하여 선택',
+                    'newc.headline': '헤드라인', 'newc.headline_ph': '광고 헤드라인 입력',
+                    'newc.subtext': '서브텍스트', 'newc.subtext_ph': '추가 텍스트 입력',
+                    'newc.ab': 'A/B 변형', 'newc.ab_opt': '(선택)', 'newc.add_variant': '+ 변형 추가',
+                    'newc.cta_btn': 'CTA 버튼 텍스트', 'newc.cta_btn_ph': '예: 자세히 보기, 지금 구매',
+                    'newc.cta_url': 'CTA URL', 'newc.adomain': '광고주 도메인', 'newc.category': '콘텐츠 카테고리',
+                    'newc.placement': '광고 배치', 'newc.ai_target': 'AI 네이티브 타겟팅',
+                    'auc.title': '옥션 인사이트',
+                    'auc.sub': '인텐트 히스토그램 · 상위 표면 · 도어별 지출 · 최근 임프레션',
+                    'auc.conv_title': '전환', 'auc.intent_match': '인텐트 매치 분포',
+                    'auc.top_surfaces': '상위 표면', 'auc.no_data': '데이터 없음',
+                    'auc.where_spend': '지출 흐름', 'auc.where_sub': '퍼블리셔 통합별 · 최근 7일',
+                    'auc.no_tagged': '아직 태그된 임프레션이 없습니다 — 이번 주 태그된 표면에서 캠페인이 게재되지 않았습니다.',
+                    'auc.recent_impr': '최근 임프레션', 'auc.no_recent': '최근 임프레션 없음',
+                    'auc.col_time': '시간', 'auc.col_surface': '표면', 'auc.col_format': '포맷', 'auc.col_intent': '인텐트', 'auc.col_cost': '비용',
+                    'setup.sub': '일회성 설정 · 픽셀 및 규칙',
+                    'setup.conv_title': '전환 추적', 'setup.conv_not_detected': '아직 감지되지 않음',
+                    'setup.copy': '복사', 'setup.test_end_to_end': '엔드투엔드 테스트:',
+                    'setup.rules_title': '자동화 규칙', 'setup.add_rule': '+ 규칙 추가',
+                    'setup.no_rules': '아직 규칙이 없습니다', 'setup.no_rules_sub': '퍼포먼스에 따라 캠페인 액션을 자동화',
+                    'foot.back': '← boostboss.ai/ads로 돌아가기', 'foot.data_live': '데이터 실시간', 'foot.updated_now': '방금 업데이트됨',
                     'modal.title': '설정',  'modal.close': '닫기',  'modal.save': '변경 저장',
                     'nav.account': '계정',  'nav.billing': '결제 및 자금',  'nav.api': 'API 접근',
                     'nav.notifs': '알림',  'nav.language': '언어',  'nav.security': '보안',
@@ -7056,6 +7181,31 @@
                     'action.pause': 'Tạm dừng', 'action.resume': 'Tiếp tục', 'action.edit': 'Sửa', 'action.dup': 'Sao',
                     'empty.loading': 'Đang tải chiến dịch…', 'empty.no_campaigns': 'Chưa có chiến dịch nào. Tạo một cái để bắt đầu!',
                     'empty.no_match': 'Không có chiến dịch phù hợp với bộ lọc', 'empty.error': 'Lỗi tải chiến dịch',
+                    'newc.title': 'Chiến dịch mới', 'newc.url': 'URL landing page',
+                    'newc.url_hint': '(chúng tôi sẽ tự điền headline, subtext và ảnh)',
+                    'newc.url_ph': 'https://landing-page-cua-ban.com', 'newc.fetch': 'Lấy',
+                    'newc.name': 'Tên chiến dịch', 'newc.name_ph': 'Nhập tên chiến dịch',
+                    'newc.upload': 'Tải creative', 'newc.upload_drop': 'Kéo & thả file vào đây', 'newc.upload_click': 'hoặc click để chọn',
+                    'newc.headline': 'Headline', 'newc.headline_ph': 'Nhập headline quảng cáo',
+                    'newc.subtext': 'Subtext', 'newc.subtext_ph': 'Nhập text bổ sung',
+                    'newc.ab': 'Biến thể A/B', 'newc.ab_opt': '(tùy chọn)', 'newc.add_variant': '+ Thêm biến thể',
+                    'newc.cta_btn': 'Text nút CTA', 'newc.cta_btn_ph': 'ví dụ: Tìm hiểu thêm, Mua ngay',
+                    'newc.cta_url': 'URL CTA', 'newc.adomain': 'Domain advertiser', 'newc.category': 'Danh mục nội dung',
+                    'newc.placement': 'Vị trí quảng cáo', 'newc.ai_target': 'Targeting AI-native',
+                    'auc.title': 'PHÂN TÍCH ĐẤU GIÁ',
+                    'auc.sub': 'biểu đồ intent · top surface · chi tiêu theo cửa · impression gần đây',
+                    'auc.conv_title': 'CHUYỂN ĐỔI', 'auc.intent_match': 'PHÂN BỐ KHỚP INTENT',
+                    'auc.top_surfaces': 'TOP SURFACE', 'auc.no_data': 'Chưa có dữ liệu',
+                    'auc.where_spend': 'CHI TIÊU CỦA BẠN ĐI ĐÂU', 'auc.where_sub': 'Theo tích hợp publisher · 7 ngày gần nhất',
+                    'auc.no_tagged': 'Chưa có impression có tag — chiến dịch của bạn chưa chạy trên surface có tag trong tuần này.',
+                    'auc.recent_impr': 'IMPRESSION GẦN ĐÂY', 'auc.no_recent': 'Chưa có impression gần đây',
+                    'auc.col_time': 'THỜI GIAN', 'auc.col_surface': 'SURFACE', 'auc.col_format': 'ĐỊNH DẠNG', 'auc.col_intent': 'INTENT', 'auc.col_cost': 'CHI PHÍ',
+                    'setup.sub': 'Cấu hình một lần · pixel và rules',
+                    'setup.conv_title': 'Conversion tracking', 'setup.conv_not_detected': 'Chưa phát hiện',
+                    'setup.copy': 'Sao chép', 'setup.test_end_to_end': 'Test end-to-end:',
+                    'setup.rules_title': 'Automated rules', 'setup.add_rule': '+ Thêm rule',
+                    'setup.no_rules': 'Chưa có rule', 'setup.no_rules_sub': 'Tự động hóa hành động chiến dịch dựa trên hiệu suất',
+                    'foot.back': '← Quay lại boostboss.ai/ads', 'foot.data_live': 'Data trực tiếp', 'foot.updated_now': 'Vừa cập nhật',
                     'modal.title': 'Cài đặt',  'modal.close': 'Đóng',  'modal.save': 'Lưu thay đổi',
                     'nav.account': 'Tài khoản',  'nav.billing': 'Thanh toán & quỹ',  'nav.api': 'Truy cập API',
                     'nav.notifs': 'Thông báo',  'nav.language': 'Ngôn ngữ',  'nav.security': 'Bảo mật',
