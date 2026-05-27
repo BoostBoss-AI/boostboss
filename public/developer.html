@@ -4898,9 +4898,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 ];
             }
 
-            // SECTIONS kept as English fallback for any code that still
-            // references it; live nav rendering uses sectionList() (translated).
-            const SECTIONS = sectionList();
+            // SECTIONS is no longer referenced — renderNav() uses sectionList()
+            // directly. Removed the `const SECTIONS = sectionList()` line that
+            // was here because it executed before LANGUAGES/DASH_T were
+            // initialized, hitting a TDZ ReferenceError that halted the IIFE
+            // and prevented settingsBtn's click listener from attaching.
             // Supported languages — must match i18n.js SUPPORTED. Display
             // labels use each language's native name + an English gloss.
             const LANGUAGES = [
