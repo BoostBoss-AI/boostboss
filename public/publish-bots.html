@@ -177,11 +177,11 @@
       <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
     </a>
     <div class="nav-links">
-      <a href="/publish/mcp">MCP Servers</a>
-      <a href="/publish/ai-apps">AI Apps</a>
-      <a href="/publish/extensions">Extensions</a>
-      <a href="/publish/bots" class="active">Bots</a>
-      <a href="/publish/no-code">Custom GPTs</a>
+      <a href="/publish/mcp" data-i18n="subnav.mcp">MCP Servers</a>
+      <a href="/publish/ai-apps" data-i18n="subnav.ai_apps">AI Apps</a>
+      <a href="/publish/extensions" data-i18n="subnav.extensions">Extensions</a>
+      <a href="/publish/bots" class="active" data-i18n="subnav.bots">Bots</a>
+      <a href="/publish/no-code" data-i18n="subnav.no_code">Custom GPTs</a>
     </div>
     <div class="nav-ctas">
       <div class="nav-lang-wrap" id="navLangWrap">
@@ -202,26 +202,26 @@
           <a href="/vi" data-lang="vi">Tiếng Việt</a>
         </div>
       </div>
-      <a class="btn btn-primary" href="/publish/signup">Start earning</a>
+      <a class="btn btn-primary" href="/publish/signup" data-i18n="publish.cta.start_earning">Start earning</a>
     </div>
   </div>
 </nav>
 
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow">For AI Bot Developers</span>
-    <h1>Turn your AI bot into a <span class="grad">revenue-generating business</span>.</h1>
-    <p class="sub">Lumi API for Bots — one REST call from your bot's response handler. Works with Discord, Telegram, Slack, and any platform your bot lives on. Any LLM. Any framework. Optional per-platform helper libraries available.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
+    <span class="eyebrow" data-i18n="publish.bots.hero_eyebrow">For AI Bot Developers</span>
+    <h1 data-i18n="publish.bots.hero_h1_html" data-i18n-html>Turn your AI bot into a <span class="grad">revenue-generating business</span>.</h1>
+    <p class="sub" data-i18n="publish.bots.hero_sub">Lumi API for Bots — one REST call from your bot's response handler. Works with Discord, Telegram, Slack, and any platform your bot lives on. Any LLM. Any framework. Optional per-platform helper libraries available.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.bots.hero_cta">Start as a publisher →</a>
   </div>
 </section>
 
 <!-- SEE IT APPEAR -->
 <section class="see-it">
   <div class="wrap">
-    <span class="section-eyebrow">See it appear</span>
-    <h2 class="section-h">Your bot replies first.<br>The sponsored message arrives right after.</h2>
-    <p class="section-sub">Same campaign renders natively on Discord, Telegram, and Slack — embed, card, or attachment, depending on the platform. Helper libs handle the formatting.</p>
+    <span class="section-eyebrow" data-i18n="publish.bots.see_eyebrow">See it appear</span>
+    <h2 class="section-h" data-i18n="publish.bots.see_h2_html" data-i18n-html>Your bot replies first.<br>The sponsored message arrives right after.</h2>
+    <p class="section-sub" data-i18n="publish.bots.see_sub">Same campaign renders natively on Discord, Telegram, and Slack — embed, card, or attachment, depending on the platform. Helper libs handle the formatting.</p>
     <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored card slides up after a bot reply on a Telegram phone screen">
       <!-- Phase G: real screenshot if /assets/publish/bots-hero.png exists. -->
       <img class="hero-mockup-real" src="/assets/publish/bots-hero.png"
@@ -335,30 +335,30 @@
         <text x="600" y="284" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">Helper libs format</text>
         <text x="600" y="298" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">per platform.</text>
       </svg>
-      <div class="stage-caption">Phone-shaped Telegram preview shown here. The same Lumi API for Bots response can be formatted as a Discord embed, Slack attachment, or Telegram card — see the static preview below for all three side-by-side.</div>
+      <div class="stage-caption" data-i18n="publish.bots.see_caption">Phone-shaped Telegram preview shown here. The same Lumi API for Bots response can be formatted as a Discord embed, Slack attachment, or Telegram card — see the static preview below for all three side-by-side.</div>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <span class="section-eyebrow">How it works</span>
-    <h2 class="section-h">From API key to first ad in ten minutes.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bots.how_eyebrow">How it works</span>
+    <h2 class="section-h" data-i18n="publish.bots.how_h2">From API key to first ad in ten minutes.</h2>
     <div class="how-grid">
       <div class="how-step">
         <div class="num">1</div>
-        <h4>Get your API key</h4>
-        <p>Sign up, copy your bearer token from the dashboard. One token works for any platform.</p>
+        <h4 data-i18n="publish.bots.how1_h4">Get your API key</h4>
+        <p data-i18n="publish.bots.how1_p">Sign up, copy your bearer token from the dashboard. One token works for any platform.</p>
       </div>
       <div class="how-step">
         <div class="num">2</div>
-        <h4>Call Boost Boss</h4>
-        <p>Hit <code>POST /v1/ad-request</code> from inside your bot's response handler with the user's query as context.</p>
+        <h4 data-i18n="publish.bots.how2_h4">Call Boost Boss</h4>
+        <p data-i18n="publish.bots.how2_p_html" data-i18n-html>Hit <code>POST /v1/ad-request</code> from inside your bot's response handler with the user's query as context.</p>
       </div>
       <div class="how-step">
         <div class="num">3</div>
-        <h4>Format and send</h4>
-        <p>Use our helper libs (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) to convert the response to native message format.</p>
+        <h4 data-i18n="publish.bots.how3_h4">Format and send</h4>
+        <p data-i18n="publish.bots.how3_p_html" data-i18n-html>Use our helper libs (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) to convert the response to native message format.</p>
       </div>
     </div>
   </div>
@@ -366,8 +366,8 @@
 
 <section>
   <div class="wrap">
-    <span class="section-eyebrow">Integration snippet</span>
-    <h2 class="section-h">A few lines, your existing handler.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bots.snippet_eyebrow">Integration snippet</span>
+    <h2 class="section-h" data-i18n="publish.bots.snippet_h2">A few lines, your existing handler.</h2>
 <pre class="code-block"><span class="cm">// Inside your Discord bot's response handler — Lumi API for Bots:</span>
 <span class="kw">const</span> { ad } = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://boostboss.ai/v1/ad-request'</span>, {
   method: <span class="str">'POST'</span>,
@@ -382,7 +382,7 @@ message.<span class="fn">reply</span>({
   content: aiResponse,
   embeds: [<span class="fn">toDiscordEmbed</span>(ad)]   <span class="cm">// from optional @boostbossai/lumi-discord</span>
 });</pre>
-    <p class="code-caption">Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are convenience wrappers around the Lumi API for Bots — they format the ad payload into each platform's native message type. Skip them and roll your own formatting if you'd rather not add a dependency. <a href="/docs/rest-api">Full docs →</a></p>
+    <p class="code-caption" data-i18n="publish.bots.snippet_caption_html" data-i18n-html>Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are convenience wrappers around the Lumi API for Bots — they format the ad payload into each platform's native message type. Skip them and roll your own formatting if you'd rather not add a dependency. <a href="/docs/rest-api">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: Discord / Telegram / Slack message previews side by side -->
     <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered on Discord, Telegram, and Slack">
@@ -493,64 +493,64 @@ message.<span class="fn">reply</span>({
 
         <text x="596" y="412" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#9CA3AF" letter-spacing="0.4">SLACK</text>
       </svg>
-      <div class="shot-caption">Same campaign, three native message formats. The helper libs (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) handle the platform-specific formatting.</div>
+      <div class="shot-caption" data-i18n="publish.bots.snippet_shot_caption_html" data-i18n-html>Same campaign, three native message formats. The helper libs (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) handle the platform-specific formatting.</div>
     </div>
   </div>
 </section>
 
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow">Who this is for</span>
-    <h2 class="section-h">If your bot lives in a chat platform, this is your path.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bots.who_eyebrow">Who this is for</span>
+    <h2 class="section-h" data-i18n="publish.bots.who_h2">If your bot lives in a chat platform, this is your path.</h2>
     <ul>
-      <li><span class="check">✓</span><span>You shipped an AI bot on Discord, Telegram, or Slack.</span></li>
-      <li><span class="check">✓</span><span>Examples: research bots, summarization bots, image generation bots, productivity assistants, customer support bots.</span></li>
-      <li><span class="check">✓</span><span>You want monetization that doesn't require a paywall — your community uses it free, you earn from ads.</span></li>
-      <li><span class="check">✓</span><span>You're tired of "tip me on Buy Me a Coffee" being your only option.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bots.who_li1">You shipped an AI bot on Discord, Telegram, or Slack.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bots.who_li2">Examples: research bots, summarization bots, image generation bots, productivity assistants, customer support bots.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bots.who_li3">You want monetization that doesn't require a paywall — your community uses it free, you earn from ads.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bots.who_li4">You're tired of "tip me on Buy Me a Coffee" being your only option.</span></li>
     </ul>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <span class="section-eyebrow">Revenue example</span>
-    <h2 class="section-h">What 15,000 daily users can earn.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bots.rev_eyebrow">Revenue example</span>
+    <h2 class="section-h" data-i18n="publish.bots.rev_h2">What 15,000 daily users can earn.</h2>
     <div class="revenue-card">
-      <span class="label">Illustrative — not a guarantee</span>
-      <div class="rev-row"><span>Daily active users</span><span class="v">15,000</span></div>
-      <div class="rev-row"><span>Ad impressions per user per day</span><span class="v">~1.5</span></div>
-      <div class="rev-row"><span>Daily impressions</span><span class="v">22,500</span></div>
-      <div class="rev-row"><span>CPM (varies by platform)</span><span class="v">$2</span></div>
-      <div class="rev-row"><span>Monthly publisher revenue</span><span class="v">~$1,350</span></div>
-      <p class="disclaimer">Numbers are illustrative for a moderately-active community bot. CPMs vary widely by platform — Slack workplace audiences pay more, Telegram consumer audiences less. Vertical and language also matter; English-language productivity bots sit at the top of the range.</p>
+      <span class="label" data-i18n="publish.bots.rev_label">Illustrative — not a guarantee</span>
+      <div class="rev-row"><span data-i18n="publish.bots.rev_row1">Daily active users</span><span class="v">15,000</span></div>
+      <div class="rev-row"><span data-i18n="publish.bots.rev_row2">Ad impressions per user per day</span><span class="v">~1.5</span></div>
+      <div class="rev-row"><span data-i18n="publish.bots.rev_row3">Daily impressions</span><span class="v">22,500</span></div>
+      <div class="rev-row"><span data-i18n="publish.bots.rev_row4">CPM (varies by platform)</span><span class="v">$2</span></div>
+      <div class="rev-row"><span data-i18n="publish.bots.rev_row5">Monthly publisher revenue</span><span class="v">~$1,350</span></div>
+      <p class="disclaimer" data-i18n="publish.bots.rev_disclaimer">Numbers are illustrative for a moderately-active community bot. CPMs vary widely by platform — Slack workplace audiences pay more, Telegram consumer audiences less. Vertical and language also matter; English-language productivity bots sit at the top of the range.</p>
     </div>
   </div>
 </section>
 
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow">Frequently asked</span>
-    <h2 class="section-h">The questions every bot dev asks.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bots.faq_eyebrow">Frequently asked</span>
+    <h2 class="section-h" data-i18n="publish.bots.faq_h2">The questions every bot dev asks.</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <h4>Will this violate Discord / Telegram / Slack ToS?</h4>
-        <p>Lumi is designed for ToS compliance. Discord requires clear ad disclosure; we handle that with a "Sponsored" prefix and the disclosure label you configured in your dashboard. Telegram and Slack have looser policies but we follow best practices regardless.</p>
+        <h4 data-i18n="publish.bots.faq1_q">Will this violate Discord / Telegram / Slack ToS?</h4>
+        <p data-i18n="publish.bots.faq1_a">Lumi is designed for ToS compliance. Discord requires clear ad disclosure; we handle that with a "Sponsored" prefix and the disclosure label you configured in your dashboard. Telegram and Slack have looser policies but we follow best practices regardless.</p>
       </div>
       <div class="faq-item">
-        <h4>Can I serve image ads, not just text?</h4>
-        <p>Yes. Discord embeds support image fields; Telegram supports inline media; Slack blocks support image accessory components. The helper libraries map a single ad payload to whichever format your platform uses.</p>
+        <h4 data-i18n="publish.bots.faq2_q">Can I serve image ads, not just text?</h4>
+        <p data-i18n="publish.bots.faq2_a">Yes. Discord embeds support image fields; Telegram supports inline media; Slack blocks support image accessory components. The helper libraries map a single ad payload to whichever format your platform uses.</p>
       </div>
       <div class="faq-item">
-        <h4>What about non-English bots?</h4>
-        <p>Boost Boss serves ads in 40+ languages. CPMs vary by market — large EN, ES, JA markets pay best; smaller-language inventory still fills but at lower rates.</p>
+        <h4 data-i18n="publish.bots.faq3_q">What about non-English bots?</h4>
+        <p data-i18n="publish.bots.faq3_a">Boost Boss serves ads in 40+ languages. CPMs vary by market — large EN, ES, JA markets pay best; smaller-language inventory still fills but at lower rates.</p>
       </div>
       <div class="faq-item">
-        <h4>Do I need to handle click tracking myself?</h4>
-        <p>No. Use the <code>click_url</code> we return in every ad response — tracking is built into that redirect. Same for impression tracking via <code>impression_url</code>.</p>
+        <h4 data-i18n="publish.bots.faq4_q">Do I need to handle click tracking myself?</h4>
+        <p data-i18n="publish.bots.faq4_a_html" data-i18n-html>No. Use the <code>click_url</code> we return in every ad response — tracking is built into that redirect. Same for impression tracking via <code>impression_url</code>.</p>
       </div>
       <div class="faq-item">
-        <h4>What's the rate limit?</h4>
-        <p>1,000 ad requests per minute per publisher on launch. We raise that for verified-volume publishers; tell us if you're approaching the cap.</p>
+        <h4 data-i18n="publish.bots.faq5_q">What's the rate limit?</h4>
+        <p data-i18n="publish.bots.faq5_a">1,000 ad requests per minute per publisher on launch. We raise that for verified-volume publishers; tell us if you're approaching the cap.</p>
       </div>
     </div>
   </div>
@@ -558,9 +558,9 @@ message.<span class="fn">reply</span>({
 
 <section class="cta-footer">
   <div class="wrap">
-    <h2>Ready to monetize your bot?</h2>
-    <p>One REST call. Helper libraries included. Weekly payouts.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup">Apply as a Founding Publisher →</a>
+    <h2 data-i18n="publish.bots.cta_h2">Ready to monetize your bot?</h2>
+    <p data-i18n="publish.bots.cta_p">One REST call. Helper libraries included. Weekly payouts.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.bots.cta_btn">Apply as a Founding Publisher →</a>
   </div>
 </section>
 
@@ -571,15 +571,15 @@ message.<span class="fn">reply</span>({
       <span class="brand-name">Boost Boss</span>
     </a>
     <div class="footer-links">
-      <a href="/publish">Publishers</a>
-      <a href="/publish/mcp">MCP</a>
+      <a href="/publish" data-i18n="pubfoot.publishers">Publishers</a>
+      <a href="/publish/mcp" data-i18n="subnav.mcp">MCP</a>
       <a href="/publish/ai-apps">AI Apps</a>
       <a href="/publish/extensions">Extensions</a>
       <a href="/publish/no-code">Custom GPTs</a>
-      <a href="/docs">Docs</a>
-      <a href="/trust">Trust</a>
+      <a href="/docs" data-i18n="pubfoot.docs">Docs</a>
+      <a href="/trust" data-i18n="pubfoot.trust">Trust</a>
     </div>
-    <div class="footer-copy">© 2026 Boost Boss</div>
+    <div class="footer-copy" data-i18n="pubfoot.copy">© 2026 Boost Boss</div>
   </div>
 </footer>
 <script>
