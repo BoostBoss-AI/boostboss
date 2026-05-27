@@ -2437,9 +2437,12 @@
                 </div>
             </div>
 
-            <!-- Deposit Modal -->
+            <!-- Deposit Modal — z-index 9999 so it sits cleanly above the
+                 sticky <header> (z-index 1000). At parity (1000), DOM
+                 order decided who won, which made the modal sometimes
+                 appear behind the top nav. -->
             <div id="depositModal" style="
-                display: none; position: fixed; inset: 0; z-index: 1000;
+                display: none; position: fixed; inset: 0; z-index: 9999;
                 background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
                 align-items: center; justify-content: center;
             ">
@@ -2819,9 +2822,10 @@
                 </div>
             </section>
 
-            <!-- Add Rule Modal -->
+            <!-- Add Rule Modal — z-index must exceed the sticky <header>
+                 (1000) so the modal doesn't sit behind the top nav. -->
             <div id="ruleModal" style="
-                display: none; position: fixed; inset: 0; z-index: 950;
+                display: none; position: fixed; inset: 0; z-index: 9999;
                 background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
             ">
                 <div style="
@@ -2898,9 +2902,10 @@
                 </div>
             </div>
 
-            <!-- Compare Modal -->
+            <!-- Compare Modal — z-index must exceed the sticky <header>
+                 (1000) so the modal doesn't sit behind the top nav. -->
             <div id="compareModal" style="
-                display: none; position: fixed; inset: 0; z-index: 950;
+                display: none; position: fixed; inset: 0; z-index: 9999;
                 background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
             ">
                 <div style="
@@ -2947,9 +2952,12 @@
             </div>
         </main>
 
-        <!-- Account Settings Modal -->
+        <!-- Account Settings Modal — z-index 9999 to clear the sticky
+             <header> (z-index 1000). The Settings IIFE also resets the
+             cssText with the same z-index; this static value is the
+             pre-JS fallback. -->
         <div id="settingsModal" style="
-            display: none; position: fixed; inset: 0; z-index: 950;
+            display: none; position: fixed; inset: 0; z-index: 9999;
             background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
         ">
             <div style="
@@ -6703,7 +6711,10 @@
             const ROW = 'margin-bottom:18px;';
             const HINT = 'font-size:11px;color:#9CA3AF;margin-top:5px;line-height:1.5;';
 
-            settingsModal.style.cssText = 'display:none;position:fixed;inset:0;z-index:950;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
+            // z-index 9999 (matches publisher dashboard) — must be ABOVE
+            // the sticky <header> (z-index 1000), otherwise the top nav
+            // bleeds through the modal overlay at the top of the screen.
+            settingsModal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;';
             function renderModalChrome() {
                 settingsModal.innerHTML = `
                 <div style="background:#fff;border-radius:16px;width:860px;max-width:94vw;height:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.3);overflow:hidden;">
