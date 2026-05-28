@@ -8584,7 +8584,11 @@
             <div style="padding: 12px 18px; border-top: 1px solid #F3F4F6; background: #FAFAFA;">
                 <div style="font-size: 11px; color: #9CA3AF; display: flex; justify-content: space-between;">
                     <span>SuperBoost v1.0</span>
-                    <a href="https://status.boostboss.ai" target="_blank" style="color: #059669; text-decoration: none; font-weight: 500;">● All systems operational</a>
+                    <!-- Was '● All systems operational' but we don't actually
+                         poll the status feed from inside the dashboard — making
+                         that claim statically was misleading. Now just a neutral
+                         link to where the live probes live. -->
+                    <a href="https://status.boostboss.ai" target="_blank" style="color: #4B5563; text-decoration: none; font-weight: 500;">Service status →</a>
                 </div>
             </div>
         `;

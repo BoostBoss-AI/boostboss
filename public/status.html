@@ -104,23 +104,9 @@
   .sc-metric .val { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink); }
   .sc-metric .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
 
-  /* UPTIME BAR */
-  .uptime-bar { display: flex; gap: 2px; height: 28px; border-radius: 6px; overflow: hidden; }
-  .uptime-bar .day { flex: 1; border-radius: 3px; transition: opacity 0.15s; position: relative; cursor: default; }
-  .uptime-bar .day.ok { background: var(--green); }
-  .uptime-bar .day.partial { background: var(--amber); }
-  .uptime-bar .day.down { background: var(--red); }
-  .uptime-bar .day:hover { opacity: 0.8; }
-  .uptime-legend { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--muted); }
-
-  /* INCIDENTS */
-  .incidents { margin-top: 32px; }
-  .incident { padding: 20px 0; border-bottom: 1px solid var(--line); }
-  .incident:last-child { border-bottom: none; }
-  .incident .date { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-  .incident .title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-  .incident .desc { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
-  .incident .resolved { font-size: 12px; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: 0.04em; }
+  /* .uptime-bar / .day / .uptime-legend / .incidents / .incident rules
+     removed 2026-05-28 along with the HTML sections that used them
+     (Option A strip — seeded uptime grid + hardcoded incident list). */
 
   /* FOOTER */
   footer { background: var(--ink); color: rgba(255,255,255,0.6); padding: 48px 0 36px; font-size: 14px; }
@@ -203,22 +189,23 @@
   </div>
 </section>
 
-<!-- UPTIME HISTORY -->
+<!-- UPTIME TRACKING ANNOUNCEMENT —
+     30-day uptime bars and historical incidents removed 2026-05-28
+     ("Option A" strip). The bars were seeded pseudo-random; the
+     incident list was three hardcoded entries. Both are replaced with
+     a single honest banner explaining that we're tracking uptime from
+     this date forward — bars will return once 30 days of real data
+     has accumulated. -->
 <section class="section alt">
-  <div class="wrap">
-    <span class="eyebrow">30-day uptime</span>
-    <h2 style="margin-bottom:8px;">Uptime history</h2>
-    <p style="font-size:15px;color:var(--ink-soft);margin-bottom:28px;">Each bar represents one day. Green = 100% uptime, amber = partial degradation, red = outage.</p>
-    <div id="uptime-bars"></div>
-  </div>
-</section>
-
-<!-- RECENT INCIDENTS -->
-<section class="section">
-  <div class="wrap">
-    <span class="eyebrow">Incidents</span>
-    <h2>Recent incidents</h2>
-    <div class="incidents" id="incidents"></div>
+  <div class="wrap" style="text-align:center; max-width: 680px;">
+    <span class="eyebrow">Uptime history</span>
+    <h2 style="margin-bottom:14px;">Tracking from May 2026</h2>
+    <p style="font-size:15px;color:var(--ink-soft);line-height:1.6;">
+      We started recording uptime metrics on <strong>May 28, 2026</strong>. A 30-day uptime grid will appear here once a full month of real data has accumulated.
+    </p>
+    <p style="font-size:13.5px;color:var(--ink-soft);margin-top:14px;">
+      In the meantime, the service cards above run a fresh probe every 60 seconds — that's the live ground truth.
+    </p>
   </div>
 </section>
 
@@ -280,11 +267,11 @@ function startRefreshBar() {
     { name: "Trust Artifacts", desc: "sellers.json, ads.txt, security.txt",endpoint: "/sellers.json",                    check: r => r.sellers && r.sellers.length > 0 },
   ];
 
-  // Seed-based pseudo random for stable uptime bars
-  function seeded(seed) {
-    let x = (seed * 9301 + 49297) % 233280;
-    return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; };
-  }
+  // seeded() pseudo-random + the renderUptimeBars/renderIncidents
+  // helpers were removed 2026-05-28 — the 30-day uptime grid and
+  // 'recent incidents' panel they fed were aspirational fixtures, not
+  // real telemetry. They'll return once we have real uptime + real
+  // incident history to populate them with.
 
   async function checkService(svc) {
     const start = performance.now();
@@ -297,13 +284,13 @@ function startRefreshBar() {
       // probe — useful for /api/auth?action=me, which is the cheapest
       // liveness check now that demo signup is gone.
       if (!res.ok && !(svc.okOn401 && res.status === 401)) {
-        return { ...svc, status: "down", latency, uptime: "—" };
+        return { ...svc, status: "down", latency };
       }
       const data = res.status === 401 ? {} : await res.json();
       const ok = svc.check(data);
-      return { ...svc, status: ok ? "ok" : "degraded", latency, uptime: "99.98%", mode: res.headers.get("x-auth-mode") || res.headers.get("x-billing-mode") || res.headers.get("x-mcp-mode") || res.headers.get("x-track-mode") || "" };
+      return { ...svc, status: ok ? "ok" : "degraded", latency, mode: res.headers.get("x-auth-mode") || res.headers.get("x-billing-mode") || res.headers.get("x-mcp-mode") || res.headers.get("x-track-mode") || "" };
     } catch (e) {
-      return { ...svc, status: "down", latency: Math.round(performance.now() - start), uptime: "—" };
+      return { ...svc, status: "down", latency: Math.round(performance.now() - start) };
     }
   }
 
@@ -318,62 +305,17 @@ function startRefreshBar() {
           <span class="sc-badge ${badgeCls}">${badgeText}</span>
         </div>
         <div class="sc-metrics">
-          <div class="sc-metric"><div class="val">${svc.latency}ms</div><div class="lbl">Latency</div></div>
-          <div class="sc-metric"><div class="val">${svc.uptime}</div><div class="lbl">30d Uptime</div></div>
+          <div class="sc-metric"><div class="val">${svc.latency}ms</div><div class="lbl">Latency (just now)</div></div>
         </div>
         <p style="font-size:13px;color:var(--ink-soft);">${svc.desc}</p>
       </div>`;
   }
 
-  function renderUptimeBars() {
-    const container = document.getElementById("uptime-bars");
-    const services = SERVICES.map(s => s.name);
-    let html = "";
-    const today = new Date();
-
-    for (const name of services) {
-      const rnd = seeded(name.length * 7 + today.getMonth());
-      let days = "";
-      let upCount = 0;
-      for (let i = 29; i >= 0; i--) {
-        const r = rnd();
-        let cls = "ok";
-        if (r > 0.97) cls = "partial";
-        if (r > 0.995) cls = "down";
-        if (cls === "ok") upCount++;
-        else if (cls === "partial") upCount += 0.5;
-        const d = new Date(today); d.setDate(d.getDate() - i);
-        days += `<div class="day ${cls}" title="${d.toLocaleDateString()}"></div>`;
-      }
-      const pct = ((upCount / 30) * 100).toFixed(2);
-      html += `
-        <div style="margin-bottom:24px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;">${name}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green);font-weight:600;">${pct}%</span>
-          </div>
-          <div class="uptime-bar">${days}</div>
-          <div class="uptime-legend"><span>30 days ago</span><span>Today</span></div>
-        </div>`;
-    }
-    container.innerHTML = html;
-  }
-
-  function renderIncidents() {
-    const incidents = [
-      { date: "April 14, 2026", title: "Elevated latency on Benna AI inference", desc: "P50 latency rose to 12ms for ~8 minutes during a model weight reload. No bid failures. Auto-resolved.", resolved: true },
-      { date: "April 8, 2026", title: "Scheduled maintenance — database migration", desc: "Supabase schema migration for the rtb_auctions and rtb_bids tables. 2-minute read-only window.", resolved: true },
-      { date: "March 29, 2026", title: "sellers.json cache stale for 45 minutes", desc: "CDN cache invalidation delay after adding a new authorized seller. No impact on live auctions.", resolved: true },
-    ];
-    const el = document.getElementById("incidents");
-    el.innerHTML = incidents.map(i => `
-      <div class="incident">
-        <div class="date">${i.date}</div>
-        <div class="title">${i.title}</div>
-        <div class="desc">${i.desc}</div>
-        ${i.resolved ? '<div class="resolved" style="margin-top:6px;">Resolved</div>' : ''}
-      </div>`).join("");
-  }
+  // renderUptimeBars() + renderIncidents() — both removed 2026-05-28
+  // along with the sections they fed. Their fixtures (seeded random
+  // bars, 3 hardcoded April/March incident entries) were misleading
+  // when we have zero real telemetry. The page now relies on the
+  // live 60-second probes as the sole source of truth.
 
   async function refresh() {
     const results = await Promise.all(SERVICES.map(checkService));
@@ -396,8 +338,6 @@ function startRefreshBar() {
     }
   }
 
-  renderUptimeBars();
-  renderIncidents();
   refresh().then(() => { showToast('All services checked', 'success'); startRefreshBar(); });
   setInterval(() => {
     refresh().then(() => { showToast('Status refreshed', 'success'); startRefreshBar(); });
