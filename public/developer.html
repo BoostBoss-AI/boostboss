@@ -1636,18 +1636,8 @@
             </form>
 
             <div style="margin-top: 22px; padding-top: 22px; border-top: 1px dashed #D1D5DB; text-align: center;">
-                <button type="button" id="demoBtn" onclick="handleDemoQuickStart()" style="
-                    width: 100%; padding: 12px 16px; background: #1A1A2E; color: #FFFFFF;
-                    border: 1.5px solid #1A1A2E; border-radius: 8px;
-                    font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
-                    cursor: pointer; box-shadow: 3px 3px 0 #04BEFE; transition: all 0.15s;">
-                    ⚡ Try the demo — instant access, no signup
-                </button>
-                <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
-                    Spins up a synthetic publisher account with $18.9K MRR and a live ad-request feed.
-                </div>
-
-                <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed #D1D5DB;">
+                <!-- Demo quick-start removed 2026-05-28 — demo mode no longer offered. -->
+                <div>
                     <button type="button" onclick="toggleApiKeyLogin()" style="
                         background: none; border: none; color: #FF2D78;
                         font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
@@ -2840,46 +2830,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             errorDiv.style.display = 'block';
         }
 
-        async function handleDemoQuickStart() {
-            clearAuthError();
-            const demoBtn = document.getElementById('demoBtn');
-            const originalText = demoBtn.textContent;
-            demoBtn.textContent = 'Spinning up your demo account…';
-            demoBtn.disabled = true;
-            try {
-                const response = await fetch(`${API_BASE}/api/auth?action=demo`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ role: 'developer' })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Demo provisioning failed');
-
-                const sessionData = {
-                    token: data.session?.access_token,
-                    user_id: data.user?.id
-                };
-                const profileData = {
-                    user_id: data.user?.id,
-                    email: data.user.email,
-                    app_name: data.profile?.app_name || 'Demo MCP App',
-                    api_key: data.profile?.api_key,
-                    monthly_revenue: data.profile?.monthly_revenue,
-                    ad_requests_30d: data.profile?.ad_requests_30d,
-                    fill_rate: data.profile?.fill_rate,
-                    is_demo: true,
-                    formats: { native: true, image: true, corner: true }
-                };
-                localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
-                localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
-                userProfile = profileData;
-                loadDashboard();
-            } catch (error) {
-                showAuthError(error.message || 'Demo provisioning failed');
-                demoBtn.textContent = originalText;
-                demoBtn.disabled = false;
-            }
-        }
+        // handleDemoQuickStart removed 2026-05-28 — demo mode no longer offered.
 
         function toggleApiKeyLogin() {
             const form = document.getElementById('apiKeyLoginForm');

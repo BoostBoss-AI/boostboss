@@ -2268,18 +2268,7 @@
                 <button type="submit" class="auth-submit-btn" id="authSubmitBtn">Login</button>
             </form>
 
-            <div style="margin-top: 22px; padding-top: 22px; border-top: 1px dashed #D1D5DB; text-align: center;">
-                <button type="button" id="demoBtn" style="
-                    width: 100%; padding: 12px 16px; background: #1A1A2E; color: #FFFFFF;
-                    border: 1.5px solid #1A1A2E; border-radius: 8px;
-                    font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
-                    cursor: pointer; box-shadow: 3px 3px 0 #FF2D78; transition: all 0.15s;">
-                    ⚡ Try the demo — instant access, no signup
-                </button>
-                <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
-                    Spins up a synthetic advertiser account loaded with $5K balance and 4 live campaigns.
-                </div>
-            </div>
+            <!-- Demo quick-start removed 2026-05-28 — demo mode no longer offered. -->
         </div>
     </div>
 
@@ -3747,9 +3736,7 @@
             // Logout
             logoutBtn.addEventListener('click', handleLogout);
 
-            // Demo quick-start
-            const demoBtn = document.getElementById('demoBtn');
-            if (demoBtn) demoBtn.addEventListener('click', handleDemoQuickStart);
+            // Demo quick-start removed 2026-05-28 — demo mode no longer offered.
 
             // Modal
             newCampaignBtn.addEventListener('click', openModal);
@@ -3914,50 +3901,7 @@
             }
         }
 
-        async function handleDemoQuickStart() {
-            const demoBtn = document.getElementById('demoBtn');
-            const originalText = demoBtn.textContent;
-            demoBtn.textContent = 'Spinning up your demo account…';
-            demoBtn.disabled = true;
-            authError.classList.remove('active');
-            try {
-                const response = await fetch(`${API_BASE}/api/auth?action=demo`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ role: 'advertiser' })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Demo provisioning failed');
-
-                const userId = data.user?.id;
-                const token = data.session?.access_token;
-                const company = data.profile?.company_name || 'Demo Co.';
-
-                currentUser = { token: token, user_id: userId };
-                currentUserData = {
-                    company_name: company,
-                    email: data.user.email,
-                    user_id: userId,
-                    is_demo: true
-                };
-
-                localStorage.setItem('bb_session_token', JSON.stringify(currentUser));
-                localStorage.setItem('bb_user_data', JSON.stringify(currentUserData));
-
-                showDashboard();
-                loadStats();
-                loadCampaigns();
-                loadBennaEngine();
-                if (!window.__bennaInterval) {
-                    window.__bennaInterval = setInterval(loadBennaEngine, 30000);
-                }
-            } catch (error) {
-                authError.textContent = error.message;
-                authError.classList.add('active');
-                demoBtn.textContent = originalText;
-                demoBtn.disabled = false;
-            }
-        }
+        // handleDemoQuickStart removed 2026-05-28 — demo mode no longer offered.
 
         function handleLogout() {
             localStorage.removeItem('bb_session_token');

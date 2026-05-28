@@ -378,8 +378,6 @@ body.dark .superboost-mark { color: #F3F4F6; }
         <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
       </form>
 
-      <div class="divider">or</div>
-      <button class="btn-submit" style="background:#0A0A14;" id="demo-btn">Try the demo (no account needed)</button>
       <div class="alt-link">Already have an account? <a href="#" id="switch-login">Sign in</a></div>
     </div>
 
@@ -409,8 +407,6 @@ body.dark .superboost-mark { color: #F3F4F6; }
         <button type="submit" class="btn-submit" id="login-submit-btn">Sign in</button>
       </form>
 
-      <div class="divider">or</div>
-      <button class="btn-submit" style="background:#0A0A14;" id="login-demo-btn">Try the demo instead</button>
       <div class="alt-link">Don't have an account? <a href="#" id="switch-signup">Create one</a></div>
     </div>
 
@@ -710,27 +706,9 @@ document.getElementById("login-form").addEventListener("submit", async e => {
   }
 });
 
-// ── Demo buttons ──
-async function launchDemo(role) {
-  try {
-    const r = await fetch(API + "?action=demo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: role || selectedRole }),
-    });
-    const j = await r.json();
-    if (!r.ok || j.error) throw new Error(j.error || "Demo failed");
-    saveSession(j);
-    showToast('Demo session started!', 'success');
-    const dest = j.user?.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
-    setTimeout(() => window.location.href = dest, 600);
-  } catch (err) {
-    showError("error", err.message);
-    showToast(err.message, 'error');
-  }
-}
-document.getElementById("demo-btn").addEventListener("click", () => launchDemo(selectedRole));
-document.getElementById("login-demo-btn").addEventListener("click", () => launchDemo("advertiser"));
+// ── Demo buttons removed 2026-05-28 — demo mode is no longer offered.
+// The /api/auth?action=demo endpoint may still exist server-side but is
+// no longer reachable from the signup / sign-in UI.
 
 // ── Google OAuth ────────────────────────────────────────────────
 // Click "Continue with Google" → Supabase redirects to Google OAuth
