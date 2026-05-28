@@ -26,17 +26,19 @@
   .app-shell {
     display: flex;
     flex-direction: column;
-    /* Lock to viewport height so each door surface owns its own scroll
-       region instead of expanding the page as ads accumulate. */
-    height: 100vh;
+    /* Card sits inside the viewport with breathing room top + bottom so
+       the pastel canvas (and decorative rockets) show through. Locked
+       height means each door surface owns its own scroll region. */
+    height: calc(100vh - 48px);
     max-width: 840px;
-    margin: 0 auto;
+    margin: 24px auto;
+    border-radius: 16px;
+    overflow: hidden;
     width: 100%;
     /* White card on the pastel canvas — gives clear edge against the page */
     background: #FFFFFF;
-    border-left: 1px solid #E5E7EB;
-    border-right: 1px solid #E5E7EB;
-    box-shadow: 0 0 60px rgba(26, 26, 46, 0.04);
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 8px 40px rgba(26, 26, 46, 0.06);
   }
 
   /* ─────────────────────────────────────────
