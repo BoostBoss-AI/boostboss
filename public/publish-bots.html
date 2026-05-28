@@ -233,7 +233,7 @@
            alt="A Telegram bot reply followed by a sponsored card"
            onload="this.parentElement.classList.add('has-real-img')"
            onerror="this.remove()" />
-      <svg viewBox="0 0 760 470" xmlns="http://www.w3.org/2000/svg" role="img">
+      <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <style>
           .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
           @keyframes bb-rise {
@@ -320,12 +320,12 @@
           <text x="396" y="358" font-family="Inter, sans-serif" font-size="8.5" fill="#9CA3AF">vercel.com</text>
         </g>
 
-        <!-- Composer -->
-        <rect x="298" y="390" width="204" height="28" fill="#F4F3EE"/>
-        <rect x="306" y="395" width="160" height="18" rx="9" fill="#FFFFFF"/>
+        <!-- Composer — rounded bottom corners match the inner phone's curve (rx=26) -->
+        <path d="M 298,390 L 502,390 L 502,392 Q 502,418 476,418 L 324,418 Q 298,418 298,392 Z" fill="#F4F3EE"/>
+        <rect x="306" y="395" width="150" height="18" rx="9" fill="#FFFFFF"/>
         <text x="316" y="408" font-family="Inter, sans-serif" font-size="9" fill="#9CA3AF">Message…</text>
-        <circle cx="482" cy="404" r="9" fill="#5288C1"/>
-        <text x="482" y="408" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">→</text>
+        <circle cx="474" cy="404" r="9" fill="#5288C1"/>
+        <text x="474" y="408" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">→</text>
 
         <!-- Side label -->
         <text x="160" y="220" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Discord</text>
