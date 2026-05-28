@@ -320,8 +320,10 @@
           <text x="396" y="358" font-family="Inter, sans-serif" font-size="8.5" fill="#9CA3AF">vercel.com</text>
         </g>
 
-        <!-- Composer — rounded bottom corners match the inner phone's curve (rx=26) -->
-        <path d="M 298,390 L 502,390 L 502,392 Q 502,418 476,418 L 324,418 Q 298,418 298,392 Z" fill="#F4F3EE"/>
+        <!-- Composer — rounded bottom corners match the inner phone's curve (rx=26).
+             Uses arc (A) commands so the curve is a true quarter-circle, not a
+             Bezier approximation — that way it traces the inner phone exactly. -->
+        <path d="M 298,390 L 502,390 L 502,392 A 26 26 0 0 1 476,418 L 324,418 A 26 26 0 0 1 298,392 Z" fill="#F4F3EE"/>
         <rect x="306" y="395" width="150" height="18" rx="9" fill="#FFFFFF"/>
         <text x="316" y="408" font-family="Inter, sans-serif" font-size="9" fill="#9CA3AF">Message…</text>
         <circle cx="474" cy="404" r="9" fill="#5288C1"/>
