@@ -26,7 +26,9 @@
   .app-shell {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    /* Relaxed from 100vh — needs to fit tab strip + surface + wedge.
+       min-height keeps the card filling the viewport on tall screens. */
+    min-height: 100vh;
     max-width: 840px;
     margin: 0 auto;
     width: 100%;
@@ -36,6 +38,536 @@
     border-right: 1px solid #E5E7EB;
     box-shadow: 0 0 60px rgba(26, 26, 46, 0.04);
   }
+
+  /* ─────────────────────────────────────────
+     DOOR TAB STRIP — sits between header and active surface
+  ───────────────────────────────────────── */
+  .door-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    overflow-x: auto;
+  }
+  .door-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    color: #6B7280;
+    border-radius: 22px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .door-tab:hover { border-color: #FF2D78; color: #FF2D78; }
+  .door-tab.active {
+    background: #FF2D78;
+    border-color: transparent;
+    color: #FFFFFF;
+  }
+  .door-tab .door-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--dot, #FF2D78);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+  }
+  .door-tab.active .door-dot { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9); }
+
+  /* Surface container — holds the four mock surfaces; only one visible. */
+  .door-surface {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+    min-height: 0; /* let the inner scroll regions own overflow */
+  }
+  .door-surface.hidden { display: none; }
+
+  /* ─────────────────────────────────────────
+     MCP DOOR — Claude Desktop window mock
+  ───────────────────────────────────────── */
+  .mcp-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #FAFAF7;
+    overflow-y: auto;
+    padding: 12px 16px 20px;
+  }
+  .mcp-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    background: #EFEEE9;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #E5E4DD;
+    border-bottom: none;
+  }
+  .mcp-titlebar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .mcp-titlebar .dot.red { background: #FF5F57; }
+  .mcp-titlebar .dot.yellow { background: #FEBC2E; }
+  .mcp-titlebar .dot.green { background: #28C840; }
+  .mcp-titlebar .label {
+    flex: 1; text-align: center;
+    font-size: 11px; color: #6B7280;
+  }
+  .mcp-body {
+    background: #FFFFFF;
+    border: 1px solid #E5E4DD;
+    border-radius: 0 0 10px 10px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mcp-user-msg {
+    align-self: flex-end;
+    background: #0F0F1A;
+    color: #FFFFFF;
+    padding: 9px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    max-width: 75%;
+  }
+  .mcp-claude-line {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: #0F0F1A;
+  }
+  .mcp-claude-line .avatar {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #D97757; color: #FFFFFF;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .mcp-toolcall {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #EEF6FF;
+    border: 1px solid #BAD7F2;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    font-size: 11.5px;
+    color: #1B5FB6;
+    align-self: flex-start;
+  }
+  .mcp-toolresult {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .mcp-toolresult .tr-label {
+    font-size: 10px; font-weight: 600; color: #6B7280;
+    letter-spacing: 0.06em; margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .mcp-toolresult .tr-line { font-size: 12.5px; color: #4B4B5E; line-height: 1.55; }
+  .mcp-toolresult .tr-line.bold { color: #0F0F1A; font-weight: 600; margin-bottom: 4px; }
+
+  /* MCP-style sponsored block (matches publish-mcp.html). */
+  .mcp-sponsored {
+    margin-top: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #FF2D78;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .mcp-sponsored .ms-label {
+    background: #FFE6F0;
+    padding: 5px 12px;
+    font-size: 10px; font-weight: 700;
+    color: #E01E65; letter-spacing: 0.06em;
+  }
+  .mcp-sponsored .ms-body {
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .mcp-sponsored .ms-logo {
+    width: 44px; height: 44px; border-radius: 9px;
+    background: #0F0F1A; color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700;
+  }
+  .mcp-sponsored .ms-title {
+    font-size: 13px; font-weight: 700; color: #0F0F1A;
+  }
+  .mcp-sponsored .ms-desc {
+    font-size: 11.5px; color: #4B4B5E; margin-top: 2px;
+  }
+  .mcp-sponsored .ms-cta {
+    background: #0F0F1A; color: #FFFFFF;
+    text-decoration: none;
+    font-size: 11.5px; font-weight: 600;
+    padding: 7px 13px; border-radius: 7px;
+    white-space: nowrap;
+  }
+
+  /* ─────────────────────────────────────────
+     EXTENSION DOOR — Browser + side-panel summarizer
+  ───────────────────────────────────────── */
+  .ext-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+    overflow: hidden;
+  }
+  .ext-chrome {
+    background: #F1F1ED;
+    padding: 6px 10px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #E5E4DD;
+  }
+  .ext-chrome .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ext-chrome .dot.red { background: #FF5F57; }
+  .ext-chrome .dot.yellow { background: #FEBC2E; }
+  .ext-chrome .dot.green { background: #28C840; }
+  .ext-chrome .urlbar {
+    flex: 1;
+    background: #FFFFFF;
+    border: 1px solid #D8D7CF;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 11px; color: #6B7280;
+  }
+  .ext-chrome .panel-btn {
+    width: 22px; height: 22px; border-radius: 5px;
+    background: #FF2D78; color: #FFFFFF;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+  }
+  .ext-split {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    min-height: 0;
+  }
+  .ext-page {
+    background: #FAFAF7;
+    padding: 18px 20px;
+    overflow-y: auto;
+    border-right: 1px solid #E5E7EB;
+  }
+  .ext-page h3 {
+    font-size: 15px; font-weight: 700; color: #0F0F1A;
+    line-height: 1.3; margin-bottom: 6px;
+  }
+  .ext-page .byline { font-size: 11px; color: #6B7280; margin-bottom: 12px; }
+  .ext-page .hero-img {
+    width: 100%; aspect-ratio: 16/7;
+    background: #E5E4DD;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #9CA3AF;
+    margin-bottom: 14px;
+  }
+  .ext-page p {
+    font-size: 12px; color: #4B4B5E; line-height: 1.65; margin-bottom: 10px;
+  }
+  .ext-panel {
+    background: #FFFFFF;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .ext-panel-head {
+    background: #0F0F1A; color: #FFFFFF;
+    padding: 9px 12px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700;
+  }
+  .ext-panel-head .ep-logo {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #FF2D78; color: #FFFFFF;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+  }
+  .ext-panel-tabs {
+    background: #F4F3EE;
+    padding: 6px 8px;
+    display: flex; gap: 4px;
+    border-bottom: 1px solid #E5E4DD;
+  }
+  .ext-panel-tabs .ept {
+    font-size: 10.5px; padding: 4px 10px; border-radius: 5px;
+    color: #6B7280;
+  }
+  .ext-panel-tabs .ept.on { background: #FFFFFF; color: #0F0F1A; font-weight: 600; }
+  .ext-panel-body {
+    flex: 1;
+    padding: 12px 14px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ext-panel-body .ep-label {
+    font-size: 10px; font-weight: 700; color: #9CA3AF;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .ext-panel-body .ep-bullet { font-size: 11.5px; color: #0F0F1A; }
+
+  /* Side-panel sponsored block (publish-extensions.html parity). */
+  .ext-sponsored {
+    margin-top: auto;
+    background: #FFFFFF;
+    border: 1.5px solid #FF2D78;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .ext-sponsored .es-label {
+    font-size: 9.5px; font-weight: 700;
+    color: #E01E65; letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .ext-sponsored .es-body {
+    display: grid; grid-template-columns: 36px 1fr; gap: 10px;
+    align-items: center;
+  }
+  .ext-sponsored .es-logo {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #0F0F1A; color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700;
+  }
+  .ext-sponsored .es-title { font-size: 11.5px; font-weight: 700; color: #0F0F1A; }
+  .ext-sponsored .es-desc { font-size: 10px; color: #4B4B5E; }
+  .ext-sponsored .es-cta {
+    display: inline-block;
+    margin-top: 8px;
+    background: #0F0F1A; color: #FFFFFF;
+    text-decoration: none;
+    font-size: 10.5px; font-weight: 600;
+    padding: 5px 10px; border-radius: 5px;
+  }
+
+  /* New-tab takeover overlay (rendered inside ext-window). */
+  .ext-newtab {
+    position: absolute; inset: 0;
+    background: #FFFFFF;
+    z-index: 5;
+    display: none;
+    flex-direction: column;
+    padding: 28px 32px;
+    overflow-y: auto;
+  }
+  .ext-newtab.on { display: flex; }
+  .ext-newtab .nt-close {
+    position: absolute; top: 12px; right: 14px;
+    background: transparent; border: none;
+    width: 28px; height: 28px; border-radius: 6px;
+    font-size: 16px; color: #6B7280; cursor: pointer;
+  }
+  .ext-newtab .nt-close:hover { background: #F3F4F6; color: #FF2D78; }
+  .ext-newtab .nt-greet { font-size: 22px; font-weight: 700; color: #0F0F1A; }
+  .ext-newtab .nt-sub { font-size: 13px; color: #6B7280; margin-top: 4px; margin-bottom: 18px; }
+  .ext-newtab .nt-search {
+    background: #F4F3EE; border-radius: 12px;
+    padding: 12px 16px; font-size: 13px; color: #9CA3AF;
+    margin-bottom: 18px;
+  }
+  .ext-newtab .nt-card {
+    border: 1.5px solid #FF2D78;
+    border-radius: 12px;
+    padding: 16px;
+    background: #FFF5F9;
+  }
+  .ext-newtab .nt-card .nt-label {
+    font-size: 10px; font-weight: 700;
+    color: #E01E65; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .ext-newtab .nt-card .nt-title { font-size: 16px; font-weight: 700; color: #0F0F1A; }
+  .ext-newtab .nt-card .nt-desc { font-size: 12.5px; color: #4B4B5E; margin-top: 4px; margin-bottom: 12px; }
+  .ext-newtab .nt-card .nt-cta {
+    display: inline-block;
+    background: #FF2D78; color: #FFFFFF;
+    text-decoration: none;
+    font-size: 12px; font-weight: 700;
+    padding: 8px 16px; border-radius: 7px;
+  }
+
+  /* ─────────────────────────────────────────
+     BOT DOOR — Telegram phone
+  ───────────────────────────────────────── */
+  .bot-window {
+    flex: 1;
+    background: #FAFAF7;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px 12px 24px;
+    overflow-y: auto;
+  }
+  .bot-phone {
+    width: 280px;
+    background: #1F1F2E;
+    border-radius: 32px;
+    padding: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+  .bot-screen {
+    background: #E7EBF0;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 480px;
+  }
+  .bot-notch {
+    height: 14px;
+    display: flex; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .bot-notch::before {
+    content: '';
+    width: 56px; height: 12px;
+    background: #1F1F2E; border-radius: 0 0 8px 8px;
+  }
+  .bot-header {
+    background: #5288C1;
+    color: #FFFFFF;
+    padding: 8px 12px;
+    display: flex; align-items: center; gap: 9px;
+    font-size: 12px;
+  }
+  .bot-header .back { font-size: 14px; }
+  .bot-header .avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #FFFFFF; color: #5288C1;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .bot-header .meta .name { font-weight: 700; font-size: 12.5px; }
+  .bot-header .meta .status { font-size: 10px; opacity: 0.85; }
+  .bot-chat {
+    flex: 1;
+    padding: 12px 10px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .bot-bubble {
+    max-width: 78%;
+    padding: 7px 11px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #0F0F1A;
+  }
+  .bot-bubble.user {
+    align-self: flex-end;
+    background: #EFFDDE;
+  }
+  .bot-bubble.bot {
+    align-self: flex-start;
+    background: #FFFFFF;
+  }
+
+  /* Bot sponsored card (Telegram attachment style). */
+  .bot-sponsored {
+    align-self: stretch;
+    background: #FFFFFF;
+    border: 1.5px solid #FF2D78;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .bot-sponsored .bs-banner {
+    background: #0F0F1A;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 12px;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .bot-sponsored .bs-body { padding: 9px 12px; }
+  .bot-sponsored .bs-label {
+    font-size: 8.5px; font-weight: 700; color: #E01E65;
+    letter-spacing: 0.06em;
+  }
+  .bot-sponsored .bs-title {
+    font-size: 11.5px; font-weight: 700; color: #0F0F1A;
+    margin-top: 4px;
+  }
+  .bot-sponsored .bs-desc {
+    font-size: 10.5px; color: #4B4B5E; margin-top: 2px;
+  }
+  .bot-sponsored .bs-cta {
+    display: inline-block;
+    margin-top: 8px;
+    background: #5288C1; color: #FFFFFF;
+    text-decoration: none;
+    font-size: 10.5px; font-weight: 600;
+    padding: 5px 11px; border-radius: 5px;
+  }
+
+  /* Bot suggested-action button row (Telegram inline-keyboard style). */
+  .bot-actions {
+    align-self: stretch;
+    display: flex; flex-direction: column; gap: 4px;
+    margin-top: 2px;
+  }
+  .bot-actions .ba-btn {
+    background: #FFFFFF;
+    color: #5288C1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .bot-actions .ba-btn.sponsored {
+    background: #FF2D78; color: #FFFFFF;
+  }
+  .bot-composer {
+    background: #F4F3EE;
+    padding: 6px 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bot-composer .bc-input {
+    flex: 1;
+    background: #FFFFFF; border-radius: 14px;
+    padding: 5px 12px;
+    font-size: 11px; color: #9CA3AF;
+  }
+  .bot-composer .bc-send {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #5288C1; color: #FFFFFF;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+
+  /* Loading-state shimmer (Web door). */
+  @keyframes bb-shimmer {
+    0% { background-position: -180px 0; }
+    100% { background-position: 180px 0; }
+  }
+  .bb-loading-card {
+    background: #FFF5F8;
+    border: 1px solid #FFE600;
+    border-left: 3px solid #FF2D78;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 8px 0;
+  }
+  .bb-loading-card .bl-label {
+    font-size: 10px; font-weight: 700; color: #FF2D78;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .bb-loading-card .bl-shimmer {
+    height: 12px; border-radius: 3px;
+    background: linear-gradient(90deg, #FFE0EC 0%, #FFF5F9 50%, #FFE0EC 100%);
+    background-size: 360px 100%;
+    animation: bb-shimmer 1.2s linear infinite;
+    margin-bottom: 6px;
+  }
+  .bb-loading-card .bl-shimmer:nth-child(3) { width: 70%; }
+  .bb-loading-card .bl-shimmer:nth-child(4) { width: 50%; margin-bottom: 0; }
 
   .app-header {
     padding: 14px 24px;
@@ -707,58 +1239,169 @@
 <div class="app-shell">
   <div class="app-header">
     <div class="logo">S</div>
-    <h1>SampleAI Chat</h1>
+    <h1 id="app-title">SampleAI Chat</h1>
     <div class="tag">Boost Boss Ads</div>
-    <span>Developer's AI App — Llama 4</span>
+    <span id="app-subtitle">Developer's AI App — Llama 4</span>
   </div>
 
-  <div class="chat-area" id="chat">
-    <div class="msg ai">
-      <div class="msg-avatar">AI</div>
-      <div class="msg-bubble">Hello! I'm your AI assistant. How can I help you today?</div>
-    </div>
-    <div class="msg user">
-      <div class="msg-avatar">U</div>
-      <div class="msg-bubble">Can you help me build a landing page for my startup?</div>
-    </div>
-    <div class="msg ai">
-      <div class="msg-avatar">AI</div>
-      <div class="msg-bubble">
-        Absolutely! A great landing page needs a clear headline, strong value proposition,
-        social proof, and one focused call-to-action. Start with your hero section —
-        answer "what is this?" in under 5 seconds.
-        <br><br>
-        Do you have a design tool in mind, or starting from scratch?
+  <!-- Door tab strip: MCP / Web / Extension / Bot -->
+  <div class="door-tabs" role="tablist" aria-label="Boost Boss door selector">
+    <button class="door-tab" role="tab" data-door="mcp" onclick="setActiveDoor('mcp')">
+      <span class="door-dot" style="--dot:#9D7AFF"></span>Lumi MCP
+    </button>
+    <button class="door-tab active" role="tab" data-door="web" aria-selected="true" onclick="setActiveDoor('web')">
+      <span class="door-dot" style="--dot:#04BEFE"></span>Web
+    </button>
+    <button class="door-tab" role="tab" data-door="ext" onclick="setActiveDoor('ext')">
+      <span class="door-dot" style="--dot:#FFB020"></span>Extension
+    </button>
+    <button class="door-tab" role="tab" data-door="bot" onclick="setActiveDoor('bot')">
+      <span class="door-dot" style="--dot:#5288C1"></span>Bot
+    </button>
+  </div>
 
-        <!-- Boost Boss native in-chat ad -->
-        <div class="bb-native-ad">
-          <div class="bb-na-label">
-            <span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
-            Sponsored by Boost Boss
+  <!-- ===== WEB DOOR — existing SampleAI Chat (default) ===== -->
+  <div class="door-surface" id="surface-web">
+    <div class="chat-area" id="chat">
+      <div class="msg ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">Hello! I'm your AI assistant. How can I help you today?</div>
+      </div>
+      <div class="msg user">
+        <div class="msg-avatar">U</div>
+        <div class="msg-bubble">Can you help me build a landing page for my startup?</div>
+      </div>
+      <div class="msg ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">
+          Absolutely! A great landing page needs a clear headline, strong value proposition,
+          social proof, and one focused call-to-action. Start with your hero section —
+          answer "what is this?" in under 5 seconds.
+          <br><br>
+          Do you have a design tool in mind, or starting from scratch?
+
+          <!-- Boost Boss native in-chat ad -->
+          <div class="bb-native-ad">
+            <div class="bb-na-label">
+              <span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
+              Sponsored by Boost Boss
+            </div>
+            <div class="bb-na-title">Build beautiful sites in minutes — no code</div>
+            <div class="bb-na-desc">Framer lets you design, build, and ship stunning landing pages. Free for 30 days.</div>
+            <a class="bb-na-cta" href="https://framer.com" target="_blank">Try Framer Free →</a>
           </div>
-          <div class="bb-na-title">Build beautiful sites in minutes — no code</div>
-          <div class="bb-na-desc">Framer lets you design, build, and ship stunning landing pages. Free for 30 days.</div>
-          <a class="bb-na-cta" href="https://framer.com" target="_blank">Try Framer Free →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <input type="text" placeholder="Type a message..." id="msg-input" />
+      <button onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+
+  <!-- ===== MCP DOOR — Claude Desktop window ===== -->
+  <div class="door-surface hidden" id="surface-mcp">
+    <div class="mcp-window">
+      <div class="mcp-titlebar">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span class="label">Claude Desktop · MCP host</span>
+      </div>
+      <div class="mcp-body" id="mcp-body">
+        <div class="mcp-user-msg">How do I deploy my FastAPI app?</div>
+        <div class="mcp-claude-line">
+          <div class="avatar">C</div>
+          <div>I'll check deployment options for FastAPI…</div>
+        </div>
+        <div class="mcp-toolcall">⚙ deploy_helper.lookup_options</div>
+        <div class="mcp-toolresult" id="mcp-toolresult">
+          <div class="tr-label">Tool result</div>
+          <div class="tr-line bold">Best options for FastAPI deployment:</div>
+          <div class="tr-line">• Railway — git push deploys, auto-scaling, $5/mo hobby tier</div>
+          <div class="tr-line">• Fly.io — global edge, Docker-based, generous free tier</div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="input-area">
-    <input type="text" placeholder="Type a message..." id="msg-input" />
-    <button onclick="sendMsg()">Send</button>
+  <!-- ===== EXTENSION DOOR — Browser + side-panel summarizer ===== -->
+  <div class="door-surface hidden" id="surface-ext">
+    <div class="ext-window" style="position:relative;">
+      <div class="ext-chrome">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <div class="urlbar">🔒 nytimes.com/2026/04/29/article</div>
+        <span class="panel-btn">||</span>
+      </div>
+      <div class="ext-split">
+        <div class="ext-page">
+          <h3>The shifting landscape of AI infrastructure spend</h3>
+          <div class="byline">Staff writers · April 29, 2026 · 8 min read</div>
+          <div class="hero-img">[ article hero image ]</div>
+          <p>Demand for hosted AI services has tripled in the past year, but the bottleneck has shifted from raw compute to deployment surface area.</p>
+          <p>Companies that once raced to buy GPUs are now racing to ship the right interface to use them. "It's no longer about model size," said one VP at a major cloud provider.</p>
+        </div>
+        <div class="ext-panel" id="ext-panel">
+          <div class="ext-panel-head">
+            <span class="ep-logo">A</span>
+            Article AI · Summarizer
+          </div>
+          <div class="ext-panel-tabs">
+            <span class="ept on">Summary</span>
+            <span class="ept">Q&amp;A</span>
+            <span class="ept">Sources</span>
+            <span class="ept">Notes</span>
+          </div>
+          <div class="ext-panel-body" id="ext-panel-body">
+            <div class="ep-label">Key points</div>
+            <div class="ep-bullet">▸ AI infra demand tripled YoY</div>
+            <div class="ep-bullet">▸ Bottleneck shifted from compute to deployment surface</div>
+            <div class="ep-bullet">▸ Integration is the new lever</div>
+            <div class="ep-label" style="margin-top:6px;">Related</div>
+            <div class="ep-bullet" style="color:#04BEFE;">→ Why Vercel won deploys (TC)</div>
+            <div class="ep-bullet" style="color:#04BEFE;">→ Replit's pivot to agents</div>
+          </div>
+        </div>
+      </div>
+      <div class="ext-newtab" id="ext-newtab">
+        <button class="nt-close" onclick="closeNewTab()" aria-label="Close new tab">×</button>
+      </div>
+    </div>
   </div>
 
-  <div class="demo-bar">
+  <!-- ===== BOT DOOR — Telegram phone ===== -->
+  <div class="door-surface hidden" id="surface-bot">
+    <div class="bot-window">
+      <div class="bot-phone">
+        <div class="bot-screen">
+          <div class="bot-notch"></div>
+          <div class="bot-header">
+            <span class="back">←</span>
+            <span class="avatar">D</span>
+            <div class="meta">
+              <div class="name">DocBot</div>
+              <div class="status">@docbot · online</div>
+            </div>
+          </div>
+          <div class="bot-chat" id="bot-chat">
+            <div class="bot-bubble user">How do I deploy a Python app?</div>
+            <div class="bot-bubble bot">Railway and Fly.io are both solid options.</div>
+          </div>
+          <div class="bot-composer">
+            <div class="bc-input">Message…</div>
+            <span class="bc-send">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Per-door trigger wedge — swaps with active door ===== -->
+  <div class="demo-bar" id="demo-bar">
     <div class="demo-label">
       <span style="width:16px;height:16px;border-radius:4px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
-      Boost Boss SDK
+      <span id="demo-label-text">Boost Boss SDK</span>
     </div>
-    <button class="demo-btn primary" onclick="BoostBoss.trigger('corner','image')">Corner unit</button>
-    <button class="demo-btn" onclick="insertNativeAd()">Inline card</button>
-    <button class="demo-btn ai-native" onclick="insertCitation()">Sponsored citation</button>
-    <button class="demo-btn ai-native" onclick="insertToolRec()">Tool / skill rec</button>
-    <button class="demo-btn ai-native" onclick="insertChip()">Suggested chip</button>
+    <div id="demo-triggers" style="display:flex; gap:8px; flex-wrap:wrap; flex:1;"></div>
     <button class="demo-btn benna" id="bennaToggle" onclick="toggleBennaInspector()">▲ Benna</button>
   </div>
 </div>
@@ -1360,110 +2003,365 @@ window.BoostBoss = (() => {
   };
 })();
 
+/* ───────────────────────────────────────────────────────────
+   DOOR STATE — drives which surface is visible and which
+   triggers render in the wedge. Web is the default.
+─────────────────────────────────────────────────────────── */
+let activeDoor = 'web';
+
+const DOOR_META = {
+  mcp: { label: 'Lumi MCP', surfaceId: 'surface-mcp', title: 'Claude Desktop',  subtitle: 'MCP host · sponsored tool result' },
+  web: { label: 'Web',      surfaceId: 'surface-web', title: 'SampleAI Chat',   subtitle: "Developer's AI App — Llama 4" },
+  ext: { label: 'Extension',surfaceId: 'surface-ext', title: 'Article AI',      subtitle: 'Chrome extension · side-panel summarizer' },
+  bot: { label: 'Bot',      surfaceId: 'surface-bot', title: 'DocBot',          subtitle: 'Telegram bot · @docbot' },
+};
+
+// Per-door trigger config — buttons swap with the active door.
+const DOOR_TRIGGERS = {
+  mcp: [
+    { label: 'Inline card',        cls: 'primary',   fn: 'insertNativeAd' },
+    { label: 'Sponsored citation', cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Tool / skill rec',   cls: 'ai-native', fn: 'insertToolRec' },
+  ],
+  web: [
+    { label: 'Corner unit',        cls: 'primary',   fn: "BoostBoss.trigger('corner','image')" },
+    { label: 'Inline card',        cls: '',          fn: 'insertNativeAd' },
+    { label: 'Loading state',      cls: '',          fn: 'insertLoadingState' },
+    { label: 'Sponsored citation', cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Suggested chip',     cls: 'ai-native', fn: 'insertChip' },
+  ],
+  ext: [
+    { label: 'Corner unit',        cls: 'primary',   fn: "BoostBoss.trigger('corner','image')" },
+    { label: 'New-tab takeover',   cls: '',          fn: 'insertNewTab' },
+    { label: 'Sponsored citation', cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Tool / skill rec',   cls: 'ai-native', fn: 'insertToolRec' },
+  ],
+  bot: [
+    { label: 'Inline card',         cls: 'primary',   fn: 'insertNativeAd' },
+    { label: 'Sponsored welcome',   cls: '',          fn: 'insertBotWelcome' },
+    { label: 'Suggested actions',   cls: 'ai-native', fn: 'insertChip' },
+    { label: 'Tool / skill rec',    cls: 'ai-native', fn: 'insertToolRec' },
+  ],
+};
+
+function setActiveDoor(door) {
+  if (!DOOR_META[door]) return;
+  activeDoor = door;
+  // Surface visibility
+  Object.keys(DOOR_META).forEach(k => {
+    const el = document.getElementById(DOOR_META[k].surfaceId);
+    if (el) el.classList.toggle('hidden', k !== door);
+  });
+  // Tab visual state
+  document.querySelectorAll('.door-tab').forEach(t => {
+    const on = t.getAttribute('data-door') === door;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  // Header label updates so the chrome reads true to the door
+  document.getElementById('app-title').textContent = DOOR_META[door].title;
+  document.getElementById('app-subtitle').textContent = DOOR_META[door].subtitle;
+  // Re-render the wedge
+  renderTriggerWedge();
+  // Close any open new-tab takeover when leaving Extension
+  if (door !== 'ext') closeNewTab();
+}
+
+function renderTriggerWedge() {
+  const wrap = document.getElementById('demo-triggers');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  DOOR_TRIGGERS[activeDoor].forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'demo-btn' + (t.cls ? ' ' + t.cls : '');
+    b.textContent = t.label;
+    // fn may be either a bare identifier (call without args) or an expression.
+    b.setAttribute('onclick', /[(.\s]/.test(t.fn) ? t.fn : t.fn + '()');
+    wrap.appendChild(b);
+  });
+}
+
+/* ───────────────────────────────────────────────────────────
+   Renderer routing — pick the right target node per door.
+─────────────────────────────────────────────────────────── */
+function getRenderTarget() {
+  if (activeDoor === 'mcp') return document.getElementById('mcp-toolresult');
+  if (activeDoor === 'ext') return document.getElementById('ext-panel-body');
+  if (activeDoor === 'bot') return document.getElementById('bot-chat');
+  return document.getElementById('chat');
+}
+
+function scrollTargetToBottom() {
+  // Each door has its own scroll container.
+  const map = {
+    web: document.getElementById('chat'),
+    mcp: document.querySelector('.mcp-window'),
+    ext: document.getElementById('ext-panel-body'),
+    bot: document.querySelector('.bot-chat'),
+  };
+  const el = map[activeDoor];
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+/* ───────────────────────────────────────────────────────────
+   Renderers — generalized to route by activeDoor.
+   Existing function names preserved (insertNativeAd, insertCitation,
+   insertToolRec, insertChip). New: insertLoadingState, insertNewTab,
+   insertBotWelcome.
+─────────────────────────────────────────────────────────── */
 function insertNativeAd() {
-  const chat = document.getElementById("chat");
   const ads = [
     { title: "Supercharge your workflow with Notion AI", desc: "Take notes, manage projects, and let AI do the heavy lifting. Free for personal use.", cta: "Try Notion Free →", url: "https://notion.so" },
     { title: "Ship 10x faster with Cursor AI", desc: "The AI-first code editor trusted by 1M+ developers. Works with any language.", cta: "Download Cursor →", url: "https://cursor.com" },
     { title: "Deploy your app in 30 seconds", desc: "Vercel — the platform for frontend developers. Git push, instant deploy.", cta: "Start Deploying →", url: "https://vercel.com" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
+  const target = getRenderTarget();
 
-  chat.innerHTML += `
-    <div class="msg ai">
-      <div class="msg-avatar">AI</div>
-      <div class="msg-bubble">
-        Here's another thought on your project...
-        <div class="bb-native-ad">
-          <div class="bb-na-label">
-            <span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
-            Sponsored · Boost Boss
+  if (activeDoor === 'mcp') {
+    target.insertAdjacentHTML('beforeend', `
+      <div class="mcp-sponsored">
+        <div class="ms-label">SPONSORED · paid for by ${ad.title.split(' ')[0]}</div>
+        <div class="ms-body">
+          <div class="ms-logo">▲</div>
+          <div>
+            <div class="ms-title">${ad.title}</div>
+            <div class="ms-desc">${ad.desc}</div>
           </div>
-          <div class="bb-na-title">${ad.title}</div>
-          <div class="bb-na-desc">${ad.desc}</div>
-          <a class="bb-na-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+          <a class="ms-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
         </div>
-      </div>
-    </div>`;
-  chat.scrollTop = chat.scrollHeight;
-  BoostBoss.trackEvent("native_impression", { id: "native_" + Date.now(), advertiser: ad.title.split(" ")[0] });
+      </div>`);
+  } else if (activeDoor === 'bot') {
+    target.insertAdjacentHTML('beforeend', `
+      <div class="bot-sponsored">
+        <div class="bs-banner">▲ ${ad.title.split(' ')[0]}</div>
+        <div class="bs-body">
+          <div class="bs-label">SPONSORED · ${ad.title.split(' ')[0]}</div>
+          <div class="bs-title">${ad.title}</div>
+          <div class="bs-desc">${ad.desc}</div>
+          <a class="bs-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+        </div>
+      </div>`);
+  } else if (activeDoor === 'ext') {
+    target.insertAdjacentHTML('beforeend', `
+      <div class="ext-sponsored">
+        <div class="es-label">SPONSORED · paid for by ${ad.title.split(' ')[0]}</div>
+        <div class="es-body">
+          <div class="es-logo">▲</div>
+          <div>
+            <div class="es-title">${ad.title}</div>
+            <div class="es-desc">${ad.desc}</div>
+            <a class="es-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+          </div>
+        </div>
+      </div>`);
+  } else {
+    target.insertAdjacentHTML('beforeend', `
+      <div class="msg ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">
+          Here's another thought on your project...
+          <div class="bb-native-ad">
+            <div class="bb-na-label">
+              <span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
+              Sponsored · Boost Boss
+            </div>
+            <div class="bb-na-title">${ad.title}</div>
+            <div class="bb-na-desc">${ad.desc}</div>
+            <a class="bb-na-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+          </div>
+        </div>
+      </div>`);
+  }
+  scrollTargetToBottom();
+  BoostBoss.trackEvent("native_impression", { id: "native_" + Date.now(), advertiser: ad.title.split(" ")[0], door: activeDoor });
 }
 
-/* ── Sponsored citation — text-native, woven into an AI answer ── */
+/* ── Sponsored citation — woven into the active surface ── */
 function insertCitation() {
-  const chat = document.getElementById("chat");
   const ads = [
     { title: "Notion AI — note-taking that thinks with you", cta: "Try Notion →", url: "https://notion.so" },
     { title: "Vercel — deploy in seconds, scale forever", cta: "Try free →", url: "https://vercel.com" },
     { title: "Cursor — the AI-first code editor", cta: "Download →", url: "https://cursor.com" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
-  chat.innerHTML += `
-    <div class="msg ai">
-      <div class="msg-avatar">AI</div>
-      <div class="msg-bubble">
-        Based on what you're describing, this tool fits the bill:
-        <div class="bb-citation">
-          <span class="bb-cite-num">1</span>
-          <span class="bb-cite-spons">SPONSORED</span>
-          <span class="bb-cite-text">${ad.title}</span>
-          <a class="bb-cite-link" href="${ad.url}" target="_blank">${ad.cta}</a>
-        </div>
-      </div>
+  const target = getRenderTarget();
+  const citation = `
+    <div class="bb-citation">
+      <span class="bb-cite-num">1</span>
+      <span class="bb-cite-spons">SPONSORED</span>
+      <span class="bb-cite-text">${ad.title}</span>
+      <a class="bb-cite-link" href="${ad.url}" target="_blank">${ad.cta}</a>
     </div>`;
-  chat.scrollTop = chat.scrollHeight;
-  BoostBoss.trackEvent("citation_impression", { id: "citation_" + Date.now(), advertiser: ad.title.split(" ")[0] });
+
+  if (activeDoor === 'mcp' || activeDoor === 'ext') {
+    target.insertAdjacentHTML('beforeend', citation);
+  } else if (activeDoor === 'bot') {
+    target.insertAdjacentHTML('beforeend',
+      `<div class="bot-bubble bot" style="max-width:92%;padding:6px 8px;">${citation}</div>`);
+  } else {
+    target.insertAdjacentHTML('beforeend', `
+      <div class="msg ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">
+          Based on what you're describing, this tool fits the bill:
+          ${citation}
+        </div>
+      </div>`);
+  }
+  scrollTargetToBottom();
+  BoostBoss.trackEvent("citation_impression", { id: "citation_" + Date.now(), advertiser: ad.title.split(" ")[0], door: activeDoor });
 }
 
-/* ── Tool / skill rec — "you might also try" recommendation panel ── */
+/* ── Tool / skill rec — "you might also try" panel ── */
 function insertToolRec() {
-  const chat = document.getElementById("chat");
   const ads = [
     { title: "Stripe — payments without the headache", desc: "Drop-in checkout, subscriptions, global tax. Free until you scale.", cta: "Get started →", url: "https://stripe.com" },
     { title: "Linear — the issue tracker built for speed", desc: "Keyboard-first, no clutter. Plans your team will actually use.", cta: "Try Linear →", url: "https://linear.app" },
     { title: "Supabase — open-source Firebase alternative", desc: "Postgres, auth, storage, edge functions. Generous free tier.", cta: "Sign up →", url: "https://supabase.com" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
-  chat.innerHTML += `
-    <div class="msg ai">
-      <div class="msg-avatar">AI</div>
-      <div class="msg-bubble">
-        You might also try this — it slots into the same workflow:
-        <div class="bb-toolrec">
-          <span class="bb-tr-spons">Sponsored · you might also try</span>
-          <div class="bb-tr-title">${ad.title}</div>
-          <div class="bb-tr-desc">${ad.desc}</div>
-          <a class="bb-tr-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
-        </div>
-      </div>
+  const target = getRenderTarget();
+  const rec = `
+    <div class="bb-toolrec">
+      <span class="bb-tr-spons">Sponsored · you might also try</span>
+      <div class="bb-tr-title">${ad.title}</div>
+      <div class="bb-tr-desc">${ad.desc}</div>
+      <a class="bb-tr-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
     </div>`;
-  chat.scrollTop = chat.scrollHeight;
-  BoostBoss.trackEvent("toolrec_impression", { id: "toolrec_" + Date.now(), advertiser: ad.title.split(" ")[0] });
+
+  if (activeDoor === 'mcp' || activeDoor === 'ext') {
+    target.insertAdjacentHTML('beforeend', rec);
+  } else if (activeDoor === 'bot') {
+    target.insertAdjacentHTML('beforeend',
+      `<div class="bot-bubble bot" style="max-width:92%;padding:6px 8px;">${rec}</div>`);
+  } else {
+    target.insertAdjacentHTML('beforeend', `
+      <div class="msg ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">
+          You might also try this — it slots into the same workflow:
+          ${rec}
+        </div>
+      </div>`);
+  }
+  scrollTargetToBottom();
+  BoostBoss.trackEvent("toolrec_impression", { id: "toolrec_" + Date.now(), advertiser: ad.title.split(" ")[0], door: activeDoor });
 }
 
-/* ── Suggested-action chip — quick-reply pills, one is sponsored ── */
+/* ── Suggested-action chip / Bot inline-keyboard ── */
 function insertChip() {
-  const chat = document.getElementById("chat");
   const ads = [
-    { label: "Try Framer free", url: "https://framer.com", brand: "Framer" },
-    { label: "Open Cursor →", url: "https://cursor.com", brand: "Cursor" },
-    { label: "Spin up a Vercel project", url: "https://vercel.com", brand: "Vercel" },
+    { label: "Try Framer free",           url: "https://framer.com", brand: "Framer" },
+    { label: "Open Cursor →",             url: "https://cursor.com", brand: "Cursor" },
+    { label: "Spin up a Vercel project",  url: "https://vercel.com", brand: "Vercel" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
-  chat.innerHTML += `
+  const target = getRenderTarget();
+
+  if (activeDoor === 'bot') {
+    // Bot inline-keyboard style: stacked buttons under the last reply.
+    target.insertAdjacentHTML('beforeend', `
+      <div class="bot-actions">
+        <span class="ba-btn">Tell me more</span>
+        <a class="ba-btn sponsored" href="${ad.url}" target="_blank">${ad.label}</a>
+        <span class="ba-btn">Show example</span>
+      </div>`);
+  } else {
+    const chipRow = `
+      <div class="bb-chip-row">
+        <span class="bb-chip">Tell me more</span>
+        <a class="bb-chip sponsored" href="${ad.url}" target="_blank">${ad.label}</a>
+        <span class="bb-chip">Show example</span>
+      </div>`;
+    if (activeDoor === 'mcp' || activeDoor === 'ext') {
+      target.insertAdjacentHTML('beforeend', chipRow);
+    } else {
+      target.insertAdjacentHTML('beforeend', `
+        <div class="msg ai">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble">
+            Want to take this further? Pick one:
+            ${chipRow}
+          </div>
+        </div>`);
+    }
+  }
+  scrollTargetToBottom();
+  BoostBoss.trackEvent("chip_impression", { id: "chip_" + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+/* ── Loading-state shimmer (Web door) ── */
+function insertLoadingState() {
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
     <div class="msg ai">
       <div class="msg-avatar">AI</div>
       <div class="msg-bubble">
-        Want to take this further? Pick one:
-        <div class="bb-chip-row">
-          <span class="bb-chip">Tell me more</span>
-          <a class="bb-chip sponsored" href="${ad.url}" target="_blank">${ad.label}</a>
-          <span class="bb-chip">Show example</span>
+        Looking that up for you…
+        <div class="bb-loading-card">
+          <div class="bl-label">Sponsored · loading</div>
+          <div class="bl-shimmer"></div>
+          <div class="bl-shimmer"></div>
+          <div class="bl-shimmer"></div>
         </div>
       </div>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent("loading_impression", { id: "loading_" + Date.now(), advertiser: "shimmer", door: activeDoor });
+}
+
+/* ── Extension new-tab takeover (full-surface card inside ext-window) ── */
+function insertNewTab() {
+  const ads = [
+    { title: "Vercel — Deploy in seconds. Scale forever.", desc: "Free hobby plan · Auto-deploy from GitHub · Global edge.", cta: "Try Vercel Free", url: "https://vercel.com", brand: "Vercel" },
+    { title: "Linear — built for product teams that move fast.", desc: "Keyboard-first issue tracking with zero clutter.",          cta: "Try Linear",        url: "https://linear.app", brand: "Linear" },
+    { title: "Notion — your wiki, docs, and projects in one.",   desc: "Free for personal use. AI-powered search built in.",       cta: "Get Notion Free",   url: "https://notion.so", brand: "Notion" },
+  ];
+  const ad = ads[Math.floor(Math.random() * ads.length)];
+  const host = document.getElementById('ext-newtab');
+  if (!host) return;
+  host.innerHTML = `
+    <button class="nt-close" onclick="closeNewTab()" aria-label="Close new tab">×</button>
+    <div class="nt-greet">New tab</div>
+    <div class="nt-sub">Sponsored content opens here when you open a fresh tab.</div>
+    <div class="nt-search">🔍 Search the web…</div>
+    <div class="nt-card">
+      <div class="nt-label">SPONSORED · paid for by ${ad.brand}</div>
+      <div class="nt-title">${ad.title}</div>
+      <div class="nt-desc">${ad.desc}</div>
+      <a class="nt-cta" href="${ad.url}" target="_blank">${ad.cta} →</a>
     </div>`;
-  chat.scrollTop = chat.scrollHeight;
-  BoostBoss.trackEvent("chip_impression", { id: "chip_" + Date.now(), advertiser: ad.brand });
+  host.classList.add('on');
+  BoostBoss.trackEvent("newtab_impression", { id: "newtab_" + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+function closeNewTab() {
+  const host = document.getElementById('ext-newtab');
+  if (host) host.classList.remove('on');
+}
+
+/* ── Bot sponsored-welcome (first-touch bot greeting with ad) ── */
+function insertBotWelcome() {
+  const ads = [
+    { brand: "Vercel",  title: "Deploy in seconds. Scale forever.", desc: "Free hobby plan, git-push to deploy, global edge.", cta: "Try Free",       url: "https://vercel.com" },
+    { brand: "Linear",  title: "Issue tracking built for speed.",   desc: "Keyboard-first, no clutter. Free for small teams.", cta: "Try Linear",     url: "https://linear.app" },
+    { brand: "Supabase",title: "Open-source Firebase alternative.", desc: "Postgres, auth, storage, edge functions.",          cta: "Sign up free",   url: "https://supabase.com" },
+  ];
+  const ad = ads[Math.floor(Math.random() * ads.length)];
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bot-bubble bot">👋 Welcome! Quick tip while we get started — our sponsor today:</div>
+    <div class="bot-sponsored">
+      <div class="bs-banner">▲ ${ad.brand}</div>
+      <div class="bs-body">
+        <div class="bs-label">SPONSORED · ${ad.brand}</div>
+        <div class="bs-title">${ad.title}</div>
+        <div class="bs-desc">${ad.desc}</div>
+        <a class="bs-cta" href="${ad.url}" target="_blank">${ad.cta} →</a>
+      </div>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent("welcome_impression", { id: "welcome_" + Date.now(), advertiser: ad.brand, door: activeDoor });
 }
 
 function sendMsg() {
@@ -1493,6 +2391,9 @@ function sendMsg() {
 document.getElementById("msg-input").addEventListener("keydown", e => {
   if (e.key === "Enter") sendMsg();
 });
+
+// Bootstrap the wedge with the default (Web) door triggers.
+renderTriggerWedge();
 </script>
 <footer>
   <div class="wrap">
