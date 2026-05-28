@@ -1466,7 +1466,9 @@ function renderAuctionDetail(j) {
 // ── Detect modes ──
 async function detectModes() {
   try {
-    const r = await fetch(API + "/api/auth?action=demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: '{"role":"advertiser"}' });
+    // ?action=me with no token returns 401 + x-auth-mode header — works
+    // as a lightweight mode probe now that ?action=demo is gone.
+    const r = await fetch(API + "/api/auth?action=me", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     document.getElementById("auth-mode-badge").textContent = r.headers.get("x-auth-mode") || "unknown";
   } catch(e) {}
   try {

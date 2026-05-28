@@ -267,7 +267,13 @@ function startRefreshBar() {
     { name: "Benna AI",       desc: "ML inference & bid optimization",    endpoint: "/api/benna?op=engine-status",       check: r => r.status === "optimizing" },
     { name: "SuperBoost API", desc: "Campaign management & creatives",    endpoint: "/api/campaigns?status=active",      check: r => Array.isArray(r.campaigns) },
     { name: "Lumi SDK (MCP)", desc: "Publisher SDK MCP server",           endpoint: "/api/mcp",                          method: "POST", body: { method: "initialize", id: 1 }, check: r => r.result && r.result.protocolVersion },
-    { name: "Auth Service",   desc: "Authentication & session management",endpoint: "/api/auth?action=demo",             method: "POST", body: { role: "advertiser" }, check: r => r.session && r.session.access_token },
+    // Health probe for /api/auth — the demo endpoint was removed
+    // 2026-05-28, so we ping ?action=me with no token. The handler
+    // returns a structured 401, which is enough to confirm the service
+    // is alive (it's still routing, parsing the JSON body, and setting
+    // x-auth-mode). `okOn401: true` tells checkService to count 401 as
+    // a passing probe.
+    { name: "Auth Service",   desc: "Authentication & session management",endpoint: "/api/auth?action=me",               method: "POST", body: {},                        okOn401: true, check: () => true },
     { name: "Billing API",    desc: "Stripe billing & payouts",           endpoint: "/api/billing?action=balance&id=status_probe", check: r => typeof r.balance === "number" },
     { name: "Event Tracking", desc: "Impression, click & conversion pixel",endpoint: "/api/track",                       method: "POST", body: { event: "impression", campaign_id: "status_probe", session_id: "status" }, check: r => r.tracked === true },
     { name: "Stats & Reporting",desc: "Analytics aggregation & dashboards",endpoint: "/api/stats?type=advertiser&id=status_probe", check: r => r.daily && Array.isArray(r.daily) },
@@ -287,8 +293,13 @@ function startRefreshBar() {
       if (svc.body) { opts.headers = { "Content-Type": "application/json" }; opts.body = JSON.stringify(svc.body); }
       const res = await fetch(BASE + svc.endpoint, opts);
       const latency = Math.round(performance.now() - start);
-      if (!res.ok) return { ...svc, status: "down", latency, uptime: "—" };
-      const data = await res.json();
+      // `okOn401` lets a service opt in to treating a 401 as a passing
+      // probe — useful for /api/auth?action=me, which is the cheapest
+      // liveness check now that demo signup is gone.
+      if (!res.ok && !(svc.okOn401 && res.status === 401)) {
+        return { ...svc, status: "down", latency, uptime: "—" };
+      }
+      const data = res.status === 401 ? {} : await res.json();
       const ok = svc.check(data);
       return { ...svc, status: ok ? "ok" : "degraded", latency, uptime: "99.98%", mode: res.headers.get("x-auth-mode") || res.headers.get("x-billing-mode") || res.headers.get("x-mcp-mode") || res.headers.get("x-track-mode") || "" };
     } catch (e) {

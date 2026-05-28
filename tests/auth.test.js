@@ -50,8 +50,11 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 200);
   });
 
-  await test("x-auth-mode header set to 'demo'", async () => {
-    const r = await run({ method: "POST", query: { action: "demo" }, body: { role: "advertiser" } });
+  await test("x-auth-mode header set to 'demo' when running without Supabase", async () => {
+    // x-auth-mode reflects which backend handler the request hits, not
+    // whether the user-facing demo button exists. It's still 'demo' in
+    // local dev / CI because Supabase isn't configured there.
+    const r = await run({ method: "POST", query: { action: "signup" }, body: { email: "header@test.com", password: "hunter2!", role: "advertiser" } });
     assert.strictEqual(r._headers["x-auth-mode"], "demo");
   });
 
@@ -60,22 +63,14 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 400);
   });
 
-  // ── DEMO QUICK-START ─────────────────────────────────────────────
-  await test("demo action creates an advertiser by default", async () => {
-    const r = await run({ method: "POST", query: { action: "demo" }, body: {} });
-    assert.strictEqual(r._status, 200);
-    assert.strictEqual(r._body.user.role, "advertiser");
-    assert.ok(r._body.session.access_token);
-    assert.ok(r._body.profile.company_name);
-    assert.ok(r._body.profile.api_key.startsWith("bb_adv_live_"));
-  });
-
-  await test("demo action with role=developer creates a developer", async () => {
-    const r = await run({ method: "POST", query: { action: "demo" }, body: { role: "developer" } });
-    assert.strictEqual(r._body.user.role, "developer");
-    assert.ok(r._body.profile.app_name);
-    assert.ok(r._body.profile.api_key.startsWith("bb_dev_live_"));
-    assert.ok(r._body.profile.fill_rate >= 0 && r._body.profile.fill_rate <= 1);
+  // ── DEMO ACTION REMOVED 2026-05-28 ───────────────────────────────
+  // The "Try the demo" buttons were dropped from the dashboards + signup
+  // pages, so the action=demo quick-start endpoint that backed them is
+  // gone too. Confirm it's now an unknown action.
+  await test("demo action is no longer available (returns 400)", async () => {
+    const r = await run({ method: "POST", query: { action: "demo" }, body: { role: "advertiser" } });
+    assert.strictEqual(r._status, 400);
+    assert.ok(/unknown action/i.test(r._body.error || ""));
   });
 
   // ── SIGNUP / LOGIN / ME ROUNDTRIP ────────────────────────────────

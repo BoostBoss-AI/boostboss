@@ -52,11 +52,15 @@ function assert(cond, msg) { if (!cond) throw new Error(msg); }
   }
 
   // ── Auth API ──
-  await check("POST /api/auth?action=demo returns a session", async () => {
-    const r = await fetch(BASE + "/api/auth?action=demo", {
+  // action=demo was removed 2026-05-28; signup is now the smoke-test
+  // path. Uses a one-off email per run so we're not stuck if the
+  // address is already registered.
+  await check("POST /api/auth?action=signup returns a session", async () => {
+    const email = `verify-${Date.now().toString(36)}@boostboss.test`;
+    const r = await fetch(BASE + "/api/auth?action=signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "advertiser" }),
+      body: JSON.stringify({ email, password: "verify-deploy-pw-1!", role: "advertiser", company_name: "Verify Co." }),
     });
     assert(r.ok, `status ${r.status}`);
     const j = await r.json();
@@ -109,11 +113,13 @@ function assert(cond, msg) { if (!cond) throw new Error(msg); }
   });
 
   // ── Auth mode header ──
+  // Use ?action=me with no token — the handler still sets the
+  // x-auth-mode header on every response, even the 401.
   await check("x-auth-mode header is present on auth endpoint", async () => {
-    const r = await fetch(BASE + "/api/auth?action=demo", {
+    const r = await fetch(BASE + "/api/auth?action=me", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "advertiser" }),
+      body: "{}",
     });
     const mode = r.headers.get("x-auth-mode");
     assert(mode === "demo" || mode === "supabase", `unexpected x-auth-mode: ${mode}`);

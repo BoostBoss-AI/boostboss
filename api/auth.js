@@ -3,17 +3,21 @@
  *
  * Two execution modes:
  *  • PRODUCTION  — Supabase (when SUPABASE_URL + SUPABASE_ANON_KEY are set)
- *  • DEMO        — in-process HMAC-signed JWTs (zero external deps, perfect
- *                  for live demos, the BBX sandbox, and CI environments)
+ *  • IN-MEMORY   — HMAC-signed JWTs against an in-process user map. Used
+ *                  for local dev, CI, and the BBX sandbox where there is
+ *                  no Supabase configured. NOT a user-facing "demo mode".
  *
  * Both modes expose the same interface so the front-end never has to branch.
  *
  *   POST /api/auth?action=signup      { email, password, role, company_name?, app_name? }
  *   POST /api/auth?action=login       { email, password }
- *   POST /api/auth?action=demo        { role }                  ← demo only
  *   POST /api/auth?action=oauth_sync  { role }  Authorization: Bearer <supabase-oauth-token>
  *   POST /api/auth?action=me          Authorization: Bearer <token>
  *   POST /api/auth?action=logout      Authorization: Bearer <token>
+ *
+ * The legacy `action=demo` quick-start endpoint was removed 2026-05-28
+ * when the "Try the demo" buttons were dropped from the dashboards and
+ * signup pages — no live demo accounts are offered any more.
  */
 
 const crypto = require("crypto");
@@ -150,26 +154,12 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// ────────────────────── DEMO IMPLEMENTATION ─────────────────────────
+// ──────────────── IN-MEMORY MODE IMPLEMENTATION ─────────────────────
+// Runs when Supabase isn't configured (local dev, CI, sandbox). Calls
+// itself "demo" in error responses for historical compat; this is not
+// the same as the user-facing "Try the demo" button (which was removed
+// 2026-05-28).
 function demoHandler(action, body, req, res) {
-  // Quick-start: no email/password required, synthesize a fresh account.
-  // This is what the "Try the demo" button on the dashboards calls.
-  if (action === "demo") {
-    const role = body.role === "developer" ? "developer" : "advertiser";
-    const ts = Date.now().toString(36) + crypto.randomBytes(3).toString("hex");
-    const email = `demo-${ts}@boostboss.ai`;
-    const company_name = role === "advertiser" ? "Demo Co." : undefined;
-    const app_name = role === "developer" ? "Demo MCP App" : undefined;
-    const user = demoUpsert(email, role, { company_name, app_name });
-    return res.json({
-      success: true,
-      mode: "demo",
-      user: { id: user.id, email: user.email, role: user.role },
-      profile: user.profile,
-      session: { access_token: tokenFor(user), expires_in: TOKEN_TTL_SEC, token_type: "Bearer" },
-    });
-  }
-
   if (action === "signup") {
     const { email, password, role, company_name, app_name } = body;
     if (!email || !password || !role) return res.status(400).json({ error: "Missing email, password, or role" });
@@ -296,11 +286,11 @@ function demoHandler(action, body, req, res) {
   }
 
   if (action === "oauth_sync") {
-    // Demo mode has no Supabase; OAuth isn't available here.
-    return res.status(501).json({ error: "Google sign-in requires Supabase — demo mode doesn't support OAuth. Use email + password or try the demo." });
+    // No Supabase configured; OAuth isn't available here.
+    return res.status(501).json({ error: "Google sign-in requires Supabase — this deployment isn't configured for OAuth. Use email + password." });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_placements" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements" });
 }
 
 // ─────────────────── SUPABASE IMPLEMENTATION ────────────────────────
@@ -313,16 +303,9 @@ async function supabaseHandler(action, body, req, res) {
   const supabaseAdmin = createClient(process.env.SUPABASE_URL, serviceKey);
   const supabaseAnon = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
-  if (action === "demo") {
-    // Even in production, allow a one-click demo path that creates a real account.
-    const role = body.role === "developer" ? "developer" : "advertiser";
-    const email = `demo-${Date.now().toString(36)}@boostboss.demo`;
-    const password = crypto.randomBytes(16).toString("hex");
-    body.email = email; body.password = password; body.role = role;
-    body.company_name = role === "advertiser" ? "Demo Co." : undefined;
-    body.app_name = role === "developer" ? "Demo MCP App" : undefined;
-    return signupSupabase(supabaseAdmin, supabaseAnon, body, res);
-  }
+  // The `action === "demo"` quick-start branch was removed 2026-05-28.
+  // The dashboards no longer expose a "Try the demo" button, so there's
+  // no caller for it — users go through normal signup or OAuth.
 
   if (action === "signup") return signupSupabase(supabaseAdmin, supabaseAnon, body, res);
 
@@ -632,7 +615,7 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ success: true, mode: "supabase" });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
