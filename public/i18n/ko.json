@@ -3,7 +3,13 @@
     "publishers": "퍼블리셔",
     "bbx": "BBX",
     "live_demo": "라이브 데모 ↗",
-    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>",
+    "publisher_mcp": "MCP 서버 개발자",
+    "publisher_ai_apps": "AI 앱 빌더",
+    "publisher_extensions": "브라우저 확장 개발자",
+    "publisher_bots": "AI 봇 개발자",
+    "publisher_no_code": "Custom GPT 및 노코드 작성자",
+    "publisher_overview": "모든 퍼블리셔 · 개요 →"
   },
   "hero": {
     "badge": "Model Context Protocol에서 가동 중",

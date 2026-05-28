@@ -3,7 +3,13 @@
     "publishers": "Nhà phát hành",
     "bbx": "BBX",
     "live_demo": "Dùng thử trực tiếp ↗",
-    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>",
+    "publisher_mcp": "Nhà phát triển MCP Server",
+    "publisher_ai_apps": "Người dựng ứng dụng AI",
+    "publisher_extensions": "Nhà phát triển extension trình duyệt",
+    "publisher_bots": "Nhà phát triển bot AI",
+    "publisher_no_code": "Tác giả Custom GPT & no-code",
+    "publisher_overview": "Tất cả publisher · tổng quan →"
   },
   "hero": {
     "badge": "Đã chạy trên Model Context Protocol",

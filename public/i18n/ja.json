@@ -3,7 +3,13 @@
     "publishers": "パブリッシャー",
     "bbx": "BBX",
     "live_demo": "ライブデモ ↗",
-    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>",
+    "publisher_mcp": "MCP サーバー開発者",
+    "publisher_ai_apps": "AI アプリ ビルダー",
+    "publisher_extensions": "ブラウザ拡張機能の開発者",
+    "publisher_bots": "AI ボット開発者",
+    "publisher_no_code": "カスタム GPT・ノーコード作者",
+    "publisher_overview": "すべてのパブリッシャー · 概要 →"
   },
   "hero": {
     "badge": "Model Context Protocol 対応で稼働中",

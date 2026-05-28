@@ -3,7 +3,13 @@
     "publishers": "Publishers",
     "bbx": "BBX",
     "live_demo": "Live Demo ↗",
-    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>",
+    "publisher_mcp": "MCP Server Developers",
+    "publisher_ai_apps": "AI App Builders",
+    "publisher_extensions": "Browser Extension Developers",
+    "publisher_bots": "AI Bot Developers",
+    "publisher_no_code": "Custom GPT & No-Code Authors",
+    "publisher_overview": "All publishers · overview →"
   },
   "hero": {
     "badge": "Now live on the Model Context Protocol",

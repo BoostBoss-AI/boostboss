@@ -3,7 +3,13 @@
     "publishers": "开发者",
     "bbx": "BBX",
     "live_demo": "在线演示 ↗",
-    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>",
+    "publisher_mcp": "MCP 服务端开发者",
+    "publisher_ai_apps": "AI 应用构建者",
+    "publisher_extensions": "浏览器扩展开发者",
+    "publisher_bots": "AI 机器人开发者",
+    "publisher_no_code": "Custom GPT 与无代码作者",
+    "publisher_overview": "所有发布商 · 总览 →"
   },
   "hero": {
     "badge": "基于 Model Context Protocol 已上线",
