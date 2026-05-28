@@ -26,9 +26,9 @@
   .app-shell {
     display: flex;
     flex-direction: column;
-    /* Relaxed from 100vh — needs to fit tab strip + surface + wedge.
-       min-height keeps the card filling the viewport on tall screens. */
-    min-height: 100vh;
+    /* Lock to viewport height so each door surface owns its own scroll
+       region instead of expanding the page as ads accumulate. */
+    height: 100vh;
     max-width: 840px;
     margin: 0 auto;
     width: 100%;
@@ -123,6 +123,11 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    /* Own the scroll inside the Claude Desktop window so inserted ads
+       don't push the page beyond viewport height. */
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
   .mcp-user-msg {
     align-self: flex-end;
