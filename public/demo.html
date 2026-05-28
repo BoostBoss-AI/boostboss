@@ -393,6 +393,67 @@
 
   .bb-native-ad .bb-na-cta:hover { opacity: 0.9; }
 
+  /* ─── AI-native placements (text-woven into the AI response) ────────── */
+  /* Sponsored citation — a small numbered reference line inline in the answer */
+  .bb-citation {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    margin: 8px 0;
+    padding: 8px 11px;
+    background: #FFF5F9; border: 1px solid #FFD3E4; border-radius: 8px;
+    font-size: 13px;
+  }
+  .bb-cite-num {
+    width: 18px; height: 18px; border-radius: 5px;
+    background: #FF2D78; color: #fff;
+    font-size: 10px; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .bb-cite-spons { font-size: 9px; font-weight: 800; color: #E01E65; letter-spacing: 0.5px; }
+  .bb-cite-text { color: #1A1A2E; font-weight: 600; flex: 1; min-width: 0; }
+  .bb-cite-link { color: #FF2D78; font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .bb-cite-link:hover { text-decoration: underline; }
+
+  /* Tool / skill rec — "you might also try" panel after the answer */
+  .bb-toolrec {
+    margin: 10px 0 4px;
+    padding: 12px 14px;
+    background: #FFF5F9; border: 1px solid #FFD3E4; border-radius: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .bb-tr-spons { font-size: 9px; font-weight: 800; color: #E01E65; letter-spacing: 0.5px; text-transform: uppercase; }
+  .bb-tr-title { font-size: 14px; font-weight: 700; color: #1A1A2E; }
+  .bb-tr-desc  { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
+  .bb-tr-cta {
+    align-self: flex-start;
+    background: #FF2D78; color: #fff; text-decoration: none;
+    font-size: 12px; font-weight: 700;
+    padding: 6px 13px; border-radius: 6px;
+    margin-top: 2px;
+  }
+  .bb-tr-cta:hover { opacity: 0.9; }
+
+  /* Suggested-action chip — a row of quick-reply pills, one is sponsored */
+  .bb-chip-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin: 10px 0 4px; }
+  .bb-chip {
+    font-size: 12px; padding: 7px 13px; border-radius: 14px;
+    background: #F3F4F6; color: #4B4B5E;
+    border: 1px solid transparent;
+  }
+  .bb-chip.sponsored {
+    background: #FF2D78; color: #fff;
+    text-decoration: none; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .bb-chip.sponsored::before {
+    content: 'BB'; font-size: 8px; font-weight: 900;
+    background: #fff; color: #FF2D78;
+    width: 14px; height: 14px; border-radius: 3px;
+    display: inline-flex; align-items: center; justify-content: center;
+    letter-spacing: -0.5px;
+  }
+  .bb-chip.sponsored:hover { background: #E01E65; }
+
   /* Demo bar */
   .demo-bar {
     background: #FFFFFF;
@@ -424,10 +485,9 @@
   .demo-btn:hover { background: #F3F4F6; border-color: #FF2D78; color: #FF2D78; }
   .demo-btn.primary { background: #FF2D78; border-color: transparent; color: #fff; }
   .demo-btn.primary:hover { opacity: 0.9; }
-  .demo-btn.vid { border-color: #04BEFE; color: #04BEFE; }
-  .demo-btn.vid:hover { background: #E0F2FE; color: #04BEFE; }
-  .demo-btn.native { border-color: #FFE600; color: #FFE600; }
-  .demo-btn.native:hover { background: #FFFACD; color: #FFE600; }
+  /* AI-native placements (citation / tool-rec / chip) — yellow accent */
+  .demo-btn.ai-native { border-color: #FFE600; color: #BA8B00; }
+  .demo-btn.ai-native:hover { background: #FFFACD; color: #856700; }
 
   /* ───────────── BENNA INSPECTOR PANEL ───────────── */
   .demo-btn.benna {
@@ -694,11 +754,11 @@
       <span style="width:16px;height:16px;border-radius:4px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
       Boost Boss SDK
     </div>
-    <button class="demo-btn primary" onclick="BoostBoss.trigger('corner','image')">Corner Image</button>
-    <button class="demo-btn" onclick="BoostBoss.trigger('fullscreen','image')">Full Image</button>
-    <button class="demo-btn vid" onclick="BoostBoss.trigger('corner','video')">Corner Video</button>
-    <button class="demo-btn vid" onclick="BoostBoss.trigger('fullscreen','video')">Full Video</button>
-    <button class="demo-btn native" onclick="insertNativeAd()">Native In-Chat</button>
+    <button class="demo-btn primary" onclick="BoostBoss.trigger('corner','image')">Corner unit</button>
+    <button class="demo-btn" onclick="insertNativeAd()">Inline card</button>
+    <button class="demo-btn ai-native" onclick="insertCitation()">Sponsored citation</button>
+    <button class="demo-btn ai-native" onclick="insertToolRec()">Tool / skill rec</button>
+    <button class="demo-btn ai-native" onclick="insertChip()">Suggested chip</button>
     <button class="demo-btn benna" id="bennaToggle" onclick="toggleBennaInspector()">▲ Benna</button>
   </div>
 </div>
@@ -1329,6 +1389,83 @@ function insertNativeAd() {
   BoostBoss.trackEvent("native_impression", { id: "native_" + Date.now(), advertiser: ad.title.split(" ")[0] });
 }
 
+/* ── Sponsored citation — text-native, woven into an AI answer ── */
+function insertCitation() {
+  const chat = document.getElementById("chat");
+  const ads = [
+    { title: "Notion AI — note-taking that thinks with you", cta: "Try Notion →", url: "https://notion.so" },
+    { title: "Vercel — deploy in seconds, scale forever", cta: "Try free →", url: "https://vercel.com" },
+    { title: "Cursor — the AI-first code editor", cta: "Download →", url: "https://cursor.com" },
+  ];
+  const ad = ads[Math.floor(Math.random() * ads.length)];
+  chat.innerHTML += `
+    <div class="msg ai">
+      <div class="msg-avatar">AI</div>
+      <div class="msg-bubble">
+        Based on what you're describing, this tool fits the bill:
+        <div class="bb-citation">
+          <span class="bb-cite-num">1</span>
+          <span class="bb-cite-spons">SPONSORED</span>
+          <span class="bb-cite-text">${ad.title}</span>
+          <a class="bb-cite-link" href="${ad.url}" target="_blank">${ad.cta}</a>
+        </div>
+      </div>
+    </div>`;
+  chat.scrollTop = chat.scrollHeight;
+  BoostBoss.trackEvent("citation_impression", { id: "citation_" + Date.now(), advertiser: ad.title.split(" ")[0] });
+}
+
+/* ── Tool / skill rec — "you might also try" recommendation panel ── */
+function insertToolRec() {
+  const chat = document.getElementById("chat");
+  const ads = [
+    { title: "Stripe — payments without the headache", desc: "Drop-in checkout, subscriptions, global tax. Free until you scale.", cta: "Get started →", url: "https://stripe.com" },
+    { title: "Linear — the issue tracker built for speed", desc: "Keyboard-first, no clutter. Plans your team will actually use.", cta: "Try Linear →", url: "https://linear.app" },
+    { title: "Supabase — open-source Firebase alternative", desc: "Postgres, auth, storage, edge functions. Generous free tier.", cta: "Sign up →", url: "https://supabase.com" },
+  ];
+  const ad = ads[Math.floor(Math.random() * ads.length)];
+  chat.innerHTML += `
+    <div class="msg ai">
+      <div class="msg-avatar">AI</div>
+      <div class="msg-bubble">
+        You might also try this — it slots into the same workflow:
+        <div class="bb-toolrec">
+          <span class="bb-tr-spons">Sponsored · you might also try</span>
+          <div class="bb-tr-title">${ad.title}</div>
+          <div class="bb-tr-desc">${ad.desc}</div>
+          <a class="bb-tr-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+        </div>
+      </div>
+    </div>`;
+  chat.scrollTop = chat.scrollHeight;
+  BoostBoss.trackEvent("toolrec_impression", { id: "toolrec_" + Date.now(), advertiser: ad.title.split(" ")[0] });
+}
+
+/* ── Suggested-action chip — quick-reply pills, one is sponsored ── */
+function insertChip() {
+  const chat = document.getElementById("chat");
+  const ads = [
+    { label: "Try Framer free", url: "https://framer.com", brand: "Framer" },
+    { label: "Open Cursor →", url: "https://cursor.com", brand: "Cursor" },
+    { label: "Spin up a Vercel project", url: "https://vercel.com", brand: "Vercel" },
+  ];
+  const ad = ads[Math.floor(Math.random() * ads.length)];
+  chat.innerHTML += `
+    <div class="msg ai">
+      <div class="msg-avatar">AI</div>
+      <div class="msg-bubble">
+        Want to take this further? Pick one:
+        <div class="bb-chip-row">
+          <span class="bb-chip">Tell me more</span>
+          <a class="bb-chip sponsored" href="${ad.url}" target="_blank">${ad.label}</a>
+          <span class="bb-chip">Show example</span>
+        </div>
+      </div>
+    </div>`;
+  chat.scrollTop = chat.scrollHeight;
+  BoostBoss.trackEvent("chip_impression", { id: "chip_" + Date.now(), advertiser: ad.brand });
+}
+
 function sendMsg() {
   const input = document.getElementById("msg-input");
   const text  = input.value.trim();
@@ -1347,8 +1484,9 @@ function sendMsg() {
       Here's what I'd suggest...<br><br>
       [AI response powered by developer's LLM]</div></div>`;
     chat.scrollTop = chat.scrollHeight;
-    // Auto-fire ad after AI response (contextual timing)
-    setTimeout(() => BoostBoss.trigger("corner", Math.random() > 0.5 ? "video" : "image"), 1200);
+    // Auto-fire a corner-unit ad after the AI response (contextual timing).
+    // Video isn't a Phase 1 placement, so we always render an image.
+    setTimeout(() => BoostBoss.trigger("corner", "image"), 1200);
   }, 1000);
 }
 
