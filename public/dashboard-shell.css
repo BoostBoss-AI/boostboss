@@ -447,6 +447,35 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+   Phase 2 — hash-route visibility
+   Routes are hidden by default; the wrapper's `data-shell-active-route`
+   attribute reveals just the matching one. JS sets the attribute from
+   window.location.hash (e.g. `#/performance` → "performance").
+
+   IMPORTANT — modals (deposit / add-rule / compare / settings / etc.)
+   must NOT live inside a [data-shell-route] wrapper, or they'll hide
+   along with the parent route. Modals are siblings of the route blocks.
+   ───────────────────────────────────────────────────────────────────── */
+[data-shell-route] {
+    display: none;
+}
+.shell-wrap[data-shell-active-route="home"]         [data-shell-route="home"],
+.shell-wrap[data-shell-active-route="performance"]  [data-shell-route="performance"],
+.shell-wrap[data-shell-active-route="campaigns"]    [data-shell-route="campaigns"],
+.shell-wrap[data-shell-active-route="billing"]      [data-shell-route="billing"],
+.shell-wrap[data-shell-active-route="setup"]        [data-shell-route="setup"],
+.shell-wrap[data-shell-active-route="integrations"] [data-shell-route="integrations"],
+.shell-wrap[data-shell-active-route="placements"]   [data-shell-route="placements"],
+.shell-wrap[data-shell-active-route="payouts"]      [data-shell-route="payouts"] {
+    display: block;
+}
+/* Onboarding banner / full-width announcements that should appear on
+   every route — add data-shell-route="any" to opt in. */
+.shell-wrap[data-shell-active-route] [data-shell-route="any"] {
+    display: block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
    Main content area
    ───────────────────────────────────────────────────────────────────── */
 .shell-main {

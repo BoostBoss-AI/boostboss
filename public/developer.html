@@ -1682,6 +1682,7 @@
            data-shell-layout="dashboard"
            data-shell-product="publisher"
            data-shell-sidebar="expanded"
+           data-shell-active-route="home"
            id="shellWrap">
 
         <!-- ─── Sidebar ─────────────────────────────────────────── -->
@@ -1777,6 +1778,10 @@
 
         <!-- Main Content (existing) -->
         <div class="container">
+
+            <!-- ═══════ ROUTE: home (page header + stats + revenue chart) ═══════ -->
+            <div data-shell-route="home">
+
             <!-- Page Header -->
             <div class="page-header" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
                 <h1 style="margin: 0;" data-t="dash.title">Publisher Dashboard</h1>
@@ -1833,6 +1838,11 @@
                     <!-- Dynamically populated -->
                 </div>
             </div>
+
+            </div><!-- /[data-shell-route="home"] -->
+
+            <!-- ═══════ ROUTE: performance (mediation / waterfall) ═══════ -->
+            <div data-shell-route="performance">
 
             <!-- Mediation / Waterfall — Lumi SDK equivalent -->
             <div class="section">
@@ -2025,6 +2035,11 @@
                     </div>
                 </div>
             </div>
+
+            </div><!-- /[data-shell-route="performance"] -->
+
+            <!-- ═══════ ROUTE: integrations (door cards + per-door code + verify + theme) ═══════ -->
+            <div data-shell-route="integrations">
 
             <!-- Integrations — unified section: state-aware cards as tab selectors + per-door install/code panels -->
             <div class="section integration-steps" id="integrationGuide">
@@ -2357,6 +2372,11 @@ await message.reply({
                 </div>
             </div>
 
+            </div><!-- /[data-shell-route="integrations"] -->
+
+            <!-- ═══════ ROUTE: placements (ad placements + API keys + per-slot table) ═══════ -->
+            <div data-shell-route="placements">
+
             <!-- Ad Placements — the door's placements, each a toggleable card -->
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
@@ -2424,7 +2444,11 @@ await message.reply({
                 </div>
             </div>
 
-            <!-- New Placement Modal -->
+            </div><!-- /[data-shell-route="placements"] -->
+
+            <!-- New Placement Modal — kept OUTSIDE any [data-shell-route]
+                 wrapper so it can open from any route (currently invoked
+                 from placements, but a route-hidden modal can't render). -->
             <div id="placementModal" style="
                 display: none; position: fixed; inset: 0; z-index: 1000;
                 background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
@@ -2516,6 +2540,9 @@ await message.reply({
                 </div>
             </div>
 
+            <!-- ═══════ ROUTE: payouts (earnings history + payout settings) ═══════ -->
+            <div data-shell-route="payouts">
+
             <!-- Earnings History Table -->
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -2581,11 +2608,16 @@ await message.reply({
                 </div>
             </div>
 
+            </div><!-- /[data-shell-route="payouts"] -->
+
             <!-- "Test Your Integration" section removed 2026-05-20 —
                  the form + results panel moved up into the Verify your
                  integration block above so there's a single testing
                  surface rather than two separate ones. -->
 
+
+            <!-- ═══════ ROUTE: integrations (Quick Start — 2nd wrapper) ═══════ -->
+            <div data-shell-route="integrations">
 
             <!-- SDK Quick Start -->
             <div class="section">
@@ -2637,6 +2669,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     " data-t="qs.npm_pkg">npm Package</a>
                 </div>
             </div>
+
+            </div><!-- /[data-shell-route="integrations"] (Quick Start) -->
         </div>
 
         <!-- Footer -->
@@ -2718,33 +2752,64 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 try { localStorage.setItem(LS_KEY, collapsed ? '0' : '1'); } catch (_) {}
             });
 
-            // Nav item clicks → scroll-jump to matching section. Settings
-            // delegates to the existing settingsBtn so the modal opens.
-            const sectionAnchors = {
-                'home':         '.page-header',
-                'performance':  '#bennaEnginePanel, .section-title[data-t="med.title"]',
-                'integrations': '#integrationGuide, .section-title[data-t="integ.title"]',
-                'placements':   '.section-title[data-t="ap.title"]',
-                'payouts':      '.section-title[data-t="payout.title"]',
-            };
+            // ── Hash-based routing ────────────────────────────────────
+            // Each sidebar item maps to a #/<route> hash. The CSS in
+            // dashboard-shell.css reveals only the matching
+            // [data-shell-route="..."] block via the wrapper's
+            // data-shell-active-route attribute. Falls back to 'home'
+            // when the hash is empty or unrecognized. Settings is a
+            // modal — it bypasses routing entirely.
+            const VALID_ROUTES = ['home', 'performance', 'integrations', 'placements', 'payouts'];
             const items = wrap.querySelectorAll('.shell-nav-item');
+
+            function routeFromHash() {
+                const m = (window.location.hash || '').match(/^#\/(\w[\w-]*)/);
+                const candidate = m ? m[1] : 'home';
+                return VALID_ROUTES.indexOf(candidate) >= 0 ? candidate : 'home';
+            }
+
+            function applyRoute(route) {
+                wrap.setAttribute('data-shell-active-route', route);
+                let activeLabel = '';
+                items.forEach((b) => {
+                    const sec = b.getAttribute('data-shell-section');
+                    const isActive = (sec === route);
+                    b.classList.toggle('is-active', isActive);
+                    if (isActive) {
+                        activeLabel = b.querySelector('.shell-nav-item__label')?.textContent || '';
+                    }
+                });
+                const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
+                if (crumb && activeLabel) crumb.textContent = activeLabel;
+                // Reset scroll on route change — old position is meaningless
+                // when content swaps in place.
+                const main = document.getElementById('shellMain');
+                if (main) main.scrollTop = 0;
+            }
+
             items.forEach((item) => {
-                item.addEventListener('click', () => {
+                item.addEventListener('click', (e) => {
                     const section = item.getAttribute('data-shell-section');
                     if (section === 'settings') {
                         const sb = document.getElementById('settingsBtn');
                         if (sb) sb.click();
                         return;
                     }
-                    items.forEach((b) => b.classList.toggle('is-active', b === item));
-                    const sel = sectionAnchors[section];
-                    if (!sel) return;
-                    const target = document.querySelector(sel);
-                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
-                    if (crumb) crumb.textContent = item.querySelector('.shell-nav-item__label')?.textContent || '';
+                    if (VALID_ROUTES.indexOf(section) >= 0) {
+                        e.preventDefault();
+                        const next = '#/' + section;
+                        if (window.location.hash !== next) {
+                            window.location.hash = next;
+                        } else {
+                            applyRoute(section);
+                        }
+                    }
                 });
             });
+
+            window.addEventListener('hashchange', () => applyRoute(routeFromHash()));
+            // Initial route — paint on load before user clicks anything.
+            applyRoute(routeFromHash());
 
             // Sync sidebar avatar + name from userProfile (loads async).
             function syncAvatar() {

@@ -2283,6 +2283,7 @@
            data-shell-layout="dashboard"
            data-shell-product="advertiser"
            data-shell-sidebar="expanded"
+           data-shell-active-route="home"
            id="shellWrap">
 
         <!-- ─── Sidebar ─────────────────────────────────────────── -->
@@ -2375,6 +2376,10 @@
         <!-- ─── Main content area ─────────────────────────────── -->
         <main class="shell-main" id="shellMain">
           <div class="shell-main__inner">
+
+            <!-- ═══════ ROUTE: home (overview + stats + chart) ═══════ -->
+            <div data-shell-route="home">
+
             <!-- Date Range Picker + Stats Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <h2 style="font-size: 18px; font-weight: 700; color: #111; margin: 0;" data-t="chrome.overview">Overview</h2>
@@ -2457,10 +2462,15 @@
                 </div>
             </div>
 
+            </div><!-- /[data-shell-route="home"] (stats block) -->
+
             <!-- Deposit Modal — z-index 9999 so it sits cleanly above the
                  sticky <header> (z-index 1000). At parity (1000), DOM
                  order decided who won, which made the modal sometimes
-                 appear behind the top nav. -->
+                 appear behind the top nav. Kept OUTSIDE any
+                 [data-shell-route] wrapper so it can open from any
+                 route (Stats Row's + Add Funds button is on the home
+                 route but the balance is also shown on others). -->
             <div id="depositModal" style="
                 display: none; position: fixed; inset: 0; z-index: 9999;
                 background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
@@ -2523,6 +2533,9 @@
                 </div>
             </div>
 
+            <!-- ═══════ ROUTE: home (chart) ═══════ -->
+            <div data-shell-route="home">
+
             <!-- Performance Chart — directly after the stats row, matching
                  the publisher dashboard pattern (stats → trend chart). -->
             <div class="chart-section">
@@ -2531,6 +2544,11 @@
                     <div class="loading">Loading chart data...</div>
                 </div>
             </div>
+
+            </div><!-- /[data-shell-route="home"] (chart block) -->
+
+            <!-- ═══════ ROUTE: performance ═══════ -->
+            <div data-shell-route="performance">
 
             <!-- PERFORMANCE GROUP — Benna Engine (dark, live status) +
                  Auction Intelligence (white, data view). One outer wrapper
@@ -2662,6 +2680,11 @@
             </div>
             </section> <!-- /.performance-group -->
 
+            </div><!-- /[data-shell-route="performance"] -->
+
+            <!-- ═══════ ROUTE: campaigns ═══════ -->
+            <div data-shell-route="campaigns">
+
             <!-- Campaigns Section -->
             <div class="campaigns-section">
                 <div class="campaigns-header">
@@ -2746,6 +2769,11 @@
                 </table>
             </div>
 
+            </div><!-- /[data-shell-route="campaigns"] -->
+
+            <!-- ═══════ ROUTE: billing ═══════ -->
+            <div data-shell-route="billing">
+
             <!-- Billing History -->
             <div class="campaigns-section" style="margin-top: 0;">
                 <div class="campaigns-header">
@@ -2772,6 +2800,11 @@
                     </tbody>
                 </table>
             </div>
+
+            </div><!-- /[data-shell-route="billing"] -->
+
+            <!-- ═══════ ROUTE: setup ═══════ -->
+            <div data-shell-route="setup">
 
             <!-- SETUP GROUP — Conversion Pixel + Automated Rules.
                  Both are one-time configuration tasks; consolidated under
@@ -2842,8 +2875,13 @@
                 </div>
             </section>
 
+            </div><!-- /[data-shell-route="setup"] -->
+
             <!-- Add Rule Modal — z-index must exceed the sticky <header>
-                 (1000) so the modal doesn't sit behind the top nav. -->
+                 (1000) so the modal doesn't sit behind the top nav.
+                 Kept OUTSIDE any [data-shell-route] wrapper so it can
+                 open from any route (triggered from setup but also
+                 referenced from other contexts). -->
             <div id="ruleModal" style="
                 display: none; position: fixed; inset: 0; z-index: 9999;
                 background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
@@ -4013,31 +4051,67 @@
                 try { localStorage.setItem(LS_KEY, collapsed ? '0' : '1'); } catch (_) {}
             });
 
-            const sectionAnchors = {
-                'home':        '.dashboard-container',
-                'campaigns':   '.campaigns-section, .campaigns-title',
-                'performance': '#bennaEnginePanel, .performance-group-title',
-                'billing':     '.stat-label[data-t="stats.balance"]',
-                'setup':       '.performance-subhead-title[data-t="auc.title"]',
-            };
+            // ── Hash-based routing ────────────────────────────────────
+            // Each sidebar item maps to a #/<route> hash. The CSS in
+            // dashboard-shell.css reveals only the matching
+            // [data-shell-route="..."] block via the wrapper's
+            // data-shell-active-route attribute. Falls back to 'home'
+            // when the hash is empty or unrecognized.
+            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'billing', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
+
+            function routeFromHash() {
+                const m = (window.location.hash || '').match(/^#\/(\w[\w-]*)/);
+                const candidate = m ? m[1] : 'home';
+                return VALID_ROUTES.indexOf(candidate) >= 0 ? candidate : 'home';
+            }
+
+            function applyRoute(route) {
+                wrap.setAttribute('data-shell-active-route', route);
+                let activeLabel = '';
+                items.forEach((b) => {
+                    const sec = b.getAttribute('data-shell-section');
+                    const isActive = (sec === route);
+                    b.classList.toggle('is-active', isActive);
+                    if (isActive) {
+                        activeLabel = b.querySelector('.shell-nav-item__label')?.textContent || '';
+                    }
+                });
+                const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
+                if (crumb && activeLabel) crumb.textContent = activeLabel;
+                // Reset scroll to top on route change — content swaps
+                // in place, so any prior scroll position is meaningless
+                // for the new route.
+                const main = document.getElementById('shellMain');
+                if (main) main.scrollTop = 0;
+            }
+
             items.forEach((item) => {
-                item.addEventListener('click', () => {
+                item.addEventListener('click', (e) => {
                     const section = item.getAttribute('data-shell-section');
                     if (section === 'settings') {
                         const sb = document.getElementById('settingsBtn');
                         if (sb) sb.click();
                         return;
                     }
-                    items.forEach((b) => b.classList.toggle('is-active', b === item));
-                    const sel = sectionAnchors[section];
-                    if (!sel) return;
-                    const target = document.querySelector(sel);
-                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
-                    if (crumb) crumb.textContent = item.querySelector('.shell-nav-item__label')?.textContent || '';
+                    if (VALID_ROUTES.indexOf(section) >= 0) {
+                        e.preventDefault();
+                        // Update hash — triggers hashchange handler
+                        // which calls applyRoute. Use replace if hash
+                        // already matches to avoid duplicate history.
+                        const next = '#/' + section;
+                        if (window.location.hash !== next) {
+                            window.location.hash = next;
+                        } else {
+                            applyRoute(section);
+                        }
+                    }
                 });
             });
+
+            window.addEventListener('hashchange', () => applyRoute(routeFromHash()));
+            // Initial route — paint on load before user clicks anything
+            applyRoute(routeFromHash());
 
             function syncAvatar() {
                 const avatar = document.getElementById('shellUserAvatar');
