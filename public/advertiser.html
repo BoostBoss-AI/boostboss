@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phase 1 dashboard shell — shared with /publish/dashboard (developer.html). -->
+    <link rel="stylesheet" href="/dashboard-shell.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -2274,76 +2276,105 @@
 
     <!-- Dashboard Container -->
     <div id="dashboardContainer" class="dashboard-container">
-        <header>
-            <div class="header-left">
-                <a href="/ads" class="logo" title="Back to SuperBoost Ads" data-t-title="chrome.back">
-                    <div class="logo-icon"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
-<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>
-<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
-<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
-<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></div>
-                    <div class="logo-text">Super<span style="color: #FF2D78;">Boost Ads</span></div>
-                </a>
-                <div class="header-title" data-t="chrome.dashboard">Dashboard</div>
-                <button onclick="openCmdPalette()" style="
-                    background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px;
-                    padding: 6px 14px; font-size: 12px; color: #9CA3AF; cursor: pointer;
-                    font-family: inherit; display: flex; align-items: center; gap: 8px;
-                ">
-                    <span data-t="chrome.search_actions">Search actions</span>
-                    <kbd style="background: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #E5E7EB; color: #6B7280;">⌘K</kbd>
-                </button>
+      <!-- ═══════════════════════════════════════════════════════════════
+           Phase 1 dashboard shell — mirrors /publish/dashboard.
+           ═══════════════════════════════════════════════════════════════ -->
+      <div class="shell-wrap"
+           data-shell-layout="dashboard"
+           data-shell-product="advertiser"
+           data-shell-sidebar="expanded"
+           id="shellWrap">
+
+        <!-- ─── Sidebar ─────────────────────────────────────────── -->
+        <aside class="shell-sidebar" id="shellSidebar" aria-label="Primary navigation">
+          <div class="shell-sidebar__head">
+            <a href="/ads" class="shell-sidebar__logo" title="Back to SuperBoost Ads" data-t-title="chrome.back">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+            </a>
+            <span class="shell-sidebar__product">Super<span class="accent">Boost Ads</span></span>
+          </div>
+
+          <div class="shell-sidebar__nav" role="navigation" aria-label="Dashboard sections">
+            <button class="shell-nav-item is-active" data-shell-section="home">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.home">Home</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="campaigns">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 21 3 14 12 14 21 10 21 10 12 3 3"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="performance">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.performance">Performance</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="billing">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.billing">Billing</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="setup">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.setup">Setup</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="settings">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.settings">Settings</span>
+            </button>
+          </div>
+
+          <div class="shell-sidebar__foot">
+            <div class="shell-sidebar__user">
+              <div class="shell-sidebar__user-avatar" id="shellUserAvatar">·</div>
+              <div class="shell-sidebar__user-text">
+                <span class="shell-user-name" id="companyDisplayName" data-t="chrome.account">Account</span>
+                <span class="shell-user-role" data-t="shell.role.advertiser">Advertiser</span>
+              </div>
             </div>
-            <div class="header-right">
-                <div class="account-info">
-                    <div class="account-label" data-t="chrome.account">Account</div>
-                    <div class="account-name" id="companyDisplayName">Loading...</div>
-                </div>
-                <div style="position: relative;">
-                    <button id="notifBtn" style="
-                        background: #F3F4F6; border: none; width: 36px; height: 36px;
-                        border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
-                        display: flex; align-items: center; justify-content: center; position: relative;
-                    " title="Notifications" data-t-title="chrome.notif_tip">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <span id="notifBadge" style="
-                            position: absolute; top: 2px; right: 2px; width: 8px; height: 8px;
-                            background: #FF2D78; border-radius: 50%; display: none;
-                        "></span>
-                    </button>
-                    <div id="notifDropdown" style="
-                        display: none; position: absolute; top: 44px; right: 0; width: 340px;
-                        background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15);
-                        z-index: 100; overflow: hidden;
-                    ">
-                        <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 14px; font-weight: 700;" data-t="chrome.notif_title">Notifications</span>
-                            <button id="notifMarkAll" style="font-size: 11px; color: var(--accent-primary); background: none; border: none; cursor: pointer; font-weight: 600;" data-t="chrome.notif_mark_all">Mark all read</button>
-                        </div>
-                        <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
-                        <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
-                            <span style="font-size: 12px; color: #9CA3AF;" data-t="chrome.notif_recent">Only showing last 7 days</span>
-                        </div>
-                    </div>
-                </div>
-                <button id="settingsBtn" style="
-                    background: #F3F4F6; border: none; width: 36px; height: 36px;
-                    border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
-                    display: flex; align-items: center; justify-content: center;
-                " title="Account Settings" data-t-title="chrome.settings_tip">⚙</button>
-                <button class="logout-btn" id="logoutBtn" data-t="chrome.logout">Logout</button>
+            <button class="shell-collapse-btn" id="shellCollapseBtn" type="button" title="Collapse sidebar" aria-label="Toggle sidebar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+          </div>
+        </aside>
+
+        <!-- ─── Top bar ─────────────────────────────────────────── -->
+        <header class="shell-topbar" role="banner">
+          <div class="shell-topbar__breadcrumb" id="shellBreadcrumb">
+            <span class="shell-crumb" data-t="shell.nav.home">Home</span>
+          </div>
+
+          <button class="shell-topbar__search" onclick="if (typeof openCmdPalette === 'function') openCmdPalette();" title="Search actions" data-t-title="chrome.search_actions">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="shell-topbar__search-label" data-t="chrome.search_actions">Search actions</span>
+            <kbd>⌘K</kbd>
+          </button>
+
+          <div class="shell-topbar__actions">
+            <button class="shell-icon-btn" id="notifBtn" title="Notifications" data-t-title="chrome.notif_tip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span id="notifBadge" class="shell-icon-btn__badge" style="display: none;"></span>
+            </button>
+            <div id="notifDropdown" style="display: none; position: absolute; top: 50px; right: 80px; width: 340px; background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 100; overflow: hidden;">
+              <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 14px; font-weight: 700;" data-t="chrome.notif_title">Notifications</span>
+                <button id="notifMarkAll" style="font-size: 11px; color: var(--accent-primary); background: none; border: none; cursor: pointer; font-weight: 600;" data-t="chrome.notif_mark_all">Mark all read</button>
+              </div>
+              <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
+              <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
+                <span style="font-size: 12px; color: #9CA3AF;" data-t="chrome.notif_recent">Only showing last 7 days</span>
+              </div>
             </div>
+
+            <button class="shell-icon-btn" id="settingsBtn" title="Account Settings" data-t-title="chrome.settings_tip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+            <button class="shell-icon-btn" id="logoutBtn" title="Logout" data-t-title="chrome.logout">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+          </div>
         </header>
 
-        <main>
+        <!-- ─── Main content area ─────────────────────────────── -->
+        <main class="shell-main" id="shellMain">
+          <div class="shell-main__inner">
             <!-- Date Range Picker + Stats Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <h2 style="font-size: 18px; font-weight: 700; color: #111; margin: 0;" data-t="chrome.overview">Overview</h2>
@@ -2939,7 +2970,7 @@
                     </div>
                 </div>
             </div>
-        </main>
+        <!-- (Stale </main> removed — the shell now closes main after the footer below.) -->
 
         <!-- Account Settings Modal — z-index 9999 to clear the sticky
              <header> (z-index 1000). The Settings IIFE also resets the
@@ -3584,6 +3615,10 @@
         <footer>
             SuperBoost © 2026 · <a href="/ads" style="color: #FF2D78; text-decoration: none;" data-t="foot.back">← Back to boostboss.ai/ads</a>
         </footer>
+
+          </div><!-- /.shell-main__inner -->
+        </main><!-- /.shell-main -->
+      </div><!-- /.shell-wrap -->
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
@@ -3958,6 +3993,72 @@
         }
 
         // Load stats
+        // ────────────────────────────────────────────────────────────────
+        // Phase 1 dashboard shell — mirrors developer.html.
+        // ────────────────────────────────────────────────────────────────
+        (function initShell() {
+            const wrap = document.getElementById('shellWrap');
+            if (!wrap) return;
+            const LS_KEY = 'bb_adv_sidebar_collapsed';
+            try {
+                if (localStorage.getItem(LS_KEY) === '1') {
+                    wrap.setAttribute('data-shell-sidebar', 'collapsed');
+                }
+            } catch (_) {}
+
+            const btn = document.getElementById('shellCollapseBtn');
+            if (btn) btn.addEventListener('click', () => {
+                const collapsed = wrap.getAttribute('data-shell-sidebar') === 'collapsed';
+                wrap.setAttribute('data-shell-sidebar', collapsed ? 'expanded' : 'collapsed');
+                try { localStorage.setItem(LS_KEY, collapsed ? '0' : '1'); } catch (_) {}
+            });
+
+            const sectionAnchors = {
+                'home':        '.dashboard-container',
+                'campaigns':   '.campaigns-section, .campaigns-title',
+                'performance': '#bennaEnginePanel, .performance-group-title',
+                'billing':     '.stat-label[data-t="stats.balance"]',
+                'setup':       '.performance-subhead-title[data-t="auc.title"]',
+            };
+            const items = wrap.querySelectorAll('.shell-nav-item');
+            items.forEach((item) => {
+                item.addEventListener('click', () => {
+                    const section = item.getAttribute('data-shell-section');
+                    if (section === 'settings') {
+                        const sb = document.getElementById('settingsBtn');
+                        if (sb) sb.click();
+                        return;
+                    }
+                    items.forEach((b) => b.classList.toggle('is-active', b === item));
+                    const sel = sectionAnchors[section];
+                    if (!sel) return;
+                    const target = document.querySelector(sel);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
+                    if (crumb) crumb.textContent = item.querySelector('.shell-nav-item__label')?.textContent || '';
+                });
+            });
+
+            function syncAvatar() {
+                const avatar = document.getElementById('shellUserAvatar');
+                const name   = document.getElementById('companyDisplayName');
+                if (!avatar) return;
+                const data = (typeof currentUserData !== 'undefined' && currentUserData) || {};
+                const display = data.company_name || data.email || 'Account';
+                if (name) name.textContent = display;
+                const initial = String(display).trim().charAt(0).toUpperCase() || 'A';
+                avatar.textContent = initial;
+            }
+            syncAvatar();
+            const avatarInterval = setInterval(() => {
+                if (typeof currentUserData !== 'undefined' && currentUserData) {
+                    syncAvatar();
+                    clearInterval(avatarInterval);
+                }
+            }, 500);
+            setTimeout(() => clearInterval(avatarInterval), 10000);
+        })();
+
         async function loadStats() {
             try {
                 const response = await fetch(
@@ -7002,6 +7103,17 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': 'Untagged',
                     'auc.door_untagged_hint': 'Pre-tag legacy traffic',
+                    'shell.nav.home': 'Home',
+                    'shell.nav.performance': 'Performance',
+                    'shell.nav.integrations': 'Integrations',
+                    'shell.nav.placements': 'Placements',
+                    'shell.nav.payouts': 'Payouts',
+                    'shell.nav.campaigns': 'Campaigns',
+                    'shell.nav.billing': 'Billing',
+                    'shell.nav.setup': 'Setup',
+                    'shell.nav.settings': 'Settings',
+                    'shell.role.publisher': 'Publisher',
+                    'shell.role.advertiser': 'Advertiser',
                 },
                 'zh': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
@@ -7218,6 +7330,17 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '未标记',
                     'auc.door_untagged_hint': '标记前的旧流量',
+                    'shell.nav.home': '首页',
+                    'shell.nav.performance': '效果',
+                    'shell.nav.integrations': '集成',
+                    'shell.nav.placements': '版位',
+                    'shell.nav.payouts': '打款',
+                    'shell.nav.campaigns': '广告',
+                    'shell.nav.billing': '账单',
+                    'shell.nav.setup': '设置向导',
+                    'shell.nav.settings': '设置',
+                    'shell.role.publisher': '发布商',
+                    'shell.role.advertiser': '广告主',
                 },
                 'zh-TW': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
@@ -7434,6 +7557,17 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '未標記',
                     'auc.door_untagged_hint': '標記前的舊流量',
+                    'shell.nav.home': '首頁',
+                    'shell.nav.performance': '效果',
+                    'shell.nav.integrations': '整合',
+                    'shell.nav.placements': '版位',
+                    'shell.nav.payouts': '撥款',
+                    'shell.nav.campaigns': '廣告',
+                    'shell.nav.billing': '帳單',
+                    'shell.nav.setup': '設定精靈',
+                    'shell.nav.settings': '設定',
+                    'shell.role.publisher': '發布商',
+                    'shell.role.advertiser': '廣告主',
                 },
                 'ja': {
                     'chrome.back': 'SuperBoost Ads に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
@@ -7650,6 +7784,17 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '未タグ',
                     'auc.door_untagged_hint': 'タグ前のレガシー トラフィック',
+                    'shell.nav.home': 'ホーム',
+                    'shell.nav.performance': 'パフォーマンス',
+                    'shell.nav.integrations': '統合',
+                    'shell.nav.placements': '配置',
+                    'shell.nav.payouts': '支払い',
+                    'shell.nav.campaigns': 'キャンペーン',
+                    'shell.nav.billing': '請求',
+                    'shell.nav.setup': 'セットアップ',
+                    'shell.nav.settings': '設定',
+                    'shell.role.publisher': 'パブリッシャー',
+                    'shell.role.advertiser': '広告主',
                 },
                 'ko': {
                     'chrome.back': 'SuperBoost Ads로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
@@ -7866,6 +8011,17 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '태그 없음',
                     'auc.door_untagged_hint': '태그 이전의 레거시 트래픽',
+                    'shell.nav.home': '홈',
+                    'shell.nav.performance': '성과',
+                    'shell.nav.integrations': '통합',
+                    'shell.nav.placements': '위치',
+                    'shell.nav.payouts': '정산',
+                    'shell.nav.campaigns': '캠페인',
+                    'shell.nav.billing': '결제',
+                    'shell.nav.setup': '설정',
+                    'shell.nav.settings': '환경설정',
+                    'shell.role.publisher': '퍼블리셔',
+                    'shell.role.advertiser': '광고주',
                 },
                 'vi': {
                     'chrome.back': 'Quay lại SuperBoost Ads', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
@@ -8082,11 +8238,22 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': 'Chưa tag',
                     'auc.door_untagged_hint': 'Traffic legacy trước khi tag',
+                    'shell.nav.home': 'Trang chủ',
+                    'shell.nav.performance': 'Hiệu suất',
+                    'shell.nav.integrations': 'Tích hợp',
+                    'shell.nav.placements': 'Vị trí',
+                    'shell.nav.payouts': 'Thanh toán',
+                    'shell.nav.campaigns': 'Chiến dịch',
+                    'shell.nav.billing': 'Hóa đơn',
+                    'shell.nav.setup': 'Thiết lập',
+                    'shell.nav.settings': 'Cài đặt',
+                    'shell.role.publisher': 'Publisher',
+                    'shell.role.advertiser': 'Advertiser',
                 },
             };
             function t(k) {
                 var d = DASH_T[currentLang()] || DASH_T.en;
-                return d[k] || DASH_T.en[k] || k;
+                return d[k] || DASH_T.en[k] || '';
             }
             // Walk the static dashboard HTML and apply translations to any
             // element tagged with data-t / data-t-title / data-t-placeholder.
