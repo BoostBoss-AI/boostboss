@@ -2380,9 +2380,15 @@
             <!-- ═══════ ROUTE: home (overview + stats + chart) ═══════ -->
             <div data-shell-route="home">
 
-            <!-- Date Range Picker + Stats Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-                <h2 style="font-size: 18px; font-weight: 700; color: #111; margin: 0;" data-t="chrome.overview">Overview</h2>
+            <!-- Route page header — replaces the old inline "Overview" h2
+                 that lived inside the date-picker row. Date picker stays
+                 on the right of the page-head via shell-page-head's
+                 built-in space-between layout. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.home.title">Overview</h1>
+                    <div class="shell-page-sub" data-t="page.home.sub">Account performance and balance</div>
+                </div>
                 <div style="display: flex; gap: 6px; align-items: center;" id="dateRangePicker">
                     <button class="date-range-btn active" data-range="7d" style="
                         padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
@@ -2550,14 +2556,22 @@
             <!-- ═══════ ROUTE: performance ═══════ -->
             <div data-shell-route="performance">
 
+            <!-- Route page header. Replaces the inner
+                 .performance-group-header — that header is removed below
+                 since the route header now anchors the page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="perf.title">Performance</h1>
+                    <div class="shell-page-sub" data-t="perf.sub">Engine status and auction signal · last 7 days</div>
+                </div>
+            </div>
+
             <!-- PERFORMANCE GROUP — Benna Engine (dark, live status) +
                  Auction Intelligence (white, data view). One outer wrapper
-                 so they read as one section instead of two parallel cards. -->
+                 so they read as one section instead of two parallel cards.
+                 .performance-group-header removed in Phase 3 — its title
+                 + sub are now in the route page-head above. -->
             <section class="performance-group" aria-label="Performance">
-              <div class="performance-group-header">
-                <div class="performance-group-title" data-t="perf.title">Performance</div>
-                <div class="performance-group-sub" data-t="perf.sub">Engine status and auction signal · last 7 days</div>
-              </div>
 
             <!-- Benna Engine — live panel (status strip at top of group) -->
             <section class="benna-engine" id="bennaEnginePanel">
@@ -2685,10 +2699,20 @@
             <!-- ═══════ ROUTE: campaigns ═══════ -->
             <div data-shell-route="campaigns">
 
-            <!-- Campaigns Section -->
+            <!-- Route page header — title moved up from .campaigns-title
+                 (kept as visually-hidden anchor for any selectors). -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="chrome.campaigns">Campaigns</h1>
+                    <div class="shell-page-sub" data-t="page.campaigns.sub">Manage your active campaigns, creatives, and pacing</div>
+                </div>
+            </div>
+
+            <!-- Campaigns Section. .campaigns-title removed in Phase 3
+                 (route page-head above carries the heading); actions row
+                 right-aligns via justify-content override. -->
             <div class="campaigns-section">
-                <div class="campaigns-header">
-                    <div class="campaigns-title" data-t="chrome.campaigns">Campaigns</div>
+                <div class="campaigns-header" style="justify-content: flex-end;">
                     <div style="display: flex; gap: 8px;">
                         <button onclick="exportCampaignsCSV()" style="
                             padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
@@ -2774,10 +2798,21 @@
             <!-- ═══════ ROUTE: billing ═══════ -->
             <div data-shell-route="billing">
 
-            <!-- Billing History -->
-            <div class="campaigns-section" style="margin-top: 0;">
-                <div class="campaigns-header">
-                    <div class="campaigns-title" data-t="chrome.billing_history">Billing History</div>
+            <!-- Route page header. "Billing History" inline title removed
+                 below; route page-head is now the heading anchor. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.billing.title">Billing</h1>
+                    <div class="shell-page-sub" data-t="page.billing.sub">Account funding and transaction history</div>
+                </div>
+            </div>
+
+            <!-- Billing History (.campaigns-title removed in Phase 3 —
+                 route page-head above carries the heading). margin-top
+                 was 0 to chain after Campaigns in scroll layout; reset
+                 now that this is the first child of its route. -->
+            <div class="campaigns-section">
+                <div class="campaigns-header" style="justify-content: flex-end;">
                     <button id="exportBillingBtn" style="
                         padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                         background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -2806,14 +2841,20 @@
             <!-- ═══════ ROUTE: setup ═══════ -->
             <div data-shell-route="setup">
 
-            <!-- SETUP GROUP — Conversion Pixel + Automated Rules.
-                 Both are one-time configuration tasks; consolidated under
-                 a single "Setup" header with two columns inside. -->
-            <section class="setup-group" aria-label="Setup">
-                <div class="setup-group-header">
-                    <div class="setup-group-title" data-t="chrome.setup">Setup</div>
-                    <div class="setup-group-sub" data-t="setup.sub">One-time configuration · pixel and rules</div>
+            <!-- Route page header — replaces .setup-group-header which
+                 was removed below. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="chrome.setup">Setup</h1>
+                    <div class="shell-page-sub" data-t="setup.sub">One-time configuration · pixel and rules</div>
                 </div>
+            </div>
+
+            <!-- SETUP GROUP — Conversion Pixel + Automated Rules.
+                 Both are one-time configuration tasks. .setup-group-header
+                 removed in Phase 3 — heading is now in the route page-head
+                 above. -->
+            <section class="setup-group" aria-label="Setup">
                 <div class="setup-group-grid">
                     <!-- Conversion Tracking column -->
                     <div class="setup-card" id="pixelSection">
@@ -4079,6 +4120,12 @@
                 });
                 const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
                 if (crumb && activeLabel) crumb.textContent = activeLabel;
+                // Sync document.title so browser tab + history entries
+                // show the route. Falls back to "Boost Boss" if the label
+                // hasn't translated yet.
+                try {
+                    document.title = (activeLabel ? activeLabel + ' · ' : '') + 'Boost Boss Ads';
+                } catch (_) {}
                 // Reset scroll to top on route change — content swaps
                 // in place, so any prior scroll position is meaningless
                 // for the new route.

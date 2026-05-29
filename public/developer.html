@@ -1782,9 +1782,15 @@
             <!-- ═══════ ROUTE: home (page header + stats + revenue chart) ═══════ -->
             <div data-shell-route="home">
 
-            <!-- Page Header -->
-            <div class="page-header" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                <h1 style="margin: 0;" data-t="dash.title">Publisher Dashboard</h1>
+            <!-- Page Header — converted to .shell-page-head in Phase 3 so
+                 it shares the same visual treatment as every other route.
+                 Integration filter stays on the right via the page-head's
+                 built-in space-between layout. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.home.title">Overview</h1>
+                    <div class="shell-page-sub" data-t="page.home.sub">Earnings, impressions, and revenue trends</div>
+                </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <label for="integrationFilter" style="font-size: 12.5px; font-weight: 600; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="dash.view">View:</label>
                     <select id="integrationFilter" onchange="applyIntegrationFilter()" style="
@@ -1843,6 +1849,14 @@
 
             <!-- ═══════ ROUTE: performance (mediation / waterfall) ═══════ -->
             <div data-shell-route="performance">
+
+            <!-- Route page header — banner for the performance page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.perf.title">Performance</h1>
+                    <div class="shell-page-sub" data-t="page.perf.sub">Mediation, waterfall, and Benna auto-order</div>
+                </div>
+            </div>
 
             <!-- Mediation / Waterfall — Lumi SDK equivalent -->
             <div class="section">
@@ -2040,6 +2054,14 @@
 
             <!-- ═══════ ROUTE: integrations (door cards + per-door code + verify + theme) ═══════ -->
             <div data-shell-route="integrations">
+
+            <!-- Route page header — banner for the integrations page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.integ.title">Integrations</h1>
+                    <div class="shell-page-sub" data-t="page.integ.sub">Four doors, one publisher account — pick your install</div>
+                </div>
+            </div>
 
             <!-- Integrations — unified section: state-aware cards as tab selectors + per-door install/code panels -->
             <div class="section integration-steps" id="integrationGuide">
@@ -2377,6 +2399,14 @@ await message.reply({
             <!-- ═══════ ROUTE: placements (ad placements + API keys + per-slot table) ═══════ -->
             <div data-shell-route="placements">
 
+            <!-- Route page header — banner for the placements page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.placements.title">Placements</h1>
+                    <div class="shell-page-sub" data-t="page.placements.sub">Ad slots, API keys, and per-slot economics</div>
+                </div>
+            </div>
+
             <!-- Ad Placements — the door's placements, each a toggleable card -->
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
@@ -2542,6 +2572,14 @@ await message.reply({
 
             <!-- ═══════ ROUTE: payouts (earnings history + payout settings) ═══════ -->
             <div data-shell-route="payouts">
+
+            <!-- Route page header — banner for the payouts page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.payouts.title">Payouts</h1>
+                    <div class="shell-page-sub" data-t="page.payouts.sub">Earnings history and payout settings</div>
+                </div>
+            </div>
 
             <!-- Earnings History Table -->
             <div class="section">
@@ -2781,6 +2819,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 });
                 const crumb = document.querySelector('#shellBreadcrumb .shell-crumb');
                 if (crumb && activeLabel) crumb.textContent = activeLabel;
+                // Sync document.title so browser tab + history entries
+                // show the route name. Falls back to product name when
+                // labels haven't translated yet.
+                try {
+                    document.title = (activeLabel ? activeLabel + ' · ' : '') + 'Lumi SDK · Publisher Dashboard';
+                } catch (_) {}
                 // Reset scroll on route change — old position is meaningless
                 // when content swaps in place.
                 const main = document.getElementById('shellMain');
