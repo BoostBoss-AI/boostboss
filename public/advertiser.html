@@ -2247,27 +2247,27 @@
             <div class="auth-error" id="authError"></div>
 
             <div class="auth-toggle">
-                <button class="auth-toggle-btn active" data-mode="login">Login</button>
-                <button class="auth-toggle-btn" data-mode="signup">Sign Up</button>
+                <button class="auth-toggle-btn active" data-mode="login" data-t="auth.login">Login</button>
+                <button class="auth-toggle-btn" data-mode="signup" data-t="auth.signup">Sign Up</button>
             </div>
 
             <form id="authForm">
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="authEmail" placeholder="you@example.com" required>
+                    <label class="form-label" data-t="auth.email">Email</label>
+                    <input type="email" class="form-input" id="authEmail" placeholder="you@example.com" data-t-placeholder="auth.email_ph" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Password</label>
+                    <label class="form-label" data-t="auth.password">Password</label>
                     <input type="password" class="form-input" id="authPassword" placeholder="••••••••" required>
                 </div>
 
                 <div class="form-group hidden" id="companyNameGroup">
-                    <label class="form-label">Company Name</label>
-                    <input type="text" class="form-input" id="authCompanyName" placeholder="Your company name">
+                    <label class="form-label" data-t="auth.company">Company Name</label>
+                    <input type="text" class="form-input" id="authCompanyName" placeholder="Your company name" data-t-placeholder="auth.company_ph">
                 </div>
 
-                <button type="submit" class="auth-submit-btn" id="authSubmitBtn">Login</button>
+                <button type="submit" class="auth-submit-btn" id="authSubmitBtn" data-t="auth.login">Login</button>
             </form>
 
             <!-- Demo quick-start removed 2026-05-28 — demo mode no longer offered. -->
@@ -2486,8 +2486,8 @@
                     background: #fff; border-radius: 16px; padding: 32px;
                     width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
                 ">
-                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">Add Funds</h3>
-                    <p style="color: #6B7280; font-size: 14px; margin-bottom: 20px;">Deposit to your Boost Boss ad account</p>
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 4px;" data-t="deposit.title">Add Funds</h3>
+                    <p style="color: #6B7280; font-size: 14px; margin-bottom: 20px;" data-t="deposit.sub">Deposit to your Boost Boss ad account</p>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
                         <button class="deposit-preset" data-amount="100" style="
                             padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
@@ -2515,8 +2515,8 @@
                         ">$10,000</button>
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Custom amount</label>
-                        <input type="number" id="depositAmount" min="10" step="1" placeholder="Enter amount ($10 minimum)" style="
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px;" data-t="deposit.custom">Custom amount</label>
+                        <input type="number" id="depositAmount" min="10" step="1" placeholder="Enter amount ($10 minimum)" data-t-placeholder="deposit.custom_ph" style="
                             width: 100%; padding: 10px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px;
                             font-size: 15px; font-family: inherit;
                         ">
@@ -2526,14 +2526,14 @@
                             flex: 1; padding: 12px; background: var(--accent-primary); color: #fff;
                             border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
                             cursor: pointer; font-family: inherit;
-                        ">Deposit via Stripe</button>
+                        " data-t="deposit.confirm">Deposit via Stripe</button>
                         <button id="depositCancelBtn" style="
                             padding: 12px 20px; background: #F3F4F6; color: #374151;
                             border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
                             cursor: pointer; font-family: inherit;
-                        ">Cancel</button>
+                        " data-t="common.cancel">Cancel</button>
                     </div>
-                    <p style="font-size: 11px; color: #9CA3AF; margin-top: 12px; text-align: center;">
+                    <p style="font-size: 11px; color: #9CA3AF; margin-top: 12px; text-align: center;" data-t="deposit.note">
                         Payments processed securely by Stripe. Funds are available instantly.
                     </p>
                 </div>
@@ -2729,7 +2729,7 @@
                                 padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                                 background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                                 font-family: inherit; color: #374151;
-                            ">Drafts <span id="draftsCount"></span> ▾</button>
+                            "><span data-t="campaigns.drafts">Drafts</span> <span id="draftsCount"></span> ▾</button>
                             <div id="draftsMenu"></div>
                         </div>
                         <button class="new-campaign-btn" id="newCampaignBtn" data-t="chrome.new_campaign">+ New Campaign</button>
@@ -2817,21 +2817,21 @@
                         padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                         background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                         font-family: inherit; color: #374151;
-                    ">Export CSV</button>
+                    " data-t="chrome.export_csv">Export CSV</button>
                 </div>
                 <table class="campaigns-table" style="font-size: 13px;">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Balance After</th>
-                            <th>Status</th>
+                            <th data-t="billing.date">Date</th>
+                            <th data-t="billing.description">Description</th>
+                            <th data-t="billing.type">Type</th>
+                            <th data-t="billing.amount">Amount</th>
+                            <th data-t="billing.balance_after">Balance After</th>
+                            <th data-t="billing.status">Status</th>
                         </tr>
                     </thead>
                     <tbody id="billingTableBody">
-                        <tr><td colspan="6" class="loading">Loading transactions...</td></tr>
+                        <tr><td colspan="6" class="loading" data-t="billing.loading">Loading transactions...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2875,7 +2875,7 @@
                                 background: rgba(255,255,255,0.1); border: none;
                                 padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
                                 font-size: 11px; cursor: pointer; font-family: inherit;
-                            ">Copy</button>
+                            " data-t="common.copy">Copy</button>
                             <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script async src="https://boostboss.ai/pixel.js"
   data-advertiser-id="<span id="pixelAdvId" style="color: #FF2D78;">YOUR_ADVERTISER_ID</span>"&gt;&lt;/script&gt;
 &lt;script&gt;
@@ -2932,39 +2932,39 @@
                     box-shadow: 0 20px 60px rgba(0,0,0,0.2); padding: 28px;
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="font-size: 20px; font-weight: 700;">Create Rule</h2>
+                        <h2 style="font-size: 20px; font-weight: 700;" data-t="rule.title">Create Rule</h2>
                         <button id="ruleCloseBtn" style="
                             background: #F3F4F6; border: none; width: 32px; height: 32px;
                             border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
                         ">×</button>
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Rule Name</label>
-                        <input type="text" id="ruleName" placeholder="e.g., Pause low CTR campaigns" style="
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.name">Rule Name</label>
+                        <input type="text" id="ruleName" placeholder="e.g., Pause low CTR campaigns" data-t-placeholder="rule.name_ph" style="
                             width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 14px; font-family: inherit;
                         ">
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">When</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.when">When</label>
                         <div style="display: flex; gap: 8px;">
                             <select id="ruleMetric" style="
                                 flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
                                 border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
                             ">
-                                <option value="ctr">CTR</option>
-                                <option value="spend">Total Spend</option>
-                                <option value="daily_spend">Daily Spend</option>
-                                <option value="impressions">Impressions</option>
-                                <option value="cpa">CPA</option>
+                                <option value="ctr" data-t="rule.metric_ctr">CTR</option>
+                                <option value="spend" data-t="rule.metric_spend">Total Spend</option>
+                                <option value="daily_spend" data-t="rule.metric_daily">Daily Spend</option>
+                                <option value="impressions" data-t="rule.metric_imp">Impressions</option>
+                                <option value="cpa" data-t="rule.metric_cpa">CPA</option>
                             </select>
                             <select id="ruleOp" style="
                                 width: 80px; padding: 10px; border: 1px solid #E5E7EB;
                                 border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
                             ">
-                                <option value="gt">above</option>
-                                <option value="lt">below</option>
-                                <option value="eq">equals</option>
+                                <option value="gt" data-t="rule.op_gt">above</option>
+                                <option value="lt" data-t="rule.op_lt">below</option>
+                                <option value="eq" data-t="rule.op_eq">equals</option>
                             </select>
                             <input type="number" id="ruleValue" placeholder="0.5" step="0.01" style="
                                 width: 100px; padding: 10px 14px; border: 1px solid #E5E7EB;
@@ -2973,31 +2973,31 @@
                         </div>
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Then</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.then">Then</label>
                         <select id="ruleAction" style="
                             width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
                         ">
-                            <option value="pause">Pause the campaign</option>
-                            <option value="notify">Send me an email alert</option>
-                            <option value="increase_bid">Increase bid by 10%</option>
-                            <option value="decrease_bid">Decrease bid by 10%</option>
+                            <option value="pause" data-t="rule.act_pause">Pause the campaign</option>
+                            <option value="notify" data-t="rule.act_notify">Send me an email alert</option>
+                            <option value="increase_bid" data-t="rule.act_inc">Increase bid by 10%</option>
+                            <option value="decrease_bid" data-t="rule.act_dec">Decrease bid by 10%</option>
                         </select>
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Apply to</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.apply_to">Apply to</label>
                         <select id="ruleCampaign" style="
                             width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
                         ">
-                            <option value="all">All live campaigns</option>
+                            <option value="all" data-t="rule.all_live">All live campaigns</option>
                         </select>
                     </div>
                     <button id="ruleSaveBtn" style="
                         width: 100%; padding: 12px; background: var(--accent-primary); color: #fff;
                         border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit;
-                    ">Create Rule</button>
+                    " data-t="rule.create">Create Rule</button>
                 </div>
             </div>
 
@@ -3012,7 +3012,7 @@
                     box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
                 ">
                     <div style="padding: 24px 28px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
-                        <h2 style="font-size: 20px; font-weight: 700;">Compare Campaigns</h2>
+                        <h2 style="font-size: 20px; font-weight: 700;" data-t="cmp.title">Compare Campaigns</h2>
                         <button onclick="document.getElementById('compareModal').style.display='none'" style="
                             background: #F3F4F6; border: none; width: 32px; height: 32px;
                             border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
@@ -3023,27 +3023,27 @@
                             <select id="compareA" style="
                                 flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
                                 border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
-                            "><option value="">Select Campaign A</option></select>
-                            <span style="font-size: 14px; font-weight: 700; color: #9CA3AF; align-self: center;">vs</span>
+                            "><option value="" data-t="cmp.pick_a">Select Campaign A</option></select>
+                            <span style="font-size: 14px; font-weight: 700; color: #9CA3AF; align-self: center;" data-t="cmp.vs">vs</span>
                             <select id="compareB" style="
                                 flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
                                 border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
-                            "><option value="">Select Campaign B</option></select>
+                            "><option value="" data-t="cmp.pick_b">Select Campaign B</option></select>
                         </div>
                         <div id="compareResult" style="display: none;">
                             <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                                 <thead>
                                     <tr style="border-bottom: 2px solid #F3F4F6;">
-                                        <th style="text-align: left; padding: 10px 8px; color: #6B7280; font-size: 12px;">Metric</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: #FF2D78; font-size: 12px;" id="compareAName">Campaign A</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: #2563EB; font-size: 12px;" id="compareBName">Campaign B</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: #6B7280; font-size: 12px;">Diff</th>
+                                        <th style="text-align: left; padding: 10px 8px; color: #6B7280; font-size: 12px;" data-t="cmp.metric">Metric</th>
+                                        <th style="text-align: right; padding: 10px 8px; color: #FF2D78; font-size: 12px;" id="compareAName" data-t="cmp.camp_a">Campaign A</th>
+                                        <th style="text-align: right; padding: 10px 8px; color: #2563EB; font-size: 12px;" id="compareBName" data-t="cmp.camp_b">Campaign B</th>
+                                        <th style="text-align: right; padding: 10px 8px; color: #6B7280; font-size: 12px;" data-t="cmp.diff">Diff</th>
                                     </tr>
                                 </thead>
                                 <tbody id="compareTableBody"></tbody>
                             </table>
                         </div>
-                        <div id="compareEmpty" style="text-align: center; padding: 40px; color: #9CA3AF;">
+                        <div id="compareEmpty" style="text-align: center; padding: 40px; color: #9CA3AF;" data-t="cmp.empty">
                             Select two campaigns to compare their performance
                         </div>
                     </div>
@@ -3065,7 +3065,7 @@
             ">
                 <div style="padding: 24px 28px 0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="font-size: 20px; font-weight: 700;">Account Settings</h2>
+                        <h2 style="font-size: 20px; font-weight: 700;" data-t="settings.title">Account Settings</h2>
                         <button id="settingsCloseBtn" style="
                             background: #F3F4F6; border: none; width: 32px; height: 32px;
                             border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
@@ -3074,14 +3074,14 @@
                 </div>
                 <div style="padding: 0 28px 28px;">
                     <div style="margin-bottom: 16px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Company Name</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="settings.company">Company Name</label>
                         <input type="text" id="settingsCompany" style="
                             width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 14px; font-family: inherit;
                         ">
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Email</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="settings.email">Email</label>
                         <input type="email" id="settingsEmail" readonly style="
                             width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 14px; font-family: inherit;
@@ -3089,7 +3089,7 @@
                         ">
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Advertiser ID</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="settings.adv_id">Advertiser ID</label>
                         <input type="text" id="settingsUserId" readonly style="
                             width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
                             border-radius: 8px; font-size: 13px; font-family: monospace;
@@ -3097,7 +3097,7 @@
                         ">
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">API Key</label>
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="settings.api_key">API Key</label>
                         <div style="display: flex; gap: 8px;">
                             <input type="password" id="settingsApiKey" readonly value="bb_live_••••••••••••" style="
                                 flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
@@ -3108,7 +3108,7 @@
                                 padding: 10px 14px; border: 1px solid #E5E7EB; border-radius: 8px;
                                 background: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
                                 font-family: inherit; color: #374151; white-space: nowrap;
-                            ">Show</button>
+                            " data-t="settings.show">Show</button>
                         </div>
                     </div>
                     <div style="
@@ -3117,8 +3117,8 @@
                         align-items: center;
                     ">
                         <div>
-                            <div style="font-size: 13px; font-weight: 600; color: #374151;">Notification Preferences</div>
-                            <div style="font-size: 12px; color: #6B7280;">Email me campaign status changes</div>
+                            <div style="font-size: 13px; font-weight: 600; color: #374151;" data-t="settings.notif_title">Notification Preferences</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="settings.notif_sub">Email me campaign status changes</div>
                         </div>
                         <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
                             <input type="checkbox" id="settingsNotify" checked style="opacity: 0; width: 0; height: 0;">
@@ -3137,7 +3137,7 @@
                         width: 100%; padding: 12px; background: var(--accent-primary); color: #fff;
                         border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit;
-                    ">Save Changes</button>
+                    " data-t="settings.save">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -3150,7 +3150,7 @@
         ">
             <div style="padding: 28px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 id="detailName" style="font-size: 20px; font-weight: 700;">Campaign</h2>
+                    <h2 id="detailName" style="font-size: 20px; font-weight: 700;" data-t="detail.default_name">Campaign</h2>
                     <button id="detailClose" style="
                         background: #F3F4F6; border: none; width: 32px; height: 32px;
                         border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
@@ -3187,30 +3187,30 @@
 
                 <!-- Performance metrics -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Performance</h4>
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;" data-t="detail.performance">Performance</h4>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 24px; font-weight: 700;" id="detailImpressions">0</div>
-                            <div style="font-size: 12px; color: #6B7280;">Impressions</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="stats.impressions_short">Impressions</div>
                         </div>
                         <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 24px; font-weight: 700;" id="detailClicks">0</div>
-                            <div style="font-size: 12px; color: #6B7280;">Clicks</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="stats.clicks_short">Clicks</div>
                         </div>
                         <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="detailCtr">0%</div>
-                            <div style="font-size: 12px; color: #6B7280;">CTR</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="stats.ctr_short">CTR</div>
                         </div>
                         <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="detailSpend">$0</div>
-                            <div style="font-size: 12px; color: #6B7280;">Total Spend</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="stats.spend">Total Spend</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 7-day sparkline -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Last 7 Days</h4>
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;" data-t="detail.last_7d">Last 7 Days</h4>
                     <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
                         <canvas id="detailSparkline" width="460" height="80" style="width: 100%; height: 80px;"></canvas>
                         <div style="display: flex; justify-content: space-between; margin-top: 6px;">
@@ -3222,24 +3222,24 @@
 
                 <!-- Budget -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Budget</h4>
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;" data-t="detail.budget">Budget</h4>
                     <div style="display: flex; gap: 10px;">
                         <div style="flex: 1; background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 18px; font-weight: 700;" id="detailDailyBudget">$0</div>
-                            <div style="font-size: 12px; color: #6B7280;">Daily</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="detail.daily">Daily</div>
                         </div>
                         <div style="flex: 1; background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 18px; font-weight: 700;" id="detailTotalBudget">$0</div>
-                            <div style="font-size: 12px; color: #6B7280;">Total</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="detail.total">Total</div>
                         </div>
                         <div style="flex: 1; background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 18px; font-weight: 700;" id="detailBid">$0</div>
-                            <div style="font-size: 12px; color: #6B7280;">Bid / CPA Target</div>
+                            <div style="font-size: 12px; color: #6B7280;" data-t="detail.bid_cpa">Bid / CPA Target</div>
                         </div>
                     </div>
                     <div style="margin-top: 10px; background: #FAFAFA; border-radius: 10px; padding: 14px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                            <span style="font-size: 12px; color: #6B7280;">Budget utilization</span>
+                            <span style="font-size: 12px; color: #6B7280;" data-t="detail.budget_util">Budget utilization</span>
                             <span style="font-size: 12px; font-weight: 600;" id="detailUtilPct">0%</span>
                         </div>
                         <div style="height: 6px; background: #E5E7EB; border-radius: 100px; overflow: hidden;">
@@ -3250,32 +3250,32 @@
 
                 <!-- Targeting -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Targeting</h4>
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;" data-t="detail.targeting">Targeting</h4>
                     <div id="detailTargeting" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
                 </div>
 
                 <!-- Metadata -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Details</h4>
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;" data-t="detail.details">Details</h4>
                     <div style="font-size: 13px; color: #374151;">
                         <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
-                            <span style="color: #6B7280;">Campaign ID</span>
+                            <span style="color: #6B7280;" data-t="detail.campaign_id">Campaign ID</span>
                             <span id="detailId" style="font-family: monospace; font-size: 12px;"></span>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
-                            <span style="color: #6B7280;">Created</span>
+                            <span style="color: #6B7280;" data-t="detail.created">Created</span>
                             <span id="detailCreated"></span>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
-                            <span style="color: #6B7280;">Ad Domain</span>
+                            <span style="color: #6B7280;" data-t="detail.ad_domain">Ad Domain</span>
                             <span id="detailAdomain"></span>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
-                            <span style="color: #6B7280;">CTA URL</span>
+                            <span style="color: #6B7280;" data-t="detail.cta_url">CTA URL</span>
                             <a id="detailCtaUrl" target="_blank" style="color: var(--accent-primary); font-size: 12px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></a>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                            <span style="color: #6B7280;">Schedule</span>
+                            <span style="color: #6B7280;" data-t="detail.schedule">Schedule</span>
                             <span id="detailSchedule" style="font-size: 12px;">—</span>
                         </div>
                     </div>
@@ -3287,12 +3287,12 @@
                         flex: 1; padding: 12px; background: var(--accent-primary); color: #fff;
                         border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit;
-                    ">Edit Campaign</button>
+                    " data-t="detail.edit">Edit Campaign</button>
                     <button id="detailToggleBtn" style="
                         padding: 12px 20px; background: #F3F4F6; color: #374151;
                         border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit;
-                    ">Pause</button>
+                    " data-t="action.pause">Pause</button>
                 </div>
             </div>
         </div>
@@ -3388,7 +3388,7 @@
                     <div class="form-group">
                         <label class="form-label" data-t="newc.category">Content Category</label>
                         <select class="form-input campaign-field" name="iab_cat" style="font-size:13px;">
-                            <option value="">Select category (optional)</option>
+                            <option value="" data-t="newc.cat_select">Select category (optional)</option>
                             <option value="IAB3">Business</option>
                             <option value="IAB5">Education</option>
                             <option value="IAB19">Technology & Computing</option>
@@ -7235,6 +7235,91 @@
                     'shell.nav.settings': 'Settings',
                     'shell.role.publisher': 'Publisher',
                     'shell.role.advertiser': 'Advertiser',
+                    'page.home.title': 'Overview',
+                    'page.home.sub': 'Account performance and balance',
+                    'page.campaigns.sub': 'Manage your active campaigns, creatives, and pacing',
+                    'page.billing.title': 'Billing',
+                    'page.billing.sub': 'Account funding and transaction history',
+                    'billing.date': 'Date',
+                    'billing.description': 'Description',
+                    'billing.type': 'Type',
+                    'billing.amount': 'Amount',
+                    'billing.balance_after': 'Balance After',
+                    'billing.status': 'Status',
+                    'billing.loading': 'Loading transactions...',
+                    'campaigns.drafts': 'Drafts',
+                    'deposit.title': 'Add Funds',
+                    'deposit.sub': 'Deposit to your Boost Boss ad account',
+                    'deposit.custom': 'Custom amount',
+                    'deposit.custom_ph': 'Enter amount ($10 minimum)',
+                    'deposit.confirm': 'Deposit via Stripe',
+                    'deposit.note': 'Payments processed securely by Stripe. Funds are available instantly.',
+                    'rule.title': 'Create Rule',
+                    'rule.name': 'Rule Name',
+                    'rule.name_ph': 'e.g., Pause low CTR campaigns',
+                    'rule.when': 'When',
+                    'rule.then': 'Then',
+                    'rule.apply_to': 'Apply to',
+                    'rule.create': 'Create Rule',
+                    'rule.metric_ctr': 'CTR',
+                    'rule.metric_spend': 'Total Spend',
+                    'rule.metric_daily': 'Daily Spend',
+                    'rule.metric_imp': 'Impressions',
+                    'rule.metric_cpa': 'CPA',
+                    'rule.op_gt': 'above',
+                    'rule.op_lt': 'below',
+                    'rule.op_eq': 'equals',
+                    'rule.act_pause': 'Pause the campaign',
+                    'rule.act_notify': 'Send me an email alert',
+                    'rule.act_inc': 'Increase bid by 10%',
+                    'rule.act_dec': 'Decrease bid by 10%',
+                    'rule.all_live': 'All live campaigns',
+                    'cmp.title': 'Compare Campaigns',
+                    'cmp.pick_a': 'Select Campaign A',
+                    'cmp.pick_b': 'Select Campaign B',
+                    'cmp.vs': 'vs',
+                    'cmp.metric': 'Metric',
+                    'cmp.camp_a': 'Campaign A',
+                    'cmp.camp_b': 'Campaign B',
+                    'cmp.diff': 'Diff',
+                    'cmp.empty': 'Select two campaigns to compare their performance',
+                    'settings.title': 'Account Settings',
+                    'settings.company': 'Company Name',
+                    'settings.email': 'Email',
+                    'settings.adv_id': 'Advertiser ID',
+                    'settings.api_key': 'API Key',
+                    'settings.show': 'Show',
+                    'settings.notif_title': 'Notification Preferences',
+                    'settings.notif_sub': 'Email me campaign status changes',
+                    'settings.save': 'Save Changes',
+                    'detail.performance': 'Performance',
+                    'detail.last_7d': 'Last 7 Days',
+                    'detail.budget': 'Budget',
+                    'detail.daily': 'Daily',
+                    'detail.total': 'Total',
+                    'detail.bid_cpa': 'Bid / CPA Target',
+                    'detail.budget_util': 'Budget utilization',
+                    'detail.targeting': 'Targeting',
+                    'detail.details': 'Details',
+                    'detail.campaign_id': 'Campaign ID',
+                    'detail.created': 'Created',
+                    'detail.ad_domain': 'Ad Domain',
+                    'detail.cta_url': 'CTA URL',
+                    'detail.schedule': 'Schedule',
+                    'detail.edit': 'Edit Campaign',
+                    'stats.impressions_short': 'Impressions',
+                    'stats.clicks_short': 'Clicks',
+                    'stats.ctr_short': 'CTR',
+                    'common.cancel': 'Cancel',
+                    'auth.login': 'Login',
+                    'auth.signup': 'Sign Up',
+                    'auth.email': 'Email',
+                    'auth.email_ph': 'you@example.com',
+                    'auth.password': 'Password',
+                    'auth.company': 'Company Name',
+                    'auth.company_ph': 'Your company name',
+                    'detail.default_name': 'Campaign',
+                    'newc.cat_select': 'Select category (optional)',
                 },
                 'zh': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
@@ -7462,6 +7547,91 @@
                     'shell.nav.settings': '设置',
                     'shell.role.publisher': '发布商',
                     'shell.role.advertiser': '广告主',
+                    'page.home.title': '概览',
+                    'page.home.sub': '账户表现与余额',
+                    'page.campaigns.sub': '管理您的活跃广告、创意和节奏',
+                    'page.billing.title': '账单',
+                    'page.billing.sub': '账户充值与交易记录',
+                    'billing.date': '日期',
+                    'billing.description': '说明',
+                    'billing.type': '类型',
+                    'billing.amount': '金额',
+                    'billing.balance_after': '余额变动',
+                    'billing.status': '状态',
+                    'billing.loading': '正在加载交易...',
+                    'campaigns.drafts': '草稿',
+                    'deposit.title': '充值',
+                    'deposit.sub': '为您的 Boost Boss 广告账户充值',
+                    'deposit.custom': '自定义金额',
+                    'deposit.custom_ph': '输入金额（最低 10 美元）',
+                    'deposit.confirm': '通过 Stripe 充值',
+                    'deposit.note': '由 Stripe 安全处理。充值后即时到账。',
+                    'rule.title': '创建规则',
+                    'rule.name': '规则名称',
+                    'rule.name_ph': '例如：暂停低 CTR 广告',
+                    'rule.when': '当',
+                    'rule.then': '则',
+                    'rule.apply_to': '应用于',
+                    'rule.create': '创建规则',
+                    'rule.metric_ctr': 'CTR',
+                    'rule.metric_spend': '总花费',
+                    'rule.metric_daily': '当日花费',
+                    'rule.metric_imp': '展示次数',
+                    'rule.metric_cpa': 'CPA',
+                    'rule.op_gt': '高于',
+                    'rule.op_lt': '低于',
+                    'rule.op_eq': '等于',
+                    'rule.act_pause': '暂停广告',
+                    'rule.act_notify': '发送邮件通知',
+                    'rule.act_inc': '提高出价 10%',
+                    'rule.act_dec': '降低出价 10%',
+                    'rule.all_live': '所有进行中的广告',
+                    'cmp.title': '广告对比',
+                    'cmp.pick_a': '选择广告 A',
+                    'cmp.pick_b': '选择广告 B',
+                    'cmp.vs': 'vs',
+                    'cmp.metric': '指标',
+                    'cmp.camp_a': '广告 A',
+                    'cmp.camp_b': '广告 B',
+                    'cmp.diff': '差异',
+                    'cmp.empty': '选择两个广告以对比效果',
+                    'settings.title': '账户设置',
+                    'settings.company': '公司名称',
+                    'settings.email': '邮箱',
+                    'settings.adv_id': '广告主 ID',
+                    'settings.api_key': 'API 密钥',
+                    'settings.show': '显示',
+                    'settings.notif_title': '通知偏好',
+                    'settings.notif_sub': '广告状态变化时通过邮件通知',
+                    'settings.save': '保存更改',
+                    'detail.performance': '效果',
+                    'detail.last_7d': '最近 7 天',
+                    'detail.budget': '预算',
+                    'detail.daily': '每日',
+                    'detail.total': '总计',
+                    'detail.bid_cpa': '出价 / CPA 目标',
+                    'detail.budget_util': '预算使用率',
+                    'detail.targeting': '定向',
+                    'detail.details': '详情',
+                    'detail.campaign_id': '广告 ID',
+                    'detail.created': '创建时间',
+                    'detail.ad_domain': '广告域名',
+                    'detail.cta_url': 'CTA 链接',
+                    'detail.schedule': '排期',
+                    'detail.edit': '编辑广告',
+                    'stats.impressions_short': '展示',
+                    'stats.clicks_short': '点击',
+                    'stats.ctr_short': 'CTR',
+                    'common.cancel': '取消',
+                    'auth.login': '登录',
+                    'auth.signup': '注册',
+                    'auth.email': '邮箱',
+                    'auth.email_ph': 'you@example.com',
+                    'auth.password': '密码',
+                    'auth.company': '公司名称',
+                    'auth.company_ph': '您的公司名称',
+                    'detail.default_name': '广告',
+                    'newc.cat_select': '选择分类（可选）',
                 },
                 'zh-TW': {
                     'chrome.back': '返回 SuperBoost Ads', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
@@ -7689,6 +7859,91 @@
                     'shell.nav.settings': '設定',
                     'shell.role.publisher': '發布商',
                     'shell.role.advertiser': '廣告主',
+                    'page.home.title': '概覽',
+                    'page.home.sub': '帳戶表現與餘額',
+                    'page.campaigns.sub': '管理您的活躍廣告、創意與節奏',
+                    'page.billing.title': '帳單',
+                    'page.billing.sub': '帳戶儲值與交易紀錄',
+                    'billing.date': '日期',
+                    'billing.description': '說明',
+                    'billing.type': '類型',
+                    'billing.amount': '金額',
+                    'billing.balance_after': '餘額變動',
+                    'billing.status': '狀態',
+                    'billing.loading': '正在載入交易...',
+                    'campaigns.drafts': '草稿',
+                    'deposit.title': '儲值',
+                    'deposit.sub': '為您的 Boost Boss 廣告帳戶儲值',
+                    'deposit.custom': '自訂金額',
+                    'deposit.custom_ph': '輸入金額（最低 10 美元）',
+                    'deposit.confirm': '透過 Stripe 儲值',
+                    'deposit.note': '由 Stripe 安全處理。儲值後即時到帳。',
+                    'rule.title': '建立規則',
+                    'rule.name': '規則名稱',
+                    'rule.name_ph': '例如：暫停低 CTR 廣告',
+                    'rule.when': '當',
+                    'rule.then': '則',
+                    'rule.apply_to': '套用至',
+                    'rule.create': '建立規則',
+                    'rule.metric_ctr': 'CTR',
+                    'rule.metric_spend': '總花費',
+                    'rule.metric_daily': '當日花費',
+                    'rule.metric_imp': '展示次數',
+                    'rule.metric_cpa': 'CPA',
+                    'rule.op_gt': '高於',
+                    'rule.op_lt': '低於',
+                    'rule.op_eq': '等於',
+                    'rule.act_pause': '暫停廣告',
+                    'rule.act_notify': '寄送 Email 通知',
+                    'rule.act_inc': '提高出價 10%',
+                    'rule.act_dec': '降低出價 10%',
+                    'rule.all_live': '所有進行中的廣告',
+                    'cmp.title': '廣告比較',
+                    'cmp.pick_a': '選擇廣告 A',
+                    'cmp.pick_b': '選擇廣告 B',
+                    'cmp.vs': 'vs',
+                    'cmp.metric': '指標',
+                    'cmp.camp_a': '廣告 A',
+                    'cmp.camp_b': '廣告 B',
+                    'cmp.diff': '差異',
+                    'cmp.empty': '選擇兩個廣告以比較效果',
+                    'settings.title': '帳戶設定',
+                    'settings.company': '公司名稱',
+                    'settings.email': '電子郵件',
+                    'settings.adv_id': '廣告主 ID',
+                    'settings.api_key': 'API 金鑰',
+                    'settings.show': '顯示',
+                    'settings.notif_title': '通知偏好',
+                    'settings.notif_sub': '廣告狀態變化時透過 Email 通知',
+                    'settings.save': '儲存變更',
+                    'detail.performance': '效果',
+                    'detail.last_7d': '最近 7 天',
+                    'detail.budget': '預算',
+                    'detail.daily': '每日',
+                    'detail.total': '總計',
+                    'detail.bid_cpa': '出價 / CPA 目標',
+                    'detail.budget_util': '預算使用率',
+                    'detail.targeting': '定向',
+                    'detail.details': '詳細資料',
+                    'detail.campaign_id': '廣告 ID',
+                    'detail.created': '建立時間',
+                    'detail.ad_domain': '廣告網域',
+                    'detail.cta_url': 'CTA 連結',
+                    'detail.schedule': '排程',
+                    'detail.edit': '編輯廣告',
+                    'stats.impressions_short': '展示',
+                    'stats.clicks_short': '點擊',
+                    'stats.ctr_short': 'CTR',
+                    'common.cancel': '取消',
+                    'auth.login': '登入',
+                    'auth.signup': '註冊',
+                    'auth.email': '電子郵件',
+                    'auth.email_ph': 'you@example.com',
+                    'auth.password': '密碼',
+                    'auth.company': '公司名稱',
+                    'auth.company_ph': '您的公司名稱',
+                    'detail.default_name': '廣告',
+                    'newc.cat_select': '選擇分類（選填）',
                 },
                 'ja': {
                     'chrome.back': 'SuperBoost Ads に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
@@ -7916,6 +8171,91 @@
                     'shell.nav.settings': '設定',
                     'shell.role.publisher': 'パブリッシャー',
                     'shell.role.advertiser': '広告主',
+                    'page.home.title': '概要',
+                    'page.home.sub': 'アカウントのパフォーマンスと残高',
+                    'page.campaigns.sub': '配信中のキャンペーン、クリエイティブ、配信ペースを管理',
+                    'page.billing.title': '請求',
+                    'page.billing.sub': 'アカウント入金と取引履歴',
+                    'billing.date': '日付',
+                    'billing.description': '内容',
+                    'billing.type': '種別',
+                    'billing.amount': '金額',
+                    'billing.balance_after': '残高変動',
+                    'billing.status': 'ステータス',
+                    'billing.loading': '取引履歴を読み込み中...',
+                    'campaigns.drafts': '下書き',
+                    'deposit.title': '入金',
+                    'deposit.sub': 'Boost Boss 広告アカウントへ入金',
+                    'deposit.custom': 'カスタム金額',
+                    'deposit.custom_ph': '金額を入力（最低 10 ドル）',
+                    'deposit.confirm': 'Stripe で入金',
+                    'deposit.note': 'Stripe により安全に処理されます。入金後すぐにご利用いただけます。',
+                    'rule.title': 'ルール作成',
+                    'rule.name': 'ルール名',
+                    'rule.name_ph': '例：CTR の低いキャンペーンを一時停止',
+                    'rule.when': '条件',
+                    'rule.then': 'アクション',
+                    'rule.apply_to': '適用対象',
+                    'rule.create': 'ルールを作成',
+                    'rule.metric_ctr': 'CTR',
+                    'rule.metric_spend': '総支出',
+                    'rule.metric_daily': '日次支出',
+                    'rule.metric_imp': 'インプレッション',
+                    'rule.metric_cpa': 'CPA',
+                    'rule.op_gt': 'より大きい',
+                    'rule.op_lt': 'より小さい',
+                    'rule.op_eq': '等しい',
+                    'rule.act_pause': 'キャンペーンを一時停止',
+                    'rule.act_notify': 'メール通知を送る',
+                    'rule.act_inc': '入札を 10% 引き上げ',
+                    'rule.act_dec': '入札を 10% 引き下げ',
+                    'rule.all_live': '配信中のすべてのキャンペーン',
+                    'cmp.title': 'キャンペーン比較',
+                    'cmp.pick_a': 'キャンペーン A を選択',
+                    'cmp.pick_b': 'キャンペーン B を選択',
+                    'cmp.vs': 'vs',
+                    'cmp.metric': '指標',
+                    'cmp.camp_a': 'キャンペーン A',
+                    'cmp.camp_b': 'キャンペーン B',
+                    'cmp.diff': '差分',
+                    'cmp.empty': '2 つのキャンペーンを選んで比較',
+                    'settings.title': 'アカウント設定',
+                    'settings.company': '会社名',
+                    'settings.email': 'メール',
+                    'settings.adv_id': '広告主 ID',
+                    'settings.api_key': 'API キー',
+                    'settings.show': '表示',
+                    'settings.notif_title': '通知設定',
+                    'settings.notif_sub': 'キャンペーンの状態変化をメールで通知',
+                    'settings.save': '変更を保存',
+                    'detail.performance': 'パフォーマンス',
+                    'detail.last_7d': '直近 7 日間',
+                    'detail.budget': '予算',
+                    'detail.daily': '日次',
+                    'detail.total': '合計',
+                    'detail.bid_cpa': '入札 / CPA 目標',
+                    'detail.budget_util': '予算消化率',
+                    'detail.targeting': 'ターゲティング',
+                    'detail.details': '詳細',
+                    'detail.campaign_id': 'キャンペーン ID',
+                    'detail.created': '作成日',
+                    'detail.ad_domain': '広告ドメイン',
+                    'detail.cta_url': 'CTA URL',
+                    'detail.schedule': 'スケジュール',
+                    'detail.edit': 'キャンペーンを編集',
+                    'stats.impressions_short': 'インプレッション',
+                    'stats.clicks_short': 'クリック',
+                    'stats.ctr_short': 'CTR',
+                    'common.cancel': 'キャンセル',
+                    'auth.login': 'ログイン',
+                    'auth.signup': '新規登録',
+                    'auth.email': 'メール',
+                    'auth.email_ph': 'you@example.com',
+                    'auth.password': 'パスワード',
+                    'auth.company': '会社名',
+                    'auth.company_ph': 'あなたの会社名',
+                    'detail.default_name': 'キャンペーン',
+                    'newc.cat_select': 'カテゴリを選択（任意）',
                 },
                 'ko': {
                     'chrome.back': 'SuperBoost Ads로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
@@ -8143,6 +8483,91 @@
                     'shell.nav.settings': '환경설정',
                     'shell.role.publisher': '퍼블리셔',
                     'shell.role.advertiser': '광고주',
+                    'page.home.title': '개요',
+                    'page.home.sub': '계정 실적 및 잔액',
+                    'page.campaigns.sub': '진행 중인 캠페인, 크리에이티브, 페이싱 관리',
+                    'page.billing.title': '결제',
+                    'page.billing.sub': '계정 충전 및 거래 내역',
+                    'billing.date': '날짜',
+                    'billing.description': '설명',
+                    'billing.type': '유형',
+                    'billing.amount': '금액',
+                    'billing.balance_after': '잔액 변동',
+                    'billing.status': '상태',
+                    'billing.loading': '거래 내역 로딩 중...',
+                    'campaigns.drafts': '초안',
+                    'deposit.title': '충전',
+                    'deposit.sub': 'Boost Boss 광고 계정에 충전',
+                    'deposit.custom': '직접 입력',
+                    'deposit.custom_ph': '금액 입력 (최소 $10)',
+                    'deposit.confirm': 'Stripe로 충전',
+                    'deposit.note': 'Stripe로 안전하게 처리됩니다. 충전 즉시 사용 가능합니다.',
+                    'rule.title': '규칙 만들기',
+                    'rule.name': '규칙 이름',
+                    'rule.name_ph': '예: 낮은 CTR 캠페인 일시중지',
+                    'rule.when': '조건',
+                    'rule.then': '동작',
+                    'rule.apply_to': '적용 대상',
+                    'rule.create': '규칙 만들기',
+                    'rule.metric_ctr': 'CTR',
+                    'rule.metric_spend': '총 지출',
+                    'rule.metric_daily': '일일 지출',
+                    'rule.metric_imp': '노출',
+                    'rule.metric_cpa': 'CPA',
+                    'rule.op_gt': '초과',
+                    'rule.op_lt': '미만',
+                    'rule.op_eq': '같음',
+                    'rule.act_pause': '캠페인 일시중지',
+                    'rule.act_notify': '이메일 알림 보내기',
+                    'rule.act_inc': '입찰가 10% 인상',
+                    'rule.act_dec': '입찰가 10% 인하',
+                    'rule.all_live': '진행 중인 모든 캠페인',
+                    'cmp.title': '캠페인 비교',
+                    'cmp.pick_a': '캠페인 A 선택',
+                    'cmp.pick_b': '캠페인 B 선택',
+                    'cmp.vs': 'vs',
+                    'cmp.metric': '지표',
+                    'cmp.camp_a': '캠페인 A',
+                    'cmp.camp_b': '캠페인 B',
+                    'cmp.diff': '차이',
+                    'cmp.empty': '두 캠페인을 선택해 성과를 비교하세요',
+                    'settings.title': '계정 설정',
+                    'settings.company': '회사 이름',
+                    'settings.email': '이메일',
+                    'settings.adv_id': '광고주 ID',
+                    'settings.api_key': 'API 키',
+                    'settings.show': '표시',
+                    'settings.notif_title': '알림 환경설정',
+                    'settings.notif_sub': '캠페인 상태 변경 시 이메일 받기',
+                    'settings.save': '변경사항 저장',
+                    'detail.performance': '성과',
+                    'detail.last_7d': '최근 7일',
+                    'detail.budget': '예산',
+                    'detail.daily': '일일',
+                    'detail.total': '총합',
+                    'detail.bid_cpa': '입찰가 / CPA 목표',
+                    'detail.budget_util': '예산 소진율',
+                    'detail.targeting': '타겟팅',
+                    'detail.details': '상세 정보',
+                    'detail.campaign_id': '캠페인 ID',
+                    'detail.created': '생성일',
+                    'detail.ad_domain': '광고 도메인',
+                    'detail.cta_url': 'CTA URL',
+                    'detail.schedule': '일정',
+                    'detail.edit': '캠페인 편집',
+                    'stats.impressions_short': '노출',
+                    'stats.clicks_short': '클릭',
+                    'stats.ctr_short': 'CTR',
+                    'common.cancel': '취소',
+                    'auth.login': '로그인',
+                    'auth.signup': '회원가입',
+                    'auth.email': '이메일',
+                    'auth.email_ph': 'you@example.com',
+                    'auth.password': '비밀번호',
+                    'auth.company': '회사명',
+                    'auth.company_ph': '회사명을 입력하세요',
+                    'detail.default_name': '캠페인',
+                    'newc.cat_select': '카테고리 선택 (선택 사항)',
                 },
                 'vi': {
                     'chrome.back': 'Quay lại SuperBoost Ads', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
@@ -8370,6 +8795,91 @@
                     'shell.nav.settings': 'Cài đặt',
                     'shell.role.publisher': 'Publisher',
                     'shell.role.advertiser': 'Advertiser',
+                    'page.home.title': 'Tổng quan',
+                    'page.home.sub': 'Hiệu suất và số dư tài khoản',
+                    'page.campaigns.sub': 'Quản lý chiến dịch đang chạy, creative và tốc độ phân phối',
+                    'page.billing.title': 'Thanh toán',
+                    'page.billing.sub': 'Nạp tiền tài khoản và lịch sử giao dịch',
+                    'billing.date': 'Ngày',
+                    'billing.description': 'Mô tả',
+                    'billing.type': 'Loại',
+                    'billing.amount': 'Số tiền',
+                    'billing.balance_after': 'Số dư sau',
+                    'billing.status': 'Trạng thái',
+                    'billing.loading': 'Đang tải giao dịch...',
+                    'campaigns.drafts': 'Bản nháp',
+                    'deposit.title': 'Nạp tiền',
+                    'deposit.sub': 'Nạp vào tài khoản quảng cáo Boost Boss của bạn',
+                    'deposit.custom': 'Số tiền tùy chỉnh',
+                    'deposit.custom_ph': 'Nhập số tiền (tối thiểu $10)',
+                    'deposit.confirm': 'Nạp qua Stripe',
+                    'deposit.note': 'Xử lý an toàn bởi Stripe. Số dư khả dụng ngay lập tức.',
+                    'rule.title': 'Tạo quy tắc',
+                    'rule.name': 'Tên quy tắc',
+                    'rule.name_ph': 'VD: Tạm dừng chiến dịch CTR thấp',
+                    'rule.when': 'Khi',
+                    'rule.then': 'Thì',
+                    'rule.apply_to': 'Áp dụng cho',
+                    'rule.create': 'Tạo quy tắc',
+                    'rule.metric_ctr': 'CTR',
+                    'rule.metric_spend': 'Tổng chi tiêu',
+                    'rule.metric_daily': 'Chi tiêu hàng ngày',
+                    'rule.metric_imp': 'Số lần hiển thị',
+                    'rule.metric_cpa': 'CPA',
+                    'rule.op_gt': 'lớn hơn',
+                    'rule.op_lt': 'nhỏ hơn',
+                    'rule.op_eq': 'bằng',
+                    'rule.act_pause': 'Tạm dừng chiến dịch',
+                    'rule.act_notify': 'Gửi email thông báo',
+                    'rule.act_inc': 'Tăng giá thầu 10%',
+                    'rule.act_dec': 'Giảm giá thầu 10%',
+                    'rule.all_live': 'Tất cả chiến dịch đang chạy',
+                    'cmp.title': 'So sánh chiến dịch',
+                    'cmp.pick_a': 'Chọn chiến dịch A',
+                    'cmp.pick_b': 'Chọn chiến dịch B',
+                    'cmp.vs': 'vs',
+                    'cmp.metric': 'Chỉ số',
+                    'cmp.camp_a': 'Chiến dịch A',
+                    'cmp.camp_b': 'Chiến dịch B',
+                    'cmp.diff': 'Chênh lệch',
+                    'cmp.empty': 'Chọn hai chiến dịch để so sánh hiệu suất',
+                    'settings.title': 'Cài đặt tài khoản',
+                    'settings.company': 'Tên công ty',
+                    'settings.email': 'Email',
+                    'settings.adv_id': 'ID nhà quảng cáo',
+                    'settings.api_key': 'API Key',
+                    'settings.show': 'Hiển thị',
+                    'settings.notif_title': 'Tùy chọn thông báo',
+                    'settings.notif_sub': 'Gửi email khi trạng thái chiến dịch thay đổi',
+                    'settings.save': 'Lưu thay đổi',
+                    'detail.performance': 'Hiệu suất',
+                    'detail.last_7d': '7 ngày gần đây',
+                    'detail.budget': 'Ngân sách',
+                    'detail.daily': 'Hàng ngày',
+                    'detail.total': 'Tổng',
+                    'detail.bid_cpa': 'Giá thầu / Mục tiêu CPA',
+                    'detail.budget_util': 'Tỷ lệ sử dụng ngân sách',
+                    'detail.targeting': 'Đối tượng',
+                    'detail.details': 'Chi tiết',
+                    'detail.campaign_id': 'ID chiến dịch',
+                    'detail.created': 'Đã tạo',
+                    'detail.ad_domain': 'Tên miền quảng cáo',
+                    'detail.cta_url': 'URL CTA',
+                    'detail.schedule': 'Lịch chạy',
+                    'detail.edit': 'Chỉnh sửa chiến dịch',
+                    'stats.impressions_short': 'Hiển thị',
+                    'stats.clicks_short': 'Nhấp',
+                    'stats.ctr_short': 'CTR',
+                    'common.cancel': 'Hủy',
+                    'auth.login': 'Đăng nhập',
+                    'auth.signup': 'Đăng ký',
+                    'auth.email': 'Email',
+                    'auth.email_ph': 'you@example.com',
+                    'auth.password': 'Mật khẩu',
+                    'auth.company': 'Tên công ty',
+                    'auth.company_ph': 'Tên công ty của bạn',
+                    'detail.default_name': 'Chiến dịch',
+                    'newc.cat_select': 'Chọn danh mục (tùy chọn)',
                 },
             };
             function t(k) {
