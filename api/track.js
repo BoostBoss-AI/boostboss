@@ -13,7 +13,14 @@
  *   POST /api/track                             JSON body, returns { tracked: true }
  */
 
-const TAKE_RATE = Number(process.env.BBX_TAKE_RATE) || 0.15;
+// Revenue split (Phase F, 2026-06-04). See api/billing.js for full doc.
+// Two env vars: BBX_RTB_FEE (6.5%, demand-side) + BBX_NETWORK_TAKE (23.5%,
+// platform margin). Sum is the combined take. Legacy BBX_TAKE_RATE wins
+// if set (back-compat). Publisher share = 1 - TAKE_RATE = 70% by default.
+const RTB_FEE      = Number(process.env.BBX_RTB_FEE)      || 0.065;
+const NETWORK_TAKE = Number(process.env.BBX_NETWORK_TAKE) || 0.235;
+const TAKE_RATE    = Number(process.env.BBX_TAKE_RATE)
+                     || +(RTB_FEE + NETWORK_TAKE).toFixed(6); // 0.30 default
 
 // Phase E Day 2 — per-event balance accrual. Imported here so it runs
 // inside the same handler invocation as the event insert; lazy require

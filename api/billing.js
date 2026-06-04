@@ -23,11 +23,14 @@
  *   GET  /api/billing?action=history&id=...     advertiser tx history
  *   GET  /api/billing?action=earnings&key=...   developer earnings
  *
- * Money model
- *   • Exchange take-rate: 15% (configurable via BBX_TAKE_RATE)
- *   • Publisher share:     85%
+ * Money model (updated 2026-06-04)
+ *   • RTB exchange fee:    6.5% (configurable via BBX_RTB_FEE)      — demand-side, charged to advertiser
+ *   • Network take:       23.5% (configurable via BBX_NETWORK_TAKE) — Boost Boss platform margin
+ *   • Combined fees:        30% (BBX_RTB_FEE + BBX_NETWORK_TAKE)
+ *   • Publisher share:      70% (1 - BBX_RTB_FEE - BBX_NETWORK_TAKE)
+ *   • Legacy BBX_TAKE_RATE  — if set, overrides the sum of the two new vars (back-compat)
  *   • Min payout threshold: $100 (configurable via BBX_MIN_PAYOUT)
- *   • Currency: USD only for v1
+ *   • Currency:             USD only for v1
  */
 
 const ledger = require("./_lib/ledger.js");
@@ -40,7 +43,15 @@ const HAS_SUPABASE = !!(
   (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)
 );
 
-const TAKE_RATE          = Number(process.env.BBX_TAKE_RATE)  || 0.15;
+// Revenue model split (Phase F, 2026-06-04). Each fee is kept as a separate
+// env var so they can be tuned independently AND attributed correctly in
+// accounting (RTB is invoiced to the advertiser as a demand-side fee; the
+// network take is platform margin). Legacy BBX_TAKE_RATE still wins if set,
+// for back-compat with anything still pointing at the old single-knob name.
+const RTB_FEE           = Number(process.env.BBX_RTB_FEE)      || 0.065;
+const NETWORK_TAKE      = Number(process.env.BBX_NETWORK_TAKE) || 0.235;
+const TAKE_RATE         = Number(process.env.BBX_TAKE_RATE)
+                          || +(RTB_FEE + NETWORK_TAKE).toFixed(6); // 0.30 default
 const MIN_PAYOUT_USD     = Number(process.env.BBX_MIN_PAYOUT) || 100.0;
 const PUBLIC_BASE_URL    = process.env.BOOSTBOSS_BASE_URL     || "https://boostboss.ai";
 const STRIPE_WEBHOOK_KEY = process.env.STRIPE_WEBHOOK_SECRET   || null;
@@ -1605,8 +1616,14 @@ async function handleInvoice(req, res) {
     impressions: wins.length,
     line_items: lineItems,
     subtotal_usd: +grossUsd.toFixed(4),
-    take_rate: TAKE_RATE,
-    total_usd:  +grossUsd.toFixed(4), // advertiser pays gross; take is deducted from publisher share
+    // Fee disclosure for the advertiser invoice. The 6.5% RTB exchange fee
+    // is a demand-side fee that shows up here; the 23.5% network take is
+    // deducted from publisher share, not from the advertiser, so it does
+    // not appear on the advertiser-facing invoice.
+    rtb_fee_rate: RTB_FEE,
+    rtb_fee_usd:  +(grossUsd * RTB_FEE).toFixed(4),
+    take_rate:    TAKE_RATE, // combined fees (legacy field, kept for back-compat)
+    total_usd:    +grossUsd.toFixed(4), // advertiser pays gross; take is deducted from publisher share
     currency: "USD",
     status: "draft",
     created_at: new Date().toISOString(),
@@ -1687,11 +1704,17 @@ async function handlePayout(req, res) {
     transfers.push({
       publisher: t.publisher,
       impressions: t.impressions,
-      gross_usd:   +t.gross_usd.toFixed(4),
-      take_usd:    +(t.gross_usd * TAKE_RATE).toFixed(4),
-      payout_usd:  pubShareUsd,
+      gross_usd:        +t.gross_usd.toFixed(4),
+      // Attribute the take to the two fee categories for accounting.
+      // The RTB fee is conceptually invoiced to the advertiser as a
+      // demand-side fee; the network take is the platform margin. Both
+      // come out of the same gross before publisher share is paid.
+      rtb_fee_usd:      +(t.gross_usd * RTB_FEE).toFixed(4),
+      network_take_usd: +(t.gross_usd * NETWORK_TAKE).toFixed(4),
+      take_usd:         +(t.gross_usd * TAKE_RATE).toFixed(4), // legacy aggregate
+      payout_usd:       pubShareUsd,
       eligible,
-      reason:      eligible ? null : `below $${MIN_PAYOUT_USD} threshold`,
+      reason:           eligible ? null : `below $${MIN_PAYOUT_USD} threshold`,
     });
   }
 
@@ -1722,7 +1745,10 @@ async function handlePayout(req, res) {
 
   const summary = {
     period: { since: new Date(sinceTs).toISOString(), until: new Date(untilTs).toISOString() },
-    take_rate: TAKE_RATE,
+    rtb_fee_rate:        RTB_FEE,
+    network_take_rate:   NETWORK_TAKE,
+    take_rate:           TAKE_RATE,             // legacy aggregate (= rtb_fee_rate + network_take_rate)
+    publisher_share_pct: +((1 - TAKE_RATE) * 100).toFixed(2),
     min_payout_usd: MIN_PAYOUT_USD,
     publishers: transfers.length,
     eligible:   transfers.filter((t) => t.eligible).length,
@@ -2117,10 +2143,12 @@ async function fireRefundClawbacks(sb, advertiserId, refundAmount, sourceStripeI
 module.exports._fireRefundClawbacks = fireRefundClawbacks;
 
 // ── exports for testing ────────────────────────────────────────────────
-module.exports.HAS_STRIPE   = HAS_STRIPE;
-module.exports.HAS_SUPABASE = HAS_SUPABASE;
-module.exports.TAKE_RATE    = TAKE_RATE;
-module.exports._DEMO        = DEMO;
+module.exports.HAS_STRIPE    = HAS_STRIPE;
+module.exports.HAS_SUPABASE  = HAS_SUPABASE;
+module.exports.RTB_FEE       = RTB_FEE;
+module.exports.NETWORK_TAKE  = NETWORK_TAKE;
+module.exports.TAKE_RATE     = TAKE_RATE; // legacy aggregate, kept for back-compat
+module.exports._DEMO         = DEMO;
 module.exports._reset = function () {
   DEMO.advertisers.clear();
   DEMO.developers.clear();
