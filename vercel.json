@@ -13,7 +13,9 @@
     { "source": "/publish/no-code",    "destination": "/en/publish/no-code",    "permanent": false },
     { "source": "/ads",        "destination": "/en/ads",        "permanent": false },
     { "source": "/developer",  "destination": "/publish/dashboard", "permanent": false },
-    { "source": "/advertiser", "destination": "/ads/dashboard",     "permanent": false }
+    { "source": "/advertiser", "destination": "/ads/dashboard",     "permanent": false },
+    { "source": "/signup",     "destination": "/",                  "permanent": false },
+    { "source": "/login",      "destination": "/",                  "permanent": false }
   ],
   "rewrites": [
     { "source": "/en", "destination": "/index.html" },
@@ -27,13 +29,11 @@
     { "source": "/ads/dashboard",     "destination": "/advertiser.html" },
     { "source": "/publish/dashboard", "destination": "/developer.html" },
     { "source": "/demo", "destination": "/demo.html" },
-    { "source": "/signup", "destination": "/signup.html" },
     { "source": "/publish/signup", "destination": "/signup.html" },
     { "source": "/publish/signin", "destination": "/signup.html" },
     { "source": "/ads/signup", "destination": "/signup.html" },
     { "source": "/ads/signin", "destination": "/signup.html" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/login", "destination": "/signup.html" },
     { "source": "/status", "destination": "/status.html" },
     { "source": "/playground", "destination": "/playground.html" },
     { "source": "/v1/ad-request", "destination": "/api/ad-request" },

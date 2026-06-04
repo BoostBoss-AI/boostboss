@@ -322,19 +322,9 @@ body.dark .superboost-mark { color: #F3F4F6; }
       </button>
       <div class="divider-small">or with email</div>
 
-      <!-- Role picker -->
-      <div class="role-picker">
-        <button class="role-btn active" data-role="advertiser">
-          <div class="icon">📣</div>
-          <div class="label">Advertiser</div>
-          <div class="desc">Run campaigns via SuperBoost</div>
-        </button>
-        <button class="role-btn" data-role="developer">
-          <div class="icon">🧩</div>
-          <div class="label">Publisher</div>
-          <div class="desc">Monetize with Lumi SDK</div>
-        </button>
-      </div>
+      <!-- Role picker removed 2026-06-04: the only entry points are now
+           /publish/signup and /ads/signup, which lockRoleFromPath() resolves
+           to `selectedRole` from the URL. No unified /signup exists. -->
 
       <form id="signup-form" autocomplete="off">
         <div class="form-group">
@@ -655,20 +645,10 @@ function updateRoleTermsLabel() {
   refresh();
 })();
 
-// ── Role picker ──
-document.querySelectorAll(".role-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".role-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    selectedRole = btn.dataset.role;
-    document.getElementById("company-group").classList.toggle("hidden", selectedRole !== "advertiser");
-    document.getElementById("app-group").classList.toggle("hidden", selectedRole !== "developer");
-    // Door-selection Layer 1: only ask publishers what they're building.
-    var appTypeG = document.getElementById("app-type-group");
-    if (appTypeG) appTypeG.classList.toggle("hidden", selectedRole !== "developer");
-    updateRoleTermsLabel();
-  });
-});
+// ── Role picker REMOVED 2026-06-04 ──
+// /signup no longer exists. Role is locked from URL path by
+// lockRoleFromPath() at page load. We just need to sync the
+// Terms-acceptance label to the locked role once.
 updateRoleTermsLabel();
 
 // ── Signup ──
