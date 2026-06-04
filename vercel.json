@@ -109,7 +109,7 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PATCH, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Stripe-Signature, x-openrtb-version" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Stripe-Signature, PayPal-Transmission-Id, PayPal-Transmission-Time, PayPal-Transmission-Sig, PayPal-Cert-Url, PayPal-Auth-Algo, x-openrtb-version" }
       ]
     },
     {

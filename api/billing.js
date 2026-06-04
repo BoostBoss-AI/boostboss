@@ -36,12 +36,27 @@
 const ledger = require("./_lib/ledger.js");
 // Phase E Day 2/3 — atomic balance helpers shared with api/track.js.
 const publisherBalance = require("./_lib/publisher_balance.js");
+// Phase 2 — PayPal pay-in rail (additive; demo-mode safe when env unset).
+const paypal = require("./_lib/payin/paypal.js");
 
 const HAS_STRIPE   = !!process.env.STRIPE_SECRET_KEY;
+const HAS_PAYPAL   = !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
   (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)
 );
+
+// Which pay-in provider the advertiser dashboard should default to.
+// "auto" picks PayPal if configured, else Stripe, else demo.
+const PAYIN_PROVIDER_ENV = (process.env.PAYIN_PROVIDER || "auto").toLowerCase();
+function resolvedPayinProvider() {
+  if (PAYIN_PROVIDER_ENV === "paypal") return HAS_PAYPAL ? "paypal" : "demo";
+  if (PAYIN_PROVIDER_ENV === "stripe") return HAS_STRIPE ? "stripe" : "demo";
+  // auto
+  if (HAS_PAYPAL) return "paypal";
+  if (HAS_STRIPE) return "stripe";
+  return "demo";
+}
 
 // Revenue model split (Phase F, 2026-06-04). Each fee is kept as a separate
 // env var so they can be tuned independently AND attributed correctly in
@@ -140,8 +155,9 @@ module.exports = async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", PUBLIC_BASE_URL);
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Stripe-Signature");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Stripe-Signature, PayPal-Transmission-Id, PayPal-Transmission-Time, PayPal-Transmission-Sig, PayPal-Cert-Url, PayPal-Auth-Algo");
   res.setHeader("x-billing-mode", HAS_STRIPE ? "stripe" : "demo");
+  res.setHeader("x-payin-provider", resolvedPayinProvider());
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const action = (req.query && req.query.action) || (req.body && req.body.action);
@@ -186,6 +202,17 @@ module.exports = async function handler(req, res) {
       case "payout":          return await handlePayout(req, res);
       case "history":         return await handleHistory(req, res);
       case "webhook":         return await handleWebhook(req, res);
+      // ── Phase 2 — PayPal pay-in rail ───────────────────────────────
+      // Frontends should switch to these once PAYIN_PROVIDER=paypal.
+      // create_paypal_order returns an approval_url the dashboard
+      // sends the advertiser to; capture_paypal_order is called from
+      // the return URL with the order id PayPal echoes back.
+      case "create_paypal_order":   return await handleCreatePaypalOrder(req, res);
+      case "capture_paypal_order":  return await handleCapturePaypalOrder(req, res);
+      case "paypal_order_status":   return await handlePaypalOrderStatus(req, res);
+      case "paypal_refund":         return await handlePaypalRefund(req, res);
+      case "paypal_webhook":        return await handlePaypalWebhook(req, res);
+      case "payin_provider":        return res.json({ provider: resolvedPayinProvider(), has_stripe: HAS_STRIPE, has_paypal: HAS_PAYPAL });
       default:                return res.status(400).json({ error: "Unknown action" });
     }
   } catch (err) {
@@ -368,6 +395,277 @@ async function handleCreateCheckout(req, res) {
     metadata: { advertiser_id, amount: String(amount) },
   });
   return res.json({ mode: "stripe", checkout_url: session.url, session_id: session.id });
+}
+
+// ────────────────────────────────────────────────────────────────────
+// ── Phase 2 — PayPal pay-in ─────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────
+//
+// Three-step flow that mirrors the Stripe Checkout pattern but routes
+// money through PayPal instead:
+//
+//   1. create_paypal_order  → backend creates a PayPal order, returns
+//                              the approval URL. Frontend redirects.
+//   2. (user approves on PayPal)
+//   3. capture_paypal_order → return URL hits this with the order id,
+//                              backend captures the funds and credits
+//                              the advertiser balance.
+//
+// paypal_webhook acts as the durable confirmation channel for
+// asynchronous capture/refund events so an interrupted return-URL
+// hop never leaves money in an unaccounted state.
+
+const PAYPAL_MIN_DEPOSIT_USD = 10;
+const PAYPAL_MAX_DEPOSIT_USD = 100000;
+
+async function handleCreatePaypalOrder(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  const { advertiser_id, amount, email } = req.body || {};
+  if (!advertiser_id || amount == null) {
+    return res.status(400).json({ error: "Missing advertiser_id or amount" });
+  }
+  const parsedAmount = Number(amount);
+  if (!Number.isFinite(parsedAmount) || parsedAmount < PAYPAL_MIN_DEPOSIT_USD) {
+    return res.status(400).json({ error: `Minimum deposit is $${PAYPAL_MIN_DEPOSIT_USD}` });
+  }
+  if (parsedAmount > PAYPAL_MAX_DEPOSIT_USD) {
+    return res.status(400).json({ error: `Maximum single deposit is $${PAYPAL_MAX_DEPOSIT_USD}` });
+  }
+
+  // Always ensure the demo advertiser record exists so the capture step
+  // can find it even when running against the in-memory ledger.
+  if (!HAS_SUPABASE) ensureDemoAdvertiser(advertiser_id, { email });
+
+  let order;
+  try {
+    order = await paypal.createOrder({
+      advertiserId: advertiser_id,
+      amountUsd:    parsedAmount,
+      email,
+      returnUrl:    `${PUBLIC_BASE_URL}/advertiser?deposit=paypal_return&advertiser_id=${encodeURIComponent(advertiser_id)}&amount=${parsedAmount}`,
+      cancelUrl:    `${PUBLIC_BASE_URL}/advertiser?deposit=cancelled`,
+      // PayPal-Request-Id idempotency: tie to advertiser + amount + minute
+      // so a double-click within the same minute returns the same order.
+      requestId:    `bb_payin_${advertiser_id}_${Math.round(parsedAmount * 100)}_${Math.floor(Date.now() / 60000)}`,
+    });
+  } catch (err) {
+    console.error("[Billing] paypal createOrder failed:", err.message, err.detail || "");
+    return res.status(502).json({ error: "paypal_create_failed", detail: err.message });
+  }
+
+  // Stamp a pending transaction so we can correlate the capture later.
+  const sb = supa();
+  if (sb && order.mode === "paypal") {
+    try {
+      await sb.from("transactions").insert({
+        advertiser_id, type: "deposit",
+        amount: parsedAmount,
+        description: "PayPal deposit (pending capture)",
+        paypal_order_id: order.order_id,
+        provider:        "paypal",
+        status:          "pending",
+      });
+    } catch (_) { /* transactions table may lack new columns yet — surface in webhook */ }
+  }
+
+  return res.json({
+    mode:         order.mode,
+    provider:     "paypal",
+    order_id:     order.order_id,
+    approval_url: order.approval_url,
+    amount:       parsedAmount,
+  });
+}
+
+async function handleCapturePaypalOrder(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  const orderId =
+    (req.body && req.body.order_id) ||
+    (req.query && req.query.order_id) ||
+    (req.query && req.query.token); // PayPal sends `token=<orderId>` on return
+  if (!orderId) return res.status(400).json({ error: "Missing order_id" });
+  const expectedAdvertiserId = (req.body && req.body.advertiser_id) || (req.query && req.query.advertiser_id) || null;
+  const expectedAmount       = Number((req.body && req.body.amount) || (req.query && req.query.amount) || 0) || undefined;
+
+  let capture;
+  try {
+    capture = await paypal.captureOrder(orderId, {
+      expectedAmountUsd: expectedAmount,
+      requestId:         `bb_capture_${orderId}`,
+    });
+  } catch (err) {
+    console.error("[Billing] paypal captureOrder failed:", err.message, err.detail || "");
+    return res.status(502).json({ error: "paypal_capture_failed", detail: err.message });
+  }
+
+  // PayPal sometimes returns 200 with status=COMPLETED but no capture id
+  // when the order has already been captured (e.g. webhook beat us). In
+  // that case it's safe to no-op: the webhook handler will / has done
+  // the bookkeeping.
+  if (capture.status !== "COMPLETED") {
+    return res.status(200).json({
+      mode:        capture.mode,
+      order_id:    capture.order_id,
+      status:      capture.status,
+      credited:    false,
+      message:     "Order not in COMPLETED state; webhook will reconcile.",
+    });
+  }
+
+  // Resolve which advertiser to credit. The order's custom_id is the
+  // authoritative source (we set it at createOrder time). Fall back to
+  // the body for demo mode where the PayPal response is synthetic.
+  const customId = ((capture.raw && capture.raw.purchase_units) || []).map((pu) => pu.custom_id).find(Boolean);
+  const advertiserId = customId || expectedAdvertiserId;
+  if (!advertiserId) {
+    console.error("[Billing] paypal capture missing custom_id and no advertiser_id provided");
+    return res.status(400).json({ error: "cannot_resolve_advertiser" });
+  }
+  const amountUsd = capture.amount_usd || expectedAmount || 0;
+
+  const credited = await creditAdvertiserForPayinEvent({
+    provider:           "paypal",
+    advertiserId,
+    amountUsd,
+    externalEventId:    capture.capture_id || capture.order_id,
+    paypalOrderId:      capture.order_id,
+    paypalCaptureId:    capture.capture_id,
+    payerEmail:         capture.payer_email,
+    description:        "PayPal deposit",
+  });
+
+  return res.json({
+    mode:        capture.mode,
+    order_id:    capture.order_id,
+    capture_id:  capture.capture_id,
+    status:      capture.status,
+    amount_usd:  amountUsd,
+    advertiser_id: advertiserId,
+    credited,
+  });
+}
+
+async function handlePaypalOrderStatus(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  const orderId = req.query && req.query.order_id;
+  if (!orderId) return res.status(400).json({ error: "Missing order_id" });
+  try {
+    const order = await paypal.getOrder(orderId);
+    return res.json(order);
+  } catch (err) {
+    return res.status(502).json({ error: "paypal_status_failed", detail: err.message });
+  }
+}
+
+async function handlePaypalRefund(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  // Admin-only refund — same Authorization pattern the admin payouts
+  // routes use. ADMIN_TOKEN is separate from CRON_SECRET so a leaked
+  // cron token can't trigger refunds.
+  const adminToken = process.env.ADMIN_TOKEN;
+  if (adminToken) {
+    const auth = req.headers && (req.headers.authorization || req.headers.Authorization);
+    if (!auth || auth !== `Bearer ${adminToken}`) {
+      return res.status(401).json({ error: "unauthorized" });
+    }
+  }
+  const { capture_id, amount, note } = req.body || {};
+  if (!capture_id) return res.status(400).json({ error: "Missing capture_id" });
+
+  try {
+    const refund = await paypal.refundCapture(capture_id, {
+      amountUsd: amount == null ? undefined : Number(amount),
+      note,
+      requestId: `bb_refund_${capture_id}_${Math.floor(Date.now() / 60000)}`,
+    });
+    // We deliberately do NOT debit the advertiser balance here; the
+    // PAYMENT.CAPTURE.REFUNDED webhook is the authoritative debit
+    // signal (matches how Stripe refunds are handled).
+    return res.json(refund);
+  } catch (err) {
+    return res.status(502).json({ error: "paypal_refund_failed", detail: err.message });
+  }
+}
+
+// ── Shared advertiser credit path (provider-agnostic) ─────────────────
+// Both the Stripe checkout webhook and the PayPal capture flow funnel
+// here so the bookkeeping is identical no matter which rail brought the
+// money in. Returns true if the balance was actually credited (vs. a
+// duplicate that was deduped).
+async function creditAdvertiserForPayinEvent({
+  provider, advertiserId, amountUsd,
+  externalEventId, paypalOrderId, paypalCaptureId,
+  payerEmail, description,
+}) {
+  if (!advertiserId || !Number.isFinite(Number(amountUsd)) || Number(amountUsd) <= 0) return false;
+  const amount = Number(amountUsd);
+
+  const sb = supa();
+  if (sb) {
+    // Idempotency: look for an existing transaction with the same
+    // external event id (capture_id for PayPal, session.id for Stripe)
+    // before crediting.
+    if (externalEventId) {
+      try {
+        const { data: existing } = await sb.from("transactions")
+          .select("id, status")
+          .or(`paypal_capture_id.eq.${externalEventId},stripe_session_id.eq.${externalEventId}`)
+          .limit(1);
+        if (existing && existing.length > 0 && existing[0].status === "completed") {
+          return false;
+        }
+      } catch (_) { /* transactions schema may not have these columns yet */ }
+    }
+
+    // Atomic balance increment via the shared RPC, with fallback for
+    // older deploys that don't have it.
+    const { error: rpcErr } = await sb.rpc("bbx_credit_advertiser_balance", {
+      p_advertiser_id: advertiserId,
+      p_amount_usd:    amount,
+    });
+    if (rpcErr && rpcErr.message && rpcErr.message.includes("does not exist")) {
+      try {
+        const { data: adv } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
+        if (adv) {
+          await sb.from("advertisers")
+            .update({ balance: (parseFloat(adv.balance) || 0) + amount })
+            .eq("id", advertiserId);
+        }
+      } catch (e) {
+        console.error("[Billing] advertiser balance fallback failed:", e.message);
+      }
+    } else if (rpcErr) {
+      console.error("[Billing] advertiser RPC credit failed:", rpcErr.message);
+    }
+
+    try {
+      const row = {
+        advertiser_id: advertiserId,
+        type:          "deposit",
+        amount,
+        description:   description || `${provider} deposit`,
+        provider,
+        status:        "completed",
+      };
+      if (paypalOrderId)   row.paypal_order_id   = paypalOrderId;
+      if (paypalCaptureId) row.paypal_capture_id = paypalCaptureId;
+      if (payerEmail)      row.payer_email       = payerEmail;
+      await sb.from("transactions").upsert(row, { onConflict: "paypal_capture_id" });
+    } catch (_) { /* if schema lacks columns the row is best-effort */ }
+
+    return true;
+  }
+
+  // Demo mode: idempotency via the same processed-webhook set the
+  // Stripe path uses, so retries don't double-credit.
+  if (externalEventId && DEMO.processedWebhookIds.has(`payin:${externalEventId}`)) {
+    return false;
+  }
+  if (externalEventId) DEMO.processedWebhookIds.add(`payin:${externalEventId}`);
+  const a = ensureDemoAdvertiser(advertiserId, { email: payerEmail });
+  a.balance = (Number(a.balance) || 0) + amount;
+  DEMO.events.push({ at: new Date().toISOString(), type: `${provider}.deposit.captured`, advertiser_id: advertiserId, amount });
+  return true;
 }
 
 // ── publisher Stripe Connect onboarding ────────────────────────────────
@@ -2022,6 +2320,175 @@ async function handleWebhook(req, res) {
   }
 
   return res.json({ received: true, event_type: event.type, mode: HAS_STRIPE ? "stripe" : "demo" });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ── Phase 2 — PayPal webhook (signature-verified via PayPal API) ─────
+// ════════════════════════════════════════════════════════════════════
+//
+// Unlike Stripe, PayPal doesn't sign with an HMAC we can verify
+// locally. Instead we POST the headers + event back to PayPal's
+// verify-webhook-signature endpoint and trust their reply.
+//
+// Events we care about:
+//   PAYMENT.CAPTURE.COMPLETED — advertiser deposit landed
+//   PAYMENT.CAPTURE.REFUNDED  — advertiser refund issued
+//   PAYMENT.CAPTURE.DENIED    — capture rejected (rare; logs only)
+//   PAYMENT.CAPTURE.PENDING   — review hold (logs only)
+//
+// The shim that delivers the raw body to this handler lives in
+// api/paypal-webhook.js (mirrors how api/stripe-webhook.js wraps
+// handleWebhook).
+async function handlePaypalWebhook(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+
+  const raw = req.rawBody || (typeof req.body === "string" ? req.body : JSON.stringify(req.body || {}));
+
+  let verification;
+  try {
+    verification = await paypal.verifyWebhook({
+      headers:   req.headers || {},
+      rawBody:   raw,
+      webhookId: process.env.PAYPAL_WEBHOOK_ID,
+    });
+  } catch (err) {
+    console.error("[Billing] paypal verifyWebhook failed:", err.message);
+    return res.status(502).json({ error: "paypal_verify_failed", detail: err.message });
+  }
+
+  if (!verification.verified && HAS_PAYPAL) {
+    console.error("[Billing] paypal webhook verification did not succeed:", verification.status);
+    return res.status(400).json({ error: "invalid_signature", status: verification.status });
+  }
+
+  let event;
+  try { event = JSON.parse(raw); }
+  catch (_) { return res.status(400).json({ error: "Invalid JSON body" }); }
+  if (!event || !event.event_type) return res.status(400).json({ error: "Missing event payload" });
+
+  // Idempotency: PayPal includes a stable `id` on every event.
+  const eventId = event.id || `paypal_demo_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  if (DEMO.processedWebhookIds.has(eventId)) {
+    return res.json({ received: true, event_type: event.event_type, duplicate: true });
+  }
+  const sb = supa();
+  if (sb && event.id) {
+    try {
+      const { data: existing } = await sb.from("transactions")
+        .select("id").eq("paypal_event_id", event.id).limit(1);
+      if (existing && existing.length > 0) {
+        return res.json({ received: true, event_type: event.event_type, duplicate: true });
+      }
+    } catch (_) { /* paypal_event_id column may not exist yet */ }
+  }
+  DEMO.processedWebhookIds.add(eventId);
+  DEMO.events.push({
+    at: new Date().toISOString(),
+    type: event.event_type,
+    event_id: eventId,
+    untrusted: verification.mode === "demo",
+  });
+
+  const resource = (event.resource || {});
+
+  if (event.event_type === "PAYMENT.CAPTURE.COMPLETED") {
+    // Resolve advertiser id from custom_id (we stamped this at order create time)
+    const advertiserId = resource.custom_id || (resource.supplementary_data && resource.supplementary_data.related_ids && resource.supplementary_data.related_ids.advertiser_id);
+    const amount       = Number((resource.amount && resource.amount.value) || 0);
+    const captureId    = resource.id;
+    const orderId      = (resource.supplementary_data && resource.supplementary_data.related_ids && resource.supplementary_data.related_ids.order_id) || null;
+    const payerEmail   = (resource.payer && resource.payer.email_address) || null;
+    if (advertiserId && amount > 0) {
+      await creditAdvertiserForPayinEvent({
+        provider:        "paypal",
+        advertiserId,
+        amountUsd:       amount,
+        externalEventId: captureId || eventId,
+        paypalOrderId:   orderId,
+        paypalCaptureId: captureId,
+        payerEmail,
+        description:     "PayPal deposit (webhook)",
+      });
+    } else {
+      console.warn("[Billing] paypal capture.completed missing advertiser/amount", { advertiserId, amount, captureId });
+    }
+  }
+
+  if (event.event_type === "PAYMENT.CAPTURE.REFUNDED") {
+    // Refunds: debit the advertiser balance and fire any publisher
+    // clawbacks tied to that advertiser's campaigns (same call the
+    // Stripe refund path uses).
+    const refundedCaptureId = resource.id;  // resource is the refund itself
+    const linkedCaptureId   = ((resource.links || []).find((l) => l.rel === "up") || {}).href || null;
+    const refundAmount      = Number((resource.amount && resource.amount.value) || 0);
+    const advertiserId      = resource.custom_id || null;
+
+    if (sb && refundAmount > 0) {
+      // Try to look the original capture up by its id to find the advertiser
+      let resolvedAdvertiserId = advertiserId;
+      try {
+        if (!resolvedAdvertiserId && linkedCaptureId) {
+          const m = linkedCaptureId.match(/captures\/([^/]+)/);
+          const sourceCapture = m && m[1];
+          if (sourceCapture) {
+            const { data } = await sb.from("transactions")
+              .select("advertiser_id").eq("paypal_capture_id", sourceCapture).limit(1);
+            resolvedAdvertiserId = data && data[0] && data[0].advertiser_id;
+          }
+        }
+        if (resolvedAdvertiserId) {
+          // Debit balance — best effort. fireRefundClawbacks runs after.
+          try {
+            await sb.rpc("bbx_credit_advertiser_balance", {
+              p_advertiser_id: resolvedAdvertiserId,
+              p_amount_usd:    -refundAmount,
+            });
+          } catch (e) { console.error("[Billing] paypal refund balance debit failed:", e.message); }
+          try { await fireRefundClawbacks(sb, resolvedAdvertiserId, refundAmount, refundedCaptureId); }
+          catch (e) { console.error("[Billing] paypal refund clawbacks failed:", e.message); }
+
+          try {
+            await sb.from("transactions").insert({
+              advertiser_id: resolvedAdvertiserId,
+              type:          "refund",
+              amount:        -refundAmount,
+              description:   "PayPal refund",
+              provider:      "paypal",
+              status:        "completed",
+              paypal_event_id:   eventId,
+              paypal_capture_id: refundedCaptureId,
+            });
+          } catch (_) { /* schema gap is non-fatal */ }
+        }
+      } catch (e) {
+        console.error("[Billing] paypal refund handling error:", e.message);
+      }
+    } else if (!sb) {
+      // Demo mode — just decrement the in-memory advertiser balance
+      if (advertiserId) {
+        const a = DEMO.advertisers.get(advertiserId);
+        if (a) a.balance = Math.max(0, (Number(a.balance) || 0) - refundAmount);
+      }
+    }
+  }
+
+  if (event.event_type === "PAYMENT.CAPTURE.DENIED" || event.event_type === "PAYMENT.CAPTURE.PENDING") {
+    // Surfaceable for ops but no balance change. Mark transactions row.
+    if (sb && resource.id) {
+      try {
+        await sb.from("transactions")
+          .update({ status: event.event_type === "PAYMENT.CAPTURE.DENIED" ? "denied" : "pending_review" })
+          .eq("paypal_capture_id", resource.id);
+      } catch (_) { /* best effort */ }
+    }
+  }
+
+  return res.json({
+    received:    true,
+    event_type:  event.event_type,
+    verified:    verification.verified,
+    mode:        verification.mode,
+  });
 }
 
 // ── helpers ────────────────────────────────────────────────────────────
