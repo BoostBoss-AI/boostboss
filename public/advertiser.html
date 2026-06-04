@@ -5629,6 +5629,7 @@
         document.getElementById('depositBtn').addEventListener('click', () => {
             depositModal.style.display = 'flex';
             depositAmountInput.value = '';
+            refreshDepositCtaLabel();
         });
         document.getElementById('depositCancelBtn').addEventListener('click', () => {
             depositModal.style.display = 'none';
@@ -5666,13 +5667,24 @@
         }
         // Update the modal CTA label so the advertiser knows which rail
         // they're about to land on. Best-effort, non-blocking.
-        getPayinProvider().then((p) => {
+        // Refresh the modal CTA label whenever the deposit modal opens, so
+        // that the i18n hydration (which runs on locale switch + page load)
+        // never wins over the provider-aware label. We also clear the i18n
+        // hydration marker so this stays sticky.
+        function refreshDepositCtaLabel() {
             const btn = document.getElementById('depositConfirmBtn');
             if (!btn) return;
-            if (p === 'paypal')      btn.textContent = 'Continue to PayPal';
-            else if (p === 'stripe') btn.textContent = 'Continue to Stripe';
-            else                     btn.textContent = 'Deposit';
-        });
+            getPayinProvider().then((p) => {
+                // Remove data-t so i18n hydration doesn't overwrite us on
+                // next locale switch. Provider-aware label is the source
+                // of truth from here on.
+                btn.removeAttribute('data-t');
+                if (p === 'paypal')      btn.textContent = 'Continue to PayPal';
+                else if (p === 'stripe') btn.textContent = 'Continue to Stripe';
+                else                     btn.textContent = 'Deposit';
+            });
+        }
+        refreshDepositCtaLabel();
 
         // Confirm deposit
         document.getElementById('depositConfirmBtn').addEventListener('click', async () => {
@@ -7334,7 +7346,7 @@
                     'deposit.sub': 'Deposit to your Boost Boss ad account',
                     'deposit.custom': 'Custom amount',
                     'deposit.custom_ph': 'Enter amount ($10 minimum)',
-                    'deposit.confirm': 'Deposit via Stripe',
+                    'deposit.confirm': 'Deposit',
                     'deposit.note': 'Payments processed securely by Stripe. Funds are available instantly.',
                     'rule.title': 'Create Rule',
                     'rule.name': 'Rule Name',
@@ -7646,7 +7658,7 @@
                     'deposit.sub': '为您的 Boost Boss 广告账户充值',
                     'deposit.custom': '自定义金额',
                     'deposit.custom_ph': '输入金额（最低 10 美元）',
-                    'deposit.confirm': '通过 Stripe 充值',
+                    'deposit.confirm': '充值',
                     'deposit.note': '由 Stripe 安全处理。充值后即时到账。',
                     'rule.title': '创建规则',
                     'rule.name': '规则名称',
@@ -7958,7 +7970,7 @@
                     'deposit.sub': '為您的 Boost Boss 廣告帳戶儲值',
                     'deposit.custom': '自訂金額',
                     'deposit.custom_ph': '輸入金額（最低 10 美元）',
-                    'deposit.confirm': '透過 Stripe 儲值',
+                    'deposit.confirm': '儲值',
                     'deposit.note': '由 Stripe 安全處理。儲值後即時到帳。',
                     'rule.title': '建立規則',
                     'rule.name': '規則名稱',
@@ -8270,7 +8282,7 @@
                     'deposit.sub': 'Boost Boss 広告アカウントへ入金',
                     'deposit.custom': 'カスタム金額',
                     'deposit.custom_ph': '金額を入力（最低 10 ドル）',
-                    'deposit.confirm': 'Stripe で入金',
+                    'deposit.confirm': '入金',
                     'deposit.note': 'Stripe により安全に処理されます。入金後すぐにご利用いただけます。',
                     'rule.title': 'ルール作成',
                     'rule.name': 'ルール名',
@@ -8582,7 +8594,7 @@
                     'deposit.sub': 'Boost Boss 광고 계정에 충전',
                     'deposit.custom': '직접 입력',
                     'deposit.custom_ph': '금액 입력 (최소 $10)',
-                    'deposit.confirm': 'Stripe로 충전',
+                    'deposit.confirm': '충전',
                     'deposit.note': 'Stripe로 안전하게 처리됩니다. 충전 즉시 사용 가능합니다.',
                     'rule.title': '규칙 만들기',
                     'rule.name': '규칙 이름',
@@ -8894,7 +8906,7 @@
                     'deposit.sub': 'Nạp vào tài khoản quảng cáo Boost Boss của bạn',
                     'deposit.custom': 'Số tiền tùy chỉnh',
                     'deposit.custom_ph': 'Nhập số tiền (tối thiểu $10)',
-                    'deposit.confirm': 'Nạp qua Stripe',
+                    'deposit.confirm': 'Nạp tiền',
                     'deposit.note': 'Xử lý an toàn bởi Stripe. Số dư khả dụng ngay lập tức.',
                     'rule.title': 'Tạo quy tắc',
                     'rule.name': 'Tên quy tắc',
