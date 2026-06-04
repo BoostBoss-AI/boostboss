@@ -5686,11 +5686,26 @@
                        note_processed_by: 'Xử lý an toàn bởi', note_stripe: 'Xử lý an toàn bởi Stripe. Số dư khả dụng ngay lập tức.', note_demo: 'Chế độ thử nghiệm — không phát sinh phí.' },
         };
         function _payinLang() {
+            // Read the dashboard locale from the same source `currentLang()`
+            // uses — `bb_dashboard_lang` localStorage. We can't call
+            // currentLang() directly because it's scoped to a different
+            // closure later in the file. Fall back to `bb_lang` (marketing
+            // site preference) for users who never opened Settings, then
+            // navigator language, then English.
             try {
-                if (typeof currentLang === 'function') {
-                    const l = currentLang();
-                    if (PAYIN_T[l]) return l;
-                }
+                const v = localStorage.getItem('bb_dashboard_lang');
+                if (v && PAYIN_T[v]) return v;
+            } catch (_) {}
+            try {
+                const v = localStorage.getItem('bb_lang');
+                if (v && PAYIN_T[v]) return v;
+            } catch (_) {}
+            try {
+                const n = (navigator.language || '').replace(/_/g, '-');
+                // navigator.language is like "zh-TW", "ja-JP", "en-US", etc.
+                if (PAYIN_T[n]) return n;           // exact match
+                const base = n.split('-')[0];
+                if (PAYIN_T[base]) return base;     // language-only match
             } catch (_) {}
             return 'en';
         }
