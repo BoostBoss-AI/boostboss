@@ -5671,19 +5671,37 @@
         // Per-locale translations for the provider-aware modal strings.
         // Reads window.currentLang() if available (set up later in the file);
         // falls back to navigator language or English.
+        // Provider note layout: `[before] [LOGO] [after]`. Word order
+        // differs by language — in CJK the brand comes first and the verb
+        // follows ("PayPalで安全に決済"), while English/Vietnamese put the
+        // brand last ("Securely processed by PayPal"). Both before/after
+        // can be empty; we only render them when set so flex-gap doesn't
+        // create dead space around the logo.
         const PAYIN_T = {
-            en:      { cta_paypal: 'Continue to PayPal', cta_stripe: 'Continue to Stripe', cta_generic: 'Deposit',
-                       note_processed_by: 'Securely processed by', note_stripe: 'Payments processed securely by Stripe. Funds are available instantly.', note_demo: 'Demo mode — no real charge.' },
-            zh:      { cta_paypal: '继续前往 PayPal',  cta_stripe: '继续前往 Stripe',  cta_generic: '充值',
-                       note_processed_by: '由', note_stripe: '由 Stripe 安全处理。充值后即时到账。', note_demo: '演示模式 — 不会产生实际费用。' },
-            'zh-TW': { cta_paypal: '繼續前往 PayPal',  cta_stripe: '繼續前往 Stripe',  cta_generic: '儲值',
-                       note_processed_by: '由', note_stripe: '由 Stripe 安全處理。儲值後即時到帳。', note_demo: '演示模式 — 不會產生實際費用。' },
-            ja:      { cta_paypal: 'PayPal に進む',     cta_stripe: 'Stripe に進む',    cta_generic: '入金',
-                       note_processed_by: '安全な処理:', note_stripe: 'Stripe により安全に処理されます。入金後すぐにご利用いただけます。', note_demo: 'デモモード — 実際の請求はありません。' },
-            ko:      { cta_paypal: 'PayPal로 계속',      cta_stripe: 'Stripe로 계속',     cta_generic: '충전',
-                       note_processed_by: '안전한 결제:', note_stripe: 'Stripe로 안전하게 처리됩니다. 충전 즉시 사용 가능합니다.', note_demo: '데모 모드 — 실제 결제는 없습니다.' },
-            vi:      { cta_paypal: 'Tiếp tục với PayPal', cta_stripe: 'Tiếp tục với Stripe', cta_generic: 'Nạp tiền',
-                       note_processed_by: 'Xử lý an toàn bởi', note_stripe: 'Xử lý an toàn bởi Stripe. Số dư khả dụng ngay lập tức.', note_demo: 'Chế độ thử nghiệm — không phát sinh phí.' },
+            en:      { cta_paypal: 'Continue to PayPal',   cta_stripe: 'Continue to Stripe',   cta_generic: 'Deposit',
+                       note_before: 'Securely processed by', note_after: '',
+                       note_stripe: 'Payments processed securely by Stripe. Funds are available instantly.',
+                       note_demo:   'Demo mode — no real charge.' },
+            zh:      { cta_paypal: '继续前往 PayPal',       cta_stripe: '继续前往 Stripe',       cta_generic: '充值',
+                       note_before: '由',                   note_after: '安全处理',
+                       note_stripe: '由 Stripe 安全处理。充值后即时到账。',
+                       note_demo:   '演示模式 — 不会产生实际费用。' },
+            'zh-TW': { cta_paypal: '繼續前往 PayPal',       cta_stripe: '繼續前往 Stripe',       cta_generic: '儲值',
+                       note_before: '由',                   note_after: '安全處理',
+                       note_stripe: '由 Stripe 安全處理。儲值後即時到帳。',
+                       note_demo:   '演示模式 — 不會產生實際費用。' },
+            ja:      { cta_paypal: 'PayPal に進む',         cta_stripe: 'Stripe に進む',         cta_generic: '入金',
+                       note_before: '',                     note_after: 'により安全に決済',
+                       note_stripe: 'Stripe により安全に処理されます。入金後すぐにご利用いただけます。',
+                       note_demo:   'デモモード — 実際の請求はありません。' },
+            ko:      { cta_paypal: 'PayPal로 계속',          cta_stripe: 'Stripe로 계속',          cta_generic: '충전',
+                       note_before: '',                     note_after: '(으)로 안전하게 결제',
+                       note_stripe: 'Stripe로 안전하게 처리됩니다. 충전 즉시 사용 가능합니다.',
+                       note_demo:   '데모 모드 — 실제 결제는 없습니다.' },
+            vi:      { cta_paypal: 'Tiếp tục với PayPal',  cta_stripe: 'Tiếp tục với Stripe',  cta_generic: 'Nạp tiền',
+                       note_before: 'Thanh toán an toàn qua', note_after: '',
+                       note_stripe: 'Xử lý an toàn bởi Stripe. Số dư khả dụng ngay lập tức.',
+                       note_demo:   'Chế độ thử nghiệm — không phát sinh phí.' },
         };
         function _payinLang() {
             // Read the dashboard locale from the same source `currentLang()`
@@ -5739,8 +5757,10 @@
             getPayinProvider().then((p) => {
                 const t = PAYIN_T[_payinLang()] || PAYIN_T.en;
                 if (p === 'paypal') {
+                    const before = t.note_before ? `<span>${t.note_before}</span>` : '';
+                    const after  = t.note_after  ? `<span>${t.note_after}</span>`  : '';
                     el.innerHTML = `
-                        <span>${t.note_processed_by}</span>
+                        ${before}
                         <svg width="58" height="14" viewBox="0 0 124 33" xmlns="http://www.w3.org/2000/svg" aria-label="PayPal" style="vertical-align: middle;">
                           <path fill="#003087" d="M46.211 6.749h-6.839a.95.95 0 0 0-.939.802L35.671 25.39a.57.57 0 0 0 .564.658h3.265c.47 0 .87-.341.943-.806l.748-4.737a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.972-1.142-2.696-1.746-4.985-1.746l-.01-.292Zm.789 6.405c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906Z"/>
                           <path fill="#003087" d="M68.183 13.075h-3.273a.57.57 0 0 0-.563.482l-.145.916-.229-.332c-.708-1.028-2.287-1.371-3.864-1.371-3.618 0-6.708 2.741-7.31 6.586-.313 1.918.131 3.752 1.22 5.03.999 1.174 2.428 1.663 4.128 1.663 2.915 0 4.532-1.875 4.532-1.875l-.146.91a.57.57 0 0 0 .564.659h2.949c.47 0 .87-.341.943-.806l1.77-11.213a.57.57 0 0 0-.575-.658l-.001.009Zm-4.561 6.374c-.317 1.871-1.802 3.127-3.696 3.127-.95 0-1.71-.305-2.198-.883-.484-.572-.668-1.388-.513-2.296.295-1.855 1.804-3.151 3.669-3.151.93 0 1.685.31 2.183.892.501.589.7 1.41.555 2.311Z"/>
@@ -5753,6 +5773,7 @@
                           <path fill="#012169" d="M21.745 9.508a9.806 9.806 0 0 0-1.213-.269 15.32 15.32 0 0 0-2.444-.179h-7.36a1.176 1.176 0 0 0-1.164.997L8 19.547l-.045.288a1.34 1.34 0 0 1 1.33-1.143h2.767c5.435 0 9.692-2.208 10.937-8.592.037-.188.069-.37.097-.547a6.625 6.625 0 0 0-1.022-.43c-.107-.034-.213-.067-.319-.099Z"/>
                           <path fill="#003087" d="M9.564 10.057a1.18 1.18 0 0 1 1.164-.997h7.359c.87 0 1.685.057 2.444.18a9.821 9.821 0 0 1 1.541.367 6.6 6.6 0 0 1 1.025.43c.301-1.92-.003-3.225-1.05-4.408-1.154-1.305-3.236-1.866-5.901-1.866H8.42c-.546 0-1.012.398-1.097.937L4.094 25.51a.81.81 0 0 0 .8.936h5.79l1.451-9.218 1.429-9.171Z"/>
                         </svg>
+                        ${after}
                     `;
                 } else if (p === 'stripe') {
                     el.innerHTML = `<span>${t.note_stripe}</span>`;
