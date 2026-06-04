@@ -101,7 +101,7 @@ When the first publisher says yes, here's how to run the call:
 
 ### Minute 2–8: Shared-screen install
 Walk them through:
-1. Sign up at boostboss.ai/signup → copy API key
+1. Sign up at boostboss.ai/publish/signup → copy API key
 2. `npm install @boostbossai/lumi-sdk` in their project
 3. Paste the 7-line integration into their AI response endpoint
 4. Add `BB_API_KEY` to their Vercel/Netlify/Render env

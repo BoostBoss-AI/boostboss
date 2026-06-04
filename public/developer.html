@@ -4490,7 +4490,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }, duration);
         }
 
-        // ───────────── AUTH BRIDGE FROM /signup ─────────────
+        // ───────────── AUTH BRIDGE FROM /publish/signup ─────────────
         (function bridgeSignupAuth() {
             const session = localStorage.getItem('bb_dev_session');
             if (session) return; // Already authenticated

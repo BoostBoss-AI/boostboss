@@ -480,10 +480,11 @@ const sb = window.supabase && window.supabase.createClient
 // ── Role lock based on URL path ──────────────────────────────────
 // /publish/signup and /publish/signin → publisher-only flow
 // /ads/signup  and /ads/signin         → advertiser-only flow
-// /signup (and /login) keeps the shared flow with the role picker.
-// On role-specific URLs we remove the Create/Sign-in tab bar entirely
-// — each URL is its own dedicated page — and re-route the "switch"
-// anchors to navigate to the sibling URL.
+// The unified /signup (and /login) entry was REMOVED 2026-06-04
+// (vercel.json now 301-redirects them to /). Every reachable URL
+// is role-specific, so this function ALWAYS resolves a role.
+// We still remove the Create/Sign-in tab bar — each URL is its own
+// dedicated page — and re-route the "switch" anchors to the sibling URL.
 (function lockRoleFromPath() {
   var path = window.location.pathname;
   var role = null;
