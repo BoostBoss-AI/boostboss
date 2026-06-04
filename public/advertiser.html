@@ -2526,7 +2526,7 @@
                             flex: 1; padding: 12px; background: var(--accent-primary); color: #fff;
                             border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
                             cursor: pointer; font-family: inherit;
-                        " data-t="deposit.confirm">Deposit via Stripe</button>
+                        " data-t="deposit.confirm">Deposit</button>
                         <button id="depositCancelBtn" style="
                             padding: 12px 20px; background: #F3F4F6; color: #374151;
                             border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
@@ -5646,6 +5646,34 @@
             });
         });
 
+        // ── Pay-in provider resolution ──────────────────────────────
+        // The backend decides which rail to use based on PAYIN_PROVIDER env
+        // var + which provider creds are configured. We fetch this once on
+        // page load and cache it so the deposit button knows where to send
+        // the request (PayPal create_paypal_order vs Stripe create_checkout
+        // vs demo direct-credit).
+        let _payinProviderCache = null;
+        async function getPayinProvider() {
+            if (_payinProviderCache) return _payinProviderCache;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=payin_provider`);
+                const j = await r.json();
+                _payinProviderCache = (j && j.provider) || 'demo';
+            } catch (_) {
+                _payinProviderCache = 'demo';
+            }
+            return _payinProviderCache;
+        }
+        // Update the modal CTA label so the advertiser knows which rail
+        // they're about to land on. Best-effort, non-blocking.
+        getPayinProvider().then((p) => {
+            const btn = document.getElementById('depositConfirmBtn');
+            if (!btn) return;
+            if (p === 'paypal')      btn.textContent = 'Continue to PayPal';
+            else if (p === 'stripe') btn.textContent = 'Continue to Stripe';
+            else                     btn.textContent = 'Deposit';
+        });
+
         // Confirm deposit
         document.getElementById('depositConfirmBtn').addEventListener('click', async () => {
             const amount = parseFloat(depositAmountInput.value);
@@ -5654,10 +5682,14 @@
                 return;
             }
             const btn = document.getElementById('depositConfirmBtn');
+            const originalLabel = btn.textContent;
             btn.textContent = 'Processing…';
             btn.disabled = true;
             try {
-                const r = await fetch(`${API_BASE}/api/billing?action=create_checkout`, {
+                const provider = await getPayinProvider();
+                const action = provider === 'paypal' ? 'create_paypal_order' : 'create_checkout';
+
+                const r = await fetch(`${API_BASE}/api/billing?action=${action}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
                     body: JSON.stringify({
@@ -5670,28 +5702,78 @@
                 if (!r.ok) {
                     throw new Error(j.error || `Server returned ${r.status}`);
                 }
+
+                // PayPal path — redirect to PayPal's hosted approval page
+                if (j.approval_url) {
+                    window.location.href = j.approval_url;
+                    return;
+                }
+                // Stripe path — redirect to Checkout
                 if (j.checkout_url) {
-                    // Stripe mode — redirect to checkout
                     window.location.href = j.checkout_url;
-                } else if (j.mode === 'demo') {
-                    // Demo mode — balance credited instantly
+                    return;
+                }
+                // Demo path — balance was credited synchronously
+                if (j.mode === 'demo') {
                     showToast(`Demo deposit of $${amount} credited!`, 'success');
                     depositModal.style.display = 'none';
                     loadBalance();
-                } else {
-                    throw new Error('Unexpected response from billing API');
+                    return;
                 }
+                throw new Error('Unexpected response from billing API');
             } catch (e) {
                 showToast('Deposit failed: ' + e.message, 'error');
             } finally {
-                btn.textContent = 'Deposit via Stripe';
+                btn.textContent = originalLabel;
                 btn.disabled = false;
             }
         });
 
-        // Check for deposit success/cancel URL params
+        // Check for deposit success/cancel/paypal-return URL params
         (function checkDepositReturn() {
             const params = new URLSearchParams(window.location.search);
+
+            // ── PayPal approval return ─────────────────────────────────
+            // PayPal redirects the advertiser back to ?deposit=paypal_return
+            // with token=<order_id>. We capture the order (which actually
+            // moves the funds), then poll balance to confirm credit.
+            if (params.get('deposit') === 'paypal_return') {
+                const orderId      = params.get('token') || params.get('order_id');
+                const advertiserId = params.get('advertiser_id');
+                const expected     = parseFloat(params.get('amount')) || 0;
+                window.history.replaceState({}, '', window.location.pathname);
+                if (!orderId) {
+                    showToast('PayPal did not return an order id — deposit could not be captured.', 'error');
+                    return;
+                }
+                showToast('Finalizing your PayPal deposit…', 'info');
+                (async () => {
+                    try {
+                        const r = await fetch(`${API_BASE}/api/billing?action=capture_paypal_order`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
+                            body: JSON.stringify({
+                                order_id:      orderId,
+                                advertiser_id: advertiserId || (currentUserData && currentUserData.user_id),
+                                amount:        expected,
+                            }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || `Server returned ${r.status}`);
+                        if (j.status === 'COMPLETED') {
+                            showToast(`Deposit of $${j.amount_usd || expected} received!`, 'success');
+                            await loadBalance();
+                        } else {
+                            showToast('Deposit pending review — the webhook will reconcile shortly.', 'info');
+                            await loadBalance();
+                        }
+                    } catch (e) {
+                        showToast('PayPal capture failed: ' + e.message + '. The webhook may still complete the credit.', 'error');
+                    }
+                })();
+                return;
+            }
+
             if (params.get('deposit') === 'success') {
                 const depositAmount = parseFloat(params.get('amount')) || 0;
                 showToast('Payment received! Updating your balance...', 'success');

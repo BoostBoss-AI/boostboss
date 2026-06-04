@@ -64,8 +64,9 @@ CREATE INDEX IF NOT EXISTS transactions_provider_idx
   WHERE provider IS NOT NULL;
 
 -- Mark migration applied (project convention from db/00_schema_migrations.sql).
-INSERT INTO public.bbx_schema_migrations (version, name, applied_at)
-VALUES (22, 'paypal_transactions', now())
-ON CONFLICT (version) DO NOTHING;
+-- The table is keyed on `name` (text PK); columns: name, applied_at, applied_by, notes.
+INSERT INTO public.bbx_schema_migrations (name, applied_by, notes)
+VALUES ('22_paypal_transactions.sql', 'andy', 'phase 2 paypal pay-in scaffolding')
+ON CONFLICT (name) DO NOTHING;
 
 COMMIT;
