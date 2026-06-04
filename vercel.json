@@ -58,7 +58,16 @@
     { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/bots", "destination": "/publish-bots.html" },
     { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/publish/no-code", "destination": "/publish-no-code.html" },
     { "source": "/test/lumi-snippet-test", "destination": "/test/lumi-snippet-test.html" },
-    { "source": "/trust", "destination": "/trust.html" }
+    { "source": "/trust", "destination": "/trust.html" },
+    { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/refunds", "destination": "/refunds.html" },
+    { "source": "/aup", "destination": "/aup.html" },
+    { "source": "/cookies", "destination": "/cookies.html" },
+    { "source": "/publisher-agreement", "destination": "/publisher-agreement.html" },
+    { "source": "/advertiser-terms", "destination": "/advertiser-terms.html" },
+    { "source": "/about", "destination": "/about.html" }
   ],
   "headers": [
     {

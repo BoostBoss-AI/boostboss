@@ -375,7 +375,25 @@ body.dark .superboost-mark { color: #F3F4F6; }
             We'll set up your dashboard with the matching integration door first. You can change it anytime.
           </div>
         </div>
-        <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
+        <!-- Terms acceptance — required for signup. Captured into terms_acceptances
+             table by the backend with IP + UA + version + timestamp for legal
+             audit trail (GDPR / CCPA / PIPL / TW data law compliance). -->
+        <div class="form-group" style="margin-top:18px;padding:14px 16px;background:#FAFAF7;border:1px solid #EAEAEF;border-radius:8px;">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:400;font-size:13.5px;line-height:1.55;color:#4B4B5E;">
+            <input type="checkbox" id="accept-terms" name="accept_terms" required style="margin-top:2px;flex-shrink:0;width:16px;height:16px;cursor:pointer;accent-color:var(--pink);">
+            <span>
+              I have read and agree to the
+              <a href="/terms" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Terms of Service</a>,
+              <a href="/privacy" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Privacy Policy</a>,
+              <a href="/aup" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Acceptable Use Policy</a>,
+              and
+              <span id="role-specific-terms-label">
+                <a href="/advertiser-terms" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Advertiser Terms</a>
+              </span>.
+            </span>
+          </label>
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn" disabled>Create account</button>
       </form>
 
       <div class="alt-link">Already have an account? <a href="#" id="switch-login">Sign in</a></div>
@@ -616,6 +634,27 @@ document.getElementById("switch-signup").addEventListener("click", e => {
   document.querySelector('[data-tab="signup"]').click();
 });
 
+// ── Role-specific terms label (Advertiser Terms vs Publisher Agreement) ──
+function updateRoleTermsLabel() {
+  var label = document.getElementById("role-specific-terms-label");
+  if (!label) return;
+  if (selectedRole === "developer") {
+    label.innerHTML = '<a href="/publisher-agreement" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Publisher Agreement</a>';
+  } else {
+    label.innerHTML = '<a href="/advertiser-terms" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Advertiser Terms</a>';
+  }
+}
+
+// ── Terms checkbox gates submit button ──
+(function gateSubmitOnTerms() {
+  var cb = document.getElementById("accept-terms");
+  var btn = document.getElementById("submit-btn");
+  if (!cb || !btn) return;
+  function refresh() { btn.disabled = !cb.checked; }
+  cb.addEventListener("change", refresh);
+  refresh();
+})();
+
 // ── Role picker ──
 document.querySelectorAll(".role-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -627,8 +666,10 @@ document.querySelectorAll(".role-btn").forEach(btn => {
     // Door-selection Layer 1: only ask publishers what they're building.
     var appTypeG = document.getElementById("app-type-group");
     if (appTypeG) appTypeG.classList.toggle("hidden", selectedRole !== "developer");
+    updateRoleTermsLabel();
   });
 });
+updateRoleTermsLabel();
 
 // ── Signup ──
 document.getElementById("signup-form").addEventListener("submit", async e => {
@@ -637,11 +678,40 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
   btn.disabled = true; btn.textContent = "Creating account…";
   hideMessages();
 
+  // Defensive: never submit without terms acceptance, even if button bypass attempted.
+  var termsCb = document.getElementById("accept-terms");
+  if (!termsCb || !termsCb.checked) {
+    showError("error", "Please accept the Terms of Service to continue.");
+    document.getElementById("submit-btn").disabled = false;
+    document.getElementById("submit-btn").textContent = "Create account";
+    return;
+  }
+
   try {
+    // Capture terms acceptance metadata. The backend records this into
+    // terms_acceptances (db/21_terms_acceptances.sql) with the request IP
+    // and user-agent for GDPR/CCPA/PIPL/TW compliance audit trail.
+    const TERMS_VERSION = "1.0";
+    const roleSpecificDoc = selectedRole === "developer" ? "publisher_agreement" : "advertiser_terms";
+    const acceptedDocs = [
+      { type: "terms_of_service",      version: TERMS_VERSION, url: "/terms" },
+      { type: "privacy_policy",        version: TERMS_VERSION, url: "/privacy" },
+      { type: "acceptable_use_policy", version: TERMS_VERSION, url: "/aup" },
+      { type: roleSpecificDoc,         version: TERMS_VERSION, url: selectedRole === "developer" ? "/publisher-agreement" : "/advertiser-terms" },
+    ];
+
     const payload = {
       email: document.getElementById("email").value.trim(),
       password: document.getElementById("password").value,
       role: selectedRole,
+      terms_acceptance: {
+        accepted: true,
+        accepted_at: new Date().toISOString(),
+        documents: acceptedDocs,
+        acceptance_method: "click_through",
+        user_agent: navigator.userAgent,  // server will also capture from headers
+        page_url: window.location.href,
+      },
     };
     if (selectedRole === "advertiser") payload.company_name = document.getElementById("company_name").value.trim() || undefined;
     if (selectedRole === "developer") payload.app_name = document.getElementById("app_name").value.trim() || undefined;
