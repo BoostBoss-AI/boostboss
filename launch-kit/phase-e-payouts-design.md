@@ -1,5 +1,13 @@
 # Phase E — Stripe Connect Autonomous Payouts Design
 
+> **2026-06-04 update — Revenue model:** the split was 85/15 when this
+> doc was written. It is now 70/30 (publisher receives 70%; Boost Boss
+> retains 30%, composed of a 6.5% demand-side RTB exchange fee and a
+> 23.5% network take). All math below should be re-read with that
+> updated split; the architectural decisions still hold. See
+> `api/billing.js` (env vars `BBX_RTB_FEE`, `BBX_NETWORK_TAKE`) for the
+> source of truth.
+
 ## Goal
 
 Autonomous weekly payouts to publishers via Stripe Connect, with minimal

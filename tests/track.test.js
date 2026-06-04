@@ -288,8 +288,8 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 200);
 
     const bal = publisherBalance._getDemoBalance("dev_accrual_1");
-    // CPM=$10, impression cost = $10/1000 = $0.01, publisher share 85%
-    // = $0.0085
+    // CPM=$10, impression cost = $10/1000 = $0.01, publisher share 70%
+    // = $0.0070 (publisher share defaults to 1 - BBX_RTB_FEE - BBX_NETWORK_TAKE)
     assert(bal.balance > 0, "balance should be > 0 after paid impression");
     assert(bal.lifetime_earned > 0, "lifetime_earned should track balance");
     assert.strictEqual(bal.balance, bal.lifetime_earned,
@@ -329,15 +329,15 @@ async function test(name, fn) {
     // Seed a $1 pending clawback for this developer
     publisherBalance._addDemoClawback("dev_cb", 1.00);
 
-    // First click — earns $5 × 0.85 = $4.25. $1 satisfies clawback,
-    // $3.25 lands in balance.
+    // First click — earns $5 × 0.70 = $3.50. $1 satisfies clawback,
+    // $2.50 lands in balance.
     await run({
       method: "POST",
       body: { event: "click", campaign_id: "cam_cb", developer_id: "dev_cb" },
     });
     const bal = publisherBalance._getDemoBalance("dev_cb");
     assert(bal.balance > 0, "balance should accrue what's left after clawback");
-    assert(bal.balance < 4.25, "balance should be reduced by the clawback");
+    assert(bal.balance < 3.50, "balance should be reduced by the clawback");
     const claws = publisherBalance._getDemoClawbacks("dev_cb");
     assert.strictEqual(claws[0].status, "applied",
       "clawback should be marked applied after being fully consumed");

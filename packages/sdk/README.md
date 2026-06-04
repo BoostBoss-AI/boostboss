@@ -20,7 +20,7 @@ That's it. You get a Benna-ranked recommendation shaped for your MCP surface, pl
 
 Web and mobile ad stacks were built for pages and apps — not tool calls. Lumi SDK is built on [MCP](https://modelcontextprotocol.io/) from day one, so every bid is ranked against the signals that actually matter in AI surfaces: user intent, tool about to be called, host app, session length. The result is an ad that feels native to Cursor, Claude, Raycast, or Perplexity instead of a banner glued on top.
 
-Publishers take **85% of cleared revenue**. Boost Boss keeps 15% as the exchange take rate.
+Publishers receive an industry-leading share of cleared revenue. The full fee schedule — a demand-side exchange fee plus the Boost Boss network take — is set out in the [Publisher Agreement](https://boostboss.ai/publisher-agreement).
 
 ## Three ways to integrate
 

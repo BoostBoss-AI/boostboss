@@ -10,7 +10,7 @@ Best for: someone you know who runs an AI product you've personally used.
 
 > Hey [name],
 >
-> I built an ad network for AI products — your users see context-relevant sponsored content inside Claude/GPT responses, you earn 85% of the spend. Like AdSense but for AI chat, MCP servers, and agents.
+> I built an ad network for AI products — your users see context-relevant sponsored content inside Claude/GPT responses, you earn an industry-leading share of the spend. Like AdSense but for AI chat, MCP servers, and agents.
 >
 > I've been running it in production on my own product (fissbot.chat) and it's working clean: impressions, attribution, revenue, all live. No latency hit to chat responses.
 >
@@ -26,13 +26,13 @@ Send on Twitter DM, iMessage, WhatsApp, or Slack.
 
 ## Template 2 — Warm email (for founders you've exchanged emails with)
 
-Subject: `Ad network for [their product]? 10 min install, 85% rev share`
+Subject: `Ad network for [their product]? 10 min install, industry-leading rev share`
 
 > Hi [name],
 >
 > Saw [their product] is generating real AI-response volume. Wanted to show you Boost Boss — an ad network built specifically for AI products.
 >
-> The short version: publishers install our Lumi SDK (one npm package, ~7 lines of code), and their AI responses get context-relevant sponsored content — like AdSense, but native to chat. Publisher keeps 85% of ad spend.
+> The short version: publishers install our Lumi SDK (one npm package, ~7 lines of code), and their AI responses get context-relevant sponsored content — like AdSense, but native to chat. Publishers receive an industry-leading share of ad spend (full schedule in the Publisher Agreement at sign-up).
 >
 > I've been eating my own dogfood — running it on fissbot.chat for the past week. Everything I'd want to see as an operator is working: real impressions, per-message attribution, publisher dashboard, no latency impact (SDK call runs in parallel to Claude/GPT).
 >
@@ -60,7 +60,7 @@ Subject: `Quick question about monetizing [product name]`
 >
 > - Publishers install via `npm install @boostbossai/lumi-sdk` (zero dependencies, Apache-2.0)
 > - Sponsored content appears inline with AI responses, context-matched, labeled clearly
-> - Publisher earns 85% of ad spend (industry is usually 60–70%)
+> - Publishers earn an industry-leading share of ad spend (the full schedule is in the Publisher Agreement at sign-up)
 > - Our own product (fissbot.chat) is running it in production right now
 > - I'm personally onboarding the first 10 publishers — 15 min call, free
 >

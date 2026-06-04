@@ -12,7 +12,7 @@ Closed the gap the spec called out for Panel 3: when an operator pastes an `auct
 Specifically, the detail response now answers four operator questions:
 
 1. **Did the impression beacon fire after the auction win? When?**
-   Tile shows ✓ Fired at `2026-05-13 01:00:00` with cost charged, 85% publisher payout, door (integration_method), and geo. ✗ Not fired in muted red when the beacon never arrived.
+   Tile shows ✓ Fired at `2026-05-13 01:00:00` with cost charged, publisher payout, door (integration_method), and geo. ✗ Not fired in muted red when the beacon never arrived.
 
 2. **Did a click event fire? When? With what destination?**
    Tile shows ✓ Fired at `…` plus the destination URL (campaign.cta_url + `?bbx_auc=` appended). Honest about the fact that the destination shown is the campaign's *current* CTA URL — we don't snapshot it per-click. In practice this matters in <1% of cases (advertiser edited their landing URL mid-campaign).
@@ -20,7 +20,7 @@ Specifically, the detail response now answers four operator questions:
 3. **Did a conversion event fire? When? With what value?**
    Tile shows ✓ Fired at `…` with conversion_type (e.g. `purchase`), USD value derived from `value_cents`, external_id (advertiser's order ID), and currency.
 
-4. **Was the publisher's 85% credited?**
+4. **Was the publisher's share credited?**
    Distinct credit block, color-coded green (credited) or red (not credited). Shows the credited amount, the impression event id that triggered the credit, the timestamp, and a current snapshot of the publisher's balance / lifetime_earned / lifetime_paid so the operator can sanity-check the credit landed.
 
 When something is missing, the panel tells the operator *why* in plain English:
@@ -45,7 +45,7 @@ That last reason is the one that catches the actual support cases. The other thr
 
 - Queries `events` by `auction_id` to build a timeline keyed by event_type (`impression`, `click`, `close`, `skip`, `video_complete`, `conversion`, `dismiss`, `error`). Every key is always present in the response (`null` when not fired) so the UI can render fired/missing tiles without scanning arrays.
 - Normalises `value_cents` (integer USD cents, per `db/05_bbx_conversions.sql`) to `value_usd` (float) for display, while keeping `value_cents` available for callers that want it.
-- Computes `publisher_credit`: did the 85% credit apply? amount? at which impression event? plus a current `publisher_balance` snapshot for context, plus a `reason_not_credited` plain-English string for the four "missing credit" cases.
+- Computes `publisher_credit`: did the publisher credit apply? amount? at which impression event? plus a current `publisher_balance` snapshot for context, plus a `reason_not_credited` plain-English string for the four "missing credit" cases.
 - Pulls the winning campaign's `cta_url` so the frontend can render the click destination inline.
 
 Uses the same `auction_id` join key that powers idempotency via `events_auction_type_unique` (db/04_bbx_mcp_extensions.sql §3) — at most one row per `(auction_id, event_type)` pair, which is what makes "fired? yes/no" cleanly answerable.

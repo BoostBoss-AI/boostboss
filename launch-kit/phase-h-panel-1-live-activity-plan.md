@@ -98,7 +98,7 @@ Single new admin tab: **📊 Live Activity** (or just "Live" — keystroke 7 in 
 │                                                                 │
 │ ┌─ Health ──────────┐ ┌─ Volume ──────────┐ ┌─ Money ──────────┐│
 │ │ ● Healthy         │ │ Auctions 1h: 423  │ │ Spend 24h: $32   ││
-│ │ Fill rate: 87%    │ │ Auctions 24h: 9.8K│ │ BB 15%: $4.81    ││
+│ │ Fill rate: 87%    │ │ Auctions 24h: 9.8K│ │ BB 30%: $9.61    ││
 │ │ Errors: 0 T2/T3   │ │ ↑ +12% vs avg     │ │ Pub accrued: $27 ││
 │ └───────────────────┘ └───────────────────┘ └──────────────────┘│
 │                                                                 │
@@ -141,7 +141,7 @@ Single new admin tab: **📊 Live Activity** (or just "Live" — keystroke 7 in 
 
 **Card "Money"** — is money moving?
 - Advertiser spend last 24h
-- BB's 15% share
+- BB's 30% share (6.5% RTB fee + 23.5% network take)
 - Publisher balance accrued (today's deltas, not lifetime)
 
 **Top publishers table (24h)** — who's sending traffic?

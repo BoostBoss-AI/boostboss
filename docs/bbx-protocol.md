@@ -542,8 +542,10 @@ For a single high-intent impression (developer in Cursor, building a billing flo
 6. User clicks. SDK fires click_url, navigates the user.
 7. User signs up at Stripe. Stripe's BBX pixel fires conversion.
 8. BBX settles: charges advertiser $18.40/1000, credits publisher
-   $15.64/1000 (after 15% BBX take rate, per `BBX_TAKE_RATE` env var
-   in `api/track.js`), feeds outcome to Benna.
+   $12.88/1000 (after the 30% combined fee — `BBX_RTB_FEE` 6.5%
+   demand-side exchange fee + `BBX_NETWORK_TAKE` 23.5% network take,
+   env vars read by `api/track.js` and `api/billing.js`), feeds
+   outcome to Benna.
 ```
 
 That's the whole protocol.
@@ -638,7 +640,7 @@ type EventPayload = {
 | §8 | Auction mechanics | First-price + reserve, atomic budget via `bbx_deduct_campaign_budget` RPC | `api/_lib/ledger.js` |
 | §9 | Benna scoring | `bid_usd = target_cpa × p_convert × (1 + ε)`, signal weights hardcoded | `api/benna.js` |
 | §10 | Latency budget | Edge runtime not yet enabled; Vercel Node functions today | (planned) |
-| §13 | Take rate | 15% via `BBX_TAKE_RATE` env var (default `0.15`) | `api/track.js:16` |
+| §13 | Take rate | 30% combined — `BBX_RTB_FEE` 6.5% + `BBX_NETWORK_TAKE` 23.5% (legacy `BBX_TAKE_RATE` still honoured if set) | `api/track.js:16-23`, `api/billing.js:43-53` |
 
 The schema migration `db/04_bbx_mcp_extensions.sql` adds the MCP-native targeting columns (`target_intent_tokens`, `target_active_tools`, `target_host_apps`, `target_surfaces`), the `placements` registry, and the auction-keyed columns on `events`. After it's applied, the wire shapes in §4–§7 are fully expressible against the existing tables — no further schema work is needed before §16 is ticked.
 

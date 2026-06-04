@@ -94,7 +94,7 @@ All 10 decisions from `launch-kit/phase-e-payouts-design.md` were implemented as
 | 6 | Failure handling → Three-tier model | ✅ + revised Tier-1 retry to Friday+Saturday cron pattern per Vercel Hobby constraints |
 | 7 | Reserve / holdback → No reserve + automatic clawback | ✅ (clawback skeleton + satisfaction logic in migration 13) |
 | 8 | Stripe Connect pricing → BB absorbs standard ACH, publisher pays Instant | ✅ |
-| 9 | Revenue split mechanics → 85/15, per-event accrual | ✅ (V2 rollup migration path documented for future) |
+| 9 | Revenue split mechanics → 85/15 at the time of writing (updated 2026-06-04 to 70/30 — 6.5% RTB fee + 23.5% network take), per-event accrual | ✅ (V2 rollup migration path documented for future) |
 | 10 | Live key rollout → Two-step | ✅ (Day 5 sandbox test + Day 7 live flip runbook) |
 
 ---

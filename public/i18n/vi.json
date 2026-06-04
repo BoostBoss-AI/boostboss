@@ -157,14 +157,15 @@
       "card_nocode_arrow_html": "Dành cho tác giả Custom GPT &amp; no-code",
       "anchor_h3": "Mọi cánh cửa, một tài khoản publisher",
       "anchor_p_html": "Một <code>publisher_id</code>, một tài khoản Stripe Connect, một lần thanh toán hàng tuần — bất kể bạn ship qua cửa nào.",
+      "anchor_stat1_value": "Hàng đầu",
       "anchor_stat1_label": "chia doanh thu",
       "anchor_stat2_value": "Hàng tuần",
       "anchor_stat2_label": "thanh toán",
       "anchor_stat3_value": "10 phút",
       "anchor_stat3_label": "để lên sóng",
       "why_h2": "Vì sao chọn Boost Boss",
-      "why1_h4": "Chia doanh thu 85/15",
-      "why1_p": "Bạn giữ 85% mỗi đô. Mức chia hàng đầu ngành, ưu tiên publisher, không phân biệt quy mô.",
+      "why1_h4": "Mức chi trả hàng đầu ngành",
+      "why1_p": "Tỷ lệ chia doanh thu có lợi cho publisher, bất kể quy mô. Điều khoản đầy đủ nêu trong Thỏa thuận Publisher khi bạn đăng ký.",
       "why2_h4": "Thiết kế cho ngữ cảnh AI",
       "why2_p": "Targeting dựa trên ngữ cảnh hội thoại — không giám sát, không tracking xuyên site.",
       "why3_h4": "Ba SDK, một API, cộng thêm đường no-code đang trên đường",
@@ -234,7 +235,7 @@
       "cta_h2": "Sẵn sàng kiếm tiền từ MCP server của bạn?",
       "cta_p": "Ba dòng. Mười phút. Thanh toán hàng tuần.",
       "cta_btn": "Đăng ký làm Founding Publisher →",
-      "cta_perk": "⚡ 20 publisher MCP đầu tiên được chia 90/10 trong 6 tháng"
+      "cta_perk": "⚡ 20 publisher MCP đầu tiên nhận mức chi trả nâng cao dành cho founding publisher trong 6 tháng"
     },
     "aiapps": {
       "hero_eyebrow": "Dành cho nhà phát triển ứng dụng AI",
@@ -417,14 +418,14 @@
       "honest_p2": "Chúng tôi có thể ship một thứ nửa vời, gói prompt của bạn trong một workaround mong manh, nhưng nó sẽ vỡ ngay khi OpenAI cập nhật runtime Custom GPT, và user của bạn sẽ nhận ra. Nên chúng tôi không làm vậy.",
       "honest_p3": "Thay vào đó, chúng tôi gom tín hiệu waitlist. Nếu nghe được 30+ tác giả no-code có audience thật, chúng tôi ship tích hợp. Nếu chỉ nghe 3 người, hướng này tạm gác lại, chúng tôi tập trung vào các cửa SDK đã chạy.",
       "wait_h2": "Vào waitlist",
-      "wait_p": "Một email cho chúng tôi biết bạn đã xây gì, nó ở đâu, và mỗi tháng có khoảng bao nhiêu cuộc hội thoại hoặc tương tác. Nếu chúng tôi ship một giải pháp phù hợp, bạn là người đầu tiên biết — và cohort đầu tiên được chia 90/10 trong 6 tháng đầu, giống Founding Publishers của chúng tôi.",
+      "wait_p": "Một email cho chúng tôi biết bạn đã xây gì, nó ở đâu, và mỗi tháng có khoảng bao nhiêu cuộc hội thoại hoặc tương tác. Nếu chúng tôi ship một giải pháp phù hợp, bạn là người đầu tiên biết — và cohort đầu tiên nhận mức chi trả nâng cao dành cho founding publisher trong 6 tháng đầu, giống Founding Publishers của chúng tôi.",
       "wait_cta": "Email hello@boostboss.ai",
       "wait_perk1_v": "Không cam kết",
       "wait_perk1_l": "Vào danh sách, rời bất kỳ lúc nào.",
       "wait_perk2_v": "Bạn định hình sản phẩm",
       "wait_perk2_l": "Cohort đầu có tiếng nói trực tiếp vào thiết kế tích hợp.",
       "wait_perk3_v": "Chia doanh thu founding",
-      "wait_perk3_l": "90/10 trong 6 tháng đầu khi chúng tôi ship.",
+      "wait_perk3_l": "Mức chi trả nâng cao dành cho founding publisher trong 6 tháng đầu khi chúng tôi ship.",
       "fit_eyebrow": "Kiểm tra phù hợp nhanh",
       "fit_h2": "Danh sách ngắn, theo cả hai hướng.",
       "fit_yes_h3": "Có vẻ phù hợp",
@@ -528,7 +529,7 @@
       "c2_h3": "Vị trí không ma sát",
       "c2_p": "Quảng cáo render dưới dạng thẻ native trong AI chat và agent flows — không popup, không banner. User chuyển đổi vì quảng cáo thật sự thuộc về đó.",
       "c3_h3": "Kinh tế minh bạch",
-      "c3_p": "Thấy rõ bạn trả gì, ai bạn tiếp cận, ai đã chuyển đổi. Không attribution hộp đen. Không arbitrage ẩn. Một take rate sạch duy nhất."
+      "c3_p": "Thấy rõ bạn trả gì, ai bạn tiếp cận, ai đã chuyển đổi. Không attribution hộp đen. Không arbitrage ẩn. Giá thống nhất minh bạch."
     },
     "stats": {
       "l1": "Phiên AI hàng tháng",
@@ -549,7 +550,7 @@
     "price": {
       "eyebrow": "Giá",
       "h2": "Trả cho kết quả. Không thuế đại lý.",
-      "sub": "Ba cách mua. Tất cả self-serve. Tất cả minh bạch. Take rate của bạn luôn được công bố trên dashboard.",
+      "sub": "Ba cách mua. Tất cả self-serve. Tất cả minh bạch. Chi tiết hóa đơn luôn được hiển thị trên dashboard.",
       "cpm_tag": "Self-serve",
       "cpm_sub": "Trả mỗi nghìn impression AI-native. Tốt nhất cho awareness.",
       "cpm_li1": "Chi tiêu tối thiểu $100",

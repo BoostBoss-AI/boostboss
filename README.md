@@ -68,7 +68,9 @@ cp .env.example .env.local
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BBX_TAKE_RATE` | `0.15` | Exchange take rate (15%) |
+| `BBX_RTB_FEE` | `0.065` | Demand-side RTB exchange fee (charged to advertiser) |
+| `BBX_NETWORK_TAKE` | `0.235` | Boost Boss network take (platform margin) |
+| `BBX_TAKE_RATE` | _legacy_ | If set, overrides `BBX_RTB_FEE + BBX_NETWORK_TAKE` (back-compat) |
 | `BBX_MIN_PAYOUT` | `100` | Minimum payout threshold (USD) |
 | `BBX_SEAT_AUTH_REQUIRED` | `false` | Require Bearer auth on RTB POST |
 
@@ -129,8 +131,10 @@ tests/          — Test suites
 
 ## Revenue Model
 
-- **Exchange take rate:** 15% of cleared spend (configurable via `BBX_TAKE_RATE`)
-- **Publisher share:** 85% of cleared spend
+- **Demand-side RTB exchange fee:** 6.5% of cleared spend, charged to the advertiser (`BBX_RTB_FEE`)
+- **Network take:** 23.5% of cleared spend, Boost Boss platform margin (`BBX_NETWORK_TAKE`)
+- **Publisher share:** 70% of cleared spend
+- **Legacy:** `BBX_TAKE_RATE` env var, if set, overrides the sum of the two new vars
 - **Benna API licensing:** $0.002/inference for third-party mediation stacks
 
 ## Links

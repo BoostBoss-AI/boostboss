@@ -178,7 +178,7 @@ async function test(name, fn) {
   });
 
   // ── payout (publisher Connect transfer) ───────────────────────────
-  await test("payout splits revenue 85/15 by default and lists per-publisher transfers", async () => {
+  await test("payout splits revenue 70/30 by default and lists per-publisher transfers", async () => {
     ledger._reset();
     billing._reset();
     // Two publishers, each with one winning bid
@@ -193,12 +193,14 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 200);
     assert.strictEqual(r._body.publishers, 2);
     assert.strictEqual(r._body.dry_run, true);
-    // Cursor: $200 gross → $170 payout (eligible). Perplexity: $100 → $85 (below $100 threshold)
+    // Cursor: $200 gross → $140 payout (eligible). Perplexity: $100 → $70 (below $100 threshold)
     const cursor = r._body.transfers.find((t) => t.publisher === "cursor.com");
     const ppx    = r._body.transfers.find((t) => t.publisher === "perplexity.ai");
-    assert.ok(Math.abs(cursor.payout_usd - 170) < 1e-6, `cursor payout: ${cursor.payout_usd}`);
+    const expectedCursor = +(200 * (1 - billing.TAKE_RATE)).toFixed(4);
+    const expectedPpx    = +(100 * (1 - billing.TAKE_RATE)).toFixed(4);
+    assert.ok(Math.abs(cursor.payout_usd - expectedCursor) < 1e-6, `cursor payout: ${cursor.payout_usd} (expected ${expectedCursor})`);
     assert.strictEqual(cursor.eligible, true);
-    assert.ok(Math.abs(ppx.payout_usd - 85) < 1e-6, `ppx payout: ${ppx.payout_usd}`);
+    assert.ok(Math.abs(ppx.payout_usd - expectedPpx) < 1e-6, `ppx payout: ${ppx.payout_usd} (expected ${expectedPpx})`);
     assert.strictEqual(ppx.eligible, false);
     assert.strictEqual(r._body.eligible, 1);
   });

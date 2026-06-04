@@ -241,7 +241,7 @@ Expected: `balance > 0`, `lifetime_earned == balance` (no payouts yet).
 
 If balance is still 0 but `paying_events_1h.count > 0`, the credit RPC isn't firing. Check Vercel logs for `bbx:track:credit_fail` or `bbx:balance:*` lines.
 
-- [ ] Publisher balance reflects the paid impression's 85% share.
+- [ ] Publisher balance reflects the paid impression's 70% share (after the 30% combined exchange fee + network take).
 
 ---
 

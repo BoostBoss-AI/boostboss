@@ -2097,7 +2097,7 @@ async function handleAuctionInspect(req, res) {
     }
 
     // ── Publisher credit summary ──
-    // Was the 85% credited? We can't show a per-event balance audit (no
+    // Was the publisher share credited? We can't show a per-event balance audit (no
     // history table; bbx_credit_publisher_balance does an atomic UPSERT)
     // but the developer_payout column ON the impression row IS the
     // ground truth for "what was credited at impression time". We also

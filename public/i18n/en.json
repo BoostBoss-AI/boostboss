@@ -157,14 +157,15 @@
       "card_nocode_arrow_html": "For Custom GPT &amp; No-Code Authors",
       "anchor_h3": "Every door, one publisher account",
       "anchor_p_html": "One <code>publisher_id</code>, one Stripe Connect account, one weekly payout — across whichever doors you ship through.",
+      "anchor_stat1_value": "Top-tier",
       "anchor_stat1_label": "revshare",
       "anchor_stat2_value": "Weekly",
       "anchor_stat2_label": "payouts",
       "anchor_stat3_value": "10 min",
       "anchor_stat3_label": "to live",
       "why_h2": "Why Boost Boss",
-      "why1_h4": "85/15 revenue split",
-      "why1_p": "You keep 85% of every dollar. Industry-leading and publisher-favorable, no matter your scale.",
+      "why1_h4": "Industry-leading payouts",
+      "why1_p": "A publisher-favorable revenue share, no matter your scale. Full terms set out in the Publisher Agreement when you sign up.",
       "why2_h4": "Built for AI context",
       "why2_p": "Contextual targeting from the conversation itself — never surveillance, never cross-site tracking.",
       "why3_h4": "Three SDKs, one API, plus a no-code path on the way",
@@ -234,7 +235,7 @@
       "cta_h2": "Ready to monetize your MCP server?",
       "cta_p": "Three lines. Ten minutes. Weekly payouts.",
       "cta_btn": "Apply as a Founding Publisher →",
-      "cta_perk": "⚡ First 20 MCP publishers get 90/10 revshare for 6 months"
+      "cta_perk": "⚡ First 20 MCP publishers get an elevated founding-publisher payout for 6 months"
     },
     "aiapps": {
       "hero_eyebrow": "For AI App Builders",
@@ -417,14 +418,14 @@
       "honest_p2": "We could ship something half-baked here that wraps your prompts in a fragile workaround, but it would break the moment OpenAI updated their Custom GPT runtime, and your users would notice. So we're not doing that.",
       "honest_p3": "Instead we're collecting waitlist signal. If we hear from 30+ no-code authors with real audiences, we ship the integration. If we hear from 3, the path stays parked while we focus on the SDK doors that already work.",
       "wait_h2": "Get on the waitlist",
-      "wait_p": "One email tells us what you built, where it lives, and roughly how many conversations or interactions it gets per month. If we ship a fit, you're first to know — and the first cohort gets a 90/10 revshare for the first six months, same as our Founding Publishers.",
+      "wait_p": "One email tells us what you built, where it lives, and roughly how many conversations or interactions it gets per month. If we ship a fit, you're first to know — and the first cohort gets an elevated founding-publisher payout for the first six months, same as our Founding Publishers.",
       "wait_cta": "Email hello@boostboss.ai",
       "wait_perk1_v": "No commitment",
       "wait_perk1_l": "Get on the list, drop off any time.",
       "wait_perk2_v": "You shape the product",
       "wait_perk2_l": "First cohort gets direct input on integration design.",
       "wait_perk3_v": "Founding revshare",
-      "wait_perk3_l": "90/10 for the first 6 months when we ship.",
+      "wait_perk3_l": "Elevated founding-publisher payout for the first 6 months when we ship.",
       "fit_eyebrow": "Quick fit check",
       "fit_h2": "A short list, both directions.",
       "fit_yes_h3": "Likely a fit",
@@ -528,7 +529,7 @@
       "c2_h3": "Frictionless placements",
       "c2_p": "Ads render as native cards inside AI chats and agent flows — not pop-ups, not banners. Users convert because the ad actually belongs there.",
       "c3_h3": "Transparent economics",
-      "c3_p": "See exactly what you pay, who you reach, and what converted. No black-box attribution. No hidden arbitrage. One clean take rate."
+      "c3_p": "See exactly what you pay, who you reach, and what converted. No black-box attribution. No hidden arbitrage. Transparent unified pricing."
     },
     "stats": {
       "l1": "Monthly AI sessions",
@@ -549,7 +550,7 @@
     "price": {
       "eyebrow": "Pricing",
       "h2": "Pay for outcomes. No agency tax.",
-      "sub": "Three ways to buy. All self-serve. All transparent. Your take rate is always posted on your dashboard.",
+      "sub": "Three ways to buy. All self-serve. All transparent. Your billing breakdown is always posted on your dashboard.",
       "cpm_tag": "Self-serve",
       "cpm_sub": "Pay per thousand AI-native impressions. Best for awareness.",
       "cpm_li1": "$100 minimum spend",

@@ -51,7 +51,7 @@ In the application form, your role is:
 You'll be asked questions about your platform. Here's a tested draft:
 
 **What does your platform do?**
-> Boost Boss operates an AI-native ad network that serves sponsored content inside AI applications and MCP (Model Context Protocol) servers. Publishers (AI product developers) install our Lumi SDK via npm, which injects context-relevant sponsored content into AI responses. Advertisers create campaigns via our self-serve dashboard; campaigns go through creative policy review before serving. Revenue flows from advertiser → Boost Boss → publisher at an 85/15 split.
+> Boost Boss operates an AI-native ad network that serves sponsored content inside AI applications and MCP (Model Context Protocol) servers. Publishers (AI product developers) install our Lumi SDK via npm, which injects context-relevant sponsored content into AI responses. Advertisers create campaigns via our self-serve dashboard; campaigns go through creative policy review before serving. Revenue flows from advertiser → Boost Boss → publisher at a 70/30 split (publisher receives 70% of advertiser gross spend; Boost Boss retains 30%, composed of a 6.5% demand-side RTB exchange fee and a 23.5% network take).
 
 **What's your inventory?**
 > Native, image, corner, video, and fullscreen ad units served inside AI chat interfaces, MCP tool responses, and AI-powered applications. All placements are contextual (matched to user's current AI task) and rendered with clear "Sponsored · via Boost Boss" labeling.

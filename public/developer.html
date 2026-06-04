@@ -1825,9 +1825,9 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-label" data-t="stats.your_share">Your Share</div>
-                    <div class="stat-value default" id="revenueShare">85%</div>
+                    <div class="stat-value default" id="revenueShare">70%</div>
                     <div class="stat-bar">
-                        <div class="stat-bar-fill" id="shareBar" style="width: 85%"></div>
+                        <div class="stat-bar-fill" id="shareBar" style="width: 70%"></div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -4147,7 +4147,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // set-membership check. Empty disabled set = all placements on.
         const DOOR_SURFACE_PREFIX = { 'mcp': 'mcp', 'js-snippet': 'web', 'npm-sdk': 'ext', 'rest-api': 'bot' };
         // Per-door placements. `mock` picks the card visual; `rpm` is the
-        // indicative revenue per 1000 impressions (publisher keeps 85%).
+        // indicative revenue per 1000 impressions after the publisher share
+        // (70% by default; see api/billing.js for the source of truth).
         const DOOR_PLACEMENTS = {
             'mcp': [
                 { key: 'card',     cat: 'display',   name: 'Inline sponsored card', rpm: 6.00, mock: 'image',  desc: 'A sponsored card block appended to the tool response.' },
@@ -4342,7 +4343,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             // Assume 30-day impression volume; fall back to 10k baseline for newcomers.
             const monthlyImpressions = Math.max(10000, (userProfile._monthly_impressions || 0));
-            const publisherShare = (monthlyImpressions / 1000) * blendedRpm * 0.85;
+            const publisherShare = (monthlyImpressions / 1000) * blendedRpm * 0.70;
 
             el.textContent = '$' + publisherShare.toLocaleString('en-US', {
                 minimumFractionDigits: 0,
@@ -4801,7 +4802,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     if (parsed.sponsored) {
                         const benna = parsed.benna || {};
                         const bid = benna.effective_bid_usd || benna.bid_usd || 0;
-                        const payout = +(bid * 0.85).toFixed(4);
+                        const payout = +(bid * 0.70).toFixed(4);
                         document.getElementById('tm-status').textContent = '✓ Ad served';
                         document.getElementById('tm-status').style.color = '#10B981';
                         document.getElementById('tm-latency').textContent = (benna.latency_ms || elapsed) + 'ms';
@@ -5122,7 +5123,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'account.email_hint': 'Used for payout and account notifications.',
                     'account.dev_id': 'Developer ID',
                     'account.revenue': 'Revenue share',
-                    'account.revenue_value': 'You keep 85% · Boost Boss takes 15%',
+                    'account.revenue_value': 'You keep 70% · Boost Boss takes 30%',
                     'account.revenue_hint': 'Applied to every cleared impression on your inventory.',
                     'payouts.how_title': 'How payouts work',
                     'payouts.how_body_html': 'Earn at least <strong>$25</strong> in publisher accruals, connect Stripe, and the next Friday cron pays you automatically — no manual request needed.',
@@ -5398,7 +5399,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'account.email_hint': '用于打款和账户通知。',
                     'account.dev_id': '开发者 ID',
                     'account.revenue': '收入分成',
-                    'account.revenue_value': '您获得 85% · Boost Boss 收取 15%',
+                    'account.revenue_value': '您获得 70% · Boost Boss 收取 30%',
                     'account.revenue_hint': '应用于您库存中每一次结算曝光。',
                     'payouts.how_title': '打款如何运作',
                     'payouts.how_body_html': '累计至少 <strong>$25</strong> 的发布商收益,连接 Stripe,下一个周五的定时任务将自动向您打款 — 无需手动申请。',
@@ -5674,7 +5675,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'account.email_hint': '用於撥款和帳號通知。',
                     'account.dev_id': '開發者 ID',
                     'account.revenue': '收益分潤',
-                    'account.revenue_value': '您獲得 85% · Boost Boss 收取 15%',
+                    'account.revenue_value': '您獲得 70% · Boost Boss 收取 30%',
                     'account.revenue_hint': '套用於您庫存中每一次結算的曝光。',
                     'payouts.how_title': '撥款如何運作',
                     'payouts.how_body_html': '累計至少 <strong>$25</strong> 的發布商收益,連接 Stripe,下一個週五的排程任務會自動撥款給您 — 無需手動申請。',
@@ -5950,7 +5951,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'account.email_hint': '支払いとアカウント通知に使用されます。',
                     'account.dev_id': 'デベロッパー ID',
                     'account.revenue': 'レベニューシェア',
-                    'account.revenue_value': 'あなたが 85% を獲得 · Boost Boss が 15% を取得',
+                    'account.revenue_value': 'あなたが 70% を獲得 · Boost Boss が 30% を取得',
                     'account.revenue_hint': 'インベントリ上のすべての確定インプレッションに適用されます。',
                     'payouts.how_title': '支払いの仕組み',
                     'payouts.how_body_html': 'パブリッシャー残高で少なくとも <strong>$25</strong> を稼ぎ、Stripe を接続すれば、次の金曜日の自動処理であなたに自動的に支払われます — 手動申請は不要です。',
@@ -6226,7 +6227,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'account.email_hint': '정산 및 계정 알림에 사용됩니다.',
                     'account.dev_id': '개발자 ID',
                     'account.revenue': '수익 분배',
-                    'account.revenue_value': '귀하 85% · Boost Boss 15%',
+                    'account.revenue_value': '귀하 70% · Boost Boss 30%',
                     'account.revenue_hint': '인벤토리의 모든 정산 노출에 적용됩니다.',
                     'payouts.how_title': '정산 작동 방식',
                     'payouts.how_body_html': '퍼블리셔 적립금으로 최소 <strong>$25</strong>을 벌고 Stripe를 연결하면, 다음 금요일 cron이 자동으로 정산해 드립니다 — 수동 요청 불필요.',
@@ -6502,7 +6503,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'account.email_hint': 'Dùng cho thanh toán và thông báo tài khoản.',
                     'account.dev_id': 'ID nhà phát triển',
                     'account.revenue': 'Chia sẻ doanh thu',
-                    'account.revenue_value': 'Bạn giữ 85% · Boost Boss lấy 15%',
+                    'account.revenue_value': 'Bạn giữ 70% · Boost Boss lấy 30%',
                     'account.revenue_hint': 'Áp dụng cho mọi impression đã thanh toán trên kho của bạn.',
                     'payouts.how_title': 'Thanh toán hoạt động thế nào',
                     'payouts.how_body_html': 'Kiếm tối thiểu <strong>$25</strong> trong tích lũy publisher, kết nối Stripe, và cron thứ Sáu kế tiếp sẽ thanh toán tự động — không cần yêu cầu thủ công.',

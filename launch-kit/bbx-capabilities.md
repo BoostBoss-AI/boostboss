@@ -181,7 +181,7 @@ Phase B added all 4 doors:
 When impression/click/conversion fires with a billable amount:
 
 - `events.cost` = computed from `campaigns.billing_model` (cpm/cpc/cpv/cpa) × `bid_amount`
-- `events.developer_payout` = `cost × 0.85`
+- `events.developer_payout` = `cost × (1 − BBX_RTB_FEE − BBX_NETWORK_TAKE)` (default `cost × 0.70`)
 - `campaigns.spent_today` and `spent_total` are atomically incremented (`api/track.js:330`)
 - Auto-pause if `spent_today >= daily_budget OR spent_total >= total_budget`
 - `publisher_balance.balance` is credited via `bbx_credit_publisher_balance` RPC (Phase E Day 2, with fallback path Day 6)
@@ -299,7 +299,7 @@ When the operator needs to answer a specific question, here's the file or table 
 | "When does this publisher get paid?" | `payout_status` endpoint | same — returns `next_payout_eta` |
 | "Did this advertiser deposit?" | `transactions` table | `SELECT * FROM transactions WHERE advertiser_id = ... AND type = 'deposit'` |
 | "Did Friday's cron run successfully?" | Vercel logs | grep `bbx:payout_cron:ok` or `bbx:payout_cron:tier3_alert` |
-| "What's my MRR?" | aggregate `events.cost` by month, multiply by 0.15 | SQL query |
+| "What's my MRR?" | aggregate `events.cost` by month, multiply by `BBX_RTB_FEE + BBX_NETWORK_TAKE` (default 0.30) | SQL query |
 | "Are any beacons being dropped silently?" | Vercel logs | grep `bbx:track:write_fail` |
 
 ---

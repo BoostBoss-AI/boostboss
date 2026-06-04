@@ -302,9 +302,10 @@ unique constraint also gives webhook idempotency for free.
 - **Min payout threshold**: $100 default. Survey publishers — some prefer
   $50, some prefer $250 to reduce noise. Make it configurable per
   publisher in v1.1, single value in v1.0.
-- **Take-rate accounting**: confirmed 15% (BBX_TAKE_RATE env). Audit:
-  every event row's `developer_payout` = `cost * (1 - 0.15)`. Verified
-  in `track.js` — no change needed.
+- **Take-rate accounting**: 30% combined (BBX_RTB_FEE 6.5% +
+  BBX_NETWORK_TAKE 23.5% env vars; legacy BBX_TAKE_RATE still honoured
+  if explicitly set). Audit: every event row's `developer_payout` =
+  `cost * (1 - 0.30)`. Wired in `track.js` and `billing.js`.
 - **Refund / clawback flow**: if an advertiser disputes a charge after
   we've already paid the publisher, do we claw back from the next
   payout cycle, or absorb the loss? Default v0: absorb (publisher
