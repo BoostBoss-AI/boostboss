@@ -1,6 +1,6 @@
 {
   "contact_email": "sellers@boostboss.ai",
-  "contact_address": "Boost Boss, Inc., 8 The Green, Suite R, Dover, DE 19901, USA",
+  "contact_address": "Hauler Technologies Co., Ltd. (operating Boost Boss), Taiwan. Full registered address provided on request to legal@boostboss.ai.",
   "version": "1.0",
   "identifiers": [
     { "name": "TAG-ID", "value": "pending-tag-certification-2026", "_todo": "Apply at tagtoday.net once entity is registered" },
@@ -9,7 +9,7 @@
   "sellers": [
     {
       "seller_id": "boostboss-primary",
-      "name": "Boost Boss, Inc.",
+      "name": "Boost Boss",
       "domain": "boostboss.ai",
       "seller_type": "BOTH",
       "is_confidential": 0,
