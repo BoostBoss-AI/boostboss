@@ -9,7 +9,7 @@
 # bid request by the major demand-side platforms.
 #
 # Spec: https://iabtechlab.com/wp-content/uploads/2022/04/Ads.txt-1.1.pdf
-# Questions: sellers@boostboss.ai
+# Questions: legal@boostboss.ai
 
 # ─────────────────── COPY BELOW THIS LINE ───────────────────
 

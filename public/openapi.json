@@ -7,7 +7,7 @@
     "description": "Two surfaces: the **MCP endpoint** (JSON-RPC 2.0, used by publishers running MCP servers) and the **REST API** (campaigns, reporting, Benna inference licensing). Every auction is ranked in real time by Benna on MCP signals.",
     "contact": {
       "name": "Boost Boss Platform",
-      "email": "sdk@boostboss.ai",
+      "email": "support@boostboss.ai",
       "url": "https://boostboss.ai/docs/api-reference"
     },
     "license": { "name": "Apache-2.0" },
