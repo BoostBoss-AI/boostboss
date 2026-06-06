@@ -34,6 +34,7 @@
     { "source": "/ads/signup", "destination": "/signup.html" },
     { "source": "/ads/signin", "destination": "/signup.html" },
     { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/payouts", "destination": "/admin-payouts.html" },
     { "source": "/status", "destination": "/status.html" },
     { "source": "/playground", "destination": "/playground.html" },
     { "source": "/v1/ad-request", "destination": "/api/ad-request" },
