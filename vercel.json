@@ -46,6 +46,7 @@
     { "source": "/docs/npm-sdk", "destination": "/docs-npm-sdk.html" },
     { "source": "/docs/rest-api", "destination": "/docs-rest-api.html" },
     { "source": "/docs/payouts", "destination": "/docs-payouts.html" },
+    { "source": "/docs/reporting", "destination": "/docs-reporting.html" },
     { "source": "/exchange", "destination": "/exchange.html" },
     { "source": "/publish", "destination": "/publish.html" },
     { "source": "/publish/mcp", "destination": "/publish-mcp.html" },

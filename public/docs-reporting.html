@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporting — Boost Boss Docs</title>
+<meta name="description" content="How to read the numbers on your Boost Boss publisher dashboard — eCPM, fill rate, CTR, revenue, and what to do when they move.">
+<meta property="og:title" content="Reporting — Boost Boss Docs">
+<meta property="og:url" content="https://boostboss.ai/docs/reporting">
+<link rel="canonical" href="https://boostboss.ai/docs/reporting">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/docs.css">
+<style>
+  /* Page-specific tweaks: a clean metric definition table + a small
+     "what's normal" pill so publishers can calibrate at a glance. */
+  .metric-table { width: 100%; border-collapse: collapse; margin: 18px 0 28px; font-size: 14px; }
+  .metric-table th, .metric-table td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .metric-table th { font-weight: 600; background: var(--bg-soft); font-family: 'Space Grotesk', sans-serif; font-size: 13px; }
+  .metric-table td.formula { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pill-info  { background: #DBEAFE; color: #1E40AF; }
+  .pill-ok    { background: #DCFCE7; color: #166534; }
+  .pill-warn  { background: #FEF3C7; color: #92400E; }
+  .funnel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 18px 0 28px; }
+  @media (max-width: 720px) { .funnel { grid-template-columns: repeat(2, 1fr); } }
+  .funnel-step { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
+  .funnel-step .label { font-size: 11.5px; font-weight: 600; color: var(--pink); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .funnel-step .name  { font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .funnel-step .desc  { font-size: 12px; color: var(--muted); line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<nav class="docs-nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-tag">docs</span>
+    </a>
+    <div class="nav-right">
+      <a href="/publish">Publishers</a>
+      <a href="/ads">Advertisers</a>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar">
+    <div class="side-section">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="/docs">Overview</a></li>
+        <li><a href="/docs/quickstart">Quickstart</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Publisher integration</h6>
+      <ul>
+        <li><a href="/docs/mcp">Lumi SDK for MCP</a></li>
+        <li><a href="/docs/js-snippet">Lumi SDK script tag</a></li>
+        <li><a href="/docs/npm-sdk">Lumi SDK for browser extensions</a></li>
+        <li><a href="/docs/rest-api">Lumi API for Bots</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="/docs/api-reference">API reference</a></li>
+        <li><a href="/docs/reporting" class="active">Reporting</a></li>
+        <li><a href="/docs/payouts">Payouts</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Policies</h6>
+      <ul>
+        <li><a href="/terms">Terms of Service</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/refunds">Refund Policy</a></li>
+        <li><a href="/aup">Acceptable Use</a></li>
+        <li><a href="/cookies">Cookie Policy</a></li>
+        <li><a href="/publisher-agreement">Publisher Agreement</a></li>
+        <li><a href="/advertiser-terms">Advertiser Terms</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="docs-main">
+    <div class="breadcrumbs">
+      <a href="/docs">Docs</a><span class="sep">/</span>
+      <span>Reporting</span>
+    </div>
+
+    <h1>Reporting</h1>
+    <p class="lede">Your publisher dashboard surfaces a handful of numbers — impressions, fill rate, CTR, eCPM, revenue. This page explains what each one actually measures, what "normal" looks like at v1 scale, and how to act on them when they move. If you're staring at a metric thinking "is this good or bad?" — that's what this doc answers.</p>
+
+    <div class="callout info">
+      <strong>This is the metrics guide, not the API.</strong>
+      <p>You're reading the conceptual explanation of what the numbers mean. A programmatic <code>GET /v1/reports</code> endpoint that lets you pull the same numbers into a sheet or BI tool is on the roadmap — see the <a href="/docs/api-reference#api-reports">Reports section</a> of the API reference for status.</p>
+    </div>
+
+    <h2 id="funnel">1. The ad funnel</h2>
+    <p>Every Boost Boss event sits somewhere on a five-step funnel. Knowing which step a number measures matters more than the absolute size of the number — a "low CTR" can mean very different things depending on whether your fill rate is also low or whether your requests are low.</p>
+
+    <div class="funnel">
+      <div class="funnel-step">
+        <div class="label">Step 1</div>
+        <div class="name">Request</div>
+        <div class="desc">Your integration calls our SDK to ask for an ad.</div>
+      </div>
+      <div class="funnel-step">
+        <div class="label">Step 2</div>
+        <div class="name">Fill</div>
+        <div class="desc">Auction finds a matching campaign and returns a creative.</div>
+      </div>
+      <div class="funnel-step">
+        <div class="label">Step 3</div>
+        <div class="name">Impression</div>
+        <div class="desc">Your app actually renders the creative to the user.</div>
+      </div>
+      <div class="funnel-step">
+        <div class="label">Step 4</div>
+        <div class="name">Click</div>
+        <div class="desc">User taps or selects the disclosure/CTA.</div>
+      </div>
+      <div class="funnel-step">
+        <div class="label">Step 5</div>
+        <div class="name">Conversion</div>
+        <div class="desc">User completes the advertiser's downstream action.</div>
+      </div>
+    </div>
+
+    <p>A request always exists; a fill, impression, click, or conversion only exists if the previous step did. So requests &ge; fills &ge; impressions &ge; clicks &ge; conversions, always. When the dashboard shows a sudden divergence between two of these — e.g. requests up 30% but impressions flat — the gap tells you what happened. (Auction returned no eligible campaigns? Creative loaded but never rendered? User dismissed before render completed? Each gap has a different fix.)</p>
+
+    <h2 id="metrics">2. The metrics, defined</h2>
+    <p>Every number on your dashboard is one of these. The formula column is exactly how we compute it server-side, so you can sanity-check any visible figure against the raw counts.</p>
+
+    <table class="metric-table">
+      <thead>
+        <tr><th style="width:170px;">Metric</th><th>What it measures</th><th>Formula</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Requests</strong></td>
+          <td>Number of times your integration asked Boost Boss for an ad.</td>
+          <td class="formula">count(ad_request events)</td>
+        </tr>
+        <tr>
+          <td><strong>Fills</strong></td>
+          <td>Requests where the auction returned a non-empty creative.</td>
+          <td class="formula">count(requests where auction_result == 'matched')</td>
+        </tr>
+        <tr>
+          <td><strong>Fill rate</strong></td>
+          <td>Share of requests that resulted in a returned creative. The single best signal of "is Boost Boss serving my surface at all."</td>
+          <td class="formula">fills / requests</td>
+        </tr>
+        <tr>
+          <td><strong>Impressions</strong></td>
+          <td>Fills that your app confirmed it rendered to the user (via the impression beacon).</td>
+          <td class="formula">count(impression beacons received)</td>
+        </tr>
+        <tr>
+          <td><strong>Clicks</strong></td>
+          <td>Confirmed click beacons fired against an impression.</td>
+          <td class="formula">count(click beacons received)</td>
+        </tr>
+        <tr>
+          <td><strong>CTR</strong> (Click-Through Rate)</td>
+          <td>Clicks per impression. Measures creative + context fit — high CTR means the right ad got in front of the right user.</td>
+          <td class="formula">clicks / impressions</td>
+        </tr>
+        <tr>
+          <td><strong>Revenue</strong></td>
+          <td>Your 85% share of advertiser spend on your inventory. Settled per impression, accrues to your balance in near-real-time.</td>
+          <td class="formula">sum(impression_revenue_usd × 0.85)</td>
+        </tr>
+        <tr>
+          <td><strong>eCPM</strong> (effective Cost Per Mille)</td>
+          <td>What your inventory earns per 1,000 impressions, on average. The single number most ad networks judge inventory quality by.</td>
+          <td class="formula">(revenue / impressions) × 1000</td>
+        </tr>
+        <tr>
+          <td><strong>RPM</strong> (Revenue Per Mille request)</td>
+          <td>Like eCPM but measured per 1,000 requests — incorporates fill rate. Useful for comparing two surfaces with different fill rates.</td>
+          <td class="formula">(revenue / requests) × 1000</td>
+        </tr>
+        <tr>
+          <td><strong>Lifetime earned</strong></td>
+          <td>Cumulative gross revenue across the life of your account, including paid-out balances.</td>
+          <td class="formula">sum(all-time impression revenue × 0.85)</td>
+        </tr>
+        <tr>
+          <td><strong>Available balance</strong></td>
+          <td>Revenue you've accrued that's eligible to cash out or spend in Promote right now.</td>
+          <td class="formula">lifetime_earned − paid_out − pending_cashouts</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="ranges">3. What "normal" looks like at v1</h2>
+    <p>Hard numbers vary by surface — an MCP server with low-volume high-intent users has different defaults than a high-volume chat UI — but here's a rough range for a healthy v1 publisher. These aren't promises; they're benchmarks for "is my integration broken or is it just slow."</p>
+
+    <table class="metric-table">
+      <thead><tr><th>Metric</th><th>Typical range</th><th>Signal</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Fill rate</strong></td><td>60–90%</td><td><span class="pill pill-warn">Below 40%</span> usually means context targeting is too narrow or your traffic mix has no matching advertisers yet. Above 95% with low CTR suggests fills aren't well-matched.</td></tr>
+        <tr><td><strong>CTR</strong></td><td>1.5–4.5%</td><td>MCP / chat-native surfaces tend higher than passive sidebars. <span class="pill pill-warn">Below 0.5%</span> after 10k impressions is a sign the creative–context match is off.</td></tr>
+        <tr><td><strong>eCPM</strong></td><td>$2–$15</td><td>Highly intent-rich placements (e.g. the moment a user asks an MCP tool a buying question) hit the top of the range. Generic chat sidebars are at the bottom.</td></tr>
+        <tr><td><strong>Time to first $1</strong></td><td>1–7 days</td><td>If you've integrated correctly and have >100 requests/day, you should clear the $1 cashout floor in your first week.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sample-size">4. Sample size — don't trust early numbers</h2>
+    <p>This is the single most common source of frustration in ad-network reporting: <strong>small numbers lie</strong>. A 12% CTR after 8 impressions is meaningless noise; the same 12% CTR after 10,000 impressions is a real signal worth acting on. Until you've crossed roughly the following thresholds, your dashboard is showing you a draft sketch, not a final number.</p>
+
+    <table class="metric-table">
+      <thead><tr><th>Metric</th><th>Settles after roughly…</th></tr></thead>
+      <tbody>
+        <tr><td>Fill rate</td><td>500 requests</td></tr>
+        <tr><td>CTR</td><td>5,000 impressions</td></tr>
+        <tr><td>eCPM</td><td>10,000 impressions</td></tr>
+        <tr><td>Conversion rate</td><td>50,000 impressions or 200 conversions, whichever comes first</td></tr>
+      </tbody>
+    </table>
+
+    <p>Below those thresholds, expect the numbers to swing day-to-day. Don't change your integration based on a metric that hasn't crossed its settling line — you'll be chasing noise.</p>
+
+    <h2 id="reading-breakdown">5. Reading the per-placement breakdown</h2>
+    <p>The dashboard breaks revenue down by placement and by format. Three useful ways to read this view:</p>
+    <ol>
+      <li><strong>Concentration check.</strong> If one placement drives 80%+ of your revenue and the rest are flat, the lopsided one is your real product. Either remove the others (they're adding integration surface for no payoff) or experiment with format/copy on them to lift their eCPM.</li>
+      <li><strong>Format comparison.</strong> Same placement, different format (sidebar vs inline vs video). The format with the higher CTR is usually the one that fits your UI flow best. Big eCPM gaps between formats often mean the lower one is rendering at a bad moment in the user's task.</li>
+      <li><strong>Trend, not absolute.</strong> A placement going from $4 → $6 eCPM week-over-week tells you more than a $6 eCPM in isolation. Compare the same placement to itself over time.</li>
+    </ol>
+
+    <h2 id="debugging">6. Debugging a revenue drop</h2>
+    <p>When revenue falls week-over-week, work down the funnel from the top — the higher up the funnel the change happens, the bigger the downstream effect.</p>
+
+    <ol>
+      <li><strong>Did requests drop?</strong> Open the dashboard's requests chart by day. If requests fell, the cause is upstream of Boost Boss — your traffic mix shifted, your integration's call site got changed, or your app usage dropped. Boost Boss isn't the bug.</li>
+      <li><strong>Did fill rate drop?</strong> If requests are flat but fills fell, advertisers stopped matching your context. Possible causes: a campaign you were a strong fit for ended, your brand safety filters changed, or your traffic shifted toward contexts with thinner demand. Check Promote / Settings → Brand safety to confirm nothing changed.</li>
+      <li><strong>Did CTR drop?</strong> Fills steady but clicks down. The creative–context fit got worse. Usually means new campaigns entered the auction with weaker creative. Wait a few days — Benna learns and rotates them out, or they pause themselves.</li>
+      <li><strong>Did eCPM drop without CTR moving?</strong> Same fills, same clicks, less money. The advertiser-side auction prices fell — either fewer advertisers competing for your inventory, or the same advertisers lowered their bids. This usually reverses on its own as new campaigns enter.</li>
+    </ol>
+
+    <p>If you've checked all four and nothing jumps out, email <a href="mailto:publishers@boostboss.ai">publishers@boostboss.ai</a> with your publisher ID and the date range — we'll trace the auction logs and tell you exactly what changed.</p>
+
+    <h2 id="acting">7. When to act vs when to wait</h2>
+    <p>Most metric movements settle themselves. The auction is a marketplace — campaigns enter, ramp, pause, exit constantly. A short-term drop in eCPM almost always reverses within a week as the auction rebalances. Three signals that a change is real and worth acting on:</p>
+    <ul>
+      <li>The change has held for two consecutive weeks, not one.</li>
+      <li>The change shows up in <em>both</em> impressions and clicks (not just one — single-step changes are usually measurement noise).</li>
+      <li>You can explain the cause. "A campaign ended" / "we changed our integration" / "we shipped a new ad format." If you can't explain it, you usually don't need to act on it — it's the market moving, not your inventory.</li>
+    </ul>
+
+    <h2 id="promote-vs-cashout">8. Promote vs cash out — reading your balance two ways</h2>
+    <p>Your available balance has two valid uses, and the right choice is a function of your eCPM. If you can spend $1 on Promote to drive >$1 of revenue back into your own product (acquire a user who'll be worth more than $1 lifetime), Promote is the better trade. If you can't, cash out is the better trade. The metrics guide here gives you the numbers to make that call: your acquisition cost on Promote shows up as advertiser-side spend in the same dashboard, so you can compare apples to apples within a few weeks of running both.</p>
+
+    <h2 id="questions">Questions?</h2>
+    <p>Anything not covered here, anything where a metric doesn't match your intuition, anything where you're not sure if you're reading the dashboard right — email <a href="mailto:publishers@boostboss.ai">publishers@boostboss.ai</a> with the metric, the date range, and your publisher ID. We'll trace the underlying events and tell you exactly what's happening.</p>
+
+    <div class="page-nav">
+      <a href="/docs/api-reference">
+        <div class="nav-dir">← Back</div>
+        <div class="nav-title">API reference</div>
+      </a>
+      <a href="/docs/payouts">
+        <div class="nav-dir">Next →</div>
+        <div class="nav-title">Payouts</div>
+      </a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

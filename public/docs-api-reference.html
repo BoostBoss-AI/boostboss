@@ -1062,8 +1062,8 @@
     <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/v1/campaigns/:id</span><span class="desc">Modify a running campaign.</span></div>
     <p>Any field from Create campaign can be patched. Patching <code>status</code> to <code>paused</code> halts spend immediately. Patching <code>creative</code> triggers automatic creative re-review (typically under 15 minutes).</p>
 
-    <!-- STATS -->
-    <h2 id="api-stats">Get stats</h2>
+    <!-- STATS (advertiser-side) -->
+    <h2 id="api-stats">Get stats <span style="font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0;">— advertiser</span></h2>
     <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/stats</span><span class="desc">Aggregate performance metrics.</span></div>
     <p>Returns impressions, clicks, conversions, spend, and derived rates (CTR, CVR, eCPA) across the time range. Break down by <code>campaign</code>, <code>format</code>, <code>host_app</code>, <code>intent_signal</code>, or <code>day</code>.</p>
 
@@ -1083,6 +1083,37 @@
   <span class="s">"breakdown"</span>: [ ... ]
 }</pre>
     </div>
+
+    <!-- REPORTS (publisher-side, placeholder) -->
+    <h2 id="api-reports">Get reports <span style="font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0;">— publisher</span> <span style="display:inline-block;margin-left:6px;font-size:10.5px;font-weight:600;color:var(--muted);background:var(--bg-soft);padding:2px 8px;border-radius:4px;letter-spacing:0.04em;text-transform:uppercase;">soon</span></h2>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/reports</span><span class="desc">Publisher inventory performance — programmatic access to the same numbers your dashboard shows.</span></div>
+    <p>The publisher-side counterpart to <a href="#api-stats"><code>/v1/stats</code></a>. Returns requests, fills, impressions, clicks, revenue, eCPM, and fill rate across the time range, broken down by placement, format, integration door (MCP, JS, NPM, REST), or day. Built for pulling into a spreadsheet, BI tool, or your own analytics pipeline.</p>
+
+    <div class="callout info">
+      <span class="icon">✦</span>
+      <div><strong>Coming soon — no fixed date.</strong> Right now the dashboard's Performance tab is the canonical surface for publisher numbers, and the <a href="/docs/reporting" class="inline-link">Reporting metrics guide</a> explains how to read every figure shown there. The programmatic endpoint lands when a publisher hits a real use case the dashboard doesn't cover — typically the first "I want to pull this into a sheet / warehouse / BI tool" request. If you have that use case today, email <a href="mailto:publishers@boostboss.ai">publishers@boostboss.ai</a> with the shape of what you want — concrete asks shape the v1 surface.</div>
+    </div>
+
+    <p><strong>What the v1 endpoint will likely look like:</strong></p>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON · 200 OK (planned shape)</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"range"</span>: { <span class="s">"from"</span>: <span class="s">"2026-06-01"</span>, <span class="s">"to"</span>: <span class="s">"2026-06-30"</span> },
+  <span class="s">"totals"</span>: {
+    <span class="s">"requests"</span>:        <span class="n">1_240_000</span>,
+    <span class="s">"fills"</span>:           <span class="n">1_058_400</span>,
+    <span class="s">"impressions"</span>:     <span class="n">1_002_800</span>,
+    <span class="s">"clicks"</span>:          <span class="n">28_640</span>,
+    <span class="s">"revenue_usd"</span>:     <span class="n">5_316.40</span>,
+    <span class="s">"fill_rate"</span>:       <span class="n">0.853</span>,
+    <span class="s">"ctr"</span>:             <span class="n">0.0286</span>,
+    <span class="s">"ecpm_usd"</span>:        <span class="n">5.30</span>,
+    <span class="s">"rpm_usd"</span>:         <span class="n">4.29</span>
+  },
+  <span class="s">"breakdown"</span>: [ <span class="cm">// by placement | format | door | day</span> ]
+}</pre>
+    </div>
+    <p>This shape is illustrative — the final fields will track whatever the dashboard is showing at the time we ship. Until then, treat the dashboard as the source of truth.</p>
 
     <!-- BENNA -->
     <h2 id="benna-overview">Benna — the ranking engine</h2>
