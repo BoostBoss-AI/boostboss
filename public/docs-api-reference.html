@@ -48,9 +48,13 @@
     display: flex; align-items: center; justify-content: space-between;
     height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
   }
+  /* Brand sized to match the landing page (index.html .brand-mark and
+     .brand-name) and docs.css — 36px mark, 20px text, -0.5px tracking.
+     Was 32px/-0.4px, which made this page's logo visibly smaller than
+     the two siblings. */
   .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 32px; height: 32px; flex-shrink: 0; }
-  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.4px; color: var(--ink); }
+  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
   .brand-sub {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 12px; font-weight: 600; color: var(--ink);

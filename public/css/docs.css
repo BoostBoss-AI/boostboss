@@ -63,7 +63,7 @@ nav.docs-nav {
 .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
 .brand-name {
   font-family: 'Space Grotesk', sans-serif; font-size: 20px;
-  font-weight: 700; color: var(--ink); letter-spacing: -0.4px;
+  font-weight: 700; color: var(--ink); letter-spacing: -0.5px;
 }
 /* Yellow tag chip — matches the api-reference .brand-sub so /docs and
    /docs/api-reference render with the same shape, just different text
