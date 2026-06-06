@@ -40,6 +40,7 @@ body {
 }
 a { color: var(--pink); text-decoration: none; }
 a:hover { text-decoration: underline; }
+.brand, .brand:hover { text-decoration: none; }
 h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.015em; color: var(--ink); }
 code, pre { font-family: 'JetBrains Mono', monospace; }
 strong { font-weight: 600; }
