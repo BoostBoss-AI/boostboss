@@ -839,6 +839,44 @@
             background: #FFF0F5;
         }
 
+        /* ═══ Placements page — 4-door navigator tabs ══════════════════════
+           Pill-style tabs that mirror selectDoorTab() state. Visually
+           distinct from .fw-tab (which is the install-panel tab style) —
+           these are the primary surface for switching doors on the
+           Placements page now that the Integration cards moved to a
+           separate route. */
+        .placement-door-tab {
+            flex: 1 1 auto;
+            min-width: 100px;
+            padding: 10px 14px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4B5563;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            text-align: center;
+        }
+        .placement-door-tab:hover {
+            background: #F9FAFB;
+            color: #1A1A2E;
+        }
+        .placement-door-tab.is-active {
+            background: #FFF0F5;
+            border-color: #FFD7E5;
+            color: #FF2D78;
+        }
+        .placement-door-tab.is-active .placement-door-tab__label {
+            font-weight: 700;
+        }
+        @media (max-width: 720px) {
+            .placement-door-tab { min-width: 0; padding: 9px 10px; font-size: 12.5px; }
+        }
+
         /* ═══ Onboarding stepper ════════════════════════════════════════ */
         .ob-step {
             display: flex;
@@ -2411,8 +2449,37 @@ await message.reply({
             <div class="shell-page-head">
                 <div>
                     <h1 class="shell-page-title" data-t="page.placements.title">Placements</h1>
-                    <div class="shell-page-sub" data-t="page.placements.sub">Ad slots, API keys, and per-slot economics</div>
+                    <div class="shell-page-sub" data-t="page.placements.sub">Ad slots and per-slot economics</div>
                 </div>
+            </div>
+
+            <!-- ── 4-door navigator ──────────────────────────────────────
+                 Switch which door's placements are shown without having
+                 to leave the route. The buttons are wired to the same
+                 `selectDoorTab(...)` source-of-truth as the Integrations
+                 page so state stays in sync across both surfaces. -->
+            <div id="placementsDoorNav" style="
+                display: flex;
+                gap: 8px;
+                background: #fff;
+                border: 1px solid #E5E7EB;
+                border-radius: 12px;
+                padding: 6px;
+                margin-bottom: 16px;
+                overflow-x: auto;
+            " role="tablist" aria-label="Switch integration door">
+                <button class="placement-door-tab" data-door="mcp"        type="button" role="tab" onclick="selectDoorTab('mcp')">
+                    <span class="placement-door-tab__label">Lumi MCP</span>
+                </button>
+                <button class="placement-door-tab" data-door="js-snippet" type="button" role="tab" onclick="selectDoorTab('js-snippet')">
+                    <span class="placement-door-tab__label">Lumi Web</span>
+                </button>
+                <button class="placement-door-tab" data-door="npm-sdk"    type="button" role="tab" onclick="selectDoorTab('npm-sdk')">
+                    <span class="placement-door-tab__label">Lumi Extension</span>
+                </button>
+                <button class="placement-door-tab" data-door="rest-api"   type="button" role="tab" onclick="selectDoorTab('rest-api')">
+                    <span class="placement-door-tab__label">Lumi Bot</span>
+                </button>
             </div>
 
             <!-- Ad Placements — the door's placements, each a toggleable card -->
@@ -2425,7 +2492,7 @@ await message.reply({
                     </div>
                 </div>
                 <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;" data-t="ap.intro">
-                    Every card below is a placement your installed door can render. Switch any one on or off — turning a placement off removes it from your auction. Showing the door selected in the Integration section above.
+                    Every card below is a placement your installed door can render. Switch any one on or off — turning a placement off removes it from your auction. Use the door tabs above to view a different door's placements.
                 </div>
                 <div id="adPlacementsContainer">
                     <!-- Dynamically populated — the selected door's placement cards -->
@@ -4145,6 +4212,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             document.querySelectorAll('.fw-panel').forEach(panel => {
                 panel.style.display = panel.id === 'fw-' + name ? '' : 'none';
             });
+            // Sync the Placements page's 4-door pill nav so switching from
+            // either surface (Integrations cards or Placements pills) keeps
+            // the active state consistent across both.
+            document.querySelectorAll('.placement-door-tab').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.door === name);
+            });
             // Sync the cards' selected state — the cards ARE the tabs in
             // the merged section.
             document.querySelectorAll('.ic-card').forEach(card => {
@@ -4190,8 +4263,17 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const target = sessionStorage.getItem('bb_dashboard_target_door');
                 if (target && document.getElementById('fw-' + target)) {
                     selectDoorTab(target);
+                    return;
                 }
             } catch (_) {}
+            // No stored target — seed the Placements page tab nav so a fresh
+            // visitor sees one tab highlighted (otherwise the pill nav looks
+            // dead on first paint).
+            const selCard = document.querySelector('.ic-card.ic-selected');
+            const fallback = (selCard && selCard.dataset.door) || 'mcp';
+            document.querySelectorAll('.placement-door-tab').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.door === fallback);
+            });
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', applyTargetDoorFromSession);
@@ -4328,7 +4410,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             const _ctx = document.createElement('div');
             _ctx.style.cssText = 'font-size:12px;color:#6B7280;margin-bottom:14px;line-height:1.5;';
-            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong> — ${placements.length} this door renders. Switch doors in the Integration section above.`;
+            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong> — ${placements.length} this door renders. Use the door tabs above to switch.`;
             container.appendChild(_ctx);
 
             PLACEMENT_CATS.forEach(cat => {
