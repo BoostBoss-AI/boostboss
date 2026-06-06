@@ -167,6 +167,8 @@
     white-space: nowrap;
     overflow: hidden;
     transition: opacity var(--shell-trans-sidebar);
+    /* Flex-grow so it pushes the collapse-btn to the right edge of the head. */
+    flex: 1;
 }
 .shell-sidebar__product .accent { color: var(--shell-brand-pink); }
 .shell-wrap[data-shell-sidebar="collapsed"] .shell-sidebar__product { opacity: 0; pointer-events: none; }
@@ -320,12 +322,21 @@
 }
 .shell-wrap[data-shell-sidebar="collapsed"] .shell-sidebar__user-text { opacity: 0; pointer-events: none; }
 
+/* Sidebar collapse toggle. Lives in .shell-sidebar__head, right-aligned
+   next to the brand text. Compact 32x32 square that fits cleanly inside
+   the head's 14px padding. When the sidebar is collapsed (64px wide),
+   the brand text fades out and the head re-centers the logo + button so
+   both stay tappable. The icon is a symmetric panel-left shape so no
+   rotation is needed for state feedback — position alone tells the user
+   what it does. */
 .shell-collapse-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    padding: 7px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--shell-radius-sm);
@@ -337,8 +348,16 @@
     background: var(--shell-sidebar-bg-hover);
     color: var(--shell-sidebar-text-active);
 }
-.shell-collapse-btn svg { width: 16px; height: 16px; transition: transform var(--shell-trans-sidebar); }
-.shell-wrap[data-shell-sidebar="collapsed"] .shell-collapse-btn svg { transform: rotate(180deg); }
+.shell-collapse-btn svg { width: 18px; height: 18px; }
+
+/* Collapsed-mode layout: 64px is too narrow for logo + button side by
+   side AND the brand text is faded, so we tuck the button under the
+   logo (column flex) and shrink padding to keep it visible. */
+.shell-wrap[data-shell-sidebar="collapsed"] .shell-sidebar__head {
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 8px;
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    Top bar
