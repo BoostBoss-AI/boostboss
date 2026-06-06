@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payouts — Boost Boss Docs</title>
+<meta name="description" content="How Boost Boss pays publishers: biweekly cycle, $1 minimum, 2FA-gated cashout, bank transfer arrival window, and using your balance to promote instead.">
+<meta property="og:title" content="Payouts — Boost Boss Docs">
+<meta property="og:url" content="https://boostboss.ai/docs/payouts">
+<link rel="canonical" href="https://boostboss.ai/docs/payouts">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/docs.css">
+<style>
+  /* Page-specific tweaks for the cycle visualization */
+  .cycle-table { width: 100%; border-collapse: collapse; margin: 18px 0 28px; font-size: 14px; }
+  .cycle-table th, .cycle-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .cycle-table th { font-weight: 600; background: var(--bg-soft); font-family: 'Space Grotesk', sans-serif; font-size: 13px; }
+  .cycle-table td code { font-size: 13px; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pill-ok { background: #DCFCE7; color: #166534; }
+  .pill-wait { background: #FEF3C7; color: #92400E; }
+  .timing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0 28px; }
+  @media (max-width: 700px) { .timing-grid { grid-template-columns: 1fr; } }
+  .timing-card { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
+  .timing-card .label { font-size: 11.5px; font-weight: 600; color: var(--pink); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .timing-card .value { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .timing-card .sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<nav class="docs-nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-tag">docs</span>
+    </a>
+    <div class="nav-right">
+      <a href="/publish">Publishers</a>
+      <a href="/ads">Advertisers</a>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar">
+    <div class="side-section">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="/docs">Overview</a></li>
+        <li><a href="/docs/quickstart">Quickstart</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Publisher integration</h6>
+      <ul>
+        <li><a href="/docs/mcp">Lumi SDK for MCP</a></li>
+        <li><a href="/docs/js-snippet">Lumi SDK script tag</a></li>
+        <li><a href="/docs/npm-sdk">Lumi SDK for browser extensions</a></li>
+        <li><a href="/docs/rest-api">Lumi API for Bots</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="/docs/api-reference">API reference</a></li>
+        <li><a href="/docs/reporting" class="deferred">Reporting</a></li>
+        <li><a href="/docs/payouts" class="active">Payouts</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Policies</h6>
+      <ul>
+        <li><a href="/terms">Terms of Service</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/refunds">Refund Policy</a></li>
+        <li><a href="/aup">Acceptable Use</a></li>
+        <li><a href="/cookies">Cookie Policy</a></li>
+        <li><a href="/publisher-agreement">Publisher Agreement</a></li>
+        <li><a href="/advertiser-terms">Advertiser Terms</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="docs-main">
+    <div class="breadcrumbs">
+      <a href="/docs">Docs</a><span class="sep">/</span>
+      <span>Payouts</span>
+    </div>
+
+    <h1>Payouts</h1>
+    <p class="lede">Boost Boss pays publishers via international bank transfer on a fixed biweekly cycle. You request a payout from your dashboard, confirm with a six-digit code from your authenticator app, and the funds land in your bank account within a few business days. This page explains exactly when your money moves and what controls the timing.</p>
+
+    <div class="callout info">
+      <strong>The short version.</strong>
+      <p>Payouts run <strong>every other Friday</strong>. The cutoff is <strong>Tuesday 23:59 UTC</strong> — request a cashout by then and it goes out that same Friday; request after Tuesday and it goes out the <em>next</em> Friday (two weeks later). Minimum payout is <strong>$1 USD</strong>. Cashout requires two-factor authentication.</p>
+    </div>
+
+    <h2 id="setup">1. One-time setup</h2>
+    <p>Before you can request your first payout you need two things in place. Both live in your publisher dashboard <a href="/publish/dashboard">Settings</a>.</p>
+
+    <h3 id="setup-2fa">Enable two-factor authentication</h3>
+    <p>Settings → Security → Two-factor authentication. Scan the QR code with Google Authenticator, Authy, 1Password, or any TOTP-compatible app, then enter the six-digit code to confirm. You'll be given a set of <strong>recovery codes</strong> — print them or save them to a password manager. They're the only way back in if you lose your phone.</p>
+    <p>2FA is required for every cashout request and for any change to your bank details. We don't rely on SMS — too easy to SIM-swap.</p>
+
+    <h3 id="setup-bank">Add your bank details</h3>
+    <p>Settings → Payout method. We collect the information Boost Boss needs to wire funds to your bank account internationally:</p>
+    <ul>
+      <li>Account holder full name (must match your bank's records)</li>
+      <li>Account holder address</li>
+      <li>Beneficiary country and currency</li>
+      <li>Bank name and bank address</li>
+      <li>SWIFT / BIC code</li>
+      <li>IBAN, or account number + routing/branch code (depending on country)</li>
+    </ul>
+    <p>Saving or changing these details requires your account password <em>and</em> a fresh 2FA code. We do this on purpose — anyone who can rewrite the destination account can intercept your earnings.</p>
+
+    <div class="callout warning">
+      <strong>Crypto rail coming later.</strong>
+      <p>For v1 we only support bank transfer. Crypto receiving (USDC on Base or similar) is on the roadmap and will appear as an alternative Payout method once it ships.</p>
+    </div>
+
+    <h2 id="requesting">2. Requesting a payout</h2>
+    <p>Open your publisher dashboard and go to <strong>Promote</strong>. Your available balance is shown at the top. Click <strong>Cash out</strong> and a modal opens:</p>
+
+    <div class="timing-grid">
+      <div class="timing-card">
+        <div class="label">Payout date</div>
+        <div class="value">Friday, Jun 19</div>
+        <div class="sub">When Boost Boss releases the batch</div>
+      </div>
+      <div class="timing-card">
+        <div class="label">Estimated arrival</div>
+        <div class="value">Mon Jun 22 — Wed Jun 24</div>
+        <div class="sub">2–5 business days after release, depending on your bank</div>
+      </div>
+    </div>
+
+    <p>These dates are calculated live based on the current date and the Tuesday cutoff. You see them <em>before</em> you confirm — never any surprises about when the money lands.</p>
+
+    <p>Enter the cashout amount (defaults to your full balance, minimum $1), enter the six-digit code from your authenticator app, and click Confirm. Your balance updates immediately and the request enters the next batch.</p>
+
+    <h2 id="cycle">3. How the cycle works</h2>
+    <p>Picture two weeks at a time. Every other Friday is a "payout day." The Tuesday before each payout day is the "cutoff." Anything you request <em>before</em> the cutoff goes in that Friday's batch; anything <em>after</em> the cutoff waits for the next batch.</p>
+
+    <table class="cycle-table">
+      <thead>
+        <tr><th>If you request cashout on…</th><th>It goes out on…</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Friday Jun 5 (right after a payout day)</td><td>Friday Jun 19</td><td><span class="pill pill-ok">Next batch</span></td></tr>
+        <tr><td>Monday Jun 15</td><td>Friday Jun 19</td><td><span class="pill pill-ok">Same week</span></td></tr>
+        <tr><td>Tuesday Jun 16 (before 23:59 UTC)</td><td>Friday Jun 19</td><td><span class="pill pill-ok">Last-minute, included</span></td></tr>
+        <tr><td>Wednesday Jun 17 (after Tuesday cutoff)</td><td>Friday Jul 3</td><td><span class="pill pill-wait">Bumped to next batch</span></td></tr>
+        <tr><td>Friday Jun 19 (payout day itself)</td><td>Friday Jul 3</td><td><span class="pill pill-wait">Bumped to next batch</span></td></tr>
+      </tbody>
+    </table>
+
+    <p>The cashout modal does this math for you — you'll always see the actual date your request will be processed before you confirm.</p>
+
+    <h2 id="arrival">4. When the money lands in your account</h2>
+    <p>Payouts are released on Friday. International bank transfers typically settle in <strong>2 to 5 business days</strong> after release, depending on your country, currency, and bank's processing speed. The cashout modal shows you the estimated arrival window so you have a reasonable expectation.</p>
+    <p>If five business days have passed and the money hasn't landed, email <a href="mailto:publishers@boostboss.ai">publishers@boostboss.ai</a> with your payout ID and we'll trace it.</p>
+
+    <h2 id="promote">5. Or: use your balance to promote instead</h2>
+    <p>You don't have to cash out. Your available balance on the Promote page can be spent buying ads for your own product on the Boost Boss exchange — same balance, no bank transfer, no wait time, no fees on the conversion. Same publisher account becomes a small advertiser account.</p>
+    <p>This is useful if you'd rather grow than withdraw. You set a campaign budget that draws from your balance, choose targeting, and your ads enter the same auction every other advertiser participates in. If you decide later that you'd rather have the cash, the balance is still cashable any time.</p>
+
+    <h2 id="security">6. Security</h2>
+    <ul>
+      <li><strong>Every cashout requires 2FA.</strong> No exceptions. Your authenticator app code is verified server-side at request time.</li>
+      <li><strong>Changing your bank details requires password + 2FA.</strong> Two factors because this is the highest-impact change you can make — it rewrites where your money goes.</li>
+      <li><strong>You'll receive an email</strong> every time a cashout is requested, when it's batched for the upcoming payout, and when the funds are released. If you see one of these emails and you didn't trigger it, change your password immediately and email <a href="mailto:support@boostboss.ai">support@boostboss.ai</a>.</li>
+      <li><strong>We never ask for your authenticator code by email or chat.</strong> It's only ever entered into the dashboard cashout modal or the change-bank-details flow.</li>
+    </ul>
+
+    <h2 id="failed">7. If a payout fails</h2>
+    <p>Bank transfers occasionally fail — usually because the receiving bank rejected the account details (wrong SWIFT code, account closed, name mismatch). When that happens:</p>
+    <ol>
+      <li>The full amount is automatically credited back to your Boost Boss balance.</li>
+      <li>You'll receive an email explaining what went wrong.</li>
+      <li>Once you've fixed the bank details in Settings, request the cashout again. It enters the next available batch using the same Tuesday-cutoff rule.</li>
+    </ol>
+
+    <h2 id="behind">8. Behind the scenes</h2>
+    <p>Boost Boss uses <a href="https://payoneer.com" target="_blank" rel="noopener">Payoneer</a> Mass Payouts as the rail for international bank transfers. You don't need a Payoneer account to receive payouts — we send the funds directly to your bank using the details you provided. Payoneer is plumbing; the relationship is between you and Boost Boss.</p>
+
+    <h2 id="taxes">9. Taxes</h2>
+    <p>Boost Boss does not withhold taxes from payouts. You receive the gross amount and are responsible for declaring your earnings according to the tax law of your country of residence. If you need tax documentation (a summary of payouts by calendar year), email <a href="mailto:publishers@boostboss.ai">publishers@boostboss.ai</a> and we'll send it.</p>
+    <p>This is general information, not tax advice. If your situation is complex, talk to a tax professional in your jurisdiction.</p>
+
+    <h2 id="questions">Questions?</h2>
+    <p>Email <a href="mailto:publishers@boostboss.ai">publishers@boostboss.ai</a> with your publisher ID and we'll get back to you within one business day.</p>
+
+    <div class="page-nav">
+      <a href="/docs/api-reference">
+        <div class="nav-dir">← Back</div>
+        <div class="nav-title">API reference</div>
+      </a>
+      <a href="/docs">
+        <div class="nav-dir">Next →</div>
+        <div class="nav-title">Documentation overview</div>
+      </a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
