@@ -877,6 +877,30 @@
             .placement-door-tab { min-width: 0; padding: 9px 10px; font-size: 12.5px; }
         }
 
+        /* ═══ API page — Sandbox / Live toggle ════════════════════════════
+           PayPal-style pill toggle. Inactive tab is transparent, active is
+           a white pill with a subtle shadow. Sits in the page header. */
+        .api-mode-toggle .api-mode-tab {
+            padding: 7px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .api-mode-toggle .api-mode-tab:hover {
+            color: #1A1A2E;
+        }
+        .api-mode-toggle .api-mode-tab.is-active {
+            background: #fff;
+            color: #1A1A2E;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+        }
+
         /* ═══ Onboarding stepper ════════════════════════════════════════ */
         .ob-step {
             display: flex;
@@ -2529,15 +2553,38 @@ await message.reply({
                  account-level config, not slot-level. Single source of
                  truth for the Lumi SDK key, App ID, and MCP endpoint. -->
             <div data-shell-route="api">
-                <div class="shell-page-header" style="margin-bottom:24px;">
-                    <h1 class="shell-page-title" data-t="page.api.title">API & Credentials</h1>
-                    <p class="shell-page-sub" data-t="page.api.sub" style="color:var(--ink-soft);font-size:14.5px;margin-top:6px;">
-                        Your account credentials for integrating Boost Boss. Keep your API key secret — anyone with this key can call ad-request on your behalf.
-                    </p>
+                <!-- Page header with Sandbox/Live toggle on the right.
+                     Mirrors PayPal Developer Dashboard pattern — a single
+                     pill toggle decides which set of credentials to show.
+                     Live is the default (what the publisher came here for);
+                     Sandbox surfaces the shared test creds + a clear
+                     explanation that they bypass billing. -->
+                <div class="shell-page-header" style="margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+                    <div style="flex:1 1 auto;min-width:240px;">
+                        <h1 class="shell-page-title" data-t="page.api.title">API & Credentials</h1>
+                        <p class="shell-page-sub" id="apiHeaderSub" data-t="page.api.sub_live" style="color:var(--ink-soft);font-size:14.5px;margin-top:6px;">
+                            Your account credentials for integrating Boost Boss. Keep your API key secret — anyone with this key can call ad-request on your behalf.
+                        </p>
+                    </div>
+                    <div class="api-mode-toggle" role="tablist" aria-label="Switch credentials mode" style="
+                        flex:0 0 auto;
+                        display:inline-flex;
+                        background:#F3F4F6;
+                        border-radius:999px;
+                        padding:4px;
+                    ">
+                        <button id="apiModeLiveBtn" class="api-mode-tab is-active" type="button" role="tab" onclick="setApiCredsMode('live')">
+                            <span data-t="api.mode.live">Live</span>
+                        </button>
+                        <button id="apiModeSandboxBtn" class="api-mode-tab" type="button" role="tab" onclick="setApiCredsMode('sandbox')">
+                            <span data-t="api.mode.sandbox">Sandbox</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="section">
-                    <div class="section-title" data-t="apikeys.title">API Keys & Credentials</div>
+                <!-- ── Live credentials panel ──────────────────────────── -->
+                <div id="apiCredsLive" class="section">
+                    <div class="section-title" data-t="apikeys.title_live">Your live credentials</div>
                     <div class="key-item">
                         <div class="key-info">
                             <div class="key-label" data-t="apikeys.api_key">API Key</div>
@@ -2560,6 +2607,43 @@ await message.reply({
                         <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')" data-t="common.copy">Copy</button>
                     </div>
                     <button class="regenerate-btn" onclick="regenerateKey()" data-t="apikeys.regenerate">Regenerate API Key</button>
+                </div>
+
+                <!-- ── Sandbox credentials panel (hidden by default) ──── -->
+                <div id="apiCredsSandbox" class="section" style="display:none;">
+                    <div class="section-title" data-t="apikeys.title_sandbox">Sandbox credentials</div>
+                    <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;color:#854F0B;margin-bottom:14px;" data-t="apikeys.sandbox_explainer">
+                        These are shared test credentials. Anyone can use them. Requests always return a fill from a small test creative pool, never charge advertisers, never pay publishers, and never show up in production analytics. Swap them for your live keys above when you're ready to ship.
+                    </div>
+                    <div class="key-item">
+                        <div class="key-info">
+                            <div class="key-label" data-t="apikeys.publisher_id">Publisher ID</div>
+                            <div class="key-value" id="sandbox-publisher-id">pub_test_demo</div>
+                        </div>
+                        <button class="reveal-btn" onclick="copyValue('pub_test_demo')" data-t="common.copy">Copy</button>
+                    </div>
+                    <div class="key-item">
+                        <div class="key-info">
+                            <div class="key-label" data-t="apikeys.api_key">API Key</div>
+                            <div class="key-value" id="sandbox-api-key">sk_test_demo</div>
+                        </div>
+                        <button class="reveal-btn" onclick="copyValue('sk_test_demo')" data-t="common.copy">Copy</button>
+                    </div>
+                    <div class="key-item">
+                        <div class="key-info">
+                            <div class="key-label" data-t="apikeys.mcp_endpoint">MCP Endpoint URL</div>
+                            <div class="key-value">https://api.boostboss.ai/mcp</div>
+                        </div>
+                        <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')" data-t="common.copy">Copy</button>
+                    </div>
+                    <a href="/docs/quickstart" style="
+                        display:inline-flex;align-items:center;gap:6px;
+                        margin-top:6px;font-size:13.5px;font-weight:600;
+                        color:#FF2D78;text-decoration:none;
+                    " data-t="apikeys.sandbox_docs">
+                        Read the sandbox docs
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
                 </div>
             </div><!-- /[data-shell-route="api"] -->
 
@@ -4616,6 +4700,44 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             document.getElementById('dashboardView').classList.add('active');
         }
 
+        // ── API page Sandbox/Live toggle ────────────────────────────────
+        // Switches between the Live credentials panel (the publisher's
+        // real key + app_id) and the Sandbox panel (shared pub_test_demo
+        // / sk_test_demo creds). Persists choice across reloads so the
+        // publisher returns to whichever view they last used.
+        function setApiCredsMode(mode) {
+            const isLive = mode !== 'sandbox';
+            const liveBtn = document.getElementById('apiModeLiveBtn');
+            const sbBtn   = document.getElementById('apiModeSandboxBtn');
+            const liveP   = document.getElementById('apiCredsLive');
+            const sbP     = document.getElementById('apiCredsSandbox');
+            const sub     = document.getElementById('apiHeaderSub');
+            if (liveBtn) liveBtn.classList.toggle('is-active', isLive);
+            if (sbBtn)   sbBtn.classList.toggle('is-active', !isLive);
+            if (liveP)   liveP.style.display = isLive ? '' : 'none';
+            if (sbP)     sbP.style.display   = isLive ? 'none' : '';
+            // Header sub copy changes per mode — Live emphasizes "keep it
+            // secret"; Sandbox emphasizes "these are shared, safe to share".
+            if (sub) {
+                sub.setAttribute('data-t', isLive ? 'page.api.sub_live' : 'page.api.sub_sandbox');
+                // Resolve immediately from the active locale dict if available.
+                try {
+                    const dict = (typeof DASH_T !== 'undefined') && DASH_T[
+                        (typeof currentLang === 'function') ? currentLang() : 'en'
+                    ];
+                    if (dict && dict[sub.getAttribute('data-t')]) sub.textContent = dict[sub.getAttribute('data-t')];
+                } catch (_) {}
+            }
+            try { localStorage.setItem('bb_api_creds_mode', isLive ? 'live' : 'sandbox'); } catch (_) {}
+        }
+        // Restore last-used mode on dashboard load.
+        (function initApiCredsMode(){
+            try {
+                const saved = localStorage.getItem('bb_api_creds_mode');
+                if (saved === 'sandbox') setApiCredsMode('sandbox');
+            } catch (_) {}
+        })();
+
         function toggleAPIKey() {
             const keyElement = document.getElementById('api-key');
             const btn = event.target;
@@ -5537,6 +5659,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': 'Ad slots and per-slot economics',
                     'page.api.title': 'API & Credentials',
                     'page.api.sub': 'Your account credentials for integrating Boost Boss. Keep your API key secret — anyone with this key can call ad-request on your behalf.',
+                    'page.api.sub_live': 'Your account credentials for integrating Boost Boss. Keep your API key secret — anyone with this key can call ad-request on your behalf.',
+                    'page.api.sub_sandbox': 'Shared test credentials. Safe to share. Use them to verify your integration end-to-end before swapping in your live key.',
+                    'api.mode.live': 'Live',
+                    'api.mode.sandbox': 'Sandbox',
+                    'apikeys.title_live': 'Your live credentials',
+                    'apikeys.title_sandbox': 'Sandbox credentials',
+                    'apikeys.publisher_id': 'Publisher ID',
+                    'apikeys.sandbox_explainer': 'These are shared test credentials. Anyone can use them. Requests always return a fill from a small test creative pool, never charge advertisers, never pay publishers, and never show up in production analytics. Swap them for your live keys above when you\'re ready to ship.',
+                    'apikeys.sandbox_docs': 'Read the sandbox docs',
                     'page.payouts.title': 'Payouts',
                     'page.payouts.sub': 'Earnings history and payout settings',
                     'page.promote.title': 'Promote',
@@ -5827,6 +5958,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '广告位与每个广告位的经济数据',
                     'page.api.title': 'API 与凭证',
                     'page.api.sub': '集成 Boost Boss 所需的账户凭证。请妥善保管 API 密钥 — 任何持有此密钥的人都可以代表您调用广告请求。',
+                    'page.api.sub_live': '集成 Boost Boss 所需的账户凭证。请妥善保管 API 密钥 — 任何持有此密钥的人都可以代表您调用广告请求。',
+                    'page.api.sub_sandbox': '共享测试凭证。可安全分享。在切换到您的正式密钥之前，用它来端到端验证您的集成。',
+                    'api.mode.live': '正式',
+                    'api.mode.sandbox': '沙盒',
+                    'apikeys.title_live': '您的正式凭证',
+                    'apikeys.title_sandbox': '沙盒凭证',
+                    'apikeys.publisher_id': '发布商 ID',
+                    'apikeys.sandbox_explainer': '这是共享的测试凭证，任何人都可以使用。请求总是从小型测试创意池返回一个素材，不会向广告主收费，不会向发布商付款，也不会出现在生产分析中。准备上线时，请替换为上方的正式密钥。',
+                    'apikeys.sandbox_docs': '阅读沙盒文档',
                     'page.payouts.title': '打款',
                     'page.payouts.sub': '收益记录与打款设置',
                     'page.promote.title': '推广',
@@ -6117,6 +6257,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '廣告版位與每個版位的經濟數據',
                     'page.api.title': 'API 與憑證',
                     'page.api.sub': '整合 Boost Boss 所需的帳戶憑證。請妥善保管 API 金鑰 — 任何持有此金鑰的人都可以代表您呼叫廣告請求。',
+                    'page.api.sub_live': '整合 Boost Boss 所需的帳戶憑證。請妥善保管 API 金鑰 — 任何持有此金鑰的人都可以代表您呼叫廣告請求。',
+                    'page.api.sub_sandbox': '共用測試憑證。可安全分享。在切換到您的正式金鑰之前，用它來端到端驗證您的整合。',
+                    'api.mode.live': '正式',
+                    'api.mode.sandbox': '沙盒',
+                    'apikeys.title_live': '您的正式憑證',
+                    'apikeys.title_sandbox': '沙盒憑證',
+                    'apikeys.publisher_id': '發布商 ID',
+                    'apikeys.sandbox_explainer': '這是共用的測試憑證，任何人都可以使用。請求總是從小型測試素材池回傳一個素材，不會向廣告主收費，不會向發布商付款，也不會出現在正式分析中。準備上線時，請替換為上方的正式金鑰。',
+                    'apikeys.sandbox_docs': '閱讀沙盒文件',
                     'page.payouts.title': '撥款',
                     'page.payouts.sub': '收益紀錄與撥款設定',
                     'page.promote.title': '推廣',
@@ -6407,6 +6556,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '広告スロットとスロットごとの経済情報',
                     'page.api.title': 'API と認証情報',
                     'page.api.sub': 'Boost Boss を統合するためのアカウント認証情報。API キーは秘密に保ってください — このキーを持つ人なら誰でもあなたの代わりに ad-request を呼び出せます。',
+                    'page.api.sub_live': 'Boost Boss を統合するためのアカウント認証情報。API キーは秘密に保ってください — このキーを持つ人なら誰でもあなたの代わりに ad-request を呼び出せます。',
+                    'page.api.sub_sandbox': '共有のテスト認証情報です。安全に共有できます。本番キーに切り替える前に、統合をエンドツーエンドで検証するために使用してください。',
+                    'api.mode.live': '本番',
+                    'api.mode.sandbox': 'サンドボックス',
+                    'apikeys.title_live': '本番認証情報',
+                    'apikeys.title_sandbox': 'サンドボックス認証情報',
+                    'apikeys.publisher_id': 'パブリッシャー ID',
+                    'apikeys.sandbox_explainer': 'これは共有のテスト認証情報で、誰でも使用できます。リクエストは常に小さなテスト クリエイティブ プールからフィルを返し、広告主に課金されることはなく、パブリッシャーに支払われることもなく、本番アナリティクスにも表示されません。リリース準備ができたら、上記の本番キーに置き換えてください。',
+                    'apikeys.sandbox_docs': 'サンドボックスのドキュメントを読む',
                     'page.payouts.title': '支払い',
                     'page.payouts.sub': '収益履歴と支払い設定',
                     'page.promote.title': 'プロモート',
@@ -6697,6 +6855,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '광고 슬롯과 슬롯별 경제 지표',
                     'page.api.title': 'API 및 자격 증명',
                     'page.api.sub': 'Boost Boss 통합에 필요한 계정 자격 증명. API 키는 비밀로 유지하세요 — 이 키를 가진 사람은 누구나 당신을 대신해 ad-request를 호출할 수 있습니다.',
+                    'page.api.sub_live': 'Boost Boss 통합에 필요한 계정 자격 증명. API 키는 비밀로 유지하세요 — 이 키를 가진 사람은 누구나 당신을 대신해 ad-request를 호출할 수 있습니다.',
+                    'page.api.sub_sandbox': '공유 테스트 자격 증명. 안전하게 공유할 수 있습니다. 라이브 키로 전환하기 전에 통합을 엔드투엔드로 검증하는 데 사용하세요.',
+                    'api.mode.live': '라이브',
+                    'api.mode.sandbox': '샌드박스',
+                    'apikeys.title_live': '라이브 자격 증명',
+                    'apikeys.title_sandbox': '샌드박스 자격 증명',
+                    'apikeys.publisher_id': '퍼블리셔 ID',
+                    'apikeys.sandbox_explainer': '이것은 공유 테스트 자격 증명으로, 누구나 사용할 수 있습니다. 요청은 항상 작은 테스트 크리에이티브 풀에서 채워지며, 광고주에게 청구되지 않고, 퍼블리셔에게 지급되지 않으며, 프로덕션 분석에도 표시되지 않습니다. 출시 준비가 되면 위의 라이브 키로 교체하세요.',
+                    'apikeys.sandbox_docs': '샌드박스 문서 읽기',
                     'page.payouts.title': '정산',
                     'page.payouts.sub': '수익 내역 및 정산 설정',
                     'page.promote.title': '프로모트',
@@ -6987,6 +7154,15 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': 'Vị trí quảng cáo và kinh tế từng vị trí',
                     'page.api.title': 'API & thông tin xác thực',
                     'page.api.sub': 'Thông tin xác thực tài khoản để tích hợp Boost Boss. Giữ API key bí mật — bất kỳ ai có key này đều có thể gọi ad-request thay bạn.',
+                    'page.api.sub_live': 'Thông tin xác thực tài khoản để tích hợp Boost Boss. Giữ API key bí mật — bất kỳ ai có key này đều có thể gọi ad-request thay bạn.',
+                    'page.api.sub_sandbox': 'Thông tin xác thực test dùng chung. Có thể chia sẻ an toàn. Dùng để xác thực tích hợp end-to-end trước khi chuyển sang live key.',
+                    'api.mode.live': 'Live',
+                    'api.mode.sandbox': 'Sandbox',
+                    'apikeys.title_live': 'Thông tin xác thực live',
+                    'apikeys.title_sandbox': 'Thông tin xác thực sandbox',
+                    'apikeys.publisher_id': 'Publisher ID',
+                    'apikeys.sandbox_explainer': 'Đây là thông tin xác thực test dùng chung. Bất kỳ ai cũng có thể sử dụng. Mọi request đều trả về fill từ một pool creative test nhỏ, không bao giờ tính phí advertiser, không bao giờ trả publisher và không bao giờ hiển thị trong analytics production. Khi sẵn sàng phát hành, hãy thay bằng live key ở trên.',
+                    'apikeys.sandbox_docs': 'Đọc tài liệu sandbox',
                     'page.payouts.title': 'Thanh toán',
                     'page.payouts.sub': 'Lịch sử doanh thu và cài đặt thanh toán',
                     'page.promote.title': 'Quảng bá',
