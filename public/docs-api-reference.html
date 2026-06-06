@@ -84,10 +84,12 @@
     border-radius: 4px; padding: 1px 6px; margin-left: auto; color: var(--ink);
   }
 
-  /* LAYOUT */
+  /* LAYOUT
+     2-col after the right TOC was removed 2026-06-06 (it duplicated the
+     left sidebar's endpoint list, so we keep only the sidebar). */
   .docs-layout {
     max-width: 1400px; margin: 0 auto;
-    display: grid; grid-template-columns: 260px 1fr 240px;
+    display: grid; grid-template-columns: 260px 1fr;
     gap: 48px; padding: 0 28px;
   }
 
@@ -295,27 +297,7 @@
   .callout.tip { background: #FFE6EE; border-color: var(--pink); }
   .callout.tip .icon { background: var(--pink); color: #fff; }
 
-  /* TOC RIGHT */
-  aside.toc {
-    position: sticky; top: 64px;
-    align-self: start; padding: 40px 0 48px;
-    height: calc(100vh - 64px); overflow-y: auto;
-  }
-  .toc h6 {
-    font-family: 'Inter', sans-serif;
-    font-size: 11px; font-weight: 700;
-    color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 10px;
-  }
-  .toc ul { list-style: none; }
-  .toc a {
-    display: block; padding: 4px 10px;
-    font-size: 13px; color: var(--muted);
-    border-left: 2px solid var(--line);
-    transition: all 0.1s;
-  }
-  .toc a:hover { color: var(--ink); border-left-color: var(--pink); }
-  .toc a.active { color: var(--pink); border-left-color: var(--pink); font-weight: 600; }
+  /* Right TOC styles removed 2026-06-06 with the .toc <aside> itself. */
 
   /* CARD GRID */
   .card-grid {
@@ -540,7 +522,6 @@
   /* RESPONSIVE */
   @media (max-width: 1100px) {
     .docs-layout { grid-template-columns: 240px 1fr; }
-    aside.toc { display: none; }
   }
   @media (max-width: 768px) {
     .docs-layout { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
@@ -1593,35 +1574,8 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
       </a>
     </div>
   </main>
-
-  <!-- RIGHT TOC -->
-  <aside class="toc">
-    <h6>On this page</h6>
-    <ul>
-      <li><a href="#introduction" class="active">Introduction</a></li>
-      <li><a href="#quickstart">Quickstart</a></li>
-      <li><a href="#authentication">Authentication</a></li>
-      <li><a href="#environments">Environments</a></li>
-      <li><a href="#sdk-typescript">SDKs</a></li>
-      <li><a href="#api-fetch-ad">Fetch ad</a></li>
-      <li><a href="#api-impression">Beacons</a></li>
-      <li><a href="#api-campaigns">Campaigns</a></li>
-      <li><a href="#api-stats">Stats</a></li>
-      <li><a href="#api-reports">Reports <span style="font-size:9.5px;font-weight:600;color:#9CA3AF;background:#F4F4F7;padding:1px 5px;border-radius:3px;margin-left:5px;letter-spacing:0.04em;text-transform:uppercase;">soon</span></a></li>
-      <li><a href="#benna-overview">Benna engine</a></li>
-      <li><a href="#benna-score">Score a bid</a></li>
-      <li><a href="#benna-signals">Signal reference</a></li>
-      <li><a href="#ad-formats">Ad formats</a></li>
-      <li><a href="#ai-targeting">AI targeting</a></li>
-      <li><a href="#mcp-integration">MCP integration</a></li>
-      <li><a href="#webhooks">Webhooks</a></li>
-      <li><a href="#rate-limits">Rate limits</a></li>
-      <li><a href="#errors">Errors</a></li>
-      <li><a href="#rtb-overview">OpenRTB (BBX)</a></li>
-      <li><a href="#rtb-mcp-translation">MCP signal map</a></li>
-      <li><a href="#changelog">Changelog</a></li>
-    </ul>
-  </aside>
+  <!-- Right "On this page" TOC removed 2026-06-06 — duplicated the left
+       sidebar. Grid template-columns dropped from 3-col to 2-col below. -->
 </div>
 
 <!-- BACK TO TOP -->
@@ -1658,7 +1612,8 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
   });
 
   // ── Scroll-spy ──
-  const tocLinks = document.querySelectorAll('aside.toc a');
+  // Tracks the left sidebar's endpoint links only — the right TOC was
+  // removed 2026-06-06 since it duplicated this list.
   const sideLinks = document.querySelectorAll('aside.sidebar .side-links a');
   const headings = document.querySelectorAll('main h2, main h1');
 
@@ -1667,7 +1622,7 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
     headings.forEach(h => {
       if (h.getBoundingClientRect().top < 180) current = h.id;
     });
-    [...tocLinks, ...sideLinks].forEach(a => {
+    sideLinks.forEach(a => {
       a.classList.toggle('active', a.getAttribute('href') === '#' + current);
     });
     // Back to top visibility
