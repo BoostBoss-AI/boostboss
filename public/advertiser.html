@@ -11,6 +11,10 @@
     <!-- Phase 1 dashboard shell — shared with /publish/dashboard (developer.html). -->
     <link rel="stylesheet" href="/dashboard-shell.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- qrcode-generator: pure-JS QR rendering for the 2FA enrollment QR.
+         Loaded sync because Settings can call it on first open and we'd
+         rather block 13KB of JS than show a spinner. -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -7286,6 +7290,36 @@
                     'security.new_hint': 'At least 8 characters.',
                     'security.confirm': 'Confirm new password',
                     'security.change_btn': 'Change password',
+                    'security.pw_heading': 'Password',
+                    'security.mfa_heading': 'Two-factor authentication',
+                    'security.mfa_off': 'Off',
+                    'security.mfa_on': 'On',
+                    'security.mfa_desc_off': 'Add an extra layer of security with an authenticator app like Google Authenticator, Authy, or 1Password. Required to cash out and to change your bank details.',
+                    'security.mfa_desc_on': 'Your account is protected with an authenticator app. Required for cashout and bank-detail changes.',
+                    'security.mfa_enrolled_at': 'Enrolled',
+                    'security.mfa_enable_btn': 'Enable two-factor authentication',
+                    'security.mfa_disable_btn': 'Disable two-factor',
+                    'security.mfa_enroll_title': 'Set up two-factor authentication',
+                    'security.mfa_enroll_step': 'Step 1 of 2 — Scan and verify',
+                    'security.mfa_enroll_scan': 'Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password, Microsoft Authenticator, etc.).',
+                    'security.mfa_enroll_manual': 'Or enter this key manually:',
+                    'security.mfa_enroll_code_label': 'Code from your authenticator app',
+                    'security.mfa_enroll_code_hint': 'A new 6-digit code appears every 30 seconds. Use the latest one.',
+                    'security.mfa_enroll_verify_btn': 'Verify & turn on',
+                    'security.mfa_enroll_verifying': 'Verifying…',
+                    'security.mfa_enroll_cancel': 'Cancel',
+                    'security.mfa_enroll_loading': 'Setting up…',
+                    'security.mfa_disable_title': 'Turn off two-factor authentication?',
+                    'security.mfa_disable_warn': 'You won\'t be able to cash out or change your bank details until you turn it back on. Enter your current 6-digit code to confirm.',
+                    'security.mfa_disable_code_label': 'Current 6-digit code',
+                    'security.mfa_disable_confirm_btn': 'Turn off two-factor',
+                    'security.mfa_disable_disabling': 'Turning off…',
+                    'security.mfa_err_code_invalid': 'That code doesn\'t match. Use the latest one from your authenticator app.',
+                    'security.mfa_err_already_enabled': 'Two-factor is already enabled on this account.',
+                    'security.mfa_err_not_enabled': 'Two-factor is not enabled on this account.',
+                    'security.mfa_err_generic': 'Could not complete two-factor setup. Please try again.',
+                    'toast.mfa_enabled': 'Two-factor authentication enabled',
+                    'toast.mfa_disabled': 'Two-factor authentication disabled',
                     'newc.placement_intro': 'Select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher\'s product.',
                     'newc.bb_ai_badge': 'Boost Boss AI',
                     'newc.intent': 'Intent signals',
@@ -7598,6 +7632,36 @@
                     'security.new_hint': '至少 8 个字符。',
                     'security.confirm': '确认新密码',
                     'security.change_btn': '更改密码',
+                    'security.pw_heading': '密码',
+                    'security.mfa_heading': '双重验证',
+                    'security.mfa_off': '关',
+                    'security.mfa_on': '开',
+                    'security.mfa_desc_off': '使用 Google Authenticator、Authy 或 1Password 等验证器应用为账户增加额外的安全保障。提现以及修改银行信息时需要使用。',
+                    'security.mfa_desc_on': '您的账户已通过验证器应用保护。提现和修改银行信息时需要此验证。',
+                    'security.mfa_enrolled_at': '已启用',
+                    'security.mfa_enable_btn': '开启双重验证',
+                    'security.mfa_disable_btn': '关闭双重验证',
+                    'security.mfa_enroll_title': '设置双重验证',
+                    'security.mfa_enroll_step': '第 1 步 / 共 2 步 — 扫描并验证',
+                    'security.mfa_enroll_scan': '用您的验证器应用扫描此二维码（Google Authenticator、Authy、1Password、Microsoft Authenticator 等）。',
+                    'security.mfa_enroll_manual': '或手动输入此密钥：',
+                    'security.mfa_enroll_code_label': '验证器应用中的代码',
+                    'security.mfa_enroll_code_hint': '每 30 秒会生成一个新的 6 位代码。请使用最新的。',
+                    'security.mfa_enroll_verify_btn': '验证并开启',
+                    'security.mfa_enroll_verifying': '正在验证…',
+                    'security.mfa_enroll_cancel': '取消',
+                    'security.mfa_enroll_loading': '正在设置…',
+                    'security.mfa_disable_title': '关闭双重验证？',
+                    'security.mfa_disable_warn': '关闭后，您将无法提现或修改银行信息，直到再次开启。请输入当前的 6 位代码以确认。',
+                    'security.mfa_disable_code_label': '当前 6 位代码',
+                    'security.mfa_disable_confirm_btn': '关闭双重验证',
+                    'security.mfa_disable_disabling': '正在关闭…',
+                    'security.mfa_err_code_invalid': '代码不匹配。请使用验证器应用中的最新代码。',
+                    'security.mfa_err_already_enabled': '此账户已开启双重验证。',
+                    'security.mfa_err_not_enabled': '此账户未开启双重验证。',
+                    'security.mfa_err_generic': '无法完成双重验证设置。请重试。',
+                    'toast.mfa_enabled': '已开启双重验证',
+                    'toast.mfa_disabled': '已关闭双重验证',
                     'newc.placement_intro': '选择一个版位组;组内的每个版位都会包含在内。点击任意卡片以在发布商产品中预览您的广告。',
                     'newc.bb_ai_badge': 'Boost Boss AI',
                     'newc.intent': '意图信号',
@@ -7910,6 +7974,36 @@
                     'security.new_hint': '至少 8 個字元。',
                     'security.confirm': '確認新密碼',
                     'security.change_btn': '更改密碼',
+                    'security.pw_heading': '密碼',
+                    'security.mfa_heading': '雙重驗證',
+                    'security.mfa_off': '關',
+                    'security.mfa_on': '開',
+                    'security.mfa_desc_off': '使用 Google Authenticator、Authy 或 1Password 等驗證器應用程式為帳號增加額外的安全保障。提領以及修改銀行資料時需要使用。',
+                    'security.mfa_desc_on': '您的帳號已透過驗證器應用程式保護。提領和修改銀行資料時需要此驗證。',
+                    'security.mfa_enrolled_at': '已啟用',
+                    'security.mfa_enable_btn': '開啟雙重驗證',
+                    'security.mfa_disable_btn': '關閉雙重驗證',
+                    'security.mfa_enroll_title': '設定雙重驗證',
+                    'security.mfa_enroll_step': '第 1 步 / 共 2 步 — 掃描並驗證',
+                    'security.mfa_enroll_scan': '用您的驗證器應用程式掃描此 QR 碼（Google Authenticator、Authy、1Password、Microsoft Authenticator 等）。',
+                    'security.mfa_enroll_manual': '或手動輸入此金鑰：',
+                    'security.mfa_enroll_code_label': '驗證器應用程式中的代碼',
+                    'security.mfa_enroll_code_hint': '每 30 秒會產生一個新的 6 位代碼。請使用最新的。',
+                    'security.mfa_enroll_verify_btn': '驗證並開啟',
+                    'security.mfa_enroll_verifying': '驗證中…',
+                    'security.mfa_enroll_cancel': '取消',
+                    'security.mfa_enroll_loading': '設定中…',
+                    'security.mfa_disable_title': '關閉雙重驗證？',
+                    'security.mfa_disable_warn': '關閉後，您將無法提領或修改銀行資料，直到再次開啟。請輸入目前的 6 位代碼以確認。',
+                    'security.mfa_disable_code_label': '目前 6 位代碼',
+                    'security.mfa_disable_confirm_btn': '關閉雙重驗證',
+                    'security.mfa_disable_disabling': '關閉中…',
+                    'security.mfa_err_code_invalid': '代碼不符。請使用驗證器應用程式中的最新代碼。',
+                    'security.mfa_err_already_enabled': '此帳號已開啟雙重驗證。',
+                    'security.mfa_err_not_enabled': '此帳號未開啟雙重驗證。',
+                    'security.mfa_err_generic': '無法完成雙重驗證設定。請重試。',
+                    'toast.mfa_enabled': '已開啟雙重驗證',
+                    'toast.mfa_disabled': '已關閉雙重驗證',
                     'newc.placement_intro': '選擇一個版位群組;群組內的每個版位都會包含在內。點擊任意卡片以在發布商產品中預覽您的廣告。',
                     'newc.bb_ai_badge': 'Boost Boss AI',
                     'newc.intent': '意圖訊號',
@@ -8222,6 +8316,36 @@
                     'security.new_hint': '8 文字以上。',
                     'security.confirm': '新しいパスワード(確認)',
                     'security.change_btn': 'パスワードを変更',
+                    'security.pw_heading': 'パスワード',
+                    'security.mfa_heading': '二段階認証',
+                    'security.mfa_off': 'オフ',
+                    'security.mfa_on': 'オン',
+                    'security.mfa_desc_off': 'Google Authenticator、Authy、1Password などの認証アプリでアカウントのセキュリティを強化します。出金や口座情報の変更時に必要です。',
+                    'security.mfa_desc_on': '認証アプリでアカウントを保護しています。出金および口座情報の変更時に認証コードが必要です。',
+                    'security.mfa_enrolled_at': '有効化日',
+                    'security.mfa_enable_btn': '二段階認証を有効化',
+                    'security.mfa_disable_btn': '二段階認証を無効化',
+                    'security.mfa_enroll_title': '二段階認証を設定',
+                    'security.mfa_enroll_step': 'ステップ 1 / 2 — スキャンして認証',
+                    'security.mfa_enroll_scan': '認証アプリ（Google Authenticator、Authy、1Password、Microsoft Authenticator など）で QR コードをスキャンしてください。',
+                    'security.mfa_enroll_manual': 'または手動でこのキーを入力：',
+                    'security.mfa_enroll_code_label': '認証アプリのコード',
+                    'security.mfa_enroll_code_hint': '30 秒ごとに新しい 6 桁のコードが表示されます。最新のものをお使いください。',
+                    'security.mfa_enroll_verify_btn': '認証して有効化',
+                    'security.mfa_enroll_verifying': '認証中…',
+                    'security.mfa_enroll_cancel': 'キャンセル',
+                    'security.mfa_enroll_loading': '設定中…',
+                    'security.mfa_disable_title': '二段階認証をオフにしますか？',
+                    'security.mfa_disable_warn': 'オフにすると、再度有効化するまで出金や口座情報の変更ができません。確認のため現在の 6 桁コードを入力してください。',
+                    'security.mfa_disable_code_label': '現在の 6 桁コード',
+                    'security.mfa_disable_confirm_btn': '二段階認証をオフにする',
+                    'security.mfa_disable_disabling': 'オフにしています…',
+                    'security.mfa_err_code_invalid': 'コードが一致しません。認証アプリの最新コードをお使いください。',
+                    'security.mfa_err_already_enabled': 'このアカウントでは二段階認証はすでに有効になっています。',
+                    'security.mfa_err_not_enabled': 'このアカウントでは二段階認証は有効になっていません。',
+                    'security.mfa_err_generic': '二段階認証の設定を完了できませんでした。もう一度お試しください。',
+                    'toast.mfa_enabled': '二段階認証を有効化しました',
+                    'toast.mfa_disabled': '二段階認証を無効化しました',
                     'newc.placement_intro': 'プレースメント グループを選択 — グループ内のすべてのプレースメントが含まれます。任意のカードをクリックすると、パブリッシャーの製品内で広告をプレビューできます。',
                     'newc.bb_ai_badge': 'Boost Boss AI',
                     'newc.intent': 'インテント シグナル',
@@ -8534,6 +8658,36 @@
                     'security.new_hint': '최소 8자.',
                     'security.confirm': '새 비밀번호 확인',
                     'security.change_btn': '비밀번호 변경',
+                    'security.pw_heading': '비밀번호',
+                    'security.mfa_heading': '이중 인증',
+                    'security.mfa_off': '꺼짐',
+                    'security.mfa_on': '켜짐',
+                    'security.mfa_desc_off': 'Google Authenticator, Authy, 1Password 같은 인증 앱으로 계정 보안을 강화하세요. 출금이나 은행 정보 변경 시 필요합니다.',
+                    'security.mfa_desc_on': '인증 앱으로 계정이 보호됩니다. 출금과 은행 정보 변경 시 인증 코드가 필요합니다.',
+                    'security.mfa_enrolled_at': '활성화',
+                    'security.mfa_enable_btn': '이중 인증 사용',
+                    'security.mfa_disable_btn': '이중 인증 끄기',
+                    'security.mfa_enroll_title': '이중 인증 설정',
+                    'security.mfa_enroll_step': '2단계 중 1단계 — 스캔 후 인증',
+                    'security.mfa_enroll_scan': '인증 앱(Google Authenticator, Authy, 1Password, Microsoft Authenticator 등)으로 이 QR 코드를 스캔하세요.',
+                    'security.mfa_enroll_manual': '또는 이 키를 직접 입력하세요:',
+                    'security.mfa_enroll_code_label': '인증 앱의 코드',
+                    'security.mfa_enroll_code_hint': '30초마다 새로운 6자리 코드가 표시됩니다. 가장 최근의 코드를 사용하세요.',
+                    'security.mfa_enroll_verify_btn': '인증 후 사용',
+                    'security.mfa_enroll_verifying': '확인 중…',
+                    'security.mfa_enroll_cancel': '취소',
+                    'security.mfa_enroll_loading': '설정 중…',
+                    'security.mfa_disable_title': '이중 인증을 끄시겠습니까?',
+                    'security.mfa_disable_warn': '끄면 다시 켤 때까지 출금이나 은행 정보 변경을 할 수 없습니다. 확인을 위해 현재 6자리 코드를 입력하세요.',
+                    'security.mfa_disable_code_label': '현재 6자리 코드',
+                    'security.mfa_disable_confirm_btn': '이중 인증 끄기',
+                    'security.mfa_disable_disabling': '끄는 중…',
+                    'security.mfa_err_code_invalid': '코드가 일치하지 않습니다. 인증 앱의 최신 코드를 사용하세요.',
+                    'security.mfa_err_already_enabled': '이 계정에는 이미 이중 인증이 활성화되어 있습니다.',
+                    'security.mfa_err_not_enabled': '이 계정에는 이중 인증이 활성화되어 있지 않습니다.',
+                    'security.mfa_err_generic': '이중 인증 설정을 완료할 수 없습니다. 다시 시도해 주세요.',
+                    'toast.mfa_enabled': '이중 인증이 활성화되었습니다',
+                    'toast.mfa_disabled': '이중 인증이 비활성화되었습니다',
                     'newc.placement_intro': '플레이스먼트 그룹을 선택하세요 — 그룹 내 모든 플레이스먼트가 포함됩니다. 카드를 클릭하면 퍼블리셔의 제품 안에서 광고를 미리 볼 수 있습니다.',
                     'newc.bb_ai_badge': 'Boost Boss AI',
                     'newc.intent': '의도 시그널',
@@ -8846,6 +9000,36 @@
                     'security.new_hint': 'Tối thiểu 8 ký tự.',
                     'security.confirm': 'Xác nhận mật khẩu mới',
                     'security.change_btn': 'Đổi mật khẩu',
+                    'security.pw_heading': 'Mật khẩu',
+                    'security.mfa_heading': 'Xác thực hai bước',
+                    'security.mfa_off': 'Tắt',
+                    'security.mfa_on': 'Bật',
+                    'security.mfa_desc_off': 'Tăng cường bảo mật tài khoản bằng ứng dụng xác thực như Google Authenticator, Authy hoặc 1Password. Bắt buộc khi rút tiền và thay đổi thông tin ngân hàng.',
+                    'security.mfa_desc_on': 'Tài khoản của bạn được bảo vệ bằng ứng dụng xác thực. Cần thiết khi rút tiền và thay đổi thông tin ngân hàng.',
+                    'security.mfa_enrolled_at': 'Kích hoạt',
+                    'security.mfa_enable_btn': 'Bật xác thực hai bước',
+                    'security.mfa_disable_btn': 'Tắt xác thực hai bước',
+                    'security.mfa_enroll_title': 'Thiết lập xác thực hai bước',
+                    'security.mfa_enroll_step': 'Bước 1/2 — Quét và xác minh',
+                    'security.mfa_enroll_scan': 'Quét mã QR này bằng ứng dụng xác thực của bạn (Google Authenticator, Authy, 1Password, Microsoft Authenticator, v.v.).',
+                    'security.mfa_enroll_manual': 'Hoặc nhập thủ công khóa này:',
+                    'security.mfa_enroll_code_label': 'Mã từ ứng dụng xác thực',
+                    'security.mfa_enroll_code_hint': 'Mã 6 chữ số mới xuất hiện mỗi 30 giây. Vui lòng dùng mã mới nhất.',
+                    'security.mfa_enroll_verify_btn': 'Xác minh & bật',
+                    'security.mfa_enroll_verifying': 'Đang xác minh…',
+                    'security.mfa_enroll_cancel': 'Hủy',
+                    'security.mfa_enroll_loading': 'Đang thiết lập…',
+                    'security.mfa_disable_title': 'Tắt xác thực hai bước?',
+                    'security.mfa_disable_warn': 'Sau khi tắt, bạn sẽ không thể rút tiền hoặc thay đổi thông tin ngân hàng cho đến khi bật lại. Nhập mã 6 chữ số hiện tại để xác nhận.',
+                    'security.mfa_disable_code_label': 'Mã 6 chữ số hiện tại',
+                    'security.mfa_disable_confirm_btn': 'Tắt xác thực hai bước',
+                    'security.mfa_disable_disabling': 'Đang tắt…',
+                    'security.mfa_err_code_invalid': 'Mã không khớp. Vui lòng dùng mã mới nhất từ ứng dụng xác thực.',
+                    'security.mfa_err_already_enabled': 'Tài khoản này đã bật xác thực hai bước.',
+                    'security.mfa_err_not_enabled': 'Tài khoản này chưa bật xác thực hai bước.',
+                    'security.mfa_err_generic': 'Không thể hoàn tất thiết lập xác thực hai bước. Vui lòng thử lại.',
+                    'toast.mfa_enabled': 'Đã bật xác thực hai bước',
+                    'toast.mfa_disabled': 'Đã tắt xác thực hai bước',
                     'newc.placement_intro': 'Chọn một nhóm placement — mọi placement trong nhóm sẽ được bao gồm. Bấm vào bất kỳ card nào để xem trước quảng cáo trong sản phẩm của publisher.',
                     'newc.bb_ai_badge': 'Boost Boss AI',
                     'newc.intent': 'Tín hiệu intent',
@@ -9201,8 +9385,25 @@
                     <div id="aSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">${esc(t('common.saved'))}</div>`;
             }
 
+            // ── Security section ──
+            // Three views, swapped inline so the wizard stays inside the
+            // Settings modal (no nested modal). Mirrors the publisher
+            // dashboard's flow at developer.html.
+            var mfaView = 'default';
+            var mfaState = { enrolled: false, enrolled_at: null, loading: true, pendingSecret: null, pendingUri: null };
+
             function sectionSecurity() {
+                if (mfaView === 'enroll') return sectionSecurityEnroll();
+                if (mfaView === 'disable') return sectionSecurityDisable();
+                return sectionSecurityDefault();
+            }
+
+            function sectionSecurityDefault() {
+                var mfaCard = mfaState.loading
+                    ? '<div style="font-size:13px;color:#9CA3AF;">' + esc(t('security.mfa_enroll_loading')) + '</div>'
+                    : (mfaState.enrolled ? mfaStatusCardOn() : mfaStatusCardOff());
                 return `
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:10px;letter-spacing:-0.01em;">${esc(t('security.pw_heading'))}</div>
                     <div style="${ROW}">
                         <label style="${LB}">${esc(t('security.current'))}</label>
                         <input id="aSetPwCurrent" type="password" autocomplete="current-password" style="${FLD}">
@@ -9217,7 +9418,117 @@
                         <input id="aSetPwConfirm" type="password" autocomplete="new-password" style="${FLD}">
                     </div>
                     <div id="aSetPwMsg" style="font-size:12px;margin-bottom:10px;display:none;line-height:1.5;"></div>
-                    <button id="aSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.change_btn'))}</button>`;
+                    <button id="aSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.change_btn'))}</button>
+                    <div style="height:1px;background:#F0F0F2;margin:28px 0 24px;"></div>
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:10px;letter-spacing:-0.01em;">${esc(t('security.mfa_heading'))}</div>
+                    ${mfaCard}`;
+            }
+
+            function mfaStatusCardOff() {
+                return `
+                    <div style="padding:16px 18px;border:1px solid #EAEAEF;border-radius:10px;background:#FAFAFA;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D1D5DB;"></span>
+                            <span style="font-size:13.5px;font-weight:700;color:#4B5563;">${esc(t('security.mfa_off'))}</span>
+                        </div>
+                        <div style="font-size:12.5px;color:#6B7280;line-height:1.55;margin-bottom:14px;">${esc(t('security.mfa_desc_off'))}</div>
+                        <button id="aSetMfaEnable" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enable_btn'))}</button>
+                    </div>`;
+            }
+
+            function mfaStatusCardOn() {
+                var dt = '';
+                try { dt = new Date(mfaState.enrolled_at).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }); } catch (_) {}
+                return `
+                    <div style="padding:16px 18px;border:1px solid #BBF7D0;border-radius:10px;background:#F0FDF4;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;"></span>
+                            <span style="font-size:13.5px;font-weight:700;color:#065F46;">${esc(t('security.mfa_on'))}</span>
+                            ${dt ? `<span style="font-size:12px;color:#6B7280;">· ${esc(t('security.mfa_enrolled_at'))} ${esc(dt)}</span>` : ''}
+                        </div>
+                        <div style="font-size:12.5px;color:#4B5563;line-height:1.55;margin-bottom:14px;">${esc(t('security.mfa_desc_on'))}</div>
+                        <button id="aSetMfaDisable" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">${esc(t('security.mfa_disable_btn'))}</button>
+                    </div>`;
+            }
+
+            function sectionSecurityEnroll() {
+                if (!mfaState.pendingSecret) {
+                    return `<div style="display:flex;align-items:center;justify-content:center;min-height:300px;color:#9CA3AF;font-size:13px;">${esc(t('security.mfa_enroll_loading'))}</div>`;
+                }
+                var secretPretty = mfaState.pendingSecret.replace(/(.{4})/g, '$1 ').trim();
+                return `
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:4px;letter-spacing:-0.01em;">${esc(t('security.mfa_enroll_title'))}</div>
+                    <div style="font-size:11.5px;font-weight:600;color:#FF2D78;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px;">${esc(t('security.mfa_enroll_step'))}</div>
+                    <div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:18px;">
+                        <div id="aSetMfaQR" style="width:170px;height:170px;flex-shrink:0;background:#fff;border:1px solid #EAEAEF;border-radius:8px;padding:10px;"></div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:12.5px;color:#4B5563;line-height:1.55;margin-bottom:10px;">${esc(t('security.mfa_enroll_scan'))}</div>
+                            <div style="font-size:11.5px;color:#9CA3AF;margin-bottom:4px;">${esc(t('security.mfa_enroll_manual'))}</div>
+                            <div style="font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:#111;background:#F4F4F7;padding:8px 10px;border-radius:6px;word-break:break-all;">${esc(secretPretty)}</div>
+                        </div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">${esc(t('security.mfa_enroll_code_label'))}</label>
+                        <input id="aSetMfaCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:0.25em;font-size:18px;">
+                        <div style="${HINT}">${esc(t('security.mfa_enroll_code_hint'))}</div>
+                    </div>
+                    <div id="aSetMfaMsg" style="font-size:12.5px;margin:6px 0 12px;display:none;line-height:1.55;color:#E24B4A;"></div>
+                    <div style="display:flex;gap:10px;">
+                        <button id="aSetMfaEnrollCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enroll_cancel'))}</button>
+                        <button id="aSetMfaEnrollVerify" style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enroll_verify_btn'))}</button>
+                    </div>`;
+            }
+
+            function sectionSecurityDisable() {
+                return `
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:10px;letter-spacing:-0.01em;">${esc(t('security.mfa_disable_title'))}</div>
+                    <div style="font-size:12.5px;color:#4B5563;line-height:1.6;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;margin-bottom:18px;">${esc(t('security.mfa_disable_warn'))}</div>
+                    <div style="${ROW}">
+                        <label style="${LB}">${esc(t('security.mfa_disable_code_label'))}</label>
+                        <input id="aSetMfaDisableCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:0.25em;font-size:18px;">
+                    </div>
+                    <div id="aSetMfaMsg" style="font-size:12.5px;margin:6px 0 12px;display:none;line-height:1.55;color:#E24B4A;"></div>
+                    <div style="display:flex;gap:10px;">
+                        <button id="aSetMfaDisableCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enroll_cancel'))}</button>
+                        <button id="aSetMfaDisableConfirm" style="padding:9px 18px;border:none;border-radius:8px;background:#E24B4A;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.mfa_disable_confirm_btn'))}</button>
+                    </div>`;
+            }
+
+            function paintMfaQR() {
+                var holder = settingsModal.querySelector('#aSetMfaQR');
+                if (!holder || !mfaState.pendingUri || typeof qrcode !== 'function') return;
+                try {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(mfaState.pendingUri);
+                    qr.make();
+                    holder.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 0, scalable: true });
+                    var svg = holder.querySelector('svg');
+                    if (svg) { svg.style.width = '100%'; svg.style.height = '100%'; svg.style.display = 'block'; }
+                } catch (e) {
+                    holder.innerHTML = '<div style="font-size:12px;color:#E24B4A;padding:10px;">QR render failed. Use the manual key.</div>';
+                }
+            }
+
+            async function loadMfaStatus() {
+                mfaState.loading = true;
+                try {
+                    const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                    if (!tok) { mfaState.loading = false; return; }
+                    const r = await fetch(`${API_BASE}/api/auth?action=mfa_status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}` },
+                        body: '{}',
+                    });
+                    const j = await r.json();
+                    if (r.ok) {
+                        mfaState.enrolled = !!j.enrolled;
+                        mfaState.enrolled_at = j.enrolled_at || null;
+                    }
+                } catch (_) {}
+                mfaState.loading = false;
+                if (activeSection === 'security' && mfaView === 'default') {
+                    renderBody();
+                }
             }
 
             function renderNav() {
@@ -9232,7 +9543,20 @@
                     return `<button class="aSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '600'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${esc(s.label)}</button>`;
                 }).join('');
                 nav.querySelectorAll('.aSetNavBtn').forEach((b) => {
-                    b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
+                    b.addEventListener('click', () => {
+                        activeSection = b.dataset.section;
+                        // Entering Security resets any in-flight MFA wizard
+                        // back to the default status view, and refreshes the
+                        // enrolled-state from the server in case it changed
+                        // in another tab.
+                        if (activeSection === 'security') {
+                            mfaView = 'default';
+                            mfaState.pendingSecret = null;
+                            mfaState.pendingUri = null;
+                            loadMfaStatus();
+                        }
+                        renderNav(); renderBody();
+                    });
                 });
             }
 
@@ -9325,6 +9649,123 @@
                         pwSave.disabled = false; pwSave.textContent = 'Change password';
                     }
                 });
+
+                // ── MFA handlers (Security section) ──
+                // Identical control flow to the publisher dashboard, with
+                // aSet* IDs and settingsModal.querySelector scoping.
+                const mfaEnable = settingsModal.querySelector('#aSetMfaEnable');
+                if (mfaEnable) mfaEnable.addEventListener('click', async () => {
+                    mfaEnable.disabled = true;
+                    try {
+                        const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=mfa_enroll_init`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': `Bearer ${tok}` } : {}) },
+                            body: '{}',
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || t('security.mfa_err_generic'));
+                        mfaState.pendingSecret = j.secret_b32;
+                        mfaState.pendingUri = j.qr_uri;
+                        mfaView = 'enroll';
+                        renderBody();
+                        requestAnimationFrame(paintMfaQR);
+                        const codeInput = settingsModal.querySelector('#aSetMfaCode');
+                        if (codeInput) codeInput.focus();
+                    } catch (e) {
+                        if (typeof showToast === 'function') showToast(e.message || t('security.mfa_err_generic'), 'error');
+                        mfaEnable.disabled = false;
+                    }
+                });
+
+                const mfaVerify = settingsModal.querySelector('#aSetMfaEnrollVerify');
+                if (mfaVerify) mfaVerify.addEventListener('click', async () => {
+                    const code = (settingsModal.querySelector('#aSetMfaCode') || {}).value || '';
+                    const msg = settingsModal.querySelector('#aSetMfaMsg');
+                    const showMfaMsg = (text) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; } };
+                    if (!/^\d{6}$/.test(code.replace(/\s+/g, ''))) {
+                        showMfaMsg(t('security.mfa_err_code_invalid'));
+                        return;
+                    }
+                    mfaVerify.disabled = true; mfaVerify.textContent = t('security.mfa_enroll_verifying');
+                    try {
+                        const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=mfa_enroll_verify`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': `Bearer ${tok}` } : {}) },
+                            body: JSON.stringify({ secret_b32: mfaState.pendingSecret, code: code.replace(/\s+/g, '') }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || t('security.mfa_err_generic'));
+                        mfaState.pendingSecret = null;
+                        mfaState.pendingUri = null;
+                        mfaState.enrolled = true;
+                        mfaState.enrolled_at = j.enrolled_at;
+                        mfaView = 'default';
+                        renderBody();
+                        if (typeof showToast === 'function') showToast(t('toast.mfa_enabled'), 'success');
+                    } catch (e) {
+                        showMfaMsg(e.message || t('security.mfa_err_code_invalid'));
+                        mfaVerify.disabled = false; mfaVerify.textContent = t('security.mfa_enroll_verify_btn');
+                    }
+                });
+
+                const mfaCancelEnroll = settingsModal.querySelector('#aSetMfaEnrollCancel');
+                if (mfaCancelEnroll) mfaCancelEnroll.addEventListener('click', () => {
+                    mfaState.pendingSecret = null;
+                    mfaState.pendingUri = null;
+                    mfaView = 'default';
+                    renderBody();
+                });
+
+                const mfaDisableOpen = settingsModal.querySelector('#aSetMfaDisable');
+                if (mfaDisableOpen) mfaDisableOpen.addEventListener('click', () => {
+                    mfaView = 'disable';
+                    renderBody();
+                    const codeInput = settingsModal.querySelector('#aSetMfaDisableCode');
+                    if (codeInput) codeInput.focus();
+                });
+
+                const mfaDisableConfirm = settingsModal.querySelector('#aSetMfaDisableConfirm');
+                if (mfaDisableConfirm) mfaDisableConfirm.addEventListener('click', async () => {
+                    const code = (settingsModal.querySelector('#aSetMfaDisableCode') || {}).value || '';
+                    const msg = settingsModal.querySelector('#aSetMfaMsg');
+                    const showMfaMsg = (text) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; } };
+                    if (!/^\d{6}$/.test(code.replace(/\s+/g, ''))) {
+                        showMfaMsg(t('security.mfa_err_code_invalid'));
+                        return;
+                    }
+                    mfaDisableConfirm.disabled = true; mfaDisableConfirm.textContent = t('security.mfa_disable_disabling');
+                    try {
+                        const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=mfa_disable`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': `Bearer ${tok}` } : {}) },
+                            body: JSON.stringify({ code: code.replace(/\s+/g, '') }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || t('security.mfa_err_generic'));
+                        mfaState.enrolled = false;
+                        mfaState.enrolled_at = null;
+                        mfaView = 'default';
+                        renderBody();
+                        if (typeof showToast === 'function') showToast(t('toast.mfa_disabled'), 'success');
+                    } catch (e) {
+                        showMfaMsg(e.message || t('security.mfa_err_code_invalid'));
+                        mfaDisableConfirm.disabled = false; mfaDisableConfirm.textContent = t('security.mfa_disable_confirm_btn');
+                    }
+                });
+
+                const mfaDisableCancel = settingsModal.querySelector('#aSetMfaDisableCancel');
+                if (mfaDisableCancel) mfaDisableCancel.addEventListener('click', () => {
+                    mfaView = 'default';
+                    renderBody();
+                });
+
+                // Re-paint QR after a language swap while on the enroll wizard.
+                if (activeSection === 'security' && mfaView === 'enroll' && mfaState.pendingUri) {
+                    requestAnimationFrame(paintMfaQR);
+                }
             }
 
             function openModal() {
