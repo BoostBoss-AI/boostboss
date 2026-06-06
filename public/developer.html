@@ -2865,19 +2865,31 @@ await message.reply({
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <!-- Cash out — secondary CTA. Solid ink background +
+                             white text reads cleanly against the gradient
+                             pink/blue balance card behind it. (The previous
+                             white-on-line-border version washed out into the
+                             card.) -->
                         <button id="promoteCashoutBtn" style="
-                            background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;
-                            padding:12px 20px;font-weight:600;font-size:14.5px;cursor:pointer;font-family:inherit;
+                            background:#1A1A2E;color:#fff;border:none;border-radius:10px;
+                            padding:12px 20px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;
                             display:inline-flex;align-items:center;gap:8px;
-                        " data-t="page.promote.cashout_btn">
+                            box-shadow:0 2px 6px rgba(15,15,26,0.18);
+                            transition:transform 0.1s, box-shadow 0.15s, background 0.15s;
+                        " onmouseover="this.style.background='#2A2A40';this.style.boxShadow='0 4px 12px rgba(15,15,26,0.28)';" onmouseout="this.style.background='#1A1A2E';this.style.boxShadow='0 2px 6px rgba(15,15,26,0.18)';" data-t="page.promote.cashout_btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
                             Cash out
                         </button>
+                        <!-- Create campaign — primary CTA. Solid hot pink
+                             with a pink-tinted shadow so it lifts cleanly
+                             off the gradient card. -->
                         <button id="promoteCreateCampaignBtn" class="payout-btn" style="
-                            background:var(--accent-primary);color:#fff;border:none;border-radius:10px;
+                            background:#FF2D78;color:#fff;border:none;border-radius:10px;
                             padding:12px 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;
                             display:inline-flex;align-items:center;gap:8px;
-                        " data-t="page.promote.create_btn">
+                            box-shadow:0 2px 8px rgba(255,45,120,0.32);
+                            transition:transform 0.1s, box-shadow 0.15s, background 0.15s;
+                        " onmouseover="this.style.background='#E01E65';this.style.boxShadow='0 4px 14px rgba(255,45,120,0.42)';" onmouseout="this.style.background='#FF2D78';this.style.boxShadow='0 2px 8px rgba(255,45,120,0.32)';" data-t="page.promote.create_btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             Create campaign
                         </button>
