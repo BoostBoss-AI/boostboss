@@ -67,12 +67,14 @@ nav.docs-nav {
 }
 /* Yellow tag chip — matches the api-reference .brand-sub so /docs and
    /docs/api-reference render with the same shape, just different text
-   ("docs" vs "API"). Was a gray monospace pill. */
+   ("DOCS" vs "API"). text-transform: uppercase capitalizes the markup's
+   literal "docs" without needing to touch all 8 docs page templates. */
 .brand-tag {
   font-family: 'Space Grotesk', sans-serif; font-size: 12px;
   font-weight: 600; color: var(--ink); margin-left: 4px;
   padding: 3px 8px; background: var(--yellow);
   border-radius: 6px; letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 .nav-right { display: flex; gap: 18px; align-items: center; }
 .nav-right a { color: var(--ink-soft); font-size: 14px; font-weight: 500; }
