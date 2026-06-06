@@ -615,7 +615,136 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ success: true, mode: "supabase" });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password" });
+  // ── MFA (TOTP) ──────────────────────────────────────────────────────────
+  // Four actions plus a step-up verify used by cashout / bank-change flows:
+  //
+  //   mfa_status        → { enrolled, enrolled_at? }
+  //   mfa_enroll_init   → server generates secret + otpauth URI; the secret
+  //                       round-trips back on enroll_verify (stateless pattern,
+  //                       no pending_enrollments table needed)
+  //   mfa_enroll_verify → { secret_b32, code } — verifies, then writes user_mfa
+  //   mfa_disable       → { code } — verifies current factor, then deletes
+  //   verify_totp       → { code } — step-up auth for cashout / bank changes
+  //                       Sets user_mfa.last_step_up_at as an audit trail.
+  if (action === "mfa_status" || action === "mfa_enroll_init"
+      || action === "mfa_enroll_verify" || action === "mfa_disable"
+      || action === "verify_totp") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
+    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const totp = require("./_lib/totp.js");
+
+    if (action === "mfa_status") {
+      const { data, error } = await supabaseAdmin
+        .from("user_mfa")
+        .select("enrolled_at, last_used_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error) return res.status(500).json({ error: error.message });
+      return res.json({
+        enrolled: !!data,
+        enrolled_at: data ? data.enrolled_at : null,
+        last_used_at: data ? data.last_used_at : null,
+      });
+    }
+
+    if (action === "mfa_enroll_init") {
+      // Check the user isn't already enrolled. Disable-then-re-enroll is
+      // the supported path; we don't allow silent overwrite.
+      const { data: existing } = await supabaseAdmin
+        .from("user_mfa").select("user_id").eq("user_id", user.id).maybeSingle();
+      if (existing) {
+        return res.status(409).json({ error: "Two-factor is already enabled. Disable it first to re-enroll." });
+      }
+      const secret = totp.generateBase32Secret();
+      const uri = totp.buildOtpauthURI({ secret, accountName: user.email || "publisher" });
+      return res.json({ secret_b32: secret, qr_uri: uri });
+    }
+
+    if (action === "mfa_enroll_verify") {
+      const { secret_b32, code } = body || {};
+      if (!secret_b32 || !code) {
+        return res.status(400).json({ error: "secret_b32 and code are required" });
+      }
+      if (!totp.verifyCode(secret_b32, code, 1)) {
+        return res.status(401).json({ error: "That code doesn't match. Make sure you're using the latest one shown in your authenticator app." });
+      }
+      // Idempotent-ish upsert: if a row somehow exists, replace it. We
+      // already 409 in init, but a race during enrollment shouldn't 500.
+      const { error } = await supabaseAdmin
+        .from("user_mfa")
+        .upsert({
+          user_id: user.id,
+          totp_secret: secret_b32,
+          friendly_name: "Authenticator",
+          enrolled_at: new Date().toISOString(),
+          last_used_at: new Date().toISOString(),
+          failed_attempts: 0,
+        }, { onConflict: "user_id" });
+      if (error) return res.status(500).json({ error: error.message });
+      return res.json({ success: true, enrolled_at: new Date().toISOString() });
+    }
+
+    if (action === "mfa_disable") {
+      const { code } = body || {};
+      if (!code) return res.status(400).json({ error: "code is required" });
+      const { data: row, error: readErr } = await supabaseAdmin
+        .from("user_mfa")
+        .select("totp_secret, failed_attempts")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (readErr) return res.status(500).json({ error: readErr.message });
+      if (!row) return res.status(404).json({ error: "Two-factor is not currently enabled on this account." });
+      if ((row.failed_attempts || 0) >= 10) {
+        return res.status(429).json({ error: "Too many failed attempts. Email support@boostboss.ai to recover access." });
+      }
+      if (!totp.verifyCode(row.totp_secret, code, 1)) {
+        await supabaseAdmin
+          .from("user_mfa")
+          .update({ failed_attempts: (row.failed_attempts || 0) + 1 })
+          .eq("user_id", user.id);
+        return res.status(401).json({ error: "That code doesn't match. Try the latest one from your authenticator app." });
+      }
+      const { error: delErr } = await supabaseAdmin
+        .from("user_mfa").delete().eq("user_id", user.id);
+      if (delErr) return res.status(500).json({ error: delErr.message });
+      return res.json({ success: true });
+    }
+
+    if (action === "verify_totp") {
+      // Step-up auth: used by cashout and bank-detail-change flows. Marks
+      // last_step_up_at as an audit trail; downstream caller checks recency.
+      const { code } = body || {};
+      if (!code) return res.status(400).json({ error: "code is required" });
+      const { data: row, error: readErr } = await supabaseAdmin
+        .from("user_mfa")
+        .select("totp_secret, failed_attempts")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (readErr) return res.status(500).json({ error: readErr.message });
+      if (!row) return res.status(404).json({ error: "Two-factor is not enabled. Enable it in Settings to continue." });
+      if ((row.failed_attempts || 0) >= 10) {
+        return res.status(429).json({ error: "Too many failed attempts. Email support@boostboss.ai to recover access." });
+      }
+      if (!totp.verifyCode(row.totp_secret, code, 1)) {
+        await supabaseAdmin
+          .from("user_mfa")
+          .update({ failed_attempts: (row.failed_attempts || 0) + 1 })
+          .eq("user_id", user.id);
+        return res.status(401).json({ error: "That code doesn't match. Try the latest one from your authenticator app." });
+      }
+      const now = new Date().toISOString();
+      await supabaseAdmin
+        .from("user_mfa")
+        .update({ last_used_at: now, last_step_up_at: now, failed_attempts: 0 })
+        .eq("user_id", user.id);
+      return res.json({ success: true, verified_at: now });
+    }
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {

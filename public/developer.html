@@ -11,6 +11,10 @@
     <!-- Phase 1 dashboard shell — shared with /ads/dashboard (advertiser.html). -->
     <link rel="stylesheet" href="/dashboard-shell.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- qrcode-generator: pure-JS QR rendering for the 2FA enrollment QR.
+         Loaded sync because the Settings overlay can call it on first open
+         and we'd rather block 13KB of JS than show a spinner. -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -5518,9 +5522,42 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'security.err_mismatch': 'New passwords do not match.',
                     'security.ok_changed': 'Password changed successfully.',
                     'security.err_generic': 'Could not change password',
+                    'security.pw_heading': 'Password',
+                    'security.mfa_heading': 'Two-factor authentication',
+                    'security.mfa_off': 'Off',
+                    'security.mfa_on': 'On',
+                    'security.mfa_desc_off': 'Add an extra layer of security with an authenticator app like Google Authenticator, Authy, or 1Password. Required to cash out and to change your bank details.',
+                    'security.mfa_desc_on': 'Your account is protected with an authenticator app. Required for cashout and bank-detail changes.',
+                    'security.mfa_enrolled_at': 'Enrolled',
+                    'security.mfa_enable_btn': 'Enable two-factor authentication',
+                    'security.mfa_disable_btn': 'Disable two-factor',
+                    'security.mfa_enroll_title': 'Set up two-factor authentication',
+                    'security.mfa_enroll_step': 'Step 1 of 2 — Scan and verify',
+                    'security.mfa_enroll_scan': 'Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password, Microsoft Authenticator, etc.).',
+                    'security.mfa_enroll_manual': 'Or enter this key manually:',
+                    'security.mfa_enroll_code_label': 'Code from your authenticator app',
+                    'security.mfa_enroll_code_hint': 'A new 6-digit code appears every 30 seconds. Use the latest one.',
+                    'security.mfa_enroll_verify_btn': 'Verify & turn on',
+                    'security.mfa_enroll_verifying': 'Verifying…',
+                    'security.mfa_enroll_cancel': 'Cancel',
+                    'security.mfa_enroll_loading': 'Setting up…',
+                    'security.mfa_enrolled_done_title': 'Two-factor authentication is on',
+                    'security.mfa_enrolled_done_body': 'Your account is now protected. You\'ll be asked for a code from your authenticator app the next time you cash out or change your bank details. Keep your authenticator device in a safe place — if you lose it, email publishers@boostboss.ai for help recovering access.',
+                    'security.mfa_enrolled_done_btn': 'Done',
+                    'security.mfa_disable_title': 'Turn off two-factor authentication?',
+                    'security.mfa_disable_warn': 'You won\'t be able to cash out or change your bank details until you turn it back on. Enter your current 6-digit code to confirm.',
+                    'security.mfa_disable_code_label': 'Current 6-digit code',
+                    'security.mfa_disable_confirm_btn': 'Turn off two-factor',
+                    'security.mfa_disable_disabling': 'Turning off…',
+                    'security.mfa_err_code_invalid': 'That code doesn\'t match. Use the latest one from your authenticator app.',
+                    'security.mfa_err_already_enabled': 'Two-factor is already enabled on this account.',
+                    'security.mfa_err_not_enabled': 'Two-factor is not enabled on this account.',
+                    'security.mfa_err_generic': 'Could not complete two-factor setup. Please try again.',
                     'toast.copied': 'Copied',
                     'toast.brand_saved': 'Brand safety saved',
                     'toast.pw_changed': 'Password changed',
+                    'toast.mfa_enabled': 'Two-factor authentication enabled',
+                    'toast.mfa_disabled': 'Two-factor authentication disabled',
                     'dash.title': 'Publisher Dashboard',
                     'dash.view': 'View:',
                     'dash.filter_all': 'All integrations',
@@ -7444,8 +7481,31 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     <div id="sSetLangSaved" style="font-size:12.5px;color:#1D9E75;font-weight:600;display:none;">${esc(t('common.saved'))}</div>`;
             }
 
+            // ── Security section ──
+            // Three views, swapped inline so the wizard stays inside the
+            // Settings modal (no nested modal):
+            //   default  — password change + 2FA status card
+            //   enroll   — 2FA enrollment wizard (QR + code entry)
+            //   disable  — 2FA disable confirmation (code entry)
+            //
+            // mfaView is reset to 'default' every time the Security tab
+            // is opened from the nav. mfaState carries the loaded status
+            // ({enrolled, enrolled_at}) and the in-flight enroll secret.
+            var mfaView = 'default';
+            var mfaState = { enrolled: false, enrolled_at: null, loading: true, pendingSecret: null, pendingUri: null };
+
             function sectionSecurity() {
+                if (mfaView === 'enroll') return sectionSecurityEnroll();
+                if (mfaView === 'disable') return sectionSecurityDisable();
+                return sectionSecurityDefault();
+            }
+
+            function sectionSecurityDefault() {
+                var mfaCard = mfaState.loading
+                    ? '<div style="font-size:13px;color:#9CA3AF;">Checking two-factor status…</div>'
+                    : (mfaState.enrolled ? mfaStatusCardOn() : mfaStatusCardOff());
                 return `
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:10px;letter-spacing:-0.01em;">${esc(t('security.pw_heading'))}</div>
                     <div style="${ROW}">
                         <label style="${LB}">${esc(t('security.cur_pw'))}</label>
                         <input id="sSetPwCurrent" type="password" autocomplete="current-password" style="${FLD}">
@@ -7460,7 +7520,126 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         <input id="sSetPwConfirm" type="password" autocomplete="new-password" style="${FLD}">
                     </div>
                     <div id="sSetPwMsg" style="font-size:12px;margin-bottom:10px;display:none;line-height:1.5;"></div>
-                    <button id="sSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.change_btn'))}</button>`;
+                    <button id="sSetPwSave" style="padding:9px 18px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.change_btn'))}</button>
+                    <div style="height:1px;background:#F0F0F2;margin:28px 0 24px;"></div>
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:10px;letter-spacing:-0.01em;">${esc(t('security.mfa_heading'))}</div>
+                    ${mfaCard}`;
+            }
+
+            function mfaStatusCardOff() {
+                return `
+                    <div style="padding:16px 18px;border:1px solid #EAEAEF;border-radius:10px;background:#FAFAFA;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D1D5DB;"></span>
+                            <span style="font-size:13.5px;font-weight:700;color:#4B5563;">${esc(t('security.mfa_off'))}</span>
+                        </div>
+                        <div style="font-size:12.5px;color:#6B7280;line-height:1.55;margin-bottom:14px;">${esc(t('security.mfa_desc_off'))}</div>
+                        <button id="sSetMfaEnable" style="padding:9px 18px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enable_btn'))}</button>
+                    </div>`;
+            }
+
+            function mfaStatusCardOn() {
+                var dt = '';
+                try { dt = new Date(mfaState.enrolled_at).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }); } catch (_) {}
+                return `
+                    <div style="padding:16px 18px;border:1px solid #BBF7D0;border-radius:10px;background:#F0FDF4;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;"></span>
+                            <span style="font-size:13.5px;font-weight:700;color:#065F46;">${esc(t('security.mfa_on'))}</span>
+                            ${dt ? `<span style="font-size:12px;color:#6B7280;">· ${esc(t('security.mfa_enrolled_at'))} ${esc(dt)}</span>` : ''}
+                        </div>
+                        <div style="font-size:12.5px;color:#4B5563;line-height:1.55;margin-bottom:14px;">${esc(t('security.mfa_desc_on'))}</div>
+                        <button id="sSetMfaDisable" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">${esc(t('security.mfa_disable_btn'))}</button>
+                    </div>`;
+            }
+
+            function sectionSecurityEnroll() {
+                // Loading state if init request hasn't returned yet.
+                if (!mfaState.pendingSecret) {
+                    return `<div style="display:flex;align-items:center;justify-content:center;min-height:300px;color:#9CA3AF;font-size:13px;">${esc(t('security.mfa_enroll_loading'))}</div>`;
+                }
+                var secretPretty = mfaState.pendingSecret.replace(/(.{4})/g, '$1 ').trim();
+                return `
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:4px;letter-spacing:-0.01em;">${esc(t('security.mfa_enroll_title'))}</div>
+                    <div style="font-size:11.5px;font-weight:600;color:#FF2D78;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px;">${esc(t('security.mfa_enroll_step'))}</div>
+                    <div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:18px;">
+                        <div id="sSetMfaQR" style="width:170px;height:170px;flex-shrink:0;background:#fff;border:1px solid #EAEAEF;border-radius:8px;padding:10px;"></div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:12.5px;color:#4B5563;line-height:1.55;margin-bottom:10px;">${esc(t('security.mfa_enroll_scan'))}</div>
+                            <div style="font-size:11.5px;color:#9CA3AF;margin-bottom:4px;">${esc(t('security.mfa_enroll_manual'))}</div>
+                            <div style="font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:#111;background:#F4F4F7;padding:8px 10px;border-radius:6px;word-break:break-all;">${esc(secretPretty)}</div>
+                        </div>
+                    </div>
+                    <div style="${ROW}">
+                        <label style="${LB}">${esc(t('security.mfa_enroll_code_label'))}</label>
+                        <input id="sSetMfaCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:0.25em;font-size:18px;">
+                        <div style="${HINT}">${esc(t('security.mfa_enroll_code_hint'))}</div>
+                    </div>
+                    <div id="sSetMfaMsg" style="font-size:12.5px;margin:6px 0 12px;display:none;line-height:1.55;color:#E24B4A;"></div>
+                    <div style="display:flex;gap:10px;">
+                        <button id="sSetMfaEnrollCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enroll_cancel'))}</button>
+                        <button id="sSetMfaEnrollVerify" style="padding:9px 18px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enroll_verify_btn'))}</button>
+                    </div>`;
+            }
+
+            function sectionSecurityDisable() {
+                return `
+                    <div style="font-size:13.5px;font-weight:700;color:#111;margin-bottom:10px;letter-spacing:-0.01em;">${esc(t('security.mfa_disable_title'))}</div>
+                    <div style="font-size:12.5px;color:#4B5563;line-height:1.6;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;margin-bottom:18px;">${esc(t('security.mfa_disable_warn'))}</div>
+                    <div style="${ROW}">
+                        <label style="${LB}">${esc(t('security.mfa_disable_code_label'))}</label>
+                        <input id="sSetMfaDisableCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:0.25em;font-size:18px;">
+                    </div>
+                    <div id="sSetMfaMsg" style="font-size:12.5px;margin:6px 0 12px;display:none;line-height:1.55;color:#E24B4A;"></div>
+                    <div style="display:flex;gap:10px;">
+                        <button id="sSetMfaDisableCancel" style="padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">${esc(t('security.mfa_enroll_cancel'))}</button>
+                        <button id="sSetMfaDisableConfirm" style="padding:9px 18px;border:none;border-radius:8px;background:#E24B4A;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;">${esc(t('security.mfa_disable_confirm_btn'))}</button>
+                    </div>`;
+            }
+
+            // Render the QR after the enroll section is inserted into the DOM
+            // (qrcode-generator needs the target element to exist).
+            function paintMfaQR() {
+                var holder = document.getElementById('sSetMfaQR');
+                if (!holder || !mfaState.pendingUri || typeof qrcode !== 'function') return;
+                try {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(mfaState.pendingUri);
+                    qr.make();
+                    // 5px module size renders to about 145px square — comfortably
+                    // inside the 170px holder with the 10px padding.
+                    holder.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 0, scalable: true });
+                    var svg = holder.querySelector('svg');
+                    if (svg) { svg.style.width = '100%'; svg.style.height = '100%'; svg.style.display = 'block'; }
+                } catch (e) {
+                    holder.innerHTML = '<div style="font-size:12px;color:#E24B4A;padding:10px;">QR render failed. Use the manual key.</div>';
+                }
+            }
+
+            // Loads MFA status into mfaState and re-renders the Security body
+            // if it's still the active section. Called when Settings opens
+            // and any time the user toggles into the Security tab.
+            async function loadMfaStatus() {
+                mfaState.loading = true;
+                try {
+                    const sessionRaw = localStorage.getItem('bb_dev_session');
+                    const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                    if (!session || !session.token) { mfaState.loading = false; return; }
+                    const r = await fetch(`${API_BASE}/api/auth?action=mfa_status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                        body: '{}',
+                    });
+                    const j = await r.json();
+                    if (r.ok) {
+                        mfaState.enrolled = !!j.enrolled;
+                        mfaState.enrolled_at = j.enrolled_at || null;
+                    }
+                } catch (_) {}
+                mfaState.loading = false;
+                if (activeSection === 'security' && mfaView === 'default') {
+                    renderBody();
+                }
             }
 
             function renderNav() {
@@ -7474,7 +7653,20 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     return `<button class="sSetNavBtn" data-section="${s.key}" style="display:block;flex:0 0 auto;width:100%;margin:0;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:${on ? '700' : '600'};font-family:inherit;text-align:left;line-height:1.4;background:${on ? '#FFF0F6' : 'transparent'};color:${on ? '#FF2D78' : '#4B5563'};">${esc(s.label)}</button>`;
                 }).join('');
                 nav.querySelectorAll('.sSetNavBtn').forEach((b) => {
-                    b.addEventListener('click', () => { activeSection = b.dataset.section; renderNav(); renderBody(); });
+                    b.addEventListener('click', () => {
+                        activeSection = b.dataset.section;
+                        // Entering Security resets any in-flight MFA wizard
+                        // back to the default status view, and refreshes the
+                        // enrolled-state from the server in case it changed
+                        // in another tab.
+                        if (activeSection === 'security') {
+                            mfaView = 'default';
+                            mfaState.pendingSecret = null;
+                            mfaState.pendingUri = null;
+                            loadMfaStatus();
+                        }
+                        renderNav(); renderBody();
+                    });
                 });
             }
 
@@ -7583,6 +7775,135 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         pwSave.disabled = false; pwSave.textContent = t('security.change_btn');
                     }
                 });
+
+                // ── MFA handlers (Security section) ──
+                // Enable 2FA → call enroll_init, switch to enroll view, paint QR.
+                const mfaEnable = document.getElementById('sSetMfaEnable');
+                if (mfaEnable) mfaEnable.addEventListener('click', async () => {
+                    mfaEnable.disabled = true;
+                    try {
+                        const sessionRaw = localStorage.getItem('bb_dev_session');
+                        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=mfa_enroll_init`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(session && session.token ? { 'Authorization': `Bearer ${session.token}` } : {}) },
+                            body: '{}',
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || t('security.mfa_err_generic'));
+                        mfaState.pendingSecret = j.secret_b32;
+                        mfaState.pendingUri = j.qr_uri;
+                        mfaView = 'enroll';
+                        renderBody();
+                        // qrcode-generator needs the holder element to exist;
+                        // wait one frame so the freshly-rendered DOM is ready.
+                        requestAnimationFrame(paintMfaQR);
+                        const codeInput = document.getElementById('sSetMfaCode');
+                        if (codeInput) codeInput.focus();
+                    } catch (e) {
+                        if (typeof showToast === 'function') showToast(e.message || t('security.mfa_err_generic'), 'error');
+                        mfaEnable.disabled = false;
+                    }
+                });
+
+                // Verify the entered code against the pending secret. On success
+                // the server writes user_mfa and we flip the view to default
+                // with a fresh status load.
+                const mfaVerify = document.getElementById('sSetMfaEnrollVerify');
+                if (mfaVerify) mfaVerify.addEventListener('click', async () => {
+                    const code = (document.getElementById('sSetMfaCode') || {}).value || '';
+                    const msg = document.getElementById('sSetMfaMsg');
+                    const showMsg = (text) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; } };
+                    if (!/^\d{6}$/.test(code.replace(/\s+/g, ''))) {
+                        showMsg(t('security.mfa_err_code_invalid'));
+                        return;
+                    }
+                    mfaVerify.disabled = true; mfaVerify.textContent = t('security.mfa_enroll_verifying');
+                    try {
+                        const sessionRaw = localStorage.getItem('bb_dev_session');
+                        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=mfa_enroll_verify`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(session && session.token ? { 'Authorization': `Bearer ${session.token}` } : {}) },
+                            body: JSON.stringify({ secret_b32: mfaState.pendingSecret, code: code.replace(/\s+/g, '') }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || t('security.mfa_err_generic'));
+                        // Success → clear pending state, refresh status, switch view.
+                        mfaState.pendingSecret = null;
+                        mfaState.pendingUri = null;
+                        mfaState.enrolled = true;
+                        mfaState.enrolled_at = j.enrolled_at;
+                        mfaView = 'default';
+                        renderBody();
+                        if (typeof showToast === 'function') showToast(t('toast.mfa_enabled'), 'success');
+                    } catch (e) {
+                        showMsg(e.message || t('security.mfa_err_code_invalid'));
+                        mfaVerify.disabled = false; mfaVerify.textContent = t('security.mfa_enroll_verify_btn');
+                    }
+                });
+
+                const mfaCancelEnroll = document.getElementById('sSetMfaEnrollCancel');
+                if (mfaCancelEnroll) mfaCancelEnroll.addEventListener('click', () => {
+                    // Abandoned enrollments are safe — the secret was never
+                    // persisted, only round-tripped. Just drop client state.
+                    mfaState.pendingSecret = null;
+                    mfaState.pendingUri = null;
+                    mfaView = 'default';
+                    renderBody();
+                });
+
+                const mfaDisableOpen = document.getElementById('sSetMfaDisable');
+                if (mfaDisableOpen) mfaDisableOpen.addEventListener('click', () => {
+                    mfaView = 'disable';
+                    renderBody();
+                    const codeInput = document.getElementById('sSetMfaDisableCode');
+                    if (codeInput) codeInput.focus();
+                });
+
+                const mfaDisableConfirm = document.getElementById('sSetMfaDisableConfirm');
+                if (mfaDisableConfirm) mfaDisableConfirm.addEventListener('click', async () => {
+                    const code = (document.getElementById('sSetMfaDisableCode') || {}).value || '';
+                    const msg = document.getElementById('sSetMfaMsg');
+                    const showMsg = (text) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; } };
+                    if (!/^\d{6}$/.test(code.replace(/\s+/g, ''))) {
+                        showMsg(t('security.mfa_err_code_invalid'));
+                        return;
+                    }
+                    mfaDisableConfirm.disabled = true; mfaDisableConfirm.textContent = t('security.mfa_disable_disabling');
+                    try {
+                        const sessionRaw = localStorage.getItem('bb_dev_session');
+                        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                        const r = await fetch(`${API_BASE}/api/auth?action=mfa_disable`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...(session && session.token ? { 'Authorization': `Bearer ${session.token}` } : {}) },
+                            body: JSON.stringify({ code: code.replace(/\s+/g, '') }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || t('security.mfa_err_generic'));
+                        mfaState.enrolled = false;
+                        mfaState.enrolled_at = null;
+                        mfaView = 'default';
+                        renderBody();
+                        if (typeof showToast === 'function') showToast(t('toast.mfa_disabled'), 'success');
+                    } catch (e) {
+                        showMsg(e.message || t('security.mfa_err_code_invalid'));
+                        mfaDisableConfirm.disabled = false; mfaDisableConfirm.textContent = t('security.mfa_disable_confirm_btn');
+                    }
+                });
+
+                const mfaDisableCancel = document.getElementById('sSetMfaDisableCancel');
+                if (mfaDisableCancel) mfaDisableCancel.addEventListener('click', () => {
+                    mfaView = 'default';
+                    renderBody();
+                });
+
+                // If we just entered the enroll view via renderBody (e.g. from a
+                // language switch while on the enroll wizard), repaint the QR so
+                // it survives the re-render.
+                if (activeSection === 'security' && mfaView === 'enroll' && mfaState.pendingUri) {
+                    requestAnimationFrame(paintMfaQR);
+                }
             }
 
             function openModal() {
