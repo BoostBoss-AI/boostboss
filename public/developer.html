@@ -2865,6 +2865,14 @@ await message.reply({
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <button id="promoteCashoutBtn" style="
+                            background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;
+                            padding:12px 20px;font-weight:600;font-size:14.5px;cursor:pointer;font-family:inherit;
+                            display:inline-flex;align-items:center;gap:8px;
+                        " data-t="page.promote.cashout_btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
+                            Cash out
+                        </button>
                         <button id="promoteCreateCampaignBtn" class="payout-btn" style="
                             background:var(--accent-primary);color:#fff;border:none;border-radius:10px;
                             padding:12px 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;
@@ -2896,6 +2904,14 @@ await message.reply({
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Recent payouts — fed by /api/payouts?action=list. Populated
+                     by the cashout IIFE; hidden when the publisher hasn't
+                     requested any yet. -->
+                <div id="promoteCashoutHistorySection" style="margin-bottom:24px;display:none;">
+                    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:var(--ink);" data-t="page.promote.history_h">Recent payouts</h3>
+                    <div id="promoteCashoutHistory" style="background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;"></div>
                 </div>
 
                 <!-- Graduation link to full advertiser dashboard -->
@@ -5763,6 +5779,38 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.empty_p': "When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your existing earnings can fund it directly — no PayPal deposit needed.",
                     'page.promote.graduate_hint': 'Want full advertiser features — multiple creatives, advanced targeting, deep analytics?',
                     'page.promote.graduate_link': 'Open advertiser dashboard',
+                    'page.promote.cashout_btn': 'Cash out',
+                    'page.promote.history_h': 'Recent payouts',
+                    'cashout.title': 'Cash out to your bank',
+                    'cashout.amount_label': 'Amount to cash out',
+                    'cashout.amount_min': 'Minimum $1.00 USD.',
+                    'cashout.amount_available': 'Available:',
+                    'cashout.payout_date': 'Payout date',
+                    'cashout.arrival': 'Estimated arrival',
+                    'cashout.totp_label': 'Code from your authenticator app',
+                    'cashout.confirm_btn': 'Confirm cashout',
+                    'cashout.submitting': 'Sending…',
+                    'cashout.cancel_btn': 'Cancel',
+                    'cashout.loading_preview': 'Calculating dates…',
+                    'cashout.err_amount': 'Enter a valid amount of at least $1.00.',
+                    'cashout.err_no_bank_title': 'Add your bank details first',
+                    'cashout.err_no_bank_desc': 'You need to add your bank details before you can cash out.',
+                    'cashout.err_no_bank_link': 'Open Settings → Payouts',
+                    'cashout.err_no_2fa_title': 'Enable two-factor authentication first',
+                    'cashout.err_no_2fa_desc': 'You need 2FA enabled to authorize cashouts.',
+                    'cashout.err_no_2fa_link': 'Open Settings → Security',
+                    'cashout.err_code': 'That code doesn\'t match. Use the latest one.',
+                    'cashout.err_generic': 'Could not submit cashout. Please try again.',
+                    'cashout.history_amount': 'Amount',
+                    'cashout.history_status': 'Status',
+                    'cashout.history_target': 'Payout date',
+                    'cashout.history_requested': 'Requested',
+                    'cashout.status_pending': 'Pending',
+                    'cashout.status_batched': 'Batched',
+                    'cashout.status_paid': 'Paid',
+                    'cashout.status_failed': 'Failed',
+                    'cashout.status_cancelled': 'Cancelled',
+                    'toast.cashout_queued': 'Cashout queued',
                     'earn.title': 'Earnings History',
                     'earn.date': 'Date',
                     'earn.impressions': 'Impressions',
@@ -6138,6 +6186,38 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.empty_p': '当您创建首个广告后,会在这里显示实时展示、点击和花费。您现有的收益可直接作为预算 — 无需 PayPal 充值。',
                     'page.promote.graduate_hint': '需要完整的广告主功能 — 多个创意、高级定向、深度分析?',
                     'page.promote.graduate_link': '打开广告主面板',
+                    'page.promote.cashout_btn': '提现',
+                    'page.promote.history_h': '近期提现',
+                    'cashout.title': '提现到您的银行账户',
+                    'cashout.amount_label': '提现金额',
+                    'cashout.amount_min': '最低 $1.00 美元。',
+                    'cashout.amount_available': '可用余额:',
+                    'cashout.payout_date': '打款日期',
+                    'cashout.arrival': '预计到账',
+                    'cashout.totp_label': '验证器应用中的代码',
+                    'cashout.confirm_btn': '确认提现',
+                    'cashout.submitting': '正在提交…',
+                    'cashout.cancel_btn': '取消',
+                    'cashout.loading_preview': '正在计算日期…',
+                    'cashout.err_amount': '请输入至少 $1.00 的有效金额。',
+                    'cashout.err_no_bank_title': '请先添加银行信息',
+                    'cashout.err_no_bank_desc': '提现前需先添加您的银行信息。',
+                    'cashout.err_no_bank_link': '打开设置 → 打款方式',
+                    'cashout.err_no_2fa_title': '请先开启双重验证',
+                    'cashout.err_no_2fa_desc': '提现需要开启双重验证以进行授权。',
+                    'cashout.err_no_2fa_link': '打开设置 → 安全',
+                    'cashout.err_code': '代码不匹配。请使用验证器应用中的最新代码。',
+                    'cashout.err_generic': '无法提交提现申请。请重试。',
+                    'cashout.history_amount': '金额',
+                    'cashout.history_status': '状态',
+                    'cashout.history_target': '打款日期',
+                    'cashout.history_requested': '申请时间',
+                    'cashout.status_pending': '待处理',
+                    'cashout.status_batched': '已入批次',
+                    'cashout.status_paid': '已打款',
+                    'cashout.status_failed': '失败',
+                    'cashout.status_cancelled': '已取消',
+                    'toast.cashout_queued': '提现已加入队列',
                     'earn.title': '收益历史',
                     'earn.date': '日期',
                     'earn.impressions': '展示次数',
@@ -6513,6 +6593,38 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.empty_p': '當您建立首個廣告後,會在這裡顯示即時展示、點擊與花費。您現有的收益可直接作為預算 — 無需 PayPal 加值。',
                     'page.promote.graduate_hint': '需要完整的廣告主功能 — 多個創意、進階定向、深度分析?',
                     'page.promote.graduate_link': '開啟廣告主面板',
+                    'page.promote.cashout_btn': '提領',
+                    'page.promote.history_h': '近期撥款',
+                    'cashout.title': '提領至您的銀行帳戶',
+                    'cashout.amount_label': '提領金額',
+                    'cashout.amount_min': '最低 $1.00 美元。',
+                    'cashout.amount_available': '可用餘額:',
+                    'cashout.payout_date': '撥款日期',
+                    'cashout.arrival': '預計到帳',
+                    'cashout.totp_label': '驗證器應用程式中的代碼',
+                    'cashout.confirm_btn': '確認提領',
+                    'cashout.submitting': '送出中…',
+                    'cashout.cancel_btn': '取消',
+                    'cashout.loading_preview': '計算日期中…',
+                    'cashout.err_amount': '請輸入至少 $1.00 的有效金額。',
+                    'cashout.err_no_bank_title': '請先新增銀行資料',
+                    'cashout.err_no_bank_desc': '提領前需先新增您的銀行資料。',
+                    'cashout.err_no_bank_link': '開啟設定 → 撥款方式',
+                    'cashout.err_no_2fa_title': '請先開啟雙重驗證',
+                    'cashout.err_no_2fa_desc': '提領需要開啟雙重驗證以進行授權。',
+                    'cashout.err_no_2fa_link': '開啟設定 → 安全',
+                    'cashout.err_code': '代碼不符。請使用驗證器應用程式中的最新代碼。',
+                    'cashout.err_generic': '無法送出提領申請。請重試。',
+                    'cashout.history_amount': '金額',
+                    'cashout.history_status': '狀態',
+                    'cashout.history_target': '撥款日期',
+                    'cashout.history_requested': '申請時間',
+                    'cashout.status_pending': '待處理',
+                    'cashout.status_batched': '已入批次',
+                    'cashout.status_paid': '已撥款',
+                    'cashout.status_failed': '失敗',
+                    'cashout.status_cancelled': '已取消',
+                    'toast.cashout_queued': '提領已加入佇列',
                     'earn.title': '收益歷史',
                     'earn.date': '日期',
                     'earn.impressions': '展示次數',
@@ -6888,6 +7000,38 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.empty_p': '最初のキャンペーンを作成すると、ライブのインプレッション、クリック、消費がここに表示されます。既存の収益をそのまま予算として使えます — PayPal 入金は不要です。',
                     'page.promote.graduate_hint': 'すべての広告主機能 — 複数クリエイティブ、高度ターゲティング、詳細分析が必要ですか?',
                     'page.promote.graduate_link': '広告主ダッシュボードを開く',
+                    'page.promote.cashout_btn': '出金',
+                    'page.promote.history_h': '最近の出金',
+                    'cashout.title': '銀行口座へ出金',
+                    'cashout.amount_label': '出金額',
+                    'cashout.amount_min': '最低 $1.00 USD。',
+                    'cashout.amount_available': '出金可能額:',
+                    'cashout.payout_date': '出金日',
+                    'cashout.arrival': '到着予定',
+                    'cashout.totp_label': '認証アプリのコード',
+                    'cashout.confirm_btn': '出金を確定',
+                    'cashout.submitting': '送信中…',
+                    'cashout.cancel_btn': 'キャンセル',
+                    'cashout.loading_preview': '日付を計算中…',
+                    'cashout.err_amount': '$1.00 以上の有効な金額を入力してください。',
+                    'cashout.err_no_bank_title': '先に口座情報を登録してください',
+                    'cashout.err_no_bank_desc': '出金には銀行口座情報の登録が必要です。',
+                    'cashout.err_no_bank_link': '設定 → 出金方法を開く',
+                    'cashout.err_no_2fa_title': '先に二段階認証を有効化してください',
+                    'cashout.err_no_2fa_desc': '出金には二段階認証による承認が必要です。',
+                    'cashout.err_no_2fa_link': '設定 → セキュリティを開く',
+                    'cashout.err_code': 'コードが一致しません。最新のコードをお使いください。',
+                    'cashout.err_generic': '出金リクエストを送信できませんでした。もう一度お試しください。',
+                    'cashout.history_amount': '金額',
+                    'cashout.history_status': 'ステータス',
+                    'cashout.history_target': '出金日',
+                    'cashout.history_requested': '申請日時',
+                    'cashout.status_pending': '待機中',
+                    'cashout.status_batched': 'バッチ済み',
+                    'cashout.status_paid': '出金済み',
+                    'cashout.status_failed': '失敗',
+                    'cashout.status_cancelled': 'キャンセル',
+                    'toast.cashout_queued': '出金リクエストを受け付けました',
                     'earn.title': '収益履歴',
                     'earn.date': '日付',
                     'earn.impressions': 'インプレッション',
@@ -7263,6 +7407,38 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.empty_p': '첫 캠페인을 생성하면 실시간 노출, 클릭, 지출이 여기에 표시됩니다. 기존 수익을 그대로 예산으로 사용할 수 있습니다 — PayPal 입금 불필요.',
                     'page.promote.graduate_hint': '전체 광고주 기능 — 다중 크리에이티브, 고급 타겟팅, 심층 분석이 필요하신가요?',
                     'page.promote.graduate_link': '광고주 대시보드 열기',
+                    'page.promote.cashout_btn': '출금',
+                    'page.promote.history_h': '최근 출금',
+                    'cashout.title': '은행 계좌로 출금',
+                    'cashout.amount_label': '출금 금액',
+                    'cashout.amount_min': '최소 $1.00 USD.',
+                    'cashout.amount_available': '출금 가능 잔액:',
+                    'cashout.payout_date': '출금 일자',
+                    'cashout.arrival': '도착 예정',
+                    'cashout.totp_label': '인증 앱의 코드',
+                    'cashout.confirm_btn': '출금 확인',
+                    'cashout.submitting': '전송 중…',
+                    'cashout.cancel_btn': '취소',
+                    'cashout.loading_preview': '날짜 계산 중…',
+                    'cashout.err_amount': '$1.00 이상의 유효한 금액을 입력하세요.',
+                    'cashout.err_no_bank_title': '먼저 은행 정보를 등록하세요',
+                    'cashout.err_no_bank_desc': '출금하려면 먼저 은행 정보를 등록해야 합니다.',
+                    'cashout.err_no_bank_link': '설정 → 출금 방법 열기',
+                    'cashout.err_no_2fa_title': '먼저 이중 인증을 활성화하세요',
+                    'cashout.err_no_2fa_desc': '출금 승인을 위해 이중 인증이 필요합니다.',
+                    'cashout.err_no_2fa_link': '설정 → 보안 열기',
+                    'cashout.err_code': '코드가 일치하지 않습니다. 최신 코드를 사용하세요.',
+                    'cashout.err_generic': '출금 요청을 제출할 수 없습니다. 다시 시도하세요.',
+                    'cashout.history_amount': '금액',
+                    'cashout.history_status': '상태',
+                    'cashout.history_target': '출금 일자',
+                    'cashout.history_requested': '신청 시간',
+                    'cashout.status_pending': '대기 중',
+                    'cashout.status_batched': '배치 처리됨',
+                    'cashout.status_paid': '출금 완료',
+                    'cashout.status_failed': '실패',
+                    'cashout.status_cancelled': '취소됨',
+                    'toast.cashout_queued': '출금 요청이 등록되었습니다',
                     'earn.title': '수익 내역',
                     'earn.date': '날짜',
                     'earn.impressions': '노출',
@@ -7638,6 +7814,38 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.empty_p': 'Khi bạn tạo chiến dịch đầu tiên, nó sẽ hiển thị ở đây với impression, click và chi tiêu trực tiếp. Doanh thu hiện có của bạn có thể dùng trực tiếp làm ngân sách — không cần nạp PayPal.',
                     'page.promote.graduate_hint': 'Cần đầy đủ tính năng advertiser — nhiều creative, nhắm mục tiêu nâng cao, phân tích sâu?',
                     'page.promote.graduate_link': 'Mở dashboard advertiser',
+                    'page.promote.cashout_btn': 'Rút tiền',
+                    'page.promote.history_h': 'Lịch sử rút tiền',
+                    'cashout.title': 'Rút tiền về tài khoản ngân hàng',
+                    'cashout.amount_label': 'Số tiền rút',
+                    'cashout.amount_min': 'Tối thiểu $1.00 USD.',
+                    'cashout.amount_available': 'Khả dụng:',
+                    'cashout.payout_date': 'Ngày thanh toán',
+                    'cashout.arrival': 'Dự kiến nhận',
+                    'cashout.totp_label': 'Mã từ ứng dụng xác thực',
+                    'cashout.confirm_btn': 'Xác nhận rút tiền',
+                    'cashout.submitting': 'Đang gửi…',
+                    'cashout.cancel_btn': 'Hủy',
+                    'cashout.loading_preview': 'Đang tính ngày…',
+                    'cashout.err_amount': 'Nhập số tiền hợp lệ ít nhất $1.00.',
+                    'cashout.err_no_bank_title': 'Thêm thông tin ngân hàng trước',
+                    'cashout.err_no_bank_desc': 'Bạn cần thêm thông tin ngân hàng trước khi rút tiền.',
+                    'cashout.err_no_bank_link': 'Mở Cài đặt → Thanh toán',
+                    'cashout.err_no_2fa_title': 'Bật xác thực hai bước trước',
+                    'cashout.err_no_2fa_desc': 'Bạn cần bật xác thực hai bước để xác nhận rút tiền.',
+                    'cashout.err_no_2fa_link': 'Mở Cài đặt → Bảo mật',
+                    'cashout.err_code': 'Mã không khớp. Vui lòng dùng mã mới nhất.',
+                    'cashout.err_generic': 'Không thể gửi yêu cầu rút tiền. Vui lòng thử lại.',
+                    'cashout.history_amount': 'Số tiền',
+                    'cashout.history_status': 'Trạng thái',
+                    'cashout.history_target': 'Ngày thanh toán',
+                    'cashout.history_requested': 'Đã yêu cầu',
+                    'cashout.status_pending': 'Chờ xử lý',
+                    'cashout.status_batched': 'Đã vào đợt',
+                    'cashout.status_paid': 'Đã thanh toán',
+                    'cashout.status_failed': 'Thất bại',
+                    'cashout.status_cancelled': 'Đã hủy',
+                    'toast.cashout_queued': 'Đã đưa yêu cầu rút tiền vào hàng đợi',
                     'earn.title': 'Lịch sử doanh thu',
                     'earn.date': 'Ngày',
                     'earn.impressions': 'Số lần hiển thị',
@@ -8720,6 +8928,382 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
             // Close/Cancel/Save are wired inside renderModalChrome() since
             // innerHTML is rebuilt on each openModal() and on language change.
+
+            // Expose a deep-link helper so other modules (cashout flow, error
+            // states) can pop Settings open to a specific tab. Without this,
+            // those code paths would have to wedge state across IIFE
+            // boundaries — this is the cleaner seam.
+            window.openSettingsTo = function (section) {
+                activeSection = section || 'account';
+                renderModalChrome();
+                renderNav();
+                renderBody();
+                modal.style.display = 'flex';
+                if (section === 'security') {
+                    mfaView = 'default';
+                    mfaState.pendingSecret = null;
+                    mfaState.pendingUri = null;
+                    loadMfaStatus();
+                } else if (section === 'payouts') {
+                    payoutMethodView = 'loading';
+                    payoutMethodState.method = null;
+                    payoutMethodState.formData = {};
+                    loadPayoutMethod();
+                    renderBody();
+                }
+            };
+        })();
+
+        // ───────────── PROMOTE CASHOUT (Promote → Cash out → bank) ─────────────
+        // Builds the cashout modal on demand, fetches a date preview from
+        // /api/payouts?action=preview, then submits with TOTP via
+        // ?action=request. On 412 mfa_required / bank_required, swaps the
+        // modal content to a clear "go enable X first" panel that deep-links
+        // to the right Settings tab.
+        //
+        // Also renders the "Recent payouts" history section on the Promote
+        // page using /api/payouts?action=list. Refresh happens on initial
+        // page load AND after every successful cashout submission.
+        (function initCashout() {
+            const cashoutBtn = document.getElementById('promoteCashoutBtn');
+            const histSection = document.getElementById('promoteCashoutHistorySection');
+            const histBody = document.getElementById('promoteCashoutHistory');
+            if (!cashoutBtn) return;
+
+            // Translations through the same DASH_T dictionary as the rest of
+            // the dashboard. Falls back to English if a key is missing in the
+            // active locale.
+            function ct(k) {
+                var d = (typeof DASH_T !== 'undefined') ? (DASH_T[currentLang()] || DASH_T.en) : null;
+                if (!d) return '';
+                return d[k] || (DASH_T.en && DASH_T.en[k]) || '';
+            }
+            function escH(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+                    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+                }[c]));
+            }
+            function fmtUSD(n) {
+                return '$' + (Number(n || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            function fmtDate(iso) {
+                if (!iso) return '—';
+                try {
+                    return new Date(iso + 'T00:00:00Z').toLocaleDateString(undefined, {
+                        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC',
+                    });
+                } catch (_) { return iso; }
+            }
+            function fmtDateTime(iso) {
+                if (!iso) return '—';
+                try {
+                    return new Date(iso).toLocaleString(undefined, {
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                    });
+                } catch (_) { return iso; }
+            }
+            function authToken() {
+                try {
+                    const raw = localStorage.getItem('bb_dev_session');
+                    if (!raw) return null;
+                    return (JSON.parse(raw) || {}).token || null;
+                } catch (_) { return null; }
+            }
+            function currentBalance() {
+                const el = document.getElementById('promoteEarningsBalance');
+                if (!el) return 0;
+                return parseFloat(el.textContent || '0') || 0;
+            }
+
+            // Build the modal element once and append it to body. We keep one
+            // instance and just swap innerHTML between the cashout-form view
+            // and the error-message views. Same pattern as the settings
+            // overlay.
+            const modal = document.createElement('div');
+            modal.id = 'cashoutModal';
+            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9998;background:rgba(10,10,20,0.55);align-items:center;justify-content:center;padding:20px;';
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeCashoutModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.style.display !== 'none') closeCashoutModal();
+            });
+
+            function closeCashoutModal() {
+                modal.style.display = 'none';
+                modal.innerHTML = '';
+            }
+
+            function openCashoutModal() {
+                modal.style.display = 'flex';
+                renderForm();
+            }
+
+            // Main cashout form. Pre-fills amount = full balance. On change,
+            // re-fetches the preview to keep the dates accurate (debounced).
+            function renderForm() {
+                const bal = currentBalance();
+                const balStr = fmtUSD(bal);
+                modal.innerHTML = `
+                    <div style="background:#fff;border-radius:16px;width:520px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.28);overflow:hidden;">
+                        <div style="padding:18px 24px;border-bottom:1px solid #F0F0F2;display:flex;justify-content:space-between;align-items:center;">
+                            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#111;margin:0;">${escH(ct('cashout.title'))}</h3>
+                            <button id="cashoutClose" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9CA3AF;line-height:1;">×</button>
+                        </div>
+                        <div style="padding:22px 24px;">
+                            <div style="margin-bottom:18px;">
+                                <label style="display:block;font-size:13px;font-weight:600;color:#111;margin-bottom:6px;">${escH(ct('cashout.amount_label'))}</label>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#111;">$</span>
+                                    <input id="cashoutAmount" type="number" min="1" max="${bal.toFixed(2)}" step="0.01" value="${bal.toFixed(2)}" style="flex:1;padding:12px 14px;border:1.5px solid #EAEAEF;border-radius:9px;font-size:18px;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;background:#FAFAFA;">
+                                    <span style="font-size:13px;color:#6B7280;font-weight:600;">USD</span>
+                                </div>
+                                <div style="font-size:12px;color:#6B7280;margin-top:6px;">${escH(ct('cashout.amount_available'))} <strong style="color:#111;">${escH(balStr)}</strong>. ${escH(ct('cashout.amount_min'))}</div>
+                            </div>
+                            <div id="cashoutPreview" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+                                <div style="padding:14px 16px;border:1px solid #EAEAEF;border-radius:10px;background:#FAFAF7;">
+                                    <div style="font-size:11px;font-weight:700;color:#FF2D78;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">${escH(ct('cashout.payout_date'))}</div>
+                                    <div id="cashoutPayoutDate" style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#111;">${escH(ct('cashout.loading_preview'))}</div>
+                                </div>
+                                <div style="padding:14px 16px;border:1px solid #EAEAEF;border-radius:10px;background:#FAFAF7;">
+                                    <div style="font-size:11px;font-weight:700;color:#FF2D78;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">${escH(ct('cashout.arrival'))}</div>
+                                    <div id="cashoutArrival" style="font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:#111;line-height:1.4;">${escH(ct('cashout.loading_preview'))}</div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:8px;">
+                                <label style="display:block;font-size:13px;font-weight:600;color:#111;margin-bottom:6px;">${escH(ct('cashout.totp_label'))}</label>
+                                <input id="cashoutCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="width:100%;padding:12px 14px;border:1.5px solid #EAEAEF;border-radius:9px;font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:0.25em;font-size:20px;background:#FAFAFA;">
+                            </div>
+                            <div id="cashoutMsg" style="font-size:13px;color:#E24B4A;display:none;margin:8px 0;line-height:1.5;"></div>
+                        </div>
+                        <div style="padding:16px 24px;background:#FAFAFA;border-top:1px solid #F0F0F2;display:flex;gap:10px;justify-content:flex-end;">
+                            <button id="cashoutCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">${escH(ct('cashout.cancel_btn'))}</button>
+                            <button id="cashoutSubmit" style="padding:10px 20px;border:none;border-radius:9px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${escH(ct('cashout.confirm_btn'))}</button>
+                        </div>
+                    </div>`;
+                document.getElementById('cashoutClose').addEventListener('click', closeCashoutModal);
+                document.getElementById('cashoutCancel').addEventListener('click', closeCashoutModal);
+
+                // Debounced preview refresh on amount change. Server is the
+                // source of truth for the dates so they always match what
+                // request will compute at submit time.
+                let previewTimer = null;
+                const amountInput = document.getElementById('cashoutAmount');
+                amountInput.addEventListener('input', () => {
+                    clearTimeout(previewTimer);
+                    previewTimer = setTimeout(refreshPreview, 300);
+                });
+
+                document.getElementById('cashoutSubmit').addEventListener('click', submitCashout);
+                document.getElementById('cashoutAmount').focus();
+                document.getElementById('cashoutAmount').select();
+                refreshPreview();
+            }
+
+            async function refreshPreview() {
+                const amt = parseFloat((document.getElementById('cashoutAmount') || {}).value || '0') || 0;
+                if (amt < 1) {
+                    setPreviewError(ct('cashout.err_amount'));
+                    return;
+                }
+                try {
+                    const tok = authToken();
+                    const r = await fetch(`${API_BASE}/api/payouts?action=preview`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': 'Bearer ' + tok } : {}) },
+                        body: JSON.stringify({ amount_usd: amt }),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) { setPreviewError(j.error || ct('cashout.err_generic')); return; }
+                    const dateEl = document.getElementById('cashoutPayoutDate');
+                    const arrEl = document.getElementById('cashoutArrival');
+                    if (dateEl) dateEl.textContent = fmtDate(j.target_payout_date);
+                    if (arrEl) {
+                        const a = j.arrival_window || {};
+                        arrEl.textContent = fmtDate(a.start) + ' – ' + fmtDate(a.end);
+                    }
+                } catch (e) {
+                    setPreviewError(ct('cashout.err_generic'));
+                }
+            }
+            function setPreviewError(text) {
+                const dateEl = document.getElementById('cashoutPayoutDate');
+                const arrEl = document.getElementById('cashoutArrival');
+                if (dateEl) dateEl.textContent = '—';
+                if (arrEl)  arrEl.textContent = '—';
+                const msg = document.getElementById('cashoutMsg');
+                if (msg) { msg.textContent = text; msg.style.display = 'block'; }
+            }
+
+            async function submitCashout() {
+                const amtRaw = (document.getElementById('cashoutAmount') || {}).value || '0';
+                const amt = parseFloat(amtRaw) || 0;
+                const code = ((document.getElementById('cashoutCode') || {}).value || '').replace(/\s+/g, '');
+                const msg = document.getElementById('cashoutMsg');
+                const btn = document.getElementById('cashoutSubmit');
+                const showMsg = (text) => { if (msg) { msg.textContent = text; msg.style.display = 'block'; } };
+
+                if (amt < 1 || amt > currentBalance() + 0.001) {
+                    showMsg(ct('cashout.err_amount'));
+                    return;
+                }
+                if (!/^\d{6}$/.test(code)) {
+                    showMsg(ct('cashout.err_code'));
+                    return;
+                }
+
+                btn.disabled = true; btn.textContent = ct('cashout.submitting');
+                try {
+                    const tok = authToken();
+                    const r = await fetch(`${API_BASE}/api/payouts?action=request`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': 'Bearer ' + tok } : {}) },
+                        body: JSON.stringify({ amount_usd: amt, totp_code: code }),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) {
+                        // Map specific server-side gate failures to in-modal
+                        // help panels that deep-link to the right Settings tab.
+                        if (r.status === 412 && j && j.code === 'mfa_required') {
+                            renderErrorPanel('mfa_required');
+                            return;
+                        }
+                        if (r.status === 412 && j && j.code === 'bank_required') {
+                            renderErrorPanel('bank_required');
+                            return;
+                        }
+                        showMsg(j.error || ct('cashout.err_generic'));
+                        btn.disabled = false; btn.textContent = ct('cashout.confirm_btn');
+                        return;
+                    }
+                    // Success — refresh balance + history, close modal, toast.
+                    closeCashoutModal();
+                    if (typeof showToast === 'function') {
+                        showToast(ct('toast.cashout_queued') + ' · ' + fmtDate(j.target_payout_date), 'success');
+                    }
+                    if (typeof loadPayoutStatus === 'function') loadPayoutStatus();
+                    loadCashoutHistory();
+                } catch (e) {
+                    showMsg(e.message || ct('cashout.err_generic'));
+                    btn.disabled = false; btn.textContent = ct('cashout.confirm_btn');
+                }
+            }
+
+            // Error panel for gate-failure cases (no 2FA enrolled / no bank
+            // info). Same modal, replaced content, with a single CTA that
+            // closes the modal AND deep-links Settings to the right tab.
+            function renderErrorPanel(kind) {
+                const isBank = (kind === 'bank_required');
+                const title = ct(isBank ? 'cashout.err_no_bank_title' : 'cashout.err_no_2fa_title');
+                const desc  = ct(isBank ? 'cashout.err_no_bank_desc'  : 'cashout.err_no_2fa_desc');
+                const link  = ct(isBank ? 'cashout.err_no_bank_link'  : 'cashout.err_no_2fa_link');
+                const tab   = isBank ? 'payouts' : 'security';
+                const icon  = isBank
+                    ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>'
+                    : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+                modal.innerHTML = `
+                    <div style="background:#fff;border-radius:16px;width:480px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.28);overflow:hidden;text-align:center;padding:32px 28px;">
+                        <div style="display:flex;justify-content:center;margin-bottom:16px;">${icon}</div>
+                        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#111;margin-bottom:8px;">${escH(title)}</h3>
+                        <p style="font-size:14px;color:#4B5563;line-height:1.55;margin-bottom:22px;">${escH(desc)}</p>
+                        <div style="display:flex;gap:10px;justify-content:center;">
+                            <button id="cashoutErrCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:13.5px;font-family:inherit;">${escH(ct('cashout.cancel_btn'))}</button>
+                            <button id="cashoutErrGo" style="padding:10px 20px;border:none;border-radius:9px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${escH(link)}</button>
+                        </div>
+                    </div>`;
+                document.getElementById('cashoutErrCancel').addEventListener('click', closeCashoutModal);
+                document.getElementById('cashoutErrGo').addEventListener('click', () => {
+                    closeCashoutModal();
+                    if (typeof window.openSettingsTo === 'function') {
+                        window.openSettingsTo(tab);
+                    }
+                });
+            }
+
+            // History list — fetched on Promote page load and after a new
+            // cashout submits. Hides the whole section if the publisher has
+            // never requested a cashout (no clutter).
+            async function loadCashoutHistory() {
+                try {
+                    const tok = authToken();
+                    if (!tok) return;
+                    const r = await fetch(`${API_BASE}/api/payouts?action=list`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+                        body: '{}',
+                    });
+                    if (!r.ok) return;
+                    const j = await r.json();
+                    renderHistory(j.requests || []);
+                } catch (_) {}
+            }
+
+            function renderHistory(requests) {
+                if (!histBody || !histSection) return;
+                if (!requests || requests.length === 0) {
+                    histSection.style.display = 'none';
+                    histBody.innerHTML = '';
+                    return;
+                }
+                histSection.style.display = 'block';
+                const STATUS_COLOR = {
+                    pending:   { bg: '#FEF3C7', fg: '#92400E' },
+                    batched:   { bg: '#DBEAFE', fg: '#1E3A8A' },
+                    paid:      { bg: '#DCFCE7', fg: '#166534' },
+                    failed:    { bg: '#FEE2E2', fg: '#991B1B' },
+                    cancelled: { bg: '#F3F4F6', fg: '#4B5563' },
+                };
+                const rows = requests.map(r => {
+                    const c = STATUS_COLOR[r.status] || STATUS_COLOR.pending;
+                    return `
+                        <tr>
+                            <td style="padding:11px 16px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:#111;">${escH(fmtUSD(r.amount_usd))}</td>
+                            <td style="padding:11px 16px;font-size:13px;color:#111;">${escH(fmtDate(r.target_payout_date))}</td>
+                            <td style="padding:11px 16px;">
+                                <span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;background:${c.bg};color:${c.fg};">${escH(ct('cashout.status_' + r.status))}</span>
+                            </td>
+                            <td style="padding:11px 16px;font-size:12px;color:#6B7280;">${escH(fmtDateTime(r.created_at))}</td>
+                        </tr>`;
+                }).join('');
+                histBody.innerHTML = `
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#FAFAFA;border-bottom:1px solid var(--line);">
+                                <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">${escH(ct('cashout.history_amount'))}</th>
+                                <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">${escH(ct('cashout.history_target'))}</th>
+                                <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">${escH(ct('cashout.history_status'))}</th>
+                                <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">${escH(ct('cashout.history_requested'))}</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>`;
+            }
+
+            cashoutBtn.addEventListener('click', () => {
+                // Quick client-side check: if there's nothing to cash out we
+                // don't even open the modal. The server enforces this too;
+                // this is just a friendlier short-circuit.
+                if (currentBalance() < 1) {
+                    if (typeof showToast === 'function') {
+                        showToast(ct('cashout.err_amount'), 'info');
+                    }
+                    return;
+                }
+                openCashoutModal();
+            });
+
+            // Initial history load. loadPayoutStatus already runs on init and
+            // fills the balance number — we piggyback on the same trigger but
+            // delay slightly so the rest of the dashboard chrome settles
+            // first.
+            setTimeout(loadCashoutHistory, 600);
+            // Expose for the cashout-success path inside submitCashout (which
+            // already calls it directly), and so other modules can poke it if
+            // a status update arrives from somewhere else later.
+            window.loadCashoutHistory = loadCashoutHistory;
         })();
 
         // ───────────── COMMAND PALETTE (⌘K) ─────────────
