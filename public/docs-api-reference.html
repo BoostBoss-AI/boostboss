@@ -89,18 +89,18 @@
     border-radius: 4px; padding: 1px 6px; margin-left: auto; color: var(--ink);
   }
 
-  /* LAYOUT
-     2-col after the right TOC was removed 2026-06-06 (it duplicated the
-     left sidebar's endpoint list, so we keep only the sidebar). Width +
-     side gutters match docs.css .docs-shell (1280 max, 24px padding) so
-     this page's side margins align with /docs, /docs/payouts,
-     /docs/reporting, etc. — previously this page was 120px wider with
-     4px more gutter, which pushed its sidebar closer to the viewport
-     edge than the sibling docs pages. */
+  /* LAYOUT — copied from docs.css .docs-shell so this page renders at
+     the exact same widths as /docs, /docs/payouts, /docs/reporting,
+     etc.:
+       sidebar         256px (matches --sidebar-w)
+       sidebar→main    0 gap (content sits flush)
+       max container   1280px, 24px gutters
+     The sister docs pages also constrain main to 892px (== content-max
+     780 + 112 padding) — applied below under main.content. */
   .docs-layout {
     max-width: 1280px; margin: 0 auto;
-    display: grid; grid-template-columns: 260px 1fr;
-    gap: 48px; padding: 0 24px;
+    display: grid; grid-template-columns: 256px 1fr;
+    gap: 0; padding: 0 24px;
   }
 
   /* SIDEBAR */
@@ -152,9 +152,16 @@
   .method-tag.patch { background: #FFF3D6; color: #8A6A00; }
   .method-tag.del { background: #FFE6EE; color: var(--pink); }
 
-  /* CONTENT */
+  /* CONTENT — matched to docs.css .docs-main so this page's article
+     column reads at the same width as /docs, /docs/payouts, etc.:
+       horizontal padding   56px (content-max 780 + 2*56 = 892 max)
+       max-width            892px
+     Was: padding 40px 0 80px (no horizontal padding, no max-width) —
+     which let content stretch ~924px wide, visibly wider than the
+     sibling docs pages. */
   main.content {
-    padding: 40px 0 80px;
+    padding: 48px 56px 100px;
+    max-width: 892px;
     min-width: 0;
   }
   .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
