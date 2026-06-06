@@ -101,13 +101,25 @@ nav {
   display: block; font-size: 13.5px; font-weight: 600; color: var(--ink);
   margin-bottom: 6px;
 }
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%; padding: 11px 14px; border: 1.5px solid var(--line);
-  border-radius: 8px; font-size: 15px; font-family: inherit;
+  border-radius: 8px; font-size: 15px; font-family: inherit; line-height: 1.4;
   transition: border-color 0.15s; background: #fff; color: var(--ink);
 }
-.form-group input:focus { outline: none; border-color: var(--pink); }
+.form-group input:focus,
+.form-group select:focus { outline: none; border-color: var(--pink); }
 .form-group input::placeholder { color: #B0B0C7; }
+/* <select> doesn't inherit input styling automatically. Strip native chrome
+   and draw a matching chevron so the dropdown looks identical to a text
+   field at rest — same border, same padding, same font. */
+.form-group select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  padding-right: 38px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%231A1A2E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 8px;
+}
+.form-group select:disabled { background-color: var(--bg-soft); color: var(--muted); cursor: not-allowed; }
 .form-group .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
 .btn-submit {
@@ -228,9 +240,14 @@ body.dark .card { background: #1F2937; border-color: #374151; box-shadow: 0 4px 
 body.dark .role-btn { background: #1F2937; border-color: #374151; }
 body.dark .role-btn:hover { border-color: #6B7280; }
 body.dark .role-btn.active { border-color: var(--pink); background: rgba(255,45,120,0.1); }
-body.dark .form-group input { background: #111827; color: #F3F4F6; border-color: #374151; }
-body.dark .form-group input:focus { border-color: var(--pink); }
+body.dark .form-group input,
+body.dark .form-group select { background: #111827; color: #F3F4F6; border-color: #374151; }
+body.dark .form-group input:focus,
+body.dark .form-group select:focus { border-color: var(--pink); }
 body.dark .form-group input::placeholder { color: #6B7280; }
+body.dark .form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23F3F4F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+}
 body.dark .btn-submit { background: var(--pink); }
 body.dark .error-msg { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #FCA5A5; }
 body.dark .success-msg { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #6EE7B7; }
@@ -283,6 +300,180 @@ body.dark .superboost-mark { color: #F3F4F6; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lumi-mark, .lumi-mark .spark { animation: none; }
+}
+
+/* ── Apple-style read-to-accept consent ──
+   Each policy link is a <button> that opens a modal. The "I've read this"
+   button at the bottom of the modal stays disabled until the user scrolls
+   to the very end of the legal text. Once all four policies are
+   acknowledged, the consent checkbox becomes enabled. No redirects. */
+.consent-box {
+  margin-top: 18px; padding: 14px 16px;
+  background: #FAFAF7; border: 1px solid #EAEAEF; border-radius: 8px;
+}
+.consent-progress {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  letter-spacing: 0.02em;
+}
+.consent-progress .pip {
+  width: 8px; height: 8px; border-radius: 50%; background: #D1D5DB;
+  display: inline-block; transition: background 0.18s;
+}
+.consent-progress .pip.done { background: var(--green); }
+.consent-progress.complete { color: var(--green); }
+.consent-text {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-weight: 400; font-size: 13.5px; line-height: 1.55; color: #4B4B5E;
+}
+.consent-text input[type="checkbox"] {
+  margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px;
+  accent-color: var(--pink);
+  cursor: pointer;
+}
+.consent-text input[type="checkbox"]:disabled { cursor: not-allowed; }
+.policy-link {
+  background: none; border: none; padding: 0; margin: 0;
+  font: inherit; color: var(--pink); font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.12s;
+}
+.policy-link:hover { border-bottom-color: var(--pink); }
+.policy-link.acknowledged {
+  color: var(--green);
+}
+.policy-link.acknowledged::after {
+  content: " ✓"; font-weight: 700; letter-spacing: -0.5px;
+}
+.consent-text label.locked { cursor: not-allowed; }
+
+/* ── Policy modal ── */
+.policy-modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(15, 15, 26, 0.55);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; transition: opacity 0.18s;
+}
+.policy-modal-overlay.open { display: flex; opacity: 1; }
+.policy-modal {
+  background: #fff; border-radius: 14px;
+  width: 100%; max-width: 640px;
+  max-height: calc(100vh - 48px);
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  transform: translateY(8px) scale(0.985);
+  transition: transform 0.2s;
+}
+.policy-modal-overlay.open .policy-modal {
+  transform: translateY(0) scale(1);
+}
+.policy-modal-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.policy-modal-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.policy-modal-close {
+  background: none; border: none; cursor: pointer; padding: 6px;
+  border-radius: 6px; color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  font-size: 20px; line-height: 1;
+}
+.policy-modal-close:hover { background: var(--bg-soft); color: var(--ink); }
+.policy-modal-body {
+  flex: 1; overflow-y: auto; padding: 24px 26px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  font-size: 14.5px; line-height: 1.7; color: var(--ink-soft);
+  position: relative;
+}
+.policy-modal-body.loading {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 14px;
+}
+/* Scoped overrides for the fetched legal-body content so it fits the modal
+   width and reads cleanly here (the source pages set their own .wrap-narrow
+   constraints, which we strip). */
+.policy-modal-body .legal-body { padding: 0; }
+.policy-modal-body .wrap-narrow { max-width: 100%; padding: 0; margin: 0; }
+.policy-modal-body h1 { font-size: 22px; margin-bottom: 14px; color: var(--ink); }
+.policy-modal-body h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  margin: 26px 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.policy-modal-body h2:first-child { margin-top: 0; }
+.policy-modal-body h3 {
+  font-size: 14.5px; font-weight: 600; color: var(--ink);
+  margin: 18px 0 6px;
+}
+.policy-modal-body p { margin-bottom: 12px; }
+.policy-modal-body ul { padding-left: 22px; margin-bottom: 12px; }
+.policy-modal-body li { margin-bottom: 6px; }
+.policy-modal-body strong { color: var(--ink); }
+.policy-modal-body a { color: var(--pink); }
+.policy-modal-body table.dt { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13px; }
+.policy-modal-body table.dt th, .policy-modal-body table.dt td {
+  padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line);
+  vertical-align: top; color: var(--ink-soft);
+}
+.policy-modal-body table.dt th { font-weight: 600; color: var(--ink); background: var(--bg-soft); }
+.policy-modal-foot {
+  padding: 14px 22px 18px; border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-shrink: 0; background: var(--bg-soft);
+}
+.policy-modal-hint {
+  font-size: 12.5px; color: var(--muted); flex: 1; line-height: 1.4;
+}
+.policy-modal-hint.ready { color: var(--green); font-weight: 600; }
+.policy-modal-accept {
+  padding: 10px 20px; border: none; border-radius: 8px;
+  background: var(--pink); color: #fff; font-weight: 700; font-size: 14px;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s;
+}
+.policy-modal-accept:disabled {
+  background: #C7C7D2; color: #fff; cursor: not-allowed; opacity: 0.85;
+}
+.policy-modal-accept:not(:disabled):hover { background: var(--pink-dark); }
+.policy-modal-error {
+  color: var(--red); font-size: 13.5px; text-align: center;
+  padding: 16px;
+}
+.policy-modal-error a { color: var(--pink); font-weight: 600; }
+body.scroll-locked { overflow: hidden; }
+
+/* Dark mode for consent + modal */
+body.dark .consent-box { background: rgba(255,255,255,0.03); border-color: #374151; }
+body.dark .policy-modal { background: #1F2937; }
+body.dark .policy-modal-head { border-bottom-color: #374151; }
+body.dark .policy-modal-title { color: #F3F4F6; }
+body.dark .policy-modal-body { color: #D1D5DB; }
+body.dark .policy-modal-body h1,
+body.dark .policy-modal-body h2,
+body.dark .policy-modal-body h3,
+body.dark .policy-modal-body strong { color: #F3F4F6; }
+body.dark .policy-modal-body h2 { border-bottom-color: #374151; }
+body.dark .policy-modal-body table.dt th { background: #111827; color: #F3F4F6; }
+body.dark .policy-modal-body table.dt th,
+body.dark .policy-modal-body table.dt td { border-bottom-color: #374151; }
+body.dark .policy-modal-foot { background: #111827; border-top-color: #374151; }
+body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
+
+@media (max-width: 560px) {
+  .policy-modal-overlay { padding: 0; align-items: stretch; }
+  .policy-modal { max-height: 100vh; border-radius: 0; max-width: 100%; }
 }
 </style>
 </head>
@@ -352,7 +543,7 @@ body.dark .superboost-mark { color: #F3F4F6; }
              need to know. UX-only; not the full plug-and-play upgrade. -->
         <div class="form-group hidden" id="app-type-group">
           <label for="app_type">What are you building?</label>
-          <select id="app_type" name="app_type" class="form-input" style="font-size:14px;">
+          <select id="app_type" name="app_type">
             <option value="">Select…</option>
             <option value="js-snippet">AI chat app or web AI tool</option>
             <option value="mcp">MCP server / tool for AI agents (Claude Desktop, Cursor, etc.)</option>
@@ -365,20 +556,32 @@ body.dark .superboost-mark { color: #F3F4F6; }
             We'll set up your dashboard with the matching integration door first. You can change it anytime.
           </div>
         </div>
-        <!-- Terms acceptance — required for signup. Captured into terms_acceptances
-             table by the backend with IP + UA + version + timestamp for legal
-             audit trail (GDPR / CCPA / PIPL / TW data law compliance). -->
-        <div class="form-group" style="margin-top:18px;padding:14px 16px;background:#FAFAF7;border:1px solid #EAEAEF;border-radius:8px;">
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:400;font-size:13.5px;line-height:1.55;color:#4B4B5E;">
-            <input type="checkbox" id="accept-terms" name="accept_terms" required style="margin-top:2px;flex-shrink:0;width:16px;height:16px;cursor:pointer;accent-color:var(--pink);">
+        <!-- Terms acceptance — Apple-style read-to-accept flow.
+             Each policy is a <button> that opens a modal with the live legal
+             text fetched from the source page. The user must scroll to the
+             end of each modal before "I've read this" enables; only after
+             all four are acknowledged does the consent checkbox unlock.
+             Captured into terms_acceptances table by the backend with IP +
+             UA + version + timestamp for legal audit trail (GDPR / CCPA /
+             PIPL / TW data law compliance). -->
+        <div class="form-group consent-box">
+          <div class="consent-progress" id="consent-progress" aria-live="polite">
+            <span class="pip" data-pip="terms"></span>
+            <span class="pip" data-pip="privacy"></span>
+            <span class="pip" data-pip="aup"></span>
+            <span class="pip" data-pip="role"></span>
+            <span id="consent-progress-label">Read all 4 policies to continue</span>
+          </div>
+          <label class="consent-text locked" id="consent-label">
+            <input type="checkbox" id="accept-terms" name="accept_terms" required disabled>
             <span>
               I have read and agree to the
-              <a href="/terms" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Terms of Service</a>,
-              <a href="/privacy" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Privacy Policy</a>,
-              <a href="/aup" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Acceptable Use Policy</a>,
+              <button type="button" class="policy-link" data-policy="terms">Terms of Service</button>,
+              <button type="button" class="policy-link" data-policy="privacy">Privacy Policy</button>,
+              <button type="button" class="policy-link" data-policy="aup">Acceptable Use Policy</button>,
               and
               <span id="role-specific-terms-label">
-                <a href="/advertiser-terms" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Advertiser Terms</a>
+                <button type="button" class="policy-link" data-policy="advertiser-terms">Advertiser Terms</button>
               </span>.
             </span>
           </label>
@@ -450,6 +653,24 @@ body.dark .superboost-mark { color: #F3F4F6; }
   </div>
   <span>© 2026 Hauler Technologies Co., Ltd. — operating Boost Boss.</span>
 </footer>
+
+<!-- Policy modal — single instance, body swapped per policy. Renders the
+     fetched .legal-body content from /terms /privacy /aup
+     /publisher-agreement /advertiser-terms. The Accept button is disabled
+     until the body has been scrolled to the end. -->
+<div class="policy-modal-overlay" id="policy-modal" role="dialog" aria-modal="true" aria-labelledby="policy-modal-title" aria-hidden="true">
+  <div class="policy-modal" role="document">
+    <div class="policy-modal-head">
+      <div class="policy-modal-title" id="policy-modal-title">Policy</div>
+      <button type="button" class="policy-modal-close" id="policy-modal-close" aria-label="Close">×</button>
+    </div>
+    <div class="policy-modal-body" id="policy-modal-body" tabindex="0">Loading…</div>
+    <div class="policy-modal-foot">
+      <div class="policy-modal-hint" id="policy-modal-hint">Scroll to the end to continue</div>
+      <button type="button" class="policy-modal-accept" id="policy-modal-accept" disabled>I've read this</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // Toast
@@ -637,17 +858,226 @@ document.getElementById("switch-signup").addEventListener("click", e => {
 });
 
 // ── Role-specific terms label (Advertiser Terms vs Publisher Agreement) ──
+// Renders the 4th policy as a <button> that opens the modal. The role's
+// policy id ("publisher-agreement" or "advertiser-terms") drives both the
+// fetched URL and the acknowledgment slot, so flipping the role resets the
+// 4th-policy ack — you have to re-read the role-specific doc if you change
+// your role mid-signup.
 function updateRoleTermsLabel() {
   var label = document.getElementById("role-specific-terms-label");
   if (!label) return;
+  var prevRolePolicy = (PolicyConsent && PolicyConsent.rolePolicy) || null;
   if (selectedRole === "developer") {
-    label.innerHTML = '<a href="/publisher-agreement" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Publisher Agreement</a>';
+    label.innerHTML = '<button type="button" class="policy-link" data-policy="publisher-agreement">Publisher Agreement</button>';
+    if (PolicyConsent) PolicyConsent.setRolePolicy("publisher-agreement");
   } else {
-    label.innerHTML = '<a href="/advertiser-terms" target="_blank" rel="noopener" style="color:var(--pink);font-weight:500;">Advertiser Terms</a>';
+    label.innerHTML = '<button type="button" class="policy-link" data-policy="advertiser-terms">Advertiser Terms</button>';
+    if (PolicyConsent) PolicyConsent.setRolePolicy("advertiser-terms");
   }
+  // If role policy changed, drop any prior ack on the old one and rebind
+  // the click handler on the freshly-rendered button.
+  if (PolicyConsent && prevRolePolicy && prevRolePolicy !== PolicyConsent.rolePolicy) {
+    PolicyConsent.dropRoleAck();
+  }
+  if (PolicyConsent) PolicyConsent.bindAll();
 }
 
-// ── Terms checkbox gates submit button ──
+// ── Apple-style read-to-accept consent flow ──
+// One modal element, content swapped per policy. We fetch the live legal
+// page, extract its .legal-body innerHTML, and inject it into the modal.
+// "I've read this" stays disabled until the user scrolls to the end. Once
+// all four policies are acknowledged, the consent checkbox is enabled —
+// the user must still click it to actually consent. No redirects.
+const PolicyConsent = (function () {
+  const POLICIES = {
+    "terms":               { title: "Terms of Service",      url: "/terms",               slot: "terms"   },
+    "privacy":             { title: "Privacy Policy",        url: "/privacy",             slot: "privacy" },
+    "aup":                 { title: "Acceptable Use Policy", url: "/aup",                 slot: "aup"     },
+    "advertiser-terms":    { title: "Advertiser Terms",      url: "/advertiser-terms",    slot: "role"    },
+    "publisher-agreement": { title: "Publisher Agreement",   url: "/publisher-agreement", slot: "role"    },
+  };
+  const cache = Object.create(null);   // url -> html (no re-fetch on reopen)
+  const acked = new Set();             // policy ids the user has read-to-end
+  let rolePolicy = "advertiser-terms"; // updated by updateRoleTermsLabel()
+  let lastFocus = null;                // for focus restoration on close
+  let activePolicy = null;
+
+  const overlayEl = document.getElementById("policy-modal");
+  const titleEl   = document.getElementById("policy-modal-title");
+  const bodyEl    = document.getElementById("policy-modal-body");
+  const hintEl    = document.getElementById("policy-modal-hint");
+  const acceptEl  = document.getElementById("policy-modal-accept");
+  const closeEl   = document.getElementById("policy-modal-close");
+
+  function progressLabel() {
+    var n = acked.size;
+    var total = 4;
+    if (n >= total) return "All policies read — please confirm below";
+    return "Read all 4 policies to continue (" + n + " of " + total + " done)";
+  }
+
+  function refreshProgress() {
+    // Pip dots
+    document.querySelectorAll(".consent-progress .pip").forEach(function (pip) {
+      var slot = pip.getAttribute("data-pip");
+      var hit = false;
+      acked.forEach(function (id) {
+        if (POLICIES[id] && POLICIES[id].slot === slot) hit = true;
+      });
+      pip.classList.toggle("done", hit);
+    });
+    // Label
+    var lbl = document.getElementById("consent-progress-label");
+    var prog = document.getElementById("consent-progress");
+    if (lbl) lbl.textContent = progressLabel();
+    if (prog) prog.classList.toggle("complete", acked.size >= 4);
+    // Acknowledged buttons get a green ✓
+    document.querySelectorAll(".policy-link").forEach(function (btn) {
+      var pid = btn.getAttribute("data-policy");
+      btn.classList.toggle("acknowledged", acked.has(pid));
+    });
+    // Checkbox stays disabled until all 4 are read
+    var cb = document.getElementById("accept-terms");
+    var consentLabel = document.getElementById("consent-label");
+    if (cb) {
+      var ready = acked.size >= 4;
+      cb.disabled = !ready;
+      if (!ready) cb.checked = false;
+      if (consentLabel) consentLabel.classList.toggle("locked", !ready);
+    }
+    // Fire downstream submit-button gate
+    var submitBtn = document.getElementById("submit-btn");
+    if (submitBtn && cb) submitBtn.disabled = !cb.checked;
+  }
+
+  async function fetchPolicy(url) {
+    if (cache[url]) return cache[url];
+    const res = await fetch(url, { credentials: "same-origin" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const body = doc.querySelector("section.legal-body");
+    if (!body) throw new Error("legal-body not found");
+    cache[url] = body.innerHTML;
+    return cache[url];
+  }
+
+  function isAtBottom() {
+    // Accept a 6px tolerance so the gate triggers reliably even with
+    // sub-pixel scrollHeight rounding.
+    return bodyEl.scrollTop + bodyEl.clientHeight >= bodyEl.scrollHeight - 6;
+  }
+
+  function onScroll() {
+    if (isAtBottom()) {
+      acceptEl.disabled = false;
+      hintEl.classList.add("ready");
+      hintEl.textContent = "You've reached the end — click below to confirm";
+    }
+  }
+
+  function open(policyId) {
+    const p = POLICIES[policyId];
+    if (!p) return;
+    activePolicy = policyId;
+    lastFocus = document.activeElement;
+    titleEl.textContent = p.title;
+    bodyEl.classList.add("loading");
+    bodyEl.innerHTML = "Loading…";
+    hintEl.classList.remove("ready");
+    hintEl.textContent = "Scroll to the end to continue";
+    acceptEl.disabled = true;
+    overlayEl.classList.add("open");
+    overlayEl.setAttribute("aria-hidden", "false");
+    document.body.classList.add("scroll-locked");
+
+    fetchPolicy(p.url).then(function (htmlStr) {
+      bodyEl.classList.remove("loading");
+      bodyEl.innerHTML = htmlStr;
+      bodyEl.scrollTop = 0;
+      // If the content is already short enough to fit without scrolling,
+      // there's nothing to scroll — enable acceptance immediately after
+      // a brief layout settle.
+      requestAnimationFrame(function () {
+        if (bodyEl.scrollHeight <= bodyEl.clientHeight + 4) {
+          acceptEl.disabled = false;
+          hintEl.classList.add("ready");
+          hintEl.textContent = "Reviewed — click below to confirm";
+        }
+      });
+      // Keyboard focus moves to the scrollable body so PageDown / arrows work.
+      setTimeout(function () { bodyEl.focus(); }, 30);
+    }).catch(function (err) {
+      bodyEl.classList.remove("loading");
+      bodyEl.innerHTML = '<div class="policy-modal-error">' +
+        "We couldn't load this policy inline. " +
+        '<a href="' + p.url + '" target="_blank" rel="noopener">Open ' + p.title + ' in a new tab</a>' +
+        " to read it, then return here. <br><br><small>" + (err && err.message ? err.message : "") + "</small>" +
+        "</div>";
+    });
+  }
+
+  function close() {
+    overlayEl.classList.remove("open");
+    overlayEl.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("scroll-locked");
+    activePolicy = null;
+    if (lastFocus && typeof lastFocus.focus === "function") {
+      try { lastFocus.focus(); } catch (e) {}
+    }
+  }
+
+  function acceptCurrent() {
+    if (!activePolicy) return;
+    acked.add(activePolicy);
+    refreshProgress();
+    close();
+  }
+
+  // Wire modal controls (once)
+  bodyEl.addEventListener("scroll", onScroll, { passive: true });
+  acceptEl.addEventListener("click", acceptCurrent);
+  closeEl.addEventListener("click", close);
+  overlayEl.addEventListener("click", function (e) {
+    if (e.target === overlayEl) close();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && overlayEl.classList.contains("open")) close();
+  });
+
+  // Bind every .policy-link on the page (re-bindable so updateRoleTermsLabel
+  // can refresh the 4th button after a role swap).
+  function bindAll() {
+    document.querySelectorAll(".policy-link").forEach(function (btn) {
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        open(btn.getAttribute("data-policy"));
+      });
+    });
+  }
+
+  return {
+    bindAll: bindAll,
+    refresh: refreshProgress,
+    setRolePolicy: function (id) { rolePolicy = id; },
+    dropRoleAck: function () {
+      // Drop any ack tied to the "role" slot (only one can be acked at a time)
+      ["advertiser-terms", "publisher-agreement"].forEach(function (id) { acked.delete(id); });
+      refreshProgress();
+    },
+    get rolePolicy() { return rolePolicy; },
+  };
+})();
+
+// Initial bind + paint progress
+PolicyConsent.bindAll();
+PolicyConsent.refresh();
+
+// ── Terms checkbox → submit button gate ──
+// Checkbox is itself gated by PolicyConsent (disabled until all 4 read),
+// so this just propagates the final state to the submit button.
 (function gateSubmitOnTerms() {
   var cb = document.getElementById("accept-terms");
   var btn = document.getElementById("submit-btn");
