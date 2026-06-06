@@ -1,5 +1,8 @@
 -- ============================================================================
--- 22_user_mfa.sql — TOTP two-factor authentication factors per user.
+-- 25_user_mfa.sql — TOTP two-factor authentication factors per user.
+--   (Renamed from 22_user_mfa.sql 2026-06-06 to resolve numbering
+--    collision with the pre-existing 22_paypal_transactions.sql. Both
+--    migrations create different objects so there's no DB conflict.)
 --
 -- One row per user once they've successfully verified an authenticator app.
 -- The TOTP secret is stored as base32 ciphertext (the secret IS the
