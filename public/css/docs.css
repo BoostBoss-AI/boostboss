@@ -55,10 +55,10 @@ nav.docs-nav {
   display: flex; align-items: center; justify-content: space-between;
   height: 60px; max-width: 1280px; margin: 0 auto; padding: 0 24px;
 }
-.brand { display: flex; align-items: center; gap: 9px; }
-.brand-mark { width: 30px; height: 30px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
 .brand-name {
-  font-family: 'Space Grotesk', sans-serif; font-size: 17.5px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 20px;
   font-weight: 700; color: var(--ink); letter-spacing: -0.4px;
 }
 .brand-tag {
