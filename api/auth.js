@@ -744,7 +744,119 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp" });
+  // ── Payout method (bank-transfer details) ──────────────────────────────
+  // Two actions: read the current method, and save (insert or replace) the
+  // method with a step-up password + TOTP verification. The frontend calls
+  // get to populate the read-only summary or to pre-fill the edit form, and
+  // save to commit changes after the publisher re-enters their password and
+  // a fresh authenticator code in the inline confirm step.
+  if (action === "get_payout_method" || action === "save_payout_method") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
+    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
+
+    if (action === "get_payout_method") {
+      const { data, error } = await supabaseAdmin
+        .from("publisher_payout_methods")
+        .select("account_holder_name, account_holder_country, account_holder_address, bank_name, bank_country, swift_bic, iban_or_account, routing_or_branch, currency, created_at, updated_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error) return res.status(500).json({ error: error.message });
+      return res.json({ method: data || null });
+    }
+
+    if (action === "save_payout_method") {
+      const {
+        current_password, totp_code,
+        account_holder_name, account_holder_country, account_holder_address,
+        bank_name, bank_country, swift_bic, iban_or_account, routing_or_branch,
+      } = body || {};
+
+      // Validate required fields before doing any auth work — fail-fast.
+      const required = {
+        current_password, totp_code,
+        account_holder_name, account_holder_country, account_holder_address,
+        bank_name, bank_country, swift_bic, iban_or_account,
+      };
+      for (const k of Object.keys(required)) {
+        if (!required[k] || String(required[k]).trim() === "") {
+          return res.status(400).json({ error: `Missing required field: ${k}` });
+        }
+      }
+      const swiftClean = String(swift_bic).toUpperCase().replace(/\s+/g, "");
+      if (!/^[A-Z0-9]{8}$|^[A-Z0-9]{11}$/.test(swiftClean)) {
+        return res.status(400).json({ error: "SWIFT/BIC code should be 8 or 11 characters (letters and digits only)." });
+      }
+      if (!/^[A-Z]{2}$/.test(String(account_holder_country))) {
+        return res.status(400).json({ error: "Invalid account holder country code." });
+      }
+      if (!/^[A-Z]{2}$/.test(String(bank_country))) {
+        return res.status(400).json({ error: "Invalid bank country code." });
+      }
+
+      // Step-up: re-verify the password against Supabase, then verify the TOTP
+      // code against user_mfa. Both must succeed — this is the single highest-
+      // impact write a publisher can make, since it rewrites where their money
+      // goes.
+      const { error: pwErr } = await supabaseAnon.auth.signInWithPassword({
+        email: user.email, password: current_password,
+      });
+      if (pwErr) return res.status(401).json({ error: "Your password is incorrect." });
+
+      const { data: mfaRow, error: mfaReadErr } = await supabaseAdmin
+        .from("user_mfa")
+        .select("totp_secret, failed_attempts")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (mfaReadErr) return res.status(500).json({ error: mfaReadErr.message });
+      if (!mfaRow) {
+        return res.status(412).json({
+          error: "Enable two-factor authentication first (Settings → Security → Two-factor authentication).",
+          code: "mfa_required",
+        });
+      }
+      if ((mfaRow.failed_attempts || 0) >= 10) {
+        return res.status(429).json({ error: "Too many failed attempts. Email support@boostboss.ai to recover access." });
+      }
+      const totp = require("./_lib/totp.js");
+      if (!totp.verifyCode(mfaRow.totp_secret, totp_code, 1)) {
+        await supabaseAdmin
+          .from("user_mfa")
+          .update({ failed_attempts: (mfaRow.failed_attempts || 0) + 1 })
+          .eq("user_id", user.id);
+        return res.status(401).json({ error: "That authenticator code doesn't match. Use the latest one." });
+      }
+
+      const nowIso = new Date().toISOString();
+      // Reset MFA failure counter on success + mark step-up.
+      await supabaseAdmin
+        .from("user_mfa")
+        .update({ last_used_at: nowIso, last_step_up_at: nowIso, failed_attempts: 0 })
+        .eq("user_id", user.id);
+
+      const row = {
+        user_id: user.id,
+        account_holder_name: String(account_holder_name).trim(),
+        account_holder_country: String(account_holder_country).toUpperCase(),
+        account_holder_address: String(account_holder_address).trim(),
+        bank_name: String(bank_name).trim(),
+        bank_country: String(bank_country).toUpperCase(),
+        swift_bic: swiftClean,
+        iban_or_account: String(iban_or_account).trim().replace(/\s+/g, ""),
+        routing_or_branch: routing_or_branch ? String(routing_or_branch).trim() : null,
+        currency: "USD",
+        updated_at: nowIso,
+      };
+      const { error: upErr } = await supabaseAdmin
+        .from("publisher_payout_methods")
+        .upsert(row, { onConflict: "user_id" });
+      if (upErr) return res.status(500).json({ error: upErr.message });
+      return res.json({ success: true, saved_at: nowIso });
+    }
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
