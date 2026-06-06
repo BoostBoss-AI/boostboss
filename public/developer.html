@@ -1715,6 +1715,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.payouts">Payouts</span>
             </button>
+            <button class="shell-nav-item" data-shell-section="promote">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.promote">Promote</span>
+            </button>
             <button class="shell-nav-item" data-shell-section="settings">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.settings">Settings</span>
@@ -2648,6 +2652,105 @@ await message.reply({
 
             </div><!-- /[data-shell-route="payouts"] -->
 
+            <!-- ═══════ ROUTE: promote ═══════
+                 Publisher-as-Advertiser flow. Same underlying advertisers
+                 + campaigns tables as /ads/dashboard — this is just a
+                 simplified entry surface for publishers who want to use
+                 their earnings (or PayPal) to promote their own product
+                 to the Boost Boss network.
+
+                 The fuller create flow + analytics lands across the
+                 v1 sprint (Days 1-7). This first ship is the route +
+                 the empty-state UI so the sidebar item resolves to a
+                 real page rather than a 404. -->
+            <div data-shell-route="promote">
+                <div class="shell-page-header" style="margin-bottom:24px;">
+                    <h1 class="shell-page-title" data-t="page.promote.title">Promote</h1>
+                    <p class="shell-page-sub" data-t="page.promote.sub" style="color:var(--ink-soft);font-size:14.5px;margin-top:6px;">
+                        Reach AI-native users on the Boost Boss network. Use your earnings or add funds to acquire customers for your product.
+                    </p>
+                </div>
+
+                <!-- Balance + primary CTA strip -->
+                <div id="promoteBalanceCard" style="
+                    background:linear-gradient(135deg, #fff5f8 0%, #f5fbff 100%);
+                    border:1.5px solid var(--line);
+                    border-radius:14px;
+                    padding:24px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    gap:16px;
+                    flex-wrap:wrap;
+                    margin-bottom:24px;
+                ">
+                    <div>
+                        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;" data-t="page.promote.balance_label">Available to spend</div>
+                        <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:var(--ink);margin-top:4px;">
+                            $<span id="promoteEarningsBalance">0.00</span>
+                        </div>
+                        <div style="font-size:13px;color:var(--ink-soft);margin-top:4px;" data-t="page.promote.balance_hint">
+                            From your publisher earnings. Add PayPal funds to spend beyond this.
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <button id="promoteCreateCampaignBtn" class="payout-btn" style="
+                            background:var(--accent-primary);color:#fff;border:none;border-radius:10px;
+                            padding:12px 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;
+                            display:inline-flex;align-items:center;gap:8px;
+                        " data-t="page.promote.create_btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Create campaign
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active campaigns list (empty state for now) -->
+                <div style="margin-bottom:24px;">
+                    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:var(--ink);" data-t="page.promote.active_h">Active campaigns</h3>
+                    <div id="promoteCampaignsList">
+                        <div id="promoteEmptyState" style="
+                            border:1.5px dashed var(--line);
+                            border-radius:14px;
+                            padding:48px 24px;
+                            text-align:center;
+                            color:var(--ink-soft);
+                        ">
+                            <div style="font-size:42px;margin-bottom:12px;">📣</div>
+                            <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:var(--ink);margin-bottom:6px;" data-t="page.promote.empty_title">
+                                No campaigns yet
+                            </div>
+                            <div style="font-size:14px;line-height:1.55;max-width:480px;margin:0 auto;" data-t="page.promote.empty_p">
+                                When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your existing earnings can fund it directly — no PayPal deposit needed.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graduation link to full advertiser dashboard -->
+                <div style="
+                    border-top:1px solid var(--line);
+                    padding-top:18px;
+                    margin-top:32px;
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    flex-wrap:wrap;
+                    gap:10px;
+                ">
+                    <div style="font-size:13px;color:var(--ink-soft);" data-t="page.promote.graduate_hint">
+                        Want full advertiser features — multiple creatives, advanced targeting, deep analytics?
+                    </div>
+                    <a href="/ads/dashboard" style="
+                        font-size:14px;font-weight:600;color:var(--accent-primary);
+                        text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+                    " data-t="page.promote.graduate_link">
+                        Open advertiser dashboard
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                </div>
+            </div><!-- /[data-shell-route="promote"] -->
+
             <!-- "Test Your Integration" section removed 2026-05-20 —
                  the form + results panel moved up into the Verify your
                  integration block above so there's a single testing
@@ -2797,7 +2900,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized. Settings is a
             // modal — it bypasses routing entirely.
-            const VALID_ROUTES = ['home', 'performance', 'integrations', 'placements', 'payouts'];
+            const VALID_ROUTES = ['home', 'performance', 'integrations', 'placements', 'payouts', 'promote'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -2854,6 +2957,21 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             window.addEventListener('hashchange', () => applyRoute(routeFromHash()));
             // Initial route — paint on load before user clicks anything.
             applyRoute(routeFromHash());
+
+            // ─── Promote section bootstrap ───────────────────────────
+            // Until the full create-campaign flow lands (sprint Day 6), the
+            // button surfaces a toast so the user knows it's coming and the
+            // sidebar item resolves to a real page rather than a dead UI.
+            const promoteBtn = document.getElementById('promoteCreateCampaignBtn');
+            if (promoteBtn) {
+                promoteBtn.addEventListener('click', () => {
+                    if (typeof showToast === 'function') {
+                        showToast('Campaign creation lands later this sprint — your earnings will be the default funding source.', 'info', 4500);
+                    } else {
+                        alert('Campaign creation is shipping later this sprint.');
+                    }
+                });
+            }
 
             // Sync sidebar avatar + name from userProfile (loads async).
             function syncAvatar() {
@@ -4570,7 +4688,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 if (!banner) return;
                 // Update threshold display from API (single source of truth)
                 if (s.balance != null) {
-                    document.getElementById('pendingPayout').textContent = '$' + (parseFloat(s.balance) || 0).toFixed(2);
+                    const bal = parseFloat(s.balance) || 0;
+                    document.getElementById('pendingPayout').textContent = '$' + bal.toFixed(2);
+                    // Mirror to the Promote section's "available to spend"
+                    // header so publisher can see their earnings as ad credit.
+                    const promoteBal = document.getElementById('promoteEarningsBalance');
+                    if (promoteBal) promoteBal.textContent = bal.toFixed(2);
                 }
                 // Phase E Day 6: threshold is fixed at $25 (Decision 3).
                 // No longer driven by the legacy /api/billing?action=earnings field.
@@ -5298,6 +5421,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.integrations': 'Integrations',
                     'shell.nav.placements': 'Placements',
                     'shell.nav.payouts': 'Payouts',
+                    'shell.nav.promote': 'Promote',
                     'shell.nav.campaigns': 'Campaigns',
                     'shell.nav.billing': 'Billing',
                     'shell.nav.setup': 'Setup',
@@ -5314,6 +5438,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': 'Ad slots, API keys, and per-slot economics',
                     'page.payouts.title': 'Payouts',
                     'page.payouts.sub': 'Earnings history and payout settings',
+                    'page.promote.title': 'Promote',
+                    'page.promote.sub': 'Reach AI-native users on the Boost Boss network. Use your earnings or add funds to acquire customers for your product.',
+                    'page.promote.balance_label': 'Available to spend',
+                    'page.promote.balance_hint': 'From your publisher earnings. Add PayPal funds to spend beyond this.',
+                    'page.promote.create_btn': 'Create campaign',
+                    'page.promote.active_h': 'Active campaigns',
+                    'page.promote.empty_title': 'No campaigns yet',
+                    'page.promote.empty_p': "When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your existing earnings can fund it directly — no PayPal deposit needed.",
+                    'page.promote.graduate_hint': 'Want full advertiser features — multiple creatives, advanced targeting, deep analytics?',
+                    'page.promote.graduate_link': 'Open advertiser dashboard',
                     'earn.title': 'Earnings History',
                     'earn.date': 'Date',
                     'earn.impressions': 'Impressions',
@@ -5574,6 +5708,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.integrations': '集成',
                     'shell.nav.placements': '版位',
                     'shell.nav.payouts': '打款',
+                    'shell.nav.promote': '推广',
                     'shell.nav.campaigns': '广告',
                     'shell.nav.billing': '账单',
                     'shell.nav.setup': '设置向导',
@@ -5590,6 +5725,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '广告位、API 密钥与每个广告位的经济数据',
                     'page.payouts.title': '打款',
                     'page.payouts.sub': '收益记录与打款设置',
+                    'page.promote.title': '推广',
+                    'page.promote.sub': '触达 Boost Boss 网络上的 AI 原生用户。使用您的收益或充值,为您的产品获取客户。',
+                    'page.promote.balance_label': '可用余额',
+                    'page.promote.balance_hint': '来自您的发布商收益。可通过 PayPal 充值以超出此余额。',
+                    'page.promote.create_btn': '创建广告',
+                    'page.promote.active_h': '运行中的广告',
+                    'page.promote.empty_title': '尚无广告',
+                    'page.promote.empty_p': '当您创建首个广告后,会在这里显示实时展示、点击和花费。您现有的收益可直接作为预算 — 无需 PayPal 充值。',
+                    'page.promote.graduate_hint': '需要完整的广告主功能 — 多个创意、高级定向、深度分析?',
+                    'page.promote.graduate_link': '打开广告主面板',
                     'earn.title': '收益历史',
                     'earn.date': '日期',
                     'earn.impressions': '展示次数',
@@ -5850,6 +5995,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.integrations': '整合',
                     'shell.nav.placements': '版位',
                     'shell.nav.payouts': '撥款',
+                    'shell.nav.promote': '推廣',
                     'shell.nav.campaigns': '廣告',
                     'shell.nav.billing': '帳單',
                     'shell.nav.setup': '設定精靈',
@@ -5866,6 +6012,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '廣告版位、API 金鑰與每個版位的經濟數據',
                     'page.payouts.title': '撥款',
                     'page.payouts.sub': '收益紀錄與撥款設定',
+                    'page.promote.title': '推廣',
+                    'page.promote.sub': '觸及 Boost Boss 網路上的 AI 原生使用者。使用您的收益或加值,為您的產品獲取客戶。',
+                    'page.promote.balance_label': '可用餘額',
+                    'page.promote.balance_hint': '來自您的發布商收益。可透過 PayPal 加值以超出此餘額。',
+                    'page.promote.create_btn': '建立廣告',
+                    'page.promote.active_h': '運行中的廣告',
+                    'page.promote.empty_title': '尚無廣告',
+                    'page.promote.empty_p': '當您建立首個廣告後,會在這裡顯示即時展示、點擊與花費。您現有的收益可直接作為預算 — 無需 PayPal 加值。',
+                    'page.promote.graduate_hint': '需要完整的廣告主功能 — 多個創意、進階定向、深度分析?',
+                    'page.promote.graduate_link': '開啟廣告主面板',
                     'earn.title': '收益歷史',
                     'earn.date': '日期',
                     'earn.impressions': '展示次數',
@@ -6126,6 +6282,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.integrations': '統合',
                     'shell.nav.placements': '配置',
                     'shell.nav.payouts': '支払い',
+                    'shell.nav.promote': 'プロモート',
                     'shell.nav.campaigns': 'キャンペーン',
                     'shell.nav.billing': '請求',
                     'shell.nav.setup': 'セットアップ',
@@ -6142,6 +6299,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '広告スロット、API キー、スロットごとの経済情報',
                     'page.payouts.title': '支払い',
                     'page.payouts.sub': '収益履歴と支払い設定',
+                    'page.promote.title': 'プロモート',
+                    'page.promote.sub': 'Boost Boss ネットワークの AI ネイティブユーザーにリーチ。あなたの収益や追加入金で、製品の顧客を獲得しましょう。',
+                    'page.promote.balance_label': '利用可能残高',
+                    'page.promote.balance_hint': 'パブリッシャー収益から。PayPal で追加入金して、この残高を超えて利用できます。',
+                    'page.promote.create_btn': 'キャンペーン作成',
+                    'page.promote.active_h': '実行中のキャンペーン',
+                    'page.promote.empty_title': 'キャンペーンはまだありません',
+                    'page.promote.empty_p': '最初のキャンペーンを作成すると、ライブのインプレッション、クリック、消費がここに表示されます。既存の収益をそのまま予算として使えます — PayPal 入金は不要です。',
+                    'page.promote.graduate_hint': 'すべての広告主機能 — 複数クリエイティブ、高度ターゲティング、詳細分析が必要ですか?',
+                    'page.promote.graduate_link': '広告主ダッシュボードを開く',
                     'earn.title': '収益履歴',
                     'earn.date': '日付',
                     'earn.impressions': 'インプレッション',
@@ -6402,6 +6569,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.integrations': '통합',
                     'shell.nav.placements': '위치',
                     'shell.nav.payouts': '정산',
+                    'shell.nav.promote': '프로모트',
                     'shell.nav.campaigns': '캠페인',
                     'shell.nav.billing': '결제',
                     'shell.nav.setup': '설정',
@@ -6418,6 +6586,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': '광고 슬롯, API 키, 슬롯별 경제 지표',
                     'page.payouts.title': '정산',
                     'page.payouts.sub': '수익 내역 및 정산 설정',
+                    'page.promote.title': '프로모트',
+                    'page.promote.sub': 'Boost Boss 네트워크의 AI 네이티브 사용자에게 도달하세요. 수익이나 추가 자금을 사용하여 제품의 고객을 확보하세요.',
+                    'page.promote.balance_label': '사용 가능 잔액',
+                    'page.promote.balance_hint': '퍼블리셔 수익에서. PayPal로 자금을 추가하여 이 잔액을 초과해 사용할 수 있습니다.',
+                    'page.promote.create_btn': '캠페인 생성',
+                    'page.promote.active_h': '활성 캠페인',
+                    'page.promote.empty_title': '아직 캠페인이 없습니다',
+                    'page.promote.empty_p': '첫 캠페인을 생성하면 실시간 노출, 클릭, 지출이 여기에 표시됩니다. 기존 수익을 그대로 예산으로 사용할 수 있습니다 — PayPal 입금 불필요.',
+                    'page.promote.graduate_hint': '전체 광고주 기능 — 다중 크리에이티브, 고급 타겟팅, 심층 분석이 필요하신가요?',
+                    'page.promote.graduate_link': '광고주 대시보드 열기',
                     'earn.title': '수익 내역',
                     'earn.date': '날짜',
                     'earn.impressions': '노출',
@@ -6678,6 +6856,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.integrations': 'Tích hợp',
                     'shell.nav.placements': 'Vị trí',
                     'shell.nav.payouts': 'Thanh toán',
+                    'shell.nav.promote': 'Quảng bá',
                     'shell.nav.campaigns': 'Chiến dịch',
                     'shell.nav.billing': 'Hóa đơn',
                     'shell.nav.setup': 'Thiết lập',
@@ -6694,6 +6873,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.sub': 'Vị trí quảng cáo, API key và kinh tế từng vị trí',
                     'page.payouts.title': 'Thanh toán',
                     'page.payouts.sub': 'Lịch sử doanh thu và cài đặt thanh toán',
+                    'page.promote.title': 'Quảng bá',
+                    'page.promote.sub': 'Tiếp cận người dùng AI-native trên mạng Boost Boss. Dùng doanh thu của bạn hoặc nạp thêm tiền để giành khách hàng cho sản phẩm.',
+                    'page.promote.balance_label': 'Số dư khả dụng',
+                    'page.promote.balance_hint': 'Từ doanh thu publisher của bạn. Nạp thêm qua PayPal để vượt mức số dư này.',
+                    'page.promote.create_btn': 'Tạo chiến dịch',
+                    'page.promote.active_h': 'Chiến dịch đang chạy',
+                    'page.promote.empty_title': 'Chưa có chiến dịch nào',
+                    'page.promote.empty_p': 'Khi bạn tạo chiến dịch đầu tiên, nó sẽ hiển thị ở đây với impression, click và chi tiêu trực tiếp. Doanh thu hiện có của bạn có thể dùng trực tiếp làm ngân sách — không cần nạp PayPal.',
+                    'page.promote.graduate_hint': 'Cần đầy đủ tính năng advertiser — nhiều creative, nhắm mục tiêu nâng cao, phân tích sâu?',
+                    'page.promote.graduate_link': 'Mở dashboard advertiser',
                     'earn.title': 'Lịch sử doanh thu',
                     'earn.date': 'Ngày',
                     'earn.impressions': 'Số lần hiển thị',
