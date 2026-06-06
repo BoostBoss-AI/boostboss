@@ -81,6 +81,8 @@ Each item below has a **trigger condition** that tells us when it stops being "l
 **Estimated effort:** 1-2 weeks across the 4 pieces.
 
 ### 2.5 Publisher-as-Advertiser via dedicated "Promote" sidebar item
+**🔄 REVERSED 2026-06-05 evening — MOVED TO V1 SCOPE.** See changelog entry. Reason: the transaction layer (admin money tracking, Payoneer integration, invoice generation, /usage analytics) is about to be built this week. Retrofitting internal-transfer support + cross-account campaign attribution into all of that later is significantly more painful than designing it in from the start. Better to ship Publisher-as-Advertiser as part of the v1 transaction/dashboard build rather than treat it as a Phase 5 addition.
+
 **What:** Let publishers become advertisers without leaving their publisher dashboard. New top-level sidebar item ("Promote") that opens a simplified ad-creation flow optimized for "promote your own product." Same underlying `advertisers` + `campaigns` tables as the standalone advertiser dashboard — Promote is just a streamlined view, not a separate account type.
 
 **Why it's a strategic move, not just a feature:**
@@ -304,6 +306,7 @@ Not deferred:
 | 2026-06-05 | Publisher-as-Advertiser via dedicated "Promote" sidebar item | Confirmed (Phase 5) | this thread, section 2.5 |
 | 2026-06-05 | "Promote" is simplified UX (not just a redirect to /ads/dashboard) | Confirmed | this thread |
 | 2026-06-05 | Pre-bake schema (`signup_source`, `linked_publisher_id`) in v1 even though feature ships in Phase 5 | Confirmed | this thread |
+| 2026-06-05 (evening) | **REVERSAL: Publisher-as-Advertiser ("Promote") moved from Phase 5 → v1.** Reason: transaction layer (admin money, Payoneer, invoices, /usage analytics) being built this week — retrofitting internal transfers + cross-account attribution later is significantly more painful than designing it in from the start. Ship it as part of v1 build, not after. | Confirmed | this thread |
 
 ---
 
