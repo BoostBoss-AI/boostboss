@@ -451,14 +451,6 @@
   .toast.success { background: #027A48; }
   .toast.info { background: var(--ink); }
 
-  /* TRY IT BUTTON */
-  .try-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
-    background: var(--pink); color: #fff; border: none; cursor: pointer;
-    transition: all 0.15s; text-decoration: none;
-  }
-  .try-btn:hover { background: var(--pink-dark); transform: translateY(-1px); }
 
   /* MOBILE MENU */
   .mobile-toggle {
@@ -928,10 +920,7 @@
 
     <!-- FETCH AD -->
     <h2 id="api-fetch-ad">Fetch ad</h2>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-      <div class="endpoint" style="margin-bottom:0;flex:1"><span class="method post">POST</span><span class="path">/v1/ads/fetch</span><span class="desc">Run an auction and return the winning ad.</span></div>
-      <a class="try-btn" href="/playground.html?endpoint=fetch" title="Open in Playground">▶ Try it</a>
-    </div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/ads/fetch</span><span class="desc">Run an auction and return the winning ad.</span></div>
 
     <p>Runs a real-time auction against your targeting parameters and returns the winning ad creative with signed beacon URLs. Designed for sub-100ms response times on the bid path; published latency targets will appear here once we have measured production data.</p>
 
@@ -1035,10 +1024,7 @@
 
     <!-- LIST CAMPAIGNS -->
     <h2 id="api-campaigns">List campaigns</h2>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-      <div class="endpoint" style="margin-bottom:0;flex:1"><span class="method get">GET</span><span class="path">/v1/campaigns</span><span class="desc">List all campaigns for the authenticated advertiser.</span></div>
-      <a class="try-btn" href="/playground.html?endpoint=campaigns" title="Open in Playground">▶ Try it</a>
-    </div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/campaigns</span><span class="desc">List all campaigns for the authenticated advertiser.</span></div>
 
     <table class="params">
       <thead><tr><th>Query param</th><th>Type</th><th>Description</th></tr></thead>
@@ -1116,10 +1102,7 @@
 
     <!-- BENNA SCORE -->
     <h2 id="benna-score">Score a bid request</h2>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-      <div class="endpoint" style="margin-bottom:0;flex:1"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Rank a single bid against your own demand.</span></div>
-      <a class="try-btn" href="/playground.html?endpoint=benna" title="Open in Playground">▶ Try it</a>
-    </div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Rank a single bid against your own demand.</span></div>
     <p>Submit a bid context and a campaign spec; Benna returns an effective bid in USD plus click / convert probabilities and a signal attribution map. Billed at $0.002 per call; latency budget is 20ms end-to-end (model itself is 3–6ms, the rest is network &amp; JSON).</p>
 
     <h4>Request</h4>
