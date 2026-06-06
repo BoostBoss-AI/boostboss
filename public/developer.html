@@ -1707,6 +1707,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.integrations">Integrations</span>
             </button>
+            <button class="shell-nav-item" data-shell-section="api">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.api">API</span>
+            </button>
             <button class="shell-nav-item" data-shell-section="placements">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.placements">Placements</span>
@@ -2428,33 +2432,6 @@ await message.reply({
                 </div>
             </div>
 
-            <!-- API Keys Section -->
-            <div class="section">
-                <div class="section-title" data-t="apikeys.title">API Keys & Credentials</div>
-                <div class="key-item">
-                    <div class="key-info">
-                        <div class="key-label" data-t="apikeys.api_key">API Key</div>
-                        <div class="key-value masked" id="api-key">bb_dev_sk••••••••••••••••••</div>
-                    </div>
-                    <button class="reveal-btn" onclick="toggleAPIKey()" data-t="apikeys.reveal">Reveal</button>
-                </div>
-                <div class="key-item">
-                    <div class="key-info">
-                        <div class="key-label" data-t="apikeys.app_id">App ID</div>
-                        <div class="key-value" id="app-id">app_loading</div>
-                    </div>
-                    <button class="reveal-btn" onclick="copyValue(document.getElementById('app-id').textContent)" data-t="common.copy">Copy</button>
-                </div>
-                <div class="key-item">
-                    <div class="key-info">
-                        <div class="key-label" data-t="apikeys.mcp_endpoint">MCP Endpoint URL</div>
-                        <div class="key-value">https://api.boostboss.ai/mcp</div>
-                    </div>
-                    <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')" data-t="common.copy">Copy</button>
-                </div>
-                <button class="regenerate-btn" onclick="regenerateKey()" data-t="apikeys.regenerate">Regenerate API Key</button>
-            </div>
-
             <!-- BBX Placements Breakdown — per-slot economics from placement_daily_stats -->
             <div class="section" data-panel="earnings">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 10px; flex-wrap: wrap;">
@@ -2479,6 +2456,45 @@ await message.reply({
             </div>
 
             </div><!-- /[data-shell-route="placements"] -->
+
+            <!-- ═══════ ROUTE: api (API keys & credentials) ═══════
+                 Moved out of Placements 2026-06-06 — credentials are
+                 account-level config, not slot-level. Single source of
+                 truth for the Lumi SDK key, App ID, and MCP endpoint. -->
+            <div data-shell-route="api">
+                <div class="shell-page-header" style="margin-bottom:24px;">
+                    <h1 class="shell-page-title" data-t="page.api.title">API & Credentials</h1>
+                    <p class="shell-page-sub" data-t="page.api.sub" style="color:var(--ink-soft);font-size:14.5px;margin-top:6px;">
+                        Your account credentials for integrating Boost Boss. Keep your API key secret — anyone with this key can call ad-request on your behalf.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <div class="section-title" data-t="apikeys.title">API Keys & Credentials</div>
+                    <div class="key-item">
+                        <div class="key-info">
+                            <div class="key-label" data-t="apikeys.api_key">API Key</div>
+                            <div class="key-value masked" id="api-key">bb_dev_sk••••••••••••••••••</div>
+                        </div>
+                        <button class="reveal-btn" onclick="toggleAPIKey()" data-t="apikeys.reveal">Reveal</button>
+                    </div>
+                    <div class="key-item">
+                        <div class="key-info">
+                            <div class="key-label" data-t="apikeys.app_id">App ID</div>
+                            <div class="key-value" id="app-id">app_loading</div>
+                        </div>
+                        <button class="reveal-btn" onclick="copyValue(document.getElementById('app-id').textContent)" data-t="common.copy">Copy</button>
+                    </div>
+                    <div class="key-item">
+                        <div class="key-info">
+                            <div class="key-label" data-t="apikeys.mcp_endpoint">MCP Endpoint URL</div>
+                            <div class="key-value">https://api.boostboss.ai/mcp</div>
+                        </div>
+                        <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')" data-t="common.copy">Copy</button>
+                    </div>
+                    <button class="regenerate-btn" onclick="regenerateKey()" data-t="apikeys.regenerate">Regenerate API Key</button>
+                </div>
+            </div><!-- /[data-shell-route="api"] -->
 
             <!-- New Placement Modal — kept OUTSIDE any [data-shell-route]
                  wrapper so it can open from any route (currently invoked
@@ -2900,7 +2916,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized. Settings is a
             // modal — it bypasses routing entirely.
-            const VALID_ROUTES = ['home', 'performance', 'integrations', 'placements', 'payouts', 'promote'];
+            const VALID_ROUTES = ['home', 'performance', 'integrations', 'api', 'placements', 'payouts', 'promote'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -5419,6 +5435,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.home': 'Home',
                     'shell.nav.performance': 'Performance',
                     'shell.nav.integrations': 'Integrations',
+                    'shell.nav.api': 'API',
                     'shell.nav.placements': 'Placements',
                     'shell.nav.payouts': 'Payouts',
                     'shell.nav.promote': 'Promote',
@@ -5435,7 +5452,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.integ.title': 'Integrations',
                     'page.integ.sub': 'Four doors, one publisher account — pick your install',
                     'page.placements.title': 'Placements',
-                    'page.placements.sub': 'Ad slots, API keys, and per-slot economics',
+                    'page.placements.sub': 'Ad slots and per-slot economics',
+                    'page.api.title': 'API & Credentials',
+                    'page.api.sub': 'Your account credentials for integrating Boost Boss. Keep your API key secret — anyone with this key can call ad-request on your behalf.',
                     'page.payouts.title': 'Payouts',
                     'page.payouts.sub': 'Earnings history and payout settings',
                     'page.promote.title': 'Promote',
@@ -5706,6 +5725,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.home': '首页',
                     'shell.nav.performance': '效果',
                     'shell.nav.integrations': '集成',
+                    'shell.nav.api': 'API',
                     'shell.nav.placements': '版位',
                     'shell.nav.payouts': '打款',
                     'shell.nav.promote': '推广',
@@ -5722,7 +5742,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.integ.title': '集成',
                     'page.integ.sub': '四个入口，一个发布商账户 — 选择您的安装方式',
                     'page.placements.title': '版位',
-                    'page.placements.sub': '广告位、API 密钥与每个广告位的经济数据',
+                    'page.placements.sub': '广告位与每个广告位的经济数据',
+                    'page.api.title': 'API 与凭证',
+                    'page.api.sub': '集成 Boost Boss 所需的账户凭证。请妥善保管 API 密钥 — 任何持有此密钥的人都可以代表您调用广告请求。',
                     'page.payouts.title': '打款',
                     'page.payouts.sub': '收益记录与打款设置',
                     'page.promote.title': '推广',
@@ -5993,6 +6015,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.home': '首頁',
                     'shell.nav.performance': '效果',
                     'shell.nav.integrations': '整合',
+                    'shell.nav.api': 'API',
                     'shell.nav.placements': '版位',
                     'shell.nav.payouts': '撥款',
                     'shell.nav.promote': '推廣',
@@ -6009,7 +6032,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.integ.title': '整合',
                     'page.integ.sub': '四個入口，一個發布商帳戶 — 選擇您的安裝方式',
                     'page.placements.title': '版位',
-                    'page.placements.sub': '廣告版位、API 金鑰與每個版位的經濟數據',
+                    'page.placements.sub': '廣告版位與每個版位的經濟數據',
+                    'page.api.title': 'API 與憑證',
+                    'page.api.sub': '整合 Boost Boss 所需的帳戶憑證。請妥善保管 API 金鑰 — 任何持有此金鑰的人都可以代表您呼叫廣告請求。',
                     'page.payouts.title': '撥款',
                     'page.payouts.sub': '收益紀錄與撥款設定',
                     'page.promote.title': '推廣',
@@ -6280,6 +6305,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.home': 'ホーム',
                     'shell.nav.performance': 'パフォーマンス',
                     'shell.nav.integrations': '統合',
+                    'shell.nav.api': 'API',
                     'shell.nav.placements': '配置',
                     'shell.nav.payouts': '支払い',
                     'shell.nav.promote': 'プロモート',
@@ -6296,7 +6322,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.integ.title': '統合',
                     'page.integ.sub': '4 つのドア、1 つのパブリッシャーアカウント — お好きな方法でインストール',
                     'page.placements.title': '配置',
-                    'page.placements.sub': '広告スロット、API キー、スロットごとの経済情報',
+                    'page.placements.sub': '広告スロットとスロットごとの経済情報',
+                    'page.api.title': 'API と認証情報',
+                    'page.api.sub': 'Boost Boss を統合するためのアカウント認証情報。API キーは秘密に保ってください — このキーを持つ人なら誰でもあなたの代わりに ad-request を呼び出せます。',
                     'page.payouts.title': '支払い',
                     'page.payouts.sub': '収益履歴と支払い設定',
                     'page.promote.title': 'プロモート',
@@ -6570,6 +6598,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.placements': '위치',
                     'shell.nav.payouts': '정산',
                     'shell.nav.promote': '프로모트',
+                    'shell.nav.api': 'API',
                     'shell.nav.campaigns': '캠페인',
                     'shell.nav.billing': '결제',
                     'shell.nav.setup': '설정',
@@ -6583,7 +6612,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.integ.title': '통합',
                     'page.integ.sub': '네 개의 입구, 하나의 퍼블리셔 계정 — 설치 방법을 선택하세요',
                     'page.placements.title': '위치',
-                    'page.placements.sub': '광고 슬롯, API 키, 슬롯별 경제 지표',
+                    'page.placements.sub': '광고 슬롯과 슬롯별 경제 지표',
+                    'page.api.title': 'API 및 자격 증명',
+                    'page.api.sub': 'Boost Boss 통합에 필요한 계정 자격 증명. API 키는 비밀로 유지하세요 — 이 키를 가진 사람은 누구나 당신을 대신해 ad-request를 호출할 수 있습니다.',
                     'page.payouts.title': '정산',
                     'page.payouts.sub': '수익 내역 및 정산 설정',
                     'page.promote.title': '프로모트',
@@ -6857,6 +6888,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'shell.nav.placements': 'Vị trí',
                     'shell.nav.payouts': 'Thanh toán',
                     'shell.nav.promote': 'Quảng bá',
+                    'shell.nav.api': 'API',
                     'shell.nav.campaigns': 'Chiến dịch',
                     'shell.nav.billing': 'Hóa đơn',
                     'shell.nav.setup': 'Thiết lập',
@@ -6870,7 +6902,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.integ.title': 'Tích hợp',
                     'page.integ.sub': 'Bốn cửa, một tài khoản publisher — chọn cách cài đặt',
                     'page.placements.title': 'Vị trí',
-                    'page.placements.sub': 'Vị trí quảng cáo, API key và kinh tế từng vị trí',
+                    'page.placements.sub': 'Vị trí quảng cáo và kinh tế từng vị trí',
+                    'page.api.title': 'API & thông tin xác thực',
+                    'page.api.sub': 'Thông tin xác thực tài khoản để tích hợp Boost Boss. Giữ API key bí mật — bất kỳ ai có key này đều có thể gọi ad-request thay bạn.',
                     'page.payouts.title': 'Thanh toán',
                     'page.payouts.sub': 'Lịch sử doanh thu và cài đặt thanh toán',
                     'page.promote.title': 'Quảng bá',

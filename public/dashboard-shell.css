@@ -468,7 +468,8 @@
 .shell-wrap[data-shell-active-route="placements"]   [data-shell-route="placements"],
 .shell-wrap[data-shell-active-route="payouts"]      [data-shell-route="payouts"],
 .shell-wrap[data-shell-active-route="promote"]      [data-shell-route="promote"],
-.shell-wrap[data-shell-active-route="usage"]        [data-shell-route="usage"] {
+.shell-wrap[data-shell-active-route="usage"]        [data-shell-route="usage"],
+.shell-wrap[data-shell-active-route="api"]          [data-shell-route="api"] {
     display: block;
 }
 /* Onboarding banner / full-width announcements that should appear on
