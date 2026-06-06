@@ -52,9 +52,12 @@ nav.docs-nav {
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
 }
+/* Nav-inner — height + max-width matched to the landing page
+   (index.html) so the brand sits at the same horizontal position
+   across landing, /docs, /docs/api-reference, etc. Was 60/1280. */
 .nav-inner {
   display: flex; align-items: center; justify-content: space-between;
-  height: 60px; max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
@@ -62,11 +65,14 @@ nav.docs-nav {
   font-family: 'Space Grotesk', sans-serif; font-size: 20px;
   font-weight: 700; color: var(--ink); letter-spacing: -0.4px;
 }
+/* Yellow tag chip — matches the api-reference .brand-sub so /docs and
+   /docs/api-reference render with the same shape, just different text
+   ("docs" vs "API"). Was a gray monospace pill. */
 .brand-tag {
-  font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
-  font-weight: 500; color: var(--muted); margin-left: 4px;
-  padding: 2px 7px; background: var(--bg-soft);
-  border: 1px solid var(--line); border-radius: 5px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px;
+  font-weight: 600; color: var(--ink); margin-left: 4px;
+  padding: 3px 8px; background: var(--yellow);
+  border-radius: 6px; letter-spacing: 0.3px;
 }
 .nav-right { display: flex; gap: 18px; align-items: center; }
 .nav-right a { color: var(--ink-soft); font-size: 14px; font-weight: 500; }
@@ -84,15 +90,18 @@ nav.docs-nav {
 .btn-primary { background: var(--pink); color: #fff; border-color: var(--pink); }
 .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
 
-/* ── LAYOUT (sidebar + content) ── */
+/* ── LAYOUT (sidebar + content) ──
+   max-width 1200 matches the nav-inner (and landing page) so the
+   sidebar starts at the same x-position the brand sits at. All
+   100vh-Npx math updated to 64 to match the new 64px nav. */
 .docs-shell {
   display: grid; grid-template-columns: var(--sidebar-w) 1fr;
-  max-width: 1280px; margin: 0 auto; padding: 0 24px;
-  min-height: calc(100vh - 60px);
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  min-height: calc(100vh - 64px);
 }
 .docs-sidebar {
-  position: sticky; top: 60px; align-self: start;
-  height: calc(100vh - 60px); overflow-y: auto;
+  position: sticky; top: 64px; align-self: start;
+  height: calc(100vh - 64px); overflow-y: auto;
   padding: 32px 28px 32px 0; border-right: 1px solid var(--line);
 }
 .docs-main {

@@ -41,14 +41,12 @@
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--line);
   }
-  /* Nav-inner width matched to .docs-layout (1280px max, 24px gutters)
-     so the brand sits at the same horizontal offset as the sidebar below
-     and the right-side nav items line up with the right edge of the main
-     content. Was 1400/28 — inconsistent with both the body and the other
-     docs pages. */
+  /* Nav-inner — matched to the landing page (index.html) so the brand
+     sits at the same x-position across landing / docs / api-reference.
+     1200/24 instead of 1280/24. */
   .nav-inner {
     display: flex; align-items: center; justify-content: space-between;
-    height: 64px; max-width: 1280px; margin: 0 auto; padding: 0 24px;
+    height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
   }
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 32px; height: 32px; flex-shrink: 0; }
@@ -94,11 +92,13 @@
      etc.:
        sidebar         256px (matches --sidebar-w)
        sidebar→main    0 gap (content sits flush)
-       max container   1280px, 24px gutters
+       max container   1200px (matches landing's .nav-inner so the
+                       brand sits at the same x-position site-wide)
+       gutters         24px
      The sister docs pages also constrain main to 892px (== content-max
      780 + 112 padding) — applied below under main.content. */
   .docs-layout {
-    max-width: 1280px; margin: 0 auto;
+    max-width: 1200px; margin: 0 auto;
     display: grid; grid-template-columns: 256px 1fr;
     gap: 0; padding: 0 24px;
   }
@@ -584,7 +584,7 @@
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
       <span class="brand-name">Boost Boss</span>
-      <span class="brand-sub">DOCS</span>
+      <span class="brand-sub">API</span>
     </a>
     <!-- Nav links / search box / Get API key CTA / mobile-toggle all
          removed 2026-06-06 — brand-only nav matches the sibling docs
