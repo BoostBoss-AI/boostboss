@@ -4634,6 +4634,54 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             span.textContent = label + txt;
         }
 
+        // Build a complete contiguous day-by-day series ending today,
+        // covering exactly `days` days. Any matching entries in
+        // dailyStats are summed by date (handles sparse + duplicate
+        // records). Missing days come out as 0. This is what makes the
+        // 7D/14D/30D/90D toggle actually show 7/14/30/90 calendar days
+        // instead of "the last 7 records in the array."
+        function buildPubDailyWindow(dailyStats, days) {
+            const dayMs = 86400000;
+            // Normalize a date input → YYYY-MM-DD string so we can match
+            // backend rows regardless of whether they pass a Date, an ISO
+            // string, or a 'YYYY-MM-DD' string.
+            const dayKey = (d) => {
+                if (!d) return '';
+                const dt = (d instanceof Date) ? d : new Date(d);
+                if (isNaN(dt.getTime())) return String(d).slice(0, 10);
+                return dt.toISOString().slice(0, 10);
+            };
+            // Bucket every record by its YYYY-MM-DD key, summing earnings
+            // / impressions / clicks across duplicates.
+            const buckets = new Map();
+            (dailyStats || []).forEach(row => {
+                const k = dayKey(row && row.date);
+                if (!k) return;
+                const cur = buckets.get(k) || { earnings: 0, impressions: 0, clicks: 0 };
+                cur.earnings    += Number(row.earnings    || 0);
+                cur.impressions += Number(row.impressions || 0);
+                cur.clicks      += Number(row.clicks      || 0);
+                buckets.set(k, cur);
+            });
+            // Walk back `days` days from today (inclusive) and emit a row
+            // for each calendar day in order.
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const out = [];
+            for (let i = days - 1; i >= 0; i--) {
+                const d = new Date(today.getTime() - i * dayMs);
+                const k = dayKey(d);
+                const cur = buckets.get(k) || { earnings: 0, impressions: 0, clicks: 0 };
+                out.push({
+                    date: k,
+                    earnings:    cur.earnings,
+                    impressions: cur.impressions,
+                    clicks:      cur.clicks,
+                });
+            }
+            return out;
+        }
+
         // Render the daily-earnings chart with summary strip, y-axis grid,
         // value-shaded bars, and date-labelled x-axis. Mirrors the
         // advertiser home chart so the two dashboards share a visual
@@ -4641,14 +4689,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         function renderChart(dailyStats, numDays) {
             const container = document.getElementById('chartContainer');
             container.innerHTML = '';
-            const days = numDays || (Array.isArray(dailyStats) ? dailyStats.length : 14);
+            const days = numDays || 14;
 
             if (!dailyStats || dailyStats.length === 0) {
                 container.innerHTML = '<p style="text-align:center;color:#9CA3AF;padding:2rem;font-size:13px;">No data yet</p>';
                 return;
             }
 
-            const slice = dailyStats.slice(-days);
+            // Build a true day-by-day window so the toggle shows N calendar
+            // days, not "last N records in the (sparse) array."
+            const slice = buildPubDailyWindow(dailyStats, days);
             const values = slice.map(d => Number(d.earnings || 0));
             const max = Math.max(...values, 0.0001);
             const total = values.reduce((s, v) => s + v, 0);
