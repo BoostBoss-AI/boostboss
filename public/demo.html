@@ -2444,76 +2444,61 @@ document.getElementById("msg-input").addEventListener("keydown", e => {
 // Bootstrap the wedge with the default (Web) door triggers.
 renderTriggerWedge();
 </script>
-<footer>
-  <div class="wrap">
-    <div class="foot-grid">
-      <div class="foot-col">
-        <div class="foot-brand">
-          <svg width="32" height="32" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
-<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>
-<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
-<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
-<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-          <span class="brand-name">Boost Boss</span>
+<footer style="background:#FAFAF7;border-top:1px solid #EAEAEF;padding:56px 0 32px;">
+  <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
+    <div class="foot-grid" style="display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:48px;margin-bottom:40px;">
+      <div>
+        <div class="foot-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <img src="/favicon.svg?v=rocket-20260421" alt="" style="width:32px;height:32px;">
+          <span class="brand-name" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:-0.5px;">Boost Boss</span>
         </div>
-        <p class="foot-tag">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
+        <p class="foot-tag" style="font-size:14px;color:#4B4B5E;line-height:1.6;">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
       </div>
-      <div class="foot-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="/publish">Publishers</a></li>
-          <li><a href="/ads">SuperBoost</a></li>
-          <li><a href="/exchange">BBX</a></li>
-          <li><a href="/demo">Live demo</a></li>
-          <li><a href="#how">How it works</a></li>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Product</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/publish" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Publishers</a></li>
+          <li style="padding:5px 0;"><a href="/ads" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SuperBoost</a></li>
+          <li style="padding:5px 0;"><a href="/exchange" style="font-size:14px;color:#4B4B5E;text-decoration:none;">BBX</a></li>
+          <li style="padding:5px 0;"><a href="/pricing" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Pricing</a></li>
+          <li style="padding:5px 0;"><a href="/demo" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Live demo</a></li>
         </ul>
       </div>
-      <div class="foot-col">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="/docs">Documentation</a></li>
-          <li><a href="/docs/api-reference">API reference</a></li>
-          <li><a href="/docs/api-reference#sdks">SDK</a></li>
-          <li><a href="/docs">Changelog</a></li>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Resources</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/docs" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Documentation</a></li>
+          <li style="padding:5px 0;"><a href="/docs/api-reference" style="font-size:14px;color:#4B4B5E;text-decoration:none;">API reference</a></li>
+          <li style="padding:5px 0;"><a href="/docs/api-reference#sdks" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SDK</a></li>
         </ul>
       </div>
-      <div class="foot-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="/about">About</a></li>
-          <li><a href="/pricing">Pricing</a></li>
-          <li><a href="mailto:info@boostboss.ai">Careers</a></li>
-          <li><a href="mailto:info@boostboss.ai">Contact</a></li>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Company</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/about" style="font-size:14px;color:#4B4B5E;text-decoration:none;">About</a></li>
+          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Contact</a></li>
+          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Careers</a></li>
         </ul>
       </div>
-      <div class="foot-col">
-        <h4>Trust &amp; legal</h4>
-        <ul>
-          <li><a href="/terms">Terms of Service</a></li>
-          <li><a href="/privacy">Privacy Policy</a></li>
-          <li><a href="/refunds">Refund Policy</a></li>
-          <li><a href="/aup">Acceptable Use</a></li>
-          <li><a href="/cookies">Cookie Policy</a></li>
-          <li><a href="/advertiser-terms">Advertiser Terms</a></li>
-          <li><a href="/publisher-agreement">Publisher Agreement</a></li>
-          <li><a href="/trust">Trust center</a></li>
-          <li><a href="/sellers.json">sellers.json</a></li>
-          <li><a href="/ads.txt">ads.txt</a></li>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Legal</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/terms" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Terms of Service</a></li>
+          <li style="padding:5px 0;"><a href="/privacy" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Privacy Policy</a></li>
+          <li style="padding:5px 0;"><a href="/refunds" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Refund Policy</a></li>
+          <li style="padding:5px 0;"><a href="/aup" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Acceptable Use</a></li>
+          <li style="padding:5px 0;"><a href="/cookies" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Cookie Policy</a></li>
+          <li style="padding:5px 0;"><a href="/trust" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Trust center</a></li>
         </ul>
       </div>
     </div>
-    <div class="foot-bottom">
-      <span>© 2026 Hauler Technologies Co., Ltd. — operating Boost Boss.</span>
+    <div class="foot-bottom" style="padding-top:28px;border-top:1px solid #EAEAEF;font-size:13px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <span>© 2026 Hauler Technologies Co., Ltd. All rights reserved. Boost Boss™ is a product of Hauler Technologies Co., Ltd.</span>
       <span>Made for the AI era.</span>
     </div>
+    <p class="foot-legal" style="margin-top:16px;font-size:12px;color:#6B7280;max-width:700px;line-height:1.6;">
+      Hauler Technologies Co., Ltd. is a company registered in Taiwan. Operating Boost Boss (boostboss.ai). All prices in USD unless otherwise stated. Taxes and processing fees apply per jurisdiction.
+    </p>
   </div>
 </footer>
 
