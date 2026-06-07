@@ -2761,7 +2761,7 @@
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                             font-family: inherit; color: #374151;
                         " data-t="chrome.compare">Compare</button>
-                        <div id="draftsWrap" style="position:relative;display:none;">
+                        <div id="draftsWrap" style="position:relative;">
                             <button type="button" id="draftsBtn" style="
                                 padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                                 background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -6341,13 +6341,17 @@
             const count = document.getElementById('draftsCount');
             if (!wrap || !menu) return;
             const drafts = loadDrafts().slice().sort((a, b) => b.savedAt - a.savedAt);
-            if (drafts.length === 0) {
-                wrap.style.display = 'none';
-                menu.classList.remove('open');
-                return;
-            }
             wrap.style.display = '';
             if (count) count.textContent = '(' + drafts.length + ')';
+            if (drafts.length === 0) {
+                menu.classList.remove('open');
+                menu.innerHTML =
+                    '<div style="padding:14px 16px;font-size:12px;color:#6B7280;line-height:1.5;">' +
+                        'No drafts yet. Start a new campaign and choose ' +
+                        '<strong>Save as draft</strong> when you close it to come back to it later.' +
+                    '</div>';
+                return;
+            }
             menu.innerHTML = drafts.map((d) =>
                 '<div class="draft-row" data-draft="' + d.id + '">' +
                     '<div class="draft-row-main">' +
