@@ -337,6 +337,17 @@
             height: 3px;
             background: linear-gradient(90deg, #FF2D78, #04BEFE);
         }
+        /* Top stripe follows the card's accent so each card reads as
+           one consistent unit — value color + stripe color match. */
+        .stat-card.accent-earnings::before {
+            background: linear-gradient(90deg, #FF2D78, #FF85B1);
+        }
+        .stat-card.accent-spend::before {
+            background: linear-gradient(90deg, #F59E0B, #FBC560);
+        }
+        .stat-card.accent-neutral::before {
+            background: linear-gradient(90deg, #D1D5DB, #E5E7EB);
+        }
         .stat-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(255, 45, 120, 0.10);
@@ -360,16 +371,13 @@
             line-height: 1.05;
             letter-spacing: -0.02em;
         }
-        /* Semantic color tokens for KPI values — used so the eye can
-           map color → metric type without reading the label.
+        /* Semantic color tokens — kept intentionally small.
               earnings → pink  : money kept / available
               spend    → amber : money going out / cost
-              count    → blue  : engagement counts (clicks, active count)
-              ratio    → green : performance percentages (CTR) */
+           Everything else stays neutral dark so the two accent
+           colors actually mean something. */
         .stat-value.earnings { color: #FF2D78; }
         .stat-value.spend    { color: #F59E0B; }
-        .stat-value.count    { color: #3B82F6; }
-        .stat-value.ratio    { color: #10B981; }
 
         .stat-trend {
             display: flex;
@@ -2837,19 +2845,19 @@
                  updateCampaignsBudgetSummary(). Same visual treatment as
                  the Home tab's overview cards. -->
             <div class="stats-row" id="campaignsBudgetSummary" style="margin-bottom: 0.75rem; grid-template-columns: repeat(4, minmax(0, 1fr));">
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="page.campaigns.budget.active_count">Active campaigns</div>
-                    <div class="stat-value count" id="bsActiveCount">0</div>
+                    <div class="stat-value" id="bsActiveCount">0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="page.campaigns.budget.ongoing">Ongoing budget</div>
                     <div class="stat-value" id="bsOngoingBudget">$0.00</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-spend">
                     <div class="stat-label" data-t="page.campaigns.budget.spent">Spent</div>
                     <div class="stat-value spend" id="bsSpent">$0.00</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-earnings">
                     <div class="stat-label" data-t="page.campaigns.budget.remaining">Remaining</div>
                     <div class="stat-value earnings" id="bsRemaining">$0.00</div>
                 </div>
@@ -2859,22 +2867,22 @@
                  Clicks, Avg CPC, CTR, CPM. Same column count as the
                  budget row above so the two grids line up exactly. -->
             <div class="stats-row" id="campaignsEfficiencySummary" style="margin-bottom: 1.25rem; grid-template-columns: repeat(4, minmax(0, 1fr));">
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="page.campaigns.eff.clicks">Total clicks</div>
-                    <div class="stat-value count" id="bsClicks">0</div>
+                    <div class="stat-value" id="bsClicks">0</div>
                     <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;"><span id="bsImpressionsCaption">0 impressions</span></div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-spend">
                     <div class="stat-label" data-t="page.campaigns.eff.cpc">Avg CPC</div>
                     <div class="stat-value spend" id="bsCpc">$0.00</div>
                     <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;" data-t="page.campaigns.eff.cpc_sub">Cost per click</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="page.campaigns.eff.ctr">CTR</div>
-                    <div class="stat-value ratio" id="bsCtr">0.00%</div>
+                    <div class="stat-value" id="bsCtr">0.00%</div>
                     <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;" data-t="page.campaigns.eff.ctr_sub">Clicks ÷ impressions</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-spend">
                     <div class="stat-label" data-t="page.campaigns.eff.cpm">Avg CPM</div>
                     <div class="stat-value spend" id="bsCpm">$0.00</div>
                     <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;" data-t="page.campaigns.eff.cpm_sub">Cost per 1k impressions</div>
