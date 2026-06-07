@@ -317,12 +317,18 @@
             background: #fff;
             border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 1.25rem 1.25rem 1.25rem;
-            transition: all 0.2s ease;
+            padding: 1.25rem;
             box-shadow: 0 1px 2px rgba(15, 15, 26, 0.04);
             position: relative;
             overflow: hidden;
             min-width: 0;
+            min-height: 116px;            /* uniform height — budget row
+                                             vs. efficiency row (which has
+                                             a caption beneath the value)
+                                             would otherwise differ */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .stat-card::before {
             content: '';
@@ -494,12 +500,17 @@
             transform: translateY(0);
         }
 
-        /* Table */
+        /* Table.
+           table-layout: fixed locks column widths to the values declared
+           on the <th> elements. Without this, the browser recomputes
+           widths from the longest content per filter tab — switching
+           from "All" to "In Review" makes columns visibly jump. Fixed +
+           explicit % keeps the geometry identical across every tab. */
         .campaigns-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.95rem;
-            table-layout: auto;
+            table-layout: fixed;
         }
 
         .campaigns-table thead {
@@ -516,6 +527,7 @@
             letter-spacing: 0.5px;
             white-space: nowrap;       /* never wrap headers (曝光數, 點擊數) */
             vertical-align: middle;
+            overflow: hidden;
         }
 
         .campaigns-table td {
@@ -523,27 +535,31 @@
             border-top: 1px solid var(--border);
             color: var(--text);
             vertical-align: middle;
+            overflow: hidden;
+            height: 64px;             /* uniform row height across tabs */
+            box-sizing: border-box;
         }
 
-        /* Column widths (10 columns).
-           1 name (flex)
-           2 status   ~140px  (badge + sub-line)
-           3 Benna    ~110px
-           4 format   ~80px
-           5 imps     ~70px   (numeric)
-           6 clicks   ~70px   (numeric)
-           7 ctr      ~60px   (numeric)
-           8 spend    ~80px   (numeric)
-           9 budget   ~80px   (numeric)
-           10 actions ~190px  (3 buttons in a row) */
+        /* Fixed column widths — sum to 100%. Same across every filter
+           tab so the table doesn't reflow when row set changes.
+              1 name      22%
+              2 status    14%
+              3 Benna      9%
+              4 format     7%
+              5 imps       7%
+              6 clicks     7%
+              7 ctr        6%
+              8 spend      8%
+              9 budget     8%
+             10 actions   12% */
         .campaigns-table th:nth-child(1),
-        .campaigns-table td:nth-child(1) { min-width: 200px; }
+        .campaigns-table td:nth-child(1) { width: 22%; }
         .campaigns-table th:nth-child(2),
-        .campaigns-table td:nth-child(2) { min-width: 140px; }
+        .campaigns-table td:nth-child(2) { width: 14%; }
         .campaigns-table th:nth-child(3),
-        .campaigns-table td:nth-child(3) { min-width: 110px; }
+        .campaigns-table td:nth-child(3) { width: 9%;  }
         .campaigns-table th:nth-child(4),
-        .campaigns-table td:nth-child(4) { min-width: 80px; white-space: nowrap; }
+        .campaigns-table td:nth-child(4) { width: 7%;  white-space: nowrap; text-overflow: ellipsis; }
         .campaigns-table th:nth-child(5),
         .campaigns-table td:nth-child(5),
         .campaigns-table th:nth-child(6),
@@ -557,19 +573,50 @@
             text-align: right;
             white-space: nowrap;
             font-variant-numeric: tabular-nums;
+            text-overflow: ellipsis;
         }
+        .campaigns-table th:nth-child(5),
+        .campaigns-table td:nth-child(5),
+        .campaigns-table th:nth-child(6),
+        .campaigns-table td:nth-child(6) { width: 7%; }
+        .campaigns-table th:nth-child(7),
+        .campaigns-table td:nth-child(7) { width: 6%; }
+        .campaigns-table th:nth-child(8),
+        .campaigns-table td:nth-child(8),
+        .campaigns-table th:nth-child(9),
+        .campaigns-table td:nth-child(9) { width: 8%; }
         .campaigns-table th:nth-child(10),
         .campaigns-table td:nth-child(10) {
-            min-width: 200px;
+            width: 12%;
             white-space: nowrap;
             text-align: right;
         }
-        /* Status cell: keep badge + sub-line stacked cleanly */
+        /* Name cell — truncate long campaign names with an ellipsis
+           instead of wrapping (would break row height symmetry). */
+        .campaigns-table td:nth-child(1) {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .campaigns-table td:nth-child(1) .campaign-name-link {
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+        /* Status cell — badge stays nowrap, sub-line truncates with
+           ellipsis on a single line so row heights stay identical. */
         .campaigns-table td:nth-child(2) .badge { white-space: nowrap; }
-        .campaigns-table td:nth-child(2) > div { white-space: normal; max-width: 160px; line-height: 1.35; }
+        .campaigns-table td:nth-child(2) > div {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
 
         .campaigns-table tbody tr {
-            transition: all 0.3s ease;
+            transition: background-color 0.15s ease;
         }
 
         .campaigns-table tbody tr:hover {
