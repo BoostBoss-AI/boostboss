@@ -437,9 +437,9 @@
         .chart-container {
             width: 100%;
             background: transparent;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            padding: 20px 24px 12px 24px;
+            /* No border/padding here — .chart-section is the visual card
+               wrapper. A second border + padding made the chart visibly
+               narrower than the Campaigns table on the next tab. */
         }
 
         /* Summary strip above the bars. Compact data row showing peak,
