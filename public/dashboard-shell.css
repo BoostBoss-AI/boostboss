@@ -62,7 +62,11 @@
     --shell-sidebar-w:         240px;
     --shell-sidebar-w-collapsed: 64px;
     --shell-topbar-h:          56px;
-    --shell-content-max:       1200px;
+    /* No max-width cap — content reaches both side edges of the .shell-main
+       inner area (only the --shell-content-px gutter remains on each side).
+       Was 1200px which centered everything with ~250px whitespace on each
+       side on wide viewports; Andy wanted edge-to-edge. */
+    --shell-content-max:       none;
     --shell-content-px:        28px;
 
     /* ─── Typography ──────────────────────────────────────────────── */
