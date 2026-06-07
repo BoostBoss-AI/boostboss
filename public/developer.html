@@ -1288,8 +1288,28 @@
             line-height: 1.4;
         }
         .chart-bar:hover .chart-bar-tooltip { opacity: 1; }
-        /* Date range buttons — selected state. */
-        .pub-range-btn.active { background: #111 !important; color: #fff !important; }
+        /* Date range buttons. Base = pill on white; .active = filled
+           black. Defined here (not inline) so the JS classList.toggle
+           actually wins — inline background/color would beat any class
+           rule and leave the previous selection stuck visually. */
+        .pub-range-btn {
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid #E5E7EB;
+            background: #fff;
+            color: #374151;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background-color 0.12s ease, color 0.12s ease;
+        }
+        .pub-range-btn:hover:not(.active) { background: #FAFAFA; }
+        .pub-range-btn.active {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
 
         /* Code Block */
         .code-block {
@@ -2050,10 +2070,10 @@
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
                     <div class="section-title" id="chartTitle" style="margin-bottom: 0;" data-t="chart.revenue_range">Revenue trend</div>
                     <div style="display: flex; gap: 6px; align-items: center;" id="pubDateRangePicker">
-                        <button class="pub-range-btn active" data-range="7d"  style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#111; color:#fff; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">7D</button>
-                        <button class="pub-range-btn"        data-range="14d" style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#fff; color:#374151; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">14D</button>
-                        <button class="pub-range-btn"        data-range="30d" style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#fff; color:#374151; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">30D</button>
-                        <button class="pub-range-btn"        data-range="90d" style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#fff; color:#374151; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">90D</button>
+                        <button class="pub-range-btn active" data-range="7d" type="button">7D</button>
+                        <button class="pub-range-btn"        data-range="14d" type="button">14D</button>
+                        <button class="pub-range-btn"        data-range="30d" type="button">30D</button>
+                        <button class="pub-range-btn"        data-range="90d" type="button">90D</button>
                     </div>
                 </div>
                 <div class="chart-container" id="chartContainer">
