@@ -296,11 +296,18 @@
             border-color: var(--accent-orange);
         }
 
-        /* Main Content */
+        /* Main Content.
+           Legacy bare `main` selector — was capping the dashboard's
+           <main class="shell-main"> at 1400px wide and centering it
+           with margin auto, which made every dashboard route render
+           with ~250px of whitespace on each side regardless of the
+           --shell-content-max variable. Override to none/0 so the
+           shell-main fills its grid cell edge to edge. .shell-main's
+           own padding (--shell-content-px) supplies the 28px gutter. */
         main {
             padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: none;
+            margin: 0;
         }
 
         /* Stats Row */
