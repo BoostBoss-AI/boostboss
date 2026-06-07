@@ -410,10 +410,17 @@
             color: var(--pink);
         }
 
-        /* Main Container */
+        /* Main Container.
+           Publisher equivalent of the legacy advertiser main{max-width:1400px}
+           cap. Was clamping every dashboard route to 1400px wide and
+           centering it with margin auto — left ~250px of whitespace on
+           each side at typical desktop widths regardless of the shell's
+           --shell-content-max variable. Override to fill the whole
+           shell-main__inner area; the shell's --shell-content-px supplies
+           the 28px gutter on each side. */
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: none;
+            margin: 0;
             padding: 2rem;
         }
 
