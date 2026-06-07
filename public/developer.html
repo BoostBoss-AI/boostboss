@@ -753,6 +753,14 @@
             height: 4px;
             background: var(--gradient-primary);
         }
+        /* Accent variants — match advertiser. Pink stripe = money kept;
+           neutral gray = facts/counts. */
+        .stat-card.accent-earnings::before {
+            background: linear-gradient(90deg, #FF2D78, #FF85B1);
+        }
+        .stat-card.accent-neutral::before {
+            background: linear-gradient(90deg, #D1D5DB, #E5E7EB);
+        }
 
         .stat-card:hover {
             transform: translateY(-4px);
@@ -788,17 +796,26 @@
         }
 
         .stat-trend {
-            font-size: 0.85rem;
-            color: var(--success);
-            font-weight: 700;
+            font-size: 0.78rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.35rem;
+            color: #6B7280;
+            min-height: 18px;
         }
-
-        .stat-trend.down {
-            color: var(--error);
+        .stat-trend.is-empty { visibility: hidden; }
+        .stat-trend.positive { color: #10B981; }
+        .stat-trend.negative { color: #EF4444; }
+        .stat-trend::before {
+            font-size: 0.85em;
+            line-height: 1;
         }
+        .stat-trend.positive::before { content: '↑'; }
+        .stat-trend.negative::before { content: '↓'; }
+        .stat-trend.neutral::before  { content: '→'; }
+        /* Legacy .stat-trend.down used by older code paths. */
+        .stat-trend.down { color: #EF4444; }
 
         .stat-bar {
             width: 100%;
@@ -1146,52 +1163,133 @@
             .wf-summary { grid-template-columns: repeat(2, 1fr); }
         }
 
+        /* Chart layout — mirrors advertiser home. Title row sits above
+           the chart-container; container holds summary strip + plot. */
         .chart-container {
-            height: 300px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            gap: 0.5rem;
-            padding: 1rem 0;
+            width: 100%;
         }
-
-        .chart-bar {
-            flex: 1;
-            background: var(--gradient-primary);
-            border-radius: 8px 8px 0 0;
-            min-height: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Summary strip above the bars (Peak / Avg / Total). */
+        .chart-summary {
+            display: flex;
+            gap: 32px;
+            padding: 4px 0 18px 0;
+            border-bottom: 1px solid #F1F2F4;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .chart-summary-item { min-width: 120px; }
+        .chart-summary-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .chart-summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A1A2E;
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .chart-summary-meta {
+            font-size: 11px;
+            font-weight: 500;
+            color: #9CA3AF;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        /* Plot = Y-axis labels + bar area. */
+        .chart-plot {
+            display: flex;
+            gap: 12px;
+            height: 240px;
             position: relative;
         }
-
-        .chart-bar:hover {
-            transform: scaleY(1.05);
-            transform-origin: bottom;
-            filter: brightness(1.1);
+        .chart-yaxis {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9CA3AF;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            text-align: right;
+            min-width: 44px;
+            padding: 0;
+            line-height: 1;
         }
+        .chart-ytick { line-height: 1; }
+        .chart-bars {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            border-left: 1px solid #F1F2F4;
+            padding-left: 8px;
+        }
+        .chart-grid-line {
+            position: absolute;
+            left: 0; right: 0;
+            border-top: 1px dashed #F1F2F4;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #FF85B1 0%, #FF2D78 100%);
+            border-radius: 4px 4px 0 0;
+            min-height: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: filter 0.15s ease;
+            z-index: 1;
+        }
+        .chart-bar:hover { filter: brightness(1.08); }
 
+        .chart-xaxis {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            padding-left: 64px;       /* yaxis 44 + gap 12 + border 8 */
+            font-size: 10px;
+            color: #9CA3AF;
+            font-variant-numeric: tabular-nums;
+        }
+        .chart-xtick {
+            flex: 1;
+            text-align: center;
+            white-space: nowrap;
+            overflow: visible;
+            position: relative;
+            min-width: 0;
+        }
         .chart-bar-tooltip {
             position: absolute;
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background-color: var(--text-dark);
-            color: white;
-            padding: 0.5rem 0.85rem;
+            background-color: rgba(15, 15, 26, 0.92);
+            color: #fff;
+            padding: 6px 10px;
             border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            white-space: nowrap;
-            margin-bottom: 0.5rem;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s;
+            transition: opacity 0.15s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+            line-height: 1.4;
         }
-
-        .chart-bar:hover .chart-bar-tooltip {
-            opacity: 1;
-        }
+        .chart-bar:hover .chart-bar-tooltip { opacity: 1; }
+        /* Date range buttons — selected state. */
+        .pub-range-btn.active { background: #111 !important; color: #fff !important; }
 
         /* Code Block */
         .code-block {
@@ -1900,37 +1998,66 @@
                 </div>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
+            <!-- Stats Grid — 5 cards mirroring the advertiser home pattern.
+                 Only the money-kept card (Earnings) gets the pink accent;
+                 the rest stay neutral so the eye reads pink = revenue.
+                 Inline grid-template-columns: repeat(5, ...) locks the row
+                 against the @media (max-width: 1100px) breakpoint that
+                 would otherwise drop to 3 columns. -->
+            <div class="stats-grid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+                <div class="stat-card accent-earnings">
                     <div class="stat-label" data-t="stats.earnings">Total Earnings</div>
                     <div class="stat-value earnings" id="totalEarnings">$0.00</div>
-                    <div class="stat-trend" id="earningsTrend" data-t="stats.trend_zero">↑ 0% from last month</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label" data-t="stats.impressions">Impressions</div>
-                    <div class="stat-value default" id="totalImpressions">0</div>
-                    <div class="stat-trend" id="impressionsTrend" data-t="stats.trend_zero">↑ 0% from last month</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label" data-t="stats.your_share">Your Share</div>
-                    <div class="stat-value default" id="revenueShare">70%</div>
-                    <div class="stat-bar">
-                        <div class="stat-bar-fill" id="shareBar" style="width: 70%"></div>
+                    <div class="stat-trend" id="earningsTrendWrap">
+                        <span id="earningsTrend"></span>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
+                    <div class="stat-label" data-t="stats.impressions">Impressions</div>
+                    <div class="stat-value default" id="totalImpressions">0</div>
+                    <div class="stat-trend" id="impressionsTrendWrap">
+                        <span id="impressionsTrend"></span>
+                    </div>
+                </div>
+                <div class="stat-card accent-neutral">
+                    <div class="stat-label" data-t="stats.clicks">Clicks</div>
+                    <div class="stat-value default" id="totalClicks">0</div>
+                    <div class="stat-trend" id="clicksTrendWrap">
+                        <span id="clicksTrend"></span>
+                    </div>
+                </div>
+                <div class="stat-card accent-neutral">
+                    <div class="stat-label" data-t="stats.ctr">CTR</div>
+                    <div class="stat-value default" id="ctrValue">0.00%</div>
+                    <div class="stat-trend" id="ctrTrendWrap">
+                        <span id="ctrTrend"></span>
+                    </div>
+                </div>
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="stats.rpm">RPM</div>
                     <div class="stat-value default" id="rpmValue">$0.00</div>
-                    <div class="stat-trend" id="rpmTrend" data-t="stats.trend_zero">↑ 0% from last month</div>
+                    <div class="stat-trend" id="rpmTrendWrap">
+                        <span id="rpmTrend"></span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Revenue Chart -->
+            <!-- Revenue Chart — mirrors the advertiser chart layout:
+                 title row + 7D/14D/30D/90D toggle, summary strip
+                 (Peak / Avg / Total), y-axis grid, value-shaded bars,
+                 x-axis date labels. Populated by renderChart(). -->
             <div class="section">
-                <div class="section-title" data-t="chart.revenue_14d">Revenue Over Last 14 Days</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
+                    <div class="section-title" id="chartTitle" style="margin-bottom: 0;" data-t="chart.revenue_range">Revenue trend</div>
+                    <div style="display: flex; gap: 6px; align-items: center;" id="pubDateRangePicker">
+                        <button class="pub-range-btn active" data-range="7d"  style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#111; color:#fff; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">7D</button>
+                        <button class="pub-range-btn"        data-range="14d" style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#fff; color:#374151; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">14D</button>
+                        <button class="pub-range-btn"        data-range="30d" style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#fff; color:#374151; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">30D</button>
+                        <button class="pub-range-btn"        data-range="90d" style="padding:6px 14px; border-radius:100px; border:1px solid #E5E7EB; background:#fff; color:#374151; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">90D</button>
+                    </div>
+                </div>
                 <div class="chart-container" id="chartContainer">
-                    <!-- Dynamically populated -->
+                    <!-- Dynamically populated by renderChart() -->
                 </div>
             </div>
 
@@ -3868,6 +3995,34 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             restoreIntegrationFilter();
         }
 
+        // Wire the home chart's 7D/14D/30D/90D toggle.
+        // Stores the choice in localStorage so it survives reloads.
+        function initPubDateRangePicker() {
+            const buttons = document.querySelectorAll('#pubDateRangePicker .pub-range-btn');
+            if (!buttons.length) return;
+            const stored = (() => { try { return localStorage.getItem('bb_pub_chart_days'); } catch (_) { return null; } })();
+            const initial = stored === '14d' || stored === '30d' || stored === '90d' ? stored : '7d';
+            window._pubChartDays = Number(initial.replace('d', '')) || 7;
+            buttons.forEach(b => {
+                b.classList.toggle('active', b.dataset.range === initial);
+                b.addEventListener('click', () => {
+                    const range = b.dataset.range;
+                    window._pubChartDays = Number(range.replace('d', '')) || 7;
+                    buttons.forEach(x => x.classList.toggle('active', x === b));
+                    try { localStorage.setItem('bb_pub_chart_days', range); } catch (_) {}
+                    // Re-render chart from cached stats with the new window.
+                    if (window._lastPubStats && Array.isArray(window._lastPubStats.daily)) {
+                        renderChart(window._lastPubStats.daily, window._pubChartDays);
+                    }
+                });
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPubDateRangePicker);
+        } else {
+            initPubDateRangePicker();
+        }
+
         // Scroll to the Integration Guide and pre-select the matching door tab
         // (selectDoorTab reads from sessionStorage on load via applyTargetDoorFromSession).
         function dashboardScrollToDoor(doorKey) {
@@ -3880,12 +4035,35 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         }
 
         function updateDashboard(stats) {
-            // Update stats cards
-            document.getElementById('totalEarnings').textContent = '$' + stats.total_earnings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('totalImpressions').textContent = stats.total_impressions.toLocaleString();
-            document.getElementById('revenueShare').textContent = stats.revenue_share + '%';
-            document.getElementById('shareBar').style.width = stats.revenue_share + '%';
-            document.getElementById('rpmValue').textContent = '$' + stats.rpm.toFixed(2);
+            // Cache so the date-range toggle can re-derive without re-fetching.
+            window._lastPubStats = stats;
+
+            // Update stats cards (5-card mirror of advertiser home)
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            const totals = {
+                earnings:    Number(stats.total_earnings    || 0),
+                impressions: Number(stats.total_impressions || 0),
+                clicks:      Number(stats.total_clicks      || 0),
+                rpm:         Number(stats.rpm               || 0),
+            };
+            const ctrPct = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0;
+            set('totalEarnings',    '$' + totals.earnings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            set('totalImpressions', totals.impressions.toLocaleString());
+            set('totalClicks',      totals.clicks.toLocaleString());
+            set('ctrValue',         ctrPct.toFixed(2) + '%');
+            set('rpmValue',         '$' + totals.rpm.toFixed(2));
+
+            // Period-over-period trend pills — split daily series in half.
+            const daily = Array.isArray(stats.daily) ? stats.daily : [];
+            setPubStatTrend('earnings',    daily, d => Number(d.earnings    || 0));
+            setPubStatTrend('impressions', daily, d => Number(d.impressions || 0));
+            setPubStatTrend('clicks',      daily, d => Number(d.clicks      || 0));
+            setPubStatTrend('rpm',         daily, d => Number(d.rpm         || 0));
+            setPubStatTrend('ctr',         daily, d => {
+                const i = Number(d.impressions || 0);
+                return i > 0 ? (Number(d.clicks || 0) / i) * 100 : 0;
+            });
+
             document.getElementById('navAppName').textContent =
                 userProfile.app_name || (userProfile.email ? String(userProfile.email).split('@')[0] : 'Publisher');
 
@@ -3906,11 +4084,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 refreshOnboardingProgress(stats);
             }
 
-            // Render chart (handle empty data)
+            // Render chart at the currently selected date range (default 7D)
             if (stats.daily && stats.daily.length > 0) {
-                renderChart(stats.daily);
+                const days = (window._pubChartDays) || 7;
+                renderChart(stats.daily, days);
             } else {
-                document.getElementById('chartContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No data yet</p>';
+                document.getElementById('chartContainer').innerHTML = '<p style="text-align: center; color: #9CA3AF; padding: 2rem; font-size: 13px;">No data yet</p>';
             }
 
             // Render the Ad Placements panel
@@ -4412,30 +4591,154 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             applyTargetDoorFromSession();
         }
 
-        function renderChart(dailyStats) {
+        // Period-over-period trend on a daily series.
+        //   key:    'earnings' | 'impressions' | 'clicks' | 'ctr' | 'rpm'
+        //   daily:  array of day objects
+        //   getValue: function returning the metric value per day
+        //   isCost:   reverse polarity (up=bad). Not used for publisher
+        //             metrics today but kept for symmetry with advertiser.
+        function setPubStatTrend(key, daily, getValue, isCost) {
+            const wrap = document.getElementById(key + 'TrendWrap');
+            const span = document.getElementById(key + 'Trend');
+            if (!wrap || !span) return;
+            wrap.classList.remove('positive', 'negative', 'neutral', 'is-empty');
+            if (!Array.isArray(daily) || daily.length < 4) {
+                wrap.classList.add('is-empty');
+                span.textContent = '';
+                return;
+            }
+            const n = daily.length;
+            const mid = Math.floor(n / 2);
+            const recent = daily.slice(mid);
+            const prior  = daily.slice(0, mid);
+            const sum = (arr) => arr.reduce((s, d) => s + Number(getValue(d) || 0), 0);
+            // For ratios (CTR, RPM), use day-average not sum.
+            const isAvg = (key === 'ctr' || key === 'rpm');
+            const recentVal = isAvg
+                ? recent.reduce((s, d) => s + getValue(d), 0) / Math.max(recent.length, 1)
+                : sum(recent);
+            const priorVal = isAvg
+                ? prior.reduce((s, d) => s + getValue(d), 0) / Math.max(prior.length, 1)
+                : sum(prior);
+            if (priorVal === 0 && recentVal === 0) {
+                wrap.classList.add('is-empty'); span.textContent = ''; return;
+            }
+            const deltaPct = priorVal === 0 ? 100 : ((recentVal - priorVal) / priorVal) * 100;
+            const arrow = deltaPct > 0.5 ? 'up' : (deltaPct < -0.5 ? 'down' : 'flat');
+            if (arrow === 'flat') wrap.classList.add('neutral');
+            else if (arrow === 'up')   wrap.classList.add(isCost ? 'negative' : 'positive');
+            else                        wrap.classList.add(isCost ? 'positive' : 'negative');
+            const shown = Math.min(Math.abs(deltaPct), 999);
+            const label = shown < 10 ? shown.toFixed(1) : Math.round(shown).toString();
+            const txt = (window.DASH_T && window.DASH_T['stats.vs_prior']) || '% vs prior';
+            span.textContent = label + txt;
+        }
+
+        // Render the daily-earnings chart with summary strip, y-axis grid,
+        // value-shaded bars, and date-labelled x-axis. Mirrors the
+        // advertiser home chart so the two dashboards share a visual
+        // language.
+        function renderChart(dailyStats, numDays) {
             const container = document.getElementById('chartContainer');
             container.innerHTML = '';
+            const days = numDays || (Array.isArray(dailyStats) ? dailyStats.length : 14);
 
             if (!dailyStats || dailyStats.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No data yet</p>';
+                container.innerHTML = '<p style="text-align:center;color:#9CA3AF;padding:2rem;font-size:13px;">No data yet</p>';
                 return;
             }
 
-            const maxEarnings = Math.max(...dailyStats.map(d => d.earnings));
+            const slice = dailyStats.slice(-days);
+            const values = slice.map(d => Number(d.earnings || 0));
+            const max = Math.max(...values, 0.0001);
+            const total = values.reduce((s, v) => s + v, 0);
+            const avg = total / Math.max(values.length, 1);
+            const peakIdx = values.indexOf(Math.max(...values));
+            const peakDay = slice[peakIdx] && slice[peakIdx].date
+                ? new Date(slice[peakIdx].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                : '—';
 
-            dailyStats.forEach(day => {
-                const percentage = (day.earnings / maxEarnings) * 100;
+            const t = (k, en) => (window.DASH_T && window.DASH_T[k]) || en;
+            const fmtMoney = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const lblPeak  = t('chart.peak',  'Peak day');
+            const lblAvg   = t('chart.avg',   'Daily avg');
+            const lblTotal = t('chart.total', 'Total');
+
+            // ── 1. Summary strip ─────────────────────────────────────
+            const summary = document.createElement('div');
+            summary.className = 'chart-summary';
+            summary.innerHTML =
+                '<div class="chart-summary-item">' +
+                    '<div class="chart-summary-label">' + lblPeak + '</div>' +
+                    '<div class="chart-summary-value">' + fmtMoney(max) + ' <span class="chart-summary-meta">' + peakDay + '</span></div>' +
+                '</div>' +
+                '<div class="chart-summary-item">' +
+                    '<div class="chart-summary-label">' + lblAvg + '</div>' +
+                    '<div class="chart-summary-value">' + fmtMoney(avg) + '</div>' +
+                '</div>' +
+                '<div class="chart-summary-item">' +
+                    '<div class="chart-summary-label">' + lblTotal + ' · ' + days + 'D</div>' +
+                    '<div class="chart-summary-value">' + fmtMoney(total) + '</div>' +
+                '</div>';
+            container.appendChild(summary);
+
+            // ── 2. Plot area (y-axis labels + bars + grid lines) ─────
+            const plot = document.createElement('div');
+            plot.className = 'chart-plot';
+
+            const yAxis = document.createElement('div');
+            yAxis.className = 'chart-yaxis';
+            [1, 0.75, 0.5, 0.25, 0].forEach(frac => {
+                const tick = document.createElement('div');
+                tick.className = 'chart-ytick';
+                tick.textContent = fmtMoney(max * frac);
+                yAxis.appendChild(tick);
+            });
+            plot.appendChild(yAxis);
+
+            const bars = document.createElement('div');
+            bars.className = 'chart-bars';
+            for (let i = 0; i < 4; i++) {
+                const grid = document.createElement('div');
+                grid.className = 'chart-grid-line';
+                grid.style.bottom = (i * 25) + '%';
+                bars.appendChild(grid);
+            }
+
+            const xLabels = document.createElement('div');
+            xLabels.className = 'chart-xaxis';
+            const targetTicks = Math.min(7, slice.length);
+            const stride = Math.max(1, Math.round((slice.length - 1) / Math.max(targetTicks - 1, 1)));
+
+            slice.forEach((day, idx) => {
+                const v = Number(day.earnings || 0);
+                const height = (v / max) * 100;
                 const bar = document.createElement('div');
                 bar.className = 'chart-bar';
-                bar.style.height = percentage + '%';
+                bar.style.height = Math.max(height, 1.5) + '%';
+                const intensity = Math.max(0.35, height / 100);
+                bar.style.opacity = String(intensity);
+                const dateLabel = day.date
+                    ? new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                    : '';
+                bar.innerHTML = '<div class="chart-bar-tooltip">' +
+                    '<strong>' + fmtMoney(v) + '</strong>' +
+                    (dateLabel ? '<div style="font-size:10px;opacity:0.7;margin-top:2px;">' + dateLabel + '</div>' : '') +
+                    '</div>';
+                bars.appendChild(bar);
 
-                const tooltip = document.createElement('div');
-                tooltip.className = 'chart-bar-tooltip';
-                tooltip.textContent = '$' + day.earnings.toFixed(2);
-
-                bar.appendChild(tooltip);
-                container.appendChild(bar);
+                const xLbl = document.createElement('div');
+                xLbl.className = 'chart-xtick';
+                const isFirst = idx === 0;
+                const isLast  = idx === slice.length - 1;
+                const onStride = idx % stride === 0;
+                const tooCloseToLast = !isLast && (slice.length - 1 - idx) < Math.floor(stride * 0.6);
+                xLbl.textContent = (isFirst || isLast || (onStride && !tooCloseToLast)) ? dateLabel : '';
+                xLabels.appendChild(xLbl);
             });
+            plot.appendChild(bars);
+            container.appendChild(plot);
+            container.appendChild(xLabels);
         }
 
         // Category metadata for the placement panel's family headers.
@@ -5660,6 +5963,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'stats.rpm': 'RPM',
                     'stats.trend_zero': '↑ 0% from last month',
                     'chart.revenue_14d': 'Revenue Over Last 14 Days',
+                    'chart.revenue_range': 'Revenue trend',
+                    'chart.peak':  'Peak day',
+                    'chart.avg':   'Daily avg',
+                    'chart.total': 'Total',
+                    'stats.clicks': 'Clicks',
+                    'stats.ctr':    'CTR',
+                    'stats.vs_prior': '% vs prior',
                     'med.title': 'Mediation & Waterfall',
                     'med.subtitle': 'Sources compete first-price per impression. Benna re-ranks on every bid.',
                     'med.auto_tip': 'Benna picks demand source order',
@@ -6067,6 +6377,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'stats.rpm': 'RPM',
                     'stats.trend_zero': '↑ 较上月 0%',
                     'chart.revenue_14d': '过去 14 天收益',
+                    'chart.revenue_range': '收益趋势',
+                    'chart.peak':  '高峰日',
+                    'chart.avg':   '日均',
+                    'chart.total': '总计',
+                    'stats.clicks': '点击数',
+                    'stats.ctr':    '点击率',
+                    'stats.vs_prior': '% 较前期',
                     'med.title': '中介与瀑布流',
                     'med.subtitle': '各广告源按每次曝光首价竞价。Benna 在每次出价时重新排序。',
                     'med.auto_tip': 'Benna 选择需求源顺序',
@@ -6474,6 +6791,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'stats.rpm': 'RPM',
                     'stats.trend_zero': '↑ 較上月 0%',
                     'chart.revenue_14d': '過去 14 天收益',
+                    'chart.revenue_range': '收益趨勢',
+                    'chart.peak':  '高峰日',
+                    'chart.avg':   '日均',
+                    'chart.total': '總計',
+                    'stats.clicks': '點擊數',
+                    'stats.ctr':    '點擊率',
+                    'stats.vs_prior': '% 較前期',
                     'med.title': '中介與瀑布流',
                     'med.subtitle': '各廣告來源按每次曝光首價競價。Benna 在每次出價時重新排序。',
                     'med.auto_tip': 'Benna 選擇需求來源順序',
@@ -6881,6 +7205,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'stats.rpm': 'RPM',
                     'stats.trend_zero': '↑ 先月比 0%',
                     'chart.revenue_14d': '過去 14 日間の収益',
+                    'chart.revenue_range': '収益トレンド',
+                    'chart.peak':  'ピーク日',
+                    'chart.avg':   '日次平均',
+                    'chart.total': '合計',
+                    'stats.clicks': 'クリック',
+                    'stats.ctr':    'CTR',
+                    'stats.vs_prior': '% 前期比',
                     'med.title': 'メディエーション & ウォーターフォール',
                     'med.subtitle': '各ソースがインプレッションごとに第一価格で競争。Benna が入札ごとに再ランクします。',
                     'med.auto_tip': 'Benna が需要ソース順を選びます',
@@ -7288,6 +7619,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'stats.rpm': 'RPM',
                     'stats.trend_zero': '↑ 지난 달 대비 0%',
                     'chart.revenue_14d': '최근 14일 수익',
+                    'chart.revenue_range': '수익 추세',
+                    'chart.peak':  '피크일',
+                    'chart.avg':   '일 평균',
+                    'chart.total': '합계',
+                    'stats.clicks': '클릭수',
+                    'stats.ctr':    'CTR',
+                    'stats.vs_prior': '% 이전 기간 대비',
                     'med.title': '미디에이션 & 워터폴',
                     'med.subtitle': '각 소스가 노출마다 1차 가격으로 경쟁합니다. Benna가 입찰마다 재정렬합니다.',
                     'med.auto_tip': 'Benna가 수요 소스 순서를 선택합니다',
@@ -7695,6 +8033,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'stats.rpm': 'RPM',
                     'stats.trend_zero': '↑ 0% so với tháng trước',
                     'chart.revenue_14d': 'Doanh thu 14 ngày qua',
+                    'chart.revenue_range': 'Xu hướng doanh thu',
+                    'chart.peak':  'Ngày cao điểm',
+                    'chart.avg':   'Trung bình ngày',
+                    'chart.total': 'Tổng',
+                    'stats.clicks': 'Nhấp chuột',
+                    'stats.ctr':    'CTR',
+                    'stats.vs_prior': '% so với kỳ trước',
                     'med.title': 'Mediation & Waterfall',
                     'med.subtitle': 'Các nguồn cạnh tranh first-price mỗi impression. Benna re-rank theo từng bid.',
                     'med.auto_tip': 'Benna chọn thứ tự nguồn nhu cầu',
