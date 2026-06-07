@@ -480,20 +480,22 @@
         }
 
         .new-campaign-btn {
-            padding: 0.75rem 1.5rem;
+            padding: 8px 16px;             /* match other toolbar buttons */
             background: var(--accent-gradient);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;            /* match other toolbar buttons */
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
+            transition: filter 0.15s ease, box-shadow 0.15s ease;
+            font-size: 13px;               /* match other toolbar buttons */
+            font-family: inherit;
+            line-height: 1.2;
         }
 
         .new-campaign-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3);
+            filter: brightness(1.05);
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.25);
         }
 
         .new-campaign-btn:active {
@@ -542,20 +544,20 @@
 
         /* Fixed column widths — sum to 100%. Same across every filter
            tab so the table doesn't reflow when row set changes.
-              1 name      22%
-              2 status    14%
+              1 name      20%
+              2 status    13%
               3 Benna      9%
               4 format     7%
-              5 imps       7%
-              6 clicks     7%
+              5 imps       6%
+              6 clicks     6%
               7 ctr        6%
-              8 spend      8%
-              9 budget     8%
-             10 actions   12% */
+              8 spend      7%
+              9 budget     7%
+             10 actions   19% (fits 3 buttons + gaps comfortably) */
         .campaigns-table th:nth-child(1),
-        .campaigns-table td:nth-child(1) { width: 22%; }
+        .campaigns-table td:nth-child(1) { width: 20%; }
         .campaigns-table th:nth-child(2),
-        .campaigns-table td:nth-child(2) { width: 14%; }
+        .campaigns-table td:nth-child(2) { width: 13%; }
         .campaigns-table th:nth-child(3),
         .campaigns-table td:nth-child(3) { width: 9%;  }
         .campaigns-table th:nth-child(4),
@@ -578,16 +580,16 @@
         .campaigns-table th:nth-child(5),
         .campaigns-table td:nth-child(5),
         .campaigns-table th:nth-child(6),
-        .campaigns-table td:nth-child(6) { width: 7%; }
+        .campaigns-table td:nth-child(6),
         .campaigns-table th:nth-child(7),
         .campaigns-table td:nth-child(7) { width: 6%; }
         .campaigns-table th:nth-child(8),
         .campaigns-table td:nth-child(8),
         .campaigns-table th:nth-child(9),
-        .campaigns-table td:nth-child(9) { width: 8%; }
+        .campaigns-table td:nth-child(9) { width: 7%; }
         .campaigns-table th:nth-child(10),
         .campaigns-table td:nth-child(10) {
-            width: 12%;
+            width: 19%;
             white-space: nowrap;
             text-align: right;
         }
@@ -2844,25 +2846,29 @@
                 </div>
             </div>
 
-            <!-- Efficiency row — 3 derived ROI/performance cards.
-                 Clicks (total), Avg CPC (spend ÷ clicks), CTR (clicks ÷
-                 impressions). Recomputed in updateCampaignsBudgetSummary()
-                 alongside the budget row. -->
-            <div class="stats-row" id="campaignsEfficiencySummary" style="margin-bottom: 1.25rem; grid-template-columns: repeat(3, minmax(0, 1fr));">
+            <!-- Efficiency row — 4 derived ROI/performance cards.
+                 Clicks, Avg CPC, CTR, CPM. Same column count as the
+                 budget row above so the two grids line up exactly. -->
+            <div class="stats-row" id="campaignsEfficiencySummary" style="margin-bottom: 1.25rem; grid-template-columns: repeat(4, minmax(0, 1fr));">
                 <div class="stat-card">
                     <div class="stat-label" data-t="page.campaigns.eff.clicks">Total clicks</div>
                     <div class="stat-value" id="bsClicks">0</div>
-                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;"><span id="bsImpressionsCaption">0 impressions</span></div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;"><span id="bsImpressionsCaption">0 impressions</span></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label" data-t="page.campaigns.eff.cpc">Avg CPC</div>
                     <div class="stat-value" id="bsCpc">$0.00</div>
-                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;" data-t="page.campaigns.eff.cpc_sub">Cost per click</div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;" data-t="page.campaigns.eff.cpc_sub">Cost per click</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label" data-t="page.campaigns.eff.ctr">CTR</div>
                     <div class="stat-value" id="bsCtr">0.00%</div>
-                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;" data-t="page.campaigns.eff.ctr_sub">Clicks ÷ impressions</div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;" data-t="page.campaigns.eff.ctr_sub">Clicks ÷ impressions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.eff.cpm">Avg CPM</div>
+                    <div class="stat-value" id="bsCpm">$0.00</div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;font-weight:500;letter-spacing:0;text-transform:none;" data-t="page.campaigns.eff.cpm_sub">Cost per 1k impressions</div>
                 </div>
             </div>
 
@@ -2871,7 +2877,7 @@
                  right-aligns via justify-content override. -->
             <div class="campaigns-section">
                 <div class="campaigns-header" style="justify-content: flex-end;">
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
                         <button onclick="exportCampaignsCSV()" style="
                             padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -4697,6 +4703,7 @@
             const totalClicks = campaigns.reduce((s, c) => s + clicksOf(c), 0);
             const cpc = totalClicks > 0 ? spent / totalClicks : 0;
             const ctr = totalImps   > 0 ? (totalClicks / totalImps) * 100 : 0;
+            const cpm = totalImps   > 0 ? (spent / totalImps) * 1000 : 0;
 
             const fmt = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const fmtInt = (n) => Number(n).toLocaleString('en-US');
@@ -4713,6 +4720,7 @@
             set('bsClicks', fmtInt(totalClicks));
             set('bsCpc',    cpc > 0 ? fmt(cpc) : '$0.00');
             set('bsCtr',    fmtPct(ctr));
+            set('bsCpm',    cpm > 0 ? fmt(cpm) : '$0.00');
 
             // Impressions caption beneath Clicks — localized "N impressions"
             const impsCap = document.getElementById('bsImpressionsCaption');
@@ -7692,6 +7700,8 @@
                     'page.campaigns.eff.cpc_sub': 'Cost per click',
                     'page.campaigns.eff.ctr': 'CTR',
                     'page.campaigns.eff.ctr_sub': 'Clicks ÷ impressions',
+                    'page.campaigns.eff.cpm': 'Avg CPM',
+                    'page.campaigns.eff.cpm_sub': 'Cost per 1k impressions',
                     'page.campaigns.eff.impressions_caption': '{n} impressions',
                     'page.billing.title': 'Billing',
                     'page.billing.sub': 'Account funding and transaction history',
@@ -8044,6 +8054,8 @@
                     'page.campaigns.eff.cpc_sub': '每次点击成本',
                     'page.campaigns.eff.ctr': '点击率',
                     'page.campaigns.eff.ctr_sub': '点击数 ÷ 曝光数',
+                    'page.campaigns.eff.cpm': '平均千次曝光成本',
+                    'page.campaigns.eff.cpm_sub': '每千次曝光成本',
                     'page.campaigns.eff.impressions_caption': '{n} 次曝光',
                     'page.billing.title': '账单',
                     'page.billing.sub': '账户充值与交易记录',
@@ -8396,6 +8408,8 @@
                     'page.campaigns.eff.cpc_sub': '每次點擊成本',
                     'page.campaigns.eff.ctr': '點擊率',
                     'page.campaigns.eff.ctr_sub': '點擊數 ÷ 曝光數',
+                    'page.campaigns.eff.cpm': '平均千次曝光成本',
+                    'page.campaigns.eff.cpm_sub': '每千次曝光成本',
                     'page.campaigns.eff.impressions_caption': '{n} 次曝光',
                     'page.billing.title': '帳單',
                     'page.billing.sub': '帳戶儲值與交易紀錄',
@@ -8748,6 +8762,8 @@
                     'page.campaigns.eff.cpc_sub': 'クリック単価',
                     'page.campaigns.eff.ctr': 'CTR',
                     'page.campaigns.eff.ctr_sub': 'クリック数 ÷ インプレッション数',
+                    'page.campaigns.eff.cpm': '平均CPM',
+                    'page.campaigns.eff.cpm_sub': '1,000インプレッションあたりの費用',
                     'page.campaigns.eff.impressions_caption': 'インプレッション {n} 回',
                     'page.billing.title': '請求',
                     'page.billing.sub': 'アカウント入金と取引履歴',
@@ -9100,6 +9116,8 @@
                     'page.campaigns.eff.cpc_sub': '클릭당 비용',
                     'page.campaigns.eff.ctr': 'CTR',
                     'page.campaigns.eff.ctr_sub': '클릭수 ÷ 노출수',
+                    'page.campaigns.eff.cpm': '평균 CPM',
+                    'page.campaigns.eff.cpm_sub': '1,000회 노출당 비용',
                     'page.campaigns.eff.impressions_caption': '노출 {n}회',
                     'page.billing.title': '결제',
                     'page.billing.sub': '계정 충전 및 거래 내역',
@@ -9452,6 +9470,8 @@
                     'page.campaigns.eff.cpc_sub': 'Chi phí mỗi nhấp chuột',
                     'page.campaigns.eff.ctr': 'CTR',
                     'page.campaigns.eff.ctr_sub': 'Nhấp chuột ÷ hiển thị',
+                    'page.campaigns.eff.cpm': 'CPM trung bình',
+                    'page.campaigns.eff.cpm_sub': 'Chi phí trên 1k hiển thị',
                     'page.campaigns.eff.impressions_caption': '{n} lượt hiển thị',
                     'page.billing.title': 'Thanh toán',
                     'page.billing.sub': 'Nạp tiền tài khoản và lịch sử giao dịch',
