@@ -2778,7 +2778,7 @@
                  Recomputed on every loadCampaigns() call via
                  updateCampaignsBudgetSummary(). Same visual treatment as
                  the Home tab's overview cards. -->
-            <div class="stats-row" id="campaignsBudgetSummary" style="margin-bottom: 1.25rem;">
+            <div class="stats-row" id="campaignsBudgetSummary" style="margin-bottom: 0.75rem; grid-template-columns: repeat(4, minmax(0, 1fr));">
                 <div class="stat-card">
                     <div class="stat-label" data-t="page.campaigns.budget.active_count">Active campaigns</div>
                     <div class="stat-value" id="bsActiveCount">0</div>
@@ -2794,6 +2794,28 @@
                 <div class="stat-card">
                     <div class="stat-label" data-t="page.campaigns.budget.remaining">Remaining</div>
                     <div class="stat-value earnings" id="bsRemaining">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Efficiency row — 3 derived ROI/performance cards.
+                 Clicks (total), Avg CPC (spend ÷ clicks), CTR (clicks ÷
+                 impressions). Recomputed in updateCampaignsBudgetSummary()
+                 alongside the budget row. -->
+            <div class="stats-row" id="campaignsEfficiencySummary" style="margin-bottom: 1.25rem; grid-template-columns: repeat(3, minmax(0, 1fr));">
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.eff.clicks">Total clicks</div>
+                    <div class="stat-value" id="bsClicks">0</div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;"><span id="bsImpressionsCaption">0 impressions</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.eff.cpc">Avg CPC</div>
+                    <div class="stat-value" id="bsCpc">$0.00</div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;" data-t="page.campaigns.eff.cpc_sub">Cost per click</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.eff.ctr">CTR</div>
+                    <div class="stat-value" id="bsCtr">0.00%</div>
+                    <div class="stat-label" style="margin-top:6px;font-size:11px;opacity:0.7;" data-t="page.campaigns.eff.ctr_sub">Clicks ÷ impressions</div>
                 </div>
             </div>
 
@@ -4607,6 +4629,8 @@
             const isActive = (c) => String(c.status || '').toLowerCase() === 'active';
             const budgetOf = (c) => Number(c.daily_budget || c.total_budget || 0);
             const spentOf  = (c) => Number(c.spent_today || c.spent_total || 0);
+            const impsOf   = (c) => Number(c.impressions || 0);
+            const clicksOf = (c) => Number(c.clicks || 0);
 
             const activeCount = campaigns.filter(isActive).length;
             const ongoing = campaigns.filter(isActive).reduce((s, c) => s + budgetOf(c), 0);
@@ -4621,12 +4645,34 @@
             const activeSpent = campaigns.filter(isActive).reduce((s, c) => s + spentOf(c), 0);
             const remaining = Math.max(0, ongoing - activeSpent);
 
+            // Efficiency / ROI row — all derived from observed totals.
+            const totalImps   = campaigns.reduce((s, c) => s + impsOf(c), 0);
+            const totalClicks = campaigns.reduce((s, c) => s + clicksOf(c), 0);
+            const cpc = totalClicks > 0 ? spent / totalClicks : 0;
+            const ctr = totalImps   > 0 ? (totalClicks / totalImps) * 100 : 0;
+
             const fmt = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmtInt = (n) => Number(n).toLocaleString('en-US');
+            const fmtPct = (n) => Number(n).toFixed(2) + '%';
             const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+
+            // Budget row
             set('bsActiveCount',  String(activeCount));
             set('bsOngoingBudget', fmt(ongoing));
             set('bsSpent',         fmt(spent));
             set('bsRemaining',     fmt(remaining));
+
+            // Efficiency row
+            set('bsClicks', fmtInt(totalClicks));
+            set('bsCpc',    cpc > 0 ? fmt(cpc) : '$0.00');
+            set('bsCtr',    fmtPct(ctr));
+
+            // Impressions caption beneath Clicks — localized "N impressions"
+            const impsCap = document.getElementById('bsImpressionsCaption');
+            if (impsCap) {
+                const tpl = (window.DASH_T && window.DASH_T['page.campaigns.eff.impressions_caption']) || '{n} impressions';
+                impsCap.textContent = tpl.replace('{n}', fmtInt(totalImps));
+            }
         }
 
         function renderCampaignTable(allCampaigns) {
@@ -7594,6 +7640,12 @@
                     'page.campaigns.budget.ongoing': 'Ongoing budget',
                     'page.campaigns.budget.spent': 'Spent',
                     'page.campaigns.budget.remaining': 'Remaining',
+                    'page.campaigns.eff.clicks': 'Total clicks',
+                    'page.campaigns.eff.cpc': 'Avg CPC',
+                    'page.campaigns.eff.cpc_sub': 'Cost per click',
+                    'page.campaigns.eff.ctr': 'CTR',
+                    'page.campaigns.eff.ctr_sub': 'Clicks ÷ impressions',
+                    'page.campaigns.eff.impressions_caption': '{n} impressions',
                     'page.billing.title': 'Billing',
                     'page.billing.sub': 'Account funding and transaction history',
                     'billing.date': 'Date',
@@ -7940,6 +7992,12 @@
                     'page.campaigns.budget.ongoing': '进行中的预算',
                     'page.campaigns.budget.spent': '已支出',
                     'page.campaigns.budget.remaining': '剩余预算',
+                    'page.campaigns.eff.clicks': '总点击数',
+                    'page.campaigns.eff.cpc': '平均每次点击成本',
+                    'page.campaigns.eff.cpc_sub': '每次点击成本',
+                    'page.campaigns.eff.ctr': '点击率',
+                    'page.campaigns.eff.ctr_sub': '点击数 ÷ 曝光数',
+                    'page.campaigns.eff.impressions_caption': '{n} 次曝光',
                     'page.billing.title': '账单',
                     'page.billing.sub': '账户充值与交易记录',
                     'billing.date': '日期',
@@ -8286,6 +8344,12 @@
                     'page.campaigns.budget.ongoing': '進行中的預算',
                     'page.campaigns.budget.spent': '已支出',
                     'page.campaigns.budget.remaining': '剩餘預算',
+                    'page.campaigns.eff.clicks': '總點擊數',
+                    'page.campaigns.eff.cpc': '平均每次點擊成本',
+                    'page.campaigns.eff.cpc_sub': '每次點擊成本',
+                    'page.campaigns.eff.ctr': '點擊率',
+                    'page.campaigns.eff.ctr_sub': '點擊數 ÷ 曝光數',
+                    'page.campaigns.eff.impressions_caption': '{n} 次曝光',
                     'page.billing.title': '帳單',
                     'page.billing.sub': '帳戶儲值與交易紀錄',
                     'billing.date': '日期',
@@ -8632,6 +8696,12 @@
                     'page.campaigns.budget.ongoing': '実行中の予算',
                     'page.campaigns.budget.spent': '支出済み',
                     'page.campaigns.budget.remaining': '残り予算',
+                    'page.campaigns.eff.clicks': '総クリック数',
+                    'page.campaigns.eff.cpc': '平均CPC',
+                    'page.campaigns.eff.cpc_sub': 'クリック単価',
+                    'page.campaigns.eff.ctr': 'CTR',
+                    'page.campaigns.eff.ctr_sub': 'クリック数 ÷ インプレッション数',
+                    'page.campaigns.eff.impressions_caption': 'インプレッション {n} 回',
                     'page.billing.title': '請求',
                     'page.billing.sub': 'アカウント入金と取引履歴',
                     'billing.date': '日付',
@@ -8978,6 +9048,12 @@
                     'page.campaigns.budget.ongoing': '진행 중인 예산',
                     'page.campaigns.budget.spent': '지출',
                     'page.campaigns.budget.remaining': '잔여 예산',
+                    'page.campaigns.eff.clicks': '총 클릭수',
+                    'page.campaigns.eff.cpc': '평균 CPC',
+                    'page.campaigns.eff.cpc_sub': '클릭당 비용',
+                    'page.campaigns.eff.ctr': 'CTR',
+                    'page.campaigns.eff.ctr_sub': '클릭수 ÷ 노출수',
+                    'page.campaigns.eff.impressions_caption': '노출 {n}회',
                     'page.billing.title': '결제',
                     'page.billing.sub': '계정 충전 및 거래 내역',
                     'billing.date': '날짜',
@@ -9324,6 +9400,12 @@
                     'page.campaigns.budget.ongoing': 'Ngân sách đang chạy',
                     'page.campaigns.budget.spent': 'Đã chi',
                     'page.campaigns.budget.remaining': 'Còn lại',
+                    'page.campaigns.eff.clicks': 'Tổng nhấp chuột',
+                    'page.campaigns.eff.cpc': 'CPC trung bình',
+                    'page.campaigns.eff.cpc_sub': 'Chi phí mỗi nhấp chuột',
+                    'page.campaigns.eff.ctr': 'CTR',
+                    'page.campaigns.eff.ctr_sub': 'Nhấp chuột ÷ hiển thị',
+                    'page.campaigns.eff.impressions_caption': '{n} lượt hiển thị',
                     'page.billing.title': 'Thanh toán',
                     'page.billing.sub': 'Nạp tiền tài khoản và lịch sử giao dịch',
                     'billing.date': 'Ngày',
