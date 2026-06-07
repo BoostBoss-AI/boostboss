@@ -2722,6 +2722,29 @@
                 </div>
             </div>
 
+            <!-- Budget summary — 4 stat cards above the campaigns table.
+                 Recomputed on every loadCampaigns() call via
+                 updateCampaignsBudgetSummary(). Same visual treatment as
+                 the Home tab's overview cards. -->
+            <div class="stats-row" id="campaignsBudgetSummary" style="margin-bottom: 1.25rem;">
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.budget.active_count">Active campaigns</div>
+                    <div class="stat-value" id="bsActiveCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.budget.ongoing">Ongoing budget</div>
+                    <div class="stat-value" id="bsOngoingBudget">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.budget.spent">Spent</div>
+                    <div class="stat-value" id="bsSpent">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" data-t="page.campaigns.budget.remaining">Remaining</div>
+                    <div class="stat-value earnings" id="bsRemaining">$0.00</div>
+                </div>
+            </div>
+
             <!-- Campaigns Section. .campaigns-title removed in Phase 3
                  (route page-head above carries the heading); actions row
                  right-aligns via justify-content override. -->
@@ -4511,11 +4534,47 @@
                 // Update Benna header counters based on full campaign cohort
                 if (_cachedCampaigns.length > 0) updateBennaEngineCounters(_cachedCampaigns);
 
+                // Recompute the budget summary cards above the table
+                updateCampaignsBudgetSummary(_cachedCampaigns);
+
                 renderCampaignTable(_cachedCampaigns);
             } catch (error) {
                 console.error('Error loading campaigns:', error);
                 campaignTableBody.innerHTML = '<tr><td colspan="10" class="loading" data-t="empty.error">Error loading campaigns</td></tr>';
             }
+        }
+
+        // Budget summary cards above the campaigns table. Counts active
+        // campaigns, sums their budgets, sums spend across all campaigns
+        // for an honest spent-to-date number, computes remaining (ongoing
+        // budget minus what's already been spent against it). Recomputed
+        // on every campaigns reload AND can be called from elsewhere
+        // (e.g., after pause/resume/edit toggles update the cache).
+        function updateCampaignsBudgetSummary(campaigns) {
+            campaigns = Array.isArray(campaigns) ? campaigns : [];
+            const isActive = (c) => String(c.status || '').toLowerCase() === 'active';
+            const budgetOf = (c) => Number(c.daily_budget || c.total_budget || 0);
+            const spentOf  = (c) => Number(c.spent_today || c.spent_total || 0);
+
+            const activeCount = campaigns.filter(isActive).length;
+            const ongoing = campaigns.filter(isActive).reduce((s, c) => s + budgetOf(c), 0);
+            // Spent is summed across ALL campaigns (active + paused +
+            // even in_review-but-already-spent). That mirrors what the
+            // ledger has actually deducted from balance.
+            const spent = campaigns.reduce((s, c) => s + spentOf(c), 0);
+            // Remaining = total budget on active campaigns minus spend
+            // attributed to those active campaigns. Floors at 0 — if a
+            // campaign's spent > budget (shouldn't happen, but defensive),
+            // we report 0 remaining rather than a negative.
+            const activeSpent = campaigns.filter(isActive).reduce((s, c) => s + spentOf(c), 0);
+            const remaining = Math.max(0, ongoing - activeSpent);
+
+            const fmt = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+            set('bsActiveCount',  String(activeCount));
+            set('bsOngoingBudget', fmt(ongoing));
+            set('bsSpent',         fmt(spent));
+            set('bsRemaining',     fmt(remaining));
         }
 
         function renderCampaignTable(allCampaigns) {
@@ -7475,6 +7534,10 @@
                     'page.home.title': 'Overview',
                     'page.home.sub': 'Account performance and balance',
                     'page.campaigns.sub': 'Manage your active campaigns, creatives, and pacing',
+                    'page.campaigns.budget.active_count': 'Active campaigns',
+                    'page.campaigns.budget.ongoing': 'Ongoing budget',
+                    'page.campaigns.budget.spent': 'Spent',
+                    'page.campaigns.budget.remaining': 'Remaining',
                     'page.billing.title': 'Billing',
                     'page.billing.sub': 'Account funding and transaction history',
                     'billing.date': 'Date',
@@ -7817,6 +7880,10 @@
                     'page.home.title': '概览',
                     'page.home.sub': '账户表现与余额',
                     'page.campaigns.sub': '管理您的活跃广告、创意和节奏',
+                    'page.campaigns.budget.active_count': '进行中的广告',
+                    'page.campaigns.budget.ongoing': '进行中的预算',
+                    'page.campaigns.budget.spent': '已支出',
+                    'page.campaigns.budget.remaining': '剩余预算',
                     'page.billing.title': '账单',
                     'page.billing.sub': '账户充值与交易记录',
                     'billing.date': '日期',
@@ -8159,6 +8226,10 @@
                     'page.home.title': '概覽',
                     'page.home.sub': '帳戶表現與餘額',
                     'page.campaigns.sub': '管理您的活躍廣告、創意與節奏',
+                    'page.campaigns.budget.active_count': '進行中的廣告',
+                    'page.campaigns.budget.ongoing': '進行中的預算',
+                    'page.campaigns.budget.spent': '已支出',
+                    'page.campaigns.budget.remaining': '剩餘預算',
                     'page.billing.title': '帳單',
                     'page.billing.sub': '帳戶儲值與交易紀錄',
                     'billing.date': '日期',
@@ -8501,6 +8572,10 @@
                     'page.home.title': '概要',
                     'page.home.sub': 'アカウントのパフォーマンスと残高',
                     'page.campaigns.sub': '配信中のキャンペーン、クリエイティブ、配信ペースを管理',
+                    'page.campaigns.budget.active_count': '実行中のキャンペーン',
+                    'page.campaigns.budget.ongoing': '実行中の予算',
+                    'page.campaigns.budget.spent': '支出済み',
+                    'page.campaigns.budget.remaining': '残り予算',
                     'page.billing.title': '請求',
                     'page.billing.sub': 'アカウント入金と取引履歴',
                     'billing.date': '日付',
@@ -8843,6 +8918,10 @@
                     'page.home.title': '개요',
                     'page.home.sub': '계정 실적 및 잔액',
                     'page.campaigns.sub': '진행 중인 캠페인, 크리에이티브, 페이싱 관리',
+                    'page.campaigns.budget.active_count': '진행 중인 캠페인',
+                    'page.campaigns.budget.ongoing': '진행 중인 예산',
+                    'page.campaigns.budget.spent': '지출',
+                    'page.campaigns.budget.remaining': '잔여 예산',
                     'page.billing.title': '결제',
                     'page.billing.sub': '계정 충전 및 거래 내역',
                     'billing.date': '날짜',
@@ -9185,6 +9264,10 @@
                     'page.home.title': 'Tổng quan',
                     'page.home.sub': 'Hiệu suất và số dư tài khoản',
                     'page.campaigns.sub': 'Quản lý chiến dịch đang chạy, creative và tốc độ phân phối',
+                    'page.campaigns.budget.active_count': 'Chiến dịch đang chạy',
+                    'page.campaigns.budget.ongoing': 'Ngân sách đang chạy',
+                    'page.campaigns.budget.spent': 'Đã chi',
+                    'page.campaigns.budget.remaining': 'Còn lại',
                     'page.billing.title': 'Thanh toán',
                     'page.billing.sub': 'Nạp tiền tài khoản và lịch sử giao dịch',
                     'billing.date': 'Ngày',
