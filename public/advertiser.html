@@ -382,13 +382,24 @@
         .stat-trend {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
             font-size: 0.78rem;
             font-weight: 600;
+            color: #6B7280;
+            min-height: 18px;             /* reserve space so the card
+                                             height doesn't jump once a
+                                             trend value arrives */
         }
-
-        .stat-trend.positive { color: var(--success); }
-        .stat-trend.negative { color: #ef4444; }
+        .stat-trend.is-empty { visibility: hidden; }
+        .stat-trend.positive { color: #10B981; }
+        .stat-trend.negative { color: #EF4444; }
+        .stat-trend::before {
+            font-size: 0.85em;
+            line-height: 1;
+        }
+        .stat-trend.positive::before { content: '↑'; }
+        .stat-trend.negative::before { content: '↓'; }
+        .stat-trend.neutral::before  { content: '→'; }
 
         /* Responsive: 5 → 3 → 2 → 1 across breakpoints */
         @media (max-width: 1100px) {
@@ -424,33 +435,113 @@
         }
 
         .chart-container {
-            position: relative;
             width: 100%;
-            height: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 0.5rem;
-            padding: 2rem 1rem;
             background: transparent;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid var(--border);
+            padding: 20px 24px 12px 24px;
         }
 
+        /* Summary strip above the bars. Compact data row showing peak,
+           avg, total — pro-dashboard pattern (Stripe / Linear). */
+        .chart-summary {
+            display: flex;
+            gap: 32px;
+            padding: 4px 0 18px 0;
+            border-bottom: 1px solid #F1F2F4;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .chart-summary-item { min-width: 120px; }
+        .chart-summary-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .chart-summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A1A2E;
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .chart-summary-meta {
+            font-size: 11px;
+            font-weight: 500;
+            color: #9CA3AF;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* Plot = Y-axis labels (left) + bar area (right). */
+        .chart-plot {
+            display: flex;
+            gap: 12px;
+            height: 240px;
+            position: relative;
+        }
+        .chart-yaxis {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9CA3AF;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            text-align: right;
+            min-width: 36px;
+            padding: 0;
+            line-height: 1;
+        }
+        .chart-ytick { line-height: 1; }
+        .chart-bars {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            border-left: 1px solid #F1F2F4;
+            padding-left: 8px;
+        }
+        .chart-grid-line {
+            position: absolute;
+            left: 0; right: 0;
+            border-top: 1px dashed #F1F2F4;
+            pointer-events: none;
+            z-index: 0;
+        }
         .chart-bar {
             flex: 1;
-            background: var(--accent-gradient);
+            background: linear-gradient(180deg, #FF85B1 0%, #FF2D78 100%);
             border-radius: 4px 4px 0 0;
-            min-height: 20px;
-            transition: all 0.3s ease;
+            min-height: 2px;
             cursor: pointer;
             position: relative;
-            opacity: 0.8;
+            transition: filter 0.15s ease;
+            z-index: 1;
         }
+        .chart-bar:hover { filter: brightness(1.08); }
 
-        .chart-bar:hover {
-            opacity: 1;
-            filter: brightness(1.1);
+        /* X-axis labels under the bars, parallel grid column. */
+        .chart-xaxis {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            padding-left: 56px;       /* y-axis col (36) + gap (12) + border (8) */
+            font-size: 10px;
+            color: #9CA3AF;
+            font-variant-numeric: tabular-nums;
+        }
+        .chart-xtick {
+            flex: 1;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .chart-bar-tooltip {
@@ -458,21 +549,21 @@
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: var(--text);
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-bottom: 0.5rem;
+            background-color: rgba(15, 15, 26, 0.92);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.15s ease;
             white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+            line-height: 1.4;
         }
-
-        .chart-bar:hover .chart-bar-tooltip {
-            opacity: 1;
-        }
+        .chart-bar:hover .chart-bar-tooltip { opacity: 1; }
 
         /* Campaigns Section */
         .campaigns-section {
@@ -2549,48 +2640,51 @@
                 </div>
             </div>
 
-            <!-- Stats Row -->
+            <!-- Stats Row.
+                 Same accent system as the Campaigns page: only money-out
+                 (Spend) and money-kept (Balance) get color; counts and
+                 ratio stay neutral. Trend arrows show period-over-period
+                 delta when available, otherwise hide cleanly via the
+                 .stat-trend.is-empty rule. -->
             <div class="stats-row">
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="stats.impressions">Total Impressions</div>
                     <div class="stat-value" id="totalImpressions">0</div>
-                    <div class="stat-trend positive">
-                        <span class="trend-arrow">↑</span>
-                        <span id="impressionsTrend">Loading...</span>
+                    <div class="stat-trend" id="impressionsTrendWrap">
+                        <span id="impressionsTrend"></span>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="stats.clicks">Total Clicks</div>
                     <div class="stat-value" id="totalClicks">0</div>
-                    <div class="stat-trend positive">
-                        <span class="trend-arrow">↑</span>
-                        <span id="clicksTrend">Loading...</span>
+                    <div class="stat-trend" id="clicksTrendWrap">
+                        <span id="clicksTrend"></span>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="stats.ctr">Click-Through Rate</div>
                     <div class="stat-value" id="ctrValue">0%</div>
-                    <div class="stat-trend negative">
-                        <span class="trend-arrow">↓</span>
-                        <span id="ctrTrend">Loading...</span>
+                    <div class="stat-trend" id="ctrTrendWrap">
+                        <span id="ctrTrend"></span>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-spend">
                     <div class="stat-label" data-t="stats.spend">Total Spend</div>
-                    <div class="stat-value" id="totalSpend">$0</div>
-                    <div class="stat-trend positive">
-                        <span class="trend-arrow">↑</span>
-                        <span id="spendTrend">Loading...</span>
+                    <div class="stat-value spend" id="totalSpend">$0</div>
+                    <div class="stat-trend" id="spendTrendWrap">
+                        <span id="spendTrend"></span>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card accent-earnings">
                     <div class="stat-label" data-t="stats.balance">Account Balance</div>
                     <div class="stat-value earnings" id="accountBalance">$0.00</div>
                     <button id="depositBtn" style="
-                        padding: 5px 12px; background: var(--accent-primary); color: #fff;
-                        border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
-                        cursor: pointer; font-family: inherit; transition: all 0.15s;
-                    " data-t="chrome.add_funds">+ Add Funds</button>
+                        padding: 6px 14px; background: var(--accent-primary); color: #fff;
+                        border: none; border-radius: 8px; font-size: 12px; font-weight: 600;
+                        cursor: pointer; font-family: inherit;
+                        transition: filter 0.15s ease;
+                    " onmouseover="this.style.filter='brightness(1.05)'" onmouseout="this.style.filter='none'"
+                       data-t="chrome.add_funds">+ Add Funds</button>
                 </div>
             </div>
 
@@ -4361,6 +4455,56 @@
             setTimeout(() => clearInterval(avatarInterval), 10000);
         })();
 
+        // Populate a stat-trend pill from a daily-series array.
+        //   key:       'impressions' | 'clicks' | 'ctr' | 'spend'
+        //   daily:     array of {date, impressions, clicks, spend, ...}
+        //   getValue:  function(dayObj) → numeric value for this metric
+        //   isCost:    if true, an UP arrow is RED (more spend) and a
+        //              DOWN arrow is GREEN (less spend). For all other
+        //              metrics, up=good=green and down=bad=red.
+        function setStatTrend(key, daily, getValue, isCost) {
+            const wrap = document.getElementById(key + 'TrendWrap');
+            const span = document.getElementById(key + 'Trend');
+            if (!wrap || !span) return;
+            // Reset any prior classes so re-renders behave predictably.
+            wrap.classList.remove('positive', 'negative', 'neutral', 'is-empty');
+            if (!Array.isArray(daily) || daily.length < 4) {
+                wrap.classList.add('is-empty');
+                span.textContent = '';
+                return;
+            }
+            const n = daily.length;
+            const mid = Math.floor(n / 2);
+            const recent = daily.slice(mid);
+            const prior  = daily.slice(0, mid);
+            const sum = (arr) => arr.reduce((s, d) => s + Number(getValue(d) || 0), 0);
+            // For CTR, take averages of the day-level rates instead of
+            // sum — summing ratios isn't meaningful.
+            let recentVal, priorVal;
+            if (key === 'ctr') {
+                recentVal = recent.reduce((s, d) => s + getValue(d), 0) / Math.max(recent.length, 1);
+                priorVal  = prior.reduce((s, d) => s + getValue(d), 0)  / Math.max(prior.length, 1);
+            } else {
+                recentVal = sum(recent);
+                priorVal  = sum(prior);
+            }
+            if (priorVal === 0 && recentVal === 0) {
+                wrap.classList.add('is-empty');
+                span.textContent = '';
+                return;
+            }
+            // % delta — clamp display to 999% so wild swings stay tidy.
+            const deltaPct = priorVal === 0 ? 100 : ((recentVal - priorVal) / priorVal) * 100;
+            const arrow = deltaPct > 0.5 ? 'up' : (deltaPct < -0.5 ? 'down' : 'flat');
+            // Color mapping. For costs, up = bad. For everything else, up = good.
+            if (arrow === 'flat') wrap.classList.add('neutral');
+            else if (arrow === 'up')   wrap.classList.add(isCost ? 'negative' : 'positive');
+            else                        wrap.classList.add(isCost ? 'positive' : 'negative');
+            const shown = Math.min(Math.abs(deltaPct), 999);
+            const label = shown < 10 ? shown.toFixed(1) : Math.round(shown).toString();
+            span.textContent = label + '% vs prior';
+        }
+
         async function loadStats() {
             try {
                 const response = await fetch(
@@ -4385,11 +4529,16 @@
                 document.getElementById('totalSpend').textContent =
                     '$' + formatNumber(totals.spend || 0, true);
 
-                // Trends (placeholder for now)
-                document.getElementById('impressionsTrend').textContent = '—';
-                document.getElementById('clicksTrend').textContent = '—';
-                document.getElementById('ctrTrend').textContent = '—';
-                document.getElementById('spendTrend').textContent = '—';
+                // Trends — period-over-period delta. Compare last half
+                // of the daily window to the prior half (e.g., 7 days
+                // vs prior 7). If insufficient data, hide cleanly.
+                setStatTrend('impressions', stats.daily, d => d.impressions || 0);
+                setStatTrend('clicks',      stats.daily, d => d.clicks      || 0);
+                setStatTrend('spend',       stats.daily, d => d.spend       || 0, true);
+                setStatTrend('ctr',         stats.daily, d => {
+                    const i = Number(d.impressions || 0);
+                    return i > 0 ? (Number(d.clicks || 0) / i) * 100 : 0;
+                });
 
                 // BBX auction summary FIRST — render before chart so a
                 // chart-rendering error can't suppress it. Each render is
@@ -4412,6 +4561,11 @@
                 console.error('Error loading stats:', error);
                 document.getElementById('totalImpressions').textContent = '0';
                 document.getElementById('totalClicks').textContent = '0';
+                // Hide trend pills on error rather than leaving stale text.
+                ['impressions','clicks','ctr','spend'].forEach(k => {
+                    const w = document.getElementById(k + 'TrendWrap');
+                    if (w) { w.classList.add('is-empty'); }
+                });
             }
         }
 
@@ -4969,6 +5123,11 @@
         }
 
         // Render chart with real data
+        // Render the daily-impressions chart in two parts:
+        //   1. a summary strip (Peak / Avg / Total / Peak day)
+        //   2. an axis-grid + bar plot. Bars are shaded by value so the
+        //      eye can sort high-vs-low days at a glance — top quartile
+        //      gets the full pink, lower bars fade to lighter pink.
         function renderChart(dailyData, numDays) {
             chartContainer.innerHTML = '';
             const days = numDays || 14;
@@ -4979,17 +5138,100 @@
                     impressions: Math.floor(Math.random() * 100000) + 50000
                 }));
             }
+            const slice = dailyData.slice(-days);
+            const values = slice.map(d => Number(d.impressions || 0));
+            const max = Math.max(...values, 1);
+            const total = values.reduce((s, v) => s + v, 0);
+            const avg = Math.round(total / Math.max(values.length, 1));
+            const peakIdx = values.indexOf(max);
+            const peakDay = slice[peakIdx] && slice[peakIdx].date
+                ? new Date(slice[peakIdx].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                : '—';
 
-            const maxImpressions = Math.max(...dailyData.map(d => d.impressions || 0), 1);
+            // i18n labels with English fallbacks
+            const t = (k, en) => (window.DASH_T && window.DASH_T[k]) || en;
+            const lblPeak  = t('chart.peak',  'Peak day');
+            const lblAvg   = t('chart.avg',   'Daily avg');
+            const lblTotal = t('chart.total', 'Total');
+            const lblImps  = t('stats.impressions_short', 'Impressions');
 
-            dailyData.slice(-days).forEach(day => {
-                const height = ((day.impressions || 0) / maxImpressions) * 100;
+            // ── 1. Summary strip ─────────────────────────────────────
+            const summary = document.createElement('div');
+            summary.className = 'chart-summary';
+            summary.innerHTML =
+                '<div class="chart-summary-item">' +
+                    '<div class="chart-summary-label">' + lblPeak + '</div>' +
+                    '<div class="chart-summary-value">' + formatNumber(max) + ' <span class="chart-summary-meta">' + peakDay + '</span></div>' +
+                '</div>' +
+                '<div class="chart-summary-item">' +
+                    '<div class="chart-summary-label">' + lblAvg + '</div>' +
+                    '<div class="chart-summary-value">' + formatNumber(avg) + '</div>' +
+                '</div>' +
+                '<div class="chart-summary-item">' +
+                    '<div class="chart-summary-label">' + lblTotal + ' · ' + days + 'D</div>' +
+                    '<div class="chart-summary-value">' + formatNumber(total) + '</div>' +
+                '</div>';
+            chartContainer.appendChild(summary);
+
+            // ── 2. Plot area (axis grid + bars + x labels) ───────────
+            const plot = document.createElement('div');
+            plot.className = 'chart-plot';
+
+            // Y-axis label column
+            const yAxis = document.createElement('div');
+            yAxis.className = 'chart-yaxis';
+            [1, 0.75, 0.5, 0.25, 0].forEach(frac => {
+                const tick = document.createElement('div');
+                tick.className = 'chart-ytick';
+                tick.textContent = formatNumber(Math.round(max * frac));
+                yAxis.appendChild(tick);
+            });
+            plot.appendChild(yAxis);
+
+            // Bars + grid lines
+            const bars = document.createElement('div');
+            bars.className = 'chart-bars';
+            // four horizontal grid lines at 25/50/75/100%
+            for (let i = 0; i < 4; i++) {
+                const grid = document.createElement('div');
+                grid.className = 'chart-grid-line';
+                grid.style.bottom = (i * 25) + '%';
+                bars.appendChild(grid);
+            }
+            // Bars + x labels in a parallel row
+            const xLabels = document.createElement('div');
+            xLabels.className = 'chart-xaxis';
+            slice.forEach((day, idx) => {
+                const v = Number(day.impressions || 0);
+                const height = (v / max) * 100;
                 const bar = document.createElement('div');
                 bar.className = 'chart-bar';
-                bar.style.height = height + '%';
-                bar.innerHTML = `<div class="chart-bar-tooltip">${formatNumber(day.impressions || 0)} impressions</div>`;
-                chartContainer.appendChild(bar);
+                bar.style.height = Math.max(height, 1.5) + '%';
+                // Value-aware shading — top quartile is full pink, lower
+                // bars fade toward a lighter tone so the dominant days
+                // are visually separable from the rest.
+                const intensity = Math.max(0.35, height / 100);
+                bar.style.opacity = String(intensity);
+                const dateLabel = day.date
+                    ? new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                    : '';
+                bar.innerHTML = '<div class="chart-bar-tooltip">' +
+                    '<strong>' + formatNumber(v) + '</strong> ' + lblImps.toLowerCase() +
+                    (dateLabel ? '<div style="font-size:10px;opacity:0.7;margin-top:2px;">' + dateLabel + '</div>' : '') +
+                    '</div>';
+                bars.appendChild(bar);
+
+                // x-axis: show first, last, and every other label to
+                // avoid crowding at 14 days
+                const xLbl = document.createElement('div');
+                xLbl.className = 'chart-xtick';
+                const isEdge = idx === 0 || idx === slice.length - 1;
+                xLbl.textContent = (isEdge || idx % 2 === 0) ? dateLabel : '';
+                xLabels.appendChild(xLbl);
             });
+            plot.appendChild(bars);
+            chartContainer.appendChild(plot);
+            chartContainer.appendChild(xLabels);
         }
 
         // Modal functions
@@ -7459,6 +7701,9 @@
                     'stats.impressions': 'Total Impressions', 'stats.clicks': 'Total Clicks',
                     'stats.ctr': 'Click-Through Rate', 'stats.spend': 'Total Spend', 'stats.balance': 'Account Balance',
                     'chart.daily_impressions': 'Daily Impressions (Last 14 Days)',
+                    'chart.peak':  'Peak day',
+                    'chart.avg':   'Daily avg',
+                    'chart.total': 'Total',
                     'perf.title': 'Performance', 'perf.sub': 'Engine status and auction signal · last 7 days',
                     'filter.all': 'All', 'filter.live': 'Live', 'filter.paused': 'Paused', 'filter.in_review': 'In Review',
                     'table.campaign_name': 'CAMPAIGN NAME', 'table.status': 'STATUS', 'table.benna': 'BENNA',
@@ -7813,6 +8058,9 @@
                     'stats.impressions': '总展示数', 'stats.clicks': '总点击数',
                     'stats.ctr': '点击率', 'stats.spend': '总支出', 'stats.balance': '账户余额',
                     'chart.daily_impressions': '每日展示数(近 14 天)',
+                    'chart.peak':  '高峰日',
+                    'chart.avg':   '日均',
+                    'chart.total': '总计',
                     'perf.title': '效果表现', 'perf.sub': '引擎状态与拍卖信号 · 近 7 天',
                     'filter.all': '全部', 'filter.live': '运行中', 'filter.paused': '已暂停', 'filter.in_review': '审核中',
                     'table.campaign_name': '广告名称', 'table.status': '状态', 'table.benna': 'BENNA',
@@ -8167,6 +8415,9 @@
                     'stats.impressions': '總曝光數', 'stats.clicks': '總點擊數',
                     'stats.ctr': '點擊率', 'stats.spend': '總支出', 'stats.balance': '帳戶餘額',
                     'chart.daily_impressions': '每日曝光數(近 14 天)',
+                    'chart.peak':  '高峰日',
+                    'chart.avg':   '日均',
+                    'chart.total': '總計',
                     'perf.title': '成效表現', 'perf.sub': '引擎狀態與競價訊號 · 近 7 天',
                     'filter.all': '全部', 'filter.live': '進行中', 'filter.paused': '已暫停', 'filter.in_review': '審核中',
                     'table.campaign_name': '廣告名稱', 'table.status': '狀態', 'table.benna': 'BENNA',
@@ -8521,6 +8772,9 @@
                     'stats.impressions': '総インプレッション', 'stats.clicks': '総クリック',
                     'stats.ctr': 'クリック率', 'stats.spend': '総支出', 'stats.balance': 'アカウント残高',
                     'chart.daily_impressions': '日次インプレッション(過去 14 日)',
+                    'chart.peak':  'ピーク日',
+                    'chart.avg':   '日次平均',
+                    'chart.total': '合計',
                     'perf.title': 'パフォーマンス', 'perf.sub': 'エンジン状態とオークション信号 · 過去 7 日',
                     'filter.all': 'すべて', 'filter.live': '実行中', 'filter.paused': '一時停止', 'filter.in_review': '審査中',
                     'table.campaign_name': 'キャンペーン名', 'table.status': 'ステータス', 'table.benna': 'BENNA',
@@ -8875,6 +9129,9 @@
                     'stats.impressions': '총 임프레션', 'stats.clicks': '총 클릭',
                     'stats.ctr': '클릭률', 'stats.spend': '총 지출', 'stats.balance': '계정 잔액',
                     'chart.daily_impressions': '일별 임프레션 (최근 14일)',
+                    'chart.peak':  '피크일',
+                    'chart.avg':   '일 평균',
+                    'chart.total': '합계',
                     'perf.title': '퍼포먼스', 'perf.sub': '엔진 상태 및 옥션 시그널 · 최근 7일',
                     'filter.all': '전체', 'filter.live': '실행중', 'filter.paused': '일시정지', 'filter.in_review': '심사중',
                     'table.campaign_name': '캠페인 이름', 'table.status': '상태', 'table.benna': 'BENNA',
@@ -9229,6 +9486,9 @@
                     'stats.impressions': 'Tổng Impression', 'stats.clicks': 'Tổng Click',
                     'stats.ctr': 'Tỷ lệ click', 'stats.spend': 'Tổng chi tiêu', 'stats.balance': 'Số dư tài khoản',
                     'chart.daily_impressions': 'Impression hàng ngày (14 ngày gần nhất)',
+                    'chart.peak':  'Ngày cao điểm',
+                    'chart.avg':   'Trung bình ngày',
+                    'chart.total': 'Tổng',
                     'perf.title': 'Hiệu suất', 'perf.sub': 'Trạng thái engine và tín hiệu đấu giá · 7 ngày gần nhất',
                     'filter.all': 'Tất cả', 'filter.live': 'Đang chạy', 'filter.paused': 'Tạm dừng', 'filter.in_review': 'Đang duyệt',
                     'table.campaign_name': 'TÊN CHIẾN DỊCH', 'table.status': 'TRẠNG THÁI', 'table.benna': 'BENNA',
