@@ -541,7 +541,11 @@
             flex: 1;
             text-align: center;
             white-space: nowrap;
-            overflow: hidden;
+            /* Let labeled ticks spill into adjacent empty ticks instead
+               of cropping to one letter at narrow widths (90D view). */
+            overflow: visible;
+            position: relative;
+            min-width: 0;
         }
 
         .chart-bar-tooltip {
@@ -5198,9 +5202,15 @@
                 grid.style.bottom = (i * 25) + '%';
                 bars.appendChild(grid);
             }
-            // Bars + x labels in a parallel row
+            // Bars + x labels in a parallel row.
+            // Label density: target ~7 visible ticks regardless of slice
+            // length, so 14D, 30D, and 90D all read cleanly. Labels are
+            // allowed to overflow into neighbor slots (CSS overflow:
+            // visible) so "May 21" doesn't get cropped to "M".
             const xLabels = document.createElement('div');
             xLabels.className = 'chart-xaxis';
+            const targetTicks = Math.min(7, slice.length);
+            const stride = Math.max(1, Math.round((slice.length - 1) / Math.max(targetTicks - 1, 1)));
             slice.forEach((day, idx) => {
                 const v = Number(day.impressions || 0);
                 const height = (v / max) * 100;
@@ -5221,12 +5231,14 @@
                     '</div>';
                 bars.appendChild(bar);
 
-                // x-axis: show first, last, and every other label to
-                // avoid crowding at 14 days
                 const xLbl = document.createElement('div');
                 xLbl.className = 'chart-xtick';
-                const isEdge = idx === 0 || idx === slice.length - 1;
-                xLbl.textContent = (isEdge || idx % 2 === 0) ? dateLabel : '';
+                const isFirst = idx === 0;
+                const isLast  = idx === slice.length - 1;
+                const onStride = idx % stride === 0;
+                // Skip a stride label if it would crowd the last label.
+                const tooCloseToLast = !isLast && (slice.length - 1 - idx) < Math.floor(stride * 0.6);
+                xLbl.textContent = (isFirst || isLast || (onStride && !tooCloseToLast)) ? dateLabel : '';
                 xLabels.appendChild(xLbl);
             });
             plot.appendChild(bars);
