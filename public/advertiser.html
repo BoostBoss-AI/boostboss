@@ -2653,8 +2653,15 @@
                  (Spend) and money-kept (Balance) get color; counts and
                  ratio stay neutral. Trend arrows show period-over-period
                  delta when available, otherwise hide cleanly via the
-                 .stat-trend.is-empty rule. -->
-            <div class="stats-row">
+                 .stat-trend.is-empty rule.
+
+                 Inline grid-template-columns locks the row to 5 cols
+                 regardless of viewport — the default .stats-row CSS has
+                 a @media (max-width: 1100px) rule that drops to 3 cols
+                 and wraps to two rows, which makes the page-width feel
+                 inconsistent vs Campaigns (Campaigns uses an identical
+                 inline override). Same trick as #79 task. -->
+            <div class="stats-row" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
                 <div class="stat-card accent-neutral">
                     <div class="stat-label" data-t="stats.impressions">Total Impressions</div>
                     <div class="stat-value" id="totalImpressions">0</div>
