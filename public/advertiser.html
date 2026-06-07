@@ -499,6 +499,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.95rem;
+            table-layout: auto;
         }
 
         .campaigns-table thead {
@@ -506,20 +507,66 @@
         }
 
         .campaigns-table th {
-            padding: 1rem;
+            padding: 12px 10px;
             text-align: left;
             color: var(--text-secondary);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 0.5px;
+            white-space: nowrap;       /* never wrap headers (曝光數, 點擊數) */
+            vertical-align: middle;
         }
 
         .campaigns-table td {
-            padding: 1rem;
+            padding: 14px 10px;
             border-top: 1px solid var(--border);
             color: var(--text);
+            vertical-align: middle;
         }
+
+        /* Column widths (10 columns).
+           1 name (flex)
+           2 status   ~140px  (badge + sub-line)
+           3 Benna    ~110px
+           4 format   ~80px
+           5 imps     ~70px   (numeric)
+           6 clicks   ~70px   (numeric)
+           7 ctr      ~60px   (numeric)
+           8 spend    ~80px   (numeric)
+           9 budget   ~80px   (numeric)
+           10 actions ~190px  (3 buttons in a row) */
+        .campaigns-table th:nth-child(1),
+        .campaigns-table td:nth-child(1) { min-width: 200px; }
+        .campaigns-table th:nth-child(2),
+        .campaigns-table td:nth-child(2) { min-width: 140px; }
+        .campaigns-table th:nth-child(3),
+        .campaigns-table td:nth-child(3) { min-width: 110px; }
+        .campaigns-table th:nth-child(4),
+        .campaigns-table td:nth-child(4) { min-width: 80px; white-space: nowrap; }
+        .campaigns-table th:nth-child(5),
+        .campaigns-table td:nth-child(5),
+        .campaigns-table th:nth-child(6),
+        .campaigns-table td:nth-child(6),
+        .campaigns-table th:nth-child(7),
+        .campaigns-table td:nth-child(7),
+        .campaigns-table th:nth-child(8),
+        .campaigns-table td:nth-child(8),
+        .campaigns-table th:nth-child(9),
+        .campaigns-table td:nth-child(9) {
+            text-align: right;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .campaigns-table th:nth-child(10),
+        .campaigns-table td:nth-child(10) {
+            min-width: 200px;
+            white-space: nowrap;
+            text-align: right;
+        }
+        /* Status cell: keep badge + sub-line stacked cleanly */
+        .campaigns-table td:nth-child(2) .badge { white-space: nowrap; }
+        .campaigns-table td:nth-child(2) > div { white-space: normal; max-width: 160px; line-height: 1.35; }
 
         .campaigns-table tbody tr {
             transition: all 0.3s ease;
@@ -559,18 +606,23 @@
         }
 
         .action-buttons {
-            display: flex;
-            gap: 0.5rem;
+            display: inline-flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+            justify-content: flex-end;
         }
 
         .action-btn {
-            padding: 0.4rem 0.8rem;
+            padding: 6px 12px;
             background-color: var(--border);
             color: var(--text);
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
             transition: all 0.3s ease;
         }
 
