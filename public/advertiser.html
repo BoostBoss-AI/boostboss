@@ -425,6 +425,9 @@
             border-radius: 10px;
             padding: 2rem;
             margin-bottom: 2rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .chart-title {
@@ -436,6 +439,8 @@
 
         .chart-container {
             width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             background: transparent;
             /* No border/padding here — .chart-section is the visual card
                wrapper. A second border + padding made the chart visibly
@@ -443,16 +448,21 @@
         }
 
         /* Summary strip above the bars. Compact data row showing peak,
-           avg, total — pro-dashboard pattern (Stripe / Linear). */
+           avg, total — pro-dashboard pattern (Stripe / Linear).
+           Locked to a 3-equal-column grid so the strip width never
+           depends on the value lengths inside (e.g. 8,585,755 vs
+           730,251 across 90D and 7D). */
         .chart-summary {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 32px;
             padding: 4px 0 18px 0;
             border-bottom: 1px solid #F1F2F4;
             margin-bottom: 18px;
-            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
         }
-        .chart-summary-item { min-width: 120px; }
+        .chart-summary-item { min-width: 0; }
         .chart-summary-label {
             font-size: 11px;
             font-weight: 600;
@@ -478,12 +488,17 @@
             letter-spacing: 0;
         }
 
-        /* Plot = Y-axis labels (left) + bar area (right). */
+        /* Plot = Y-axis labels (left) + bar area (right).
+           Explicit width + box-sizing so toggling 7D/14D/30D/90D does
+           not let the bar count influence the section's measured width. */
         .chart-plot {
             display: flex;
             gap: 12px;
             height: 240px;
             position: relative;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .chart-yaxis {
             display: flex;
@@ -501,6 +516,11 @@
         .chart-ytick { line-height: 1; }
         .chart-bars {
             flex: 1;
+            min-width: 0;             /* don't let bars push the parent
+                                         wider than 100% — without this,
+                                         a low bar count + min-width
+                                         defaults can subtly differ from
+                                         a high bar count */
             position: relative;
             display: flex;
             align-items: flex-end;
@@ -517,6 +537,9 @@
         }
         .chart-bar {
             flex: 1;
+            min-width: 0;             /* match .chart-bars — keep widths
+                                         determined by flex distribution
+                                         only, not by intrinsic content */
             background: linear-gradient(180deg, #FF85B1 0%, #FF2D78 100%);
             border-radius: 4px 4px 0 0;
             min-height: 2px;
@@ -576,6 +599,7 @@
             border-radius: 10px;
             padding: 2rem;
             margin-bottom: 2rem;
+            box-sizing: border-box;
         }
 
         .campaigns-header {
