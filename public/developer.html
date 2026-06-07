@@ -4010,9 +4010,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     window._pubChartDays = Number(range.replace('d', '')) || 7;
                     buttons.forEach(x => x.classList.toggle('active', x === b));
                     try { localStorage.setItem('bb_pub_chart_days', range); } catch (_) {}
-                    // Re-render chart from cached stats with the new window.
-                    if (window._lastPubStats && Array.isArray(window._lastPubStats.daily)) {
-                        renderChart(window._lastPubStats.daily, window._pubChartDays);
+                    // Re-render cards + trends + chart for the new window.
+                    if (window._lastPubStats) {
+                        renderPubHomeForWindow(window._pubChartDays);
                     }
                 });
             });
@@ -4037,32 +4037,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         function updateDashboard(stats) {
             // Cache so the date-range toggle can re-derive without re-fetching.
             window._lastPubStats = stats;
-
-            // Update stats cards (5-card mirror of advertiser home)
-            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-            const totals = {
-                earnings:    Number(stats.total_earnings    || 0),
-                impressions: Number(stats.total_impressions || 0),
-                clicks:      Number(stats.total_clicks      || 0),
-                rpm:         Number(stats.rpm               || 0),
-            };
-            const ctrPct = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0;
-            set('totalEarnings',    '$' + totals.earnings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-            set('totalImpressions', totals.impressions.toLocaleString());
-            set('totalClicks',      totals.clicks.toLocaleString());
-            set('ctrValue',         ctrPct.toFixed(2) + '%');
-            set('rpmValue',         '$' + totals.rpm.toFixed(2));
-
-            // Period-over-period trend pills — split daily series in half.
-            const daily = Array.isArray(stats.daily) ? stats.daily : [];
-            setPubStatTrend('earnings',    daily, d => Number(d.earnings    || 0));
-            setPubStatTrend('impressions', daily, d => Number(d.impressions || 0));
-            setPubStatTrend('clicks',      daily, d => Number(d.clicks      || 0));
-            setPubStatTrend('rpm',         daily, d => Number(d.rpm         || 0));
-            setPubStatTrend('ctr',         daily, d => {
-                const i = Number(d.impressions || 0);
-                return i > 0 ? (Number(d.clicks || 0) / i) * 100 : 0;
-            });
+            // Cards / trends / chart all read from the same windowed slice.
+            renderPubHomeForWindow(window._pubChartDays || 7);
 
             document.getElementById('navAppName').textContent =
                 userProfile.app_name || (userProfile.email ? String(userProfile.email).split('@')[0] : 'Publisher');
@@ -4085,12 +4061,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
 
             // Render chart at the currently selected date range (default 7D)
-            if (stats.daily && stats.daily.length > 0) {
-                const days = (window._pubChartDays) || 7;
-                renderChart(stats.daily, days);
-            } else {
-                document.getElementById('chartContainer').innerHTML = '<p style="text-align: center; color: #9CA3AF; padding: 2rem; font-size: 13px;">No data yet</p>';
-            }
+            // Chart already rendered by renderPubHomeForWindow() above —
+            // no need to render again here.
 
             // Render the Ad Placements panel
             renderAdPlacements();
@@ -4682,6 +4654,70 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             return out;
         }
 
+        // Render every piece of the publisher home (5 stat cards + 5 trend
+        // pills + chart) for a given calendar-day window. Cards and trends
+        // now read the SAME windowed slice the chart uses, so toggling
+        // 7D/14D/30D/90D keeps everything consistent — no more "cards say
+        // $0.79 lifetime, chart says $0.01 7D" mismatch.
+        function renderPubHomeForWindow(days) {
+            const stats = window._lastPubStats;
+            if (!stats) return;
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            const daily = Array.isArray(stats.daily) ? stats.daily : [];
+
+            // Build the contiguous window once and reuse it for cards,
+            // trends, and chart.
+            const windowed = buildPubDailyWindow(daily, days);
+            const prior    = buildPubDailyWindow(daily, days * 2).slice(0, days);
+
+            const sum   = (arr, k) => arr.reduce((s, d) => s + Number(d[k] || 0), 0);
+            const earnings    = sum(windowed, 'earnings');
+            const impressions = sum(windowed, 'impressions');
+            const clicks      = sum(windowed, 'clicks');
+            const ctrPct      = impressions > 0 ? (clicks / impressions) * 100 : 0;
+            const rpm         = impressions > 0 ? (earnings / impressions) * 1000 : 0;
+
+            // Money formatting — adaptive precision for tiny values (a
+            // $0.01 7D total shouldn't display as $0.01 next to a 14D
+            // $0.005 that rounds to the same).
+            const fmtMoney = (n) => {
+                const v = Number(n);
+                const d = Math.abs(v) < 0.01 ? 4 : Math.abs(v) < 1 ? 3 : 2;
+                return '$' + v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+            };
+            set('totalEarnings',    fmtMoney(earnings));
+            set('totalImpressions', impressions.toLocaleString());
+            set('totalClicks',      clicks.toLocaleString());
+            set('ctrValue',         ctrPct.toFixed(2) + '%');
+            set('rpmValue',         fmtMoney(rpm));
+
+            // Trend pills — compare this window to the prior window of
+            // the same length. setPubStatTrend wants an array it can
+            // split in half, so concatenate prior+current.
+            const trendInput = prior.concat(windowed);
+            setPubStatTrend('earnings',    trendInput, d => Number(d.earnings    || 0));
+            setPubStatTrend('impressions', trendInput, d => Number(d.impressions || 0));
+            setPubStatTrend('clicks',      trendInput, d => Number(d.clicks      || 0));
+            setPubStatTrend('rpm',         trendInput, d => {
+                const i = Number(d.impressions || 0);
+                return i > 0 ? (Number(d.earnings || 0) / i) * 1000 : 0;
+            });
+            setPubStatTrend('ctr', trendInput, d => {
+                const i = Number(d.impressions || 0);
+                return i > 0 ? (Number(d.clicks || 0) / i) * 100 : 0;
+            });
+
+            // Chart — pass the raw daily; renderChart will rebuild its own
+            // windowed slice (same buildPubDailyWindow) so the bars and
+            // summary numbers stay aligned with the cards above.
+            if (daily.length > 0) {
+                renderChart(daily, days);
+            } else {
+                document.getElementById('chartContainer').innerHTML =
+                    '<p style="text-align:center;color:#9CA3AF;padding:2rem;font-size:13px;">No data yet</p>';
+            }
+        }
+
         // Render the daily-earnings chart with summary strip, y-axis grid,
         // value-shaded bars, and date-labelled x-axis. Mirrors the
         // advertiser home chart so the two dashboards share a visual
@@ -4709,7 +4745,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 : '—';
 
             const t = (k, en) => (window.DASH_T && window.DASH_T[k]) || en;
-            const fmtMoney = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            // Adaptive precision: when the largest value is under $1, use
+            // 3 decimals so the 25%/50%/75% labels stop collapsing into
+            // duplicate "$0.00 / $0.01" stacks. Under $0.10 → 3 decimals;
+            // under $0.01 → 4 decimals; otherwise 2 (normal money).
+            const decimals = max < 0.01 ? 4 : max < 1 ? 3 : 2;
+            const fmtMoney = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
             const lblPeak  = t('chart.peak',  'Peak day');
             const lblAvg   = t('chart.avg',   'Daily avg');
             const lblTotal = t('chart.total', 'Total');
