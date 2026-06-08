@@ -121,26 +121,115 @@ function tokenFor(user) {
 }
 
 // ────────────────────────────────────────────────────────────────────
+//                  bb_session COOKIE — cross-origin auth
+// ────────────────────────────────────────────────────────────────────
+// Used purely so benna.ai (different root domain) can ask "is this user
+// signed in?" via a CORS fetch with credentials: 'include'. The same JWT
+// value also lives in localStorage on boostboss.ai for everything else —
+// the cookie is purely additive.
+//
+// Security model:
+//   - HttpOnly  → JS can't read the cookie; only the browser sends it.
+//                 Reduces XSS impact (a stolen XSS payload can't exfil
+//                 the session token from document.cookie).
+//   - Secure    → only sent over HTTPS.
+//   - SameSite=None → required so the browser sends it on the
+//                     cross-origin fetch from benna.ai to boostboss.ai.
+//   - Path=/    → available on every endpoint on boostboss.ai.
+//
+// CSRF: the cookie is used ONLY for the read-only me_cors action, which
+// returns just { email, app_name, role }. State-changing endpoints
+// still require the Bearer token in the Authorization header — which a
+// CSRF attacker can't forge cross-origin. So the cookie identifies who;
+// the Bearer token still authorizes what.
+function setSessionCookie(res, token) {
+  if (!token) return;
+  const cookie = [
+    "bb_session=" + token,
+    "Path=/",
+    "HttpOnly",
+    "Secure",
+    "SameSite=None",
+    "Max-Age=" + TOKEN_TTL_SEC,
+  ].join("; ");
+  // Append rather than overwrite so we don't clobber any other Set-Cookie
+  // headers the response is already carrying.
+  const prior = res.getHeader("Set-Cookie");
+  if (!prior) {
+    res.setHeader("Set-Cookie", cookie);
+  } else if (Array.isArray(prior)) {
+    res.setHeader("Set-Cookie", prior.concat(cookie));
+  } else {
+    res.setHeader("Set-Cookie", [prior, cookie]);
+  }
+}
+
+// Read the bb_session value from the Cookie request header. Returns the
+// JWT string (or null). Robust against extra cookies and missing header.
+function readSessionCookie(req) {
+  const raw = req.headers && req.headers.cookie;
+  if (!raw) return null;
+  for (const part of raw.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq < 0) continue;
+    const k = part.slice(0, eq).trim();
+    if (k === "bb_session") return part.slice(eq + 1).trim();
+  }
+  return null;
+}
+
+// ────────────────────────────────────────────────────────────────────
 //                              HANDLER
 // ────────────────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
-  // Restrict CORS in production to BoostBoss origins; allow * in demo for local dev
+  // Restrict CORS in production. Two trust circles:
+  //   1. Same-origin (boostboss.ai, www.) — the main dashboard
+  //   2. Cross-origin benna.ai — marketing site that needs to know whether
+  //      the user is signed in so it can render an avatar + name lockup
+  //      instead of the Sign-up CTA.
+  // Cross-origin requests from benna.ai MUST send credentials (the
+  // bb_session cookie) to read the me_cors response, so we have to:
+  //   - echo the exact Origin header back (wildcard not allowed with credentials)
+  //   - set Access-Control-Allow-Credentials: true
+  //   - include cookie in Vary so cached responses don't leak across origins.
   const PUBLIC_BASE = process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai";
+  const ALLOWED_ORIGINS = [
+    "https://boostboss.ai",
+    "https://www.boostboss.ai",
+    "https://benna.ai",
+    "https://www.benna.ai",
+    PUBLIC_BASE,
+  ];
+  const reqOrigin = req.headers && req.headers.origin;
   if (HAS_SUPABASE) {
-    const origin = req.headers && req.headers.origin;
-    const allowed = ["https://boostboss.ai", "https://www.boostboss.ai", PUBLIC_BASE];
-    res.setHeader("Access-Control-Allow-Origin", allowed.includes(origin) ? origin : PUBLIC_BASE);
+    res.setHeader(
+      "Access-Control-Allow-Origin",
+      ALLOWED_ORIGINS.includes(reqOrigin) ? reqOrigin : PUBLIC_BASE
+    );
   } else {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    // Demo / dev — echo any origin so localhost works, but only when there
+    // IS an origin (browsers send it on cross-origin fetches).
+    res.setHeader("Access-Control-Allow-Origin", reqOrigin || "*");
   }
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Vary", "Origin, Cookie");
   res.setHeader("x-auth-mode", HAS_SUPABASE ? "supabase" : "demo");
   if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
   const action = (req.query && req.query.action) || (req.body && req.body.action);
   const body = req.body || {};
+
+  // me_cors is the ONLY action allowed via GET. It's read-only (returns
+  // the logged-in user from the cookie) and used by benna.ai to render
+  // a logged-in lockup. Everything else still requires POST.
+  if (req.method === "GET" && action !== "me_cors") {
+    return res.status(405).json({ error: "GET allowed only for action=me_cors" });
+  }
+  if (req.method !== "POST" && req.method !== "GET") {
+    return res.status(405).json({ error: "POST only" });
+  }
 
   try {
     // ── DEMO MODE ─────────────────────────────────────────────────
@@ -166,12 +255,14 @@ function demoHandler(action, body, req, res) {
     if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
     if (!["advertiser", "developer"].includes(role)) return res.status(400).json({ error: "role must be advertiser or developer" });
     const user = demoUpsert(email, role, { company_name, app_name });
+    const token = tokenFor(user);
+    setSessionCookie(res, token);
     return res.json({
       success: true,
       mode: "demo",
       user: { id: user.id, email: user.email, role: user.role },
       profile: user.profile,
-      session: { access_token: tokenFor(user), expires_in: TOKEN_TTL_SEC, token_type: "Bearer" },
+      session: { access_token: token, expires_in: TOKEN_TTL_SEC, token_type: "Bearer" },
     });
   }
 
@@ -182,12 +273,35 @@ function demoHandler(action, body, req, res) {
     const id = userIdFromEmail(email);
     let user = DEMO_USERS.get(id);
     if (!user) user = demoUpsert(email, "advertiser");
+    const token = tokenFor(user);
+    setSessionCookie(res, token);
     return res.json({
       success: true,
       mode: "demo",
       user: { id: user.id, email: user.email, role: user.role },
       profile: user.profile,
-      session: { access_token: tokenFor(user), expires_in: TOKEN_TTL_SEC, token_type: "Bearer" },
+      session: { access_token: token, expires_in: TOKEN_TTL_SEC, token_type: "Bearer" },
+    });
+  }
+
+  // Cross-origin read-only auth check used by benna.ai.
+  //   GET /api/auth?action=me_cors with Cookie: bb_session=<jwt>
+  // Returns a minimal {email, app_name, role} so benna.ai can render
+  // the avatar + name lockup. Never returns sensitive data.
+  if (action === "me_cors") {
+    const token = readSessionCookie(req);
+    if (!token) return res.status(401).json({ error: "Not signed in" });
+    const claims = verifyJwt(token);
+    if (!claims) return res.status(401).json({ error: "Invalid or expired token" });
+    let user = DEMO_USERS.get(claims.sub);
+    if (!user) user = demoUpsert(claims.email, claims.role);
+    const p = user.profile || {};
+    return res.json({
+      mode: "demo",
+      email:        user.email,
+      role:         user.role,
+      app_name:     p.app_name || null,
+      company_name: p.company_name || null,
     });
   }
 
@@ -206,6 +320,10 @@ function demoHandler(action, body, req, res) {
 
   if (action === "logout") {
     // JWTs are stateless — client just discards the token. Acknowledge for UX symmetry.
+    // Also clear the bb_session cookie so benna.ai's me_cors check
+    // returns 401 on the next page load.
+    res.setHeader("Set-Cookie",
+      "bb_session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0");
     return res.json({ success: true, mode: "demo" });
   }
 
@@ -345,11 +463,52 @@ async function supabaseHandler(action, body, req, res) {
       });
     }
 
+    // Set the cross-origin session cookie alongside the existing
+    // Bearer token. benna.ai reads this cookie via /api/auth?action=me_cors
+    // to know whether to render the avatar lockup or the Sign-up CTA.
+    setSessionCookie(res, data.session.access_token);
+
     return res.json({
       success: true, mode: "supabase",
       user: { id: data.user.id, email: data.user.email, role: wantedRole },
       profile,
       session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token },
+    });
+  }
+
+  // Cross-origin read-only auth check used by benna.ai.
+  // Same shape as the demo branch's me_cors above.
+  if (action === "me_cors") {
+    const token = readSessionCookie(req);
+    if (!token) return res.status(401).json({ error: "Not signed in" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid or expired token" });
+    // Pull the matching profile for whichever role the user last signed
+    // in with. We don't know the route they're coming from on benna.ai,
+    // so fall back to user_metadata.role.
+    const role = user.user_metadata?.role || "advertiser";
+    let appName = null, companyName = null;
+    if (role === "advertiser") {
+      const { data: adv } = await supabaseAdmin
+        .from("advertisers")
+        .select("company_name")
+        .eq("id", user.id)
+        .maybeSingle();
+      companyName = adv && adv.company_name;
+    } else if (role === "developer") {
+      const { data: dev } = await supabaseAdmin
+        .from("developers")
+        .select("app_name")
+        .eq("id", user.id)
+        .maybeSingle();
+      appName = dev && dev.app_name;
+    }
+    return res.json({
+      mode: "supabase",
+      email:        user.email,
+      role,
+      app_name:     appName,
+      company_name: companyName,
     });
   }
 
@@ -466,6 +625,9 @@ async function supabaseHandler(action, body, req, res) {
   if (action === "logout") {
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (token) await supabaseAnon.auth.signOut();
+    // Clear the cross-origin session cookie so benna.ai notices.
+    res.setHeader("Set-Cookie",
+      "bb_session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0");
     return res.json({ success: true, mode: "supabase" });
   }
 
@@ -942,6 +1104,12 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
   } else {
     const apiKey = makeApiKey("dev", userId);
     profile = { app_name: app_name || "My AI App", api_key: apiKey };
+  }
+
+  // Also set the cross-origin session cookie. benna.ai uses this to
+  // detect the logged-in state via /api/auth?action=me_cors.
+  if (!signInErr && signInData && signInData.session) {
+    setSessionCookie(res, signInData.session.access_token);
   }
 
   return res.json({
