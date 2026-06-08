@@ -10737,5 +10737,10 @@
             if (currentUser) checkOnboarding();
         }, 1500);
     </script>
+
+    <!-- Boost Boss assistant — floating Q&A copilot scoped to the
+         advertiser dashboard. Single self-contained script; talks to
+         /api/assist (POST). Uses ANTHROPIC_API_KEY on the backend. -->
+    <script src="/assist.js" data-surface="advertiser" defer></script>
 </body>
 </html>
