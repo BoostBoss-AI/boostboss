@@ -614,6 +614,13 @@ async function supabaseHandler(action, body, req, res) {
       console.warn("[Auth oauth_sync] user_metadata update failed:", e.message);
     }
 
+    // Set the cross-origin session cookie so benna.ai can detect the
+    // logged-in user. Google OAuth is the most common sign-in path, so
+    // this branch absolutely has to set the cookie — missing this was
+    // the bug that left benna.ai showing Sign-up after every OAuth
+    // sign-in.
+    setSessionCookie(res, token);
+
     return res.json({
       success: true, mode: "supabase",
       user: { id: user.id, email: user.email, role },
