@@ -269,6 +269,54 @@ body.dark .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink)
 .superboost-mark .bb { color: var(--pink); }
 body.dark .superboost-mark { color: #F3F4F6; }
 
+/* "Powered by Benna" treatments — the brand framing surfaces the
+   optimization moat without renaming SuperBoost Ads. Two variants:
+     .powered-by-inline — small italic appended after the mark
+                          (used in body copy like "Reach AI-native users
+                          via SuperBoost Ads · Powered by Benna").
+     .powered-by-stack  — stacked under the wordmark in the top-left
+                          nav lockup, smaller, on its own line. */
+.powered-by-inline {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.85em;
+  color: #6B7280;
+  margin-left: 4px;
+}
+.powered-by-inline .benna-accent {
+  color: #9D7AFF;      /* Benna brand violet */
+  font-style: italic;
+  font-weight: 600;
+}
+.superboost-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+  vertical-align: middle;
+}
+.superboost-wordmark .superboost-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+body.dark .superboost-wordmark .superboost-name { color: #F3F4F6; }
+.superboost-wordmark .powered-by-stack {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  font-style: italic;
+  color: #6B7280;
+  letter-spacing: 0;
+  margin-top: 2px;
+}
+.superboost-wordmark .powered-by-stack em {
+  color: #9D7AFF;
+  font-style: italic;
+  font-weight: 600;
+}
+
 .lumi-mark {
   /* Same font + treatment as the top-left nav logo so "Lumi SDK" reads
      identically wherever it appears on the page. */
@@ -726,7 +774,8 @@ const sb = window.supabase && window.supabase.createClient
   var brand = null;
 
   var LUMI = '<span class="lumi-mark">Lumi SDK <span class="spark">✦</span></span>';
-  var SUPERBOOST = '<span class="superboost-mark">Super<span class="bb">Boost Ads</span></span>';
+  var SUPERBOOST = '<span class="superboost-mark">Super<span class="bb">Boost Ads</span></span>' +
+    '<span class="powered-by-inline"> · <em>Powered by <span class="benna-accent">Benna</span></em></span>';
   // Primary rocket logo SVG — shared across the landing / publish / ads navs
   var ROCKET_SVG = '<svg class="brand-mark" width="36" height="36" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">' +
     '<path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>' +
@@ -765,7 +814,10 @@ const sb = window.supabase && window.supabase.createClient
       loginH:  "Welcome back",
       loginS:  "Sign in to your " + SUPERBOOST + " dashboard",
       logoSvg: ROCKET_SVG,
-      wordmark: 'Super<span style="color: var(--pink);">Boost Ads</span>',
+      wordmark: '<span class="superboost-wordmark">' +
+                  '<span class="superboost-name">Super<span style="color: var(--pink);">Boost Ads</span></span>' +
+                  '<span class="powered-by-stack">Powered by <em>Benna</em></span>' +
+                '</span>',
       brandHref: "/ads"
     };
   }
