@@ -173,8 +173,25 @@
     transition: opacity var(--shell-trans-sidebar);
     /* Flex-grow so it pushes the collapse-btn to the right edge of the head. */
     flex: 1;
+    /* Stacked lockup: product name + "Powered by Benna" subtitle */
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
 }
 .shell-sidebar__product .accent { color: var(--shell-brand-pink); }
+.shell-sidebar__product .powered-by {
+    font-size: 10px;
+    font-weight: 500;
+    color: #6B7280;
+    letter-spacing: 0;
+    margin-top: 2px;
+    font-style: italic;
+}
+.shell-sidebar__product .powered-by em {
+    color: #9D7AFF;  /* Benna brand violet */
+    font-style: italic;
+    font-weight: 600;
+}
 .shell-wrap[data-shell-sidebar="collapsed"] .shell-sidebar__product { opacity: 0; pointer-events: none; }
 
 .shell-sidebar__nav {
