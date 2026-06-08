@@ -8,13 +8,17 @@
 
 <!-- ════════════════════════════════════════════════════════════════════
      INTERNAL VALIDATION PUBLISHER FOR DOOR 2 (Lumi SDK script tag).
-     This is a throwaway page — not linked from anywhere on the site.
+     Moved 2026-06-06 from /test/lumi-snippet-test to the admin-gated
+     path /admin/qa/lumi-snippet-test so it isn't browsable by any
+     stranger who happens to guess the URL — same defense-in-depth
+     posture as the rest of /admin.
      Purpose: load lumi.js with sandbox publisher ID, mount all four slot
      formats, watch them render in the browser, take screenshots.
 
      Usage:
-       https://boostboss.ai/test/lumi-snippet-test
-     (or open the file directly via local server)
+       1. Log in at https://boostboss.ai/admin with your BBX_ADMIN_KEY.
+          That populates localStorage.bb_admin_token.
+       2. Then open https://boostboss.ai/admin/qa/lumi-snippet-test.
 
      What to verify:
        1. Each slot renders the [Sandbox] creative
@@ -25,6 +29,25 @@
        6. Console has no Lumi errors
        7. Layout adapts to dark mode (set OS to dark + reload)
      ════════════════════════════════════════════════════════════════════ -->
+
+<!-- Admin-token gate. Runs synchronously before anything else loads so
+     the SDK doesn't fire ad requests for an unauthorized visitor. Same
+     storage key (bb_admin_token) and same redirect target (/admin) that
+     /admin.html itself uses. -->
+<script>
+(function () {
+  var tok = null;
+  try { tok = localStorage.getItem('bb_admin_token'); } catch (_) {}
+  if (!tok) {
+    // Stop the page in its tracks and bounce to the admin login. After
+    // the operator logs in there, they can re-open this URL — the
+    // bb_admin_token cookie/local-storage will be set and the gate
+    // will pass.
+    document.documentElement.innerHTML = '';
+    window.location.replace('/admin');
+  }
+})();
+</script>
 
 <!-- The Lumi SDK script tag — exactly what a publisher would add. -->
 <script async
