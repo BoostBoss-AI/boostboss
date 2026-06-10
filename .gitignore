@@ -8,3 +8,4 @@ benna-ai/
 benna-ai/
 .vercel
 .env*.local
+launch-kit/outreach-batch-*.csv
