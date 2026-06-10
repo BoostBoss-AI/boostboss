@@ -431,7 +431,20 @@ async function supabaseHandler(action, body, req, res) {
     const { email, password, role: wantedRoleRaw } = body;
     if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
     const { data, error } = await supabaseAnon.auth.signInWithPassword({ email, password });
-    if (error) return res.status(401).json({ error: error.message });
+    if (error) {
+      // Phase 3A: catch the specific "email not confirmed" error and return
+      // a structured response so the signup page can render a "resend
+      // confirmation" button instead of a generic error.
+      const msg = (error.message || "").toLowerCase();
+      if (msg.includes("email not confirmed") || msg.includes("not confirmed") || msg.includes("confirm")) {
+        return res.status(403).json({
+          error: "Please confirm your email before signing in. Check your inbox for the confirmation link.",
+          requires_confirmation: true,
+          email,
+        });
+      }
+      return res.status(401).json({ error: error.message });
+    }
 
     // Two-product sign-in: the role is decided by the URL the user came
     // from (e.g. /publish/signin vs /ads/signin). We only return the
@@ -636,6 +649,78 @@ async function supabaseHandler(action, body, req, res) {
     res.setHeader("Set-Cookie",
       "bb_session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0");
     return res.json({ success: true, mode: "supabase" });
+  }
+
+  // ── Phase 3A: Resend the email-confirmation message ──
+  // Called from either the /check-email page ("Didn't get the email?") or
+  // from the signup page when a login fails with requires_confirmation.
+  if (action === "resend_confirmation") {
+    const { email, role: roleRaw } = body;
+    if (!email) return res.status(400).json({ error: "Missing email" });
+    const role = roleRaw === "developer" ? "developer" : "advertiser";
+    const { error } = await supabaseAnon.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: confirmRedirectFor(role) },
+    });
+    if (error) {
+      // Don't leak whether the email exists — return a generic success
+      // even on "user not found" to avoid email enumeration.
+      console.warn("[Auth] resend_confirmation error:", error.message);
+    }
+    return res.json({ success: true });
+  }
+
+  // ── Phase 3B: Request password reset email ──
+  // Triggered by the /forgot-password page. Email contains a link to
+  // /ads/reset-password (or /publish/reset-password) where the user lands
+  // with the recovery access_token in the URL hash. The reset-password
+  // page uses that token to authenticate, then calls action=update_password
+  // to set the new value.
+  //
+  // We always return success even if the email doesn't exist, to avoid
+  // letting attackers enumerate registered emails.
+  if (action === "request_password_reset") {
+    const { email, role: roleRaw } = body;
+    if (!email) return res.status(400).json({ error: "Missing email" });
+    const role = roleRaw === "developer" ? "developer" : "advertiser";
+    const { error } = await supabaseAnon.auth.resetPasswordForEmail(email, {
+      redirectTo: resetRedirectFor(role),
+    });
+    if (error) {
+      console.warn("[Auth] request_password_reset error:", error.message);
+    }
+    return res.json({ success: true });
+  }
+
+  // ── Phase 3B: Update password using a recovery-flow access_token ──
+  // The /reset-password page extracts the access_token from the URL hash
+  // (set by Supabase after verifying the recovery link), then POSTs it
+  // here with the new password. We use the user-scoped Supabase client
+  // (not admin) so that the access_token is what authorizes the update,
+  // not our service role key — that way the token actually has to be
+  // valid + non-expired + of recovery type.
+  if (action === "update_password") {
+    const { access_token, password } = body;
+    if (!access_token || !password) {
+      return res.status(400).json({ error: "Missing access_token or password" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+    const createClient = loadSupabase();
+    if (!createClient) return res.status(500).json({ error: "Supabase client unavailable" });
+    // User-scoped client — uses the recovery access_token as the bearer.
+    const supabaseUser = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: `Bearer ${access_token}` } },
+    });
+    const { error } = await supabaseUser.auth.updateUser({ password });
+    if (error) {
+      return res.status(400).json({
+        error: error.message || "Could not update password. The reset link may have expired.",
+      });
+    }
+    return res.json({ success: true });
   }
 
   if (action === "update_formats") {
@@ -1025,7 +1110,20 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, logout, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method" });
+}
+
+// ── helper: build the email confirmation redirect URL for a given role ──
+// Email links in the confirmation email land here after Supabase verifies
+// the token. /ads/confirm vs /publish/confirm so the user sees the right
+// product branding and lands at the right dashboard afterward.
+function confirmRedirectFor(role) {
+  const base = process.env.PUBLIC_BASE || "https://boostboss.ai";
+  return role === "developer" ? `${base}/publish/confirm` : `${base}/ads/confirm`;
+}
+function resetRedirectFor(role) {
+  const base = process.env.PUBLIC_BASE || "https://boostboss.ai";
+  return role === "developer" ? `${base}/publish/reset-password` : `${base}/ads/reset-password`;
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
@@ -1035,33 +1133,70 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     return res.status(400).json({ error: "Invalid role" });
   }
 
-  // Publisher (Lumi SDK) and Advertiser (SuperBoost Ads) are two separate
-  // products. One email can register for both — we create/update a
-  // profile row per role on the same Supabase auth user.
-  let userId = null;
-  let existingMeta = {};
+  // Phase 3A change (2026-06-10): replaced the previous
+  // `supabaseAdmin.auth.admin.createUser({ email_confirm: true })` bypass
+  // with real email confirmation. Two reasons:
+  //   1. Compliance — an ad network handling money shouldn't let users
+  //      register with email addresses they don't own. Auto-confirm meant
+  //      spammers could register under any address.
+  //   2. Custom-domain branding (Phase 2) — the confirmation email link
+  //      uses auth.boostboss.ai now, which only matters if confirmation
+  //      emails actually exist.
+  //
+  // New flow:
+  //   - supabaseAnon.auth.signUp() creates the user with email_confirmed=false
+  //     and sends the Supabase "Confirm signup" email
+  //   - Profile row is still inserted at signup time so it's ready the moment
+  //     the user confirms (no race conditions, no webhook setup needed)
+  //   - We return { requires_confirmation: true } instead of a session,
+  //     so the signup page redirects to /ads/check-email (or /publish/check-email)
+  //     instead of straight to the dashboard
+  //   - Login is then gated on email_confirmed_at being non-null
+  //
+  // IMPORTANT — Supabase project setting: this requires "Confirm email" to
+  // be enabled in Supabase Dashboard → Authentication → Sign In / Providers
+  // → Email → Confirm email. If that's off, signUp returns a session and
+  // we'd be back to the bypass.
 
   const initialMeta = { role };
   if (role === "advertiser" && company_name) initialMeta.company_name = company_name;
   if (role === "developer"  && app_name)     initialMeta.app_name     = app_name;
 
-  const { data: createData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-    email, password, email_confirm: true,
-    user_metadata: initialMeta,
+  // signUp may return null user (if Supabase rejects), or a user with
+  // session=null (if email confirmation is required). Both are fine —
+  // we don't return a session at this stage either way.
+  const { data: signUpData, error: signUpErr } = await supabaseAnon.auth.signUp({
+    email,
+    password,
+    options: {
+      data: initialMeta,
+      emailRedirectTo: confirmRedirectFor(role),
+    },
   });
 
-  if (createErr) {
-    // Auth user likely already exists. Verify password, then attach the new role.
+  let userId = null;
+  let existingMeta = {};
+  let isExistingUser = false;
+
+  if (signUpErr) {
+    // User already exists OR password doesn't meet Supabase requirements.
+    // Try signInWithPassword to see if it's the "already registered" case
+    // where we should attach a new role to an existing user.
     const { data: siData, error: siErr } = await supabaseAnon.auth.signInWithPassword({ email, password });
     if (siErr || !siData.user) {
+      // Most likely: weak password, invalid email format, or rate limit.
       return res.status(400).json({
-        error: "This email is already registered. Please sign in or use a different email.",
+        error: signUpErr.message || "Could not create account. Please check your email and password.",
       });
     }
+    // Existing user, correct password. Could be:
+    //   - Adding a second product (advertiser already, now signing up as publisher)
+    //   - Re-running signup after confirming a different product
     userId = siData.user.id;
     existingMeta = siData.user.user_metadata || {};
+    isExistingUser = true;
 
-    // Refuse if this role's profile already exists.
+    // Refuse if this role's profile already exists — they should sign in instead.
     const table = role === "advertiser" ? "advertisers" : "developers";
     const { data: existingProfile } = await supabaseAdmin
       .from(table).select("id").eq("id", userId).maybeSingle();
@@ -1072,7 +1207,11 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
       });
     }
   } else {
-    userId = createData.user?.id;
+    userId = signUpData.user?.id;
+  }
+
+  if (!userId) {
+    return res.status(500).json({ error: "Account created but no user ID returned. Please contact support." });
   }
 
   // Merge the new role into user_metadata.roles (array) so future logins can
@@ -1088,7 +1227,8 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     console.warn("[Auth] user_metadata update failed:", e.message);
   }
 
-  // Insert the missing profile row for this role.
+  // Insert the missing profile row for this role. We do this even before
+  // confirmation so it's ready the moment they click the email link.
   if (role === "advertiser") {
     const { error } = await supabaseAdmin.from("advertisers").insert({
       id: userId, email, company_name: company_name || email.split("@")[0], balance: 0,
@@ -1103,30 +1243,36 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     if (error) console.error("[Auth] Developer insert error:", error.message);
   }
 
-  const { data: signInData, error: signInErr } = await supabaseAnon.auth.signInWithPassword({ email, password });
-
-  let profile;
-  if (role === "advertiser") {
-    profile = { company_name: company_name || email.split("@")[0], balance: 0 };
-  } else {
-    const apiKey = makeApiKey("dev", userId);
-    profile = { app_name: app_name || "My AI App", api_key: apiKey };
+  // Existing users (adding a second product) who are ALREADY confirmed
+  // can sign in immediately for the new product — they've already proven
+  // they own the email. Brand-new users must confirm first.
+  if (isExistingUser) {
+    const { data: signInData, error: signInErr } = await supabaseAnon.auth.signInWithPassword({ email, password });
+    let profile;
+    if (role === "advertiser") {
+      profile = { company_name: company_name || email.split("@")[0], balance: 0 };
+    } else {
+      const apiKey = makeApiKey("dev", userId);
+      profile = { app_name: app_name || "My AI App", api_key: apiKey };
+    }
+    if (!signInErr && signInData && signInData.session) {
+      setSessionCookie(res, signInData.session.access_token);
+    }
+    return res.json({
+      success: true, mode: "supabase", requires_confirmation: false,
+      user: { id: userId, email, role },
+      profile,
+      session: signInErr ? null : {
+        access_token: signInData.session.access_token,
+        refresh_token: signInData.session.refresh_token,
+      },
+    });
   }
 
-  // Also set the cross-origin session cookie. benna.ai uses this to
-  // detect the logged-in state via /api/auth?action=me_cors.
-  if (!signInErr && signInData && signInData.session) {
-    setSessionCookie(res, signInData.session.access_token);
-  }
-
+  // Brand-new signup — redirect to check-email page, no session yet.
   return res.json({
-    success: true, mode: "supabase",
+    success: true, mode: "supabase", requires_confirmation: true,
     user: { id: userId, email, role },
-    profile,
-    session: signInErr ? null : {
-      access_token: signInData.session.access_token,
-      refresh_token: signInData.session.refresh_token,
-    },
   });
 }
 

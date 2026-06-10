@@ -662,7 +662,11 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
           <input type="email" id="login-email" name="email" placeholder="you@company.com" required>
         </div>
         <div class="form-group">
-          <label for="login-password">Password</label>
+          <label for="login-password" style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span>Password</span>
+            <a id="forgot-password-link" href="/ads/forgot-password"
+               style="font-size:12.5px; font-weight:500; color:var(--pink); text-decoration:none;">Forgot password?</a>
+          </label>
           <input type="password" id="login-password" name="password" placeholder="Your password" required>
         </div>
         <button type="submit" class="btn-submit" id="login-submit-btn">Sign in</button>
@@ -830,6 +834,12 @@ const sb = window.supabase && window.supabase.createClient
   // Remove the Create/Sign-in tab bar — dedicated URLs handle each
   var tabRow = document.querySelector(".tab-row");
   if (tabRow) tabRow.style.display = "none";
+
+  // Phase 3B: point the Forgot Password link at the right product surface
+  // so the email-link callback uses the matching role's redirect URL and
+  // the post-reset success page sends them back to the right signin URL.
+  var fp = document.getElementById("forgot-password-link");
+  if (fp) fp.href = (role === "developer" ? "/publish" : "/ads") + "/forgot-password";
   // Toggle field visibility to match the locked role
   var companyG = document.getElementById("company-group");
   var appG     = document.getElementById("app-group");
@@ -1183,6 +1193,19 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     const j = await r.json();
     if (!r.ok || j.error) throw new Error(j.error || "Signup failed");
 
+    // Phase 3A: if the backend says email confirmation is required
+    // (brand-new signup), redirect to /check-email instead of dashboard.
+    // The check-email page surfaces the "didn't get it? resend" CTA and
+    // tells the user what to do next.
+    if (j.requires_confirmation) {
+      const email = (payload.email || "").trim();
+      const dest = (selectedRole === "developer" ? "/publish" : "/ads") +
+                   "/check-email?email=" + encodeURIComponent(email);
+      showToast('Account created — check your email', 'success');
+      setTimeout(() => window.location.href = dest, 400);
+      return;
+    }
+
     saveSession(j);
     showWelcome(j);
     showToast('Account created!', 'success');
@@ -1202,16 +1225,28 @@ document.getElementById("login-form").addEventListener("submit", async e => {
   hideMessages();
 
   try {
+    const loginEmail = document.getElementById("login-email").value.trim();
     const r = await fetch(API + "?action=login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: document.getElementById("login-email").value.trim(),
+        email: loginEmail,
         password: document.getElementById("login-password").value,
         role: selectedRole,   // /publish/signin → developer · /ads/signin → advertiser
       }),
     });
     const j = await r.json();
+
+    // Phase 3A: if the backend says email is unconfirmed, route the user
+    // to the check-email page so they can resend the confirmation link.
+    if (!r.ok && j.requires_confirmation) {
+      const dest = (selectedRole === "developer" ? "/publish" : "/ads") +
+                   "/check-email?email=" + encodeURIComponent(loginEmail);
+      showToast('Please confirm your email first', 'info');
+      setTimeout(() => window.location.href = dest, 400);
+      return;
+    }
+
     if (!r.ok || j.error) throw new Error(j.error || "Login failed");
 
     saveSession(j);

@@ -15,7 +15,8 @@
     { "source": "/developer",  "destination": "/publish/dashboard", "permanent": false },
     { "source": "/advertiser", "destination": "/ads/dashboard",     "permanent": false },
     { "source": "/signup",     "destination": "/",                  "permanent": false },
-    { "source": "/login",      "destination": "/",                  "permanent": false }
+    { "source": "/login",      "destination": "/",                  "permanent": false },
+    { "source": "/test/lumi-snippet-test", "destination": "/admin/qa/lumi-snippet-test", "permanent": true }
   ],
   "rewrites": [
     { "source": "/en", "destination": "/index.html" },
@@ -33,8 +34,19 @@
     { "source": "/publish/signin", "destination": "/signup.html" },
     { "source": "/ads/signup", "destination": "/signup.html" },
     { "source": "/ads/signin", "destination": "/signup.html" },
+
+    { "source": "/ads/check-email",         "destination": "/auth-flow.html" },
+    { "source": "/ads/confirm",             "destination": "/auth-flow.html" },
+    { "source": "/ads/forgot-password",     "destination": "/auth-flow.html" },
+    { "source": "/ads/reset-password",      "destination": "/auth-flow.html" },
+    { "source": "/publish/check-email",     "destination": "/auth-flow.html" },
+    { "source": "/publish/confirm",         "destination": "/auth-flow.html" },
+    { "source": "/publish/forgot-password", "destination": "/auth-flow.html" },
+    { "source": "/publish/reset-password",  "destination": "/auth-flow.html" },
+
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin/payouts", "destination": "/admin-payouts.html" },
+    { "source": "/admin/qa/lumi-snippet-test", "destination": "/admin-qa-lumi-snippet-test.html" },
     { "source": "/status", "destination": "/status.html" },
     { "source": "/playground", "destination": "/playground.html" },
     { "source": "/v1/ad-request", "destination": "/api/ad-request" },

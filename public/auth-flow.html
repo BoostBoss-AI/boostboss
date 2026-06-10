@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boost Boss — Auth</title>
+<meta name="description" content="Boost Boss account — email confirmation, sign-in, password reset.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://boostboss.ai/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --pink: #FF2D78; --pink-dark: #E01E65; --cyan: #04BEFE;
+  --ink: #1A1A2E; --ink-soft: #4B4B5E; --muted: #6B7280;
+  --line: #EAEAEF; --bg: #FFFFFF; --bg-soft: #FAFAF7;
+  --green: #10B981; --red: #EF4444; --amber: #F59E0B;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-soft); color: var(--ink);
+  line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+
+/* ── Top brand strip ── */
+.topbar {
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner {
+  display: flex; align-items: center; justify-content: center;
+  height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand img { width: 32px; height: 32px; }
+.brand-name {
+  font-family: 'Space Grotesk', sans-serif; font-size: 20px;
+  font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
+}
+
+/* ── Layout ── */
+.page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+.card {
+  background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  border: 1px solid var(--line); width: 100%; max-width: 480px; padding: 48px 40px;
+}
+.card .emoji {
+  font-size: 48px; text-align: center; margin-bottom: 16px; line-height: 1;
+}
+.card h1 { font-size: 26px; font-weight: 700; margin-bottom: 12px; text-align: center; }
+.card .sub { color: var(--muted); font-size: 15px; text-align: center; margin-bottom: 28px; }
+.card .sub strong { color: var(--ink); }
+
+/* ── Form ── */
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block; font-weight: 600; font-size: 14px; color: var(--ink);
+  margin-bottom: 8px;
+}
+.form-group input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--line);
+  border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--ink);
+  transition: border 0.15s;
+}
+.form-group input:focus { outline: none; border-color: var(--pink); }
+.form-group input:disabled { background: var(--bg-soft); color: var(--muted); }
+.helper { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+/* ── Buttons ── */
+.btn {
+  display: block; width: 100%; padding: 13px 16px;
+  border-radius: 10px; border: none; font-weight: 600; font-size: 15px;
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.btn-primary { background: var(--pink); color: #fff; }
+.btn-primary:hover { background: var(--pink-dark); }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary {
+  background: transparent; color: var(--pink); border: 1.5px solid var(--pink);
+}
+.btn-secondary:hover { background: #FFF5F8; }
+.btn-text {
+  background: transparent; color: var(--pink); border: none;
+  text-decoration: underline; font-weight: 500; cursor: pointer;
+  padding: 0; font-family: inherit; font-size: 14px;
+}
+
+/* ── Status messages ── */
+.status {
+  padding: 12px 14px; border-radius: 10px; font-size: 14px;
+  margin-bottom: 18px; display: none;
+}
+.status.show { display: block; }
+.status.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+.status.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+.status.info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid #fff; border-top-color: transparent;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+  vertical-align: middle; margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Footer ── */
+footer {
+  text-align: center; padding: 24px; color: var(--muted); font-size: 13px;
+}
+footer a { color: var(--pink); text-decoration: none; }
+
+/* ── Spacing helpers ── */
+.mt-12 { margin-top: 12px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.center { text-align: center; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/" id="brandLink">
+      <img src="/favicon.svg?v=rocket-20260421" alt="Boost Boss">
+      <span class="brand-name">Boost Boss</span>
+    </a>
+  </div>
+</div>
+
+<main class="page">
+  <div class="card" id="card">
+    <!-- Card content swapped by JS depending on mode -->
+    <div class="emoji" id="emoji">…</div>
+    <h1 id="title">Loading…</h1>
+    <div class="sub" id="sub"></div>
+
+    <div class="status" id="status"></div>
+
+    <!-- check-email mode: shows after signup -->
+    <div id="mode-check-email" class="hidden">
+      <button class="btn btn-secondary" id="resendBtn">Resend confirmation email</button>
+      <div class="center mt-20">
+        <a href="#" id="backToSignupLink" class="btn-text">Back to sign-up</a>
+      </div>
+    </div>
+
+    <!-- confirm mode: handles the email-link callback -->
+    <div id="mode-confirm" class="hidden">
+      <button class="btn btn-primary hidden" id="confirmGoBtn">Continue to dashboard</button>
+    </div>
+
+    <!-- forgot-password mode: email input form -->
+    <div id="mode-forgot" class="hidden">
+      <form id="forgotForm">
+        <div class="form-group">
+          <label for="forgotEmail">Email address</label>
+          <input type="email" id="forgotEmail" required autocomplete="email" placeholder="you@example.com">
+        </div>
+        <button type="submit" class="btn btn-primary" id="forgotBtn">Send reset link</button>
+      </form>
+      <div class="center mt-20">
+        <a href="#" id="backToSignupLink2" class="btn-text">Back to sign-in</a>
+      </div>
+    </div>
+
+    <!-- reset-password mode: new password form -->
+    <div id="mode-reset" class="hidden">
+      <form id="resetForm">
+        <div class="form-group">
+          <label for="resetPwd">New password</label>
+          <input type="password" id="resetPwd" required autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
+          <div class="helper">Use at least 6 characters. Longer passwords are stronger.</div>
+        </div>
+        <div class="form-group">
+          <label for="resetPwd2">Confirm new password</label>
+          <input type="password" id="resetPwd2" required autocomplete="new-password" minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" id="resetBtn">Update password</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Boost Boss · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+</footer>
+
+<script>
+(() => {
+  // ─────────────────────────────────────────────────────────────────────
+  // Detect mode + product from URL path.
+  //
+  // URL patterns:
+  //   /ads/check-email          → mode=check-email, role=advertiser
+  //   /publish/check-email      → mode=check-email, role=developer
+  //   /ads/confirm              → mode=confirm,     role=advertiser
+  //   /publish/confirm          → mode=confirm,     role=developer
+  //   /ads/forgot-password      → mode=forgot,      role=advertiser
+  //   /publish/forgot-password  → mode=forgot,      role=developer
+  //   /ads/reset-password       → mode=reset,       role=advertiser
+  //   /publish/reset-password   → mode=reset,       role=developer
+  //
+  // Role-derived branding:
+  //   advertiser  → /ads/signup    → /ads/dashboard
+  //   developer   → /publish/signup → /publish/dashboard
+  // ─────────────────────────────────────────────────────────────────────
+  const path = window.location.pathname;
+  const isPublisher = path.startsWith("/publish/");
+  const role = isPublisher ? "developer" : "advertiser";
+  const product = isPublisher ? "Lumi SDK" : "SuperBoost Ads";
+  const signupHref = isPublisher ? "/publish/signup" : "/ads/signup";
+  const dashboardHref = isPublisher ? "/publish/dashboard" : "/ads/dashboard";
+
+  let mode = "unknown";
+  if      (path.endsWith("/check-email"))     mode = "check-email";
+  else if (path.endsWith("/confirm"))         mode = "confirm";
+  else if (path.endsWith("/forgot-password")) mode = "forgot";
+  else if (path.endsWith("/reset-password"))  mode = "reset";
+
+  // ─── DOM helpers ─────────────────────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  function show(id) { $(id).classList.remove("hidden"); }
+  function setStatus(kind, msg) {
+    const el = $("status");
+    el.className = "status show " + kind;
+    el.textContent = msg;
+  }
+  function clearStatus() { $("status").classList.remove("show"); }
+  function setBusy(btnId, busy, busyLabel) {
+    const b = $(btnId);
+    if (busy) {
+      b.dataset.label = b.textContent;
+      b.disabled = true;
+      b.innerHTML = `<span class="spinner"></span>${busyLabel || "Working…"}`;
+    } else {
+      b.disabled = false;
+      b.textContent = b.dataset.label || b.textContent;
+    }
+  }
+
+  // Wire up the "back to signup" links to the right product
+  const back1 = $("backToSignupLink");
+  const back2 = $("backToSignupLink2");
+  if (back1) back1.href = signupHref;
+  if (back2) back2.href = signupHref;
+
+  // ─── Mode: check-email (post-signup landing) ────────────────────────
+  if (mode === "check-email") {
+    const email = (new URLSearchParams(window.location.search)).get("email") || "";
+    $("emoji").textContent = "📬";
+    $("title").textContent = "Check your inbox";
+    $("sub").innerHTML = email
+      ? `We sent a confirmation link to <strong>${email}</strong>. Click it to activate your ${product} account.`
+      : `We sent a confirmation link to your email. Click it to activate your ${product} account.`;
+    show("mode-check-email");
+
+    $("resendBtn").addEventListener("click", async () => {
+      if (!email) {
+        setStatus("error", "Email address missing from URL. Please sign up again.");
+        return;
+      }
+      setBusy("resendBtn", true, "Sending…");
+      clearStatus();
+      try {
+        const r = await fetch("/api/auth?action=resend_confirmation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, role }),
+        });
+        if (r.ok) {
+          setStatus("success", "Email sent. Check your inbox (and spam folder).");
+        } else {
+          setStatus("error", "Could not send email. Please try again or contact support@boostboss.ai.");
+        }
+      } catch (e) {
+        setStatus("error", "Network error. Please try again.");
+      }
+      setBusy("resendBtn", false);
+    });
+  }
+
+  // ─── Mode: confirm (email-link handler) ──────────────────────────────
+  // Supabase has already verified the token by the time the user lands
+  // here (via /auth/v1/verify?token=...&type=signup&redirect_to=here).
+  // The access_token + refresh_token are in the URL hash like:
+  //   #access_token=...&refresh_token=...&expires_in=...&token_type=bearer&type=signup
+  // We parse those, call /api/auth?action=oauth_sync to set our app-side
+  // session cookie, then redirect to the dashboard.
+  if (mode === "confirm") {
+    $("emoji").textContent = "✨";
+    $("title").textContent = "Confirming your email…";
+    $("sub").textContent = `Activating your ${product} account.`;
+    show("mode-confirm");
+
+    (async () => {
+      // Parse the URL hash for the Supabase auth tokens.
+      const hash = window.location.hash.replace(/^#/, "");
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      const tokenType = params.get("type");
+      const errCode = params.get("error_code") || params.get("error");
+      const errDesc = params.get("error_description");
+
+      if (errCode || !accessToken) {
+        $("emoji").textContent = "⚠️";
+        $("title").textContent = "Confirmation link expired";
+        $("sub").innerHTML = `This link is invalid or expired. <a href="${signupHref}" class="btn-text">Sign up again</a> or contact support@boostboss.ai.`;
+        if (errDesc) setStatus("error", decodeURIComponent(errDesc.replace(/\+/g, " ")));
+        return;
+      }
+
+      // Hand the access_token to our backend's oauth_sync action so it can
+      // verify the user, ensure the profile row exists for this role, and
+      // set the cross-origin session cookie that the dashboard expects.
+      try {
+        const r = await fetch("/api/auth?action=oauth_sync", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + accessToken,
+          },
+          body: JSON.stringify({ role }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          $("emoji").textContent = "⚠️";
+          $("title").textContent = "Something went wrong";
+          $("sub").textContent = "We couldn't complete confirmation. Please try signing in.";
+          setStatus("error", data.error || "Unknown error");
+          return;
+        }
+        // Store the session in localStorage so the dashboard JS can use it.
+        if (data.session && data.session.access_token) {
+          localStorage.setItem("bb_token", data.session.access_token);
+        }
+        if (data.user) {
+          localStorage.setItem("bb_user", JSON.stringify(data.user));
+        }
+        if (data.profile) {
+          localStorage.setItem("bb_profile", JSON.stringify(data.profile));
+        }
+        $("emoji").textContent = "🎉";
+        $("title").textContent = "Email confirmed!";
+        $("sub").textContent = `Welcome to ${product}. Redirecting you to the dashboard…`;
+        setTimeout(() => { window.location.href = dashboardHref; }, 1200);
+      } catch (e) {
+        $("emoji").textContent = "⚠️";
+        $("title").textContent = "Network error";
+        $("sub").textContent = "Please try again or contact support@boostboss.ai.";
+        setStatus("error", e.message);
+      }
+    })();
+  }
+
+  // ─── Mode: forgot-password (request reset) ───────────────────────────
+  if (mode === "forgot") {
+    $("emoji").textContent = "🔑";
+    $("title").textContent = "Forgot your password?";
+    $("sub").textContent = "Enter your email and we'll send a reset link.";
+    show("mode-forgot");
+
+    $("forgotForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("forgotEmail").value.trim();
+      if (!email) return;
+      setBusy("forgotBtn", true, "Sending…");
+      clearStatus();
+      try {
+        const r = await fetch("/api/auth?action=request_password_reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, role }),
+        });
+        // We always show success regardless of whether the email exists,
+        // to avoid letting attackers enumerate registered emails.
+        $("emoji").textContent = "📬";
+        $("title").textContent = "Check your inbox";
+        $("sub").innerHTML = `If <strong>${email}</strong> is registered, we just sent a reset link. The link expires in 1 hour.`;
+        $("mode-forgot").classList.add("hidden");
+      } catch (err) {
+        setStatus("error", "Network error. Please try again.");
+        setBusy("forgotBtn", false);
+      }
+    });
+  }
+
+  // ─── Mode: reset-password (new password form) ───────────────────────
+  // The user lands here from the password-reset email. Supabase's verify
+  // endpoint has already exchanged the recovery token for an access_token
+  // that's placed in the URL hash. We extract it, then use it as the
+  // bearer for /api/auth?action=update_password.
+  if (mode === "reset") {
+    $("emoji").textContent = "🔐";
+    $("title").textContent = "Set a new password";
+    $("sub").textContent = `Choose a new password for your ${product} account.`;
+    show("mode-reset");
+
+    const hash = window.location.hash.replace(/^#/, "");
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("access_token");
+    const errCode = params.get("error_code") || params.get("error");
+    const errDesc = params.get("error_description");
+
+    if (errCode || !accessToken) {
+      $("emoji").textContent = "⚠️";
+      $("title").textContent = "Reset link expired";
+      $("sub").innerHTML = `This link is invalid or has expired. <a href="${signupHref.replace('/signup', '/forgot-password')}" class="btn-text">Request a new one</a>.`;
+      if (errDesc) setStatus("error", decodeURIComponent(errDesc.replace(/\+/g, " ")));
+      $("mode-reset").classList.add("hidden");
+      return;
+    }
+
+    $("resetForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pwd = $("resetPwd").value;
+      const pwd2 = $("resetPwd2").value;
+      clearStatus();
+      if (pwd.length < 6) {
+        setStatus("error", "Password must be at least 6 characters.");
+        return;
+      }
+      if (pwd !== pwd2) {
+        setStatus("error", "Passwords don't match.");
+        return;
+      }
+      setBusy("resetBtn", true, "Updating…");
+      try {
+        const r = await fetch("/api/auth?action=update_password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: accessToken, password: pwd }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          setStatus("error", data.error || "Could not update password. The link may have expired.");
+          setBusy("resetBtn", false);
+          return;
+        }
+        $("emoji").textContent = "✅";
+        $("title").textContent = "Password updated!";
+        $("sub").innerHTML = `You can now sign in with your new password. Redirecting to <a href="${signupHref}">${signupHref}</a>…`;
+        $("mode-reset").classList.add("hidden");
+        setTimeout(() => { window.location.href = signupHref; }, 1800);
+      } catch (err) {
+        setStatus("error", "Network error. Please try again.");
+        setBusy("resetBtn", false);
+      }
+    });
+  }
+
+  // ─── Unknown mode fallback ───────────────────────────────────────────
+  if (mode === "unknown") {
+    $("emoji").textContent = "🤔";
+    $("title").textContent = "Page not found";
+    $("sub").innerHTML = `<a href="${signupHref}" class="btn-text">Go to sign-up</a>`;
+  }
+})();
+</script>
+
+</body>
+</html>
