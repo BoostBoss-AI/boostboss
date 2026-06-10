@@ -310,6 +310,19 @@
             margin: 0;
         }
 
+        /* Inner content container — mirrors the publisher dashboard's
+           .container wrapper. Adds 32px of uniform padding around the
+           route content so the advertiser shell breathes the same way
+           as /publish/dashboard. Without this, content sits directly
+           in .shell-main__inner with only the shell's 24px/28px/64px
+           padding, which read as tight vs. publisher's more generous
+           gutters (Andy audit, 2026-06-10). */
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 2rem;
+        }
+
         /* Stats Row */
         /* Stats row — 5 cards in one row, mirrors /publish/dashboard look:
            pink accent stripe at top, soft shadow, hover lift, big bold value. */
@@ -2612,6 +2625,11 @@
         <main class="shell-main" id="shellMain">
           <div class="shell-main__inner">
 
+        <!-- Inner container — mirrors publisher dashboard's .container
+             wrapper so /ads/dashboard spacing reads identical to
+             /publish/dashboard (Andy audit, 2026-06-10). -->
+        <div class="container">
+
             <!-- ═══════ ROUTE: home (overview + stats + chart) ═══════ -->
             <div data-shell-route="home">
 
@@ -3995,6 +4013,7 @@
             SuperBoost © 2026 · <a href="/ads" style="color: #FF2D78; text-decoration: none;" data-t="foot.back">← Back to boostboss.ai/ads</a>
         </footer>
 
+        </div><!-- /.container -->
           </div><!-- /.shell-main__inner -->
         </main><!-- /.shell-main -->
       </div><!-- /.shell-wrap -->
