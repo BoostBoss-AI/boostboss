@@ -4195,7 +4195,26 @@
                     await loadBalance();
                 }
             } catch (e) {
-                showToast('PayPal capture failed: ' + e.message + '. The webhook may still complete the credit.', 'error');
+                // Map common PayPal error patterns to clean, customer-friendly
+                // language. The raw e.message often contains PayPal jargon like
+                // "paypal_capture_failed" or "paypal_http_422" which means
+                // nothing to a customer trying to fund their campaign balance.
+                // Log the technical detail to console for debugging.
+                console.error('[Deposit] capture error:', e.message, e);
+                const raw = (e && e.message ? String(e.message) : '').toLowerCase();
+                let friendly;
+                if (raw.includes('instrument_declined') || raw.includes('paypal_capture_failed')) {
+                    friendly = 'Your payment was declined. Please try a different card or payment method.';
+                } else if (raw.includes('order_not_approved') || raw.includes('payer_action_required')) {
+                    friendly = 'Your payment wasn’t confirmed at PayPal. Please try again.';
+                } else if (raw.includes('order_already_captured')) {
+                    friendly = 'This payment was already processed. Refresh to see your updated balance.';
+                } else if (raw.includes('network') || raw.includes('failed to fetch')) {
+                    friendly = 'Network error confirming your deposit. Please refresh — if your balance hasn’t updated in 1 minute, contact support@boostboss.ai.';
+                } else {
+                    friendly = 'We couldn’t confirm your deposit. Please try again or contact support@boostboss.ai if your card was charged.';
+                }
+                showToast(friendly, 'error');
             }
         }
 
