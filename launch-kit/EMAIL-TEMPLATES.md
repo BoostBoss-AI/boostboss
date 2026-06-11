@@ -214,7 +214,7 @@ For each of the 4 templates below:
       </div>
 
       <h1>Confirm your new email</h1>
-      <p>You requested to change the email address on your Boost Boss account. Click the button below to confirm the new address.</p>
+      <p>You requested to change your account email from <strong style="color:#1A1A2E;">{{ .Email }}</strong> to <strong style="color:#1A1A2E;">{{ .NewEmail }}</strong>. Click the button below to confirm the new address.</p>
 
       <div class="btn-wrap">
         <a href="{{ .ConfirmationURL }}" class="btn">Confirm new email</a>
