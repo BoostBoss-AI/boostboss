@@ -159,52 +159,10 @@ body.dark .btn-google:hover { background: #2A3748; border-color: #4B5563; }
 body.dark .divider-small { color: #6B7280; }
 body.dark .divider-small::before, body.dark .divider-small::after { border-top-color: #374151; }
 
-/* Required-consent checkbox that gates the Google OAuth button.
-   Upgraded from microcopy 2026-06-11 — closes the loophole where OAuth
-   signups bypassed the Apple-style explicit acceptance that the email
-   signup flow enforces. The role-specific contract link (Advertiser
-   Terms vs Publisher Agreement) is swapped by JS in lockRoleFromPath(). */
-.oauth-consent-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-  margin: 4px 2px 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #FAFAF7;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-.oauth-consent-check:hover {
-  border-color: #D1D5DB;
-  background: #F5F5F0;
-}
-.oauth-consent-check input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin-top: 1px;
-  accent-color: var(--pink);
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.oauth-consent-check a {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 2px;
-  font-weight: 500;
-}
-.oauth-consent-check a:hover {
-  color: var(--pink);
-  text-decoration-color: var(--pink);
-}
-/* Disabled Google OAuth button state — applied when the consent
-   checkbox is unticked. Keeps the visual presence so the user sees
-   what they're about to enable, but removes the affordance + cursor. */
+/* Disabled Google OAuth button state — the signup-side Google button
+   is gated by the same Apple-style scroll-to-accept checkbox
+   (#accept-terms) that gates the Create Account submit. One acceptance
+   unlocks both signup paths. Login Google button has no gate. */
 .btn-google:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -623,25 +581,11 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
       <div id="error" class="error-msg"></div>
       <div id="success" class="success-msg"></div>
 
-      <!-- Required consent checkbox — upgraded from microcopy 2026-06-11.
-           Google OAuth users now have to explicitly tick this box before
-           the "Continue with Google" button is enabled. Stricter than the
-           industry-norm constructive-consent pattern, but matches the
-           Apple-style explicit acceptance that email signup goes through
-           (tasks #61, #62). Role-specific contract link is swapped by JS
-           in lockRoleFromPath() — /ads → Advertiser Terms,
-           /publish → Publisher Agreement. -->
-      <label class="oauth-consent-check" for="signup-oauth-consent-cb">
-        <input type="checkbox" id="signup-oauth-consent-cb">
-        <span>I have read and agree to the
-          <a href="/terms" target="_blank" rel="noopener">Terms</a>,
-          <a href="/advertiser-terms" target="_blank" rel="noopener" id="signup-oauth-role-doc">Advertiser Terms</a>, and
-          <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
-        </span>
-      </label>
-      <!-- Google OAuth — disabled by default, enabled when the consent
-           checkbox above is ticked. JS in the consent-gate block also
-           defends in depth in case the disabled attr is stripped. -->
+      <!-- Google OAuth — disabled until the Apple-style scroll-to-accept
+           checkbox (#accept-terms) further down the form is ticked. Same
+           consent governs both the email "Create account" submit AND the
+           Google OAuth click — one consent for all signup paths. Wired
+           by gateSubmitOnTerms() in the JS block below. -->
       <button class="btn-google" id="google-btn" type="button" disabled>
         <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
         Continue with Google
@@ -725,20 +669,10 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
 
       <div id="login-error" class="error-msg"></div>
 
-      <!-- Required consent checkbox on the sign-in panel too. Some users
-           land on /publish/signin without ever having signed up via the
-           same product (e.g. multi-product accounts), so we ensure they
-           reacknowledge the right contract on every Google OAuth attempt. -->
-      <label class="oauth-consent-check" for="login-oauth-consent-cb">
-        <input type="checkbox" id="login-oauth-consent-cb">
-        <span>I have read and agree to the
-          <a href="/terms" target="_blank" rel="noopener">Terms</a>,
-          <a href="/advertiser-terms" target="_blank" rel="noopener" id="login-oauth-role-doc">Advertiser Terms</a>, and
-          <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
-        </span>
-      </label>
-      <!-- Google OAuth — disabled until the consent checkbox above is ticked. -->
-      <button class="btn-google" id="login-google-btn" type="button" disabled>
+      <!-- Google OAuth — login (returning users). No consent gate here:
+           returning users already agreed to terms at signup, and login is
+           an authentication step rather than a contract acceptance. -->
+      <button class="btn-google" id="login-google-btn" type="button">
         <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
         Continue with Google
       </button>
@@ -928,20 +862,6 @@ const sb = window.supabase && window.supabase.createClient
   // the post-reset success page sends them back to the right signin URL.
   var fp = document.getElementById("forgot-password-link");
   if (fp) fp.href = (role === "developer" ? "/publish" : "/ads") + "/forgot-password";
-
-  // OAuth consent microcopy: swap the role-specific contract link
-  // (Advertiser Terms vs Publisher Agreement) on both signup and login
-  // panels so the implicit consent line references the right document.
-  // The static HTML defaults to "Advertiser Terms" / /advertiser-terms;
-  // flip both link text + href when this is a publisher page.
-  var roleDocLabel = role === "developer" ? "Publisher Agreement" : "Advertiser Terms";
-  var roleDocHref  = role === "developer" ? "/publisher-agreement" : "/advertiser-terms";
-  ["signup-oauth-role-doc", "login-oauth-role-doc"].forEach(function (id) {
-    var a = document.getElementById(id);
-    if (!a) return;
-    a.textContent = roleDocLabel;
-    a.setAttribute("href", roleDocHref);
-  });
   // Toggle field visibility to match the locked role
   var companyG = document.getElementById("company-group");
   var appG     = document.getElementById("app-group");
@@ -1216,14 +1136,23 @@ const Agreement = (function () {
 })();
 window.Agreement = Agreement;
 
-// ── Terms checkbox → submit button gate ──
+// ── Terms checkbox → submit + Google OAuth gate ──
 // Checkbox is itself gated by PolicyConsent (disabled until all 4 read),
-// so this just propagates the final state to the submit button.
+// so this just propagates the final state to BOTH the email-signup submit
+// button AND the Google OAuth button. One acceptance unlocks both paths.
+// The login Google button (#login-google-btn) is intentionally NOT gated —
+// returning users already agreed at signup, and login is authentication
+// rather than contract acceptance.
 (function gateSubmitOnTerms() {
   var cb = document.getElementById("accept-terms");
-  var btn = document.getElementById("submit-btn");
-  if (!cb || !btn) return;
-  function refresh() { btn.disabled = !cb.checked; }
+  var submitBtn = document.getElementById("submit-btn");
+  var googleBtn = document.getElementById("google-btn");
+  if (!cb) return;
+  function refresh() {
+    var ok = cb.checked;
+    if (submitBtn) submitBtn.disabled = !ok;
+    if (googleBtn) googleBtn.disabled = !ok;
+  }
   cb.addEventListener("change", refresh);
   refresh();
 })();
@@ -1409,48 +1338,20 @@ async function signInWithGoogle(buttonId) {
     showToast(err.message || "Google sign-in failed", "error");
   }
 }
-// ── OAuth consent gate ─────────────────────────────────────────────
-// Both Google OAuth buttons are rendered with `disabled` in HTML.
-// They become clickable only after the matching consent checkbox is
-// ticked. We also defense-in-depth check the box state at click time
-// so even if someone strips the disabled attr in devtools, the OAuth
-// click is refused. The same logic applies on both signup and login
-// panels — pair each checkbox with its sibling button.
-(function wireOAuthConsentGate() {
-  function pair(checkboxId, buttonId) {
-    var cb = document.getElementById(checkboxId);
-    var btn = document.getElementById(buttonId);
-    if (!cb || !btn) return;
-    cb.addEventListener("change", function () {
-      btn.disabled = !cb.checked;
-    });
-  }
-  pair("signup-oauth-consent-cb", "google-btn");
-  pair("login-oauth-consent-cb",  "login-google-btn");
-})();
-
-function consentCheckedFor(buttonId) {
-  var checkboxId = buttonId === "google-btn"
-    ? "signup-oauth-consent-cb"
-    : "login-oauth-consent-cb";
-  var cb = document.getElementById(checkboxId);
-  return !!(cb && cb.checked);
-}
-
+// ── Google OAuth click handlers ──────────────────────────────────
+// Signup-side button is gated by the existing #accept-terms scroll-to-accept
+// checkbox (the same one that gates "Create account"). Defense-in-depth at
+// click time refuses the OAuth call if someone strips the disabled attr.
+// Login-side button is ungated — returning users.
 document.getElementById("google-btn").addEventListener("click", () => {
-  if (!consentCheckedFor("google-btn")) {
-    showError("error", "Please tick the consent box before continuing with Google.");
+  var termsCb = document.getElementById("accept-terms");
+  if (!termsCb || !termsCb.checked) {
+    showError("error", "Please accept the Terms of Service before continuing with Google.");
     return;
   }
   signInWithGoogle("google-btn");
 });
-document.getElementById("login-google-btn").addEventListener("click", () => {
-  if (!consentCheckedFor("login-google-btn")) {
-    showError("login-error", "Please tick the consent box before continuing with Google.");
-    return;
-  }
-  signInWithGoogle("login-google-btn");
-});
+document.getElementById("login-google-btn").addEventListener("click", () => signInWithGoogle("login-google-btn"));
 
 // If Supabase bounced the user back with an OAuth error (e.g. bad_oauth_state
 // after clicking back/forward mid-flow), clean the URL, wipe the stale PKCE
