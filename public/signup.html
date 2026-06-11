@@ -597,13 +597,22 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
            to `selectedRole` from the URL. No unified /signup exists. -->
 
       <form id="signup-form" autocomplete="off">
+        <!-- autocomplete hints: `email` is the proper semantic for the
+             account-creation email field; `new-password` tells Chrome
+             this is a brand-new password (so it won't autofill a saved
+             one from a previous testing session and won't suggest the
+             same password the user uses on other sites).
+             The JS clear-on-load below adds defense in depth — even if
+             Chrome ignores the hint, the fields get cleared after mount. -->
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="you@company.com" required>
+          <input type="email" id="email" name="email" placeholder="you@company.com"
+                 required autocomplete="email">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="At least 6 characters" required minlength="6">
+          <input type="password" id="password" name="password" placeholder="At least 6 characters"
+                 required minlength="6" autocomplete="new-password">
           <div class="pw-strength"><div class="bar" id="pw-bar"></div></div>
           <div class="pw-label" id="pw-label"></div>
         </div>
@@ -1162,6 +1171,29 @@ window.Agreement = Agreement;
 // lockRoleFromPath() at page load. We just need to sync the
 // Terms-acceptance label to the locked role once.
 updateRoleTermsLabel();
+
+// ── Defense-in-depth: clear signup email + password on page load ──
+// Even with autocomplete="email" / autocomplete="new-password", Chrome
+// will sometimes still autofill from saved credentials for this domain
+// (residual data from prior testing or any saved boostboss.ai login).
+// For new users we want a clean form, so explicitly blank both fields
+// once on mount. The setTimeout delay handles Chrome's autofill timing —
+// the autofill runs after DOM ready but before paint, so an immediate
+// clear would race the autofill. 100ms is short enough that a real user
+// who hand-typed something doesn't notice, but long enough that browser
+// autofill has already completed and we win the race.
+// Login form is left alone — autofill helps returning users.
+(function clearSignupFieldsOnMount() {
+  setTimeout(function () {
+    var email = document.getElementById("email");
+    var pwd   = document.getElementById("password");
+    // Only blank if the user hasn't already started typing in the field
+    // (i.e. it's not the currently focused element). Protects against
+    // wiping input from a fast typist who started immediately on page load.
+    if (email && document.activeElement !== email) email.value = "";
+    if (pwd   && document.activeElement !== pwd)   pwd.value   = "";
+  }, 100);
+})();
 
 // ── Signup ──
 document.getElementById("signup-form").addEventListener("submit", async e => {
