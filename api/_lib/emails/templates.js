@@ -81,8 +81,8 @@ function renderEmail(opts) {
   body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: ${BRAND.bg}; color: ${BRAND.ink}; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 560px; margin: 40px auto; padding: 0 24px; }
   .card { background: ${BRAND.surface}; border: 1px solid ${BRAND.line}; border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-  /* Logo row uses a 2-cell <table> for vertical centering because Gmail
-     and Outlook silently strip `display:flex`. Inline styles on the <td>
+  /* Logo row uses a 2-cell table for vertical centering because Gmail
+     and Outlook silently strip display:flex. Inline styles on the td
      are the actual carriers; these class-based rules are belt-and-
      suspenders for clients that DO honor CSS classes. */
   .logo-row { margin-bottom: 28px; border-collapse: collapse; }
