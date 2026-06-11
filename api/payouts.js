@@ -428,8 +428,44 @@ module.exports = async function handler(req, res) {
         .update({ status: "paid", paid_at: new Date().toISOString() })
         .eq("batch_id", batchId)
         .eq("status", "batched")
-        .select("id");
+        .select("id, publisher_id, amount_usd, bank_snapshot");
       if (error) return res.status(500).json({ error: error.message });
+
+      // Phase 4: fire the branded "Payout sent" email to each publisher
+      // in the batch. Fire-and-forget — admin batch processing shouldn't
+      // wait on email delivery. Failures are logged by the emails module.
+      // We look up each publisher's email from the developers table; the
+      // bank_snapshot column on payout_requests is the routing info, NOT
+      // necessarily the contact email.
+      try {
+        const { sendPayoutSent } = require("./_lib/emails/send");
+        const rows = data || [];
+        if (rows.length > 0) {
+          const ids = Array.from(new Set(rows.map((r) => r.publisher_id).filter(Boolean)));
+          const { data: pubs } = await supabaseAdmin
+            .from("developers")
+            .select("id, email")
+            .in("id", ids);
+          const emailByPubId = new Map((pubs || []).map((p) => [p.id, p.email]));
+          for (const row of rows) {
+            const email = emailByPubId.get(row.publisher_id);
+            if (!email) continue;
+            const method = row.bank_snapshot && row.bank_snapshot.method
+              ? String(row.bank_snapshot.method)
+              : "Bank transfer";
+            sendPayoutSent({
+              to:                   email,
+              amountUsd:            Number(row.amount_usd) || 0,
+              payoutMethod:        method,
+              payoutId:            row.id,
+              expectedDeliveryDays: "1-3 business days",
+            }).catch((e) => console.error("[Payouts] sendPayoutSent threw:", e.message));
+          }
+        }
+      } catch (e) {
+        console.warn("[Payouts] payout-sent emails skipped:", e.message);
+      }
+
       return res.json({ success: true, updated: (data || []).length });
     }
 

@@ -653,6 +653,31 @@ async function creditAdvertiserForPayinEvent({
       await sb.from("transactions").upsert(row, { onConflict: "paypal_capture_id" });
     } catch (_) { /* if schema lacks columns the row is best-effort */ }
 
+    // Phase 4: send the branded "Deposit successful" email. Best-effort,
+    // fire-and-forget — never block crediting on email. Failures are logged
+    // by the emails module but don't propagate. We fetch the post-credit
+    // balance + advertiser email here so the email shows the user what
+    // their new spendable amount is.
+    try {
+      const { data: adv } = await sb.from("advertisers")
+        .select("email, balance, company_name")
+        .eq("id", advertiserId)
+        .maybeSingle();
+      if (adv && adv.email) {
+        const { sendDepositSuccess } = require("./_lib/emails/send");
+        // Don't await — we want the HTTP response to return immediately
+        // and the email to send in the background.
+        sendDepositSuccess({
+          to:              adv.email,
+          amountUsd:       amount,
+          balanceAfterUsd: Number(adv.balance) || amount,
+          companyName:     adv.company_name || null,
+        }).catch((e) => console.error("[Billing] sendDepositSuccess threw:", e.message));
+      }
+    } catch (e) {
+      console.warn("[Billing] could not send deposit-success email:", e.message);
+    }
+
     return true;
   }
 

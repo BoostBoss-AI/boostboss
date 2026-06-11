@@ -573,7 +573,9 @@ async function supabaseHandler(action, body, req, res) {
     const role = body.role === "developer" ? "developer" : "advertiser";
 
     // Ensure the profile row for this role exists (create on first time).
+    // `wasNewProfile` triggers the branded welcome email further down.
     let profile = null;
+    let wasNewProfile = false;
     if (role === "advertiser") {
       const { data: existing } = await supabaseAdmin
         .from("advertisers").select("*").eq("id", user.id).maybeSingle();
@@ -589,6 +591,7 @@ async function supabaseHandler(action, body, req, res) {
           .select("*").single();
         if (insErr) return res.status(500).json({ error: "Profile create failed: " + insErr.message });
         profile = inserted;
+        wasNewProfile = true;
       }
     } else {
       const { data: existing } = await supabaseAdmin
@@ -611,6 +614,23 @@ async function supabaseHandler(action, body, req, res) {
           .select("*").single();
         if (insErr) return res.status(500).json({ error: "Profile create failed: " + insErr.message });
         profile = inserted;
+        wasNewProfile = true;
+      }
+    }
+
+    // Phase 4: send the branded welcome email on FIRST successful sign-in
+    // for this role. Fire-and-forget — don't block the response on email
+    // delivery. If `wasNewProfile` is false (returning user, or user adding
+    // a second product to an existing account), we skip the welcome.
+    if (wasNewProfile && user.email) {
+      try {
+        const { sendWelcome } = require("./_lib/emails/send");
+        const firstName = (user.user_metadata?.full_name || user.user_metadata?.name || "")
+          .toString().split(" ")[0] || "";
+        sendWelcome({ to: user.email, role, firstName })
+          .catch((e) => console.error("[Auth oauth_sync] sendWelcome threw:", e.message));
+      } catch (e) {
+        console.warn("[Auth oauth_sync] welcome email skipped:", e.message);
       }
     }
 
