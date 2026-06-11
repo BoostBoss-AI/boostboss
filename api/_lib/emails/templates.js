@@ -81,7 +81,13 @@ function renderEmail(opts) {
   body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: ${BRAND.bg}; color: ${BRAND.ink}; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 560px; margin: 40px auto; padding: 0 24px; }
   .card { background: ${BRAND.surface}; border: 1px solid ${BRAND.line}; border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-  .logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  /* Logo row uses a 2-cell <table> for vertical centering because Gmail
+     and Outlook silently strip `display:flex`. Inline styles on the <td>
+     are the actual carriers; these class-based rules are belt-and-
+     suspenders for clients that DO honor CSS classes. */
+  .logo-row { margin-bottom: 28px; border-collapse: collapse; }
+  .logo-cell { vertical-align: middle; padding: 0; }
+  .logo-cell.icon { padding-right: 14px; }
   .logo-img { width: 56px; height: 56px; display: block; }
   .brand { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: ${BRAND.ink}; line-height: 1; }
   h1 { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.25; margin: 0 0 16px; color: ${BRAND.ink}; letter-spacing: -0.3px; }
@@ -111,10 +117,16 @@ function renderEmail(opts) {
   ${preheaderHtml}
   <div class="wrap">
     <div class="card">
-      <div class="logo-row">
-        <img class="logo-img" src="${BRAND.logoUrl}" alt="${BRAND.brandName}" width="56" height="56">
-        <div class="brand">${BRAND.brandName}</div>
-      </div>
+      <table class="logo-row" role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;border-collapse:collapse;">
+        <tr>
+          <td class="logo-cell icon" valign="middle" style="vertical-align:middle;padding:0 14px 0 0;line-height:0;">
+            <img class="logo-img" src="${BRAND.logoUrl}" alt="${BRAND.brandName}" width="56" height="56" style="display:block;width:56px;height:56px;">
+          </td>
+          <td class="logo-cell" valign="middle" style="vertical-align:middle;padding:0;">
+            <span class="brand" style="font-family:'Space Grotesk',-apple-system,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;color:${BRAND.ink};line-height:1;">${BRAND.brandName}</span>
+          </td>
+        </tr>
+      </table>
 
       <h1>${escapeHtml(title)}</h1>
       ${bodyHtml}

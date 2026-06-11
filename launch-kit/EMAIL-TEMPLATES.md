@@ -47,7 +47,13 @@ For each of the 4 templates below:
   body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #FAFAF7; color: #1A1A2E; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 560px; margin: 40px auto; padding: 0 24px; }
   .card { background: #FFFFFF; border: 1px solid #EAEAEF; border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-  .logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  /* Logo row uses a 2-cell <table> for vertical centering — Gmail
+     and Outlook strip `display:flex`. Inline styles on the <td>
+     are the actual alignment carriers; these classes are belt-
+     and-suspenders for clients that DO honor CSS classes. */
+  .logo-row { margin-bottom: 28px; border-collapse: collapse; }
+  .logo-cell { vertical-align: middle; padding: 0; }
+  .logo-cell.icon { padding-right: 14px; }
   .logo-img { width: 56px; height: 56px; display: block; }
   .brand { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #1A1A2E; line-height: 1; }
   h1 { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.25; margin: 0 0 16px; color: #1A1A2E; letter-spacing: -0.3px; }
@@ -67,10 +73,16 @@ For each of the 4 templates below:
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="logo-row">
-        <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56">
-        <div class="brand">Boost Boss</div>
-      </div>
+      <table class="logo-row" role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;border-collapse:collapse;">
+        <tr>
+          <td class="logo-cell icon" valign="middle" style="vertical-align:middle;padding:0 14px 0 0;line-height:0;">
+            <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56" style="display:block;width:56px;height:56px;">
+          </td>
+          <td class="logo-cell" valign="middle" style="vertical-align:middle;padding:0;">
+            <span class="brand" style="font-family:'Space Grotesk',-apple-system,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#1A1A2E;line-height:1;">Boost Boss</span>
+          </td>
+        </tr>
+      </table>
 
       <h1>Confirm your email</h1>
       <p>Welcome to Boost Boss — the AI-native ad network. Click the button below to activate your account and start launching campaigns.</p>
@@ -120,7 +132,13 @@ For each of the 4 templates below:
   body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #FAFAF7; color: #1A1A2E; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 560px; margin: 40px auto; padding: 0 24px; }
   .card { background: #FFFFFF; border: 1px solid #EAEAEF; border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-  .logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  /* Logo row uses a 2-cell <table> for vertical centering — Gmail
+     and Outlook strip `display:flex`. Inline styles on the <td>
+     are the actual alignment carriers; these classes are belt-
+     and-suspenders for clients that DO honor CSS classes. */
+  .logo-row { margin-bottom: 28px; border-collapse: collapse; }
+  .logo-cell { vertical-align: middle; padding: 0; }
+  .logo-cell.icon { padding-right: 14px; }
   .logo-img { width: 56px; height: 56px; display: block; }
   .brand { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #1A1A2E; line-height: 1; }
   h1 { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.25; margin: 0 0 16px; color: #1A1A2E; letter-spacing: -0.3px; }
@@ -139,10 +157,16 @@ For each of the 4 templates below:
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="logo-row">
-        <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56">
-        <div class="brand">Boost Boss</div>
-      </div>
+      <table class="logo-row" role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;border-collapse:collapse;">
+        <tr>
+          <td class="logo-cell icon" valign="middle" style="vertical-align:middle;padding:0 14px 0 0;line-height:0;">
+            <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56" style="display:block;width:56px;height:56px;">
+          </td>
+          <td class="logo-cell" valign="middle" style="vertical-align:middle;padding:0;">
+            <span class="brand" style="font-family:'Space Grotesk',-apple-system,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#1A1A2E;line-height:1;">Boost Boss</span>
+          </td>
+        </tr>
+      </table>
 
       <h1>Reset your password</h1>
       <p>We received a request to reset the password on your Boost Boss account. Click the button below to choose a new one.</p>
@@ -191,7 +215,13 @@ For each of the 4 templates below:
   body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #FAFAF7; color: #1A1A2E; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 560px; margin: 40px auto; padding: 0 24px; }
   .card { background: #FFFFFF; border: 1px solid #EAEAEF; border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-  .logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  /* Logo row uses a 2-cell <table> for vertical centering — Gmail
+     and Outlook strip `display:flex`. Inline styles on the <td>
+     are the actual alignment carriers; these classes are belt-
+     and-suspenders for clients that DO honor CSS classes. */
+  .logo-row { margin-bottom: 28px; border-collapse: collapse; }
+  .logo-cell { vertical-align: middle; padding: 0; }
+  .logo-cell.icon { padding-right: 14px; }
   .logo-img { width: 56px; height: 56px; display: block; }
   .brand { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #1A1A2E; line-height: 1; }
   h1 { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.25; margin: 0 0 16px; color: #1A1A2E; letter-spacing: -0.3px; }
@@ -208,10 +238,16 @@ For each of the 4 templates below:
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="logo-row">
-        <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56">
-        <div class="brand">Boost Boss</div>
-      </div>
+      <table class="logo-row" role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;border-collapse:collapse;">
+        <tr>
+          <td class="logo-cell icon" valign="middle" style="vertical-align:middle;padding:0 14px 0 0;line-height:0;">
+            <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56" style="display:block;width:56px;height:56px;">
+          </td>
+          <td class="logo-cell" valign="middle" style="vertical-align:middle;padding:0;">
+            <span class="brand" style="font-family:'Space Grotesk',-apple-system,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#1A1A2E;line-height:1;">Boost Boss</span>
+          </td>
+        </tr>
+      </table>
 
       <h1>Confirm your new email</h1>
       <p>You requested to change your account email from <strong style="color:#1A1A2E;">{{ .Email }}</strong> to <strong style="color:#1A1A2E;">{{ .NewEmail }}</strong>. Click the button below to confirm the new address.</p>
@@ -257,7 +293,13 @@ For each of the 4 templates below:
   body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #FAFAF7; color: #1A1A2E; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 560px; margin: 40px auto; padding: 0 24px; }
   .card { background: #FFFFFF; border: 1px solid #EAEAEF; border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
-  .logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  /* Logo row uses a 2-cell <table> for vertical centering — Gmail
+     and Outlook strip `display:flex`. Inline styles on the <td>
+     are the actual alignment carriers; these classes are belt-
+     and-suspenders for clients that DO honor CSS classes. */
+  .logo-row { margin-bottom: 28px; border-collapse: collapse; }
+  .logo-cell { vertical-align: middle; padding: 0; }
+  .logo-cell.icon { padding-right: 14px; }
   .logo-img { width: 56px; height: 56px; display: block; }
   .brand { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #1A1A2E; line-height: 1; }
   h1 { font-family: 'Space Grotesk', -apple-system, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.25; margin: 0 0 16px; color: #1A1A2E; letter-spacing: -0.3px; }
@@ -274,10 +316,16 @@ For each of the 4 templates below:
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="logo-row">
-        <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56">
-        <div class="brand">Boost Boss</div>
-      </div>
+      <table class="logo-row" role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;border-collapse:collapse;">
+        <tr>
+          <td class="logo-cell icon" valign="middle" style="vertical-align:middle;padding:0 14px 0 0;line-height:0;">
+            <img class="logo-img" src="https://boostboss.ai/email-logo.png" alt="Boost Boss" width="56" height="56" style="display:block;width:56px;height:56px;">
+          </td>
+          <td class="logo-cell" valign="middle" style="vertical-align:middle;padding:0;">
+            <span class="brand" style="font-family:'Space Grotesk',-apple-system,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#1A1A2E;line-height:1;">Boost Boss</span>
+          </td>
+        </tr>
+      </table>
 
       <h1>Your password was changed</h1>
       <p>This is a confirmation that the password on your Boost Boss account was just changed.</p>
