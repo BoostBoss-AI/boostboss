@@ -4138,8 +4138,64 @@
                 if (!window.__bennaInterval) {
                     window.__bennaInterval = setInterval(loadBennaEngine, 30000);
                 }
+                // If user just returned from PayPal approval, the deposit
+                // params were stashed in sessionStorage by the IIFE further
+                // down the page (which ran before checkSession()). Now that
+                // currentUser is loaded, fire the capture call.
+                processPendingPaypalCapture();
             } else {
                 showAuthForm();
+            }
+        }
+
+        // Capture a PayPal deposit that was stashed by checkDepositReturn().
+        // This runs *after* checkSession() loads currentUser, so the
+        // authenticated POST has a real bearer token. Without this two-phase
+        // approach, the capture call fires synchronously at script-load
+        // time before init() runs, with currentUser still null → silently
+        // throws TypeError and the deposit never credits.
+        async function processPendingPaypalCapture() {
+            let raw;
+            try { raw = sessionStorage.getItem('bb_pending_paypal_capture'); }
+            catch (_) { return; }
+            if (!raw) return;
+            if (!currentUser || !currentUser.token) return; // safety guard
+
+            let pending;
+            try { pending = JSON.parse(raw); }
+            catch (_) { sessionStorage.removeItem('bb_pending_paypal_capture'); return; }
+
+            // Stale guard — if the user left this tab open for >10min between
+            // PayPal approval and dashboard load, the order may have already
+            // been auto-voided by PayPal. Drop the stash either way to avoid
+            // spamming retries.
+            if (Date.now() - (pending.t || 0) > 10 * 60 * 1000) {
+                sessionStorage.removeItem('bb_pending_paypal_capture');
+                return;
+            }
+            sessionStorage.removeItem('bb_pending_paypal_capture');
+
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=capture_paypal_order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
+                    body: JSON.stringify({
+                        order_id:      pending.orderId,
+                        advertiser_id: pending.advertiserId || (currentUserData && currentUserData.user_id),
+                        amount:        pending.expected,
+                    }),
+                });
+                const j = await r.json();
+                if (!r.ok) throw new Error(j.error || `Server returned ${r.status}`);
+                if (j.status === 'COMPLETED') {
+                    showToast(`Deposit of $${j.amount_usd || pending.expected} received!`, 'success');
+                    await loadBalance();
+                } else {
+                    showToast('Deposit pending review — the webhook will reconcile shortly.', 'info');
+                    await loadBalance();
+                }
+            } catch (e) {
+                showToast('PayPal capture failed: ' + e.message + '. The webhook may still complete the credit.', 'error');
             }
         }
 
@@ -6386,8 +6442,16 @@
 
             // ── PayPal approval return ─────────────────────────────────
             // PayPal redirects the advertiser back to ?deposit=paypal_return
-            // with token=<order_id>. We capture the order (which actually
-            // moves the funds), then poll balance to confirm credit.
+            // with token=<order_id>. We stash the params in sessionStorage
+            // here (this IIFE runs at script-load time, BEFORE init() calls
+            // checkSession(), so currentUser is still null and we can't
+            // make the authenticated capture call yet). The actual capture
+            // happens in processPendingPaypalCapture() which checkSession()
+            // calls once currentUser is loaded from localStorage.
+            //
+            // We strip the URL query string immediately so a refresh doesn't
+            // loop, but the sessionStorage stash survives the reload chain
+            // (Vercel redirect /advertiser → /ads/dashboard) until consumed.
             if (params.get('deposit') === 'paypal_return') {
                 const orderId      = params.get('token') || params.get('order_id');
                 const advertiserId = params.get('advertiser_id');
@@ -6397,31 +6461,12 @@
                     showToast('PayPal did not return an order id — deposit could not be captured.', 'error');
                     return;
                 }
+                try {
+                    sessionStorage.setItem('bb_pending_paypal_capture', JSON.stringify({
+                        orderId, advertiserId, expected, t: Date.now(),
+                    }));
+                } catch (_) { /* private mode / quota — fall through */ }
                 showToast('Finalizing your PayPal deposit…', 'info');
-                (async () => {
-                    try {
-                        const r = await fetch(`${API_BASE}/api/billing?action=capture_paypal_order`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
-                            body: JSON.stringify({
-                                order_id:      orderId,
-                                advertiser_id: advertiserId || (currentUserData && currentUserData.user_id),
-                                amount:        expected,
-                            }),
-                        });
-                        const j = await r.json();
-                        if (!r.ok) throw new Error(j.error || `Server returned ${r.status}`);
-                        if (j.status === 'COMPLETED') {
-                            showToast(`Deposit of $${j.amount_usd || expected} received!`, 'success');
-                            await loadBalance();
-                        } else {
-                            showToast('Deposit pending review — the webhook will reconcile shortly.', 'info');
-                            await loadBalance();
-                        }
-                    } catch (e) {
-                        showToast('PayPal capture failed: ' + e.message + '. The webhook may still complete the credit.', 'error');
-                    }
-                })();
                 return;
             }
 
