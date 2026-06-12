@@ -137,9 +137,13 @@
 }
 .lumi-x:hover { color: var(--_t); }
 
-/* ── Save to affiliate — mirror corner of the close X ── */
+/* ── Save to affiliate — sits next to the close X in the top-right
+   action cluster. Originally placed top-left, but the .lumi-disclosure
+   ("SPONSORED · …") label always occupies that area, so the bookmark
+   got obscured. Grouping the two action icons (save + close) in the
+   same corner is also a more conventional pattern. ── */
 .lumi-save {
-  position: absolute; top: 8px; left: 10px;
+  position: absolute; top: 8px; right: 38px;
   width: 24px; height: 24px; border: none; background: transparent;
   cursor: pointer; line-height: 1; color: var(--_m); padding: 0;
   display: flex; align-items: center; justify-content: center;
@@ -149,7 +153,7 @@
 .lumi-save.is-saved { color: var(--_p); }
 
 .lumi-save-pop {
-  position: absolute; top: 36px; left: 8px; z-index: 10;
+  position: absolute; top: 36px; right: 8px; z-index: 10;
   background: #fff; border: 1px solid var(--_b); border-radius: 10px;
   padding: 14px 14px 12px; min-width: 220px; max-width: 280px;
   box-shadow: 0 8px 28px rgba(0,0,0,0.14);
