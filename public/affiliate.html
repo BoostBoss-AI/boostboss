@@ -2081,6 +2081,9 @@ function switchSection(name) {
   if (name === 'catalog')  loadCatalog();
   if (name === 'partners') loadPartners();
   if (name === 'click-soon') loadClickReport();
+  if (name === 'conv-soon')  loadConversionReport();
+  if (name === 'bill')       loadCommissionBill();
+  if (name === 'payouts')    loadPayoutRecord();
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -2192,14 +2195,15 @@ async function loadDashboard() {
   const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 
   // Home metric cards (6-up grid, SaaS-tailored). h-clicks gets filled
-  // in by loadShareLinks() once it returns. The other metrics stay at
-  // their placeholder values until #3 commission tracking ships.
+  // in by loadShareLinks(). The rest come from loadConversionSummary()
+  // which aggregates affiliate_conversions for this affiliate.
   setText('h-clicks',      '…');
   setText('h-signups',     0);
   setText('h-earn',        '$0.00');
   setText('h-activations', 0);
   setText('h-revenue',     '$0.00');
   setText('h-newusers',    0);
+  loadConversionSummary(session.token).catch(() => { /* keep placeholders */ });
 
   // Pull share-links in parallel with the rest of the dashboard render.
   // Populates the Share Links section AND the home dashboard's "Share clicks"
@@ -2239,6 +2243,120 @@ async function loadDashboard() {
   if (!p.payout_method && !p.paypal_email) {
     document.getElementById('home-banner').classList.remove('hidden');
   }
+}
+
+// ────────────────────────────────────────────────────────────────────────
+//  Conversion Report, Commission Bill, Payout Record — REAL DATA
+//  All three pull from /api/conversions and /api/conversions?action=summary.
+//  See [[commission-attribution-model]] for the data shape.
+// ────────────────────────────────────────────────────────────────────────
+
+async function loadConversionSummary(token) {
+  if (!token) return;
+  const r = await fetch(`${API_BASE}/api/conversions?action=summary`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!r.ok) throw new Error('summary failed');
+  const j = await r.json();
+  const c = j.counts || {};
+  const m = j.money  || {};
+  // Pending commission is the headline number on Home — that's what the
+  // affiliate cares about most ("what will I get paid?")
+  const pendingTotal = (m.pending_commission || 0) + (m.confirmed_commission || 0);
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setText('h-signups',     c.signups     || 0);
+  setText('h-activations', c.activations || 0);
+  setText('h-newusers',    c.new_users   || 0);
+  setText('h-earn',        '$' + pendingTotal.toFixed(2));
+  setText('h-revenue',     '$' + (m.revenue || 0).toFixed(2));
+}
+
+async function loadConversionReport() {
+  const session = getSession();
+  if (!session || !session.token) return;
+  // Locate the empty Conversion Report tbody — the section currently
+  // shows a placeholder no-data row; we replace it with real rows or
+  // a richer empty state.
+  const tbody = document.querySelector('#sec-conv-soon table tbody');
+  const totalEl = document.querySelector('#sec-conv-soon .table-head .total strong');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-data"><div class="illus">⏳</div><div>Loading…</div></td></tr>';
+  try {
+    const r = await fetch(`${API_BASE}/api/conversions?limit=200`, {
+      headers: { 'Authorization': `Bearer ${session.token}` },
+    });
+    if (!r.ok) throw new Error('Failed to load conversions');
+    const j = await r.json();
+    if (totalEl) totalEl.textContent = j.total != null ? j.total : 0;
+    const rows = j.conversions || [];
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="no-data">
+        <div class="illus">▭</div>
+        <div>No conversions tracked yet.</div>
+        <div style="margin-top:6px;font-size:13px;">Conversions land here once an advertiser fires <code style="background:#FAFAFA;border:1px solid var(--line-soft);padding:1px 5px;border-radius:4px;font-size:12px;font-family:'JetBrains Mono',monospace;">trackConversion({bb_click, type, amount})</code> after one of your share-link visitors completes a paid action.</div>
+      </td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((r) => {
+      const created = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
+      const product = r.product ? r.product.name : '—';
+      const status  = r.status || 'pending';
+      const statusColor = status === 'paid' ? '#059669'
+                       : status === 'confirmed' ? '#0EA5E9'
+                       : status === 'refunded' ? '#DC2626'
+                       : status === 'orphan' ? '#9CA3AF' : '#92400E';
+      return `<tr>
+        <td>
+          <div style="font-size:13px;color:var(--ink);">${esc(created)}</div>
+          <div style="font-size:11.5px;color:var(--muted);text-transform:capitalize;">${esc(r.event_type)}</div>
+        </td>
+        <td>—</td>
+        <td>${esc(product)}</td>
+        <td><span style="font-weight:700;color:${statusColor};text-transform:capitalize;">${esc(status)}</span></td>
+        <td style="text-align:right;font-weight:600;">$${Number(r.amount || 0).toFixed(2)}</td>
+        <td style="text-align:right;color:var(--pink);font-weight:700;">$${Number(r.commission_due || 0).toFixed(2)}</td>
+        <td style="text-align:right;color:var(--pink);font-weight:700;">$${Number(r.commission_due || 0).toFixed(2)}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="7" class="no-data" style="color:#DC2626;">
+      <div class="illus">⚠</div><div>${esc(e.message || 'Could not load')}</div>
+    </td></tr>`;
+  }
+}
+
+async function loadCommissionBill() {
+  const session = getSession();
+  if (!session || !session.token) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/conversions?action=summary`, {
+      headers: { 'Authorization': `Bearer ${session.token}` },
+    });
+    if (!r.ok) return;
+    const j = await r.json();
+    const m = j.money || {};
+    // Bill page's "Pending Payout" is the sum of pending + confirmed (everything
+    // that's accrued but not yet sent to PayPal).
+    const pending = (m.pending_commission || 0) + (m.confirmed_commission || 0);
+    const el = document.getElementById('bill-pending');
+    if (el) el.textContent = pending.toFixed(2);
+  } catch (_) { /* keep placeholder $0.00 */ }
+}
+
+async function loadPayoutRecord() {
+  const session = getSession();
+  if (!session || !session.token) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/conversions?action=summary`, {
+      headers: { 'Authorization': `Bearer ${session.token}` },
+    });
+    if (!r.ok) return;
+    const j = await r.json();
+    const m = j.money || {};
+    // Payout Record's "Lifetime Payout" is the sum of all PAID commissions.
+    const el = document.getElementById('payout-lifetime');
+    if (el) el.textContent = (m.paid_commission || 0).toFixed(2);
+  } catch (_) { /* keep placeholder $0.00 */ }
 }
 
 // ────────────────────────────────────────────────────────────────────────

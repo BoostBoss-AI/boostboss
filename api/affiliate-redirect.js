@@ -25,6 +25,7 @@
 
 "use strict";
 
+const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
@@ -47,9 +48,15 @@ function clientIp(req) {
   return first || req.socket?.remoteAddress || null;
 }
 
-// Append UTM params + Boost Boss attribution hint to the target URL.
+// Append UTM params + Boost Boss attribution hints to the target URL.
 // Preserves any existing query params the advertiser put on their own URL.
-function decorateUrl(targetUrl, affiliateId, savedAdId) {
+//
+// The load-bearing param is bb_click=<click_id> — the UUID we minted for
+// THIS specific click. The advertiser preserves it through their funnel
+// as a hidden form field and echoes it via trackConversion. Click ID
+// survives Safari ITP, ad blockers, and mobile app handoffs because it
+// lives in the URL, not in a cookie. See [[commission-attribution-model]].
+function decorateUrl(targetUrl, affiliateId, savedAdId, clickId) {
   let url;
   try { url = new URL(targetUrl); }
   catch (_) { return targetUrl; }  // malformed target → just return as-is
@@ -60,9 +67,15 @@ function decorateUrl(targetUrl, affiliateId, savedAdId) {
   if (!url.searchParams.has("utm_medium"))   url.searchParams.set("utm_medium",   "share");
   if (!url.searchParams.has("utm_campaign")) url.searchParams.set("utm_campaign", String(affiliateId).slice(0, 24));
 
-  // Always add bb_aff — this is the Boost Boss-specific attribution hint
-  // the advertiser's postback should echo back to us. Keeps boostboss analytics
-  // independent of the advertiser's UTM choices.
+  // The primary attribution identifier. Without this, conversion-postbacks
+  // fall back to the (less reliable) bb_aff cookie. With it, we get
+  // deterministic (affiliate, share_link, product) resolution that survives
+  // ITP / ad-blocker stripping.
+  if (clickId) url.searchParams.set("bb_click", String(clickId));
+
+  // Always add bb_aff — backup attribution hint independent of cookies and
+  // independent of click_id (so the affiliate is still identifiable even
+  // if the advertiser drops the click_id by accident).
   url.searchParams.set("bb_aff", String(affiliateId));
   if (savedAdId) url.searchParams.set("bb_sa", String(savedAdId));
 
@@ -121,10 +134,19 @@ module.exports = async function handler(req, res) {
     return res.redirect(302, safeFallback);
   }
 
+  // Mint a fresh click_id UUID for this redirect. Generated server-side
+  // (not by Postgres default) so we have it BEFORE the INSERT and can
+  // pass it into decorateUrl on the SAME request. The DB still has a
+  // default in case any future code path inserts without supplying one.
+  const clickId = crypto.randomUUID();
+
   // Best-effort click log. Doesn't block the redirect — if the INSERT
   // fails we still 302 the user; we just lose one analytics row.
+  // click_id is included so the postback handler can resolve attribution
+  // back to (affiliate, share_link, product) via this row.
   try {
     await client.from("affiliate_clicks").insert({
+      click_id:      clickId,
       share_link_id: row.id,
       affiliate_id:  row.affiliate_id,
       saved_ad_id:   row.saved_ad_id,
@@ -136,10 +158,11 @@ module.exports = async function handler(req, res) {
     console.warn("[AffiliateRedirect] click log failed:", e.message);
   }
 
-  // Set attribution cookie + decorate target URL with UTM/bb_aff.
+  // Set attribution cookie + decorate target URL with bb_click / UTM / bb_aff.
+  // bb_click is the load-bearing identifier; cookie is the secondary fallback.
   setAttributionCookie(res, row.saved_ad_id, row.affiliate_id);
   const target = row.target_url
-    ? decorateUrl(row.target_url, row.affiliate_id, row.saved_ad_id)
+    ? decorateUrl(row.target_url, row.affiliate_id, row.saved_ad_id, clickId)
     : safeFallback;
 
   return res.redirect(302, target);
