@@ -187,17 +187,22 @@ module.exports = async function handler(req, res) {
         return res.status(401).json({ error: "That authenticator code doesn't match. Use the latest one." });
       }
 
-      // 2. Verify bank details on file. Without them we have nothing to wire.
+      // 2. Verify payout method on file. Post-pivot to PayPal Payouts API
+      //    (see taiwan_entity_single_provider memory), we only need a valid
+      //    paypal_email — bank fields are no longer required. Legacy rows
+      //    that only have bank fields and no paypal_email will be treated
+      //    as missing and the publisher gets the same 412 prompt as a
+      //    brand-new publisher.
       const { data: bank, error: bankErr } = await supabaseAdmin
         .from("publisher_payout_methods")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
       if (bankErr) return res.status(500).json({ error: bankErr.message });
-      if (!bank) {
+      if (!bank || !bank.paypal_email) {
         return res.status(412).json({
-          error: "Add your bank details first (Settings → Payouts).",
-          code: "bank_required",
+          error: "Add your PayPal payout email first (Settings → Payouts).",
+          code: "payout_method_required",
         });
       }
 
@@ -218,17 +223,15 @@ module.exports = async function handler(req, res) {
       const targetDate = isoDate(friday);
       const arrival = estimateArrivalWindow(friday);
 
+      // Freeze the payout method into bank_snapshot. Column name preserved
+      // (no migration); contents pivoted to { paypal_email, ... }. The
+      // `method: "paypal"` discriminator lets future code distinguish from
+      // legacy bank-snapshot rows without inspecting field presence.
       const bankSnapshot = {
-        account_holder_name: bank.account_holder_name,
-        account_holder_country: bank.account_holder_country,
-        account_holder_address: bank.account_holder_address,
-        bank_name: bank.bank_name,
-        bank_country: bank.bank_country,
-        swift_bic: bank.swift_bic,
-        iban_or_account: bank.iban_or_account,
-        routing_or_branch: bank.routing_or_branch,
-        currency: bank.currency || "USD",
-        captured_at: new Date().toISOString(),
+        method:       "paypal",
+        paypal_email: bank.paypal_email,
+        currency:     bank.currency || "USD",
+        captured_at:  new Date().toISOString(),
       };
 
       const { data: inserted, error: insErr } = await supabaseAdmin

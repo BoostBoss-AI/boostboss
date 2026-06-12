@@ -8606,10 +8606,20 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
 
             function payoutMethodSummary() {
+                // Post-pivot to PayPal: the summary card just shows the email
+                // we'll send the payout to. We mask the local-part beyond
+                // the first 3 chars so an over-the-shoulder reader can't grab
+                // the whole address — same intent as the old account-number
+                // masking, but for an email.
                 var m = payoutMethodState.method || {};
-                // Mask the account/IBAN — show first 4 + last 4 if long enough.
-                var acct = m.iban_or_account || '';
-                var maskedAcct = acct.length > 8 ? acct.slice(0, 4) + ' •••• ' + acct.slice(-4) : acct;
+                var email = m.paypal_email || '';
+                var maskedEmail = email;
+                var at = email.indexOf('@');
+                if (at > 3) {
+                    maskedEmail = email.slice(0, 3) + '•••' + email.slice(at);
+                } else if (at >= 0) {
+                    maskedEmail = email.slice(0, Math.max(1, at)) + '•••' + email.slice(at);
+                }
                 var updated = '';
                 try { updated = m.updated_at ? new Date(m.updated_at).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }) : ''; } catch (_) {}
                 function row(label, value) {
@@ -8631,59 +8641,30 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                             <button id="sSetPayoutEdit" style="padding:7px 14px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;color:#111;cursor:pointer;font-weight:600;font-size:12.5px;font-family:inherit;">${esc(t('payouts.method_edit_btn'))}</button>
                         </div>
                         <div>
-                            ${row(t('payouts.method_field_holder'), m.account_holder_name)}
-                            ${row(t('payouts.method_field_acct_country'), countryName(m.account_holder_country))}
-                            ${row(t('payouts.method_field_address'), m.account_holder_address)}
-                            ${row(t('payouts.method_field_bank'), m.bank_name)}
-                            ${row(t('payouts.method_field_bank_country'), countryName(m.bank_country))}
-                            ${row(t('payouts.method_field_swift'), m.swift_bic)}
-                            ${row(t('payouts.method_field_iban'), maskedAcct)}
-                            ${row(t('payouts.method_field_routing'), m.routing_or_branch)}
+                            ${row('Method', 'PayPal')}
+                            ${row('PayPal email', maskedEmail)}
                             ${row(t('payouts.method_currency'), m.currency || 'USD')}
                         </div>
                     </div>`;
             }
 
             function payoutMethodForm() {
+                // Single-field form post-pivot. Inline copy (no t() lookups for
+                // the new field) because the i18n keys for the old bank-detail
+                // form (8 fields, hints, intro) carried bank terminology baked
+                // in across 6 language packs and threading new keys through
+                // each pack is out of scope for this build. The 2FA confirm
+                // step still uses the same t() keys — they're provider-neutral
+                // ("Re-enter your password" etc).
                 var f = payoutMethodState.formData || {};
                 return `
-                    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:11px 14px;margin-bottom:18px;font-size:12.5px;color:#92400E;line-height:1.55;">${esc(t('payouts.method_form_intro'))}</div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_holder'))}</label>
-                        <input id="sSetPayoutHolder" type="text" placeholder="${esc(t('payouts.method_field_holder_ph'))}" value="${esc(f.account_holder_name || '')}" style="${FLD}">
-                        <div style="${HINT}">${esc(t('payouts.method_field_holder_hint'))}</div>
+                    <div style="background:#FFF5F8;border:1px solid #FFD0E0;border-radius:8px;padding:11px 14px;margin-bottom:18px;font-size:12.5px;color:#4B4B5E;line-height:1.55;">
+                        We pay publishers via <strong>PayPal Payouts</strong>. Enter the email address tied to your PayPal account — funds typically arrive within minutes once a batch dispatches. Don't have a PayPal account? <a href="https://www.paypal.com/signup" target="_blank" rel="noopener" style="color:#FF2D78;font-weight:700;text-decoration:none;">Create one free</a>.
                     </div>
                     <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_acct_country'))}</label>
-                        ${countrySelect('sSetPayoutHolderCountry', f.account_holder_country)}
-                    </div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_address'))}</label>
-                        <textarea id="sSetPayoutAddress" rows="2" placeholder="${esc(t('payouts.method_field_address_ph'))}" style="${FLD};resize:vertical;min-height:60px;">${esc(f.account_holder_address || '')}</textarea>
-                        <div style="${HINT}">${esc(t('payouts.method_field_address_hint'))}</div>
-                    </div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_bank'))}</label>
-                        <input id="sSetPayoutBank" type="text" placeholder="${esc(t('payouts.method_field_bank_ph'))}" value="${esc(f.bank_name || '')}" style="${FLD}">
-                    </div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_bank_country'))}</label>
-                        ${countrySelect('sSetPayoutBankCountry', f.bank_country)}
-                    </div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_swift'))}</label>
-                        <input id="sSetPayoutSwift" type="text" placeholder="${esc(t('payouts.method_field_swift_ph'))}" value="${esc(f.swift_bic || '')}" maxlength="11" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;text-transform:uppercase;">
-                        <div style="${HINT}">${esc(t('payouts.method_field_swift_hint'))}</div>
-                    </div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_iban'))}</label>
-                        <input id="sSetPayoutIban" type="text" placeholder="${esc(t('payouts.method_field_iban_ph'))}" value="${esc(f.iban_or_account || '')}" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;">
-                        <div style="${HINT}">${esc(t('payouts.method_field_iban_hint'))}</div>
-                    </div>
-                    <div style="${ROW}">
-                        <label style="${LB}">${esc(t('payouts.method_field_routing'))}</label>
-                        <input id="sSetPayoutRouting" type="text" placeholder="${esc(t('payouts.method_field_routing_ph'))}" value="${esc(f.routing_or_branch || '')}" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;">
-                        <div style="${HINT}">${esc(t('payouts.method_field_routing_hint'))}</div>
+                        <label style="${LB}">PayPal email</label>
+                        <input id="sSetPayoutPaypalEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" value="${esc(f.paypal_email || '')}" style="${FLD};font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;">
+                        <div style="${HINT}">Use the email PayPal sends your receipts to. Mistyping it means we can't pay you — double-check before saving.</div>
                     </div>
                     <div style="${ROW}">
                         <label style="${LB}">${esc(t('payouts.method_currency'))}</label>
@@ -8748,24 +8729,25 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
 
             // Read the in-DOM form into payoutMethodState.formData and run
-            // the same validation the server will. Returns true if OK.
+            // the same validation the server will. Returns the captured form
+            // object if OK, null otherwise (after calling showMsg with the
+            // error). Post-pivot: single field, paypal_email.
             function captureAndValidatePayoutForm(showMsg) {
                 var val = function (id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
-                var f = {
-                    account_holder_name:    val('sSetPayoutHolder'),
-                    account_holder_country: val('sSetPayoutHolderCountry').toUpperCase(),
-                    account_holder_address: val('sSetPayoutAddress'),
-                    bank_name:              val('sSetPayoutBank'),
-                    bank_country:           val('sSetPayoutBankCountry').toUpperCase(),
-                    swift_bic:              val('sSetPayoutSwift').toUpperCase().replace(/\s+/g, ''),
-                    iban_or_account:        val('sSetPayoutIban').replace(/\s+/g, ''),
-                    routing_or_branch:      val('sSetPayoutRouting'),
-                };
-                var requiredKeys = ['account_holder_name', 'account_holder_country', 'account_holder_address', 'bank_name', 'bank_country', 'swift_bic', 'iban_or_account'];
-                for (var i = 0; i < requiredKeys.length; i++) {
-                    if (!f[requiredKeys[i]]) { showMsg(t('payouts.method_err_missing')); return null; }
+                var email = val('sSetPayoutPaypalEmail').toLowerCase();
+                if (!email) {
+                    showMsg("Enter your PayPal email address.");
+                    return null;
                 }
-                if (!/^[A-Z0-9]{8}$|^[A-Z0-9]{11}$/.test(f.swift_bic)) { showMsg(t('payouts.method_err_swift')); return null; }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showMsg("That doesn't look like a valid email address.");
+                    return null;
+                }
+                if (email.length > 254) {
+                    showMsg("That email address is too long.");
+                    return null;
+                }
+                var f = { paypal_email: email };
                 payoutMethodState.formData = f;
                 return f;
             }
@@ -9302,17 +9284,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const payoutEdit = document.getElementById('sSetPayoutEdit');
                 if (payoutEdit) payoutEdit.addEventListener('click', () => {
                     // Pre-fill formData from the stored method so the user
-                    // can tweak rather than re-type the whole form.
+                    // can tweak rather than re-type. Post-pivot: just the
+                    // PayPal email.
                     var m = payoutMethodState.method || {};
                     payoutMethodState.formData = {
-                        account_holder_name:    m.account_holder_name || '',
-                        account_holder_country: m.account_holder_country || '',
-                        account_holder_address: m.account_holder_address || '',
-                        bank_name:              m.bank_name || '',
-                        bank_country:           m.bank_country || '',
-                        swift_bic:              m.swift_bic || '',
-                        iban_or_account:        m.iban_or_account || '',
-                        routing_or_branch:      m.routing_or_branch || '',
+                        paypal_email: m.paypal_email || '',
                     };
                     payoutMethodView = 'form';
                     renderBody();

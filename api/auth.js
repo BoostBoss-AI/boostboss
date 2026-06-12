@@ -1018,12 +1018,22 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  // ── Payout method (bank-transfer details) ──────────────────────────────
+  // ── Payout method (PayPal email) ───────────────────────────────────────
   // Two actions: read the current method, and save (insert or replace) the
   // method with a step-up password + TOTP verification. The frontend calls
   // get to populate the read-only summary or to pre-fill the edit form, and
   // save to commit changes after the publisher re-enters their password and
   // a fresh authenticator code in the inline confirm step.
+  //
+  // Provider revision 2026-06-11: pivoted from bank-transfer (Payoneer-era)
+  // to PayPal email (single field). Taiwan-entity legal constraint forces
+  // single-provider pay-in + payout; PayPal handles both until Singapore
+  // corp. The publisher_payout_methods table gains a `paypal_email` column;
+  // old bank columns stay in schema for now but are no longer written or
+  // validated. The bank_snapshot jsonb on payout_requests still keys off
+  // `bank_snapshot` (column name preserved to avoid migration), but contents
+  // change to { paypal_email, currency, captured_at } instead of full bank
+  // fields. See taiwan_entity_single_provider memory for rationale.
   if (action === "get_payout_method" || action === "save_payout_method") {
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (!token) return res.status(401).json({ error: "No token" });
@@ -1033,40 +1043,42 @@ async function supabaseHandler(action, body, req, res) {
     if (action === "get_payout_method") {
       const { data, error } = await supabaseAdmin
         .from("publisher_payout_methods")
-        .select("account_holder_name, account_holder_country, account_holder_address, bank_name, bank_country, swift_bic, iban_or_account, routing_or_branch, currency, created_at, updated_at")
+        .select("paypal_email, currency, created_at, updated_at")
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) return res.status(500).json({ error: error.message });
-      return res.json({ method: data || null });
+      // Only treat the row as "having a method" if paypal_email is populated.
+      // A legacy bank-only row from before the pivot looks identical to no
+      // row here because we don't select bank fields anymore — explicit
+      // shape lets the frontend decide cleanly.
+      const method = (data && data.paypal_email) ? data : null;
+      return res.json({ method });
     }
 
     if (action === "save_payout_method") {
       const {
         current_password, totp_code,
-        account_holder_name, account_holder_country, account_holder_address,
-        bank_name, bank_country, swift_bic, iban_or_account, routing_or_branch,
+        paypal_email,
       } = body || {};
 
       // Validate required fields before doing any auth work — fail-fast.
-      const required = {
-        current_password, totp_code,
-        account_holder_name, account_holder_country, account_holder_address,
-        bank_name, bank_country, swift_bic, iban_or_account,
-      };
+      const required = { current_password, totp_code, paypal_email };
       for (const k of Object.keys(required)) {
         if (!required[k] || String(required[k]).trim() === "") {
           return res.status(400).json({ error: `Missing required field: ${k}` });
         }
       }
-      const swiftClean = String(swift_bic).toUpperCase().replace(/\s+/g, "");
-      if (!/^[A-Z0-9]{8}$|^[A-Z0-9]{11}$/.test(swiftClean)) {
-        return res.status(400).json({ error: "SWIFT/BIC code should be 8 or 11 characters (letters and digits only)." });
+
+      // Loose RFC-5322-ish email validation. PayPal will do the strict check
+      // when we dispatch the payout (and reject with INVALID_FIELD_NAME if
+      // the address can't receive money) — our job here is just to filter
+      // obvious typos before saving.
+      const emailClean = String(paypal_email).trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailClean)) {
+        return res.status(400).json({ error: "That doesn't look like a valid email address." });
       }
-      if (!/^[A-Z]{2}$/.test(String(account_holder_country))) {
-        return res.status(400).json({ error: "Invalid account holder country code." });
-      }
-      if (!/^[A-Z]{2}$/.test(String(bank_country))) {
-        return res.status(400).json({ error: "Invalid bank country code." });
+      if (emailClean.length > 254) {
+        return res.status(400).json({ error: "Email address is too long." });
       }
 
       // Step-up: re-verify the password against Supabase, then verify the TOTP
@@ -1110,17 +1122,10 @@ async function supabaseHandler(action, body, req, res) {
         .eq("user_id", user.id);
 
       const row = {
-        user_id: user.id,
-        account_holder_name: String(account_holder_name).trim(),
-        account_holder_country: String(account_holder_country).toUpperCase(),
-        account_holder_address: String(account_holder_address).trim(),
-        bank_name: String(bank_name).trim(),
-        bank_country: String(bank_country).toUpperCase(),
-        swift_bic: swiftClean,
-        iban_or_account: String(iban_or_account).trim().replace(/\s+/g, ""),
-        routing_or_branch: routing_or_branch ? String(routing_or_branch).trim() : null,
-        currency: "USD",
-        updated_at: nowIso,
+        user_id:      user.id,
+        paypal_email: emailClean,
+        currency:     "USD",
+        updated_at:   nowIso,
       };
       const { error: upErr } = await supabaseAdmin
         .from("publisher_payout_methods")
