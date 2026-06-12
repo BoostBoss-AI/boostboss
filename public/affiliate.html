@@ -307,6 +307,63 @@
   .profile-grid dt { font-size: 13px; color: var(--muted); font-weight: 600; padding: 8px 0; }
   .profile-grid dd { font-size: 14.5px; color: var(--ink); padding: 8px 0; word-break: break-all; }
 
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; box-shadow: var(--shadow-lg);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;
+    z-index: 9999; max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #064E3B; }
+  .toast.error   { background: #7F1D1D; }
+
+  /* ── Share link button + share-list rows ── */
+  .saved-card .actions {
+    display: flex; gap: 8px; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .saved-card .action-btn {
+    flex: 1; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px;
+    background: #fff; color: var(--ink); cursor: pointer; font-size: 12px;
+    font-weight: 600; font-family: inherit; display: inline-flex; align-items: center;
+    justify-content: center; gap: 4px;
+  }
+  .saved-card .action-btn:hover { background: var(--bg); border-color: var(--ink-soft); }
+  .saved-card .action-btn.primary { background: var(--pink); color: #fff; border-color: var(--pink); }
+  .saved-card .action-btn.primary:hover { background: var(--pink-dark); }
+  .saved-card .clicks-badge {
+    display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px;
+    border-radius: 99px; background: var(--pink-soft); color: var(--pink);
+    margin-left: 6px; vertical-align: middle;
+  }
+
+  .links-table { width: 100%; border-collapse: collapse; background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .links-table th, .links-table td {
+    padding: 12px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--line-soft);
+  }
+  .links-table th {
+    background: var(--bg); color: var(--muted); font-weight: 600;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .links-table tr:last-child td { border-bottom: none; }
+  .links-table td.url { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink); }
+  .links-table td.headline { color: var(--ink); font-weight: 500; max-width: 280px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .links-table .copy-btn {
+    background: var(--pink-soft); border: none; color: var(--pink); padding: 5px 10px;
+    border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .links-table .copy-btn:hover { background: rgba(255,45,120,0.18); }
+  .links-table .revoke-btn {
+    background: none; border: none; color: var(--muted); padding: 5px 8px;
+    cursor: pointer; font-size: 11.5px; font-family: inherit;
+  }
+  .links-table .revoke-btn:hover { color: #DC2626; }
+  .links-table tr.revoked td { opacity: 0.45; }
+
   .hidden { display: none !important; }
 
   @media (max-width: 800px) {
@@ -642,16 +699,11 @@
         </div>
       </section>
 
-      <!-- Share Links (coming soon) -->
+      <!-- Share Links (functional) -->
       <section id="sec-links" class="dash-section hidden">
         <h2>Share links</h2>
-        <p class="pre">Every saved ad becomes a tracked URL — paste it anywhere your audience hangs out. See clicks, conversions, and EPC per link.</p>
-        <div class="empty">
-          <div class="icon">🔗</div>
-          <h3>Share links coming soon</h3>
-          <p>We're wiring up the link-minting + click tracking infrastructure. When it ships, every saved ad gets a "Get share link" button and per-link analytics show up here.</p>
-          <p class="small">For now your saves live in <a href="#" onclick="switchSection('saves');return false;">My Saves</a> — you can copy the target URL manually if needed.</p>
-        </div>
+        <p class="pre">Every saved ad you tap "Copy share link" on shows up here. Paste these URLs anywhere your audience hangs out — every click is tracked.</p>
+        <div id="links-content"></div>
       </section>
 
       <!-- Earnings (coming soon) -->
@@ -691,9 +743,16 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 const API_BASE = window.location.origin;
 const LS_KEY   = 'bb_affiliate_session';
+
+// Cache of saved_ad_id → share URL so repeat clicks on the same card
+// don't re-roundtrip to mint a new link (the backend is idempotent
+// anyway but skipping the call feels snappier).
+const shareUrlCache = new Map();
 
 // ── Session helpers ────────────────────────────────────────────────
 function getSession() { try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (_) { return null; } }
@@ -933,9 +992,16 @@ async function loadDashboard() {
 
   // Stats card on Home
   document.getElementById('h-saves').textContent = me.saved_count != null ? me.saved_count : 0;
-  document.getElementById('h-clicks').textContent = '—';
+  document.getElementById('h-clicks').textContent = '…';   // filled in by loadShareLinks below
   document.getElementById('h-conv').textContent   = '—';
   document.getElementById('h-earn').textContent   = '$0.00';
+
+  // Pull share-links in parallel with the rest of the dashboard render.
+  // Populates the Share Links section AND the home dashboard's "Share clicks"
+  // total. Failures are non-fatal — the dashboard still shows.
+  loadShareLinks(session.token).catch(() => {
+    document.getElementById('h-clicks').textContent = '—';
+  });
 
   // Settings: render profile rows
   const p = me.profile || {};
@@ -989,8 +1055,9 @@ function savedCard(item) {
     : '';
   const link = item.target_url
     ? `<a href="${esc(item.target_url)}" target="_blank" rel="noopener noreferrer">Open →</a>` : '';
+  // The share-link mint happens on click — no DB call at render time.
   return `
-    <div class="saved-card">
+    <div class="saved-card" data-saved-id="${esc(item.id)}">
       <div class="image" ${img ? `style="background-image:url('${esc(img)}');"` : ''}></div>
       <div class="body">
         <div class="headline">${esc(headline)}</div>
@@ -999,8 +1066,165 @@ function savedCard(item) {
           <span class="when">${esc(when)}</span>
           ${link}
         </div>
+        <div class="actions">
+          <button type="button" class="action-btn primary" onclick="copyShareLink('${esc(item.id)}', this)">📋 Copy share link</button>
+          ${item.target_url ? `<button type="button" class="action-btn" onclick="window.open('${esc(item.target_url)}','_blank','noopener')">↗ Preview</button>` : ''}
+        </div>
       </div>
     </div>`;
+}
+
+// Toast — short-lived bottom-of-screen confirmation. Reuses #toast element.
+function showToast(text, kind) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.className = 'toast show ' + (kind || '');
+  el.textContent = text;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { el.className = 'toast ' + (kind || ''); }, 2400);
+}
+
+// Copy share link to clipboard. Mints the link via affiliate_create_share_link
+// (idempotent on the backend) then writes the URL to the clipboard. Cached
+// so subsequent clicks on the same card skip the round trip.
+async function copyShareLink(savedAdId, btn) {
+  if (!savedAdId) return;
+  const originalLabel = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '… minting'; }
+  try {
+    let url = shareUrlCache.get(savedAdId);
+    if (!url) {
+      const session = getSession();
+      if (!session || !session.token) {
+        showToast('Sign in expired — please reload', 'error');
+        return;
+      }
+      const r = await fetch(`${API_BASE}/api/auth?action=affiliate_create_share_link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+        body: JSON.stringify({ saved_ad_id: savedAdId }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Mint failed');
+      url = j.url;
+      shareUrlCache.set(savedAdId, url);
+    }
+    // Clipboard API requires user-activation (which we have — this is a click handler).
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Share link copied — paste anywhere your audience hangs out', 'success');
+    } catch (clipErr) {
+      // Fallback: drop the URL into a prompt so the user can copy manually.
+      window.prompt('Copy this link:', url);
+    }
+  } catch (e) {
+    showToast(e.message || 'Could not generate link', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+  }
+}
+
+// Load + render share links. Called in parallel with the rest of the
+// dashboard. Updates both the Share Links section and the home stat.
+async function loadShareLinks(token) {
+  try {
+    const r = await fetch(`${API_BASE}/api/auth?action=affiliate_list_share_links&limit=200`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Could not load share links');
+    document.getElementById('h-clicks').textContent = j.total_clicks != null ? j.total_clicks : 0;
+    // Pre-warm the shareUrlCache so My Saves copy buttons don't re-mint
+    // links the user has already created.
+    (j.links || []).forEach((lk) => {
+      if (lk.saved_ad_id && lk.url) shareUrlCache.set(lk.saved_ad_id, lk.url);
+    });
+    renderShareLinks(j.links || []);
+  } catch (e) {
+    document.getElementById('h-clicks').textContent = '—';
+    document.getElementById('links-content').innerHTML =
+      `<div class="empty"><div class="icon">⚠</div><h3>Couldn't load share links</h3><p>${esc(e.message || String(e))}</p></div>`;
+  }
+}
+
+function renderShareLinks(items) {
+  const wrap = document.getElementById('links-content');
+  if (!items.length) {
+    wrap.innerHTML = `
+      <div class="empty">
+        <div class="icon">🔗</div>
+        <h3>No share links yet</h3>
+        <p>Head to <a href="#" onclick="switchSection('saves');return false;">My Saves</a> and tap "Copy share link" on any saved ad. The link shows up here with a click counter.</p>
+        <p class="small">Tracked URLs use the format <code>boostboss.ai/s/&lt;token&gt;</code> — paste them anywhere your audience hangs out.</p>
+      </div>`;
+    return;
+  }
+  const rows = items.map((lk) => {
+    const revoked = !!lk.revoked_at;
+    const lastClick = lk.last_click_at
+      ? new Date(lk.last_click_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—';
+    return `
+      <tr class="${revoked ? 'revoked' : ''}">
+        <td class="headline" title="${esc(lk.headline || lk.target_url || '')}">${esc(lk.headline || lk.target_url || 'Saved ad')}</td>
+        <td class="url" title="${esc(lk.url)}">${esc(lk.url.replace(/^https?:\/\//, ''))}</td>
+        <td style="text-align:center;font-weight:700;color:var(--pink);">${lk.click_count || 0}</td>
+        <td style="color:var(--muted);font-size:12.5px;">${esc(lastClick)}</td>
+        <td style="text-align:right;">
+          ${revoked
+            ? '<span style="font-size:11px;color:#DC2626;font-weight:700;">REVOKED</span>'
+            : `<button type="button" class="copy-btn" onclick="copyLinkFromTable('${esc(lk.url)}', this)">Copy</button>
+               <button type="button" class="revoke-btn" onclick="revokeShareLink('${esc(lk.id)}', this)" title="Revoke this link — clicks stop working">Revoke</button>`}
+        </td>
+      </tr>`;
+  }).join('');
+  wrap.innerHTML = `
+    <table class="links-table">
+      <thead><tr>
+        <th>Saved ad</th>
+        <th>Share URL</th>
+        <th style="text-align:center;width:80px;">Clicks</th>
+        <th>Last click</th>
+        <th style="text-align:right;width:160px;">Action</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// Copy a URL from the share-links table row's button.
+async function copyLinkFromTable(url, btn) {
+  try {
+    await navigator.clipboard.writeText(url);
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+    showToast('URL copied to clipboard', 'success');
+  } catch (e) {
+    window.prompt('Copy this link:', url);
+  }
+}
+
+// Revoke a share link (sets revoked_at; clicks redirect to home thereafter).
+async function revokeShareLink(linkId, btn) {
+  if (!confirm('Revoke this share link? Anyone who clicks an already-shared copy will be redirected to boostboss.ai instead of the target.')) return;
+  const session = getSession();
+  if (!session || !session.token) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Revoking…'; }
+  try {
+    const r = await fetch(`${API_BASE}/api/auth?action=affiliate_revoke_share_link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+      body: JSON.stringify({ id: linkId }),
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Revoke failed');
+    showToast('Share link revoked', 'success');
+    // Reload to show the strikethrough state
+    await loadShareLinks(session.token);
+  } catch (e) {
+    showToast(e.message || 'Could not revoke', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Revoke'; }
+  }
 }
 
 // Pretty-print snake_case → Title Case for display

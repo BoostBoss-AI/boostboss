@@ -25,6 +25,7 @@
       "destination": "/affiliate.html"
     },
     { "source": "/affiliate", "destination": "/affiliate.html" },
+    { "source": "/s/:token", "destination": "/api/affiliate-redirect?token=:token" },
     { "source": "/en", "destination": "/index.html" },
     { "source": "/zh", "destination": "/index.html" },
     { "source": "/zh-TW", "destination": "/index.html" },

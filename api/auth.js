@@ -77,6 +77,32 @@ function makeApiKey(prefix, userId) {
   return `bb_${prefix}_live_${seed.slice(0, 32)}`;
 }
 
+// ── Affiliate share-link helpers ───────────────────────────────────────
+// makeToken: 8-char base62 → ~218 trillion possibilities. Collision risk
+// at any reasonable scale is negligible; the affiliate_share_links table
+// has a UNIQUE constraint on token so a collision throws and the caller
+// retries with a fresh value.
+const TOKEN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"; // skip 0/O/1/l/I for legibility
+function makeToken(len = 8) {
+  const bytes = crypto.randomBytes(len);
+  let out = "";
+  for (let i = 0; i < len; i++) {
+    out += TOKEN_ALPHABET[bytes[i] % TOKEN_ALPHABET.length];
+  }
+  return out;
+}
+
+// buildShareUrl: assemble the public-facing share URL for a token. Uses
+// PUBLIC_BASE if set (production = https://boostboss.ai), falls back to
+// the request's own origin so dev / preview deploys work without env vars.
+function buildShareUrl(req, token) {
+  const fromEnv = process.env.PUBLIC_BASE || process.env.PUBLIC_BASE_URL;
+  if (fromEnv) return fromEnv.replace(/\/$/, "") + "/s/" + token;
+  const host = (req && req.headers && req.headers.host) || "boostboss.ai";
+  const proto = (req && req.headers && req.headers["x-forwarded-proto"]) || "https";
+  return proto + "://" + host + "/s/" + token;
+}
+
 // ── demo-mode in-process user store (resets on cold start; that's fine) ──
 const DEMO_USERS = new Map(); // userId → user row
 
@@ -1620,6 +1646,148 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ success: true, saved: data });
   }
 
+  // ── Share-links (affiliate #2) ─────────────────────────────────────
+  // affiliate_create_share_link
+  //   Idempotent. Mints a tokenized URL for an affiliate's saved ad.
+  //   If a share_link already exists for (affiliate_id, saved_ad_id),
+  //   returns the existing token. The token is what appears in the
+  //   boostboss.ai/s/<token> URL the affiliate pastes everywhere.
+  if (action === "affiliate_create_share_link") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const { data: aff } = await supabaseAdmin
+      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
+    if (!aff) return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
+
+    const savedAdId = (body && body.saved_ad_id) || null;
+    if (!savedAdId) return res.status(400).json({ error: "saved_ad_id is required" });
+
+    // Verify the saved_ad belongs to THIS affiliate. Stops one affiliate
+    // from minting share-links over another affiliate's saved ads.
+    const { data: sa } = await supabaseAdmin
+      .from("affiliate_saved_ads")
+      .select("id, affiliate_id, target_url")
+      .eq("id", savedAdId)
+      .maybeSingle();
+    if (!sa || sa.affiliate_id !== user.id) {
+      return res.status(404).json({ error: "Saved ad not found" });
+    }
+
+    // Existing link? Return it (idempotent).
+    const { data: existing } = await supabaseAdmin
+      .from("affiliate_share_links")
+      .select("*")
+      .eq("affiliate_id", user.id)
+      .eq("saved_ad_id", savedAdId)
+      .maybeSingle();
+    if (existing) {
+      return res.json({
+        share_link: existing,
+        url: buildShareUrl(req, existing.token),
+        new: false,
+      });
+    }
+
+    // Mint a new one. Token is 8 chars of base62 — collision risk at
+    // 62^8 ≈ 2e14 is negligible at any scale we'll hit. If it collides
+    // anyway, the unique index throws and we retry with a fresh token.
+    let newToken = null;
+    let lastErr = null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const candidate = makeToken(8);
+      const { data: created, error: insErr } = await supabaseAdmin
+        .from("affiliate_share_links")
+        .insert({
+          affiliate_id: user.id,
+          saved_ad_id:  savedAdId,
+          token:        candidate,
+          target_url:   sa.target_url || null,
+        })
+        .select()
+        .maybeSingle();
+      if (!insErr) {
+        return res.json({
+          share_link: created,
+          url: buildShareUrl(req, candidate),
+          new: true,
+        });
+      }
+      lastErr = insErr;
+      // Only retry on unique-violation; bail on other errors.
+      if (!/duplicate|unique/i.test(insErr.message || "")) break;
+    }
+    return res.status(500).json({ error: (lastErr && lastErr.message) || "Could not mint token" });
+  }
+
+  if (action === "affiliate_list_share_links") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const { data: aff } = await supabaseAdmin
+      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
+    if (!aff) return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
+
+    const params = Object.assign({}, req.query || {}, body || {});
+    const limit  = Math.min(parseInt(params.limit, 10) || 50, 200);
+    const offset = Math.max(parseInt(params.offset, 10) || 0, 0);
+
+    // Join saved_ad headline for the dashboard display (avoid a second
+    // round-trip from the frontend).
+    const { data, error: listErr } = await supabaseAdmin
+      .from("affiliate_share_links")
+      .select("id, token, target_url, created_at, click_count, last_click_at, revoked_at, saved_ad_id, affiliate_saved_ads(headline, image_url)")
+      .eq("affiliate_id", user.id)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (listErr) return res.status(500).json({ error: listErr.message });
+
+    // Aggregate total clicks for the dashboard home stat.
+    const totalClicks = (data || []).reduce((a, r) => a + (r.click_count || 0), 0);
+
+    // Flatten the joined headline so the frontend has a simple shape.
+    const links = (data || []).map((r) => ({
+      id:           r.id,
+      token:        r.token,
+      url:          buildShareUrl(req, r.token),
+      target_url:   r.target_url,
+      created_at:   r.created_at,
+      click_count:  r.click_count,
+      last_click_at: r.last_click_at,
+      revoked_at:   r.revoked_at,
+      saved_ad_id:  r.saved_ad_id,
+      headline:     r.affiliate_saved_ads ? r.affiliate_saved_ads.headline : null,
+      image_url:    r.affiliate_saved_ads ? r.affiliate_saved_ads.image_url : null,
+    }));
+    return res.json({ links, total_clicks: totalClicks });
+  }
+
+  if (action === "affiliate_revoke_share_link") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const linkId = (body && body.id) || null;
+    if (!linkId) return res.status(400).json({ error: "id is required" });
+
+    // Scoped by affiliate_id so an affiliate can only revoke their own.
+    const { data, error: upErr } = await supabaseAdmin
+      .from("affiliate_share_links")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("id", linkId)
+      .eq("affiliate_id", user.id)
+      .select()
+      .maybeSingle();
+    if (upErr) return res.status(500).json({ error: upErr.message });
+    if (!data) return res.status(404).json({ error: "Share link not found" });
+    return res.json({ success: true, share_link: data });
+  }
+
   if (action === "affiliate_list_saved") {
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (!token) return res.status(401).json({ error: "No token" });
@@ -1652,7 +1820,7 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ saved: data || [], total: count || 0 });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved, affiliate_create_share_link, affiliate_list_share_links, affiliate_revoke_share_link" });
 }
 
 // ── helper: build the email confirmation redirect URL for a given role ──
