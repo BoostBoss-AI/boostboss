@@ -714,9 +714,10 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <div class="panel" id="panel-users">
       <div class="section-header">
         <h1>Users</h1>
+        <button class="btn-sm btn-action" onclick="loadUsersPanel()">Refresh</button>
       </div>
       <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
-        Advertisers and publishers registered on the platform.
+        Advertisers and publishers registered on the platform. Click a row to see their onboarding answers and performance.
       </p>
       <div class="stats-row" style="margin-bottom:20px;">
         <div class="stat-card">
@@ -728,10 +729,43 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
           <div class="value cyan" id="stat-publishers">—</div>
         </div>
       </div>
-      <div class="empty-state">
-        <div class="icon">👥</div>
-        <p>User management coming soon.</p>
-        <p style="margin-top:8px;">Use Supabase dashboard for direct user management.</p>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
+        <input id="users-search" type="text" placeholder="Search email or name…"
+               style="flex:1;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:#F5F5F7;font-family:inherit;font-size:13px;"
+               oninput="usersSearchDebounce()">
+        <select id="users-role-filter" onchange="loadUsersPanel()"
+                style="padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:#F5F5F7;font-family:inherit;font-size:13px;">
+          <option value="all">All users</option>
+          <option value="advertiser">Advertisers only</option>
+          <option value="developer">Publishers only</option>
+        </select>
+        <select id="users-onb-filter" onchange="loadUsersPanel()"
+                style="padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:#F5F5F7;font-family:inherit;font-size:13px;"
+                title="Onboarding status filter">
+          <option value="all">Any onboarding</option>
+          <option value="completed">Onboarded</option>
+          <option value="pending">Not onboarded</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Name</th>
+              <th>Balance</th>
+              <th>Performance</th>
+              <th>Onboarding</th>
+              <th>Signed up</th>
+            </tr>
+          </thead>
+          <tbody id="users-body">
+            <tr><td colspan="7" class="empty-state">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -923,10 +957,133 @@ function switchPanel(name) {
   if (name === "seats") loadSeats();
   if (name === "review") loadReviewQueue();
   if (name === "payouts") loadPayoutsPanel();
+  if (name === "users") loadUsersPanel();
   if (name === "live") startLiveActivity();
   else stopLiveActivity();
   if (name === "money") loadMoneyFlow();
   if (name === "inspector") loadAuctionInspector();
+}
+
+// ── Users panel ─────────────────────────────────────────────────────
+// Lists every advertiser + publisher with their onboarding answers and
+// lifetime performance (spend for advertisers, paid-out for publishers).
+// Server side: GET /api/auth?action=admin_list_users with admin bearer.
+// Click a row to expand a detail panel below it.
+let _usersSearchTimer = null;
+function usersSearchDebounce() {
+  if (_usersSearchTimer) clearTimeout(_usersSearchTimer);
+  _usersSearchTimer = setTimeout(loadUsersPanel, 250);
+}
+
+async function loadUsersPanel() {
+  const body = document.getElementById("users-body");
+  if (!body) return;
+  const role = (document.getElementById("users-role-filter") || {}).value || "all";
+  const q = ((document.getElementById("users-search") || {}).value || "").trim();
+  const onbFilter = (document.getElementById("users-onb-filter") || {}).value || "all";
+
+  body.innerHTML = '<tr><td colspan="7" class="empty-state">Loading…</td></tr>';
+  try {
+    const params = new URLSearchParams({ action: "admin_list_users" });
+    if (role !== "all") params.set("role", role);
+    if (q) params.set("q", q);
+    params.set("limit", "100");
+    const r = await fetch("/api/auth?" + params.toString(), {
+      method: "GET",
+      headers: { "Authorization": "Bearer " + (token || "") },
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || ("HTTP " + r.status));
+    // Update the two stat cards
+    const advEl = document.getElementById("stat-advertisers");
+    const pubEl = document.getElementById("stat-publishers");
+    if (advEl) advEl.textContent = (j.counts && j.counts.advertisers != null) ? j.counts.advertisers : "—";
+    if (pubEl) pubEl.textContent = (j.counts && j.counts.developers  != null) ? j.counts.developers  : "—";
+
+    // Client-side onboarding filter so the dropdown is instant
+    const users = (j.users || []).filter((u) => {
+      if (onbFilter === "completed") return u.onboarding_completed;
+      if (onbFilter === "pending")   return !u.onboarding_completed;
+      return true;
+    });
+    if (users.length === 0) {
+      body.innerHTML = '<tr><td colspan="7" class="empty-state">No users matched. Try a broader filter.</td></tr>';
+      return;
+    }
+    body.innerHTML = users.map((u) => renderUserRow(u)).join("");
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="7" class="empty-state" style="color:#FCA5A5;">Failed to load users — ' + escapeHtml(e.message || String(e)) + '</td></tr>';
+  }
+}
+
+function renderUserRow(u) {
+  const perfCell = u.role === "advertiser"
+    ? '<div style="font-weight:600;color:#F5F5F7;">$' + fmt(u.performance.lifetime_spend_usd || 0) + ' spent</div>'
+      + '<div style="font-size:11.5px;color:var(--muted);">' + (u.performance.campaign_count || 0) + ' campaign' + (u.performance.campaign_count === 1 ? '' : 's') + '</div>'
+    : '<div style="font-weight:600;color:#F5F5F7;">$' + fmt(u.performance.lifetime_paid_usd || 0) + ' paid out</div>'
+      + '<div style="font-size:11.5px;color:var(--muted);">' + (u.performance.payout_count || 0) + ' payout' + (u.performance.payout_count === 1 ? '' : 's') + '</div>';
+  const onbBadge = u.onboarding_completed
+    ? '<span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#064E3B;color:#86EFAC;">DONE</span>'
+    : '<span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#7C2D12;color:#FED7AA;">PENDING</span>';
+  const roleBadge = u.role === "advertiser"
+    ? '<span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(255,45,120,0.18);color:#FF8DB1;">Advertiser</span>'
+    : '<span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(4,190,254,0.18);color:#7DD3FC;">Publisher</span>';
+
+  const signupDate = u.signup_date
+    ? new Date(u.signup_date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+    : "—";
+
+  const summary = u.profile_summary || {};
+  const summaryRows = u.role === "advertiser"
+    ? [
+        ["Industry",     summary.industry],
+        ["Product type", summary.product_type],
+        ["DAU range",    summary.digital_dau_range],
+        ["Revenue",      summary.annual_revenue_range],
+      ]
+    : [
+        ["AI category",  summary.ai_app_category],
+        ["Surface",      summary.surface_type],
+        ["DAU range",    summary.daily_users_range],
+        ["Monetization", summary.monetization_model],
+      ];
+  const detailHtml = '<tr id="user-detail-' + u.id + '" style="display:none;background:rgba(255,255,255,0.02);">'
+    + '<td colspan="7" style="padding:14px 20px;">'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:12.5px;">'
+    + summaryRows.map(([k, v]) =>
+        '<div><div style="color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-size:10.5px;margin-bottom:3px;">' + k + '</div>'
+        + '<div style="color:#F5F5F7;font-weight:600;">' + (v ? escapeHtml(String(v)) : '<span style="color:var(--muted);">—</span>') + '</div></div>'
+      ).join('')
+    + '</div>'
+    + '<div style="margin-top:14px;font-size:11.5px;color:var(--muted);">User ID: <code style="color:#9CA3AF;">' + escapeHtml(u.id || '—') + '</code></div>'
+    + '</td></tr>';
+
+  return '<tr style="cursor:pointer;" onclick="toggleUserDetail(\'' + u.id + '\')">'
+    + '<td><div style="color:#F5F5F7;font-weight:500;">' + escapeHtml(u.email || '—') + '</div></td>'
+    + '<td>' + roleBadge + '</td>'
+    + '<td>' + (u.name ? escapeHtml(u.name) : '<span style="color:var(--muted);">—</span>') + '</td>'
+    + '<td style="font-family:JetBrains Mono,monospace;color:#F5F5F7;">$' + fmt(u.balance) + '</td>'
+    + '<td>' + perfCell + '</td>'
+    + '<td>' + onbBadge + '</td>'
+    + '<td style="color:var(--muted);font-size:12px;">' + escapeHtml(signupDate) + '</td>'
+    + '</tr>'
+    + detailHtml;
+}
+
+function toggleUserDetail(userId) {
+  const row = document.getElementById("user-detail-" + userId);
+  if (!row) return;
+  row.style.display = row.style.display === "none" ? "table-row" : "none";
+}
+
+function fmt(n) {
+  return Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
 }
 
 // ── Live Activity (Phase H Panel 1) ──

@@ -1135,7 +1135,253 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method" });
+  // ── Onboarding questionnaire ───────────────────────────────────────────
+  // Required for every new signup before they can interact with the
+  // dashboard. The frontend gates the dashboard with a modal that posts
+  // here. Allowed values match the CHECK constraints in
+  // launch-kit/MIGRATION-onboarding-questionnaire.sql; we don't validate
+  // exhaustively here because the DB will reject anything off-list.
+  //
+  // Role-specific shape:
+  //   advertiser → { industry, product_type, digital_dau_range?, annual_revenue_range }
+  //   developer  → { ai_app_category, surface_type, daily_users_range, monetization_model }
+  //
+  // Sets onboarding_completed_at as the gate signal — frontend reads this
+  // from the `me` response on every dashboard load and decides whether to
+  // show the modal.
+  if (action === "save_onboarding") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
+    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const role = (body && body.role) === "developer" ? "developer" : "advertiser";
+    const nowIso = new Date().toISOString();
+
+    if (role === "advertiser") {
+      const {
+        industry, product_type, digital_dau_range, annual_revenue_range,
+      } = body || {};
+
+      // Required: industry + product_type + annual_revenue_range. DAU is
+      // only required when product_type='digital' — otherwise it's null.
+      if (!industry || !String(industry).trim()) {
+        return res.status(400).json({ error: "Industry is required" });
+      }
+      if (!product_type) {
+        return res.status(400).json({ error: "Product type is required" });
+      }
+      if (!annual_revenue_range) {
+        return res.status(400).json({ error: "Annual revenue range is required" });
+      }
+      const dauForRow = product_type === "digital" ? (digital_dau_range || null) : null;
+      if (product_type === "digital" && !dauForRow) {
+        return res.status(400).json({ error: "Daily active users range is required for digital products" });
+      }
+
+      const row = {
+        industry:                 String(industry).trim().slice(0, 80),
+        product_type:             String(product_type),
+        digital_dau_range:        dauForRow,
+        annual_revenue_range:     String(annual_revenue_range),
+        onboarding_completed_at:  nowIso,
+        updated_at:               nowIso,
+      };
+      const { error: upErr } = await supabaseAdmin
+        .from("advertisers")
+        .update(row)
+        .eq("id", user.id);
+      if (upErr) return res.status(500).json({ error: upErr.message });
+      return res.json({ success: true, role, saved_at: nowIso });
+    }
+
+    // developer (publisher) path
+    const {
+      ai_app_category, surface_type, daily_users_range, monetization_model,
+    } = body || {};
+
+    if (!ai_app_category) return res.status(400).json({ error: "AI app category is required" });
+    if (!surface_type)    return res.status(400).json({ error: "Surface type is required" });
+    if (!daily_users_range) return res.status(400).json({ error: "Daily users range is required" });
+    if (!monetization_model) return res.status(400).json({ error: "Monetization model is required" });
+
+    const row = {
+      ai_app_category:          String(ai_app_category),
+      surface_type:             String(surface_type),
+      daily_users_range:        String(daily_users_range),
+      monetization_model:       String(monetization_model),
+      onboarding_completed_at:  nowIso,
+      updated_at:               nowIso,
+    };
+    const { error: upErr } = await supabaseAdmin
+      .from("developers")
+      .update(row)
+      .eq("id", user.id);
+    if (upErr) return res.status(500).json({ error: upErr.message });
+    return res.json({ success: true, role, saved_at: nowIso });
+  }
+
+  // ── Admin: list/search users with performance summary ─────────────────
+  // Powers the /admin Users panel. Returns advertiser + publisher rows
+  // with their onboarding answers + lightweight performance metrics so
+  // the admin can spot active accounts, big spenders, top earners, and
+  // anyone stuck in onboarding without opening Supabase directly.
+  //
+  // Auth: BBX_ADMIN_KEY or ADMIN_TOKEN bearer (same pattern as
+  // api/payouts.js requireAdmin).
+  //
+  // Query params (all optional, via JSON body or query string):
+  //   role       — "advertiser" | "developer" | "all" (default: "all")
+  //   q          — search string; matched against email + company/app name
+  //   limit      — page size, default 50, max 200
+  //   offset     — pagination offset
+  //
+  // Response shape:
+  //   { users: [{id, role, email, name, balance, signup_date,
+  //              onboarding_completed, profile_summary, performance}], total }
+  if (action === "admin_list_users") {
+    const authHeader = req.headers && req.headers.authorization;
+    const adminToken = authHeader && authHeader.replace(/^Bearer\s+/i, "");
+    const staticKeys = [process.env.BBX_ADMIN_KEY, process.env.ADMIN_TOKEN].filter(Boolean);
+    if (!adminToken || !staticKeys.includes(adminToken)) {
+      return res.status(401).json({ error: "Admin authentication required" });
+    }
+
+    const params = Object.assign({}, req.query || {}, body || {});
+    const role = (params.role || "all").toString();
+    const q = (params.q || "").toString().trim().toLowerCase();
+    const limit = Math.min(parseInt(params.limit, 10) || 50, 200);
+    const offset = Math.max(parseInt(params.offset, 10) || 0, 0);
+
+    // Helper — build the per-table query with optional fuzzy search.
+    async function fetchTable(table, nameField) {
+      let query = supabaseAdmin
+        .from(table)
+        .select(`id, email, ${nameField}, balance, created_at, onboarding_completed_at, industry, product_type, digital_dau_range, annual_revenue_range, ai_app_category, surface_type, daily_users_range, monetization_model`, { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
+      if (q) {
+        // Match either email or name field. Supabase .or() syntax.
+        const safe = q.replace(/[%,]/g, "");
+        query = query.or(`email.ilike.%${safe}%,${nameField}.ilike.%${safe}%`);
+      }
+      const { data, count, error } = await query;
+      if (error) throw error;
+      return { rows: data || [], count: count || 0 };
+    }
+
+    try {
+      const wantAdvertisers = (role === "all" || role === "advertiser");
+      const wantPublishers  = (role === "all" || role === "developer");
+
+      const [advResult, devResult] = await Promise.all([
+        wantAdvertisers ? fetchTable("advertisers", "company_name") : Promise.resolve({ rows: [], count: 0 }),
+        wantPublishers  ? fetchTable("developers",  "app_name")     : Promise.resolve({ rows: [], count: 0 }),
+      ]);
+
+      // Compute performance per row. Keep cheap: aggregate from campaigns
+      // (advertisers) and payout_requests (publishers). Best-effort — if
+      // a table column is missing, fall through with zeros.
+      const advIds = advResult.rows.map((r) => r.id);
+      const devIds = devResult.rows.map((r) => r.id);
+
+      let spendByAdv = new Map();
+      let campaignsByAdv = new Map();
+      if (advIds.length > 0) {
+        try {
+          const { data: campaigns } = await supabaseAdmin
+            .from("campaigns")
+            .select("advertiser_id, spent")
+            .in("advertiser_id", advIds);
+          (campaigns || []).forEach((c) => {
+            const adv = c.advertiser_id;
+            spendByAdv.set(adv, (spendByAdv.get(adv) || 0) + Number(c.spent || 0));
+            campaignsByAdv.set(adv, (campaignsByAdv.get(adv) || 0) + 1);
+          });
+        } catch (_) { /* column may not exist on every env — best effort */ }
+      }
+
+      let paidByDev = new Map();
+      let payoutCountByDev = new Map();
+      if (devIds.length > 0) {
+        try {
+          const { data: payouts } = await supabaseAdmin
+            .from("payout_requests")
+            .select("publisher_id, amount_usd, status")
+            .in("publisher_id", devIds)
+            .eq("status", "paid");
+          (payouts || []).forEach((p) => {
+            const d = p.publisher_id;
+            paidByDev.set(d, (paidByDev.get(d) || 0) + Number(p.amount_usd || 0));
+            payoutCountByDev.set(d, (payoutCountByDev.get(d) || 0) + 1);
+          });
+        } catch (_) { /* best effort */ }
+      }
+
+      const users = [];
+      for (const r of advResult.rows) {
+        users.push({
+          id: r.id,
+          role: "advertiser",
+          email: r.email,
+          name: r.company_name || null,
+          balance: Number(r.balance) || 0,
+          signup_date: r.created_at,
+          onboarding_completed: !!r.onboarding_completed_at,
+          profile_summary: {
+            industry:             r.industry             || null,
+            product_type:         r.product_type         || null,
+            digital_dau_range:    r.digital_dau_range    || null,
+            annual_revenue_range: r.annual_revenue_range || null,
+          },
+          performance: {
+            lifetime_spend_usd: spendByAdv.get(r.id) || 0,
+            campaign_count:     campaignsByAdv.get(r.id) || 0,
+          },
+        });
+      }
+      for (const r of devResult.rows) {
+        users.push({
+          id: r.id,
+          role: "developer",
+          email: r.email,
+          name: r.app_name || null,
+          balance: Number(r.balance) || 0,
+          signup_date: r.created_at,
+          onboarding_completed: !!r.onboarding_completed_at,
+          profile_summary: {
+            ai_app_category:    r.ai_app_category    || null,
+            surface_type:       r.surface_type       || null,
+            daily_users_range:  r.daily_users_range  || null,
+            monetization_model: r.monetization_model || null,
+          },
+          performance: {
+            lifetime_paid_usd: paidByDev.get(r.id) || 0,
+            payout_count:      payoutCountByDev.get(r.id) || 0,
+          },
+        });
+      }
+
+      // Sort the combined set by signup date desc so newest signups
+      // surface first regardless of role.
+      users.sort((a, b) => {
+        const da = a.signup_date ? Date.parse(a.signup_date) : 0;
+        const db = b.signup_date ? Date.parse(b.signup_date) : 0;
+        return db - da;
+      });
+
+      return res.json({
+        users,
+        total: advResult.count + devResult.count,
+        counts: { advertisers: advResult.count, developers: devResult.count },
+      });
+    } catch (e) {
+      console.error("[Admin] admin_list_users failed:", e.message);
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users" });
 }
 
 // ── helper: build the email confirmation redirect URL for a given role ──

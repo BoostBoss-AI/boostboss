@@ -10594,70 +10594,230 @@
 
         cmdPalette.addEventListener('click', (e) => { if (e.target === cmdPalette) closeCmdPalette(); });
 
-        // ───────────── ONBOARDING WALKTHROUGH ─────────────
-        function checkOnboarding() {
-            if (localStorage.getItem('bb_onboarded')) return;
-            const overlay = document.createElement('div');
-            overlay.id = 'onboardOverlay';
-            overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;';
-            const steps = [
-                { title: 'Welcome to SuperBoost! 🚀', body: 'Your advertiser dashboard is ready. Let\'s take a quick tour of the key features.', icon: '👋' },
-                { title: 'Create Campaigns', body: 'Click <strong>+ New Campaign</strong> to launch your first ad. Set your budget, targeting, and let Benna AI optimize delivery.', icon: '📢' },
-                { title: 'Benna AI Optimization', body: 'Our AI engine ranks every impression in real time. Watch the Benna panel for live scoring, learning phase, and signal attribution.', icon: '🧠' },
-                { title: 'Fund Your Account', body: 'Click <strong>Add Funds</strong> on the balance card to deposit via Stripe. Your spend deducts automatically as campaigns run.', icon: '💰' },
-                { title: 'Track Conversions', body: 'Scroll down to <strong>Conversion Tracking</strong> and install the pixel on your site. This unlocks CPA and ROAS optimization.', icon: '📊' },
-                { title: 'You\'re All Set!', body: 'Use <kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px;">⌘K</kbd> anytime for quick actions. Happy advertising!', icon: '✅' },
-            ];
-            let stepIdx = 0;
-
-            function renderStep() {
-                const s = steps[stepIdx];
-                overlay.innerHTML = `
-                    <div style="
-                        background: #fff; border-radius: 20px; width: 440px; max-width: 90vw;
-                        box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 36px; text-align: center;
-                    ">
-                        <div style="font-size: 48px; margin-bottom: 16px;">${s.icon}</div>
-                        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 10px;">${s.title}</h2>
-                        <p style="font-size: 14px; color: #6B7280; line-height: 1.6; margin-bottom: 24px;">${s.body}</p>
-                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                            ${stepIdx > 0 ? '<button id="obBack" style="padding:10px 20px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Back</button>' : ''}
-                            <button id="obNext" style="
-                                padding: 10px 28px; background: var(--accent-primary); color: #fff;
-                                border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
-                                cursor: pointer; font-family: inherit;
-                            ">${stepIdx === steps.length - 1 ? 'Get Started' : 'Next'}</button>
-                        </div>
-                        <div style="display: flex; gap: 6px; justify-content: center; margin-top: 18px;">
-                            ${steps.map((_, i) => `<div style="width:8px;height:8px;border-radius:50%;background:${i === stepIdx ? '#FF2D78' : '#E5E7EB'};transition:background 0.2s;"></div>`).join('')}
-                        </div>
-                        <button id="obSkip" style="
-                            margin-top: 12px; font-size: 12px; color: #9CA3AF; background: none;
-                            border: none; cursor: pointer; font-family: inherit;
-                        ">Skip tour</button>
-                    </div>
-                `;
-                overlay.querySelector('#obNext').addEventListener('click', () => {
-                    if (stepIdx === steps.length - 1) {
-                        finishOnboarding();
-                    } else {
-                        stepIdx++;
-                        renderStep();
-                    }
+        // ───────────── ONBOARDING QUESTIONNAIRE (REQUIRED) ─────────────
+        // Required data collection gate before any new advertiser can use the
+        // dashboard. Fires on first login (Google OAuth or email). Refuses to
+        // close until 3 required questions are answered (industry, product
+        // type incl. DAU if digital, annual revenue). Each question includes
+        // an "Other / Prefer not to say" option so users unsure how to
+        // categorize aren't blocked.
+        //
+        // Server side: posts to /api/auth?action=save_onboarding which sets
+        // onboarding_completed_at on the advertisers row. The frontend reads
+        // that field from the freshest `me` call to decide whether to show.
+        async function checkOnboarding() {
+            if (!currentUser || !currentUser.token) return;
+            // Hit /me to get the freshest profile state — localStorage may be
+            // stale (pre-migration data won't have the new field).
+            let needs = false;
+            try {
+                const r = await fetch(`${API_BASE}/api/auth?action=me`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
+                    body: JSON.stringify({ role: 'advertiser' }),
                 });
-                const backBtn = overlay.querySelector('#obBack');
-                if (backBtn) backBtn.addEventListener('click', () => { stepIdx--; renderStep(); });
-                overlay.querySelector('#obSkip').addEventListener('click', finishOnboarding);
+                const j = await r.json();
+                if (r.ok && j && j.profile) {
+                    needs = !j.profile.onboarding_completed_at;
+                    // Refresh currentUserData so the rest of the dashboard
+                    // sees the freshest profile (incl. the new fields once
+                    // saved).
+                    if (currentUserData && typeof currentUserData === 'object') {
+                        Object.assign(currentUserData, j.profile);
+                        try { localStorage.setItem('bb_user_data', JSON.stringify(currentUserData)); } catch (_) {}
+                    }
+                }
+            } catch (e) { /* network blip — bail; user can refresh later */ return; }
+
+            if (!needs) return;
+
+            // ── Build the modal ──
+            // Semi-transparent backdrop over the dashboard, blurred so the user
+            // can sense the product behind but can't interact. Modal content is
+            // a 3-step single-card questionnaire.
+            const overlay = document.createElement('div');
+            overlay.id = 'onboardingModal';
+            overlay.setAttribute('role', 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+            overlay.style.cssText = `
+                position: fixed; inset: 0; z-index: 9998;
+                background: rgba(15, 17, 33, 0.55);
+                backdrop-filter: blur(6px);
+                display: flex; align-items: center; justify-content: center;
+                padding: 24px; overflow-y: auto;
+            `;
+            // Block scrolling on the underlying page while modal is open
+            const prevOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+
+            // ── Question definitions ──
+            const INDUSTRIES = [
+                'Tech / Software', 'AI / Machine Learning', 'E-commerce', 'SaaS',
+                'Finance / Fintech', 'Healthcare / Medtech', 'Education / Edtech',
+                'Entertainment / Media', 'Gaming', 'Travel / Hospitality',
+                'Food & Beverage', 'Real Estate', 'Retail', 'Marketing / Adtech',
+                'Professional services', 'Manufacturing', 'Non-profit',
+                'Crypto / Web3', 'Other',
+            ];
+            const PRODUCT_TYPES = [
+                { v: 'digital',        label: 'Digital product' },
+                { v: 'physical_goods', label: 'Physical goods' },
+                { v: 'services',       label: 'Services' },
+                { v: 'mix',            label: 'Mix of the above' },
+                { v: 'other',          label: 'Other / not sure' },
+            ];
+            const DAU_RANGES = [
+                { v: 'pre_launch', label: 'Pre-launch (no users yet)' },
+                { v: 'under_1k',   label: 'Under 1,000' },
+                { v: '1k_10k',     label: '1,000 – 10,000' },
+                { v: '10k_100k',   label: '10,000 – 100,000' },
+                { v: '100k_1m',    label: '100,000 – 1 million' },
+                { v: 'over_1m',    label: 'Over 1 million' },
+                { v: 'other',      label: 'Other / not sure' },
+            ];
+            const REVENUE_RANGES = [
+                { v: 'pre_revenue',       label: 'Pre-revenue' },
+                { v: 'under_10k',         label: 'Under $10K' },
+                { v: '10k_100k',          label: '$10K – $100K' },
+                { v: '100k_1m',           label: '$100K – $1M' },
+                { v: '1m_10m',            label: '$1M – $10M' },
+                { v: '10m_100m',          label: '$10M – $100M' },
+                { v: 'over_100m',         label: 'Over $100M' },
+                { v: 'prefer_not_to_say', label: 'Prefer not to say' },
+                { v: 'other',             label: 'Other / not sure' },
+            ];
+
+            // Helper to render <select>
+            function selectHtml(id, placeholder, opts, isObjList) {
+                const options = isObjList
+                    ? opts.map(o => `<option value="${o.v}">${o.label}</option>`).join('')
+                    : opts.map(o => `<option value="${o}">${o}</option>`).join('');
+                return `
+                    <select id="${id}" style="
+                        width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB;
+                        border-radius: 10px; background: #fff; font-size: 14.5px;
+                        font-family: inherit; color: #111; cursor: pointer;
+                        appearance: none; -webkit-appearance: none;
+                        background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path fill=%22%236B7280%22 d=%22M6 8L0 0h12z%22/></svg>');
+                        background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+                    ">
+                        <option value="" disabled selected>${placeholder}</option>
+                        ${options}
+                    </select>`;
             }
 
-            function finishOnboarding() {
-                localStorage.setItem('bb_onboarded', '1');
-                overlay.remove();
-                showToast('Welcome aboard! Create your first campaign to get started.', 'success', 4000);
-            }
+            overlay.innerHTML = `
+                <div style="
+                    background: #fff; border-radius: 18px; width: 520px; max-width: 100%;
+                    box-shadow: 0 24px 60px rgba(0,0,0,0.25); padding: 36px 36px 28px;
+                    font-family: inherit;
+                ">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                        <img src="/email-logo.png" alt="" width="40" height="40" style="display:block;">
+                        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; color: #1A1A2E;">Boost Boss</div>
+                    </div>
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #1A1A2E; margin: 16px 0 8px; letter-spacing: -0.3px;">Welcome — tell us about your business</h2>
+                    <p style="font-size: 14px; color: #6B7280; line-height: 1.55; margin-bottom: 26px;">
+                        Three quick questions so we can match the right ad inventory to your campaigns. Your answers stay private and only inform targeting.
+                    </p>
 
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">1. What industry is your product in?</label>
+                        ${selectHtml('obIndustry', 'Select your industry…', INDUSTRIES, false)}
+                    </div>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">2. What's your product type?</label>
+                        ${selectHtml('obProductType', 'Select product type…', PRODUCT_TYPES, true)}
+                    </div>
+
+                    <div id="obDauWrap" style="margin-bottom: 18px; display: none;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">2a. Your product's daily active users?</label>
+                        ${selectHtml('obDau', 'Select DAU range…', DAU_RANGES, true)}
+                    </div>
+
+                    <div style="margin-bottom: 26px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">3. Annual revenue?</label>
+                        ${selectHtml('obRevenue', 'Select revenue range…', REVENUE_RANGES, true)}
+                    </div>
+
+                    <div id="obMsg" style="font-size:13px; color:#DC2626; margin-bottom:12px; display:none; line-height:1.5;"></div>
+
+                    <button id="obSubmit" disabled style="
+                        width: 100%; padding: 13px 22px; background: #FF2D78; color: #fff;
+                        border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+                        cursor: pointer; font-family: inherit; opacity: 0.45; transition: opacity 0.15s;
+                    ">Continue to dashboard</button>
+
+                    <p style="font-size:11.5px; color:#9CA3AF; text-align:center; margin-top:14px; line-height:1.5;">
+                        These answers help us match relevant ad inventory.<br>You can update them later in Settings.
+                    </p>
+                </div>
+            `;
             document.body.appendChild(overlay);
-            renderStep();
+
+            // ── Wiring ──
+            const elIndustry = overlay.querySelector('#obIndustry');
+            const elProductType = overlay.querySelector('#obProductType');
+            const elDauWrap = overlay.querySelector('#obDauWrap');
+            const elDau = overlay.querySelector('#obDau');
+            const elRevenue = overlay.querySelector('#obRevenue');
+            const elSubmit = overlay.querySelector('#obSubmit');
+            const elMsg = overlay.querySelector('#obMsg');
+
+            function refreshValidity() {
+                const needDau = elProductType.value === 'digital';
+                elDauWrap.style.display = needDau ? 'block' : 'none';
+                const valid = elIndustry.value && elProductType.value && elRevenue.value
+                              && (!needDau || elDau.value);
+                elSubmit.disabled = !valid;
+                elSubmit.style.opacity = valid ? '1' : '0.45';
+            }
+            elIndustry.addEventListener('change', refreshValidity);
+            elProductType.addEventListener('change', refreshValidity);
+            elDau.addEventListener('change', refreshValidity);
+            elRevenue.addEventListener('change', refreshValidity);
+
+            elSubmit.addEventListener('click', async () => {
+                elSubmit.disabled = true;
+                elSubmit.textContent = 'Saving…';
+                elMsg.style.display = 'none';
+                try {
+                    const payload = {
+                        role:                  'advertiser',
+                        industry:              elIndustry.value,
+                        product_type:          elProductType.value,
+                        digital_dau_range:     elProductType.value === 'digital' ? elDau.value : null,
+                        annual_revenue_range:  elRevenue.value,
+                    };
+                    const r = await fetch(`${API_BASE}/api/auth?action=save_onboarding`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
+                        body: JSON.stringify(payload),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) throw new Error(j.error || `Server returned ${r.status}`);
+                    // Stamp onboarding_completed_at on local cache so subsequent
+                    // dashboard loads don't re-trigger the modal even if /me
+                    // is briefly stale.
+                    if (currentUserData) {
+                        currentUserData.onboarding_completed_at = j.saved_at;
+                        try { localStorage.setItem('bb_user_data', JSON.stringify(currentUserData)); } catch (_) {}
+                    }
+                    overlay.remove();
+                    document.body.style.overflow = prevOverflow;
+                    if (typeof showToast === 'function') {
+                        showToast('Thanks — your dashboard is ready.', 'success', 3500);
+                    }
+                } catch (e) {
+                    elMsg.textContent = e.message || 'Could not save — please try again.';
+                    elMsg.style.display = 'block';
+                    elSubmit.disabled = false;
+                    elSubmit.textContent = 'Continue to dashboard';
+                }
+            });
+
+            refreshValidity();
         }
 
         // ───────────── HELP CENTER ─────────────

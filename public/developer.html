@@ -3507,6 +3507,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             };
             localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
             loadDashboard();
+            // Gate the dashboard with a required onboarding questionnaire if
+            // the publisher hasn't answered it yet. The dashboard renders
+            // behind a semi-transparent backdrop until they submit.
+            if (!userProfile.onboarding_completed_at) {
+                showPublisherOnboarding();
+            }
         }
 
         function clearSessionAndShowAuth() {
@@ -9723,6 +9729,202 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 }
             });
         })();
+
+        // ───────────── PUBLISHER ONBOARDING QUESTIONNAIRE (REQUIRED) ─────────────
+        // Required data gate on first login (Google OAuth or email). Asks 4
+        // dropdowns: AI app category, surface type, daily users range, and
+        // monetization model. Each has an "Other / not sure" escape so users
+        // unsure how to categorize aren't stuck. Posts to
+        // /api/auth?action=save_onboarding which sets onboarding_completed_at
+        // on the developers row. Frontend reads that field from /me on
+        // every dashboard load to decide whether to re-show.
+        function showPublisherOnboarding() {
+            if (!userProfile || userProfile.onboarding_completed_at) return;
+
+            const sessionRaw = localStorage.getItem('bb_dev_session');
+            const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+            if (!session || !session.token) return;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'onboardingModal';
+            overlay.setAttribute('role', 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+            overlay.style.cssText = `
+                position: fixed; inset: 0; z-index: 9998;
+                background: rgba(15, 17, 33, 0.55);
+                backdrop-filter: blur(6px);
+                display: flex; align-items: center; justify-content: center;
+                padding: 24px; overflow-y: auto;
+            `;
+            const prevOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+
+            const AI_CATEGORIES = [
+                { v: 'entertainment',     label: 'Entertainment (companions, story tools, fun apps)' },
+                { v: 'educational',       label: 'Educational (tutors, language, study aids)' },
+                { v: 'productivity',      label: 'Productivity (writing, planning, summarization)' },
+                { v: 'developer_tools',   label: 'Developer tools (coding assistants, devops)' },
+                { v: 'creative',          label: 'Creative tools (image, video, music, design)' },
+                { v: 'gaming',            label: 'Gaming (game AI, NPC, in-game tools)' },
+                { v: 'health',            label: 'Health / wellness (fitness, mindfulness, medical)' },
+                { v: 'finance',           label: 'Finance / fintech (advisory, analysis, trading)' },
+                { v: 'customer_service',  label: 'Customer service (chatbots, support automation)' },
+                { v: 'research',          label: 'Research / data (search, analytics, knowledge)' },
+                { v: 'other',             label: 'Other / not sure' },
+            ];
+            const SURFACES = [
+                { v: 'web_app',           label: 'Web AI application (browser-based)' },
+                { v: 'mcp_server',        label: 'MCP server (Claude, Cursor, etc.)' },
+                { v: 'telegram_bot',      label: 'Telegram bot' },
+                { v: 'discord_bot',       label: 'Discord bot' },
+                { v: 'whatsapp_bot',      label: 'WhatsApp bot' },
+                { v: 'browser_extension', label: 'Browser extension' },
+                { v: 'mobile_app',        label: 'Mobile app (iOS / Android)' },
+                { v: 'desktop_app',       label: 'Desktop app (Mac / Windows / Linux)' },
+                { v: 'slack_teams',       label: 'Slack or Microsoft Teams integration' },
+                { v: 'voice',             label: 'Voice assistant (Alexa, Siri, etc.)' },
+                { v: 'other',             label: 'Other / not sure' },
+            ];
+            const DAU_RANGES = [
+                { v: 'pre_launch', label: 'Pre-launch (not live yet)' },
+                { v: 'under_100',  label: 'Under 100' },
+                { v: '100_1k',     label: '100 – 1,000' },
+                { v: '1k_10k',     label: '1,000 – 10,000' },
+                { v: '10k_100k',   label: '10,000 – 100,000' },
+                { v: '100k_1m',    label: '100,000 – 1 million' },
+                { v: 'over_1m',    label: 'Over 1 million' },
+                { v: 'other',      label: 'Other / not sure' },
+            ];
+            const MONETIZATION = [
+                { v: 'free',              label: 'Free for users' },
+                { v: 'freemium',          label: 'Freemium (free tier + paid upgrades)' },
+                { v: 'subscription',      label: 'Subscription (monthly / yearly)' },
+                { v: 'one_time_purchase', label: 'One-time purchase' },
+                { v: 'mix',               label: 'Mix of the above' },
+                { v: 'other',             label: 'Other / not sure' },
+            ];
+
+            function selectHtml(id, placeholder, opts) {
+                const options = opts.map(o => `<option value="${o.v}">${o.label}</option>`).join('');
+                return `
+                    <select id="${id}" style="
+                        width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB;
+                        border-radius: 10px; background: #fff; font-size: 14.5px;
+                        font-family: inherit; color: #111; cursor: pointer;
+                        appearance: none; -webkit-appearance: none;
+                        background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path fill=%22%236B7280%22 d=%22M6 8L0 0h12z%22/></svg>');
+                        background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+                    ">
+                        <option value="" disabled selected>${placeholder}</option>
+                        ${options}
+                    </select>`;
+            }
+
+            overlay.innerHTML = `
+                <div style="
+                    background: #fff; border-radius: 18px; width: 540px; max-width: 100%;
+                    box-shadow: 0 24px 60px rgba(0,0,0,0.25); padding: 36px 36px 28px;
+                    font-family: inherit;
+                ">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                        <img src="/email-logo.png" alt="" width="40" height="40" style="display:block;">
+                        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; color: #1A1A2E;">Boost Boss</div>
+                    </div>
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #1A1A2E; margin: 16px 0 8px; letter-spacing: -0.3px;">Welcome — tell us about your AI app</h2>
+                    <p style="font-size: 14px; color: #6B7280; line-height: 1.55; margin-bottom: 26px;">
+                        Four quick questions so we can match the right advertisers to your inventory. Your answers stay private and only inform targeting.
+                    </p>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">1. What kind of AI tool do you build?</label>
+                        ${selectHtml('obCategory', 'Select category…', AI_CATEGORIES)}
+                    </div>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">2. What surface does it run on?</label>
+                        ${selectHtml('obSurface', 'Select surface…', SURFACES)}
+                    </div>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">3. Your product's current daily active users?</label>
+                        ${selectHtml('obDau', 'Select DAU range…', DAU_RANGES)}
+                    </div>
+
+                    <div style="margin-bottom: 26px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:6px;">4. How is your product monetized today?</label>
+                        ${selectHtml('obMonetization', 'Select model…', MONETIZATION)}
+                    </div>
+
+                    <div id="obMsg" style="font-size:13px; color:#DC2626; margin-bottom:12px; display:none; line-height:1.5;"></div>
+
+                    <button id="obSubmit" disabled style="
+                        width: 100%; padding: 13px 22px; background: #FF2D78; color: #fff;
+                        border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+                        cursor: pointer; font-family: inherit; opacity: 0.45; transition: opacity 0.15s;
+                    ">Continue to dashboard</button>
+
+                    <p style="font-size:11.5px; color:#9CA3AF; text-align:center; margin-top:14px; line-height:1.5;">
+                        These answers help us match relevant advertisers to your inventory.<br>You can update them later in Settings.
+                    </p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const elCategory = overlay.querySelector('#obCategory');
+            const elSurface = overlay.querySelector('#obSurface');
+            const elDau = overlay.querySelector('#obDau');
+            const elMonetization = overlay.querySelector('#obMonetization');
+            const elSubmit = overlay.querySelector('#obSubmit');
+            const elMsg = overlay.querySelector('#obMsg');
+
+            function refreshValidity() {
+                const valid = elCategory.value && elSurface.value && elDau.value && elMonetization.value;
+                elSubmit.disabled = !valid;
+                elSubmit.style.opacity = valid ? '1' : '0.45';
+            }
+            elCategory.addEventListener('change', refreshValidity);
+            elSurface.addEventListener('change', refreshValidity);
+            elDau.addEventListener('change', refreshValidity);
+            elMonetization.addEventListener('change', refreshValidity);
+
+            elSubmit.addEventListener('click', async () => {
+                elSubmit.disabled = true;
+                elSubmit.textContent = 'Saving…';
+                elMsg.style.display = 'none';
+                try {
+                    const payload = {
+                        role:                 'developer',
+                        ai_app_category:      elCategory.value,
+                        surface_type:         elSurface.value,
+                        daily_users_range:    elDau.value,
+                        monetization_model:   elMonetization.value,
+                    };
+                    const r = await fetch(`${API_BASE}/api/auth?action=save_onboarding`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                        body: JSON.stringify(payload),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) throw new Error(j.error || `Server returned ${r.status}`);
+                    if (userProfile) {
+                        userProfile.onboarding_completed_at = j.saved_at;
+                        try { localStorage.setItem('bb_dev_data', JSON.stringify(userProfile)); } catch (_) {}
+                    }
+                    overlay.remove();
+                    document.body.style.overflow = prevOverflow;
+                    if (typeof showToast === 'function') {
+                        showToast('Thanks — your dashboard is ready.', 'success', 3500);
+                    }
+                } catch (e) {
+                    elMsg.textContent = e.message || 'Could not save — please try again.';
+                    elMsg.style.display = 'block';
+                    elSubmit.disabled = false;
+                    elSubmit.textContent = 'Continue to dashboard';
+                }
+            });
+
+            refreshValidity();
+        }
     </script>
 </body>
 </html>
