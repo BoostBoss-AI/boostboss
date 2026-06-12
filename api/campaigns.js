@@ -449,6 +449,9 @@ async function handleCreate(req, res) {
     end_date: b.end_date || null,
     skippable_after_sec: b.skippable_after_sec || 3,
     spent_today: 0, spent_total: 0,
+    // Parent product. Nullable for back-compat with pre-Products campaigns
+    // and for the "standalone campaign" path. See [[products-as-parent]].
+    product_id: b.product_id || null,
     created_at: now, updated_at: now,
   };
 
@@ -584,6 +587,9 @@ async function handleUpdate(req, res) {
     "target_integration_methods",
     // Conversion-billing allowlist (migration 11 / Phase B)
     "conversion_event_types",
+    // Parent product link (Products migration, 2026-06-12). NULLable so the
+    // advertiser can detach a campaign from a product if they restructure.
+    "product_id",
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];

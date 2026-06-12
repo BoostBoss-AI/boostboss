@@ -1633,10 +1633,44 @@ async function supabaseHandler(action, body, req, res) {
       target_url, source_placement_id, source_surface, notes,
     } = body || {};
 
+    // Resolve the campaign's parent product (if any) at save time so the
+    // affiliate's saved list groups by product. See [[products-as-parent]].
+    // Failure is non-fatal — we still save the ad, just without the
+    // product_id linkage. Stale/missing campaign_id is treated as "no
+    // product attached" rather than 404'ing the save.
+    let resolvedProductId = null;
+    if (campaign_id) {
+      try {
+        const { data: camp } = await supabaseAdmin
+          .from("campaigns")
+          .select("product_id")
+          .eq("id", campaign_id)
+          .maybeSingle();
+        if (camp && camp.product_id) resolvedProductId = camp.product_id;
+      } catch (_) { /* swallow — save proceeds without product link */ }
+    }
+
+    // If the affiliate has already saved this product, return the existing
+    // row instead of inserting a duplicate. Dedupe is per (affiliate,
+    // product) — one product = one card in My Saves regardless of how many
+    // different campaign renders they've seen for it.
+    if (resolvedProductId) {
+      const { data: existing } = await supabaseAdmin
+        .from("affiliate_saved_ads")
+        .select("*")
+        .eq("affiliate_id", user.id)
+        .eq("product_id", resolvedProductId)
+        .maybeSingle();
+      if (existing) {
+        return res.json({ success: true, saved: existing, deduped: true });
+      }
+    }
+
     const row = {
       affiliate_id:         user.id,
       campaign_id:          campaign_id || null,
       advertiser_id:        advertiser_id || null,
+      product_id:           resolvedProductId,
       headline:             headline ? String(headline).slice(0, 240) : null,
       body:                 adBody ? String(adBody).slice(0, 2000) : null,
       image_url:            image_url ? String(image_url).slice(0, 2000) : null,

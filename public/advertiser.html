@@ -2557,6 +2557,11 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 21 3 14 12 14 21 10 21 10 12 3 3"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns</span>
             </button>
+            <!-- Products — parent entity above campaigns. See [[products-as-parent]]. -->
+            <button class="shell-nav-item" data-shell-section="products">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.products">Products</span>
+            </button>
             <button class="shell-nav-item" data-shell-section="performance">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.performance">Performance</span>
@@ -3116,6 +3121,41 @@
 
             </div><!-- /[data-shell-route="campaigns"] -->
 
+            <!-- ═══════ ROUTE: products ═══════ -->
+            <!--
+              Products are the parent entity above Campaigns. An advertiser
+              registers a real-world thing they sell once (name, image,
+              default URL, default commission %), then attaches one or many
+              campaigns to it over time. Affiliates save and share by
+              Product. See [[products-as-parent]] memory.
+            -->
+            <div data-shell-route="products">
+              <div class="shell-page-head">
+                <div>
+                  <h1 class="shell-page-title" data-t="page.products.title">Products</h1>
+                  <div class="shell-page-sub" data-t="page.products.sub">Register the things you sell. Campaigns attach to a product. Affiliates browse and save by product.</div>
+                </div>
+              </div>
+
+              <!-- Top action row: search + New Product button -->
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+                <input type="search" id="productsSearch" placeholder="Search products…" style="flex:1;min-width:240px;max-width:380px;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;">
+                <div style="display:flex;gap:8px;">
+                  <select id="productsStatusFilter" style="padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;">
+                    <option value="">All products</option>
+                    <option value="active">Active only</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                  <button id="newProductBtn" class="new-campaign-btn" type="button">+ New Product</button>
+                </div>
+              </div>
+
+              <!-- Products list — table on wide viewports, cards on narrow -->
+              <div id="productsList" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;">
+                <div style="padding:48px 24px;text-align:center;color:#9CA3AF;font-size:13px;" id="productsLoading">Loading products…</div>
+              </div>
+            </div><!-- /[data-shell-route="products"] -->
+
             <!-- ═══════ ROUTE: billing ═══════ -->
             <div data-shell-route="billing">
 
@@ -3623,6 +3663,50 @@
         "></div>
 
         <!-- Create Campaign Modal -->
+        <!-- ═══════ Product create/edit modal ═══════ -->
+        <!-- Mirrors the campaign modal styling (same .modal, .modal-content,
+             .form-group, .form-input classes). When productModal.dataset.mode
+             is "create" the form POSTs to /api/products?action=create; when
+             it's "edit" the form PATCHes /api/products?action=update with
+             the row id in productModal.dataset.productId. -->
+        <div id="productModal" class="modal" data-mode="create">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="modal-title" id="productModalTitle">New Product</h2>
+              <button class="modal-close" type="button" id="productModalCloseBtn">×</button>
+            </div>
+            <form id="productForm">
+              <div class="form-group">
+                <label class="form-label">Product name</label>
+                <input type="text" class="form-input" name="name" required maxlength="240" placeholder="e.g. Stripe Atlas">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional, shown in marketplace)</span></label>
+                <textarea class="form-input" name="description" rows="2" maxlength="5000" placeholder="One-liner that helps an affiliate understand what they're promoting"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Image URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(square or 4:3, hosted on a CDN)</span></label>
+                <input type="url" class="form-input" name="image_url" placeholder="https://cdn.example.com/product.png">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Default destination URL</label>
+                <input type="url" class="form-input" name="default_url" required placeholder="https://example.com/product">
+                <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Where the share-link redirect lands by default. Individual campaigns can override.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Default commission %</label>
+                <input type="number" class="form-input" name="default_commission_pct" min="0" max="100" step="0.01" value="0" required>
+                <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">What affiliates earn per converting customer. Higher commission → better marketplace placement.</div>
+              </div>
+              <div id="productFormErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;"></div>
+              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
+                <button type="button" class="new-campaign-btn" id="productCancelBtn" style="background:#fff;color:#374151;border:1px solid #E5E7EB;">Cancel</button>
+                <button type="submit" class="new-campaign-btn" id="productSubmitBtn">Save product</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <div id="campaignModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -3645,6 +3729,19 @@
                     <div class="form-group">
                         <label class="form-label" data-t="newc.name">Campaign Name</label>
                         <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" data-t-placeholder="newc.name_ph" required>
+                    </div>
+
+                    <!-- Product picker — attaches this campaign to a parent product.
+                         See [[products-as-parent]]. Optional for back-compat with
+                         pre-Products campaigns. Populated by loadProductOptions(). -->
+                    <div class="form-group">
+                        <label class="form-label">Product <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(parent — affiliates browse and save by product)</span></label>
+                        <select class="form-input campaign-field" name="product_id" id="campaignProductSelect">
+                            <option value="">— No product (standalone campaign) —</option>
+                        </select>
+                        <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">
+                            Don't see your product? <a href="#/products" style="color:#FF2D78;font-weight:600;text-decoration:none;">Add one →</a>
+                        </div>
                     </div>
 
                     <!-- File Upload -->
@@ -4495,7 +4592,7 @@
             // [data-shell-route="..."] block via the wrapper's
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
-            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'billing', 'setup'];
+            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'billing', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -5364,10 +5461,37 @@
             chartContainer.appendChild(xLabels);
         }
 
+        // Populate the Product <select> inside the campaign modal. Lazy —
+        // only fetches when the modal opens. Failure is non-fatal: the
+        // select stays empty and the user can still create a "standalone"
+        // campaign with no product attached.
+        async function loadProductOptions(selectedId) {
+            const sel = document.getElementById('campaignProductSelect');
+            if (!sel || !currentUser || !currentUser.token) return;
+            try {
+                const r = await fetch('/api/products?status=active&limit=200', {
+                    headers: { 'Authorization': 'Bearer ' + currentUser.token },
+                });
+                if (!r.ok) return;
+                const j = await r.json();
+                const items = j.products || [];
+                const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g,
+                    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+                sel.innerHTML = '<option value="">— No product (standalone campaign) —</option>'
+                    + items.map((p) =>
+                        `<option value="${esc(p.id)}"${selectedId === p.id ? ' selected' : ''}>${esc(p.name)}${
+                            p.default_commission_pct > 0 ? ' · ' + Number(p.default_commission_pct).toFixed(2) + '% commission' : ''
+                        }</option>`).join('');
+            } catch (_) { /* silent — keep the placeholder option */ }
+        }
+
         // Modal functions
         function openModal() {
             campaignModal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            // Refresh products on every open in case the advertiser added
+            // one from another tab.
+            loadProductOptions();
         }
 
         function closeModal() {
@@ -6163,6 +6287,10 @@
                 per_door_creatives: typeof window.__buildPerDoorCreatives === 'function'
                     ? window.__buildPerDoorCreatives()
                     : {},
+                // Parent product. Empty string = standalone (legacy) campaign.
+                // [[products-as-parent]] — links the campaign to a product so
+                // affiliate saves and share-link redirects can route through it.
+                product_id: (formData.get('product_id') || '').toString().trim() || null,
             };
 
             try {
@@ -6651,6 +6779,8 @@
                     target_surfaces: getSelectedSurfaces(),
                     // Per-door opt-in (migration 09). Empty array = all four doors.
                     target_integration_methods: getSelectedIntegrationMethods(),
+                    // Parent product. Empty string from the <select> = NULL (standalone campaign).
+                    product_id: (formData.get('product_id') || '').toString().trim() || null,
                 };
 
                 try {
@@ -10985,6 +11115,264 @@
         setTimeout(() => {
             if (currentUser) checkOnboarding();
         }, 1500);
+
+        // ────────────────────────────────────────────────────────────────
+        // Products section
+        // ────────────────────────────────────────────────────────────────
+        // [[products-as-parent]] — Products are the parent entity above
+        // Campaigns. This block handles list rendering, create/edit modal,
+        // archive/restore, and re-fetch when the user lands on the
+        // #/products route.
+        // ────────────────────────────────────────────────────────────────
+        (function () {
+            const list      = document.getElementById('productsList');
+            const search    = document.getElementById('productsSearch');
+            const filterSel = document.getElementById('productsStatusFilter');
+            const newBtn    = document.getElementById('newProductBtn');
+            const modal     = document.getElementById('productModal');
+            const closeBtn  = document.getElementById('productModalCloseBtn');
+            const cancelBtn = document.getElementById('productCancelBtn');
+            const form      = document.getElementById('productForm');
+            const errBox    = document.getElementById('productFormErr');
+            const titleEl   = document.getElementById('productModalTitle');
+            const submitBtn = document.getElementById('productSubmitBtn');
+
+            if (!list || !modal || !form) return;  // page hasn't rendered yet
+
+            let productsCache = [];  // last fetched list
+
+            function escHtml(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+                    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+                );
+            }
+
+            function openModal(mode, product) {
+                modal.dataset.mode = mode;
+                modal.dataset.productId = product ? product.id : '';
+                titleEl.textContent = mode === 'edit' ? 'Edit product' : 'New product';
+                submitBtn.textContent = mode === 'edit' ? 'Save changes' : 'Save product';
+                form.reset();
+                errBox.style.display = 'none';
+                if (product) {
+                    form.elements.name.value = product.name || '';
+                    form.elements.description.value = product.description || '';
+                    form.elements.image_url.value = product.image_url || '';
+                    form.elements.default_url.value = product.default_url || '';
+                    form.elements.default_commission_pct.value = product.default_commission_pct != null
+                        ? product.default_commission_pct : 0;
+                }
+                modal.classList.add('active');
+                setTimeout(() => form.elements.name.focus(), 50);
+            }
+            function closeModal() {
+                modal.classList.remove('active');
+                errBox.style.display = 'none';
+            }
+            function showFormErr(msg) {
+                errBox.textContent = msg;
+                errBox.style.display = 'block';
+            }
+
+            async function loadProducts() {
+                if (!currentUser || !currentUser.token) return;
+                const params = new URLSearchParams({ limit: '200' });
+                const status = filterSel ? filterSel.value : '';
+                if (status) params.set('status', status);
+                list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:#9CA3AF;font-size:13px;">Loading products…</div>';
+                try {
+                    const r = await fetch('/api/products?' + params.toString(), {
+                        headers: { 'Authorization': 'Bearer ' + currentUser.token },
+                    });
+                    const j = await r.json();
+                    if (!r.ok) throw new Error(j.error || 'Failed to load products');
+                    productsCache = j.products || [];
+                    renderList();
+                } catch (e) {
+                    list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:#DC2626;font-size:13px;">' + escHtml(e.message || 'Could not load') + '</div>';
+                }
+            }
+
+            function renderList() {
+                const q = (search && search.value || '').trim().toLowerCase();
+                const filtered = productsCache.filter((p) =>
+                    !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q)
+                );
+                if (!filtered.length) {
+                    list.innerHTML = `
+                        <div style="padding:64px 24px;text-align:center;">
+                            <div style="font-size:32px;margin-bottom:12px;">📦</div>
+                            <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:6px;">No products yet</div>
+                            <div style="font-size:13px;color:#6B7280;max-width:420px;margin:0 auto 18px;line-height:1.55;">
+                                Register the things you sell. Each product can have many campaigns over time — the affiliate marketplace lists products, not campaigns, so your share links stay durable across promo cycles.
+                            </div>
+                            <button class="new-campaign-btn" type="button" onclick="document.getElementById('newProductBtn').click()">+ Add your first product</button>
+                        </div>`;
+                    return;
+                }
+                const rows = filtered.map((p) => {
+                    const archived = p.status === 'archived';
+                    const img = p.image_url
+                        ? `<img src="${escHtml(p.image_url)}" alt="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#F3F4F6;" onerror="this.style.display='none'">`
+                        : `<div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#FFE4EE,#FFC9DC);display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>`;
+                    const created = p.created_at ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                    return `
+                        <tr data-product-id="${escHtml(p.id)}" ${archived ? 'style="opacity:0.55;"' : ''}>
+                            <td style="padding:14px 18px;">${img}</td>
+                            <td style="padding:14px 18px;">
+                                <div style="font-weight:700;color:#111827;font-size:14px;margin-bottom:2px;">${escHtml(p.name)}</div>
+                                <div style="font-size:12px;color:#6B7280;line-height:1.4;max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(p.description || '—')}</div>
+                            </td>
+                            <td style="padding:14px 18px;font-size:13px;color:#FF2D78;font-weight:700;">${(Number(p.default_commission_pct) || 0).toFixed(2)}%</td>
+                            <td style="padding:14px 18px;font-size:12px;color:#6B7280;">${escHtml(created)}</td>
+                            <td style="padding:14px 18px;font-size:12px;">${archived
+                                ? '<span style="color:#9CA3AF;font-weight:600;">Archived</span>'
+                                : '<span style="color:#059669;font-weight:600;">Active</span>'}</td>
+                            <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
+                                <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">Edit</button>
+                                ${archived
+                                    ? '<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;">Restore</button>'
+                                    : '<button type="button" data-action="archive" style="padding:6px 12px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;">Archive</button>'}
+                            </td>
+                        </tr>`;
+                }).join('');
+
+                list.innerHTML = `
+                    <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+                        <thead>
+                            <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:80px;"></th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Product</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:120px;">Commission</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:120px;">Created</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:90px;">Status</th>
+                                <th style="padding:12px 18px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:180px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>`;
+            }
+
+            async function archiveProduct(id) {
+                if (!confirm('Archive this product? Existing share links keep working but it disappears from the marketplace.')) return;
+                try {
+                    const r = await fetch('/api/products?action=archive', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                        body: JSON.stringify({ id }),
+                    });
+                    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Archive failed'); }
+                    await loadProducts();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+            async function restoreProduct(id) {
+                try {
+                    const r = await fetch('/api/products?action=restore', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                        body: JSON.stringify({ id }),
+                    });
+                    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Restore failed'); }
+                    await loadProducts();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // Delegated click handler for the rendered table rows
+            list.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-action]');
+                if (!btn) return;
+                const row = btn.closest('tr[data-product-id]');
+                if (!row) return;
+                const id = row.dataset.productId;
+                const product = productsCache.find((p) => p.id === id);
+                const action = btn.dataset.action;
+                if (action === 'edit')    return openModal('edit', product);
+                if (action === 'archive') return archiveProduct(id);
+                if (action === 'restore') return restoreProduct(id);
+            });
+
+            // Filters + search
+            if (search)    search.addEventListener('input', () => renderList());
+            if (filterSel) filterSel.addEventListener('change', () => loadProducts());
+
+            // New Product button
+            if (newBtn) newBtn.addEventListener('click', () => openModal('create', null));
+
+            // Modal close affordances
+            if (closeBtn)  closeBtn.addEventListener('click', closeModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+            });
+
+            // Form submit — create or update depending on dataset.mode
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errBox.style.display = 'none';
+                const payload = {
+                    name:        form.elements.name.value.trim(),
+                    description: form.elements.description.value.trim() || null,
+                    image_url:   form.elements.image_url.value.trim() || null,
+                    default_url: form.elements.default_url.value.trim(),
+                    default_commission_pct: Number(form.elements.default_commission_pct.value),
+                };
+                if (!payload.name) return showFormErr('Product name is required.');
+                if (!payload.default_url) return showFormErr('Default URL is required.');
+                if (!/^https?:\/\//i.test(payload.default_url)) return showFormErr('Default URL must start with http:// or https://');
+
+                const mode = modal.dataset.mode || 'create';
+                const id = modal.dataset.productId;
+                const url = mode === 'edit'
+                    ? '/api/products?action=update'
+                    : '/api/products?action=create';
+                if (mode === 'edit') payload.id = id;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving…';
+                try {
+                    const r = await fetch(url, {
+                        method: mode === 'edit' ? 'PATCH' : 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                        body: JSON.stringify(payload),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) throw new Error(j.error || 'Save failed');
+                    closeModal();
+                    await loadProducts();
+                } catch (e) {
+                    showFormErr(e.message || 'Could not save product');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = mode === 'edit' ? 'Save changes' : 'Save product';
+                }
+            });
+
+            // Fetch products when the route becomes active (and on first
+            // entry from a deep link). The shell sets data-shell-active-route
+            // on the wrapper — observe hash changes to know when we land here.
+            function maybeLoad() {
+                const wrap = document.querySelector('[data-shell-active-route]');
+                if (wrap && wrap.getAttribute('data-shell-active-route') === 'products') {
+                    if (currentUser && currentUser.token) loadProducts();
+                }
+            }
+            window.addEventListener('hashchange', maybeLoad);
+            // Also trigger after auth completes (currentUser is set asynchronously).
+            const authPollInterval = setInterval(() => {
+                if (currentUser && currentUser.token) {
+                    clearInterval(authPollInterval);
+                    maybeLoad();
+                }
+            }, 400);
+            setTimeout(() => clearInterval(authPollInterval), 15000);
+            // And once immediately in case we're already on the route.
+            setTimeout(maybeLoad, 100);
+        })();
     </script>
 
     <!-- Boost Boss assistant — floating Q&A copilot scoped to the
