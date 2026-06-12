@@ -447,7 +447,9 @@
   /* ── Custom Link form ─────────────────────────────────────────────── */
   .form-card {
     background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 28px 30px; max-width: 820px;
+    padding: 28px 30px;
+    /* No max-width cap — match the rest of the dashboard. Inner Sub IDs
+       grid auto-flows so it always fills nicely. */
   }
   .form-card label {
     display: block; font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 7px;
@@ -1337,7 +1339,7 @@
           <div id="custom-result" class="result hidden"></div>
         </div>
 
-        <div style="margin-top:24px;padding:16px 18px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;font-size:12.5px;color:#92400E;line-height:1.55;max-width:720px;">
+        <div style="margin-top:24px;padding:18px 22px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;font-size:13.5px;color:#92400E;line-height:1.6;">
           <strong>Note:</strong> Custom links bypass the catalog's category filtering and exclusive-offer tiers. Commission still flows from the advertiser per the rate they've registered with Boost Boss. If the URL isn't on a participating advertiser's domain, the link mints but won't earn commission.
         </div>
       </section>
