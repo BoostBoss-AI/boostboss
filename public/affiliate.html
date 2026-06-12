@@ -224,18 +224,252 @@
     border-radius: 99px; background: rgba(255,45,120,0.10); letter-spacing: 0.5px;
   }
   .side-nav { display: flex; flex-direction: column; gap: 2px; }
+  /* Section group header (small uppercase label like DASHBOARD / OFFER).
+     Mirrors Shopee's grouped sidebar — collapses related items under a
+     category so a 14-item nav still feels scannable. */
+  .side-nav .grp {
+    font-size: 10.5px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 14px 12px 6px; margin-top: 4px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .side-nav .grp:first-child { margin-top: 0; padding-top: 4px; }
+  .side-nav .grp .grp-icon { font-size: 12px; opacity: 0.7; }
   .side-nav button {
     display: flex; align-items: center; gap: 10px; width: 100%;
-    background: none; border: none; padding: 9px 12px; border-radius: 8px;
-    font-size: 13.5px; font-weight: 500; color: var(--ink-soft);
+    background: none; border: none; padding: 8px 12px 8px 24px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
     cursor: pointer; font-family: inherit; text-align: left;
   }
   .side-nav button:hover { background: var(--bg); color: var(--ink); }
-  .side-nav button.active { background: var(--pink-soft); color: var(--pink); font-weight: 600; }
-  .side-nav .icon { font-size: 16px; width: 20px; text-align: center; }
+  .side-nav button.active {
+    background: var(--pink-soft); color: var(--pink); font-weight: 600;
+    border-left: 3px solid var(--pink); padding-left: 21px;
+  }
+  .side-nav .icon { display: none; }  /* group headers carry the visual; per-item icons are noise */
   .side-nav .soon {
     margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 6px;
     border-radius: 99px; background: #F3F4F6; color: var(--muted); letter-spacing: 0.4px;
+  }
+  /* Make the sidebar scroll independently when nav grows long. */
+  .side-nav { max-height: calc(100vh - 200px); overflow-y: auto; padding-bottom: 8px; }
+
+  /* ── Top warning banner ─────────────────────────────────────────────
+     Shopee shows a persistent rose banner at the top of every dashboard
+     page until payout method + tax info is set. We use this for any
+     onboarding-incomplete state. */
+  .top-banner {
+    background: #FFF1F2; border: 1px solid #FECDD3; color: #9F1239;
+    border-radius: 10px; padding: 11px 16px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 22px;
+  }
+  .top-banner .x-icon {
+    width: 18px; height: 18px; border-radius: 50%; background: #F43F5E; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+  }
+  .top-banner a { color: var(--pink); font-weight: 600; text-decoration: none; }
+  .top-banner a:hover { text-decoration: underline; }
+  .top-banner .close {
+    margin-left: auto; background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 16px; padding: 2px 6px;
+  }
+
+  /* ── Date-range header on Dashboard home ───────────────────────────── */
+  .date-bar {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .date-bar .lbl { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+  .date-bar .picker {
+    background: #fff; border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 12px; font-size: 13px; cursor: pointer; min-width: 160px;
+    font-family: inherit; color: var(--ink);
+  }
+  .date-bar .updated { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+  /* ── Dashboard metric card variant (6-up grid for Shopee parity) ─────
+     The legacy .stats grid auto-fits at 160px which makes 4 cards across.
+     The new .metrics grid is 3-up on wide viewports and shows delta % vs.
+     prior period. */
+  .metrics {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; position: relative;
+  }
+  .metric-card.is-primary { border-color: var(--pink); }
+  .metric-card .lbl {
+    font-size: 11.5px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .metric-card .lbl .help-i {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 13px; height: 13px; border-radius: 50%; background: #E5E7EB;
+    color: #6B7280; font-size: 9px; font-weight: 700;
+  }
+  .metric-card .val {
+    font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
+    color: var(--ink); line-height: 1.1;
+  }
+  .metric-card .delta {
+    font-size: 11px; color: var(--muted); margin-top: 4px;
+  }
+  .metric-card .delta.up   { color: var(--green); }
+  .metric-card .delta.down { color: #DC2626; }
+
+  /* ── Breakdown panel (clicks by surface) ───────────────────────────── */
+  .breakdown {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 22px;
+  }
+  .breakdown h3 {
+    font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 14px;
+  }
+  .breakdown .row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    background: var(--bg); border-radius: 8px; margin-bottom: 6px;
+  }
+  .breakdown .row:last-child { margin-bottom: 0; }
+  .breakdown .row .icon-d {
+    width: 28px; height: 28px; background: var(--pink-soft); color: var(--pink);
+    border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .breakdown .row .label-d { flex: 1; font-size: 13px; color: var(--ink); }
+  .breakdown .row .val-d { font-size: 14px; font-weight: 700; color: var(--ink); }
+
+  /* ── Top 5 list panel ─────────────────────────────────────────────── */
+  .top-list {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .top-list h3 {
+    font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 14px;
+  }
+  .top-list table { width: 100%; border-collapse: collapse; }
+  .top-list th {
+    text-align: left; font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .top-list td {
+    padding: 12px 8px; font-size: 13px; color: var(--ink);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .top-list td:last-child, .top-list th:last-child { text-align: right; }
+  .top-list tr:last-child td { border-bottom: none; }
+  .top-list .empty-tbl { text-align: center; color: var(--muted); padding: 28px 0; font-size: 13px; }
+
+  /* ── Offer page: category tiles (Boost Boss Offer view) ────────────── */
+  .cat-tiles {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .cat-tile {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px; cursor: pointer; transition: transform 0.12s, box-shadow 0.12s;
+    text-align: left;
+  }
+  .cat-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .cat-tile .cat-icon {
+    font-size: 26px; margin-bottom: 10px; display: inline-block;
+    background: var(--pink-soft); width: 44px; height: 44px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .cat-tile .cat-name {
+    font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px;
+  }
+  .cat-tile .cat-sub { font-size: 12px; color: var(--muted); line-height: 1.45; margin-bottom: 10px; }
+  .cat-tile .cat-comm {
+    font-size: 13px; font-weight: 700; color: var(--pink);
+  }
+
+  /* ── Offer page: product catalog grid ─────────────────────────────── */
+  .cat-tabs {
+    display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .cat-tabs button {
+    background: none; border: none; padding: 10px 14px; font-size: 13px;
+    font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: inherit;
+    border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
+  }
+  .cat-tabs button.active { color: var(--pink); border-bottom-color: var(--pink); }
+  .cat-search-row {
+    display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;
+  }
+  .cat-search {
+    flex: 1; min-width: 240px; padding: 9px 13px; border: 1px solid var(--line);
+    border-radius: 8px; font-size: 13px; background: #fff; font-family: inherit;
+  }
+  .cat-sort {
+    padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+    font-family: inherit; font-size: 13px; cursor: pointer;
+  }
+  .product-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+  }
+  .product-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: box-shadow 0.12s, transform 0.12s;
+  }
+  .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .product-card .img {
+    aspect-ratio: 4/3; background: linear-gradient(135deg, #FFF5F8, #F3F4F6);
+    display: flex; align-items: center; justify-content: center; font-size: 36px;
+    background-size: cover; background-position: center;
+  }
+  .product-card .body { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; }
+  .product-card .name { font-weight: 700; font-size: 13.5px; color: var(--ink); margin-bottom: 4px; line-height: 1.35; }
+  .product-card .desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.45; min-height: 2.9em; }
+  .product-card .meta { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 8px; }
+  .product-card .comm { font-size: 12px; color: var(--pink); font-weight: 700; }
+  .product-card .get-link-btn {
+    background: var(--pink); color: #fff; border: none; padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .product-card .get-link-btn:hover { filter: brightness(1.05); }
+  .product-card .get-link-btn:disabled { opacity: 0.6; cursor: wait; }
+
+  /* ── Custom Link form ─────────────────────────────────────────────── */
+  .form-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 24px 26px; max-width: 720px;
+  }
+  .form-card label {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px;
+  }
+  .form-card .hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+  .form-card textarea, .form-card input[type=text], .form-card input[type=url] {
+    width: 100%; padding: 10px 13px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 13px; font-family: inherit; background: #fff; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .form-card textarea { resize: vertical; min-height: 100px; }
+  .form-card .subs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin: 14px 0 18px; }
+  .form-card .get-btn {
+    background: var(--pink); color: #fff; border: none; padding: 11px 24px; border-radius: 8px;
+    font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .form-card .get-btn:hover { filter: brightness(1.05); }
+  .form-card .result {
+    margin-top: 22px; padding: 14px 16px; background: #F0FDF4; border: 1px solid #BBF7D0;
+    border-radius: 8px; font-size: 13px; color: #166534;
+  }
+  .form-card .result code {
+    display: block; background: #fff; border: 1px solid #BBF7D0; border-radius: 6px;
+    padding: 9px 12px; margin-top: 6px; font-size: 12px; color: var(--ink);
+    word-break: break-all;
+  }
+  .form-card .result .copy {
+    margin-top: 8px; background: #166534; color: #fff; border: none; padding: 7px 14px;
+    border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
   .side-foot {
     margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line-soft);
@@ -629,14 +863,42 @@
         <span class="name">Boost Boss</span>
         <span class="tag">AFFILIATE</span>
       </div>
+      <!--
+        Sidebar follows the Shopee Affiliate Center grouping: small
+        uppercase section labels (DASHBOARD / OFFER / CAMPAIGN / ...)
+        with the leaf items underneath. Familiar to anyone joining
+        from a Shopee, Lazada, or TikTok Shop affiliate program — and
+        scannable even at 14 leaf items. See [[products-as-parent]].
+      -->
       <nav class="side-nav">
-        <button data-section="home"      class="active"><span class="icon">⌂</span> Dashboard</button>
-        <button data-section="saves"><span class="icon">📌</span> My Saves</button>
-        <button data-section="marketplace"><span class="icon">🛍</span> Marketplace <span class="soon">SOON</span></button>
-        <button data-section="links"><span class="icon">🔗</span> Share Links <span class="soon">SOON</span></button>
-        <button data-section="earnings"><span class="icon">💸</span> Earnings <span class="soon">SOON</span></button>
-        <button data-section="payouts"><span class="icon">🏦</span> Payouts <span class="soon">SOON</span></button>
-        <button data-section="settings"><span class="icon">⚙</span> Settings</button>
+        <div class="grp"><span class="grp-icon">▦</span> Dashboard</div>
+        <button data-section="home" class="active">Dashboard</button>
+        <button data-section="saves">My Saves</button>
+
+        <div class="grp"><span class="grp-icon">⊙</span> Offer</div>
+        <button data-section="bb-offer">Boost Boss Offer</button>
+        <button data-section="partners">Premium Partners</button>
+        <button data-section="catalog">Product Catalog</button>
+        <button data-section="exclusive">Exclusive Offers</button>
+        <button data-section="custom">Custom Link</button>
+
+        <div class="grp"><span class="grp-icon">⛿</span> Campaign</div>
+        <button data-section="campaigns-soon">Affiliate Campaigns <span class="soon">SOON</span></button>
+
+        <div class="grp"><span class="grp-icon">✺</span> Creative</div>
+        <button data-section="feed-soon">Product Feed <span class="soon">SOON</span></button>
+
+        <div class="grp"><span class="grp-icon">▭</span> Report</div>
+        <button data-section="links">Share Links</button>
+        <button data-section="conv-soon">Conversion Report <span class="soon">SOON</span></button>
+        <button data-section="click-soon">Click Report <span class="soon">SOON</span></button>
+
+        <div class="grp"><span class="grp-icon">$</span> Payment</div>
+        <button data-section="bill-soon">Commission Bill <span class="soon">SOON</span></button>
+        <button data-section="payouts">Payout Record <span class="soon">SOON</span></button>
+
+        <div class="grp"><span class="grp-icon">⚙</span> Account</div>
+        <button data-section="settings">Settings</button>
       </nav>
       <div class="side-foot">
         <div class="user-email" id="side-user-email">—</div>
@@ -645,38 +907,90 @@
     </aside>
 
     <main class="main">
-      <!-- Home -->
+      <!-- Home — software-tailored metrics (Signups, Activations, MRR)
+           rather than Shopee's physical-good metrics (Orders, Items Sold).
+           See [[products-as-parent]] for why these labels match SaaS reality.
+           Banner shown until the affiliate sets a payout method. -->
       <section id="sec-home" class="dash-section">
-        <h2>Welcome to your affiliate dashboard</h2>
-        <p class="pre">Here's where your activity will show up. As Boost Boss rolls out share links, conversions, and payouts, this page fills in automatically.</p>
-        <div class="stats">
-          <div class="stat">
-            <div class="lbl">Saved ads</div>
-            <div class="val pink" id="h-saves">—</div>
-            <div class="sub">Bookmarks across all platforms</div>
+        <div id="home-banner" class="top-banner hidden">
+          <span class="x-icon">×</span>
+          <span>Please complete your <a href="#settings" id="banner-link">Payout &amp; Tax information</a> to receive commission.</span>
+          <button class="close" type="button" onclick="document.getElementById('home-banner').classList.add('hidden')">×</button>
+        </div>
+
+        <h2 style="margin-bottom:10px;">Dashboard</h2>
+
+        <div class="date-bar">
+          <span class="lbl">Data Period</span>
+          <select class="picker" id="date-range">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="7d" selected>Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+          </select>
+          <span class="updated">Data is updated hourly</span>
+        </div>
+
+        <!-- Key metrics — adapted to digital products:
+             Orders → Signups (CPA model)
+             Items Sold → Activations (paid conversions / first purchase)
+             Order Amount → Revenue (advertiser top-line driven by your traffic)
+             New Buyers → New Users -->
+        <div class="metrics">
+          <div class="metric-card is-primary">
+            <div class="lbl">Clicks <span class="help-i" title="Total clicks on your share links">i</span></div>
+            <div class="val" id="h-clicks">0</div>
+            <div class="delta" id="h-clicks-delta">vs previous period</div>
           </div>
-          <div class="stat">
-            <div class="lbl">Share clicks</div>
-            <div class="val" id="h-clicks">—</div>
-            <div class="sub">Coming soon</div>
+          <div class="metric-card">
+            <div class="lbl">Signups <span class="help-i" title="Account signups attributed to your links via advertiser postback">i</span></div>
+            <div class="val" id="h-signups">0</div>
+            <div class="delta" id="h-signups-delta">vs previous period</div>
           </div>
-          <div class="stat">
-            <div class="lbl">Conversions</div>
-            <div class="val" id="h-conv">—</div>
-            <div class="sub">Coming soon</div>
+          <div class="metric-card">
+            <div class="lbl">Est. Commission ($) <span class="help-i" title="Estimated USD across pending + confirmed">i</span></div>
+            <div class="val" id="h-earn">$0.00</div>
+            <div class="delta">Pending until refund window passes</div>
           </div>
-          <div class="stat">
-            <div class="lbl">Lifetime earned</div>
-            <div class="val green" id="h-earn">$0.00</div>
-            <div class="sub">Coming soon</div>
+          <div class="metric-card">
+            <div class="lbl">Activations <span class="help-i" title="Paid conversions — first credit purchase, paid plan upgrade, etc.">i</span></div>
+            <div class="val" id="h-activations">0</div>
+            <div class="delta" id="h-activations-delta">vs previous period</div>
+          </div>
+          <div class="metric-card">
+            <div class="lbl">Revenue ($) <span class="help-i" title="Top-line revenue the advertiser earned from your audience">i</span></div>
+            <div class="val" id="h-revenue">$0.00</div>
+            <div class="delta">Advertiser top-line</div>
+          </div>
+          <div class="metric-card">
+            <div class="lbl">New Users <span class="help-i" title="First-time users from your audience">i</span></div>
+            <div class="val" id="h-newusers">0</div>
+            <div class="delta">First-time conversions</div>
           </div>
         </div>
 
-        <div class="empty">
-          <div class="icon">🚀</div>
-          <h3>Your dashboard fills in as you save and share</h3>
-          <p>Start by tapping the bookmark on any Boost Boss ad you spot. Your saves show up here with shareable links and click tracking.</p>
-          <span class="roadmap">SHARE LINKS · CONVERSIONS · PAYOUTS · ROLLING OUT</span>
+        <!-- Clicks breakdown — surfaces matter more for AI-native than channels.
+             Maps to source_surface stored on each saved ad / click row. -->
+        <div class="breakdown">
+          <h3>Clicks breakdown</h3>
+          <div class="row"><span class="icon-d">⌬</span><span class="label-d">AI Chat (MCP / NPM SDK)</span><span class="val-d" id="b-mcp">0</span></div>
+          <div class="row"><span class="icon-d">▭</span><span class="label-d">Web (JS Snippet)</span><span class="val-d" id="b-web">0</span></div>
+          <div class="row"><span class="icon-d">⊙</span><span class="label-d">Browser Extension</span><span class="val-d" id="b-ext">0</span></div>
+          <div class="row"><span class="icon-d">♠</span><span class="label-d">Bot (Telegram / Discord / Line)</span><span class="val-d" id="b-bot">0</span></div>
+          <div class="row"><span class="icon-d">⌖</span><span class="label-d">Direct paste (social, newsletter, DM)</span><span class="val-d" id="b-direct">0</span></div>
+        </div>
+
+        <!-- My Top 5 Products — saved + share-link metrics joined per product. -->
+        <div class="top-list">
+          <h3>My top 5 products</h3>
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Clicks</th><th>Activations</th><th>Est. Commission</th></tr>
+            </thead>
+            <tbody id="top5-tbody">
+              <tr><td colspan="4" class="empty-tbl">Save your first ads from inside AI tools, or browse the <a href="#catalog" onclick="switchSection('catalog');return false;" style="color:var(--pink);font-weight:600;text-decoration:none;">Product Catalog →</a></td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -687,15 +1001,211 @@
         <div id="saves-content"></div>
       </section>
 
-      <!-- Marketplace (coming soon) -->
-      <section id="sec-marketplace" class="dash-section hidden">
-        <h2>Affiliate marketplace</h2>
-        <p class="pre">Browse offers from Boost Boss advertisers who've opted into affiliate distribution. Filter by category, commission rate, and audience fit.</p>
+      <!-- ════════ OFFER section pages — Shopee-style 5-pane structure ════════ -->
+
+      <!-- 1. Boost Boss Offer — category-level commission tiles.
+           Software/digital categories (NOT Shopee's Home Electronics etc.).
+           Click a tile → switches to Product Catalog filtered by that category. -->
+      <section id="sec-bb-offer" class="dash-section hidden">
+        <h2>Boost Boss Offer</h2>
+        <p class="pre">Broad category-level commission tiers across the Boost Boss network. Click any category to see the products available to promote.</p>
+        <div class="cat-tiles" id="cat-tiles">
+          <!-- Hardcoded software/digital categories. Real per-category aggregation
+               ships once enough advertisers register products to make ranges meaningful. -->
+          <button type="button" class="cat-tile" data-cat="ai-tools">
+            <span class="cat-icon">🤖</span>
+            <div class="cat-name">AI Tools</div>
+            <div class="cat-sub">LLM assistants, agents, image gen, voice, code-gen</div>
+            <div class="cat-comm">up to 30%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="developer">
+            <span class="cat-icon">⌨</span>
+            <div class="cat-name">Developer Tools</div>
+            <div class="cat-sub">IDEs, code editors, debugging, terminals, copilots</div>
+            <div class="cat-comm">up to 25%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="productivity">
+            <span class="cat-icon">▤</span>
+            <div class="cat-name">Productivity SaaS</div>
+            <div class="cat-sub">Docs, project management, calendars, CRM</div>
+            <div class="cat-comm">up to 25%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="design">
+            <span class="cat-icon">✦</span>
+            <div class="cat-name">Design Tools</div>
+            <div class="cat-sub">Figma alternatives, AI image/video, mockups</div>
+            <div class="cat-comm">up to 20%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="cloud">
+            <span class="cat-icon">☁</span>
+            <div class="cat-name">Cloud / DevOps</div>
+            <div class="cat-sub">Hosting, databases, observability, deployment</div>
+            <div class="cat-comm">up to 20%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="marketing">
+            <span class="cat-icon">⌖</span>
+            <div class="cat-name">Marketing / Analytics</div>
+            <div class="cat-sub">Email, attribution, ad ops, growth tooling</div>
+            <div class="cat-comm">up to 30%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="education">
+            <span class="cat-icon">▸</span>
+            <div class="cat-name">Education / Learning</div>
+            <div class="cat-sub">Courses, bootcamps, certifications, tutorials</div>
+            <div class="cat-comm">up to 40%</div>
+          </button>
+          <button type="button" class="cat-tile" data-cat="brand">
+            <span class="cat-icon">★</span>
+            <div class="cat-name">Brand Deals</div>
+            <div class="cat-sub">Fixed-payout sponsorships from premium SaaS brands</div>
+            <div class="cat-comm">$50–$500 / deal</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Premium Partners — featured advertisers with boosted commission.
+           Pulled from /api/products?action=browse, grouped by advertiser,
+           showing the top-commission shop on each row. -->
+      <section id="sec-partners" class="dash-section hidden">
+        <h2>Premium Partners</h2>
+        <p class="pre">Featured Boost Boss advertisers with elevated commission rates. These shops have committed to top-tier payouts during their launch window — promote early to lock in the best rates.</p>
+        <div id="partners-content">
+          <div class="empty"><div class="icon">⏳</div><h3>Loading partners…</h3></div>
+        </div>
+      </section>
+
+      <!-- 3. Product Catalog — full grid with category tabs + search + sort.
+           Driven by /api/products?action=browse. This is the workhorse
+           "browse what's available to promote" page. -->
+      <section id="sec-catalog" class="dash-section hidden">
+        <h2>Product Catalog</h2>
+        <p class="pre">Every active product across the Boost Boss network. Sort by commission, search by name, click "Get Link" on any product to mint your tracked share URL.</p>
+
+        <div class="cat-search-row">
+          <input class="cat-search" id="cat-search" type="search" placeholder="Search for products in the Boost Boss network">
+          <select class="cat-sort" id="cat-sort">
+            <option value="commission">Sort: Highest commission</option>
+            <option value="latest">Sort: Latest</option>
+            <option value="name">Sort: Name (A–Z)</option>
+          </select>
+        </div>
+
+        <div class="cat-tabs" id="cat-tabs">
+          <button data-cat="" class="active">All</button>
+          <button data-cat="ai-tools">AI Tools</button>
+          <button data-cat="developer">Developer</button>
+          <button data-cat="productivity">Productivity</button>
+          <button data-cat="design">Design</button>
+          <button data-cat="cloud">Cloud / DevOps</button>
+          <button data-cat="marketing">Marketing</button>
+          <button data-cat="education">Education</button>
+          <button data-cat="brand">Brand Deals</button>
+        </div>
+
+        <div id="catalog-content">
+          <div class="empty"><div class="icon">⏳</div><h3>Loading products…</h3></div>
+        </div>
+      </section>
+
+      <!-- 4. Exclusive Offers — personalized rates for top-performing affiliates.
+           Empty state for everyone until BB earns enough volume to set tiers. -->
+      <section id="sec-exclusive" class="dash-section hidden">
+        <h2>Exclusive Offers</h2>
+        <p class="pre">Personalized commission rates negotiated for top-performing affiliates. Once you cross the volume thresholds below, advertisers start showing you commission bumps not available in the public catalog.</p>
         <div class="empty">
-          <div class="icon">🛍</div>
-          <h3>Marketplace coming soon</h3>
-          <p>Today you can save ads you organically encounter in AI tools. Soon you'll be able to browse a curated catalog of offers from advertisers actively recruiting affiliates — each showing commission rate, payout speed, and audience fit.</p>
-          <p class="small">We're onboarding advertisers + product catalogs first. You'll be notified when the marketplace opens.</p>
+          <div class="icon">🔒</div>
+          <h3>No exclusive offers yet</h3>
+          <p>Cross any of these thresholds in a 30-day window and exclusive offers unlock automatically:</p>
+          <p class="small" style="text-align:left;max-width:480px;margin:14px auto;">
+            • <strong>10k+ clicks</strong> — Premium Partners reach out with bespoke rates<br>
+            • <strong>500+ activations</strong> — Tier-2 commission across the network<br>
+            • <strong>$1k+ confirmed commission</strong> — Direct-to-advertiser negotiation channel
+          </p>
+        </div>
+      </section>
+
+      <!-- 5. Custom Link — paste any Boost Boss advertiser URL → get a
+           tokenized share link. Mirrors Shopee's Custom Link form,
+           including the sub_id1..5 tracking inputs. -->
+      <section id="sec-custom" class="dash-section hidden">
+        <h2>Custom Link</h2>
+        <p class="pre">Got an advertiser URL that isn't in the catalog yet? Paste it here and we'll mint a tracked share URL. Useful for brand-deal landing pages, beta access flows, or any URL you negotiated directly with an advertiser.</p>
+
+        <div class="form-card">
+          <label>Advertiser URL(s)</label>
+          <textarea id="custom-urls" placeholder="https://example.com/special-promo&#10;https://example.com/beta&#10;&#10;One URL per line, up to 5"></textarea>
+          <div class="hint">Must be on a Boost Boss-participating advertiser's domain. Submit up to 5 URLs at once.</div>
+
+          <div style="margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.5;">
+            Add up to 5 <strong>Sub IDs</strong> to track which channel each click came from.<br>Alphanumeric only (a–z, A–Z, 0–9). Click "Get Link" with empty Sub IDs if you don't need them.
+          </div>
+
+          <div class="subs">
+            <div><label>Sub ID 1</label><input type="text" id="sub_id1" maxlength="32" placeholder="e.g. twitter"></div>
+            <div><label>Sub ID 2</label><input type="text" id="sub_id2" maxlength="32" placeholder="e.g. newsletter"></div>
+            <div><label>Sub ID 3</label><input type="text" id="sub_id3" maxlength="32" placeholder="e.g. blogpost_dec"></div>
+            <div><label>Sub ID 4</label><input type="text" id="sub_id4" maxlength="32" placeholder=""></div>
+            <div><label>Sub ID 5</label><input type="text" id="sub_id5" maxlength="32" placeholder=""></div>
+          </div>
+
+          <button class="get-btn" type="button" id="custom-get-btn">Get Link</button>
+
+          <div id="custom-result" class="result hidden"></div>
+        </div>
+
+        <div style="margin-top:24px;padding:16px 18px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;font-size:12.5px;color:#92400E;line-height:1.55;max-width:720px;">
+          <strong>Note:</strong> Custom links bypass the catalog's category filtering and exclusive-offer tiers. Commission still flows from the advertiser per the rate they've registered with Boost Boss. If the URL isn't on a participating advertiser's domain, the link mints but won't earn commission.
+        </div>
+      </section>
+
+      <!-- ════════ SOON placeholders (Campaign / Creative / Report / Payment) ════════ -->
+      <section id="sec-campaigns-soon" class="dash-section hidden">
+        <h2>Affiliate Campaigns</h2>
+        <p class="pre">Time-bound promotional pushes from advertisers — flash sales, product launches, exclusive bonuses for top affiliates.</p>
+        <div class="empty">
+          <div class="icon">⛿</div>
+          <h3>Campaigns roll out with our first 20 advertisers</h3>
+          <p>Once we have enough participating advertisers, this view will list active promotional pushes with elevated commission, bonus pools, and limited-time creative drops.</p>
+        </div>
+      </section>
+
+      <section id="sec-feed-soon" class="dash-section hidden">
+        <h2>Product Feed</h2>
+        <p class="pre">Download the entire active product catalog as a CSV / JSON / RSS feed for use in your own tools — newsletter automations, MCP servers, recommendation engines.</p>
+        <div class="empty">
+          <div class="icon">✺</div>
+          <h3>Product feed coming soon</h3>
+          <p>API access ships once we have enough catalog depth for a feed to be useful. Power-user affiliates will be able to integrate the catalog directly into their MCP servers or custom recommendation flows.</p>
+        </div>
+      </section>
+
+      <section id="sec-conv-soon" class="dash-section hidden">
+        <h2>Conversion Report</h2>
+        <p class="pre">Per-product attribution detail — every conversion event the advertiser fired back via postback, with the original click, source, and commission state.</p>
+        <div class="empty">
+          <div class="icon">▭</div>
+          <h3>Conversion reporting ships with #3 Commission Tracking</h3>
+          <p>Click tracking is live (see Share Links). Conversion attribution comes online once the postback infrastructure lands.</p>
+        </div>
+      </section>
+
+      <section id="sec-click-soon" class="dash-section hidden">
+        <h2>Click Report</h2>
+        <p class="pre">Granular click log — every redirect through your share links with timestamp, referrer, surface, and conversion outcome.</p>
+        <div class="empty">
+          <div class="icon">▭</div>
+          <h3>Granular click report coming soon</h3>
+          <p>The aggregate live now in your Share Links section. The per-click drill-down view follows shortly.</p>
+        </div>
+      </section>
+
+      <section id="sec-bill-soon" class="dash-section hidden">
+        <h2>Commission Bill</h2>
+        <p class="pre">Monthly statements showing pending, confirmed, refunded, and paid commission per advertiser. Same shape as a Shopee monthly bill.</p>
+        <div class="empty">
+          <div class="icon">$</div>
+          <h3>Commission billing ships with #3 + #5</h3>
+          <p>Generated automatically once monthly reconciliation runs. You'll be able to download each month's bill as PDF for tax records.</p>
         </div>
       </section>
 
@@ -942,7 +1452,17 @@ document.querySelectorAll('.side-nav button').forEach(b => {
   b.addEventListener('click', () => switchSection(b.getAttribute('data-section')));
 });
 
+// Section names that have a real <section id="sec-X"> backing them.
+// Includes all OFFER pages + the SOON placeholders + legacy sections.
+const VALID_SECTIONS = new Set([
+  'home', 'saves',
+  'bb-offer', 'partners', 'catalog', 'exclusive', 'custom',
+  'campaigns-soon', 'feed-soon', 'conv-soon', 'click-soon', 'bill-soon',
+  'links', 'payouts', 'settings',
+]);
+
 function switchSection(name) {
+  if (!VALID_SECTIONS.has(name)) name = 'home';
   document.querySelectorAll('.side-nav button').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-section') === name);
   });
@@ -950,7 +1470,24 @@ function switchSection(name) {
     s.classList.toggle('hidden', s.id !== 'sec-' + name);
   });
   if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+
+  // Lazy-load offer-page data on first visit so the dashboard's
+  // initial render isn't blocked by N parallel /api/products requests
+  // for pages the user may never look at.
+  if (name === 'catalog')  loadCatalog();
+  if (name === 'partners') loadPartners();
 }
+
+// Boost Boss Offer — category tiles → jump to Catalog filtered by that cat
+document.addEventListener('click', (e) => {
+  const tile = e.target.closest('.cat-tile');
+  if (!tile) return;
+  const cat = tile.getAttribute('data-cat') || '';
+  switchSection('catalog');
+  // Switch the catalog's active tab to match.
+  const tab = document.querySelector(`#cat-tabs button[data-cat="${cat}"]`);
+  if (tab) tab.click();
+});
 
 async function loadDashboard() {
   const session = getSession();
@@ -1027,9 +1564,241 @@ async function loadDashboard() {
   // Show dashboard, restore section from hash if present
   showView('dashboard');
   const hash = (location.hash || '#home').replace(/^#/, '');
-  const ok = ['home', 'saves', 'marketplace', 'links', 'earnings', 'payouts', 'settings'].includes(hash);
-  switchSection(ok ? hash : 'home');
+  switchSection(VALID_SECTIONS.has(hash) ? hash : 'home');
+
+  // Show payout-method-incomplete banner on home until method is set.
+  // Conservative check: any payout_method on the profile means it's done.
+  if (!p.payout_method && !p.paypal_email) {
+    document.getElementById('home-banner').classList.remove('hidden');
+  }
 }
+
+// ────────────────────────────────────────────────────────────────────────
+//  OFFER pages: Premium Partners, Product Catalog, Custom Link
+// ────────────────────────────────────────────────────────────────────────
+//  All three read from /api/products?action=browse (returns active
+//  products across ALL advertisers, sorted by commission DESC). Different
+//  views slice the same data differently.
+// ────────────────────────────────────────────────────────────────────────
+
+let _catalogCache = null;
+let _activeCat    = '';
+let _activeSort   = 'commission';
+let _activeQuery  = '';
+
+async function fetchBrowse() {
+  if (_catalogCache) return _catalogCache;
+  const session = getSession();
+  if (!session || !session.token) return { products: [] };
+  try {
+    const r = await fetch(`${API_BASE}/api/products?action=browse&limit=200`, {
+      headers: { 'Authorization': `Bearer ${session.token}` },
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Browse failed');
+    _catalogCache = await r.json();
+    return _catalogCache;
+  } catch (e) {
+    return { products: [], error: e.message };
+  }
+}
+
+// Lightweight client-side category mapping. Until the products schema
+// gets a real `category` column, we infer from a few keywords in the
+// name/description so the tabs work today. When the schema column ships,
+// this function will just return product.category directly.
+function inferCategory(p) {
+  const s = ((p.name || '') + ' ' + (p.description || '')).toLowerCase();
+  if (/\b(ai|llm|gpt|claude|agent|copilot|prompt)\b/.test(s)) return 'ai-tools';
+  if (/\b(ide|editor|code|terminal|debug|repo|git|deploy|cli)\b/.test(s)) return 'developer';
+  if (/\b(notion|task|project|crm|doc|calendar|kanban)\b/.test(s)) return 'productivity';
+  if (/\b(figma|design|mockup|image|video|illustr|sketch)\b/.test(s)) return 'design';
+  if (/\b(cloud|host|deploy|database|aws|gcp|azure|server|kubernetes|docker)\b/.test(s)) return 'cloud';
+  if (/\b(market|analytic|email|attribution|growth|crm|ads?)\b/.test(s)) return 'marketing';
+  if (/\b(course|bootcamp|learn|tutorial|cert|education|class)\b/.test(s)) return 'education';
+  if (/\b(brand|sponsor|deal)\b/.test(s)) return 'brand';
+  return 'other';
+}
+
+function renderProductCard(p) {
+  const img = p.image_url
+    ? `<div class="img" style="background-image:url('${esc(p.image_url)}');"></div>`
+    : `<div class="img"><span>📦</span></div>`;
+  const comm = (Number(p.default_commission_pct) || 0).toFixed(2);
+  return `
+    <div class="product-card" data-product-id="${esc(p.id)}">
+      ${img}
+      <div class="body">
+        <div class="name" title="${esc(p.name)}">${esc(p.name)}</div>
+        <div class="desc">${esc(p.description || '—')}</div>
+        <div class="meta">
+          <span class="comm">${comm}% commission</span>
+          <button class="get-link-btn" type="button" data-act="get-link" data-product-id="${esc(p.id)}" data-product-url="${esc(p.default_url)}">Get Link</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadCatalog() {
+  const wrap = document.getElementById('catalog-content');
+  if (!wrap) return;
+  const j = await fetchBrowse();
+  if (j.error) {
+    wrap.innerHTML = `<div class="empty"><div class="icon">⚠</div><h3>Couldn't load catalog</h3><p>${esc(j.error)}</p></div>`;
+    return;
+  }
+  let items = (j.products || []).slice();
+
+  // Category filter (client-side via inferCategory until schema column lands)
+  if (_activeCat) items = items.filter((p) => inferCategory(p) === _activeCat);
+
+  // Search filter
+  if (_activeQuery) {
+    const q = _activeQuery.toLowerCase();
+    items = items.filter((p) =>
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.description || '').toLowerCase().includes(q));
+  }
+
+  // Sort
+  if (_activeSort === 'latest') {
+    items.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  } else if (_activeSort === 'name') {
+    items.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } else { // commission default
+    items.sort((a, b) => (Number(b.default_commission_pct) || 0) - (Number(a.default_commission_pct) || 0));
+  }
+
+  if (!items.length) {
+    wrap.innerHTML = `
+      <div class="empty">
+        <div class="icon">📦</div>
+        <h3>No products in this category yet</h3>
+        <p>The Boost Boss catalog grows as advertisers register products. Try a different category, or use <a href="#custom" onclick="switchSection('custom');return false;" style="color:var(--pink);font-weight:600;text-decoration:none;">Custom Link</a> to promote any advertiser URL directly.</p>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="product-grid">${items.map(renderProductCard).join('')}</div>`;
+}
+
+async function loadPartners() {
+  const wrap = document.getElementById('partners-content');
+  if (!wrap) return;
+  const j = await fetchBrowse();
+  if (j.error) {
+    wrap.innerHTML = `<div class="empty"><div class="icon">⚠</div><h3>Couldn't load partners</h3><p>${esc(j.error)}</p></div>`;
+    return;
+  }
+  // Partners = top 12 products by commission rate. Premium Partners surface
+  // is product-level here (since we don't have a shops table yet); when the
+  // advertisers table grows we'll switch to a per-shop aggregation.
+  const top = (j.products || [])
+    .filter((p) => (Number(p.default_commission_pct) || 0) >= 15)
+    .sort((a, b) => (Number(b.default_commission_pct) || 0) - (Number(a.default_commission_pct) || 0))
+    .slice(0, 12);
+
+  if (!top.length) {
+    wrap.innerHTML = `
+      <div class="empty">
+        <div class="icon">⭐</div>
+        <h3>No premium partners yet</h3>
+        <p>Premium Partners are advertisers running campaigns with 15%+ commission rates. The list fills as more advertisers join. Check the <a href="#catalog" onclick="switchSection('catalog');return false;" style="color:var(--pink);font-weight:600;text-decoration:none;">full catalog →</a> in the meantime.</p>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="product-grid">${top.map(renderProductCard).join('')}</div>`;
+}
+
+// Delegated handler — Get Link button on any product card in Catalog or Partners.
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.get-link-btn');
+  if (!btn) return;
+  const productId  = btn.getAttribute('data-product-id');
+  const productUrl = btn.getAttribute('data-product-url');
+  if (!productUrl) return;
+  const session = getSession();
+  if (!session || !session.token) { showToast('Sign in expired — please reload', 'error'); return; }
+  btn.disabled = true; const orig = btn.textContent; btn.textContent = '…';
+  try {
+    const r = await fetch(`${API_BASE}/api/auth?action=affiliate_create_share_link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+      body: JSON.stringify({ target_url: productUrl, product_id: productId }),
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Mint failed');
+    await navigator.clipboard.writeText(j.url).catch(() => {
+      window.prompt('Copy this link:', j.url);
+    });
+    showToast('Share link copied — ' + j.url, 'success');
+  } catch (err) {
+    showToast(err.message || 'Could not mint link', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+});
+
+// Catalog tabs / search / sort wiring
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('#cat-tabs button');
+  if (!tab) return;
+  document.querySelectorAll('#cat-tabs button').forEach((b) => b.classList.toggle('active', b === tab));
+  _activeCat = tab.getAttribute('data-cat') || '';
+  loadCatalog();
+});
+const catSearch = document.getElementById('cat-search');
+if (catSearch) catSearch.addEventListener('input', () => {
+  _activeQuery = catSearch.value || '';
+  loadCatalog();
+});
+const catSort = document.getElementById('cat-sort');
+if (catSort) catSort.addEventListener('change', () => {
+  _activeSort = catSort.value || 'commission';
+  loadCatalog();
+});
+
+// Custom Link form — submit to mint share links for arbitrary URLs.
+const customBtn = document.getElementById('custom-get-btn');
+if (customBtn) customBtn.addEventListener('click', async () => {
+  const session = getSession();
+  if (!session || !session.token) { showToast('Sign in expired — please reload', 'error'); return; }
+  const urls = (document.getElementById('custom-urls').value || '')
+    .split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 5);
+  if (!urls.length) { showToast('Paste at least one URL', 'error'); return; }
+  const subs = {};
+  ['sub_id1', 'sub_id2', 'sub_id3', 'sub_id4', 'sub_id5'].forEach((k) => {
+    const v = (document.getElementById(k).value || '').trim();
+    if (v) subs[k] = v.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 32);
+  });
+  const resultEl = document.getElementById('custom-result');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div style="color:#6B7280;">Minting links…</div>';
+  customBtn.disabled = true; const orig = customBtn.textContent; customBtn.textContent = '…';
+  try {
+    const minted = [];
+    for (const u of urls) {
+      const r = await fetch(`${API_BASE}/api/auth?action=affiliate_create_share_link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+        body: JSON.stringify({ target_url: u, sub_ids: subs }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Mint failed for ' + u);
+      // Decorate URL with sub_ids if any. The redirect endpoint passes them
+      // through to the target as ?sub_id1=... so the advertiser sees the source.
+      let finalUrl = j.url;
+      const sParams = Object.entries(subs).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+      if (sParams) finalUrl += (finalUrl.includes('?') ? '&' : '?') + sParams;
+      minted.push({ source: u, link: finalUrl });
+    }
+    resultEl.innerHTML = '<strong>✓ Links minted</strong>' + minted.map((m) =>
+      `<div style="margin-top:10px;"><div style="font-size:11.5px;color:#6B7280;margin-bottom:3px;">${esc(m.source)}</div><code>${esc(m.link)}</code><button class="copy" type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent).then(()=>{this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1500);})">Copy</button></div>`
+    ).join('');
+  } catch (err) {
+    resultEl.innerHTML = `<div style="color:#DC2626;">${esc(err.message || 'Could not mint links')}</div>`;
+  } finally {
+    customBtn.disabled = false; customBtn.textContent = orig;
+  }
+});
 
 function renderSaves(items) {
   const wrap = document.getElementById('saves-content');

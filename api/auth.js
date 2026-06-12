@@ -1704,33 +1704,73 @@ async function supabaseHandler(action, body, req, res) {
       .from("affiliates").select("id").eq("id", user.id).maybeSingle();
     if (!aff) return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
 
-    const savedAdId = (body && body.saved_ad_id) || null;
-    if (!savedAdId) return res.status(400).json({ error: "saved_ad_id is required" });
-
-    // Verify the saved_ad belongs to THIS affiliate. Stops one affiliate
-    // from minting share-links over another affiliate's saved ads.
-    const { data: sa } = await supabaseAdmin
-      .from("affiliate_saved_ads")
-      .select("id, affiliate_id, target_url")
-      .eq("id", savedAdId)
-      .maybeSingle();
-    if (!sa || sa.affiliate_id !== user.id) {
-      return res.status(404).json({ error: "Saved ad not found" });
+    // Three mint paths supported (in priority order):
+    //  1) saved_ad_id     — legacy SDK-save flow, idempotent per saved_ad
+    //  2) product_id      — catalog "Get Link" flow, idempotent per product
+    //  3) target_url      — Custom Link flow, accepts any URL (non-idempotent
+    //                        across re-submits unless the URL matches exactly)
+    // At least one MUST be supplied.
+    const savedAdId  = (body && body.saved_ad_id)  || null;
+    const productId  = (body && body.product_id)   || null;
+    const rawUrl     = (body && body.target_url)   || null;
+    if (!savedAdId && !productId && !rawUrl) {
+      return res.status(400).json({ error: "Provide saved_ad_id, product_id, or target_url" });
     }
 
-    // Existing link? Return it (idempotent).
-    const { data: existing } = await supabaseAdmin
-      .from("affiliate_share_links")
-      .select("*")
-      .eq("affiliate_id", user.id)
-      .eq("saved_ad_id", savedAdId)
-      .maybeSingle();
-    if (existing) {
-      return res.json({
-        share_link: existing,
-        url: buildShareUrl(req, existing.token),
-        new: false,
-      });
+    // Resolve the target URL the redirect will use. Priority:
+    //  - saved_ad_id: pulled from the saved_ads row
+    //  - product_id:  pulled from the products row
+    //  - target_url:  used as-is after http(s):// validation
+    let resolvedTargetUrl = null;
+    if (savedAdId) {
+      // Verify the saved_ad belongs to THIS affiliate. Stops one affiliate
+      // from minting share-links over another affiliate's saved ads.
+      const { data: sa } = await supabaseAdmin
+        .from("affiliate_saved_ads")
+        .select("id, affiliate_id, target_url")
+        .eq("id", savedAdId)
+        .maybeSingle();
+      if (!sa || sa.affiliate_id !== user.id) {
+        return res.status(404).json({ error: "Saved ad not found" });
+      }
+      resolvedTargetUrl = sa.target_url || null;
+    } else if (productId) {
+      const { data: prod } = await supabaseAdmin
+        .from("products")
+        .select("id, default_url, status")
+        .eq("id", productId)
+        .maybeSingle();
+      if (!prod || prod.status !== "active") {
+        return res.status(404).json({ error: "Product not found or archived" });
+      }
+      resolvedTargetUrl = prod.default_url || null;
+    } else if (rawUrl) {
+      const u = String(rawUrl).trim();
+      if (!/^https?:\/\//i.test(u)) {
+        return res.status(400).json({ error: "target_url must start with http:// or https://" });
+      }
+      resolvedTargetUrl = u.slice(0, 2000);
+    }
+
+    // Idempotency lookup. We only dedupe when we have a stable parent key
+    // (saved_ad_id or product_id). Pure target_url mints always create a
+    // new row — re-submitting the same URL is treated as a new link request
+    // because the affiliate may want different sub_ids attached.
+    if (savedAdId || productId) {
+      let q = supabaseAdmin
+        .from("affiliate_share_links")
+        .select("*")
+        .eq("affiliate_id", user.id);
+      if (savedAdId) q = q.eq("saved_ad_id", savedAdId);
+      else           q = q.eq("product_id",  productId);
+      const { data: existing } = await q.maybeSingle();
+      if (existing) {
+        return res.json({
+          share_link: existing,
+          url: buildShareUrl(req, existing.token),
+          new: false,
+        });
+      }
     }
 
     // Mint a new one. Token is 8 chars of base62 — collision risk at
@@ -1744,9 +1784,10 @@ async function supabaseHandler(action, body, req, res) {
         .from("affiliate_share_links")
         .insert({
           affiliate_id: user.id,
-          saved_ad_id:  savedAdId,
+          saved_ad_id:  savedAdId  || null,
+          product_id:   productId  || null,
           token:        candidate,
-          target_url:   sa.target_url || null,
+          target_url:   resolvedTargetUrl,
         })
         .select()
         .maybeSingle();

@@ -160,6 +160,51 @@ COMMENT ON COLUMN public.affiliate_saved_ads.product_id IS
   'no parent product, or for historical saves predating Products.';
 
 -- ────────────────────────────────────────────────────────────────────────
+-- 3b. affiliate_share_links — saved_ad_id becomes optional + product_id added
+-- ────────────────────────────────────────────────────────────────────────
+--
+-- The share-links table was originally minted-from-saved-ad only. Two new
+-- paths are now supported:
+--
+--   (a) Catalog "Get Link" — mints from a product_id directly (no save
+--       required). Lets affiliates browse the public catalog and grab a
+--       tracked URL without first bookmarking an ad render.
+--
+--   (b) Custom Link — mints from an arbitrary advertiser URL (target_url
+--       only, neither saved_ad nor product). For URLs that aren't in the
+--       catalog yet — brand deals, beta links, etc.
+--
+-- The legacy SDK-bookmark path still works (saved_ad_id is set).
+
+-- Make saved_ad_id NULLable. Without this, the Custom Link / Catalog paths
+-- can't insert a row that has no saved_ad backing.
+ALTER TABLE public.affiliate_share_links
+  ALTER COLUMN saved_ad_id DROP NOT NULL;
+
+ALTER TABLE public.affiliate_share_links
+  ADD COLUMN IF NOT EXISTS product_id UUID;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'affiliate_share_links_product_id_fkey'
+  ) THEN
+    ALTER TABLE public.affiliate_share_links
+      ADD CONSTRAINT affiliate_share_links_product_id_fkey
+      FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS affiliate_share_links_product_idx
+  ON public.affiliate_share_links (affiliate_id, product_id)
+  WHERE product_id IS NOT NULL;
+
+COMMENT ON COLUMN public.affiliate_share_links.product_id IS
+  'Set when the affiliate mints a share link by clicking "Get Link" in '
+  'the Product Catalog. NULL for SDK-save mints (which set saved_ad_id) '
+  'and Custom Link mints (which set neither and rely on target_url).';
+
+-- ────────────────────────────────────────────────────────────────────────
 -- 4. RLS — advertisers see only their own products
 -- ────────────────────────────────────────────────────────────────────────
 --
