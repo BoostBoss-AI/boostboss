@@ -1409,9 +1409,32 @@ async function supabaseHandler(action, body, req, res) {
   // see affiliate data they didn't sign up for; the role audit trail
   // stays accurate.
   if (action === "affiliate_signup") {
-    const { email, password, display_name } = body || {};
+    const {
+      email, password, display_name,
+      // v2 onboarding fields — collected in the multi-step signup. All
+      // optional from the API's perspective (the dashboard surfaces them
+      // via Settings later), but the frontend form requires them.
+      account_type, primary_platform, platform_handle, followers_range,
+      audience_topic, phone, referral_code_used,
+    } = body || {};
     if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
     if (String(password).length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+
+    // Validate enum-like fields against the same vocabulary as the DB
+    // CHECK constraints. Belt-and-suspenders so we return a friendlier
+    // error than the raw Postgres constraint violation.
+    const ALLOWED_ACCOUNT_TYPES   = ["individual", "enterprise"];
+    const ALLOWED_PLATFORMS       = ["twitter", "tiktok", "youtube", "instagram", "reddit", "discord", "telegram", "linkedin", "newsletter", "blog", "podcast", "twitch", "other"];
+    const ALLOWED_FOLLOWERS_RANGES = ["under_1k", "1k_10k", "10k_100k", "100k_1m", "over_1m", "other"];
+    if (account_type && !ALLOWED_ACCOUNT_TYPES.includes(account_type)) {
+      return res.status(400).json({ error: "Invalid account_type" });
+    }
+    if (primary_platform && !ALLOWED_PLATFORMS.includes(primary_platform)) {
+      return res.status(400).json({ error: "Invalid primary_platform" });
+    }
+    if (followers_range && !ALLOWED_FOLLOWERS_RANGES.includes(followers_range)) {
+      return res.status(400).json({ error: "Invalid followers_range" });
+    }
 
     const cleanEmail = String(email).trim().toLowerCase();
     let userId = null;
@@ -1461,11 +1484,26 @@ async function supabaseHandler(action, body, req, res) {
     }
 
     // Create the affiliates row — this is what gates affiliate access from
-    // here on out.
+    // here on out. The v2 onboarding fields are captured here too so the
+    // dashboard Settings + future marketplace targeting has them from
+    // signup onward.
+    const nowIso = new Date().toISOString();
     const { error: insErr } = await supabaseAdmin.from("affiliates").insert({
-      id:           userId,
-      email:        cleanEmail,
-      display_name: display_name ? String(display_name).slice(0, 80) : null,
+      id:                        userId,
+      email:                     cleanEmail,
+      display_name:              display_name ? String(display_name).slice(0, 80) : null,
+      account_type:              account_type || null,
+      primary_platform:          primary_platform || null,
+      platform_handle:           platform_handle ? String(platform_handle).trim().slice(0, 120) : null,
+      followers_range:           followers_range || null,
+      audience_topic:            audience_topic ? String(audience_topic).trim().slice(0, 120) : null,
+      phone:                     phone ? String(phone).trim().slice(0, 40) : null,
+      referral_code_used:        referral_code_used ? String(referral_code_used).trim().slice(0, 40) : null,
+      // Mark onboarding complete only if the new structured fields were
+      // provided. If a legacy caller passes only email+password, leave the
+      // timestamp null so we know to prompt for the rest on first dashboard
+      // load.
+      onboarding_completed_at:   (account_type && primary_platform && followers_range) ? nowIso : null,
     });
     if (insErr) return res.status(500).json({ error: insErr.message });
 
