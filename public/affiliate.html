@@ -1155,15 +1155,21 @@
           </div>
         </div>
 
-        <!-- Clicks breakdown — surfaces matter more for AI-native than channels.
-             Maps to source_surface stored on each saved ad / click row. -->
+        <!-- Clicks breakdown — by traffic source / referrer. These are the
+             surfaces where the affiliate's AUDIENCE clicked (Twitter, DM,
+             newsletter, etc.), NOT the Boost Boss doors where ads get
+             served (that's publisher-side). Buckets are parsed from the
+             Referer header on each /s/<token> redirect.
+             See [[publisher-integration-architecture]] vs. affiliate
+             promotion surfaces — they're independent. -->
         <div class="breakdown">
-          <h3>Clicks breakdown</h3>
-          <div class="row"><span class="icon-d">⌬</span><span class="label-d">AI Chat (MCP / NPM SDK)</span><span class="val-d" id="b-mcp">0</span></div>
-          <div class="row"><span class="icon-d">▭</span><span class="label-d">Web (JS Snippet)</span><span class="val-d" id="b-web">0</span></div>
-          <div class="row"><span class="icon-d">⊙</span><span class="label-d">Browser Extension</span><span class="val-d" id="b-ext">0</span></div>
-          <div class="row"><span class="icon-d">♠</span><span class="label-d">Bot (Telegram / Discord / Line)</span><span class="val-d" id="b-bot">0</span></div>
-          <div class="row"><span class="icon-d">⌖</span><span class="label-d">Direct paste (social, newsletter, DM)</span><span class="val-d" id="b-direct">0</span></div>
+          <h3>Top traffic sources</h3>
+          <div class="row"><span class="icon-d">𝕏</span><span class="label-d">Social media (X, IG, TikTok, FB, Reddit, Threads, LinkedIn)</span><span class="val-d" id="b-social">0</span></div>
+          <div class="row"><span class="icon-d">✉</span><span class="label-d">Newsletter &amp; email (Substack, beehiiv, mail clients)</span><span class="val-d" id="b-email">0</span></div>
+          <div class="row"><span class="icon-d">💬</span><span class="label-d">Messaging (WhatsApp, Telegram, Discord, Slack, LINE)</span><span class="val-d" id="b-msg">0</span></div>
+          <div class="row"><span class="icon-d">🔎</span><span class="label-d">Search (Google, Bing, DuckDuckGo)</span><span class="val-d" id="b-search">0</span></div>
+          <div class="row"><span class="icon-d">⌖</span><span class="label-d">Direct (no referrer — DM paste, copied URL, deep link)</span><span class="val-d" id="b-direct">0</span></div>
+          <div class="row"><span class="icon-d">▭</span><span class="label-d">Other websites</span><span class="val-d" id="b-other">0</span></div>
         </div>
 
         <!-- My Top 5 Products — saved + share-link metrics joined per product. -->
