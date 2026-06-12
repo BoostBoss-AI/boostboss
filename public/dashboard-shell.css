@@ -502,6 +502,7 @@
 .shell-wrap[data-shell-active-route="home"]         [data-shell-route="home"],
 .shell-wrap[data-shell-active-route="performance"]  [data-shell-route="performance"],
 .shell-wrap[data-shell-active-route="campaigns"]    [data-shell-route="campaigns"],
+.shell-wrap[data-shell-active-route="products"]     [data-shell-route="products"],
 .shell-wrap[data-shell-active-route="billing"]      [data-shell-route="billing"],
 .shell-wrap[data-shell-active-route="setup"]        [data-shell-route="setup"],
 .shell-wrap[data-shell-active-route="integrations"] [data-shell-route="integrations"],
