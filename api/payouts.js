@@ -11,9 +11,18 @@
 //
 // Admin-facing actions (requireAdmin):
 //   admin_list_pending → all pending requests grouped by target_payout_date
-//   admin_export       → returns CSV ready for Payoneer Mass Payouts upload,
-//                        marks the included rows as batched with a batch_id
+//   admin_send_batch   → dispatches a batch via PayPal Payouts API. Preferred
+//                        path post-2026-06-11. Marks rows batched, calls
+//                        /v1/payments/payouts, stores PayPal batch + item ids.
+//                        Status reconciles via PAYMENT.PAYOUTS-ITEM.* webhooks
+//                        handled in api/billing.js.
+//   admin_export       → LEGACY escape hatch — returns CSV ready for manual
+//                        upload (Payoneer-era flow). Kept because the PayPal
+//                        rail can hard-fail and Andy needs a manual ship lane.
+//                        Marks rows batched; admin_mark_paid finishes them.
 //   admin_mark_paid    → moves all rows in a batch from batched → paid
+//                        (only needed for admin_export's manual path —
+//                        admin_send_batch uses webhook reconciliation)
 //   admin_mark_failed  → marks ONE request failed and refunds the balance
 //                        via bbx_credit_publisher_balance
 //
@@ -29,6 +38,7 @@
 
 const { createClient } = require("@supabase/supabase-js");
 const totp = require("./_lib/totp.js");
+const paypalPayouts = require("./_lib/payout/paypal.js");
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "";
@@ -327,6 +337,7 @@ module.exports = async function handler(req, res) {
 
   // ── Admin batch actions ──────────────────────────────────────────────────
   if (action === "admin_list_pending" || action === "admin_export"
+      || action === "admin_send_batch"
       || action === "admin_mark_paid" || action === "admin_mark_failed") {
     if (!requireAdmin(req)) {
       return res.status(401).json({ error: "Admin authentication required" });
@@ -419,6 +430,131 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // ── dispatch a batch via the PayPal Payouts API ──
+    // The intended successor to admin_export. Same selection logic (all
+    // pending rows for one target_payout_date), but instead of generating a
+    // CSV for manual upload, it calls PayPal Payouts /v1/payments/payouts
+    // directly. PayPal queues the batch and starts moving money; status
+    // arrives via PAYMENT.PAYOUTSBATCH.* and PAYMENT.PAYOUTS-ITEM.*
+    // webhooks (handler lives in api/billing.js handlePaypalWebhook).
+    //
+    // Why the legacy admin_export stays in the file: it's a manual escape
+    // hatch for cases where the PayPal API is down or returns an
+    // unrecoverable error and Andy needs to ship a batch the old way
+    // (export CSV → upload elsewhere → confirm manually with admin_mark_paid).
+    //
+    // Schema notes — payout_requests columns used:
+    //   bank_snapshot jsonb — post-pivot contains { paypal_email: "..." }
+    //     instead of the old { account_holder_name, swift_bic, ... }. The
+    //     column NAME stays "bank_snapshot" to avoid a migration; only the
+    //     contents change.
+    //   batch_id text — formatted BB-YYYYMMDD-XXXXXX, becomes PayPal's
+    //     sender_batch_id (PayPal idempotency key for retries).
+    //   paypal_batch_id text — PayPal's payout_batch_id (NEW column, may
+    //     not yet exist in db/24 — write is best-effort with try/catch).
+    if (action === "admin_send_batch") {
+      const targetDate = String(body.target_payout_date || "");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
+        return res.status(400).json({ error: "target_payout_date must be ISO YYYY-MM-DD" });
+      }
+      const batchId = "BB-" + targetDate.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+      // Read all pending rows for this date.
+      const { data: rows, error: readErr } = await supabaseAdmin
+        .from("payout_requests")
+        .select("id, publisher_id, amount_usd, bank_snapshot")
+        .eq("status", "pending")
+        .eq("target_payout_date", targetDate);
+      if (readErr) return res.status(500).json({ error: readErr.message });
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: "No pending requests for that date." });
+      }
+
+      // Map our rows → PayPal Payouts items. Reject up-front if any row
+      // is missing a paypal_email — saves us from a partial-dispatch state
+      // where some items got accepted by PayPal and others got 400'd.
+      const items = [];
+      const missingEmail = [];
+      for (const r of rows) {
+        const snap = r.bank_snapshot || {};
+        const email = String(snap.paypal_email || "").trim();
+        if (!email) { missingEmail.push(r.id); continue; }
+        items.push({
+          senderItemId:  r.id,
+          receiverEmail: email,
+          amountUsd:     Number(r.amount_usd),
+          note:          `Boost Boss publisher payout · ${batchId}`,
+        });
+      }
+      if (missingEmail.length > 0) {
+        return res.status(400).json({
+          error: "missing_paypal_email",
+          detail: "Some payout_requests rows have no paypal_email in bank_snapshot. Ask the affected publishers to set their payout method before dispatching.",
+          missing_request_ids: missingEmail,
+        });
+      }
+
+      // Optimistically mark rows batched BEFORE the PayPal call. If the
+      // dispatch fails, we roll back in the catch block. Doing it in this
+      // order means a successful dispatch can never end up with rows still
+      // marked pending (which would let a publisher cancel a request that's
+      // already moving money on PayPal's side).
+      const ids = rows.map((r) => r.id);
+      const batchedAt = new Date().toISOString();
+      const { error: updErr } = await supabaseAdmin
+        .from("payout_requests")
+        .update({ status: "batched", batched_at: batchedAt, batch_id: batchId })
+        .in("id", ids)
+        .eq("status", "pending");
+      if (updErr) return res.status(500).json({ error: updErr.message });
+
+      let dispatched;
+      try {
+        dispatched = await paypalPayouts.sendBatchPayout({
+          senderBatchId: batchId,
+          items,
+        });
+      } catch (err) {
+        // Roll back the batched marking so the admin can retry. Don't refund
+        // publisher balances yet — they're still going to be paid, just not
+        // in this batch.
+        console.error("[Payouts] PayPal dispatch failed, rolling back batch:", err.message, err.detail || "");
+        await supabaseAdmin
+          .from("payout_requests")
+          .update({ status: "pending", batched_at: null, batch_id: null })
+          .in("id", ids)
+          .eq("batch_id", batchId);
+        return res.status(502).json({
+          error:  "paypal_dispatch_failed",
+          detail: err.message,
+          paypal_error: err.detail || null,
+        });
+      }
+
+      // Store PayPal's payout_batch_id on each row for later reconciliation
+      // from PAYMENT.PAYOUTS-ITEM.* webhooks. Best-effort: if the column
+      // doesn't exist yet (db migration not run), don't fail the dispatch —
+      // we still have batch_id + sender_item_id for reconciliation.
+      if (dispatched.payout_batch_id) {
+        try {
+          await supabaseAdmin
+            .from("payout_requests")
+            .update({ paypal_batch_id: dispatched.payout_batch_id })
+            .in("id", ids);
+        } catch (_) { /* column may not exist yet — skip */ }
+      }
+
+      return res.json({
+        batch_id:        batchId,
+        paypal_batch_id: dispatched.payout_batch_id,
+        target_payout_date: targetDate,
+        row_count:       rows.length,
+        total_usd:       dispatched.total_usd,
+        batch_status:    dispatched.batch_status,
+        mode:            dispatched.mode,
+      });
+    }
+
     // ── mark every row in a batch as paid ──
     if (action === "admin_mark_paid") {
       const batchId = String(body.batch_id || "");
@@ -502,7 +638,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: preview, request, list, cancel, admin_list_pending, admin_export, admin_mark_paid, admin_mark_failed" });
+  return res.status(400).json({ error: "Unknown action. Use: preview, request, list, cancel, admin_list_pending, admin_send_batch, admin_export, admin_mark_paid, admin_mark_failed" });
 };
 
 function csvEscape(v) {
