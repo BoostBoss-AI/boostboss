@@ -60,16 +60,16 @@ The publisher dashboard at boostboss.ai/publish/dashboard has these sections:
 - Integrations — Your Integrations 4-door grid (MCP / AI Apps / Extensions / Bots), verify badges, format gallery, Theme & Preview controls
 - Placements — per-slot economics; publisher passes placement_id to getSponsoredContent() to enable per-slot reporting
 - API — Sandbox/Live toggle, API key & credentials
-- Payouts — biweekly Friday batches, Tuesday cutoff, $1 minimum, bank transfer via Payoneer
+- Payouts — biweekly Friday batches, Tuesday cutoff, $1 minimum, PayPal payout (more methods on roadmap)
 - Promote — fast cashout (gated on 2FA + threshold)
-- Settings — bank-details payout method, 2FA
+- Settings — PayPal email payout method, 2FA
 
 Key concepts:
 - Publisher share defaults to 70% of impression revenue (configurable per-publisher via revenue_share_pct).
 - Benna scores each impression for context match. A higher intent score for a placement means Benna is picking better-fitting ads for that slot.
 - Placements are tagged by the publisher passing placement_id in the SDK call. Without it, you can't see per-slot performance.
 - Payouts run biweekly on Fridays. Tuesday 23:59 UTC is the cutoff for the upcoming Friday batch. Minimum $1.
-- 2FA is required to change bank details or initiate cashout.
+- 2FA is required to change the PayPal payout email or initiate cashout.
 
 Style:
 - 2–4 sentences. Specific. Reference sections by name when giving steps.
