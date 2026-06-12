@@ -5,24 +5,47 @@
  * advertisers can fire conversions from their landing / thank-you page
  * without writing any tracking logic themselves.
  *
+ * The pixel handles BOTH attribution paths automatically — one snippet,
+ * the script figures out which (or both) to fire based on URL params:
+ *
+ *   1. AD-AUCTION (publisher side)
+ *      Triggered when bbx_auc / bbx_cmp are in the URL (BBX click-through).
+ *      Fires to /api/track with auction_id + campaign_id.
+ *
+ *   2. AFFILIATE (audience side, [[commission-attribution-model]])
+ *      Triggered when bb_click is in the URL (boostboss.ai/s/<token> redirect).
+ *      Fires to /api/conversions/postback with bb_click. Commission is
+ *      computed server-side from the product's default_commission_pct.
+ *
+ * Both can fire on the same page if the visitor's session has both
+ * identifiers (rare but possible).
+ *
  * INSTALLATION (one snippet, paste before </head> on your conversion page):
  *
  *   <script async src="https://boostboss.ai/pixel.js"
  *           data-advertiser-id="adv_xxx"></script>
  *   <script>
  *     window.bbq = window.bbq || [];
- *     bbq.push(['track', 'signup', { value: 29.99, currency: 'USD' }]);
+ *     bbq.push(['track', 'signup',   { value: 29.99, currency: 'USD' }]);
+ *     bbq.push(['track', 'purchase', { value: 49.00, idempotency_key: 'ord_12345' }]);
  *   </script>
- *
- * The pixel auto-detects the `bbx_auc` and `bbx_cmp` query params that
- * BBX appends to the click-through URL, so attribution back to the
- * winning auction is automatic.
  *
  * API:
  *   bbq.push(['init',  advertiserId])           // optional override of data-advertiser-id
- *   bbq.push(['track', conversionType, props])  // conversionType ∈ signup|purchase|tool_invoke|lead
+ *   bbq.push(['track', conversionType, props])  // conversionType ∈ signup|purchase|trial|...
  *
- * `props` may contain { value, currency, external_id }. Defaults: USD, no external_id.
+ * `props` may contain:
+ *   value           Number — gross purchase value (USD by default)
+ *   currency        String — ISO code, defaults USD
+ *   external_id     String — your own order id (also used as idempotency_key
+ *                            on the affiliate postback if idempotency_key
+ *                            isn't supplied separately)
+ *   idempotency_key String — explicit dedupe key for affiliate postback
+ *   metadata        Object — anything else useful (plan, tier, etc.)
+ *
+ * Explicit affiliate-only API (skips the ad-auction path):
+ *   window.bbx = window.bbx || {};
+ *   window.bbx.trackConversion({ type, value, idempotency_key, metadata });
  */
 (function () {
   // Queue can already exist if the page used the standard snippet that
@@ -78,6 +101,91 @@
       }
     } catch (_) {}
     return out;
+  }
+
+  // ── Affiliate-side attribution (Phase 3b — [[commission-attribution-model]])
+  //
+  // Read bb_click from the URL params first, fall back to sessionStorage so
+  // multi-page funnels work (landing → signup → thank-you). Cookies are NOT
+  // checked here — the URL/session pair is more reliable across Safari ITP
+  // and ad-blockers.
+  function readBBClick() {
+    var click = null;
+    try {
+      var u = new URL(window.location.href);
+      click = u.searchParams.get('bb_click');
+      if (click) {
+        try { sessionStorage.setItem('bbx_click', click); } catch (_) {}
+        return click;
+      }
+    } catch (_) {}
+    try { return sessionStorage.getItem('bbx_click') || null; } catch (_) {}
+    return null;
+  }
+
+  // Resolve affiliate postback endpoint to the same origin as pixel.js
+  // (so staging / preview environments stay self-contained).
+  function affiliatePostbackEndpoint() {
+    try {
+      var s = document.currentScript;
+      if (!s) {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = scripts.length - 1; i >= 0; i--) {
+          if ((scripts[i].src || '').indexOf('/pixel.js') !== -1) { s = scripts[i]; break; }
+        }
+      }
+      if (s && s.src) {
+        var u = new URL(s.src, window.location.href);
+        return u.origin + '/api/conversions/postback';
+      }
+    } catch (_) {}
+    return 'https://boostboss.ai/api/conversions/postback';
+  }
+
+  function fireAffiliateConversion(conversionType, props) {
+    var bbClick = readBBClick();
+    if (!bbClick) {
+      log('no bb_click — skipping affiliate conversion postback');
+      return Promise.resolve({ skipped: 'no_bb_click' });
+    }
+    var body = {
+      bb_click:        bbClick,
+      event_type:      conversionType || 'signup',
+      amount:          (props && props.value  != null) ? Number(props.value)
+                     : (props && props.amount != null) ? Number(props.amount) : 0,
+      currency:        (props && props.currency) || 'USD',
+      // External_id doubles as idempotency_key on the affiliate path when
+      // the advertiser hasn't supplied an explicit one. Order IDs are the
+      // most common stable dedupe value advertisers already have.
+      idempotency_key: (props && (props.idempotency_key || props.external_id)) || null,
+      metadata:        (props && props.metadata) || {},
+    };
+    log('firing affiliate conversion', body);
+    var url = affiliatePostbackEndpoint();
+
+    // fetch with keepalive — survives the user navigating away (closing
+    // the thank-you tab, clicking through, etc.). Returns a Promise so
+    // advertisers using window.bbx.trackConversion can await it if they
+    // really want to.
+    try {
+      return fetch(url, {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(function (r) {
+        return r.json().then(function (j) {
+          if (DEBUG) log(r.ok ? 'affiliate conversion accepted' : ('rejected ' + r.status), j);
+          return j;
+        }).catch(function () { return { status: r.status }; });
+      }).catch(function (e) {
+        log('affiliate fetch failed:', e && e.message);
+        return { error: e && e.message };
+      });
+    } catch (e) {
+      log('affiliate fetch threw:', e && e.message);
+      return Promise.resolve({ error: e && e.message });
+    }
   }
 
   // Resolve the advertiser id from data-advertiser-id on the script tag,
@@ -159,6 +267,10 @@
   }
 
   // Public command processor. Each item is [verb, ...args].
+  // 'track' fires BOTH attribution paths — fire() handles the ad-auction
+  // side (bbx_auc/bbx_cmp), fireAffiliateConversion() handles the
+  // affiliate side (bb_click). Either or both are no-ops if their
+  // identifier isn't present in the URL/session.
   function process(cmd) {
     if (!Array.isArray(cmd) || cmd.length === 0) return;
     var verb = cmd[0];
@@ -167,7 +279,8 @@
     } else if (verb === 'track') {
       var conversionType = cmd[1];
       var props          = cmd[2] || {};
-      fire(conversionType, props);
+      fire(conversionType, props);                    // ad-auction path
+      fireAffiliateConversion(conversionType, props); // affiliate path
     }
   }
 
@@ -178,9 +291,30 @@
   window.bbq = queue;
   for (var i = 0; i < existingQueue.length; i++) process(existingQueue[i]);
 
+  // Explicit affiliate-only API — for advertisers who want to skip the
+  // ad-auction firing (e.g. they don't run BBX ads, only have affiliates)
+  // OR want a Promise back so they can await the postback.
+  //
+  //   window.bbx.trackConversion({ type: 'purchase', value: 49.00,
+  //                                idempotency_key: 'ord_12345',
+  //                                metadata: { plan: 'pro' } })
+  //     .then(r => console.log('attributed:', r));
+  window.bbx = window.bbx || {};
+  window.bbx.trackConversion = function (opts) {
+    opts = opts || {};
+    var type = opts.type || opts.event_type || 'signup';
+    return fireAffiliateConversion(type, opts);
+  };
+
   // Auto-init from data-advertiser-id if no explicit init command ran.
   if (!window.__BBX_ADVERTISER_ID__) {
     var adv = readAdvertiserId();
     if (adv) window.__BBX_ADVERTISER_ID__ = adv;
   }
+
+  // On page load, capture bb_click into sessionStorage even if track
+  // hasn't been called yet — so the multi-step funnel (landing → signup
+  // → thank-you) preserves attribution even if the URL is rewritten
+  // before the conversion fires.
+  readBBClick();
 })();

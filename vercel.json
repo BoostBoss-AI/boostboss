@@ -186,6 +186,10 @@
     {
       "path": "/api/billing?action=run_payout_retry_sweep",
       "schedule": "0 12 * * 6"
+    },
+    {
+      "path": "/api/conversions?action=auto_confirm",
+      "schedule": "30 12 * * *"
     }
   ]
 }

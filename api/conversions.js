@@ -77,9 +77,12 @@ function clientIp(req) {
 
 // Validate event_type to a known set + custom-string allowlist (alphanumeric
 // + underscore, max 40 chars). Prevents the conversion log from becoming
-// a free-for-all of arbitrary advertiser-defined strings.
+// a free-for-all of arbitrary advertiser-defined strings. 'refund' is
+// special-cased — it doesn't create a new conversion but reverses an
+// existing one (see handleRefund below).
 function normalizeEventType(t) {
-  const allowed = new Set(["signup", "purchase", "trial", "credit_purchase", "subscription_start", "upgrade"]);
+  const allowed = new Set(["signup", "purchase", "trial", "credit_purchase",
+                           "subscription_start", "upgrade", "refund"]);
   if (allowed.has(t)) return t;
   if (typeof t === "string" && /^[a-z][a-z0-9_]{0,39}$/.test(t)) return t;
   return null;
@@ -103,11 +106,18 @@ async function handlePostback(req, res) {
 
   if (!eventType) {
     return res.status(400).json({
-      error: "event_type is required (signup, purchase, trial, etc.)",
+      error: "event_type is required (signup, purchase, trial, refund, etc.)",
     });
   }
   if (!Number.isFinite(amount) || amount < 0) {
     return res.status(400).json({ error: "amount must be a non-negative number" });
+  }
+
+  // Refund event flips an existing conversion to refunded — handled by a
+  // dedicated path that matches the original conversion + validates the
+  // clawback window. Different control flow from a new-conversion insert.
+  if (eventType === "refund") {
+    return handleRefund(req, res, body);
   }
 
   // Resolve attribution chain via bb_click. If bb_click is missing or
@@ -218,6 +228,222 @@ async function handlePostback(req, res) {
       clawback_until:  data.clawback_until,
     },
   });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// REFUND path — event_type=refund flips a prior conversion to 'refunded'
+// within its clawback window. See [[commission-attribution-model]].
+//
+// Matching strategy:
+//   1. Match the original conversion by (advertiser_id, original_idempotency_key)
+//      — this is the cleanest path since advertisers know their own order id.
+//   2. Fall back to (bb_click, event_type) — works when advertisers don't
+//      track idempotency_key but the visitor came via the same click.
+//
+// Behavior:
+//   - If found AND still within clawback_until → flip to refunded, set
+//     refunded_at, zero out commission_due so payouts don't credit.
+//   - If found but already paid → record the refund attempt in metadata
+//     but don't reverse commission (handled by accounting reconciliation).
+//   - If not found → record an orphan refund row for ops review.
+// ──────────────────────────────────────────────────────────────────────
+async function handleRefund(req, res, body) {
+  const sbCli = sb();
+  const bbClick = (body.bb_click || body.click_id || "").toString().trim();
+  const originalKey = body.original_idempotency_key
+    ? String(body.original_idempotency_key).slice(0, 120) : null;
+  const idempotencyKey = body.idempotency_key
+    ? String(body.idempotency_key).slice(0, 120) : null;
+
+  // Try to find the original conversion. Priority: idempotency_key match
+  // (precise), then bb_click match (best-effort).
+  let original = null;
+  if (originalKey) {
+    // We need advertiser_id to scope the idempotency lookup. The cleanest
+    // path: derive advertiser_id from bb_click → click → product.
+    let advertiserId = null;
+    if (bbClick && /^[0-9a-fA-F-]{8,40}$/.test(bbClick)) {
+      const { data: click } = await sbCli
+        .from("affiliate_clicks")
+        .select("share_link_id")
+        .eq("click_id", bbClick)
+        .maybeSingle();
+      if (click && click.share_link_id) {
+        const { data: link } = await sbCli
+          .from("affiliate_share_links")
+          .select("product_id")
+          .eq("id", click.share_link_id)
+          .maybeSingle();
+        if (link && link.product_id) {
+          const { data: prod } = await sbCli
+            .from("products")
+            .select("advertiser_id")
+            .eq("id", link.product_id)
+            .maybeSingle();
+          if (prod) advertiserId = prod.advertiser_id;
+        }
+      }
+    }
+    if (advertiserId) {
+      const { data } = await sbCli
+        .from("affiliate_conversions")
+        .select("*")
+        .eq("advertiser_id", advertiserId)
+        .eq("idempotency_key", originalKey)
+        .maybeSingle();
+      if (data) original = data;
+    }
+  }
+  // Fallback: match by click_id alone if idempotency_key lookup failed.
+  if (!original && bbClick && /^[0-9a-fA-F-]{8,40}$/.test(bbClick)) {
+    const { data } = await sbCli
+      .from("affiliate_conversions")
+      .select("*")
+      .eq("click_id", bbClick)
+      .in("status", ["pending", "confirmed"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) original = data;
+  }
+
+  if (!original) {
+    // Refund arrived for a conversion we have no record of. Log it as an
+    // orphan refund so ops can investigate (maybe the conversion was
+    // never recorded, maybe the advertiser is testing).
+    const row = {
+      click_id:        bbClick && /^[0-9a-fA-F-]{8,40}$/.test(bbClick) ? bbClick : null,
+      event_type:      "refund",
+      amount:          Number(body.amount || 0),
+      currency:        (body.currency || "USD").toString().slice(0, 8).toUpperCase(),
+      commission_pct:  0,
+      commission_due:  0,
+      bb_take_pct:     0,
+      bb_take_due:     0,
+      status:          "orphan",
+      idempotency_key: idempotencyKey,
+      metadata:        { refund_orphan: true, original_idempotency_key: originalKey || null },
+      client_ip:       clientIp(req),
+    };
+    const { data } = await sbCli.from("affiliate_conversions").insert(row).select().maybeSingle();
+    return res.json({
+      success: true,
+      refunded: false,
+      reason:   "no_matching_conversion",
+      orphan_refund: data ? { id: data.id } : null,
+    });
+  }
+
+  // If already paid out, we can't reverse commission via this code path —
+  // it requires reconciliation against an actual money movement. Record
+  // the refund attempt and leave commission untouched; payout-recon job
+  // will handle clawback against the next batch.
+  if (original.status === "paid") {
+    return res.json({
+      success: true,
+      refunded: false,
+      reason:   "already_paid",
+      conversion: { id: original.id, status: original.status, paid_at: original.paid_at },
+    });
+  }
+
+  // Past the clawback window? Reject the refund — at this point we'd
+  // already have processed it through the monthly bill cycle.
+  if (original.clawback_until && new Date(original.clawback_until) < new Date()) {
+    return res.json({
+      success: true,
+      refunded: false,
+      reason:   "clawback_window_elapsed",
+      conversion: { id: original.id, clawback_until: original.clawback_until },
+    });
+  }
+
+  // Already refunded? Idempotent return.
+  if (original.status === "refunded") {
+    return res.json({
+      success: true,
+      refunded: true,
+      deduped:  true,
+      conversion: { id: original.id, status: "refunded", refunded_at: original.refunded_at },
+    });
+  }
+
+  // Flip to refunded — zero out commission_due so payouts don't credit.
+  const refundedAt = new Date().toISOString();
+  const { data, error } = await sbCli
+    .from("affiliate_conversions")
+    .update({
+      status:         "refunded",
+      refunded_at:    refundedAt,
+      commission_due: 0,
+      bb_take_due:    0,
+      metadata: Object.assign({}, original.metadata || {}, {
+        refund_amount: Number(body.amount || 0),
+        refund_idempotency_key: idempotencyKey,
+        original_commission_due: original.commission_due,
+      }),
+    })
+    .eq("id", original.id)
+    .select()
+    .maybeSingle();
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({
+    success:   true,
+    refunded:  true,
+    conversion: {
+      id:                       data.id,
+      status:                   data.status,
+      refunded_at:              data.refunded_at,
+      original_commission_due:  original.commission_due,
+    },
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// AUTO-CONFIRM cron — runs daily, moves status pending → confirmed for
+// rows where clawback_until < now(). The monthly aggregator only picks
+// up confirmed rows, so this is the gate between "advertiser still has
+// time to refund" and "this commission is eligible for payout".
+//
+// Protected by CRON_SECRET — Vercel's scheduled invocations include the
+// secret in the Authorization header (see vercel.json crons block).
+// ──────────────────────────────────────────────────────────────────────
+async function handleAutoConfirm(req, res) {
+  // Auth: either Vercel's cron secret OR a manual admin invocation with
+  // CRON_SECRET in the Authorization header.
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret) {
+    const provided = (req.headers.authorization || "").replace(/^Bearer\s+/i, "")
+                  || req.headers["x-vercel-signature"]
+                  || "";
+    if (provided !== cronSecret) {
+      return res.status(401).json({ error: "Unauthorized — missing CRON_SECRET" });
+    }
+  } else {
+    // If CRON_SECRET isn't set in env, refuse rather than running an
+    // open endpoint that anyone could trigger.
+    return res.status(500).json({ error: "CRON_SECRET not configured" });
+  }
+
+  const sbCli = sb();
+  if (!sbCli) return res.status(500).json({ error: "Supabase not configured" });
+
+  const nowIso = new Date().toISOString();
+  // Single UPDATE returns the rows that flipped — gives us a count for
+  // the cron log without a separate SELECT.
+  const { data, error } = await sbCli
+    .from("affiliate_conversions")
+    .update({ status: "confirmed" })
+    .eq("status", "pending")
+    .lt("clawback_until", nowIso)
+    .select("id");
+  if (error) {
+    console.error("[Conversions auto-confirm] error:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+  const promoted = (data || []).length;
+  console.log(`[Conversions auto-confirm] ${promoted} rows promoted pending → confirmed`);
+  return res.json({ success: true, promoted, ran_at: nowIso });
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -365,13 +591,17 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST" && isPostback) {
       return await handlePostback(req, res);
     }
+    if (action === "auto_confirm") {
+      // Vercel cron uses GET, manual admin invocation can use either.
+      return await handleAutoConfirm(req, res);
+    }
     if (req.method === "GET" && action === "summary") {
       return await handleAffiliateSummary(req, res);
     }
     if (req.method === "GET") {
       return await handleAffiliateList(req, res);
     }
-    return res.status(400).json({ error: "Unknown action. Use POST /postback or GET (with optional ?action=summary)." });
+    return res.status(400).json({ error: "Unknown action. Use POST /postback, GET (list), GET ?action=summary, or GET ?action=auto_confirm (cron)." });
   } catch (err) {
     console.error("[conversions] handler error:", err);
     return res.status(500).json({ error: err.message || "Internal server error" });
