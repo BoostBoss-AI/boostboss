@@ -138,6 +138,14 @@
   .status-pill.paid     { background: #DCFCE7; color: #166534; }
   .status-pill.failed   { background: #FEE2E2; color: #991B1B; }
   .status-pill.cancelled{ background: #F3F4F6; color: #4B5563; }
+  /* Method pill mirrors status-pill but neutral palette — Method column
+     just needs a glance to tell PayPal-era rows from legacy bank rows. */
+  table.requests .method-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .method-pill.paypal { background: #FFF5F8; color: #C0185D; border: 1px solid #FFD0E0; }
+  .method-pill.bank   { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
 
   /* Empty state */
   .empty {
@@ -192,7 +200,7 @@
   <div class="page-head">
     <div>
       <h2>Pending payout batches</h2>
-      <div class="sub">Grouped by target payout date. Export to download a Payoneer-ready CSV, then mark paid after the batch settles.</div>
+      <div class="sub">Grouped by target payout date. <strong>Send via PayPal</strong> dispatches the batch through the PayPal Payouts API — recipients get funds within minutes, status updates come back via webhook (no manual mark-paid needed). The <em>Export CSV</em> button is a legacy escape hatch for the rare case PayPal's API rejects the batch and the rail has to ship the old way.</div>
     </div>
     <div class="toolbar">
       <button id="refreshBtn" class="ghost">↻ Refresh</button>
@@ -289,24 +297,39 @@ function renderBatch(batch) {
 
   let actions = '';
   if (pending.length > 0) {
-    actions += '<button class="primary export-btn" data-date="' + escapeHTML(batch.target_payout_date) + '">Export CSV (' + pending.length + ' pending)</button>';
+    // Primary action: dispatch via PayPal Payouts API. Webhook updates the
+    // row from batched → paid automatically once each item processes.
+    actions += '<button class="primary send-btn" data-date="' + escapeHTML(batch.target_payout_date) + '">Send via PayPal (' + pending.length + ' pending)</button>';
+    // Legacy escape hatch — keeps the CSV path alive for cases where the
+    // PayPal rail hard-fails. Styled as ghost so it never gets reached for
+    // by accident.
+    actions += '<button class="ghost export-btn" data-date="' + escapeHTML(batch.target_payout_date) + '" title="Export CSV — legacy escape hatch only">Export CSV</button>';
   }
   if (batchIds.length > 0) {
     for (const bid of batchIds) {
-      actions += '<button class="success markpaid-btn" data-batch="' + escapeHTML(bid) + '">Mark batch ' + escapeHTML(bid) + ' paid</button>';
+      // Only relevant for CSV-exported batches; PayPal-dispatched batches
+      // get marked paid automatically by the webhook. Label clarifies.
+      actions += '<button class="success markpaid-btn" data-batch="' + escapeHTML(bid) + '" title="Manual mark-paid (only needed for CSV-exported batches; PayPal-dispatched batches resolve via webhook)">Mark ' + escapeHTML(bid) + ' paid (CSV path)</button>';
     }
   }
   actions += '<span class="batch-id">' + escapeHTML(batch.count) + ' request' + (batch.count === 1 ? '' : 's') + '</span>';
 
+  // Table rows. bank_snapshot can carry either old bank fields (pre-pivot)
+  // or new { method:"paypal", paypal_email } — show whichever is present
+  // so we can still process legacy rows during the cutover.
   const rows = batch.requests.map(r => {
     const s = r.bank_snapshot || {};
+    const isPaypal = s.method === 'paypal' || !!s.paypal_email;
+    const methodCell = isPaypal
+      ? '<span class="method-pill paypal">PayPal</span>'
+      : '<span class="method-pill bank">Bank</span>';
+    const recipientCell = isPaypal
+      ? '<span class="mono">' + escapeHTML(s.paypal_email || '—') + '</span>'
+      : escapeHTML(s.account_holder_name || '—') + (s.bank_name ? '<div style="font-size:11.5px;color:var(--muted);margin-top:2px;">' + escapeHTML(s.bank_name) + ' · ' + escapeHTML(s.swift_bic || '') + ' · ' + escapeHTML(shortAcct(s.iban_or_account)) + '</div>' : '');
     return '<tr>' +
       '<td class="amount">' + fmtUSD(r.amount_usd) + '</td>' +
-      '<td>' + escapeHTML(s.account_holder_name || '—') + '</td>' +
-      '<td>' + escapeHTML(s.account_holder_country || '') + ' → ' + escapeHTML(s.bank_country || '') + '</td>' +
-      '<td>' + escapeHTML(s.bank_name || '—') + '</td>' +
-      '<td class="mono">' + escapeHTML(s.swift_bic || '—') + '</td>' +
-      '<td class="mono">' + escapeHTML(shortAcct(s.iban_or_account)) + '</td>' +
+      '<td>' + methodCell + '</td>' +
+      '<td>' + recipientCell + '</td>' +
       '<td><span class="status-pill ' + r.status + '">' + r.status + '</span></td>' +
       '<td><button class="danger fail-btn" data-id="' + escapeHTML(r.id) + '">Fail…</button></td>' +
     '</tr>';
@@ -325,7 +348,7 @@ function renderBatch(batch) {
     '</div>' +
     '<div class="batch-actions">' + actions + '</div>' +
     '<table class="requests"><thead><tr>' +
-      '<th>Amount</th><th>Beneficiary</th><th>Route</th><th>Bank</th><th>SWIFT</th><th>Account</th><th>Status</th><th></th>' +
+      '<th>Amount</th><th>Method</th><th>Recipient</th><th>Status</th><th></th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table>' +
     '</section>';
 }
@@ -350,9 +373,63 @@ async function loadBatches() {
 // Delegated click handler for the batch actions. Lives on the body so it
 // survives re-renders after each action completes.
 document.body.addEventListener('click', async (e) => {
+  // ── Primary path: dispatch the batch via PayPal Payouts API ──
+  // On success the batch transitions to "batched" and PayPal returns a
+  // payout_batch_id. Per-item status comes back via PAYMENT.PAYOUTS-ITEM.*
+  // webhooks (handler in api/billing.js flips each row to paid / failed).
+  // No manual mark-paid needed for PayPal-dispatched batches.
+  const snd = e.target.closest('.send-btn');
+  if (snd) {
+    const date = snd.dataset.date;
+    if (!confirm(
+      'Dispatch this batch via PayPal Payouts API?\n\n' +
+      'This moves real money. The dispatch is queued instantly; per-item ' +
+      'status updates arrive via webhook over the next few minutes.\n\n' +
+      'Target date: ' + date
+    )) return;
+    snd.disabled = true;
+    const originalLabel = snd.textContent;
+    snd.textContent = 'Dispatching…';
+    try {
+      const j = await api('admin_send_batch', { target_payout_date: date });
+      const totalLabel = fmtUSD(j.total_usd) + ' across ' + j.row_count + ' item' + (j.row_count === 1 ? '' : 's');
+      const modeNote = j.mode === 'demo' ? ' (demo mode — no real money moved)' : '';
+      showToast('Batch ' + j.batch_id + ' dispatched — ' + totalLabel + modeNote, 'success');
+      loadBatches();
+    } catch (err) {
+      // Special-case the most common operator-facing error: a publisher
+      // didn't fill in their PayPal email. Surface the request ids so the
+      // admin can reach out before retrying.
+      let msg = err.message || 'Dispatch failed';
+      try {
+        const parsed = JSON.parse(err.message);
+        if (parsed && parsed.missing_request_ids) {
+          msg = 'Missing PayPal email on requests: ' + parsed.missing_request_ids.join(', ');
+        }
+      } catch (_) {}
+      showToast(msg, 'error');
+      snd.disabled = false;
+      snd.textContent = originalLabel;
+    }
+    return;
+  }
+
+  // ── Legacy escape hatch: download a Payoneer-shaped CSV ──
+  // Kept around for cases where the PayPal Payouts API rejects the batch
+  // and Andy needs to ship through a different rail manually. After the
+  // CSV is processed offline, the operator hits "Mark paid (CSV path)" to
+  // close the loop. PayPal-dispatched batches skip both buttons — webhooks
+  // do the work.
   const exp = e.target.closest('.export-btn');
   if (exp) {
     const date = exp.dataset.date;
+    if (!confirm(
+      'Export CSV instead of dispatching via PayPal?\n\n' +
+      'This is the legacy manual path — only use if the PayPal Payouts ' +
+      'API is unavailable or has rejected the batch. After upload elsewhere, ' +
+      'remember to click "Mark paid (CSV path)" to close out.\n\n' +
+      'Continue with CSV export?'
+    )) return;
     exp.disabled = true;
     try {
       const j = await api('admin_export', { target_payout_date: date });
