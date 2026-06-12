@@ -451,7 +451,7 @@ document.body.addEventListener('click', async (e) => {
   const mp = e.target.closest('.markpaid-btn');
   if (mp) {
     const batchId = mp.dataset.batch;
-    if (!confirm('Mark batch ' + batchId + ' as PAID? This is final — only do it after Payoneer confirms the transfer.')) return;
+    if (!confirm('Mark batch ' + batchId + ' as PAID? This is final — only do it after the off-platform rail confirms the transfer. (PayPal-dispatched batches resolve automatically via webhook; this button is only for the CSV legacy lane.)')) return;
     mp.disabled = true;
     try {
       const j = await api('admin_mark_paid', { batch_id: batchId });
