@@ -247,11 +247,19 @@ module.exports = async function handler(req, res) {
   const action = (req.query && req.query.action) || (req.body && req.body.action);
   const body = req.body || {};
 
-  // me_cors is the ONLY action allowed via GET. It's read-only (returns
-  // the logged-in user from the cookie) and used by benna.ai to render
-  // a logged-in lockup. Everything else still requires POST.
-  if (req.method === "GET" && action !== "me_cors") {
-    return res.status(405).json({ error: "GET allowed only for action=me_cors" });
+  // Read-only actions allowed via GET. These are idempotent fetches with
+  // no side effects; pagination params go in the query string. Everything
+  // else still requires POST.
+  //   - me_cors: benna.ai logged-in lockup (legacy)
+  //   - affiliate_list_saved: affiliate dashboard saved-ads list
+  //   - affiliate_list_share_links: affiliate dashboard share-links list
+  const GET_ALLOWED = new Set([
+    "me_cors",
+    "affiliate_list_saved",
+    "affiliate_list_share_links",
+  ]);
+  if (req.method === "GET" && !GET_ALLOWED.has(action)) {
+    return res.status(405).json({ error: "GET not allowed for this action" });
   }
   if (req.method !== "POST" && req.method !== "GET") {
     return res.status(405).json({ error: "POST only" });
