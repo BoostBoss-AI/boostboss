@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boost Boss Affiliate</title>
+<meta name="description" content="Save AI-native ads you discover in the wild. Boost Boss Affiliate marketplace — share what you find, earn when your audience buys.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --pink: #FF2D78; --pink-dark: #E01E65;
+    --ink: #1A1A2E; --ink-soft: #4B4B5E; --muted: #6B7280;
+    --line: #EAEAEF; --bg: #FAFAF7; --bg-card: #FFFFFF;
+    --green: #16A34A; --green-soft: #DCFCE7;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    -webkit-font-smoothing: antialiased; font-size: 15px;
+  }
+  a { color: var(--pink); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Auth (login/signup) view ── */
+  .auth-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 40px 20px; background: linear-gradient(180deg, #FFF5F8 0%, #FAFAF7 100%);
+  }
+  .auth-card {
+    width: 440px; max-width: 100%; background: var(--bg-card); border-radius: 18px;
+    padding: 44px 40px; box-shadow: var(--shadow-lg); border: 1px solid var(--line);
+  }
+  .brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .brand-row img { width: 44px; height: 44px; display: block; }
+  .brand-row .name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+  .brand-row .tag { font-size: 11px; font-weight: 700; color: var(--pink); padding: 3px 9px; border-radius: 99px; background: rgba(255,45,120,0.10); letter-spacing: 0.5px; }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; margin: 18px 0 8px; letter-spacing: -0.3px; }
+  .auth-card .sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+    font-size: 14.5px; font-family: inherit; color: var(--ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus {
+    outline: none; border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(255,45,120,0.12);
+  }
+
+  .err {
+    background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B;
+    border-radius: 10px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 16px;
+    display: none; line-height: 1.5;
+  }
+  .err.show { display: block; }
+
+  .btn-primary {
+    width: 100%; padding: 13px 22px; background: var(--pink); color: #fff;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--pink-dark); }
+  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .auth-toggle {
+    margin-top: 22px; text-align: center; font-size: 13.5px; color: var(--muted);
+  }
+  .auth-toggle button {
+    background: none; border: none; color: var(--pink); font-weight: 600;
+    cursor: pointer; font-family: inherit; font-size: 13.5px; padding: 0;
+  }
+  .auth-toggle button:hover { text-decoration: underline; }
+
+  .auth-foot {
+    margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6;
+  }
+  .auth-foot a { color: var(--ink-soft); }
+
+  /* ── Dashboard view ── */
+  .dash-nav {
+    background: var(--bg-card); border-bottom: 1px solid var(--line);
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .dash-nav .brand { display: flex; align-items: center; gap: 10px; }
+  .dash-nav .brand img { width: 34px; height: 34px; }
+  .dash-nav .brand .name { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; }
+  .dash-nav .brand .tag { font-size: 10.5px; font-weight: 700; color: var(--pink); padding: 2px 8px; border-radius: 99px; background: rgba(255,45,120,0.10); }
+  .dash-nav .user { display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--muted); }
+  .logout-btn {
+    background: none; border: 1px solid var(--line); color: var(--ink-soft);
+    padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;
+    font-family: inherit;
+  }
+  .logout-btn:hover { background: var(--bg); color: var(--ink); }
+
+  .dash-body { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+  .dash-head { margin-bottom: 28px; }
+  .dash-head h2 { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.4px; }
+  .dash-head p { font-size: 14.5px; color: var(--muted); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 32px; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .stat-card .label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stat-card .value { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: var(--ink); }
+  .stat-card .value.pink { color: var(--pink); }
+
+  .saved-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .saved-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; transition: box-shadow 0.15s, transform 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .saved-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .saved-card .image {
+    width: 100%; aspect-ratio: 16/9; background: linear-gradient(135deg, #FFF5F8, #F3F4F6);
+    background-size: cover; background-position: center;
+  }
+  .saved-card .body { padding: 14px 16px 16px; }
+  .saved-card .headline { font-weight: 600; font-size: 14.5px; color: var(--ink); margin-bottom: 6px; line-height: 1.4; }
+  .saved-card .desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; max-height: 3.6em; overflow: hidden; }
+  .saved-card .meta { display: flex; gap: 10px; font-size: 11.5px; color: var(--muted); }
+  .saved-card .meta .when { flex: 1; }
+  .saved-card .meta a { color: var(--pink); font-weight: 600; }
+
+  .empty {
+    background: var(--bg-card); border: 1.5px dashed var(--line); border-radius: 14px;
+    padding: 64px 32px; text-align: center;
+  }
+  .empty .icon { font-size: 48px; margin-bottom: 14px; }
+  .empty h3 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+  .empty p { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+
+  @media (max-width: 600px) {
+    .auth-card { padding: 32px 24px; }
+    .dash-body { padding: 24px 16px 60px; }
+    .saved-grid { grid-template-columns: 1fr; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH VIEW (login + signup) ── -->
+<div id="authView" class="auth-wrap">
+  <div class="auth-card">
+    <div class="brand-row">
+      <img src="/email-logo.png" alt="Boost Boss">
+      <span class="name">Boost Boss</span>
+      <span class="tag">AFFILIATE</span>
+    </div>
+
+    <div id="authLogin">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to your affiliate dashboard.</p>
+      <div id="errLogin" class="err"></div>
+      <form id="loginForm" autocomplete="on" novalidate>
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required>
+        </div>
+        <button type="submit" id="loginBtn" class="btn-primary">Sign in</button>
+      </form>
+      <div class="auth-toggle">
+        New to Boost Boss Affiliate?
+        <button type="button" id="toSignup">Create an account</button>
+      </div>
+    </div>
+
+    <div id="authSignup" class="hidden">
+      <h1>Join the affiliate marketplace</h1>
+      <p class="sub">Save AI-native ads you discover, share what you find, earn when your audience buys. No email confirmation needed.</p>
+      <div id="errSignup" class="err"></div>
+      <form id="signupForm" autocomplete="on" novalidate>
+        <div class="field">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="field">
+          <label for="signupPassword2">Confirm password</label>
+          <input type="password" id="signupPassword2" autocomplete="new-password" minlength="8" required>
+        </div>
+        <button type="submit" id="signupBtn" class="btn-primary">Create account</button>
+      </form>
+      <div class="auth-toggle">
+        Already have an account?
+        <button type="button" id="toLogin">Sign in</button>
+      </div>
+    </div>
+
+    <div class="auth-foot">
+      By creating an account you agree to the
+      <a href="https://boostboss.ai/terms">Terms of Service</a> and
+      <a href="https://boostboss.ai/privacy">Privacy Policy</a>.
+    </div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD VIEW ── -->
+<div id="dashView" class="hidden">
+  <div class="dash-nav">
+    <div class="brand">
+      <img src="/email-logo.png" alt="Boost Boss">
+      <span class="name">Boost Boss</span>
+      <span class="tag">AFFILIATE</span>
+    </div>
+    <div class="user">
+      <span id="userEmail">—</span>
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <div class="dash-head">
+      <h2>Your saved ads</h2>
+      <p>Ads you've saved from your favorite AI tools live here. Each saved ad is a starting point — share it, earn when your audience buys.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Saved ads</div>
+        <div class="value pink" id="statSaved">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Member since</div>
+        <div class="value" id="statSince" style="font-size:18px;">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Status</div>
+        <div class="value" id="statStatus" style="font-size:18px;color:var(--green);">Active</div>
+      </div>
+    </div>
+
+    <div id="savedList"></div>
+  </div>
+</div>
+
+<script>
+const API_BASE = window.location.origin;
+const LS_KEY = 'bb_affiliate_session';
+
+// ── Auth helpers ──
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (_) { return null; }
+}
+function setSession(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+function clearSession() { localStorage.removeItem(LS_KEY); }
+
+function showErr(elId, text) {
+  const el = document.getElementById(elId);
+  el.textContent = text;
+  el.classList.add('show');
+}
+function clearErr(elId) {
+  const el = document.getElementById(elId);
+  el.textContent = '';
+  el.classList.remove('show');
+}
+
+function showAuth(mode) {
+  document.getElementById('authView').classList.remove('hidden');
+  document.getElementById('dashView').classList.add('hidden');
+  if (mode === 'signup') {
+    document.getElementById('authLogin').classList.add('hidden');
+    document.getElementById('authSignup').classList.remove('hidden');
+  } else {
+    document.getElementById('authSignup').classList.add('hidden');
+    document.getElementById('authLogin').classList.remove('hidden');
+  }
+}
+function showDash() {
+  document.getElementById('authView').classList.add('hidden');
+  document.getElementById('dashView').classList.remove('hidden');
+}
+
+// ── Auth toggle wiring ──
+document.getElementById('toSignup').addEventListener('click', () => showAuth('signup'));
+document.getElementById('toLogin').addEventListener('click', () => showAuth('login'));
+
+// ── Login submit ──
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErr('errLogin');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showErr('errLogin', 'Email and password are required.'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const r = await fetch(`${API_BASE}/api/auth?action=affiliate_login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Sign in failed');
+    setSession({ token: j.token, user: j.user });
+    await loadDashboard();
+  } catch (err) {
+    showErr('errLogin', err.message || 'Sign in failed');
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+});
+
+// ── Signup submit ──
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErr('errSignup');
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const password2 = document.getElementById('signupPassword2').value;
+  if (!email || !password) { showErr('errSignup', 'Email and password are required.'); return; }
+  if (password.length < 8) { showErr('errSignup', 'Password must be at least 8 characters.'); return; }
+  if (password !== password2) { showErr('errSignup', 'Passwords don\'t match.'); return; }
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const r = await fetch(`${API_BASE}/api/auth?action=affiliate_signup`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Signup failed');
+    setSession({ token: j.token, user: j.user });
+    await loadDashboard();
+  } catch (err) {
+    showErr('errSignup', err.message || 'Signup failed');
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
+});
+
+// ── Logout ──
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  clearSession();
+  showAuth('login');
+});
+
+// ── Dashboard loader ──
+async function loadDashboard() {
+  const session = getSession();
+  if (!session || !session.token) { showAuth('login'); return; }
+
+  // Fetch profile + saved ads in parallel
+  let me, saved;
+  try {
+    const [meR, savedR] = await Promise.all([
+      fetch(`${API_BASE}/api/auth?action=affiliate_me`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+        body: '{}',
+      }),
+      fetch(`${API_BASE}/api/auth?action=affiliate_list_saved&limit=100`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${session.token}` },
+      }),
+    ]);
+    if (meR.status === 401 || savedR.status === 401) {
+      clearSession(); showAuth('login'); return;
+    }
+    me = await meR.json();
+    saved = await savedR.json();
+  } catch (e) {
+    showErr('errLogin', 'Could not load dashboard: ' + (e.message || e));
+    return;
+  }
+
+  showDash();
+  document.getElementById('userEmail').textContent = (me.user && me.user.email) || session.user.email;
+  document.getElementById('statSaved').textContent = me.saved_count != null ? me.saved_count : 0;
+  if (me.profile && me.profile.created_at) {
+    try {
+      const d = new Date(me.profile.created_at);
+      document.getElementById('statSince').textContent = d.toLocaleDateString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+      });
+    } catch (_) {}
+  }
+  renderSavedList(saved.saved || []);
+}
+
+function renderSavedList(items) {
+  const wrap = document.getElementById('savedList');
+  if (!items.length) {
+    wrap.innerHTML = `
+      <div class="empty">
+        <div class="icon">📌</div>
+        <h3>Nothing saved yet</h3>
+        <p>When you spot a Boost Boss ad in an AI tool you use — Cursor, Claude, a chatbot, anywhere — tap the bookmark icon to save it here. From there, you'll be able to share it with your audience and earn a cut when they buy.</p>
+        <p style="margin-top:14px;font-size:12.5px;color:var(--muted);">
+          The "save to affiliate" button rolls out across all Boost Boss placements soon. Hang tight — we'll backfill your saves when it ships.
+        </p>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="saved-grid">${items.map(savedCardHtml).join('')}</div>`;
+}
+
+function savedCardHtml(item) {
+  const headline = item.headline || 'Saved ad';
+  const desc = item.body || '';
+  const img = item.image_url || '';
+  const when = item.saved_at
+    ? new Date(item.saved_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+    : '';
+  const linkHtml = item.target_url
+    ? `<a href="${esc(item.target_url)}" target="_blank" rel="noopener noreferrer">View →</a>` : '';
+  return `
+    <div class="saved-card">
+      <div class="image" ${img ? `style="background-image:url('${esc(img)}');"` : ''}></div>
+      <div class="body">
+        <div class="headline">${esc(headline)}</div>
+        ${desc ? `<div class="desc">${esc(desc)}</div>` : ''}
+        <div class="meta">
+          <span class="when">${esc(when)}</span>
+          ${linkHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// ── Boot: if there's a session, jump straight to dashboard ──
+(function init() {
+  const session = getSession();
+  if (session && session.token) {
+    loadDashboard().catch(() => showAuth('login'));
+  } else {
+    showAuth('login');
+  }
+})();
+</script>
+</body>
+</html>

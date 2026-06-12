@@ -19,6 +19,12 @@
     { "source": "/test/lumi-snippet-test", "destination": "/admin/qa/lumi-snippet-test", "permanent": true }
   ],
   "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
+      "destination": "/affiliate.html"
+    },
+    { "source": "/affiliate", "destination": "/affiliate.html" },
     { "source": "/en", "destination": "/index.html" },
     { "source": "/zh", "destination": "/index.html" },
     { "source": "/zh-TW", "destination": "/index.html" },

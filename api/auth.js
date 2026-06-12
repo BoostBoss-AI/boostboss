@@ -1381,7 +1381,187 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users" });
+  // ════════════════════════════════════════════════════════════════════
+  //          AFFILIATE — third role alongside advertiser + publisher
+  // ════════════════════════════════════════════════════════════════════
+  //
+  // MVP scope: an affiliate can sign up, log in, and view a dashboard
+  // listing ads they've "saved" via the SDK's save-to-affiliate button
+  // (the SDK button itself ships in a follow-up). Future scope: share
+  // links, commission tracking, payouts.
+  //
+  // Backed by:
+  //   public.affiliates           — profile keyed by auth.users.id
+  //   public.affiliate_saved_ads  — saved ad impressions
+  //
+  // Auth: same Supabase auth as advertiser + publisher. user_metadata
+  // gets role: "affiliate" so the same email can be all three roles.
+
+  if (action === "affiliate_signup") {
+    const { email, password, display_name } = body || {};
+    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+    if (String(password).length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+
+    // No email confirmation needed for affiliate signup (Andy's spec:
+    // speedy signup). Use admin createUser to skip the confirmation
+    // email — affiliates land in the dashboard immediately.
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email: String(email).trim().toLowerCase(),
+      password: String(password),
+      email_confirm: true,  // mark confirmed so login works without click-through
+      user_metadata: { role: "affiliate" },
+    });
+    if (error) return res.status(400).json({ error: error.message });
+    if (!data || !data.user) return res.status(500).json({ error: "Signup failed" });
+
+    // Insert affiliates row. Best-effort: if row already exists (re-signup),
+    // we keep going.
+    try {
+      await supabaseAdmin.from("affiliates").upsert({
+        id:           data.user.id,
+        email:        data.user.email,
+        display_name: display_name ? String(display_name).slice(0, 80) : null,
+      }, { onConflict: "id" });
+    } catch (e) {
+      console.warn("[Affiliate] signup affiliates upsert failed:", e.message);
+    }
+
+    // Sign them in immediately so the frontend gets a JWT back.
+    const { data: signinData, error: signinErr } = await supabaseAnon.auth.signInWithPassword({
+      email:    data.user.email,
+      password: String(password),
+    });
+    if (signinErr || !signinData || !signinData.session) {
+      return res.status(500).json({ error: "Created but sign-in failed: " + (signinErr && signinErr.message) });
+    }
+    return res.json({
+      success: true,
+      token: signinData.session.access_token,
+      user:  { id: data.user.id, email: data.user.email, role: "affiliate" },
+    });
+  }
+
+  if (action === "affiliate_login") {
+    const { email, password } = body || {};
+    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+    const { data, error } = await supabaseAnon.auth.signInWithPassword({
+      email:    String(email).trim().toLowerCase(),
+      password: String(password),
+    });
+    if (error || !data || !data.session) {
+      return res.status(401).json({ error: error ? error.message : "Invalid email or password" });
+    }
+    // Ensure profile row exists — handles users who signed up before the
+    // affiliates table existed.
+    try {
+      await supabaseAdmin.from("affiliates").upsert({
+        id:    data.user.id,
+        email: data.user.email,
+      }, { onConflict: "id" });
+    } catch (_) { /* best effort */ }
+    return res.json({
+      success: true,
+      token: data.session.access_token,
+      user:  { id: data.user.id, email: data.user.email, role: "affiliate" },
+    });
+  }
+
+  if (action === "affiliate_me") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid token" });
+    const { data: profile, error: pErr } = await supabaseAdmin
+      .from("affiliates")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (pErr) return res.status(500).json({ error: pErr.message });
+    // Auto-create the row if a Supabase auth user exists but no affiliates
+    // row does (e.g. they signed up before the table existed).
+    let finalProfile = profile;
+    if (!finalProfile) {
+      const { data: created } = await supabaseAdmin
+        .from("affiliates")
+        .insert({ id: user.id, email: user.email })
+        .select()
+        .maybeSingle();
+      finalProfile = created;
+    }
+    // Saved-ad count is a quick aggregate the dashboard header shows.
+    const { count } = await supabaseAdmin
+      .from("affiliate_saved_ads")
+      .select("id", { count: "exact", head: true })
+      .eq("affiliate_id", user.id);
+    return res.json({
+      user: { id: user.id, email: user.email, role: "affiliate" },
+      profile: finalProfile,
+      saved_count: count || 0,
+    });
+  }
+
+  // Future: SDK calls this when an affiliate clicks "save to affiliate"
+  // on an ad render. Stubbed in v1 — nothing in the SDK calls it yet, but
+  // the endpoint exists so we can ship the dashboard without waiting on
+  // the SDK update.
+  if (action === "affiliate_save_ad") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const {
+      campaign_id, advertiser_id, headline, body: adBody, image_url,
+      target_url, source_placement_id, source_surface, notes,
+    } = body || {};
+
+    const row = {
+      affiliate_id:         user.id,
+      campaign_id:          campaign_id || null,
+      advertiser_id:        advertiser_id || null,
+      headline:             headline ? String(headline).slice(0, 240) : null,
+      body:                 adBody ? String(adBody).slice(0, 2000) : null,
+      image_url:            image_url ? String(image_url).slice(0, 2000) : null,
+      target_url:           target_url ? String(target_url).slice(0, 2000) : null,
+      source_placement_id:  source_placement_id ? String(source_placement_id).slice(0, 120) : null,
+      source_surface:       source_surface || null,
+      notes:                notes ? String(notes).slice(0, 1000) : null,
+    };
+    const { data, error: insErr } = await supabaseAdmin
+      .from("affiliate_saved_ads")
+      .insert(row)
+      .select()
+      .maybeSingle();
+    if (insErr) return res.status(500).json({ error: insErr.message });
+    return res.json({ success: true, saved: data });
+  }
+
+  if (action === "affiliate_list_saved") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const params = Object.assign({}, req.query || {}, body || {});
+    const limit  = Math.min(parseInt(params.limit, 10) || 50, 200);
+    const offset = Math.max(parseInt(params.offset, 10) || 0, 0);
+    const status = params.status && ["active", "shared", "archived"].includes(params.status)
+      ? params.status : null;
+
+    let q = supabaseAdmin
+      .from("affiliate_saved_ads")
+      .select("*", { count: "exact" })
+      .eq("affiliate_id", user.id)
+      .order("saved_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (status) q = q.eq("status", status);
+
+    const { data, count, error: listErr } = await q;
+    if (listErr) return res.status(500).json({ error: listErr.message });
+    return res.json({ saved: data || [], total: count || 0 });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved" });
 }
 
 // ── helper: build the email confirmation redirect URL for a given role ──
