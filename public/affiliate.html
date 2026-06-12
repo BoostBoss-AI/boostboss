@@ -249,7 +249,11 @@
   }
   .side-foot button:hover { background: var(--bg); color: var(--ink); }
 
-  .main { padding: 28px 36px 60px; max-width: 1100px; }
+  /* .main lives in the right column of the dash grid. max-width caps the
+     reading-width of long lists; margin: 0 auto centers that capped block
+     within the column so wide viewports don't leave acres of empty space
+     on the right. */
+  .main { padding: 28px 36px 60px; max-width: 960px; margin: 0 auto; width: 100%; }
   .main h2 { font-size: 26px; margin-bottom: 6px; letter-spacing: -0.3px; }
   .main .pre { font-size: 14.5px; color: var(--muted); margin-bottom: 26px; line-height: 1.55; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
