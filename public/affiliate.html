@@ -314,6 +314,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       body: JSON.stringify({ email, password }),
     });
     const j = await r.json();
+    // 403 not_affiliate → password was right but they aren't signed up.
+    // Send them to the signup form with the email pre-filled.
+    if (r.status === 403 && j && j.code === 'not_affiliate') {
+      showAuth('signup');
+      const emailInput = document.getElementById('signupEmail');
+      if (emailInput) emailInput.value = email;
+      showErr('errSignup', 'This email isn’t signed up as an affiliate yet. Create your affiliate account below.');
+      btn.disabled = false; btn.textContent = 'Sign in';
+      return;
+    }
     if (!r.ok) throw new Error(j.error || 'Sign in failed');
     setSession({ token: j.token, user: j.user });
     await loadDashboard();
@@ -377,6 +387,18 @@ async function loadDashboard() {
     ]);
     if (meR.status === 401 || savedR.status === 401) {
       clearSession(); showAuth('login'); return;
+    }
+    // 403 not_affiliate → user is signed in to Supabase auth but never
+    // signed up as an affiliate. Bounce them to signup with email pre-
+    // filled (we know it from the session) so they explicitly opt in.
+    if (meR.status === 403) {
+      clearSession();
+      showAuth('signup');
+      const email = (session.user && session.user.email) || '';
+      const emailInput = document.getElementById('signupEmail');
+      if (emailInput && email) emailInput.value = email;
+      showErr('errSignup', 'This email isn’t signed up as an affiliate yet. Create your affiliate account below.');
+      return;
     }
     me = await meR.json();
     saved = await savedR.json();

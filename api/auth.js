@@ -1397,47 +1397,90 @@ async function supabaseHandler(action, body, req, res) {
   // Auth: same Supabase auth as advertiser + publisher. user_metadata
   // gets role: "affiliate" so the same email can be all three roles.
 
+  // ── Strict role separation ──
+  // Affiliate is its own role. Having a Supabase auth user (from being an
+  // advertiser/publisher) does NOT grant affiliate access. To use the
+  // affiliate dashboard you must explicitly sign up via affiliate_signup,
+  // which creates a row in public.affiliates. The login + me + save
+  // endpoints all check for that row and return 403 if it's missing.
+  //
+  // Why this matters: an attacker with a leaked advertiser password
+  // shouldn't automatically gain affiliate access; a publisher shouldn't
+  // see affiliate data they didn't sign up for; the role audit trail
+  // stays accurate.
   if (action === "affiliate_signup") {
     const { email, password, display_name } = body || {};
     if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
     if (String(password).length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
 
-    // No email confirmation needed for affiliate signup (Andy's spec:
-    // speedy signup). Use admin createUser to skip the confirmation
-    // email — affiliates land in the dashboard immediately.
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email: String(email).trim().toLowerCase(),
+    const cleanEmail = String(email).trim().toLowerCase();
+    let userId = null;
+
+    // Try to create a brand-new Supabase auth user first.
+    const { data: createData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+      email: cleanEmail,
       password: String(password),
-      email_confirm: true,  // mark confirmed so login works without click-through
+      email_confirm: true,  // skip confirmation email — speedy affiliate signup
       user_metadata: { role: "affiliate" },
     });
-    if (error) return res.status(400).json({ error: error.message });
-    if (!data || !data.user) return res.status(500).json({ error: "Signup failed" });
 
-    // Insert affiliates row. Best-effort: if row already exists (re-signup),
-    // we keep going.
-    try {
-      await supabaseAdmin.from("affiliates").upsert({
-        id:           data.user.id,
-        email:        data.user.email,
-        display_name: display_name ? String(display_name).slice(0, 80) : null,
-      }, { onConflict: "id" });
-    } catch (e) {
-      console.warn("[Affiliate] signup affiliates upsert failed:", e.message);
+    if (createErr) {
+      // Common case: email already exists in Supabase auth (advertiser
+      // or publisher signup elsewhere). The affiliate signup can still
+      // proceed for this user — BUT only if they can prove they own the
+      // existing account by providing the correct password. This stops
+      // an attacker from "registering" with a known email + arbitrary
+      // password and gaining affiliate access.
+      if (/already.*registered|already.*exists|duplicate/i.test(createErr.message || "")) {
+        const { data: existSignin, error: existErr } = await supabaseAnon.auth.signInWithPassword({
+          email:    cleanEmail,
+          password: String(password),
+        });
+        if (existErr || !existSignin || !existSignin.user) {
+          return res.status(401).json({
+            error: "This email already has a Boost Boss account. Use that account’s password to sign up for the affiliate dashboard, or reset the password first.",
+          });
+        }
+        userId = existSignin.user.id;
+      } else {
+        return res.status(400).json({ error: createErr.message });
+      }
+    } else if (createData && createData.user) {
+      userId = createData.user.id;
+    } else {
+      return res.status(500).json({ error: "Signup failed" });
     }
 
-    // Sign them in immediately so the frontend gets a JWT back.
-    const { data: signinData, error: signinErr } = await supabaseAnon.auth.signInWithPassword({
-      email:    data.user.email,
+    // Reject if affiliates row already exists — they should LOG IN, not sign up.
+    const { data: existingAff } = await supabaseAdmin
+      .from("affiliates").select("id").eq("id", userId).maybeSingle();
+    if (existingAff) {
+      return res.status(409).json({
+        error: "You already have an affiliate account on this email. Try signing in instead.",
+      });
+    }
+
+    // Create the affiliates row — this is what gates affiliate access from
+    // here on out.
+    const { error: insErr } = await supabaseAdmin.from("affiliates").insert({
+      id:           userId,
+      email:        cleanEmail,
+      display_name: display_name ? String(display_name).slice(0, 80) : null,
+    });
+    if (insErr) return res.status(500).json({ error: insErr.message });
+
+    // Sign them in to mint a JWT for the dashboard.
+    const { data: sessData, error: sessErr } = await supabaseAnon.auth.signInWithPassword({
+      email:    cleanEmail,
       password: String(password),
     });
-    if (signinErr || !signinData || !signinData.session) {
-      return res.status(500).json({ error: "Created but sign-in failed: " + (signinErr && signinErr.message) });
+    if (sessErr || !sessData || !sessData.session) {
+      return res.status(500).json({ error: "Created but sign-in failed: " + (sessErr && sessErr.message) });
     }
     return res.json({
       success: true,
-      token: signinData.session.access_token,
-      user:  { id: data.user.id, email: data.user.email, role: "affiliate" },
+      token: sessData.session.access_token,
+      user:  { id: userId, email: cleanEmail, role: "affiliate" },
     });
   }
 
@@ -1451,14 +1494,17 @@ async function supabaseHandler(action, body, req, res) {
     if (error || !data || !data.session) {
       return res.status(401).json({ error: error ? error.message : "Invalid email or password" });
     }
-    // Ensure profile row exists — handles users who signed up before the
-    // affiliates table existed.
-    try {
-      await supabaseAdmin.from("affiliates").upsert({
-        id:    data.user.id,
-        email: data.user.email,
-      }, { onConflict: "id" });
-    } catch (_) { /* best effort */ }
+    // STRICT: require affiliates row. Don't auto-create. If the user
+    // exists in Supabase auth but has no affiliates row, they have not
+    // signed up for the affiliate dashboard yet — bounce them to signup.
+    const { data: aff } = await supabaseAdmin
+      .from("affiliates").select("id").eq("id", data.user.id).maybeSingle();
+    if (!aff) {
+      return res.status(403).json({
+        error: "No affiliate account on this email. Sign up to create one.",
+        code:  "not_affiliate",
+      });
+    }
     return res.json({
       success: true,
       token: data.session.access_token,
@@ -1477,38 +1523,38 @@ async function supabaseHandler(action, body, req, res) {
       .eq("id", user.id)
       .maybeSingle();
     if (pErr) return res.status(500).json({ error: pErr.message });
-    // Auto-create the row if a Supabase auth user exists but no affiliates
-    // row does (e.g. they signed up before the table existed).
-    let finalProfile = profile;
-    if (!finalProfile) {
-      const { data: created } = await supabaseAdmin
-        .from("affiliates")
-        .insert({ id: user.id, email: user.email })
-        .select()
-        .maybeSingle();
-      finalProfile = created;
+    // STRICT: no auto-create. If they don't have an affiliates row, they
+    // haven't signed up for the affiliate role yet — return 403 with a
+    // code the frontend can detect and route to signup view.
+    if (!profile) {
+      return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
     }
-    // Saved-ad count is a quick aggregate the dashboard header shows.
     const { count } = await supabaseAdmin
       .from("affiliate_saved_ads")
       .select("id", { count: "exact", head: true })
       .eq("affiliate_id", user.id);
     return res.json({
       user: { id: user.id, email: user.email, role: "affiliate" },
-      profile: finalProfile,
+      profile,
       saved_count: count || 0,
     });
   }
 
-  // Future: SDK calls this when an affiliate clicks "save to affiliate"
-  // on an ad render. Stubbed in v1 — nothing in the SDK calls it yet, but
-  // the endpoint exists so we can ship the dashboard without waiting on
-  // the SDK update.
+  // SDK calls this when an affiliate clicks "save to affiliate" on an ad
+  // render. STRICT: requires affiliates row — without one the user is
+  // not an affiliate and can't save, even if they have a valid Supabase
+  // JWT from another role.
   if (action === "affiliate_save_ad") {
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (!token) return res.status(401).json({ error: "No token" });
     const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
     if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    const { data: aff } = await supabaseAdmin
+      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
+    if (!aff) {
+      return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
+    }
 
     const {
       campaign_id, advertiser_id, headline, body: adBody, image_url,
@@ -1541,6 +1587,13 @@ async function supabaseHandler(action, body, req, res) {
     if (!token) return res.status(401).json({ error: "No token" });
     const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
     if (error || !user) return res.status(401).json({ error: "Invalid token" });
+
+    // STRICT: require affiliates row, no leak across roles.
+    const { data: aff } = await supabaseAdmin
+      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
+    if (!aff) {
+      return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
+    }
 
     const params = Object.assign({}, req.query || {}, body || {});
     const limit  = Math.min(parseInt(params.limit, 10) || 50, 200);

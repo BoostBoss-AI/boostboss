@@ -527,18 +527,28 @@
         state = "done";
         renderPop();
       } catch (err) {
-        // 401 → token expired/invalid. Bounce them through the signup flow,
-        // which double-acts as a sign-in path because affiliate_signup with
-        // an existing email returns a "User already registered" error and
-        // they can use the affiliate.boostboss.ai sign-in link in the footer.
-        if (err && /401|invalid token/i.test(err.message || "")) {
+        const msg = (err && err.message) || "";
+        // 401 → token expired/invalid. Drop session, bounce to signup.
+        if (/401|invalid token/i.test(msg)) {
           try { localStorage.removeItem("bb_affiliate_session"); } catch (_) {}
           errMsg = "Session expired — please sign in again.";
           state = "signup";
           renderPop();
           return;
         }
-        errMsg = (err && err.message) || "Save failed";
+        // 403 not_affiliate → JWT is valid but the user isn't an affiliate.
+        // This happens if their Supabase auth user exists from another role
+        // (advertiser/publisher) but they've never signed up for the
+        // affiliate dashboard. Drop the session and route to signup so
+        // they explicitly opt in.
+        if (/403|not_affiliate|Not an affiliate/i.test(msg)) {
+          try { localStorage.removeItem("bb_affiliate_session"); } catch (_) {}
+          errMsg = "Sign up for the affiliate dashboard to save ads.";
+          state = "signup";
+          renderPop();
+          return;
+        }
+        errMsg = msg || "Save failed";
         state = "error";
         renderPop();
       }
@@ -591,7 +601,12 @@
         body: JSON.stringify(payload),
       });
       const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Save failed");
+      if (!r.ok) {
+        // Surface status in the thrown message so onSave() can branch on
+        // 401 (expired token) vs 403 (not_affiliate) vs everything else.
+        const code = (j && j.code) || "";
+        throw new Error((j && j.error) || "Save failed", { cause: code });
+      }
       // Tracking — let the publisher know an affiliate save happened.
       dispatch("affiliate_save", { adId: ad.adId, auctionId: ad.auctionId });
       return j;
