@@ -419,7 +419,7 @@
       + '</svg>';
 
     let pop = null;
-    let state = "closed";  // closed | confirm | signup | saving | done | error
+    let state = "closed";  // closed | confirm | signup | signin | saving | done | error
     let errMsg = "";
 
     btn.addEventListener("click", function (e) {
@@ -487,11 +487,46 @@
         +   '<button type="button" class="lumi-save-pop__btn lumi-save-pop__btn--primary" data-act="signup">Sign up &amp; save</button>'
         + '</div>'
         + '<div class="lumi-save-pop__foot">Already have an account? '
-        + '<a href="https://affiliate.boostboss.ai" target="_blank" rel="noopener">Sign in</a></div>';
+        + '<a href="#" data-act="goto-signin">Sign in</a></div>';
         pop.querySelector('[data-act="cancel"]').addEventListener("click", closePop);
         pop.querySelector('[data-act="signup"]').addEventListener("click", onSignup);
+        pop.querySelector('[data-act="goto-signin"]').addEventListener("click", function (e) {
+          e.preventDefault(); errMsg = ""; state = "signin"; renderPop();
+        });
         const emailInput = pop.querySelector('[data-f="email"]');
         if (emailInput) setTimeout(function () { emailInput.focus(); }, 0);
+      } else if (state === "signin") {
+        // Inline sign-in path. Existing affiliates authenticate here and the
+        // save fires immediately on success — no jump to affiliate.boostboss.ai
+        // and back. Bug fix for the "click Sign in, land on dashboard, nothing
+        // happens" report.
+        pop.innerHTML =
+          '<div class="lumi-save-pop__title">Sign in to save</div>'
+        + '<div class="lumi-save-pop__sub">Welcome back. We&rsquo;ll save this ad to your affiliate list.</div>'
+        + '<div class="lumi-save-pop__err' + (errMsg ? " is-show" : "") + '">' + escAttr(errMsg) + '</div>'
+        + '<div class="lumi-save-pop__field"><input type="email" autocomplete="email" placeholder="you@example.com" data-f="email"></div>'
+        + '<div class="lumi-save-pop__field"><input type="password" autocomplete="current-password" placeholder="Password" data-f="pw"></div>'
+        + '<div class="lumi-save-pop__row">'
+        +   '<button type="button" class="lumi-save-pop__btn" data-act="cancel">Cancel</button>'
+        +   '<button type="button" class="lumi-save-pop__btn lumi-save-pop__btn--primary" data-act="signin">Sign in &amp; save</button>'
+        + '</div>'
+        + '<div class="lumi-save-pop__foot">New here? '
+        + '<a href="#" data-act="goto-signup">Sign up</a></div>';
+        pop.querySelector('[data-act="cancel"]').addEventListener("click", closePop);
+        pop.querySelector('[data-act="signin"]').addEventListener("click", onSignin);
+        pop.querySelector('[data-act="goto-signup"]').addEventListener("click", function (e) {
+          e.preventDefault(); errMsg = ""; state = "signup"; renderPop();
+        });
+        const pwInput  = pop.querySelector('[data-f="pw"]');
+        const emInput  = pop.querySelector('[data-f="email"]');
+        // Submit on Enter from either field
+        [emInput, pwInput].forEach(function (el) {
+          if (!el) return;
+          el.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { e.preventDefault(); onSignin(); }
+          });
+        });
+        if (emInput) setTimeout(function () { emInput.focus(); }, 0);
       } else if (state === "saving") {
         pop.innerHTML = '<div class="lumi-save-pop__sub" style="text-align:center;padding:10px 0;margin:0;">Saving…</div>';
       } else if (state === "done") {
@@ -519,8 +554,11 @@
     async function onSave() {
       const session = getSession();
       if (!session || !session.token) {
+        // Default to sign-in for the no-session case. After the first save,
+        // users are signed up; sign-in is the more common return path. New
+        // users tap the "Sign up" link in the foot to switch forms.
         errMsg = "";
-        state = "signup";
+        state = "signin";
         renderPop();
         return;
       }
@@ -532,11 +570,12 @@
         renderPop();
       } catch (err) {
         const msg = (err && err.message) || "";
-        // 401 → token expired/invalid. Drop session, bounce to signup.
+        // 401 → token expired/invalid. Drop session, bounce to inline signin
+        // (not signup — the user already exists, they just need to re-auth).
         if (/401|invalid token/i.test(msg)) {
           try { localStorage.removeItem("bb_affiliate_session"); } catch (_) {}
           errMsg = "Session expired — please sign in again.";
-          state = "signup";
+          state = "signin";
           renderPop();
           return;
         }
@@ -554,6 +593,45 @@
         }
         errMsg = msg || "Save failed";
         state = "error";
+        renderPop();
+      }
+    }
+
+    async function onSignin() {
+      const get = function (sel) { const el = pop.querySelector(sel); return el ? el.value : ""; };
+      const email = (get('[data-f="email"]') || "").trim().toLowerCase();
+      const pw    = get('[data-f="pw"]');
+      if (!email)   { errMsg = "Enter your email.";    state = "signin"; renderPop(); return; }
+      if (!pw)      { errMsg = "Enter your password."; state = "signin"; renderPop(); return; }
+
+      state = "saving";
+      renderPop();
+      try {
+        const r = await fetch(apiBase.replace(/\/$/, "") + "/api/auth?action=affiliate_login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, password: pw }),
+        });
+        const j = await r.json();
+        if (!r.ok) {
+          // 403 not_affiliate → user has a Supabase auth row from another
+          // role (advertiser/publisher) but no affiliates row. Route to
+          // signup so they explicitly opt into the affiliate dashboard.
+          if (r.status === 403 || (j && j.code === "not_affiliate")) {
+            errMsg = "No affiliate account on this email — sign up below.";
+            state = "signup";
+            renderPop();
+            return;
+          }
+          throw new Error((j && j.error) || "Sign in failed");
+        }
+        setSession({ token: j.token, user: j.user });
+        await postSave(j.token);
+        state = "done";
+        renderPop();
+      } catch (err) {
+        errMsg = (err && err.message) || "Couldn’t sign in";
+        state = "signin";
         renderPop();
       }
     }
