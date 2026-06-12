@@ -1527,11 +1527,23 @@ async function loadDashboard() {
   const email = (me.user && me.user.email) || (session.user && session.user.email) || '—';
   document.getElementById('side-user-email').textContent = email;
 
-  // Stats card on Home
-  document.getElementById('h-saves').textContent = me.saved_count != null ? me.saved_count : 0;
-  document.getElementById('h-clicks').textContent = '…';   // filled in by loadShareLinks below
-  document.getElementById('h-conv').textContent   = '—';
-  document.getElementById('h-earn').textContent   = '$0.00';
+  // Null-safe setter — the metric card IDs changed in the Shopee-style
+  // rebuild (h-saves + h-conv removed; h-signups/h-activations/h-revenue/
+  // h-newusers added). Without this helper, any future ID rename breaks
+  // the entire dashboard load because the first throw jumps to the catch
+  // block which routes the user back to the login view. See
+  // [[feedback-dashboard-chrome-id-audit]] — same class of bug.
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  // Home metric cards (6-up grid, SaaS-tailored). h-clicks gets filled
+  // in by loadShareLinks() once it returns. The other metrics stay at
+  // their placeholder values until #3 commission tracking ships.
+  setText('h-clicks',      '…');
+  setText('h-signups',     0);
+  setText('h-earn',        '$0.00');
+  setText('h-activations', 0);
+  setText('h-revenue',     '$0.00');
+  setText('h-newusers',    0);
 
   // Pull share-links in parallel with the rest of the dashboard render.
   // Populates the Share Links section AND the home dashboard's "Share clicks"
