@@ -2508,6 +2508,230 @@ async function handlePaypalWebhook(req, res) {
     }
   }
 
+  // ── PayPal Payouts (publisher cash-out side) ─────────────────────────
+  // Twin of the pay-in events above. We get item-level webhooks from
+  // PayPal whenever a payout we dispatched changes state. Each event's
+  // resource carries:
+  //   resource.payout_item_id           — PayPal's id for this item
+  //   resource.payout_batch_id          — PayPal's id for the batch
+  //   resource.transaction_id           — PayPal txn id once money moves
+  //   resource.transaction_status       — SUCCESS / DENIED / FAILED / RETURNED / etc
+  //   resource.payout_item.sender_item_id   — our payout_requests.id (KEY)
+  //   resource.payout_item.amount.value     — USD amount
+  //   resource.errors                   — array of PayPal error details on failure
+  //
+  // We look rows up by sender_item_id (our PK), which is always present
+  // in the event payload. PayPal's own ids (payout_item_id, payout_batch_id)
+  // get stored on the row for future polling / reconciliation.
+  //
+  // Idempotency notes:
+  //   - DEMO.processedWebhookIds.has(eventId) above already dedupes
+  //     identical event deliveries.
+  //   - Status updates are conditioned on the current status so a stale
+  //     event arriving after a manual admin_mark_failed can't flip an
+  //     already-paid row back to a different state.
+  //   - Balance refund on failure is conditioned on the row not having
+  //     been refunded already (refunded_at IS NULL on update path).
+  if (event.event_type && event.event_type.startsWith("PAYMENT.PAYOUTS-ITEM.")) {
+    const senderItemId = (resource.payout_item && resource.payout_item.sender_item_id) || null;
+    const payoutItemId = resource.payout_item_id || null;
+    const payoutBatchId = resource.payout_batch_id || null;
+    const txnStatus = String(resource.transaction_status || "").toUpperCase();
+    const itemAmount = Number((resource.payout_item && resource.payout_item.amount && resource.payout_item.amount.value) || 0);
+
+    if (!senderItemId) {
+      console.warn("[Billing] PayPal Payouts item event missing sender_item_id — can't reconcile:", event.event_type, event.id);
+    } else if (sb) {
+      // Pull the row first so we know publisher_id (for balance refund + email)
+      // and current status (for idempotency).
+      let row = null;
+      try {
+        const { data } = await sb.from("payout_requests")
+          .select("id, publisher_id, amount_usd, status, paypal_item_id, paypal_batch_id, bank_snapshot")
+          .eq("id", senderItemId).maybeSingle();
+        row = data || null;
+      } catch (e) {
+        console.error("[Billing] PayPal Payouts row lookup failed:", e.message);
+      }
+
+      if (!row) {
+        console.warn("[Billing] PayPal Payouts event references unknown sender_item_id:", senderItemId, event.event_type);
+      } else {
+        // Best-effort store PayPal's ids on the row (idempotent — same id
+        // on retry is a no-op).
+        try {
+          const updates = {};
+          if (payoutItemId  && !row.paypal_item_id)  updates.paypal_item_id  = payoutItemId;
+          if (payoutBatchId && !row.paypal_batch_id) updates.paypal_batch_id = payoutBatchId;
+          if (Object.keys(updates).length > 0) {
+            await sb.from("payout_requests").update(updates).eq("id", row.id);
+          }
+        } catch (_) { /* column may not yet exist */ }
+
+        // ── Success path ──
+        if (event.event_type === "PAYMENT.PAYOUTS-ITEM.SUCCEEDED" || txnStatus === "SUCCESS") {
+          // Flip batched → paid. Conditioned on status='batched' so a
+          // re-delivery after admin_mark_failed can't flip the row back.
+          const { data: updated } = await sb.from("payout_requests")
+            .update({ status: "paid", paid_at: new Date().toISOString() })
+            .eq("id", row.id)
+            .eq("status", "batched")
+            .select("id, publisher_id, amount_usd, bank_snapshot");
+
+          if (updated && updated.length > 0) {
+            // Send the branded "Payout sent" email — same call-site as
+            // admin_mark_paid. Look up the publisher's email from developers.
+            try {
+              const r = updated[0];
+              const { data: pub } = await sb.from("developers")
+                .select("email").eq("id", r.publisher_id).maybeSingle();
+              const email = pub && pub.email;
+              if (email) {
+                const { sendPayoutSent } = require("./_lib/emails/send");
+                const method = (r.bank_snapshot && r.bank_snapshot.method)
+                  ? String(r.bank_snapshot.method) : "PayPal";
+                sendPayoutSent({
+                  to:                   email,
+                  amountUsd:            Number(r.amount_usd) || 0,
+                  payoutMethod:         method === "paypal" ? "PayPal" : method,
+                  payoutId:             r.id,
+                  expectedDeliveryDays: "minutes",
+                }).catch((e) => console.error("[Billing] sendPayoutSent threw:", e.message));
+              }
+            } catch (e) {
+              console.warn("[Billing] payout-sent email skipped:", e.message);
+            }
+          }
+        }
+
+        // ── Failure paths ──
+        // DENIED         = PayPal couldn't process (e.g. recipient blocked)
+        // FAILED         = network/system failure during payout
+        // RETURNED       = money came back (recipient closed PayPal acct,
+        //                  email unreachable for 30 days)
+        // REFUNDED       = sender-initiated reversal (admin clawback)
+        // BLOCKED / HELD = manual review (we log + leave row in batched)
+        const isFailure = (
+          event.event_type === "PAYMENT.PAYOUTS-ITEM.DENIED"   ||
+          event.event_type === "PAYMENT.PAYOUTS-ITEM.FAILED"   ||
+          event.event_type === "PAYMENT.PAYOUTS-ITEM.RETURNED" ||
+          event.event_type === "PAYMENT.PAYOUTS-ITEM.REFUNDED" ||
+          (txnStatus && ["DENIED", "FAILED", "RETURNED", "REFUNDED"].includes(txnStatus))
+        );
+        if (isFailure) {
+          // Build a human-readable reason string from PayPal's `errors`
+          // array. Capped at 500 chars to fit the failure_reason column.
+          let reason = `PayPal ${event.event_type.split(".").pop()}`;
+          try {
+            if (Array.isArray(resource.errors) && resource.errors[0]) {
+              const e0 = resource.errors[0];
+              const name = e0.name || e0.error_code || "";
+              const msg = e0.message || e0.description || "";
+              reason = `${reason}${name ? ` (${name})` : ""}${msg ? `: ${msg}` : ""}`.slice(0, 500);
+            }
+          } catch (_) { /* best effort */ }
+
+          // Flip batched → failed, conditioned on status='batched' so
+          // we don't double-flip. The condition is also our refund gate:
+          // if .length > 0 we know this is the FIRST failure event for
+          // this row, so safe to refund the balance.
+          const { data: failedRows } = await sb.from("payout_requests")
+            .update({
+              status:         "failed",
+              failed_at:      new Date().toISOString(),
+              failure_reason: reason,
+            })
+            .eq("id", row.id)
+            .eq("status", "batched")
+            .select("id, publisher_id, amount_usd");
+
+          if (failedRows && failedRows.length > 0) {
+            const refundAmount = Number(failedRows[0].amount_usd) || itemAmount;
+            if (refundAmount > 0) {
+              try {
+                await sb.rpc("bbx_credit_publisher_balance", {
+                  p_developer_id: failedRows[0].publisher_id,
+                  p_amount_usd:   refundAmount,
+                });
+              } catch (e) {
+                console.error("[Billing] PayPal Payouts failure refund failed:", e.message);
+              }
+            }
+            console.log(`[Billing] PayPal Payouts ${event.event_type} → refunded $${refundAmount} to ${failedRows[0].publisher_id} (request ${row.id}): ${reason}`);
+          }
+        }
+
+        // ── Informational / no-op paths ──
+        // UNCLAIMED = recipient hasn't claimed yet (30-day window). Leave
+        //             row in batched. PayPal will fire SUCCEEDED or RETURNED
+        //             eventually.
+        // BLOCKED   = PayPal compliance/risk hold. Leave row in batched and
+        //             surface to admin via Vercel logs.
+        // HELD      = funds held pending review. Leave row in batched.
+        if (["PAYMENT.PAYOUTS-ITEM.UNCLAIMED",
+             "PAYMENT.PAYOUTS-ITEM.BLOCKED",
+             "PAYMENT.PAYOUTS-ITEM.HELD"].includes(event.event_type)) {
+          console.log(`[Billing] PayPal Payouts ${event.event_type} for request ${row.id} — left in batched, awaiting next event`);
+        }
+      }
+    }
+  }
+
+  // ── PayPal Payouts batch-level events ────────────────────────────────
+  // Batch-level events are mostly informational — item-level events above
+  // do the actual reconciliation. We log them and use BATCH.DENIED as a
+  // safety net to fail any items in the batch that didn't get individual
+  // failure events (defensive — PayPal docs say item events always fire,
+  // but better to have the catch-all).
+  if (event.event_type === "PAYMENT.PAYOUTSBATCH.SUCCESS") {
+    const batchId = resource.batch_header && resource.batch_header.payout_batch_id;
+    console.log(`[Billing] PayPal Payouts batch ${batchId} succeeded (informational — item events handle row updates)`);
+  }
+  if (event.event_type === "PAYMENT.PAYOUTSBATCH.DENIED") {
+    const batchId = resource.batch_header && resource.batch_header.payout_batch_id;
+    const senderBatchId = resource.batch_header
+      && resource.batch_header.sender_batch_header
+      && resource.batch_header.sender_batch_header.sender_batch_id;
+    console.error(`[Billing] PayPal Payouts BATCH DENIED — paypal_batch_id=${batchId} sender_batch_id=${senderBatchId}`);
+
+    // Safety net: refund anything still in batched for this batch. Normally
+    // item-level DENIED events handle this per-row, but the docs leave the
+    // batch-level case ambiguous when the entire batch is rejected up front
+    // (e.g. invalid API call). Iterate by sender_batch_id since that's our
+    // batch_id column on the row.
+    if (sb && senderBatchId) {
+      try {
+        const { data: stranded } = await sb.from("payout_requests")
+          .update({
+            status:         "failed",
+            failed_at:      new Date().toISOString(),
+            failure_reason: "PayPal batch denied",
+          })
+          .eq("batch_id", senderBatchId)
+          .eq("status", "batched")
+          .select("id, publisher_id, amount_usd");
+        for (const r of stranded || []) {
+          try {
+            await sb.rpc("bbx_credit_publisher_balance", {
+              p_developer_id: r.publisher_id,
+              p_amount_usd:   Number(r.amount_usd) || 0,
+            });
+          } catch (e) {
+            console.error("[Billing] PayPal Payouts batch-denied refund failed for", r.id, e.message);
+          }
+        }
+        console.log(`[Billing] PayPal Payouts BATCH DENIED — refunded ${(stranded || []).length} stranded item(s)`);
+      } catch (e) {
+        console.error("[Billing] PayPal Payouts batch-denied fallback failed:", e.message);
+      }
+    }
+  }
+  if (event.event_type === "PAYMENT.PAYOUTSBATCH.PROCESSING") {
+    // Just logging — no row update needed.
+    const batchId = resource.batch_header && resource.batch_header.payout_batch_id;
+    console.log(`[Billing] PayPal Payouts batch ${batchId} processing`);
+  }
+
   return res.json({
     received:    true,
     event_type:  event.event_type,
