@@ -137,6 +137,55 @@
 }
 .lumi-x:hover { color: var(--_t); }
 
+/* ── Save to affiliate — mirror corner of the close X ── */
+.lumi-save {
+  position: absolute; top: 8px; left: 10px;
+  width: 24px; height: 24px; border: none; background: transparent;
+  cursor: pointer; line-height: 1; color: var(--_m); padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.lumi-save svg { width: 15px; height: 15px; display: block; fill: currentColor; }
+.lumi-save:hover    { color: var(--_p); }
+.lumi-save.is-saved { color: var(--_p); }
+
+.lumi-save-pop {
+  position: absolute; top: 36px; left: 8px; z-index: 10;
+  background: #fff; border: 1px solid var(--_b); border-radius: 10px;
+  padding: 14px 14px 12px; min-width: 220px; max-width: 280px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  font-family: inherit; font-size: 13px; color: var(--_t);
+  line-height: 1.5; text-align: left;
+}
+.lumi-save-pop__title { font-weight: 700; font-size: 13.5px; margin-bottom: 6px; color: var(--_t); }
+.lumi-save-pop__sub   { font-size: 12px; color: var(--_m); margin-bottom: 12px; line-height: 1.5; }
+.lumi-save-pop__err   { font-size: 12px; color: #DC2626; margin-bottom: 8px; display: none; line-height: 1.4; }
+.lumi-save-pop__err.is-show { display: block; }
+.lumi-save-pop__row   { display: flex; gap: 6px; }
+.lumi-save-pop__btn   {
+  flex: 1; padding: 8px 10px; border: 1px solid var(--_b); border-radius: 7px;
+  background: #fff; color: var(--_t); cursor: pointer; font-size: 12.5px;
+  font-weight: 600; font-family: inherit;
+}
+.lumi-save-pop__btn:hover { background: rgba(0,0,0,0.03); }
+.lumi-save-pop__btn--primary { background: var(--_p); color: #fff !important; border-color: var(--_p); }
+.lumi-save-pop__btn--primary:hover { filter: brightness(1.06); background: var(--_p); }
+.lumi-save-pop__btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.lumi-save-pop__field { margin-bottom: 7px; }
+.lumi-save-pop__field input {
+  width: 100%; padding: 7px 9px; border: 1px solid var(--_b);
+  border-radius: 6px; font-size: 12.5px; font-family: inherit; color: var(--_t);
+  background: #fff; box-sizing: border-box;
+}
+.lumi-save-pop__field input:focus { outline: none; border-color: var(--_p); box-shadow: 0 0 0 2px rgba(255,45,120,0.10); }
+.lumi-save-pop__done { text-align: center; padding: 4px 0 2px; }
+.lumi-save-pop__done .check { font-size: 22px; color: #16A34A; margin-bottom: 4px; line-height: 1; }
+.lumi-save-pop__foot {
+  font-size: 11px; color: var(--_m); margin-top: 10px; padding-top: 8px;
+  border-top: 1px solid var(--_b); text-align: center;
+}
+.lumi-save-pop__foot a { color: var(--_p); font-weight: 600; text-decoration: none; }
+.lumi-save-pop__foot a:hover { text-decoration: underline; }
+
 /* ── card — inline sponsored card ── */
 .lumi-cardbox {
   position: relative; display: flex; flex-direction: column; gap: 8px;
@@ -345,6 +394,212 @@
     return b;
   }
 
+  // ── Save-to-affiliate button + popover ───────────────────────────────
+  // Third interaction option alongside close + click. Lets a viewer
+  // bookmark the ad to their affiliate list at affiliate.boostboss.ai.
+  // Self-contained state machine inside this function: closed →
+  // confirm → (signup if needed) → saving → done/error. Session is
+  // persisted to localStorage as bb_affiliate_session so subsequent
+  // saves on the same site skip the signup form.
+  //
+  // The button is meant to live in the top-LEFT corner of the ad,
+  // mirroring the close X in the top-right.
+  function saveAffiliateButton(ad, slotEl) {
+    const btn = document.createElement("button");
+    btn.className = "lumi-save";
+    btn.setAttribute("aria-label", "Save to affiliate");
+    btn.title = "Save to affiliate";
+    // Bookmark icon (Material Design "bookmark" path)
+    btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+      + '<path d="M19 3H5C3.9 3 3 3.9 3 5V21L12 17L21 21V5C21 3.9 20.1 3 19 3M19 18L12 15L5 18V5H19V18Z"/>'
+      + '</svg>';
+
+    let pop = null;
+    let state = "closed";  // closed | confirm | signup | saving | done | error
+    let errMsg = "";
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (state === "closed") openPop();
+      else                    closePop();
+    });
+
+    function openPop() {
+      closePop();
+      pop = document.createElement("div");
+      pop.className = "lumi-save-pop";
+      pop.addEventListener("click", function (e) { e.stopPropagation(); });
+      btn.parentNode.appendChild(pop);
+      state = "confirm";
+      renderPop();
+      setTimeout(function () { document.addEventListener("click", outsideClick); }, 0);
+    }
+    function closePop() {
+      if (pop && pop.parentNode) pop.parentNode.removeChild(pop);
+      pop = null;
+      state = "closed";
+      document.removeEventListener("click", outsideClick);
+    }
+    function outsideClick(e) {
+      if (pop && !pop.contains(e.target) && !btn.contains(e.target)) closePop();
+    }
+
+    function getSession() {
+      try { return JSON.parse(localStorage.getItem("bb_affiliate_session") || "null"); } catch (_) { return null; }
+    }
+    function setSession(s) {
+      try { localStorage.setItem("bb_affiliate_session", JSON.stringify(s)); } catch (_) {}
+    }
+
+    function escAttr(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+      });
+    }
+
+    function renderPop() {
+      if (!pop) return;
+      if (state === "confirm") {
+        pop.innerHTML =
+          '<div class="lumi-save-pop__title">Save to affiliate?</div>'
+        + '<div class="lumi-save-pop__sub">Bookmark this ad to your Boost Boss affiliate list. Share it later, earn when it converts.</div>'
+        + '<div class="lumi-save-pop__row">'
+        +   '<button type="button" class="lumi-save-pop__btn" data-act="cancel">No</button>'
+        +   '<button type="button" class="lumi-save-pop__btn lumi-save-pop__btn--primary" data-act="save">Yes, save</button>'
+        + '</div>';
+        pop.querySelector('[data-act="cancel"]').addEventListener("click", closePop);
+        pop.querySelector('[data-act="save"]').addEventListener("click", onSave);
+      } else if (state === "signup") {
+        pop.innerHTML =
+          '<div class="lumi-save-pop__title">Create affiliate account</div>'
+        + '<div class="lumi-save-pop__sub">One step. No email confirmation.</div>'
+        + '<div class="lumi-save-pop__err' + (errMsg ? " is-show" : "") + '">' + escAttr(errMsg) + '</div>'
+        + '<div class="lumi-save-pop__field"><input type="email" autocomplete="email" placeholder="you@example.com" data-f="email"></div>'
+        + '<div class="lumi-save-pop__field"><input type="password" autocomplete="new-password" placeholder="Password (8+ chars)" data-f="pw1"></div>'
+        + '<div class="lumi-save-pop__field"><input type="password" autocomplete="new-password" placeholder="Confirm password" data-f="pw2"></div>'
+        + '<div class="lumi-save-pop__row">'
+        +   '<button type="button" class="lumi-save-pop__btn" data-act="cancel">Cancel</button>'
+        +   '<button type="button" class="lumi-save-pop__btn lumi-save-pop__btn--primary" data-act="signup">Sign up &amp; save</button>'
+        + '</div>'
+        + '<div class="lumi-save-pop__foot">Already have an account? '
+        + '<a href="https://affiliate.boostboss.ai" target="_blank" rel="noopener">Sign in</a></div>';
+        pop.querySelector('[data-act="cancel"]').addEventListener("click", closePop);
+        pop.querySelector('[data-act="signup"]').addEventListener("click", onSignup);
+        const emailInput = pop.querySelector('[data-f="email"]');
+        if (emailInput) setTimeout(function () { emailInput.focus(); }, 0);
+      } else if (state === "saving") {
+        pop.innerHTML = '<div class="lumi-save-pop__sub" style="text-align:center;padding:10px 0;margin:0;">Saving…</div>';
+      } else if (state === "done") {
+        pop.innerHTML =
+          '<div class="lumi-save-pop__done">'
+        +   '<div class="check">✓</div>'
+        +   '<div class="lumi-save-pop__title" style="margin-bottom:4px;">Saved</div>'
+        +   '<div class="lumi-save-pop__sub" style="margin-bottom:0;"><a href="https://affiliate.boostboss.ai" target="_blank" rel="noopener" style="color:var(--_p);font-weight:600;text-decoration:none;">View your saves →</a></div>'
+        + '</div>';
+        btn.classList.add("is-saved");
+        setTimeout(closePop, 2400);
+      } else if (state === "error") {
+        pop.innerHTML =
+          '<div class="lumi-save-pop__title">Couldn’t save</div>'
+        + '<div class="lumi-save-pop__err is-show" style="margin-bottom:12px;">' + escAttr(errMsg || "Try again later.") + '</div>'
+        + '<div class="lumi-save-pop__row">'
+        +   '<button type="button" class="lumi-save-pop__btn" data-act="cancel">Close</button>'
+        +   '<button type="button" class="lumi-save-pop__btn lumi-save-pop__btn--primary" data-act="retry">Retry</button>'
+        + '</div>';
+        pop.querySelector('[data-act="cancel"]').addEventListener("click", closePop);
+        pop.querySelector('[data-act="retry"]').addEventListener("click", onSave);
+      }
+    }
+
+    async function onSave() {
+      const session = getSession();
+      if (!session || !session.token) {
+        errMsg = "";
+        state = "signup";
+        renderPop();
+        return;
+      }
+      state = "saving";
+      renderPop();
+      try {
+        await postSave(session.token);
+        state = "done";
+        renderPop();
+      } catch (err) {
+        // 401 → token expired/invalid. Bounce them through the signup flow,
+        // which double-acts as a sign-in path because affiliate_signup with
+        // an existing email returns a "User already registered" error and
+        // they can use the affiliate.boostboss.ai sign-in link in the footer.
+        if (err && /401|invalid token/i.test(err.message || "")) {
+          try { localStorage.removeItem("bb_affiliate_session"); } catch (_) {}
+          errMsg = "Session expired — please sign in again.";
+          state = "signup";
+          renderPop();
+          return;
+        }
+        errMsg = (err && err.message) || "Save failed";
+        state = "error";
+        renderPop();
+      }
+    }
+
+    async function onSignup() {
+      const get = function (sel) { const el = pop.querySelector(sel); return el ? el.value : ""; };
+      const email = (get('[data-f="email"]') || "").trim().toLowerCase();
+      const pw1   = get('[data-f="pw1"]');
+      const pw2   = get('[data-f="pw2"]');
+      if (!email)             { errMsg = "Enter your email.";              state = "signup"; renderPop(); return; }
+      if ((pw1 || "").length < 8) { errMsg = "Password must be 8+ characters."; state = "signup"; renderPop(); return; }
+      if (pw1 !== pw2)        { errMsg = "Passwords don’t match.";    state = "signup"; renderPop(); return; }
+
+      state = "saving";
+      renderPop();
+      try {
+        const r = await fetch(apiBase.replace(/\/$/, "") + "/api/auth?action=affiliate_signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, password: pw1 }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || "Signup failed");
+        setSession({ token: j.token, user: j.user });
+        await postSave(j.token);
+        state = "done";
+        renderPop();
+      } catch (err) {
+        errMsg = (err && err.message) || "Couldn’t sign up";
+        state = "signup";  // stay on signup form so they can retry
+        renderPop();
+      }
+    }
+
+    async function postSave(token) {
+      const payload = {
+        campaign_id:         ad.campaignId   || ad.campaign_id   || null,
+        advertiser_id:       ad.advertiserId || ad.advertiser_id || null,
+        headline:            ad.headline   || null,
+        body:                ad.subtext    || null,
+        image_url:           (ad.media && ad.media.url) || ad.imageUrl || null,
+        target_url:          ad.ctaUrl     || null,
+        source_placement_id: (slotEl && slotEl.getAttribute && slotEl.getAttribute("data-lumi-slot")) || null,
+        source_surface:      "web",
+      };
+      const r = await fetch(apiBase.replace(/\/$/, "") + "/api/auth?action=affiliate_save_ad", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(payload),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Save failed");
+      // Tracking — let the publisher know an affiliate save happened.
+      dispatch("affiliate_save", { adId: ad.adId, auctionId: ad.auctionId });
+      return j;
+    }
+
+    return btn;
+  }
+
   function buildCta(ad, slotEl, cls) {
     const a = document.createElement("a");
     a.className = "lumi-cta" + (cls ? " " + cls : "");
@@ -379,6 +634,7 @@
       dispatch("close", { adId: ad.adId, auctionId: ad.auctionId });
       el.innerHTML = ""; el.style.display = "none";
     }));
+    el.appendChild(saveAffiliateButton(ad, el));
     el.appendChild(makeDisclosure(ad));
     addMedia(el, ad, "lumi-cardbox__media");
     const h = document.createElement("p");
@@ -407,6 +663,7 @@
       dispatch("close", { adId: ad.adId, auctionId: ad.auctionId });
       if (anchor.parentNode) anchor.parentNode.removeChild(anchor);
     }));
+    card.appendChild(saveAffiliateButton(ad, el));
     card.appendChild(makeDisclosure(ad));
     addMedia(card, ad, "lumi-corner__media");
     const h = document.createElement("p");
