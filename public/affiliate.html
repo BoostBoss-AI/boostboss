@@ -251,8 +251,12 @@
     margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 6px;
     border-radius: 99px; background: #F3F4F6; color: var(--muted); letter-spacing: 0.4px;
   }
-  /* Make the sidebar scroll independently when nav grows long. */
-  .side-nav { max-height: calc(100vh - 200px); overflow-y: auto; padding-bottom: 8px; }
+  /* Sidebar scrolling: .side itself has overflow-y:auto already, so the
+     nav doesn't need its own scroller. Adding one creates a confusing
+     double-scroll where clicking an item at the bottom can scroll the
+     inner nav out of view of the visible portion. Padding-bottom just
+     gives the last item breathing room from the foot. */
+  .side-nav { padding-bottom: 18px; }
 
   /* ── Top warning banner ─────────────────────────────────────────────
      Shopee shows a persistent rose banner at the top of every dashboard
@@ -483,11 +487,13 @@
   }
   .side-foot button:hover { background: var(--bg); color: var(--ink); }
 
-  /* .main lives in the right column of the dash grid. max-width caps the
-     reading-width of long lists; margin: 0 auto centers that capped block
-     within the column so wide viewports don't leave acres of empty space
-     on the right. */
-  .main { padding: 28px 36px 60px; max-width: 960px; margin: 0 auto; width: 100%; }
+  /* .main lives in the right column of the dash grid. Width matches the
+     Shopee Affiliate Center pattern — fills the available column with a
+     soft 1480px cap so ultra-wide monitors don't get unreadable long
+     lines, but the catalog grid + metric cards have room to breathe on
+     normal desktop sizes. Higher horizontal padding (40px) keeps the
+     content from touching the sidebar / right edge. */
+  .main { padding: 28px 40px 60px; max-width: 1480px; margin: 0 auto; width: 100%; }
   .main h2 { font-size: 26px; margin-bottom: 6px; letter-spacing: -0.3px; }
   .main .pre { font-size: 14.5px; color: var(--muted); margin-bottom: 26px; line-height: 1.55; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
