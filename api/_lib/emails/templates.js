@@ -204,21 +204,42 @@ function depositSuccessEmail({ amountUsd, balanceAfterUsd, companyName, dashboar
   };
 }
 
-function payoutSentEmail({ amountUsd, payoutMethod, payoutId, dashboardUrl, expectedDeliveryDays = "1-3 business days" }) {
+function payoutSentEmail({ amountUsd, payoutMethod, payoutId, dashboardUrl, expectedDeliveryDays, paypalEmail }) {
+  // Post-pivot: default method + delivery window assume PayPal Payouts rail.
+  // PayPal moves money near-realtime when the recipient is also on PayPal
+  // (which is required to receive — we collect paypal_email at payout-method
+  // setup). For most recipients funds show up in their PayPal balance within
+  // a few minutes; "up to 30 minutes" gives PayPal's batch processor wiggle
+  // room without overpromising. If the caller still passes the legacy
+  // "Bank transfer" + "1-3 business days" combo (admin_export CSV escape
+  // hatch path), the email respects those values verbatim — so legacy rows
+  // shipped through the manual rail still get the right copy.
+  const method = payoutMethod || "PayPal";
+  const isPaypal = /paypal/i.test(method);
+  const arrivalWindow = expectedDeliveryDays || (isPaypal ? "within 30 minutes" : "1-3 business days");
+  const destinationLabel = isPaypal ? "PayPal account" : "bank account";
+  const maskedRecipient = paypalEmail ? (function maskEmail(e) {
+    const at = e.indexOf("@");
+    if (at <= 0) return e;
+    if (at <= 3) return e[0] + "•••" + e.slice(at);
+    return e.slice(0, 3) + "•••" + e.slice(at);
+  })(paypalEmail) : null;
+
   return {
     subject: `Your Boost Boss payout of $${formatUsd(amountUsd)} is on its way`,
     html: renderEmail({
-      title: "Payout sent ✅",
-      preheader: `$${formatUsd(amountUsd)} is heading your way via ${escapeHtml(payoutMethod || "bank transfer")}.`,
+      title: "Payout sent",
+      preheader: `$${formatUsd(amountUsd)} is heading your way via ${escapeHtml(method)}.`,
       bodyHtml: `
-        <p>Your payout request has been processed. Funds are on their way.</p>
+        <p>Your payout request has been processed. Funds are on their way to your ${escapeHtml(destinationLabel)}.</p>
         <table class="stats-table" role="presentation">
           <tr><td>Amount</td><td style="color:${BRAND.primary};">$${formatUsd(amountUsd)}</td></tr>
-          <tr><td>Method</td><td>${escapeHtml(payoutMethod || "Bank transfer")}</td></tr>
-          <tr><td>Expected arrival</td><td>${escapeHtml(expectedDeliveryDays)}</td></tr>
+          <tr><td>Method</td><td>${escapeHtml(method)}</td></tr>
+          ${maskedRecipient ? `<tr><td>Recipient</td><td><code style="font-size:12.5px;color:${BRAND.muted};">${escapeHtml(maskedRecipient)}</code></td></tr>` : ""}
+          <tr><td>Expected arrival</td><td>${escapeHtml(arrivalWindow)}</td></tr>
           <tr><td>Reference</td><td><code style="font-size:12.5px;color:${BRAND.muted};">${escapeHtml(payoutId || "—")}</code></td></tr>
         </table>
-        <div class="panel success"><strong>Heads up:</strong> Funds typically arrive in ${escapeHtml(expectedDeliveryDays)}. If you don't see them in your bank account after that, reply to this email and we'll trace it.</div>
+        <div class="panel success"><strong>Heads up:</strong> Funds typically arrive ${escapeHtml(arrivalWindow)}. If you don't see them in your ${escapeHtml(destinationLabel)} after that, reply to this email and we'll trace it.</div>
       `,
       cta: { label: "View payout history", url: dashboardUrl },
     }),

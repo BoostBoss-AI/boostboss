@@ -589,15 +589,24 @@ module.exports = async function handler(req, res) {
           for (const row of rows) {
             const email = emailByPubId.get(row.publisher_id);
             if (!email) continue;
+            // admin_mark_paid is only used for CSV-exported (legacy bank
+            // rail) batches now — PayPal-dispatched batches get marked
+            // paid by the webhook handler in api/billing.js. So this path
+            // defaults to "Bank transfer" + "1-3 business days" copy. If
+            // the row happens to be PayPal (mixed migration state), the
+            // template detects via /paypal/i and adjusts arrival window.
             const method = row.bank_snapshot && row.bank_snapshot.method
               ? String(row.bank_snapshot.method)
               : "Bank transfer";
+            const methodLabel = /paypal/i.test(method) ? "PayPal" : method;
+            const paypalRecipient = (row.bank_snapshot && row.bank_snapshot.paypal_email) || null;
             sendPayoutSent({
               to:                   email,
               amountUsd:            Number(row.amount_usd) || 0,
-              payoutMethod:        method,
-              payoutId:            row.id,
-              expectedDeliveryDays: "1-3 business days",
+              payoutMethod:         methodLabel,
+              payoutId:             row.id,
+              paypalEmail:          paypalRecipient,
+              expectedDeliveryDays: /paypal/i.test(method) ? undefined : "1-3 business days",
             }).catch((e) => console.error("[Payouts] sendPayoutSent threw:", e.message));
           }
         }

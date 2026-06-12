@@ -123,10 +123,10 @@ async function sendDepositSuccess({ to, amountUsd, balanceAfterUsd, companyName 
   return send({ kind: "billing", to, subject, html });
 }
 
-async function sendPayoutSent({ to, amountUsd, payoutMethod, payoutId, expectedDeliveryDays }) {
+async function sendPayoutSent({ to, amountUsd, payoutMethod, payoutId, expectedDeliveryDays, paypalEmail }) {
   const dashboardUrl = `${PUBLIC_BASE}/publish/dashboard#/payouts`;
   const { subject, html } = payoutSentEmail({
-    amountUsd, payoutMethod, payoutId, dashboardUrl, expectedDeliveryDays,
+    amountUsd, payoutMethod, payoutId, dashboardUrl, expectedDeliveryDays, paypalEmail,
   });
   return send({ kind: "payouts", to, subject, html });
 }

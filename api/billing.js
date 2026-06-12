@@ -2590,12 +2590,15 @@ async function handlePaypalWebhook(req, res) {
                 const { sendPayoutSent } = require("./_lib/emails/send");
                 const method = (r.bank_snapshot && r.bank_snapshot.method)
                   ? String(r.bank_snapshot.method) : "PayPal";
+                const paypalRecipient = (r.bank_snapshot && r.bank_snapshot.paypal_email) || null;
                 sendPayoutSent({
                   to:                   email,
                   amountUsd:            Number(r.amount_usd) || 0,
                   payoutMethod:         method === "paypal" ? "PayPal" : method,
                   payoutId:             r.id,
-                  expectedDeliveryDays: "minutes",
+                  paypalEmail:          paypalRecipient,
+                  // expectedDeliveryDays omitted — template defaults to
+                  // "within 30 minutes" for PayPal-method rows.
                 }).catch((e) => console.error("[Billing] sendPayoutSent threw:", e.message));
               }
             } catch (e) {
