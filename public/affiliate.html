@@ -607,6 +607,175 @@
   .links-table .revoke-btn:hover { color: #DC2626; }
   .links-table tr.revoked td { opacity: 0.45; }
 
+  /* ── Filter bar (Conversion Report, Click Report) ──────────────────── */
+  .filter-bar {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px; margin-bottom: 22px;
+  }
+  .filter-bar .row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px; margin-bottom: 14px;
+  }
+  .filter-bar .row:last-of-type { margin-bottom: 0; }
+  .filter-bar .field {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .filter-bar .lbl {
+    font-size: 13.5px; color: var(--ink-soft); font-weight: 500;
+    white-space: nowrap; min-width: 90px;
+  }
+  .filter-bar input, .filter-bar select {
+    flex: 1; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; background: #fff; font-family: inherit; color: var(--ink);
+    min-width: 0;
+  }
+  .filter-bar .date-range {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+  }
+  .filter-bar .date-range input { flex: 1; }
+  .filter-bar .actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;
+  }
+  .filter-bar .btn-clear {
+    background: #fff; border: 1px solid var(--line); color: var(--ink);
+    padding: 9px 22px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .filter-bar .btn-search {
+    background: var(--pink); border: none; color: #fff;
+    padding: 9px 24px; border-radius: 8px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+  }
+
+  /* ── Data table with built-in empty state (Shopee parity) ─────────────
+     Used by Product Feed, Conversion Report, Click Report, Commission
+     Bill, Payout Record. Headers always visible so the affiliate can see
+     what columns WILL fill once data flows. */
+  .data-table-wrap {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden;
+  }
+  .data-table-wrap .table-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 18px 22px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap;
+  }
+  .data-table-wrap .table-head .total { font-size: 13.5px; color: var(--ink-soft); }
+  .data-table-wrap .table-head .total strong { color: var(--ink); font-weight: 700; margin-left: 4px; }
+  .data-table-wrap .table-head .actions { display: flex; gap: 10px; }
+  .data-table-wrap .btn-export {
+    background: var(--pink); border: none; color: #fff; padding: 9px 20px;
+    border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+    opacity: 0.55;  /* disabled until there's data to export */
+  }
+  .data-table-wrap .btn-config {
+    background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
+    width: 38px; height: 38px; border-radius: 8px; font-size: 16px;
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .data-table-wrap table { width: 100%; border-collapse: collapse; }
+  .data-table-wrap thead { background: #FAFAFA; }
+  .data-table-wrap th {
+    text-align: left; font-size: 12.5px; font-weight: 700; color: var(--ink-soft);
+    padding: 14px 18px; border-bottom: 1px solid var(--line-soft); white-space: nowrap;
+  }
+  .data-table-wrap td {
+    padding: 14px 18px; font-size: 14px; color: var(--ink);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .data-table-wrap tr:last-child td { border-bottom: none; }
+  .data-table-wrap .no-data {
+    padding: 64px 24px; text-align: center; color: var(--muted); font-size: 14.5px;
+  }
+  .data-table-wrap .no-data .illus { font-size: 52px; margin-bottom: 14px; opacity: 0.5; }
+  .data-table-wrap .no-data .pink-emph { color: var(--pink); font-weight: 700; }
+
+  /* ── Big-number summary (Commission Bill pending, Payout Record total) ─ */
+  .big-num {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 30px 32px; text-align: center; margin-bottom: 22px;
+  }
+  .big-num .lbl {
+    font-size: 14px; color: var(--ink-soft); margin-bottom: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .big-num .lbl .help-i {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%; background: #E5E7EB;
+    color: #6B7280; font-size: 10px; font-weight: 700;
+  }
+  .big-num .val {
+    font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 700;
+    color: var(--ink); letter-spacing: -1px; line-height: 1;
+  }
+  .big-num .val .cents { font-size: 28px; opacity: 0.7; }
+  .big-num .note {
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line-soft);
+    font-size: 13.5px; color: var(--ink-soft); line-height: 1.55;
+  }
+  .big-num .note .threshold { color: var(--pink); font-weight: 700; }
+  .big-num .note a { color: var(--pink); font-weight: 600; text-decoration: none; }
+
+  /* ── Campaign banner cards (Affiliate Campaigns) ─────────────────────── */
+  .camp-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 0; margin-bottom: 14px; display: grid; grid-template-columns: 280px 1fr auto;
+    gap: 20px; align-items: center; overflow: hidden;
+  }
+  .camp-card .banner {
+    aspect-ratio: 2/1; background: linear-gradient(135deg, #FFE4EE, #FFC9DC);
+    display: flex; align-items: center; justify-content: center; font-size: 52px;
+    color: var(--pink); width: 100%; height: 140px;
+  }
+  .camp-card .body { padding: 14px 0; }
+  .camp-card .pill {
+    display: inline-block; font-size: 11.5px; font-weight: 700;
+    padding: 4px 10px; border-radius: 99px; margin-bottom: 8px; letter-spacing: 0.3px;
+  }
+  .camp-card .pill.ongoing  { background: #DCFCE7; color: #166534; }
+  .camp-card .pill.upcoming { background: #FEF3C7; color: #92400E; }
+  .camp-card .pill.ended    { background: #F3F4F6; color: var(--muted); }
+  .camp-card .name { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; letter-spacing: -0.1px; }
+  .camp-card .dates { font-size: 13px; color: var(--muted); }
+  .camp-card .cta {
+    margin-right: 22px;
+    background: #fff; border: 1px solid var(--pink); color: var(--pink);
+    padding: 10px 22px; border-radius: 8px; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .camp-card .cta:hover { background: var(--pink-soft); }
+
+  /* ── Open API panels ─────────────────────────────────────────────────── */
+  .api-panel {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 24px 26px; margin-bottom: 18px;
+  }
+  .api-panel h3 {
+    font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 16px;
+    letter-spacing: -0.1px;
+  }
+  .api-panel .api-row {
+    display: flex; align-items: center; gap: 14px; padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft); font-size: 14px;
+  }
+  .api-panel .api-row:last-of-type { border-bottom: none; padding-bottom: 16px; }
+  .api-panel .api-row .k { color: var(--ink-soft); width: 90px; font-weight: 600; }
+  .api-panel .api-row .v { color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .api-panel .api-row .v.muted { color: var(--muted); }
+  .api-panel .btn-apply {
+    background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
+    padding: 10px 22px; border-radius: 8px; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-top: 6px;
+  }
+  .api-panel .btn-apply:not(:disabled):hover { border-color: var(--pink); color: var(--pink); }
+  .api-panel .btn-apply:disabled { opacity: 0.6; cursor: not-allowed; }
+  .api-panel .api-note { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
+  .api-panel .api-note a { color: var(--pink); font-weight: 600; text-decoration: none; }
+  .api-panel pre {
+    background: #FAFAFA; border: 1px solid var(--line-soft); border-radius: 8px;
+    padding: 14px 16px; font-size: 12.5px; font-family: 'JetBrains Mono', monospace;
+    color: var(--ink); overflow-x: auto; margin-top: 12px; line-height: 1.55;
+  }
+
   .hidden { display: none !important; }
 
   @media (max-width: 800px) {
@@ -903,8 +1072,14 @@
         <button data-section="click-soon">Click Report <span class="soon">SOON</span></button>
 
         <div class="grp"><span class="grp-icon">$</span> Payment</div>
-        <button data-section="bill-soon">Commission Bill <span class="soon">SOON</span></button>
-        <button data-section="payouts">Payout Record <span class="soon">SOON</span></button>
+        <button data-section="bill">Commission Bill</button>
+        <button data-section="payouts">Payout Record</button>
+
+        <!-- Open API — programmatic access to the affiliate's own data
+             (clicks, conversions, payouts). Power-user surface for affiliates
+             building MCP servers, recommendation engines, automation. -->
+        <div class="grp"><span class="grp-icon">⌬</span> Open API</div>
+        <button data-section="api">Open API</button>
 
         <div class="grp"><span class="grp-icon">⚙</span> Account</div>
         <button data-section="settings">Settings</button>
@@ -1167,54 +1342,342 @@
         </div>
       </section>
 
-      <!-- ════════ SOON placeholders (Campaign / Creative / Report / Payment) ════════ -->
+      <!-- ═══════════════════ CAMPAIGN ═══════════════════ -->
+      <!-- Affiliate Campaigns — time-bound promotional pushes. Banner-card
+           layout mirroring Shopee. Empty state for now; cards fill in once
+           advertisers register limited-time promotions. -->
       <section id="sec-campaigns-soon" class="dash-section hidden">
         <h2>Affiliate Campaigns</h2>
-        <p class="pre">Time-bound promotional pushes from advertisers — flash sales, product launches, exclusive bonuses for top affiliates.</p>
-        <div class="empty">
+        <p class="pre">Time-bound promotional pushes from advertisers — launch weeks, seasonal sales, and exclusive bonuses for top affiliates. Promote during the window and your commission rate is bumped.</p>
+
+        <!-- Preview of what a campaign card will look like, so affiliates
+             see the structure even without active data. -->
+        <div class="camp-card" style="opacity: 0.55; pointer-events: none;">
+          <div class="banner">★</div>
+          <div class="body">
+            <span class="pill upcoming">Upcoming</span>
+            <div class="name">First-advertiser launch campaigns will appear here</div>
+            <div class="dates">Each card shows banner · status · date window · View Details</div>
+          </div>
+          <button class="cta" type="button" disabled>View Details</button>
+        </div>
+
+        <div class="empty" style="margin-top: 18px;">
           <div class="icon">⛿</div>
           <h3>Campaigns roll out with our first 20 advertisers</h3>
-          <p>Once we have enough participating advertisers, this view will list active promotional pushes with elevated commission, bonus pools, and limited-time creative drops.</p>
+          <p>Active promotional pushes will list here with elevated commission, bonus pools, and limited-time creative drops. Each campaign card shows the banner, ongoing/upcoming/ended status, the date window, and a View Details link with the full commission rules.</p>
+          <p class="small">Pin your favorites once campaigns appear — those products auto-feature in your Boost Boss Offer category browse.</p>
         </div>
       </section>
 
+      <!-- ═══════════════════ CREATIVE ═══════════════════ -->
       <section id="sec-feed-soon" class="dash-section hidden">
         <h2>Product Feed</h2>
-        <p class="pre">Download the entire active product catalog as a CSV / JSON / RSS feed for use in your own tools — newsletter automations, MCP servers, recommendation engines.</p>
-        <div class="empty">
-          <div class="icon">✺</div>
-          <h3>Product feed coming soon</h3>
-          <p>API access ships once we have enough catalog depth for a feed to be useful. Power-user affiliates will be able to integrate the catalog directly into their MCP servers or custom recommendation flows.</p>
+        <p class="pre">Download the entire active product catalog as CSV / JSON / RSS for use in your own tools — newsletter automations, MCP servers, recommendation engines. Updated daily.</p>
+
+        <div class="data-table-wrap">
+          <div class="table-head">
+            <div class="total">Total: <strong>0</strong></div>
+            <div class="actions">
+              <button class="btn-config" title="Configure columns" type="button">⚙</button>
+              <button class="btn-export" type="button" disabled>Download All</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Feed Name</th>
+                <th>Description</th>
+                <th>Format</th>
+                <th>Data Update Time</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="5" class="no-data">
+                <div class="illus">✺</div>
+                <div>Product feed activates when the catalog has <span class="pink-emph">≥10 active products</span> across the network.</div>
+                <div style="margin-top:6px;font-size:13px;">Power-user affiliates will be able to plug the daily-refreshed feed directly into MCP servers, newsletter automations, or recommendation engines.</div>
+              </td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
+      <!-- ═══════════════════ REPORT — CONVERSION ═══════════════════ -->
       <section id="sec-conv-soon" class="dash-section hidden">
         <h2>Conversion Report</h2>
-        <p class="pre">Per-product attribution detail — every conversion event the advertiser fired back via postback, with the original click, source, and commission state.</p>
-        <div class="empty">
-          <div class="icon">▭</div>
-          <h3>Conversion reporting ships with #3 Commission Tracking</h3>
-          <p>Click tracking is live (see Share Links). Conversion attribution comes online once the postback infrastructure lands.</p>
+        <p class="pre" style="margin-bottom:18px;">Per-conversion drill-down across the whole network. Every postback event the advertiser fires back lands here with the original click, the source surface, and the commission state.</p>
+
+        <div class="filter-bar">
+          <div class="row">
+            <div class="field">
+              <span class="lbl">Order Time</span>
+              <div class="date-range"><input type="date" disabled> ~ <input type="date" disabled></div>
+            </div>
+            <div class="field">
+              <span class="lbl">Order Status</span>
+              <select disabled><option>All</option></select>
+            </div>
+            <div class="field">
+              <span class="lbl">Order ID</span>
+              <input type="text" placeholder="Search for order id" disabled>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <span class="lbl">Advertiser</span>
+              <input type="text" placeholder="Search for advertiser" disabled>
+            </div>
+            <div class="field">
+              <span class="lbl">Product</span>
+              <input type="text" placeholder="Search for product name" disabled>
+            </div>
+            <div class="field">
+              <span class="lbl">Category</span>
+              <select disabled><option>All</option></select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn-clear" type="button" disabled>Clear</button>
+            <button class="btn-search" type="button" disabled>Search</button>
+          </div>
+        </div>
+
+        <div class="data-table-wrap">
+          <div class="table-head">
+            <div class="total">Total conversions: <strong>0</strong></div>
+            <div class="actions">
+              <button class="btn-config" title="Configure columns" type="button">⚙</button>
+              <button class="btn-export" type="button" disabled>Export</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order Details</th>
+                <th>Advertiser</th>
+                <th>Product</th>
+                <th>Offer</th>
+                <th style="text-align:right;">Purchase Value</th>
+                <th style="text-align:right;">Item Commission</th>
+                <th style="text-align:right;">Order Commission</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" class="no-data">
+                <div class="illus">▭</div>
+                <div>Conversions appear here once <span class="pink-emph">#3 Commission Tracking</span> ships.</div>
+                <div style="margin-top:6px;font-size:13px;">Today: clicks are tracked (see Click Report and Share Links). Soon: advertiser postbacks complete the loop.</div>
+              </td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
+      <!-- ═══════════════════ REPORT — CLICK ═══════════════════
+           This one has REAL data — we already track every click on
+           /s/<token> in the affiliate_clicks table. The loader pulls
+           rows for the current affiliate and renders them. -->
       <section id="sec-click-soon" class="dash-section hidden">
         <h2>Click Report</h2>
-        <p class="pre">Granular click log — every redirect through your share links with timestamp, referrer, surface, and conversion outcome.</p>
-        <div class="empty">
-          <div class="icon">▭</div>
-          <h3>Granular click report coming soon</h3>
-          <p>The aggregate live now in your Share Links section. The per-click drill-down view follows shortly.</p>
+        <p class="pre" style="margin-bottom:18px;">Granular log of every redirect through your share links. Useful for understanding which channels convert and for fraud detection (self-clicks, bot traffic).</p>
+
+        <div class="filter-bar">
+          <div class="row">
+            <div class="field">
+              <span class="lbl">Click Time</span>
+              <div class="date-range"><input type="date" id="click-from"> ~ <input type="date" id="click-to"></div>
+            </div>
+            <div class="field">
+              <span class="lbl">Region</span>
+              <input type="text" id="click-region" placeholder="e.g. US, TW, JP">
+            </div>
+            <div class="field">
+              <span class="lbl">Referrer</span>
+              <input type="text" id="click-ref" placeholder="e.g. twitter.com">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn-clear" type="button" id="click-clear">Clear</button>
+            <button class="btn-search" type="button" id="click-search">Search</button>
+          </div>
+        </div>
+
+        <div class="data-table-wrap">
+          <div class="table-head">
+            <div class="total">Total: <strong id="click-total">…</strong></div>
+            <div class="actions">
+              <button class="btn-config" type="button" title="Configure columns">⚙</button>
+              <button class="btn-export" type="button" disabled>Export</button>
+            </div>
+          </div>
+          <div id="click-tbody-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Click Time</th>
+                  <th>Share Link</th>
+                  <th>Product / Target</th>
+                  <th>Region</th>
+                  <th>Referrer</th>
+                  <th>User Agent</th>
+                </tr>
+              </thead>
+              <tbody id="click-tbody">
+                <tr><td colspan="6" class="no-data">
+                  <div class="illus">⏳</div>
+                  <div>Loading…</div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <section id="sec-bill-soon" class="dash-section hidden">
+      <!-- ═══════════════════ PAYMENT — COMMISSION BILL ═══════════════════ -->
+      <section id="sec-bill" class="dash-section hidden">
         <h2>Commission Bill</h2>
-        <p class="pre">Monthly statements showing pending, confirmed, refunded, and paid commission per advertiser. Same shape as a Shopee monthly bill.</p>
-        <div class="empty">
-          <div class="icon">$</div>
-          <h3>Commission billing ships with #3 + #5</h3>
-          <p>Generated automatically once monthly reconciliation runs. You'll be able to download each month's bill as PDF for tax records.</p>
+        <p class="pre" style="margin-bottom:18px;">Monthly statements showing pending, confirmed, refunded, and paid commission per advertiser. Each row is one closed commission line — download the monthly bundle as a PDF for tax records.</p>
+
+        <div class="big-num">
+          <div class="lbl">Pending Payout <span class="help-i" title="Confirmed commission awaiting next payout cycle">i</span></div>
+          <div class="val">$<span id="bill-pending">0.00</span></div>
+          <div class="note">
+            Payout runs <strong>biweekly on Friday</strong> via PayPal when pending balance is above <span class="threshold">$1.00</span>.
+            <a href="#payouts" onclick="switchSection('payouts');return false;">View Payout Record →</a>
+          </div>
+        </div>
+
+        <div class="data-table-wrap">
+          <div class="table-head">
+            <div class="total">Bills this year: <strong>0</strong></div>
+            <div class="actions">
+              <button class="btn-config" type="button" title="Configure columns">⚙</button>
+              <button class="btn-export" type="button" disabled>Download PDF</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Bill Period</th>
+                <th>Advertiser</th>
+                <th style="text-align:right;">Gross Commission</th>
+                <th style="text-align:right;">Refunds / Clawback</th>
+                <th style="text-align:right;">Net Commission</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" class="no-data">
+                <div class="illus">$</div>
+                <div>Commission bills generate <span class="pink-emph">monthly</span> once advertiser postbacks land.</div>
+                <div style="margin-top:6px;font-size:13px;">Each bill consolidates confirmed conversions per advertiser, applies refund clawback within the 30-day window, and produces a downloadable PDF for your records.</div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ PAYMENT — PAYOUT RECORD ═══════════════════ -->
+      <section id="sec-payouts" class="dash-section hidden">
+        <h2>Payout Record</h2>
+        <p class="pre" style="margin-bottom:18px;">History of payouts sent to your PayPal email. Boost Boss runs the same biweekly Friday batch cycle that pays our publishers — proven rail, branded confirmation emails, near-instant PayPal-to-PayPal transfers.</p>
+
+        <div class="big-num">
+          <div class="lbl">Lifetime Payout Amount <span class="help-i" title="Total USD sent to your PayPal across all payout cycles">i</span></div>
+          <div class="val">$<span id="payout-lifetime">0.00</span></div>
+          <div class="note">
+            Next payout window opens <strong>this Friday</strong>. Tuesday is the cutoff for new conversions to land in the upcoming batch.
+            <br>Minimum payout <span class="threshold">$1.00 USD</span>. Set your PayPal email in <a href="#settings" onclick="switchSection('settings');return false;">Settings → Payout Method</a>.
+          </div>
+        </div>
+
+        <div class="data-table-wrap">
+          <div class="table-head">
+            <div class="total">Payouts: <strong>0</strong></div>
+            <div class="actions">
+              <button class="btn-config" type="button" title="Configure columns">⚙</button>
+              <button class="btn-export" type="button" disabled>Export</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Payout Created</th>
+                <th>Payout ID</th>
+                <th style="text-align:right;">Amount</th>
+                <th>Status</th>
+                <th>Sent At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" class="no-data">
+                <div class="illus">🏦</div>
+                <div>No payouts yet — first one lands once confirmed commissions cross <span class="pink-emph">$1.00</span>.</div>
+                <div style="margin-top:6px;font-size:13px;">Batch runs Friday at 12:00 UTC. Status flows: pending → sent → completed. Failed payouts (bad email, recipient unverified) retry the following Saturday.</div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ OPEN API ═══════════════════
+           Programmatic access to the affiliate's own data. Lets power
+           users plug Boost Boss into MCP servers, recommendation engines,
+           and automated link minting. Read-only by default. -->
+      <section id="sec-api" class="dash-section hidden">
+        <h2>Open API</h2>
+        <p class="pre">Programmatic access to your share links, clicks, conversions, and payouts. Build MCP servers that serve Boost Boss products, automate link minting from your CMS, or pipe conversion data into your own analytics stack.</p>
+
+        <div class="api-panel">
+          <h3>My API</h3>
+          <div class="api-row">
+            <span class="k">App ID</span>
+            <span class="v muted" id="api-appid">— (apply below)</span>
+          </div>
+          <div class="api-row">
+            <span class="k">Secret</span>
+            <span class="v muted" id="api-secret">— (apply below)</span>
+          </div>
+          <button class="btn-apply" type="button" id="api-apply-btn" disabled>Apply for API access</button>
+          <p class="api-note" style="margin-top: 14px;">
+            API access is currently invite-only while we tune rate limits. <a href="mailto:api@boostboss.ai">Email api@boostboss.ai</a> to request access — typical turnaround 1 business day. API keys are scoped to your affiliate account only (read-your-own-data); no cross-affiliate access.
+          </p>
+        </div>
+
+        <div class="api-panel">
+          <h3>Quickstart</h3>
+          <p class="api-note">
+            Boost Boss exposes a <strong>REST API</strong> at <code style="background:#FAFAFA;border:1px solid var(--line-soft);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'JetBrains Mono',monospace;">https://api.boostboss.ai/v1</code>. All endpoints accept the App ID + Secret as Bearer credentials and return JSON. Rate limit: 60 requests/minute per key.
+          </p>
+          <p class="api-note" style="margin-top: 12px;">Example — list your share links + click counts:</p>
+          <pre>curl https://api.boostboss.ai/v1/share-links \
+  -H "Authorization: Bearer $BB_API_SECRET" \
+  -H "X-BB-App-ID: $BB_APP_ID"
+
+# Response
+{
+  "links": [
+    { "token": "aBcDeFgH", "url": "https://boostboss.ai/s/aBcDeFgH",
+      "product": "Stripe Atlas", "clicks": 42, "last_click_at": "2026-06-12T15:00:00Z" }
+  ],
+  "total_clicks": 42
+}</pre>
+        </div>
+
+        <div class="api-panel">
+          <h3>Endpoints</h3>
+          <div class="api-row"><span class="k">GET</span><span class="v">/v1/share-links</span></div>
+          <div class="api-row"><span class="k">POST</span><span class="v">/v1/share-links</span></div>
+          <div class="api-row"><span class="k">GET</span><span class="v">/v1/clicks</span></div>
+          <div class="api-row"><span class="k">GET</span><span class="v">/v1/conversions</span></div>
+          <div class="api-row"><span class="k">GET</span><span class="v">/v1/payouts</span></div>
+          <div class="api-row"><span class="k">GET</span><span class="v">/v1/products</span></div>
+          <p class="api-note" style="margin-top: 12px;">
+            Full reference + GraphQL alternative ships alongside general availability. <a href="https://docs.boostboss.ai/affiliate-api" target="_blank">View full docs →</a>
+          </p>
         </div>
       </section>
 
@@ -1225,29 +1688,11 @@
         <div id="links-content"></div>
       </section>
 
-      <!-- Earnings (coming soon) -->
-      <section id="sec-earnings" class="dash-section hidden">
-        <h2>Earnings</h2>
-        <p class="pre">Track pending, confirmed, and paid commissions. See which advertisers convert best for your audience.</p>
-        <div class="empty">
-          <div class="icon">💸</div>
-          <h3>Earnings tracking coming soon</h3>
-          <p>When an advertiser opts into affiliate, they set a commission rate per product. Once share-links and conversion tracking ship, your earnings accrue here — pending until the advertiser's refund window passes, then confirmed, then paid out.</p>
-          <p class="small">Industry-standard 30-day cookie window. 30-day hold before payout eligibility.</p>
-        </div>
-      </section>
+      <!-- Earnings + Payouts (old empty states) removed 2026-06-12 —
+           superseded by the new Payment group: Commission Bill (sec-bill)
+           and Payout Record (sec-payouts, defined below in the Payment
+           section block). -->
 
-      <!-- Payouts (coming soon) -->
-      <section id="sec-payouts" class="dash-section hidden">
-        <h2>Payouts</h2>
-        <p class="pre">Boost Boss pays affiliates via PayPal on a biweekly Friday cycle — the same rail that pays Boost Boss publishers.</p>
-        <div class="empty">
-          <div class="icon">🏦</div>
-          <h3>Payouts coming soon</h3>
-          <p>When you have confirmed earnings, you'll set your PayPal payout email here. Cashouts run every other Friday with a Tuesday cutoff. Minimum payout $1 USD.</p>
-          <p class="small">Same infrastructure that pays our publishers — proven, branded confirmation emails, near-instant PayPal-to-PayPal transfers.</p>
-        </div>
-      </section>
 
       <!-- Settings -->
       <section id="sec-settings" class="dash-section hidden">
@@ -1466,8 +1911,8 @@ document.querySelectorAll('.side-nav button').forEach(b => {
 const VALID_SECTIONS = new Set([
   'home', 'saves',
   'bb-offer', 'partners', 'catalog', 'exclusive', 'custom',
-  'campaigns-soon', 'feed-soon', 'conv-soon', 'click-soon', 'bill-soon',
-  'links', 'payouts', 'settings',
+  'campaigns-soon', 'feed-soon', 'conv-soon', 'click-soon',
+  'links', 'bill', 'payouts', 'api', 'settings',
 ]);
 
 function switchSection(name) {
@@ -1485,6 +1930,58 @@ function switchSection(name) {
   // for pages the user may never look at.
   if (name === 'catalog')  loadCatalog();
   if (name === 'partners') loadPartners();
+  if (name === 'click-soon') loadClickReport();
+}
+
+// ────────────────────────────────────────────────────────────────────────
+//  Click Report — pulls real click data from the share-link table
+// ────────────────────────────────────────────────────────────────────────
+//  Approach for MVP: piggyback on affiliate_list_share_links which
+//  already returns per-link click_count + last_click_at. A future
+//  iteration will add a per-click drill-down endpoint that surfaces
+//  individual rows from the affiliate_clicks table.
+async function loadClickReport() {
+  const session = getSession();
+  if (!session || !session.token) return;
+  const tbody = document.getElementById('click-tbody');
+  const total = document.getElementById('click-total');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="no-data"><div class="illus">⏳</div><div>Loading…</div></td></tr>';
+  try {
+    const r = await fetch(`${API_BASE}/api/auth?action=affiliate_list_share_links&limit=200`, {
+      headers: { 'Authorization': `Bearer ${session.token}` },
+    });
+    if (!r.ok) throw new Error('Failed to load clicks');
+    const j = await r.json();
+    const links = (j.links || []).filter((l) => (l.click_count || 0) > 0);
+    total.textContent = j.total_clicks != null ? j.total_clicks : 0;
+    if (!links.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="no-data">
+        <div class="illus">▭</div>
+        <div>No clicks yet on any of your share links.</div>
+        <div style="margin-top:6px;font-size:13px;">Once you paste a share URL somewhere and someone clicks it, the row lands here with timestamp, referrer, and region.</div>
+      </td></tr>`;
+      return;
+    }
+    // Per-share-link aggregate row. (Per-click drill-down comes with the
+    // dedicated affiliate_clicks endpoint in a follow-up.)
+    tbody.innerHTML = links.map((lk) => {
+      const lastClick = lk.last_click_at ? new Date(lk.last_click_at).toLocaleString() : '—';
+      return `<tr>
+        <td style="font-size:13.5px;">${esc(lastClick)}</td>
+        <td><code style="font-family:'JetBrains Mono',monospace;font-size:12.5px;">boostboss.ai/s/${esc(lk.token)}</code></td>
+        <td title="${esc(lk.target_url || '')}" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(lk.headline || lk.target_url || '—')}</td>
+        <td style="color:var(--muted);">—</td>
+        <td style="color:var(--muted);">—</td>
+        <td style="color:var(--pink);font-weight:700;">${lk.click_count || 0} click${lk.click_count === 1 ? '' : 's'}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="no-data" style="color:#DC2626;">
+      <div class="illus">⚠</div>
+      <div>${esc(e.message || 'Could not load')}</div>
+    </td></tr>`;
+  }
 }
 
 // Boost Boss Offer — category tiles → jump to Catalog filtered by that cat
