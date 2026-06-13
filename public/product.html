@@ -204,6 +204,67 @@
       font-weight: 700;
     }
 
+    /* ── Gated state ────────────────────────────────────────────────
+       Shown to anonymous visitors without bb_click. Reveals product
+       name + image (already public via affiliate promotion) but hides
+       everything else (price, description, FAQ, Buy button). See
+       [[mor-product-page-model]] "The gate" section. */
+    .gate-wrap {
+      max-width: 640px; margin: 64px auto 80px; padding: 0 24px;
+      text-align: center;
+    }
+    .gate-product {
+      background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 36px 32px 32px; box-shadow: var(--shadow-md);
+    }
+    .gate-img {
+      width: 120px; height: 120px; margin: 0 auto 22px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--pink-soft), #FFC9DC);
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: center; font-size: 48px;
+    }
+    .gate-name {
+      font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
+      letter-spacing: -0.3px; margin: 0 0 8px;
+    }
+    .gate-lock {
+      display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px;
+      background: var(--pink-soft); color: var(--pink); border-radius: 99px;
+      font-size: 12.5px; font-weight: 700; letter-spacing: 0.3px;
+      text-transform: uppercase; margin-bottom: 22px;
+    }
+    .gate-explain {
+      font-size: 15px; color: var(--ink-soft); line-height: 1.65; margin: 0 0 26px;
+      max-width: 460px; margin-left: auto; margin-right: auto;
+    }
+    .gate-cta {
+      display: inline-block; background: var(--pink); color: #fff;
+      padding: 14px 28px; border-radius: 10px; text-decoration: none;
+      font-weight: 700; font-size: 15px; box-shadow: var(--shadow-md);
+      transition: filter 0.12s, transform 0.08s;
+    }
+    .gate-cta:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    .gate-sub {
+      margin-top: 16px; font-size: 13px; color: var(--muted);
+    }
+    .gate-sub a { color: var(--ink-soft); font-weight: 600; }
+
+    /* ── Preview banner (advertiser viewing their own product) ─── */
+    .preview-banner {
+      background: #FEF3C7; border-bottom: 1px solid #FDE68A;
+      padding: 12px 28px; font-size: 13.5px; color: #92400E;
+      text-align: center; font-weight: 600;
+    }
+    .preview-banner .pill {
+      background: #FBBF24; color: #78350F; font-size: 10.5px; font-weight: 700;
+      padding: 3px 8px; border-radius: 99px; margin-right: 8px;
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .buy-btn.preview-disabled {
+      background: #D1D5DB; color: #6B7280; cursor: not-allowed;
+      box-shadow: none; pointer-events: none;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -233,6 +294,32 @@
   <h2 id="errorTitle">Product not found</h2>
   <p id="errorBody">This product link may be expired or invalid.</p>
   <a href="https://boostboss.ai">Back to Boost Boss</a>
+</div>
+
+<!-- ════════════════════ GATE ════════════════════
+     Shown when the visitor lacks bb_click AND isn't the product owner.
+     See [[mor-product-page-model]] "The gate" section. -->
+<div id="gateState" class="gate-wrap hidden">
+  <div class="gate-product">
+    <div class="gate-img" id="gateImg">📦</div>
+    <h2 class="gate-name" id="gateName">—</h2>
+    <div class="gate-lock">🔒 Affiliate-only product</div>
+    <p class="gate-explain">
+      Boost Boss products are exclusively available through trusted affiliates. To access pricing, full details, and purchase this product, you need to arrive via an affiliate's share link.
+    </p>
+    <a class="gate-cta" href="https://affiliate.boostboss.ai">Become a Boost Boss affiliate →</a>
+    <div class="gate-sub">
+      Already affiliated? Use your share link to access this product.<br>
+      <a href="mailto:support@boostboss.ai">Need help finding an affiliate?</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ PREVIEW BANNER ════════════════════
+     Shown when the advertiser is viewing their own product page. -->
+<div id="previewBanner" class="preview-banner hidden">
+  <span class="pill">Preview</span>
+  This is how buyers see your product page. Purchases require an affiliate link — your <a href="/ads/dashboard#/products" style="color:#92400E;text-decoration:underline;">Products dashboard</a> still works normally.
 </div>
 
 <!-- ════════════════════ PRODUCT PAGE ════════════════════ -->
@@ -351,13 +438,43 @@
   }
 
   // ── Fetch + render ───────────────────────────────────────────────────
-  fetch(`${API_BASE}/api/products?action=public&id=${encodeURIComponent(productId)}`)
+  //
+  // Build the API URL with bb_click if we have it (URL or sessionStorage),
+  // so the gate decision happens server-side. Pull the advertiser auth
+  // token from the bb_session_token localStorage (set by the advertiser
+  // dashboard) so the owner-preview path works if they're signed in.
+  const apiUrl = new URL(`${API_BASE}/api/products?action=public&id=${encodeURIComponent(productId)}`);
+  const effectiveClick = bbClick || (function () {
+    try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; }
+  })();
+  if (effectiveClick) apiUrl.searchParams.set('bb_click', effectiveClick);
+
+  const fetchOpts = { method: 'GET' };
+  try {
+    // The advertiser dashboard signs in via Supabase auth and stashes the
+    // session token in localStorage. If present, send it as Bearer so the
+    // server can detect ownership and return is_owner=true. Anonymous
+    // visitors don't have this and the gate kicks in.
+    const advToken = localStorage.getItem('bb_session_token');
+    if (advToken) {
+      fetchOpts.headers = { 'Authorization': 'Bearer ' + advToken };
+    }
+  } catch (_) {}
+
+  fetch(apiUrl.toString(), fetchOpts)
     .then((r) => {
       if (r.status === 404) throw new Error('not_found');
       if (!r.ok) throw new Error('server_error');
       return r.json();
     })
-    .then((j) => render(j.product))
+    .then((j) => {
+      const access = j.access || {};
+      if (access.gated) {
+        renderGate(j.product);
+      } else {
+        render(j.product, access.is_owner === true);
+      }
+    })
     .catch((err) => {
       if (err.message === 'not_found') {
         showError('Product not found', 'This product link may be expired, archived, or invalid.');
@@ -365,6 +482,21 @@
         showError('Couldn\'t load product', 'Please try again in a moment. If the problem persists, contact support@boostboss.ai.');
       }
     });
+
+  // Gate state — visitor has no bb_click and isn't the advertiser.
+  // Show minimal product identity + "become an affiliate" CTA.
+  function renderGate(p) {
+    document.title = p.name + ' · Boost Boss';
+    document.getElementById('gateName').textContent = p.name;
+    if (p.image_url) {
+      const img = document.getElementById('gateImg');
+      img.style.backgroundImage = `url("${p.image_url.replace(/"/g, '%22')}")`;
+      img.textContent = '';
+    }
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('affPill').classList.remove('show');  // hide aff-pill in gate state
+    document.getElementById('gateState').classList.remove('hidden');
+  }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
@@ -379,7 +511,13 @@
     document.title = title + ' · Boost Boss';
   }
 
-  function render(p) {
+  function render(p, isOwner) {
+    // Preview banner — advertiser viewing their own product page
+    if (isOwner) {
+      document.getElementById('previewBanner').classList.remove('hidden');
+      document.getElementById('affPill').classList.remove('show');  // don't double-banner
+    }
+
     // Page chrome
     document.title = p.name + ' · Boost Boss';
     document.getElementById('prodName').textContent = p.name;
@@ -411,11 +549,19 @@
     }[p.sku_type] || '';
     document.getElementById('prodSku').textContent = skuLabel;
 
-    // Buy button — preserve bb_click into the /buy URL
+    // Buy button — preserve bb_click into the /buy URL. In owner-preview
+    // mode the button is visibly disabled with "Preview only" text and the
+    // .preview-disabled class blocks clicks via CSS pointer-events.
     const buyBtn = document.getElementById('buyBtn');
-    const bb = bbClick || (function () { try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; } })();
-    const buyUrl = '/buy/' + encodeURIComponent(p.id) + (bb ? '?bb_click=' + encodeURIComponent(bb) : '');
-    buyBtn.href = buyUrl;
+    if (isOwner) {
+      buyBtn.textContent = 'Buy (Preview — purchases require an affiliate link)';
+      buyBtn.classList.add('preview-disabled');
+      buyBtn.removeAttribute('href');
+    } else {
+      const bb = bbClick || (function () { try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; } })();
+      const buyUrl = '/buy/' + encodeURIComponent(p.id) + (bb ? '?bb_click=' + encodeURIComponent(bb) : '');
+      buyBtn.href = buyUrl;
+    }
 
     // Optional external "read more" CTA
     if (p.external_marketing_url) {

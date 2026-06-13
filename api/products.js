@@ -342,19 +342,30 @@ module.exports = async function handler(req, res) {
       return res.json({ product: data });
     }
 
-    // ── PUBLIC product page (no auth, no marketplace browse) ──
-    // GET /api/products?action=public&id=<uuid>
-    // Returns ONLY buyer-safe fields so the public /p/<token> page can render.
-    // Webhook secrets, advertiser_id, and any internal fields are excluded.
-    // No auth required since this is the buyer-facing surface.
+    // ── PUBLIC product page (gated) ──
+    // GET /api/products?action=public&id=<uuid>[&bb_click=<id>]
+    //
+    // Three access modes (see [[mor-product-page-model]] "The gate" section):
+    //   1. bb_click present + valid UUID format     → full product
+    //   2. Bearer auth + user owns product           → full product + is_owner=true
+    //   3. Neither                                   → minimal gated response
+    //
+    // The gated response contains ONLY name + image_url + the gated flag.
+    // The frontend uses it to render the "Exclusive to affiliates" gate.
+    // Price, description, FAQ, etc. are hidden — sellers can't bypass the
+    // affiliate ecosystem by sharing the bare /p/<uuid> URL.
     if (req.method === "GET" && action === "public") {
       const id = (req.query && req.query.id) || (req.query && req.query.token);
       if (!id) return res.status(400).json({ error: "id is required" });
 
+      const bbClick = (req.query && req.query.bb_click) || "";
+      const hasValidClick = typeof bbClick === "string" && /^[0-9a-fA-F-]{8,40}$/.test(bbClick);
+
+      // Pull all fields — we'll decide what to expose based on access mode.
       const { data, error } = await sb
         .from("products")
         .select(`
-          id, name, description, image_url, status,
+          id, advertiser_id, name, description, image_url, status,
           price, currency, sku_type,
           long_description, screenshots, demo_video_url,
           package_details, faq, testimonials,
@@ -368,10 +379,40 @@ module.exports = async function handler(req, res) {
         return res.status(404).json({ error: "Product not found" });
       }
 
-      // Whitelist: do NOT leak fulfillment_webhook_url / secret /
-      // advertiser_id to the public client. The above SELECT already
-      // omits them but be explicit so future schema growth doesn't
-      // accidentally widen the surface.
+      // Advertiser-ownership check (preview mode). If a Bearer token is
+      // present, validate via Supabase auth and check if the user owns
+      // this product. We do NOT 401 on missing/invalid auth — we just
+      // fall through to the gated response.
+      let isOwner = false;
+      const authHeader = req.headers.authorization || "";
+      if (authHeader.startsWith("Bearer ") && data.advertiser_id) {
+        const token = authHeader.replace(/^Bearer\s+/i, "");
+        const anon = sbAnon();
+        if (anon) {
+          try {
+            const { data: { user } } = await anon.auth.getUser(token);
+            if (user && user.id === data.advertiser_id) isOwner = true;
+          } catch (_) { /* swallow — gate the page */ }
+        }
+      }
+
+      // Decide which response to return.
+      if (!hasValidClick && !isOwner) {
+        // GATED — minimal payload, just enough to render the gate UI.
+        return res.json({
+          product: {
+            id:        data.id,
+            name:      data.name,
+            image_url: data.image_url,
+          },
+          access: {
+            gated:  true,
+            reason: "no_affiliate",
+          },
+        });
+      }
+
+      // FULL access — buyer with valid bb_click, or advertiser previewing.
       const safe = {
         id:                       data.id,
         name:                     data.name,
@@ -388,13 +429,17 @@ module.exports = async function handler(req, res) {
         testimonials:             data.testimonials || [],
         external_marketing_url:   data.external_marketing_url,
         default_url:              data.default_url,
-        // Buyer-facing display: "what % does the affiliate earn" — useful
-        // social-proof signal for buyers ("by buying via this affiliate link
-        // you support the creator"). Optional; some products may hide it.
         commission_pct_display:   data.default_commission_pct,
         package_duration_days:    data.package_duration_days,
       };
-      return res.json({ product: safe });
+      return res.json({
+        product: safe,
+        access: {
+          gated:    false,
+          reason:   isOwner ? "preview" : "affiliate",
+          is_owner: isOwner,
+        },
+      });
     }
 
     // ── BROWSE (marketplace — all active products across advertisers) ──

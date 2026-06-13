@@ -240,6 +240,16 @@
     return;
   }
 
+  // ── Gate: checkout requires bb_click (just like /p/<uuid> does) ──────
+  // Buyers without an affiliate attribution get bounced back to the
+  // product page, which will then show its own gate state. This keeps
+  // the model consistent: no purchase path is reachable without an
+  // affiliate's share link. See [[mor-product-page-model]] "The gate".
+  if (!bbClick) {
+    window.location.replace('/p/' + encodeURIComponent(productId));
+    return;
+  }
+
   let product = null;
 
   // ── Step 1: load product details for the summary card ─────────────
