@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout · Boost Boss</title>
+  <link rel="icon" href="/favicon.ico">
+  <meta name="robots" content="noindex">
+  <style>
+    :root {
+      --pink: #FF2D78;
+      --pink-dark: #E91C68;
+      --pink-soft: #FFF0F6;
+      --ink: #111827;
+      --ink-soft: #374151;
+      --muted: #6B7280;
+      --line: #E5E7EB;
+      --line-soft: #F3F4F6;
+      --bg: #F9FAFB;
+      --bg-card: #ffffff;
+      --green: #059669;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; line-height: 1.55; }
+
+    .topbar {
+      background: var(--bg-card); border-bottom: 1px solid var(--line);
+      padding: 14px 28px; display: flex; align-items: center; gap: 14px;
+    }
+    .topbar img { width: 26px; height: 26px; }
+    .topbar .name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
+    .topbar .tag {
+      font-size: 10.5px; font-weight: 700; color: var(--pink); padding: 3px 8px;
+      border-radius: 99px; background: rgba(255,45,120,0.10); letter-spacing: 0.4px;
+    }
+    .topbar .right { margin-left: auto; font-size: 13px; }
+    .topbar a { color: var(--ink-soft); text-decoration: none; font-weight: 500; }
+
+    .aff-pill {
+      display: none; background: var(--pink-soft); color: var(--pink);
+      padding: 10px 28px; font-size: 13px; font-weight: 600;
+      text-align: center; border-bottom: 1px solid #FECDD3;
+    }
+    .aff-pill.show { display: block; }
+
+    .wrap {
+      max-width: 480px; margin: 40px auto 80px; padding: 0 24px;
+    }
+
+    .summary-card {
+      background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 20px 22px; margin-bottom: 18px; display: flex; gap: 14px; align-items: center;
+    }
+    .summary-card .thumb {
+      width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--pink-soft), #FFC9DC);
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .summary-card .text { flex: 1; min-width: 0; }
+    .summary-card .pname { font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .summary-card .psub  { font-size: 12.5px; color: var(--muted); }
+    .summary-card .price { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.5px; line-height: 1; flex-shrink: 0; }
+
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
+      letter-spacing: -0.4px; margin: 8px 0 6px; }
+    .sub { font-size: 14.5px; color: var(--muted); margin: 0 0 22px; }
+
+    .form-card {
+      background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 22px 24px; box-shadow: var(--shadow-sm);
+    }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px;
+    }
+    .field input[type=email], .field input[type=text] {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px;
+      font-size: 15px; font-family: inherit; background: #fff; color: var(--ink);
+    }
+    .field input:focus { outline: none; border-color: var(--pink); }
+    .field .hint { font-size: 11.5px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+    .divider {
+      margin: 22px 0 18px; height: 1px; background: var(--line-soft);
+      position: relative; text-align: center;
+    }
+    .divider span {
+      background: var(--bg-card); position: relative; top: -8px; padding: 0 12px;
+      font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    #paypal-button-container { min-height: 50px; }
+    #paypal-button-container.disabled { opacity: 0.5; pointer-events: none; }
+
+    .err-box {
+      display: none; background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B;
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-top: 14px;
+    }
+    .err-box.show { display: block; }
+
+    .legal {
+      margin-top: 20px; font-size: 11.5px; color: var(--muted);
+      line-height: 1.6; text-align: center;
+    }
+    .legal a { color: var(--ink-soft); }
+
+    .footer {
+      max-width: 720px; margin: 24px auto 0; padding: 16px 24px;
+      color: var(--muted); font-size: 12.5px; text-align: center; line-height: 1.5;
+    }
+    .footer strong { color: var(--ink); }
+
+    /* Capturing state — covers the page while we wait for PayPal capture to land */
+    .capturing-overlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.92);
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; z-index: 9999;
+    }
+    .capturing-overlay.show { display: flex; }
+    .capturing-overlay .spin {
+      width: 36px; height: 36px; border: 3px solid var(--line);
+      border-top-color: var(--pink); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .capturing-overlay .label { font-size: 14px; color: var(--ink-soft); font-weight: 600; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="/email-logo.png" alt="Boost Boss" onerror="this.style.display='none'">
+  <span class="name">Boost Boss</span>
+  <span class="tag">CHECKOUT</span>
+  <span class="right"><a href="javascript:history.back()">← Back</a></span>
+</div>
+
+<div class="aff-pill" id="affPill">
+  ✨ You arrived via an affiliate's recommendation — buying here supports them at no extra cost to you
+</div>
+
+<div class="wrap">
+
+  <!-- Loading state -->
+  <div id="loading" style="text-align: center; color: var(--muted); padding: 60px 0;">
+    Loading checkout…
+  </div>
+
+  <!-- Error state -->
+  <div id="errorState" class="hidden" style="text-align: center; padding: 40px 0;">
+    <h1 id="errorTitle" style="text-align:center;">Couldn't load product</h1>
+    <p class="sub" style="text-align:center;" id="errorBody">Please try again in a moment.</p>
+    <a href="/" style="display:inline-block;background:var(--pink);color:#fff;padding:11px 22px;border-radius:10px;text-decoration:none;font-weight:700;">← Boost Boss</a>
+  </div>
+
+  <!-- Checkout state -->
+  <div id="checkoutState" class="hidden">
+
+    <!-- Summary: thumbnail | name + sku type | price -->
+    <div class="summary-card">
+      <div class="thumb" id="thumb">📦</div>
+      <div class="text">
+        <div class="pname" id="pname">—</div>
+        <div class="psub" id="psub"></div>
+      </div>
+      <div class="price" id="priceDisplay">—</div>
+    </div>
+
+    <h1>Complete your purchase</h1>
+    <p class="sub">Boost Boss handles payment securely via PayPal. You'll receive a redemption code by email immediately after purchase.</p>
+
+    <div class="form-card">
+      <div class="field">
+        <label for="buyerEmail">Email address</label>
+        <input type="email" id="buyerEmail" placeholder="you@example.com" autocomplete="email" required>
+        <div class="hint">We'll send your redemption code + receipt here.</div>
+      </div>
+
+      <div class="divider"><span>then pay</span></div>
+
+      <!-- PayPal Smart Buttons mount point. SDK injects the button(s) here.
+           Stays disabled until the buyer enters a valid email. -->
+      <div id="paypal-button-container" class="disabled"></div>
+
+      <div id="errBox" class="err-box"></div>
+
+      <p class="legal">
+        By completing this purchase you agree to Boost Boss's
+        <a href="/terms" target="_blank">Terms</a> and
+        <a href="/refunds" target="_blank">Refund policy</a> (14 days).
+        <strong>Boost Boss</strong> is the Merchant of Record.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="footer" id="footer">
+  Payment processed by <strong>PayPal</strong>. Your account information is never seen by Boost Boss or the seller.
+</div>
+
+<!-- Capturing overlay shown after PayPal returns and we're calling capture -->
+<div class="capturing-overlay" id="capturingOverlay">
+  <div class="spin"></div>
+  <div class="label">Finalising your purchase…</div>
+</div>
+
+<!--
+  PayPal JS SDK. Client ID + currency are fetched from a public config
+  endpoint (the SDK doesn't allow the secret to ever touch the client).
+  We load it dynamically once we have the buyer's email so the Smart
+  Buttons render with the right intent + currency.
+-->
+<script>
+(function () {
+  const API_BASE = window.location.origin;
+  // Parse product id from /buy/<uuid> pathname (Vercel rewrites are
+  // server-side; see [[feedback-vercel-rewrite-server-side]] memory).
+  const pathMatch = window.location.pathname.match(/^\/buy\/([^/?#]+)/i);
+  const params = new URLSearchParams(window.location.search);
+  const productId = (pathMatch && pathMatch[1]) || params.get('id');
+  const bbClick = params.get('bb_click') || (function () {
+    try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; }
+  })();
+
+  if (bbClick) {
+    document.getElementById('affPill').classList.add('show');
+    try { sessionStorage.setItem('bbx_click', bbClick); } catch (_) {}
+  }
+
+  if (!productId) {
+    showError('Missing product ID', 'This checkout URL is incomplete.');
+    return;
+  }
+
+  let product = null;
+
+  // ── Step 1: load product details for the summary card ─────────────
+  fetch(`${API_BASE}/api/products?action=public&id=${encodeURIComponent(productId)}`)
+    .then((r) => { if (r.status === 404) throw new Error('not_found'); if (!r.ok) throw new Error('server'); return r.json(); })
+    .then((j) => {
+      product = j.product;
+      if (!product.price || Number(product.price) <= 0) {
+        throw new Error('not_purchasable');
+      }
+      renderSummary(product);
+      loadPayPalSDK();
+    })
+    .catch((err) => {
+      if (err.message === 'not_found') {
+        showError('Product not found', 'This link may be expired or invalid.');
+      } else if (err.message === 'not_purchasable') {
+        showError('Not available for purchase', 'This product can\'t be bought directly — contact the seller for details.');
+      } else {
+        showError('Couldn\'t load checkout', 'Please try again in a moment.');
+      }
+    });
+
+  function showError(title, body) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('checkoutState').classList.add('hidden');
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorBody').textContent = body;
+    document.getElementById('errorState').classList.remove('hidden');
+    document.title = title + ' · Boost Boss';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+
+  function renderSummary(p) {
+    document.title = 'Checkout: ' + p.name + ' · Boost Boss';
+    document.getElementById('pname').textContent = p.name;
+    document.getElementById('psub').textContent = ({
+      one_time: 'One-time purchase',
+      bundle: 'Bundle',
+      lifetime: 'Lifetime access',
+      subscription_pack: p.package_duration_days
+        ? Math.round(p.package_duration_days / 30) + '-month pack'
+        : 'Subscription pack',
+    }[p.sku_type] || p.sku_type || '');
+    if (p.image_url) {
+      const t = document.getElementById('thumb');
+      t.style.backgroundImage = `url("${p.image_url.replace(/"/g, '%22')}")`;
+      t.textContent = '';
+    }
+    const price = Number(p.price).toFixed(p.price >= 100 ? 0 : 2);
+    document.getElementById('priceDisplay').textContent =
+      (p.currency === 'USD' ? '$' : '') + price + (p.currency !== 'USD' ? ' ' + p.currency : '');
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('checkoutState').classList.remove('hidden');
+  }
+
+  // ── Step 2: lazy-load PayPal SDK ──────────────────────────────────
+  // The client ID comes from a server config endpoint. We never embed
+  // it in HTML so it can change per environment (sandbox/prod) without
+  // rebuilds.
+  function loadPayPalSDK() {
+    fetch(`${API_BASE}/api/config?key=paypal_client_id`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((cfg) => {
+        const clientId = (cfg && cfg.value) || 'sb';  // 'sb' = PayPal sandbox demo client
+        const currency = (product && product.currency) || 'USD';
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture`;
+        script.onload = renderPayPalButton;
+        script.onerror = () => showFormError('Couldn\'t load PayPal. Please reload the page.');
+        document.head.appendChild(script);
+      })
+      .catch(() => showFormError('Couldn\'t load PayPal. Please reload the page.'));
+  }
+
+  function showFormError(msg) {
+    const box = document.getElementById('errBox');
+    box.textContent = msg;
+    box.classList.add('show');
+  }
+
+  // Enable the PayPal button only when the email field is valid.
+  const emailInput = document.getElementById('buyerEmail');
+  const container = document.getElementById('paypal-button-container');
+  emailInput.addEventListener('input', () => {
+    const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput.value.trim());
+    container.classList.toggle('disabled', !valid);
+  });
+
+  // ── Step 3: render PayPal Smart Buttons ───────────────────────────
+  function renderPayPalButton() {
+    if (!window.paypal) {
+      showFormError('PayPal didn\'t load. Please reload.');
+      return;
+    }
+    window.paypal.Buttons({
+      style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'paypal' },
+
+      // createOrder — runs when the buyer clicks the PayPal button.
+      // We POST to our backend which:
+      //   1. Resolves attribution from bb_click
+      //   2. Writes a pending storefront_transactions row
+      //   3. Creates a PayPal Order (invoice_id = our tx UUID)
+      //   4. Returns the PayPal order_id
+      createOrder: function () {
+        const email = emailInput.value.trim();
+        return fetch(`${API_BASE}/api/checkout?action=create_order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id:  productId,
+            buyer_email: email,
+            bb_click:    bbClick || null,
+          }),
+        }).then((r) => r.json().then((j) => ({ ok: r.ok, j })))
+          .then((res) => {
+            if (!res.ok) throw new Error(res.j.error || 'create_order failed');
+            return res.j.order_id;
+          })
+          .catch((err) => {
+            showFormError(err.message || 'Could not start checkout');
+            throw err;  // PayPal SDK needs to see the rejection to abort
+          });
+      },
+
+      // onApprove — buyer authorized on PayPal. Show overlay while we
+      // call our capture endpoint, then redirect to the success page
+      // when capture completes.
+      onApprove: function (data) {
+        document.getElementById('capturingOverlay').classList.add('show');
+        return fetch(`${API_BASE}/api/checkout?action=capture_order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: data.orderID }),
+        }).then((r) => r.json().then((j) => ({ ok: r.ok, j })))
+          .then((res) => {
+            if (!res.ok) throw new Error(res.j.error || 'capture failed');
+            // Redirect to success page — query string includes tx id
+            // so the success page can fetch + display the voucher.
+            window.location.href = `/buy/${encodeURIComponent(productId)}/success?tx=${encodeURIComponent(res.j.transaction_id)}`;
+          })
+          .catch((err) => {
+            document.getElementById('capturingOverlay').classList.remove('show');
+            showFormError(err.message || 'Payment captured but we couldn\'t confirm — please contact support@boostboss.ai with order ' + data.orderID);
+          });
+      },
+
+      onCancel: function () {
+        showFormError('You cancelled the payment. No charges were made.');
+      },
+
+      onError: function (err) {
+        showFormError('Payment error: ' + (err && err.message ? err.message : 'unknown'));
+      },
+    }).render('#paypal-button-container');
+  }
+})();
+</script>
+</body>
+</html>

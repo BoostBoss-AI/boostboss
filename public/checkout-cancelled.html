@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancelled · Boost Boss</title>
+  <meta name="robots" content="noindex">
+  <style>
+    :root { --pink:#FF2D78; --ink:#111827; --muted:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; line-height: 1.6; }
+    .topbar { background: #fff; border-bottom: 1px solid var(--line); padding: 14px 28px; display: flex; align-items: center; gap: 14px; }
+    .topbar img { width: 26px; height: 26px; }
+    .topbar .name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
+    .wrap { max-width: 520px; margin: 80px auto; padding: 0 24px; text-align: center; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 26px; margin: 0 0 12px; letter-spacing: -0.3px; }
+    .sub { font-size: 15.5px; color: var(--muted); margin: 0 0 28px; line-height: 1.65; }
+    .btn { display: inline-block; background: var(--pink); color: #fff; padding: 13px 26px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14.5px; }
+    .btn:hover { filter: brightness(1.06); }
+    .ghost { display: inline-block; color: var(--muted); text-decoration: none; padding: 13px 18px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <img src="/email-logo.png" alt="Boost Boss" onerror="this.style.display='none'">
+    <span class="name">Boost Boss</span>
+  </div>
+  <div class="wrap">
+    <h1>Checkout cancelled</h1>
+    <p class="sub">No charges were made. You can try again any time — the product page is still here.</p>
+    <a class="btn" href="javascript:history.back()">← Try again</a>
+    <a class="ghost" href="/">Or back to Boost Boss</a>
+  </div>
+</body>
+</html>
