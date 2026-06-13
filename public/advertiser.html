@@ -4176,6 +4176,11 @@
                 <div id="productAuditBannerInner"></div>
               </div>
 
+              <!-- Lock tip — shown when audit_status='approved' -->
+              <div id="productLockedTip" style="display:none;margin-top:14px;padding:12px 16px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:10px;font-size:12.5px;color:#475569;line-height:1.6;">
+                🔒 <strong>This product is approved and locked.</strong> To keep the marketplace honest, approved products are immutable — sellers can't edit pricing or marketing after approval. Use <strong>Duplicate as new</strong> to create a fresh version pre-filled with these values, then update + resubmit for audit.
+              </div>
+
               <div id="productFormErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;margin-top:14px;"></div>
               <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid #F3F4F6;flex-wrap:wrap;">
                 <div style="font-size:11.5px;color:#9CA3AF;">Tab fields marked optional can be filled later — save anytime.</div>
@@ -4183,6 +4188,11 @@
                   <button type="button" class="new-campaign-btn" id="productCancelBtn" style="background:#fff;color:#374151;border:1px solid #E5E7EB;">Cancel</button>
                   <button type="button" id="productSubmitForAuditBtn" style="display:none;padding:9px 16px;border:1px solid #4338CA;border-radius:8px;background:#EEF2FF;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#4338CA;">Submit for audit</button>
                   <button type="submit" class="new-campaign-btn" id="productSubmitBtn">Save product</button>
+                  <!-- Locked-state actions — visible only when audit_status='approved' -->
+                  <span id="productLockedActions" style="display:none;gap:8px;flex-wrap:wrap;">
+                    <button type="button" id="productLockedDuplicateBtn" style="padding:9px 16px;border:1px solid #FF2D78;border-radius:8px;background:#FFF1F6;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#FF2D78;">Duplicate as new</button>
+                    <button type="button" id="productLockedArchiveBtn" style="padding:9px 16px;border:1px solid #DC2626;border-radius:8px;background:#FEF2F2;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#DC2626;">Archive product</button>
+                  </span>
                 </div>
               </div>
             </form>
@@ -11857,11 +11867,20 @@ function pfParseScreenshots(text) {
 
                     // Pricing & Affiliate
                     if (form.elements.affiliate_pool_pct) form.elements.affiliate_pool_pct.value = product.affiliate_pool_pct != null ? product.affiliate_pool_pct : (product.default_commission_pct != null ? product.default_commission_pct : 20);
-                    // Product-level audit banner
-                    paintAuditBanner(product);
+                    // Product-level audit banner — only shown in EDIT mode.
+                    // For CREATE mode (incl. Duplicate-as-new where product is a
+                    // pre-fill clone), the new product hasn't been saved yet.
+                    if (mode === 'edit') {
+                        paintAuditBanner(product);
+                        paintLockState(product);
+                    } else {
+                        paintAuditBanner(null);
+                        paintLockState(null);
+                    }
                 } else {
                     if (form.elements.affiliate_pool_pct) form.elements.affiliate_pool_pct.value = 20;
                     paintAuditBanner(null);
+                    paintLockState(null);
                 }
                 // Tee up the inline pricing-plans state for this product.
                 // For CREATE mode there's no product_id yet — the list shows
@@ -11871,6 +11890,45 @@ function pfParseScreenshots(text) {
                 modal.classList.add('active');
                 setTimeout(() => form.elements.name.focus(), 50);
             }
+            // ── Lock approved products into read-only mode ────────────────
+            // Approved products are immutable (see [[pricing-plans-audit-policy]]).
+            // Seller must archive + Duplicate-as-new to change anything.
+            // This function disables every form input, hides Save + Submit-for-audit,
+            // adds an Archive button, and reveals a Duplicate-as-new button.
+            function paintLockState(product) {
+                const isLocked = !!(product && product.audit_status === 'approved');
+                const formEl = document.getElementById('productForm');
+                if (!formEl) return;
+
+                // Disable every input / select / textarea inside the form
+                formEl.querySelectorAll('input, select, textarea, button[type="submit"]').forEach((el) => {
+                    if (el.id === 'productCancelBtn' || el.id === 'productPreviewLink') return;
+                    el.disabled = isLocked;
+                });
+                // Also disable the inline plan editor add button and any plan-action buttons
+                const ppAddBtn = document.getElementById('ppInlineAddBtn');
+                if (ppAddBtn) ppAddBtn.disabled = isLocked;
+                document.querySelectorAll('#ppInlineList button[data-pp-action]').forEach((b) => { b.disabled = isLocked; });
+
+                // Hide Save + Submit-for-audit when locked; replace with Archive + Duplicate
+                const saveBtn   = document.getElementById('productSubmitBtn');
+                const submitBtn = document.getElementById('productSubmitForAuditBtn');
+                const lockBar   = document.getElementById('productLockedActions');
+                if (saveBtn)   saveBtn.style.display   = isLocked ? 'none' : '';
+                if (submitBtn) submitBtn.style.display = isLocked ? 'none' : (submitBtn.style.display || 'none');
+                if (lockBar)   lockBar.style.display   = isLocked ? 'inline-flex' : 'none';
+
+                // Highlight the lock with a banner inline tip
+                const lockTip = document.getElementById('productLockedTip');
+                if (lockTip) lockTip.style.display = isLocked ? 'block' : 'none';
+
+                // Stash the product id for Archive/Duplicate buttons
+                const archBtn = document.getElementById('productLockedArchiveBtn');
+                const dupBtn  = document.getElementById('productLockedDuplicateBtn');
+                if (archBtn) archBtn.dataset.productId = (product && product.id) || '';
+                if (dupBtn)  dupBtn.dataset.productId  = (product && product.id) || '';
+            }
+
             // ── Product-level audit banner + Submit-for-audit button ──────
             // Audit happens at the product level (see [[pricing-plans-audit-policy]]).
             // The banner inside the modal reflects current audit_status; the
@@ -11912,6 +11970,55 @@ function pfParseScreenshots(text) {
                 submitBtn.style.display = (status === 'pending') ? 'none' : 'inline-flex';
                 submitBtn.dataset.productId = product.id;
             }
+
+            // Wire Archive + Duplicate-as-new buttons (visible only when locked)
+            (function () {
+                const archBtn = document.getElementById('productLockedArchiveBtn');
+                const dupBtn  = document.getElementById('productLockedDuplicateBtn');
+
+                if (archBtn) archBtn.addEventListener('click', async () => {
+                    const id = archBtn.dataset.productId;
+                    if (!id) return;
+                    if (!confirm('Archive this product?\n\nIt disappears from the affiliate marketplace and new buyers can\'t purchase. Existing voucher holders are unaffected. Use this if you want to change pricing or content — then Duplicate as new.')) return;
+                    archBtn.disabled = true;
+                    archBtn.textContent = 'Archiving…';
+                    try {
+                        const r = await fetch('/api/products?action=archive', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                            body: JSON.stringify({ id }),
+                        });
+                        if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Archive failed'); }
+                        closeModal();
+                        await loadProducts();
+                    } catch (err) {
+                        alert(err.message);
+                    } finally {
+                        archBtn.disabled = false;
+                        archBtn.textContent = 'Archive product';
+                    }
+                });
+
+                if (dupBtn) dupBtn.addEventListener('click', () => {
+                    const id = dupBtn.dataset.productId;
+                    if (!id) return;
+                    const src = productsCache.find((p) => p.id === id);
+                    if (!src) { alert('Source product not found in cache'); return; }
+                    if (!confirm('Duplicate as new?\n\nA new product will open pre-filled with all marketing + identity values. Pricing plans don\'t carry over — re-add them in the Pricing & Affiliate tab once the new product is saved. The new product goes through a fresh audit.')) return;
+                    // Build a clone — keep all marketing/identity values but BLANK the
+                    // proof-bearing fields so the new product re-attests its pricing
+                    // claim. Name gets a " (v2)" suffix as a hint.
+                    const clone = Object.assign({}, src, {
+                        id:                     undefined,
+                        name:                   (src.name || '') + ' (v2)',
+                        audit_status:           'pending',
+                        audit_review_notes:     null,
+                        audit_reviewed_at:      null,
+                    });
+                    closeModal();
+                    setTimeout(() => openModal('create', clone), 50);
+                });
+            })();
 
             // Wire Submit-for-audit button (once)
             (function () {

@@ -80,6 +80,29 @@ async function getAuthUser(req) {
   return data.user;
 }
 
+// Lock guard — approved products are immutable. Reject any plan CRUD that
+// would modify a plan whose parent product is approved. The seller must
+// archive + recreate (or use Duplicate-as-new) to change anything.
+// See [[pricing-plans-audit-policy]].
+async function rejectIfParentApproved(client, productId) {
+  if (!productId) return null;
+  const { data: product } = await client
+    .from("products")
+    .select("id, audit_status")
+    .eq("id", productId)
+    .maybeSingle();
+  if (product && product.audit_status === "approved") {
+    return {
+      status: 403,
+      body: {
+        error: "Approved products are immutable. Archive this product and create a new one to change pricing (use 'Duplicate as new' to start from these values).",
+        code:  "product_locked",
+      },
+    };
+  }
+  return null;
+}
+
 async function requireProductOwner(req, productId) {
   if (!productId || !/^[0-9a-f-]{36}$/i.test(productId)) {
     return { error: "Invalid product_id", status: 400 };
@@ -235,6 +258,10 @@ async function handleCreate(req, res) {
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
   const { client, product } = auth;
 
+  // Lock check
+  const locked = await rejectIfParentApproved(client, productId);
+  if (locked) return res.status(locked.status).json(locked.body);
+
   const n = normalizePlan(body, { partial: false });
   if (n.error) return res.status(400).json({ error: n.error });
 
@@ -291,12 +318,19 @@ async function handleUpdate(req, res) {
 
   const { data: product, error: prodErr } = await client
     .from("products")
-    .select("id, advertiser_id")
+    .select("id, advertiser_id, audit_status")
     .eq("id", plan.product_id)
     .maybeSingle();
   if (prodErr) return res.status(500).json({ error: prodErr.message });
   if (!product || product.advertiser_id !== user.id) {
     return res.status(403).json({ error: "Forbidden" });
+  }
+  // Lock check
+  if (product.audit_status === "approved") {
+    return res.status(403).json({
+      error: "Approved products are immutable. Archive this product and create a new one to change pricing.",
+      code:  "product_locked",
+    });
   }
 
   const n = normalizePlan(body, { partial: true });
@@ -345,11 +379,18 @@ async function handleDelete(req, res) {
 
   const { data: product } = await client
     .from("products")
-    .select("id, advertiser_id")
+    .select("id, advertiser_id, audit_status")
     .eq("id", plan.product_id)
     .maybeSingle();
   if (!product || product.advertiser_id !== user.id) {
     return res.status(403).json({ error: "Forbidden" });
+  }
+  // Lock check
+  if (product.audit_status === "approved") {
+    return res.status(403).json({
+      error: "Approved products are immutable. Archive this product and create a new one to change pricing.",
+      code:  "product_locked",
+    });
   }
 
   // Any transactions reference this plan?

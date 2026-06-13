@@ -685,12 +685,35 @@ module.exports = async function handler(req, res) {
     }
 
     // ── UPDATE (partial) ───────────────────────────────────────────────
+    // LOCK RULE: approved products are immutable. To make any change, the
+    // seller must archive the product and create a new one (or use the
+    // "Duplicate as new" affordance). Eliminates the bait-and-switch
+    // surface entirely. See [[pricing-plans-audit-policy]] and the
+    // 2026-06-13 lock-decision conversation.
     if ((req.method === "PATCH" || req.method === "POST") && action === "update") {
       const auth = await requireAdvertiser(req);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
 
       const id = body.id || req.query.id;
       if (!id) return res.status(400).json({ error: "id is required" });
+
+      // Lock check — fetch audit_status BEFORE attempting the update
+      const { data: existing, error: lookupErr } = await sb
+        .from("products")
+        .select("id, audit_status, advertiser_id")
+        .eq("id", id)
+        .maybeSingle();
+      if (lookupErr) return res.status(500).json({ error: lookupErr.message });
+      if (!existing) return res.status(404).json({ error: "Product not found" });
+      if (existing.advertiser_id !== auth.advertiserId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      if (existing.audit_status === "approved") {
+        return res.status(403).json({
+          error: "Approved products are immutable. To make changes, archive this product and create a new one (use 'Duplicate as new' to start from these values).",
+          code:  "product_locked",
+        });
+      }
 
       const norm = normalizeProduct(body, { partial: true });
       if (norm.error) return res.status(400).json({ error: norm.error });
