@@ -1126,7 +1126,7 @@
           </button>
           <div class="grp-items">
             <button data-section="links">Share Links</button>
-            <button data-section="conv-soon">Conversion Report <span class="soon">SOON</span></button>
+            <button data-section="conv-soon">Sales Report</button>
             <button data-section="click-soon">Click Report</button>
           </div>
         </div>
@@ -1138,7 +1138,7 @@
             <svg class="grp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="grp-items">
-            <button data-section="bill">Commission Bill</button>
+            <button data-section="bill">Earnings</button>
             <button data-section="payouts">Payout Record</button>
           </div>
         </div>
@@ -1493,47 +1493,39 @@
 
       <!-- ═══════════════════ REPORT — CONVERSION ═══════════════════ -->
       <section id="sec-conv-soon" class="dash-section hidden">
-        <h2>Conversion Report</h2>
-        <p class="pre" style="margin-bottom:18px;">Per-conversion drill-down across the whole network. Every postback event the advertiser fires back lands here with the original click, the source surface, and the commission state.</p>
+        <h2>Sales Report</h2>
+        <p class="pre" style="margin-bottom:18px;">Real sales BB processed on your behalf via the MoR storefront. Every PayPal capture from a buyer who came through your share link lands here with the product, amount, and your commission share.</p>
 
         <div class="filter-bar">
           <div class="row">
             <div class="field">
-              <span class="lbl">Order Time</span>
-              <div class="date-range"><input type="date" disabled> ~ <input type="date" disabled></div>
+              <span class="lbl">Sale Date</span>
+              <div class="date-range"><input type="date" id="sales-from"> ~ <input type="date" id="sales-to"></div>
             </div>
             <div class="field">
-              <span class="lbl">Order Status</span>
-              <select disabled><option>All</option></select>
-            </div>
-            <div class="field">
-              <span class="lbl">Order ID</span>
-              <input type="text" placeholder="Search for order id" disabled>
-            </div>
-          </div>
-          <div class="row">
-            <div class="field">
-              <span class="lbl">Advertiser</span>
-              <input type="text" placeholder="Search for advertiser" disabled>
+              <span class="lbl">Status</span>
+              <select id="sales-status">
+                <option value="">All</option>
+                <option value="captured">Captured (awaiting payout)</option>
+                <option value="settled">Settled (paid to you)</option>
+                <option value="refunded">Refunded</option>
+                <option value="pending">Pending</option>
+              </select>
             </div>
             <div class="field">
               <span class="lbl">Product</span>
-              <input type="text" placeholder="Search for product name" disabled>
-            </div>
-            <div class="field">
-              <span class="lbl">Category</span>
-              <select disabled><option>All</option></select>
+              <input type="text" id="sales-product" placeholder="Search by product name">
             </div>
           </div>
           <div class="actions">
-            <button class="btn-clear" type="button" disabled>Clear</button>
-            <button class="btn-search" type="button" disabled>Search</button>
+            <button class="btn-clear" type="button" id="sales-clear">Clear</button>
+            <button class="btn-search" type="button" id="sales-search">Search</button>
           </div>
         </div>
 
         <div class="data-table-wrap">
           <div class="table-head">
-            <div class="total">Total conversions: <strong>0</strong></div>
+            <div class="total">Total sales: <strong id="sales-total">…</strong></div>
             <div class="actions">
               <button class="btn-config" title="Configure columns" type="button">⚙</button>
               <button class="btn-export" type="button" disabled>Export</button>
@@ -1542,20 +1534,18 @@
           <table>
             <thead>
               <tr>
-                <th>Order Details</th>
-                <th>Advertiser</th>
+                <th>Sale Date</th>
                 <th>Product</th>
-                <th>Offer</th>
+                <th>Buyer</th>
+                <th>Status</th>
                 <th style="text-align:right;">Purchase Value</th>
-                <th style="text-align:right;">Item Commission</th>
-                <th style="text-align:right;">Order Commission</th>
+                <th style="text-align:right;">Your Commission</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td colspan="7" class="no-data">
-                <div class="illus">▭</div>
-                <div>Conversions appear here once <span class="pink-emph">#3 Commission Tracking</span> ships.</div>
-                <div style="margin-top:6px;font-size:13px;">Today: clicks are tracked (see Click Report and Share Links). Soon: advertiser postbacks complete the loop.</div>
+            <tbody id="sales-tbody">
+              <tr><td colspan="6" class="no-data">
+                <div class="illus">⏳</div>
+                <div>Loading…</div>
               </td></tr>
             </tbody>
           </table>
@@ -1622,23 +1612,23 @@
         </div>
       </section>
 
-      <!-- ═══════════════════ PAYMENT — COMMISSION BILL ═══════════════════ -->
+      <!-- ═══════════════════ PAYMENT — EARNINGS ═══════════════════ -->
       <section id="sec-bill" class="dash-section hidden">
-        <h2>Commission Bill</h2>
-        <p class="pre" style="margin-bottom:18px;">Monthly statements showing pending, confirmed, refunded, and paid commission per advertiser. Each row is one closed commission line — download the monthly bundle as a PDF for tax records.</p>
+        <h2>Earnings</h2>
+        <p class="pre" style="margin-bottom:18px;">Boost Boss collected this money on your behalf via the MoR storefront — your share is here, ready to be paid out via PayPal. No invoices to chase, no advertiser to bill. We took the money first, you get your cut.</p>
 
         <div class="big-num">
-          <div class="lbl">Pending Payout <span class="help-i" title="Confirmed commission awaiting next payout cycle">i</span></div>
+          <div class="lbl">Ready for payout <span class="help-i" title="Commission BB is holding on your behalf, awaiting next payout cycle">i</span></div>
           <div class="val">$<span id="bill-pending">0.00</span></div>
           <div class="note">
-            Payout runs <strong>biweekly on Friday</strong> via PayPal when pending balance is above <span class="threshold">$1.00</span>.
+            BB runs payouts <strong>biweekly on Friday</strong> via PayPal when your balance is above <span class="threshold">$1.00</span>.
             <a href="#payouts" onclick="switchSection('payouts');return false;">View Payout Record →</a>
           </div>
         </div>
 
         <div class="data-table-wrap">
           <div class="table-head">
-            <div class="total">Bills this year: <strong>0</strong></div>
+            <div class="total">Sales contributing to earnings: <strong id="bill-sales-count">…</strong></div>
             <div class="actions">
               <button class="btn-config" type="button" title="Configure columns">⚙</button>
               <button class="btn-export" type="button" disabled>Download PDF</button>
@@ -1647,19 +1637,17 @@
           <table>
             <thead>
               <tr>
-                <th>Bill Period</th>
-                <th>Advertiser</th>
-                <th style="text-align:right;">Gross Commission</th>
-                <th style="text-align:right;">Refunds / Clawback</th>
-                <th style="text-align:right;">Net Commission</th>
+                <th>Sale Date</th>
+                <th>Product</th>
+                <th style="text-align:right;">Purchase Value</th>
+                <th style="text-align:right;">Your Commission</th>
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td colspan="6" class="no-data">
-                <div class="illus">$</div>
-                <div>Commission bills generate <span class="pink-emph">monthly</span> once advertiser postbacks land.</div>
-                <div style="margin-top:6px;font-size:13px;">Each bill consolidates confirmed conversions per advertiser, applies refund clawback within the 30-day window, and produces a downloadable PDF for your records.</div>
+            <tbody id="bill-tbody">
+              <tr><td colspan="5" class="no-data">
+                <div class="illus">⏳</div>
+                <div>Loading…</div>
               </td></tr>
             </tbody>
           </table>
@@ -2251,97 +2239,170 @@ async function loadDashboard() {
 //  See [[commission-attribution-model]] for the data shape.
 // ────────────────────────────────────────────────────────────────────────
 
+// MoR Storefront — affiliate sees real storefront_transactions data, not
+// postback conversions. /api/affiliate-sales reads storefront_transactions
+// where affiliate_id = current affiliate. See [[mor-product-page-model]].
 async function loadConversionSummary(token) {
   if (!token) return;
-  const r = await fetch(`${API_BASE}/api/conversions?action=summary`, {
+  const r = await fetch(`${API_BASE}/api/affiliate-sales?action=summary`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!r.ok) throw new Error('summary failed');
   const j = await r.json();
   const c = j.counts || {};
   const m = j.money  || {};
-  // Pending commission is the headline number on Home — that's what the
-  // affiliate cares about most ("what will I get paid?")
-  const pendingTotal = (m.pending_commission || 0) + (m.confirmed_commission || 0);
+  // "Activations" = captured sales (the buyer paid, the seller will provision)
+  // "Revenue" = top-line $ BB collected from the affiliate's traffic
+  // "Est. Commission" = the affiliate's share that's waiting/already paid
+  const totalEarned = (m.pending_commission || 0) + (m.paid_commission || 0);
   const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  setText('h-signups',     c.signups     || 0);
-  setText('h-activations', c.activations || 0);
-  setText('h-newusers',    c.new_users   || 0);
-  setText('h-earn',        '$' + pendingTotal.toFixed(2));
+  setText('h-signups',     0);  // signup events come from postback flow, not MoR
+  setText('h-activations', c.captured || 0);
+  setText('h-newusers',    c.captured || 0);
+  setText('h-earn',        '$' + totalEarned.toFixed(2));
   setText('h-revenue',     '$' + (m.revenue || 0).toFixed(2));
 }
 
+// Helper to colorize a transaction status pill
+function txStatusColor(s) {
+  return s === 'settled'   ? '#059669'
+       : s === 'captured'  ? '#0EA5E9'
+       : s === 'refunded'  ? '#DC2626'
+       : s === 'cancelled' ? '#9CA3AF'
+       : s === 'failed'    ? '#DC2626'
+       :                     '#92400E';  // pending
+}
+
+// Sales Report (formerly Conversion Report). Reads storefront_transactions
+// for the current affiliate and renders rows with product + amount + commission.
 async function loadConversionReport() {
   const session = getSession();
   if (!session || !session.token) return;
-  // Locate the empty Conversion Report tbody — the section currently
-  // shows a placeholder no-data row; we replace it with real rows or
-  // a richer empty state.
-  const tbody = document.querySelector('#sec-conv-soon table tbody');
-  const totalEl = document.querySelector('#sec-conv-soon .table-head .total strong');
+  const tbody = document.getElementById('sales-tbody');
+  const totalEl = document.getElementById('sales-total');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="7" class="no-data"><div class="illus">⏳</div><div>Loading…</div></td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="no-data"><div class="illus">⏳</div><div>Loading…</div></td></tr>';
   try {
-    const r = await fetch(`${API_BASE}/api/conversions?limit=200`, {
+    // Read filters from the inputs
+    const params = new URLSearchParams({ limit: '200' });
+    const statusEl = document.getElementById('sales-status');
+    const fromEl   = document.getElementById('sales-from');
+    const toEl     = document.getElementById('sales-to');
+    if (statusEl && statusEl.value) params.set('status', statusEl.value);
+    if (fromEl   && fromEl.value)   params.set('from',   fromEl.value);
+    if (toEl     && toEl.value)     params.set('to',     toEl.value);
+
+    const r = await fetch(`${API_BASE}/api/affiliate-sales?` + params.toString(), {
       headers: { 'Authorization': `Bearer ${session.token}` },
     });
-    if (!r.ok) throw new Error('Failed to load conversions');
+    if (!r.ok) throw new Error('Failed to load sales');
     const j = await r.json();
     if (totalEl) totalEl.textContent = j.total != null ? j.total : 0;
-    const rows = j.conversions || [];
+    const rows = j.sales || [];
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="no-data">
-        <div class="illus">▭</div>
-        <div>No conversions tracked yet.</div>
-        <div style="margin-top:6px;font-size:13px;">Conversions land here once an advertiser fires <code style="background:#FAFAFA;border:1px solid var(--line-soft);padding:1px 5px;border-radius:4px;font-size:12px;font-family:'JetBrains Mono',monospace;">trackConversion({bb_click, type, amount})</code> after one of your share-link visitors completes a paid action.</div>
+      tbody.innerHTML = `<tr><td colspan="6" class="no-data">
+        <div class="illus">📦</div>
+        <div>No sales yet.</div>
+        <div style="margin-top:6px;font-size:13px;">Sales land here when a buyer completes checkout via your share link. Each row shows the product, the buyer's masked email, status, purchase value, and your commission cut.</div>
       </td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map((r) => {
       const created = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
-      const product = r.product ? r.product.name : '—';
+      const productName = r.product ? r.product.name : '—';
       const status  = r.status || 'pending';
-      const statusColor = status === 'paid' ? '#059669'
-                       : status === 'confirmed' ? '#0EA5E9'
-                       : status === 'refunded' ? '#DC2626'
-                       : status === 'orphan' ? '#9CA3AF' : '#92400E';
+      const statusColor = txStatusColor(status);
       return `<tr>
         <td>
-          <div style="font-size:13px;color:var(--ink);">${esc(created)}</div>
-          <div style="font-size:11.5px;color:var(--muted);text-transform:capitalize;">${esc(r.event_type)}</div>
+          <div style="font-size:13.5px;color:var(--ink);">${esc(created)}</div>
         </td>
-        <td>—</td>
-        <td>${esc(product)}</td>
+        <td>${esc(productName)}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted);">${esc(r.buyer_email_masked || '—')}</td>
         <td><span style="font-weight:700;color:${statusColor};text-transform:capitalize;">${esc(status)}</span></td>
         <td style="text-align:right;font-weight:600;">$${Number(r.amount || 0).toFixed(2)}</td>
-        <td style="text-align:right;color:var(--pink);font-weight:700;">$${Number(r.commission_due || 0).toFixed(2)}</td>
-        <td style="text-align:right;color:var(--pink);font-weight:700;">$${Number(r.commission_due || 0).toFixed(2)}</td>
+        <td style="text-align:right;color:var(--pink);font-weight:700;">$${Number(r.affiliate_commission || 0).toFixed(2)}</td>
       </tr>`;
     }).join('');
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="7" class="no-data" style="color:#DC2626;">
+    tbody.innerHTML = `<tr><td colspan="6" class="no-data" style="color:#DC2626;">
       <div class="illus">⚠</div><div>${esc(e.message || 'Could not load')}</div>
     </td></tr>`;
   }
 }
 
+// Earnings page (formerly Commission Bill). Same MoR storefront data,
+// different framing — shows the "what BB collected on my behalf" view.
 async function loadCommissionBill() {
   const session = getSession();
   if (!session || !session.token) return;
+  // Big-number summary
   try {
-    const r = await fetch(`${API_BASE}/api/conversions?action=summary`, {
+    const r = await fetch(`${API_BASE}/api/affiliate-sales?action=summary`, {
       headers: { 'Authorization': `Bearer ${session.token}` },
     });
-    if (!r.ok) return;
-    const j = await r.json();
-    const m = j.money || {};
-    // Bill page's "Pending Payout" is the sum of pending + confirmed (everything
-    // that's accrued but not yet sent to PayPal).
-    const pending = (m.pending_commission || 0) + (m.confirmed_commission || 0);
-    const el = document.getElementById('bill-pending');
-    if (el) el.textContent = pending.toFixed(2);
+    if (r.ok) {
+      const j = await r.json();
+      const m = j.money || {};
+      const c = j.counts || {};
+      const el = document.getElementById('bill-pending');
+      if (el) el.textContent = (m.pending_commission || 0).toFixed(2);
+      const countEl = document.getElementById('bill-sales-count');
+      if (countEl) countEl.textContent = c.captured != null ? c.captured : 0;
+    }
   } catch (_) { /* keep placeholder $0.00 */ }
+
+  // Earnings table — same data as Sales Report but only captured/settled rows
+  const tbody = document.getElementById('bill-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" class="no-data"><div class="illus">⏳</div><div>Loading…</div></td></tr>';
+  try {
+    const r = await fetch(`${API_BASE}/api/affiliate-sales?limit=200`, {
+      headers: { 'Authorization': `Bearer ${session.token}` },
+    });
+    if (!r.ok) throw new Error('Failed to load earnings');
+    const j = await r.json();
+    const rows = (j.sales || []).filter((x) => x.status === 'captured' || x.status === 'settled');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="no-data">
+        <div class="illus">$</div>
+        <div>No earnings yet.</div>
+        <div style="margin-top:6px;font-size:13px;">Earnings accrue when a buyer completes checkout via your share link and BB captures the payment. The next biweekly Friday PayPal payout will deliver your balance.</div>
+      </td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((r) => {
+      const created = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
+      const productName = r.product ? r.product.name : '—';
+      const status = r.status || 'pending';
+      const statusColor = txStatusColor(status);
+      return `<tr>
+        <td><div style="font-size:13.5px;color:var(--ink);">${esc(created)}</div></td>
+        <td>${esc(productName)}</td>
+        <td style="text-align:right;font-weight:600;">$${Number(r.amount || 0).toFixed(2)}</td>
+        <td style="text-align:right;color:var(--pink);font-weight:700;">$${Number(r.affiliate_commission || 0).toFixed(2)}</td>
+        <td><span style="font-weight:700;color:${statusColor};text-transform:capitalize;">${esc(status)}</span></td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="color:#DC2626;">
+      <div class="illus">⚠</div><div>${esc(e.message || 'Could not load')}</div>
+    </td></tr>`;
+  }
 }
+
+// Sales Report filter handlers — re-run loadConversionReport when changed.
+document.addEventListener('DOMContentLoaded', () => {
+  const search = document.getElementById('sales-search');
+  const clear  = document.getElementById('sales-clear');
+  if (search) search.addEventListener('click', () => loadConversionReport());
+  if (clear)  clear.addEventListener('click', () => {
+    ['sales-status', 'sales-from', 'sales-to', 'sales-product'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    loadConversionReport();
+  });
+});
 
 async function loadPayoutRecord() {
   const session = getSession();

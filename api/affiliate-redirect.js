@@ -158,12 +158,53 @@ module.exports = async function handler(req, res) {
     console.warn("[AffiliateRedirect] click log failed:", e.message);
   }
 
-  // Set attribution cookie + decorate target URL with bb_click / UTM / bb_aff.
-  // bb_click is the load-bearing identifier; cookie is the secondary fallback.
+  // Set attribution cookie (works for both MoR and legacy redirect paths).
   setAttributionCookie(res, row.saved_ad_id, row.affiliate_id);
-  const target = row.target_url
-    ? decorateUrl(row.target_url, row.affiliate_id, row.saved_ad_id, clickId)
-    : safeFallback;
+
+  // ── MoR routing — if the share link is tied to a BB-hosted product,
+  // route through the product page instead of the seller's raw URL.
+  //
+  // The /s/<token> redirect doesn't know whether this is a MoR product
+  // upfront (the RPC returns only the share_link row). Do a small lookup:
+  // if share_link.product_id is set AND that product is active with a
+  // price > 0, we treat it as a MoR product and land on /p/<uuid> (which
+  // gates by bb_click — only present in this URL). Otherwise fall back
+  // to the legacy redirect-to-seller behavior (postback model).
+  //
+  // See [[mor-product-page-model]] + [[commission-attribution-model]].
+  let target = safeFallback;
+  if (row.target_url) {
+    target = decorateUrl(row.target_url, row.affiliate_id, row.saved_ad_id, clickId);
+  }
+
+  // The RPC's RETURNING list doesn't include product_id, so look it up
+  // separately. One small query — adds ~5ms but enables the routing.
+  try {
+    const { data: link } = await client
+      .from("affiliate_share_links")
+      .select("product_id")
+      .eq("id", row.id)
+      .maybeSingle();
+    if (link && link.product_id) {
+      const { data: product } = await client
+        .from("products")
+        .select("id, status, price")
+        .eq("id", link.product_id)
+        .maybeSingle();
+      if (product && product.status === "active" && Number(product.price) > 0) {
+        // MoR product — route to BB-hosted product page. The /p/<uuid>
+        // page is itself gated by bb_click (see [[mor-product-page-model]]
+        // "The gate"), so we MUST include it in the URL or the page will
+        // gate the buyer who just came through the affiliate's link.
+        target = `${PUBLIC_BASE}/p/${encodeURIComponent(product.id)}?bb_click=${encodeURIComponent(clickId)}`;
+      }
+    }
+  } catch (e) {
+    // Best-effort MoR check — if the lookup fails, fall back to legacy
+    // target_url. Worst case: a MoR product behaves like a postback
+    // product (buyer lands on seller's site instead of BB-hosted page).
+    console.warn("[AffiliateRedirect] MoR product lookup failed:", e.message);
+  }
 
   return res.redirect(302, target);
 };
