@@ -253,7 +253,13 @@
   let product = null;
 
   // ── Step 1: load product details for the summary card ─────────────
-  fetch(`${API_BASE}/api/products?action=public&id=${encodeURIComponent(productId)}`)
+  // Pass bb_click to the public endpoint so the server returns the FULL
+  // product (with price) — without it we'd get the gated response and
+  // hit "not purchasable". The buyer already passed the gate to reach
+  // /buy/ (checkout.html redirects them back if bb_click is missing),
+  // so by here we're guaranteed to have a valid click.
+  const productUrl = `${API_BASE}/api/products?action=public&id=${encodeURIComponent(productId)}&bb_click=${encodeURIComponent(bbClick)}`;
+  fetch(productUrl)
     .then((r) => { if (r.status === 404) throw new Error('not_found'); if (!r.ok) throw new Error('server'); return r.json(); })
     .then((j) => {
       product = j.product;
