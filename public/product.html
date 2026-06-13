@@ -319,13 +319,20 @@
   const API_BASE = window.location.origin;
 
   // ── Resolve product token + bb_click from URL ────────────────────────
-  // The Vercel rewrite (/p/:token → /product.html?id=:token) lands here
-  // with ?id=<uuid>. We ALSO accept ?token= for backwards compat. The
-  // bb_click param (if present) is preserved into sessionStorage so the
-  // buy button can forward it to /buy/<token>?bb_click=<id> even if the
-  // buyer navigates around.
+  // Vercel rewrites are SERVER-SIDE — the browser URL stays as /p/<uuid>
+  // and only the served file changes. So we can't read ?id= from
+  // window.location.search (the rewrite's destination params aren't
+  // reflected in the browser). We parse the UUID out of the pathname
+  // instead, falling back to ?id=/?token= for the case where someone
+  // opens /product.html directly (admin testing, no rewrite).
+  //
+  // The bb_click param IS in the actual browser URL so URLSearchParams
+  // sees it correctly. Persist to sessionStorage so the buy button
+  // forwards it to /buy/<token>?bb_click=<id> even if the buyer
+  // navigates around between landing and clicking Buy.
   const params = new URLSearchParams(window.location.search);
-  const productId = params.get('id') || params.get('token');
+  const pathMatch = window.location.pathname.match(/^\/p\/([^/?#]+)/i);
+  const productId = (pathMatch && pathMatch[1]) || params.get('id') || params.get('token');
   const bbClick = params.get('bb_click');
 
   if (bbClick) {
