@@ -342,6 +342,61 @@ module.exports = async function handler(req, res) {
       return res.json({ product: data });
     }
 
+    // ── PUBLIC product page (no auth, no marketplace browse) ──
+    // GET /api/products?action=public&id=<uuid>
+    // Returns ONLY buyer-safe fields so the public /p/<token> page can render.
+    // Webhook secrets, advertiser_id, and any internal fields are excluded.
+    // No auth required since this is the buyer-facing surface.
+    if (req.method === "GET" && action === "public") {
+      const id = (req.query && req.query.id) || (req.query && req.query.token);
+      if (!id) return res.status(400).json({ error: "id is required" });
+
+      const { data, error } = await sb
+        .from("products")
+        .select(`
+          id, name, description, image_url, status,
+          price, currency, sku_type,
+          long_description, screenshots, demo_video_url,
+          package_details, faq, testimonials,
+          external_marketing_url, default_url,
+          default_commission_pct, redemption_window_days, package_duration_days
+        `)
+        .eq("id", id)
+        .maybeSingle();
+      if (error) return res.status(500).json({ error: error.message });
+      if (!data || data.status !== "active") {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      // Whitelist: do NOT leak fulfillment_webhook_url / secret /
+      // advertiser_id to the public client. The above SELECT already
+      // omits them but be explicit so future schema growth doesn't
+      // accidentally widen the surface.
+      const safe = {
+        id:                       data.id,
+        name:                     data.name,
+        description:              data.description,
+        image_url:                data.image_url,
+        price:                    data.price,
+        currency:                 data.currency,
+        sku_type:                 data.sku_type,
+        long_description:         data.long_description,
+        screenshots:              data.screenshots || [],
+        demo_video_url:           data.demo_video_url,
+        package_details:          data.package_details || [],
+        faq:                      data.faq || [],
+        testimonials:             data.testimonials || [],
+        external_marketing_url:   data.external_marketing_url,
+        default_url:              data.default_url,
+        // Buyer-facing display: "what % does the affiliate earn" — useful
+        // social-proof signal for buyers ("by buying via this affiliate link
+        // you support the creator"). Optional; some products may hide it.
+        commission_pct_display:   data.default_commission_pct,
+        package_duration_days:    data.package_duration_days,
+      };
+      return res.json({ product: safe });
+    }
+
     // ── BROWSE (marketplace — all active products across advertisers) ──
     // Used by the affiliate dashboard's #4 Marketplace section. Returns
     // active products only, with the join to advertiser display name

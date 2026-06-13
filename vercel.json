@@ -26,6 +26,7 @@
     },
     { "source": "/affiliate", "destination": "/affiliate.html" },
     { "source": "/s/:token", "destination": "/api/affiliate-redirect?token=:token" },
+    { "source": "/p/:token", "destination": "/product.html?id=:token" },
     { "source": "/api/conversions/postback", "destination": "/api/conversions?action=postback" },
     { "source": "/v1/conversion", "destination": "/api/conversions?action=postback" },
     { "source": "/en", "destination": "/index.html" },
