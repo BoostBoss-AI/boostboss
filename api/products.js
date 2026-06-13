@@ -114,6 +114,25 @@ async function requireAffiliate(req) {
 // constraint in MIGRATION-mor-storefront.sql.
 const SKU_TYPES = new Set(["one_time", "bundle", "lifetime", "subscription_pack"]);
 
+// When auto-creating a default pricing_plan on product create, pick a
+// sensible name + billing_period from the product's sku_type. Sellers
+// can rename / split later via the pricing-plans sub-page.
+function pickDefaultPlanName(skuType) {
+  switch (skuType) {
+    case "lifetime":           return "Lifetime";
+    case "subscription_pack":  return "Annual";
+    case "bundle":             return "Bundle";
+    default:                   return "Standard";
+  }
+}
+function pickDefaultBillingPeriod(skuType) {
+  switch (skuType) {
+    case "lifetime":           return "lifetime";
+    case "subscription_pack":  return "annual";
+    default:                   return "one_time";
+  }
+}
+
 // Normalize + validate a product row from the request body. Returns
 // either { row } (the cleaned row ready for insert/update) or { error }
 // (a validation error to return as 400).
@@ -489,6 +508,33 @@ module.exports = async function handler(req, res) {
         .select()
         .maybeSingle();
       if (error) return res.status(500).json({ error: error.message });
+
+      // Auto-create a default pricing plan from the modal's price/currency
+      // so the seller has something to attach proof to from day one.
+      // Plan starts in 'pending' audit status — NOT auto-approved like the
+      // backfilled legacy plans were. New products must go through the
+      // audit gate before they're purchasable. See [[pricing-plans-audit-policy]].
+      if (data && data.id && data.price != null && Number(data.price) > 0) {
+        try {
+          await sb.from("pricing_plans").insert({
+            product_id:     data.id,
+            plan_name:      pickDefaultPlanName(data.sku_type),
+            price:          data.price,
+            currency:       data.currency || "USD",
+            billing_period: pickDefaultBillingPeriod(data.sku_type),
+            audit_status:   "pending",
+            is_active:      true,
+            is_recommended: true,
+            sort_order:     0,
+            features:       [],
+          });
+        } catch (e) {
+          // Don't fail the product create over a missing default plan —
+          // seller can add one manually on the Pricing plans sub-page.
+          console.warn(`[products] default plan auto-create failed for product ${data.id}:`, e.message);
+        }
+      }
+
       return res.status(201).json({ product: data });
     }
 
