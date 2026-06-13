@@ -406,6 +406,45 @@ function normalizeProduct(body, { partial = false } = {}) {
     }
   }
 
+  // ── Hero image carousel ───────────────────────────────────────────
+  if (body.hero_images !== undefined) {
+    if (!Array.isArray(body.hero_images)) return { error: "hero_images must be an array of URLs" };
+    if (body.hero_images.length > 8) return { error: "hero_images: max 8 images" };
+    const urls = [];
+    for (const u of body.hero_images) {
+      const s = String(u || "").trim();
+      if (!s) continue;
+      if (!/^https?:\/\//i.test(s)) return { error: "each hero_image must be a valid http(s) URL" };
+      urls.push(s.slice(0, 2000));
+    }
+    row.hero_images = urls;
+  }
+
+  // ── Feature blocks (zigzag content) ───────────────────────────────
+  // Each block: { heading, bullets[], image_url }. Max 8 blocks, max
+  // 6 bullets per block. The buyer page renders these alternating
+  // image-left/image-right.
+  if (body.feature_blocks !== undefined) {
+    if (!Array.isArray(body.feature_blocks)) return { error: "feature_blocks must be an array" };
+    if (body.feature_blocks.length > 8) return { error: "feature_blocks: max 8 blocks" };
+    const blocks = [];
+    for (const b of body.feature_blocks) {
+      if (!b || typeof b !== "object") continue;
+      const heading = String(b.heading || "").trim().slice(0, 240);
+      if (!heading) continue;  // heading is required per block
+      const bullets = Array.isArray(b.bullets)
+        ? b.bullets.map((x) => String(x || "").trim().slice(0, 500)).filter(Boolean).slice(0, 6)
+        : [];
+      let imageUrl = String(b.image_url || "").trim();
+      if (imageUrl && !/^https?:\/\//i.test(imageUrl)) {
+        return { error: `feature_blocks: each image_url must be a valid http(s) URL (block "${heading.slice(0,40)}")` };
+      }
+      imageUrl = imageUrl.slice(0, 2000) || null;
+      blocks.push({ heading, bullets, image_url: imageUrl });
+    }
+    row.feature_blocks = blocks;
+  }
+
   return { row };
 }
 

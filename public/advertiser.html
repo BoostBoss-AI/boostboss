@@ -3775,16 +3775,20 @@
         <div id="productModal" class="modal" data-mode="create">
           <div class="modal-content" style="max-width: 720px;">
             <div class="modal-header">
-              <h2 class="modal-title" id="productModalTitle">New Product</h2>
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <h2 class="modal-title" id="productModalTitle">New Product</h2>
+                <a id="productPreviewLink" href="#" target="_blank" rel="noopener" style="display:none;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#4338CA;text-decoration:none;padding:4px 10px;border:1px solid #C7D2FE;border-radius:6px;background:#EEF2FF;">Preview live page <span style="color:#9CA3AF;font-size:11px;">↗</span></a>
+              </div>
               <button class="modal-close" type="button" id="productModalCloseBtn">×</button>
             </div>
 
             <!-- Tab strip -->
             <div class="pf-tabs" style="display:flex;gap:2px;border-bottom:1px solid #E5E7EB;margin-bottom:20px;flex-wrap:wrap;">
-              <button type="button" class="pf-tab pf-tab-active" data-pf-tab="basics" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;">Basics</button>
-              <button type="button" class="pf-tab" data-pf-tab="storefront" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Storefront</button>
-              <button type="button" class="pf-tab" data-pf-tab="fulfillment" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Fulfillment</button>
-              <button type="button" class="pf-tab" data-pf-tab="pricing" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Pricing &amp; Affiliate</button>
+              <button type="button" class="pf-tab pf-tab-active" data-pf-tab="basics" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;" title="What you're selling — identity, hero images, price">Basics</button>
+              <button type="button" class="pf-tab" data-pf-tab="marketing" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="How you're pitching it — copy, features, screenshots">Marketing</button>
+              <button type="button" class="pf-tab" data-pf-tab="trust" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Who you are as a seller — refunds, deal terms, founder card">Trust</button>
+              <button type="button" class="pf-tab" data-pf-tab="pricing" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Pricing tiers + affiliate marketing budget">Pricing &amp; Affiliate</button>
+              <button type="button" class="pf-tab" data-pf-tab="fulfillment" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="What happens after they buy — webhook, voucher, redemption">Fulfillment</button>
             </div>
 
             <form id="productForm">
@@ -3799,8 +3803,9 @@
                   <textarea class="form-input" name="description" rows="2" maxlength="5000" placeholder="One-liner that explains what the buyer is getting"></textarea>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Hero image URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(square or 4:3, hosted on a CDN)</span></label>
+                  <label class="form-label">Primary hero image URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(square or 4:3 — shown above all other images)</span></label>
                   <input type="url" class="form-input" name="image_url" placeholder="https://cdn.example.com/product.png">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">→ Upload to imgur.com, Cloudinary, or your own CDN, then paste the URL.</div>
                 </div>
                 <div class="form-group" style="display:grid;grid-template-columns:1fr 120px 160px;gap:12px;">
                   <div>
@@ -3832,10 +3837,24 @@
                   <label class="form-label">Default destination URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(fallback when no BB page)</span></label>
                   <input type="url" class="form-input" name="default_url" required placeholder="https://example.com/product">
                 </div>
+
+                <!-- Hero images — primary + carousel thumbnails -->
+                <div style="margin:24px 0 12px;padding-top:18px;border-top:1px solid #F3F4F6;">
+                  <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:4px;">Additional hero images <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — up to 8 URLs, one per line)</span></div>
+                  <div style="font-size:11.5px;color:#6B7280;line-height:1.55;margin-bottom:8px;">Buyer page shows your primary image above + these as clickable thumbnails below it (AppSumo-style carousel). Use imgur, Cloudinary, or your own CDN — paste each URL on its own line.</div>
+                  <textarea class="form-input" name="hero_images_text" rows="4" placeholder="https://cdn.example.com/hero-1.png&#10;https://cdn.example.com/hero-2.png&#10;https://cdn.example.com/hero-3.png"></textarea>
+                </div>
+
+                <!-- External marketing URL moved here (it's identity, not storefront content) -->
+                <div class="form-group" style="margin-top:24px;padding-top:18px;border-top:1px solid #F3F4F6;">
+                  <label class="form-label">External marketing URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional)</span></label>
+                  <input type="url" class="form-input" name="external_marketing_url" placeholder="https://example.com/full-product-page">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">When set, the BB product page shows a "Read full details →" link out to your own site.</div>
+                </div>
               </div>
 
-              <!-- ─── TAB 2: STOREFRONT ─── -->
-              <div class="pf-panel" data-pf-panel="storefront" style="display:none;">
+              <!-- ─── TAB 2: MARKETING (was Storefront — trust + founder moved out) ─── -->
+              <div class="pf-panel" data-pf-panel="marketing" style="display:none;">
                 <div class="form-group">
                   <label class="form-label">Long description <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(markdown supported)</span></label>
                   <textarea class="form-input" name="long_description" rows="6" maxlength="20000" placeholder="Full sales copy. Describe the product, who it's for, what they'll get..."></textarea>
@@ -3860,12 +3879,6 @@
                   <label class="form-label">Testimonials <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(format: "Quote" — Name, Role; blank line between)</span></label>
                   <textarea class="form-input" name="testimonials_text" rows="5" placeholder='"This saved me weeks of setup." — Jane Doe, CTO at ACME&#10;&#10;"Best onboarding experience I have ever had." — John Smith, Founder'></textarea>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">External marketing URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — links from BB page to your full marketing site)</span></label>
-                  <input type="url" class="form-input" name="external_marketing_url" placeholder="https://example.com/full-product-page">
-                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">When set, BB shows a "Read full details →" link on the product page.</div>
-                </div>
-
                 <!-- ─── NEW: TL;DR bullets ─── -->
                 <div style="padding:14px 16px;background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border:1px solid #BBF7D0;border-radius:10px;margin:24px 0 16px;">
                   <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:4px;">TL;DR (top-of-page bullets)</div>
@@ -3895,10 +3908,27 @@
                   </div>
                 </div>
 
-                <!-- ─── NEW: Trust block (refund + guarantee + deal terms) ─── -->
-                <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);border:1px solid #FDBA74;border-radius:10px;margin:24px 0 16px;">
+                <!-- ─── NEW: Feature blocks (zigzag content) ─── -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF0F5,#FCE7F3);border:1px solid #F9A8D4;border-radius:10px;margin:24px 0 12px;">
+                  <div style="font-size:13px;font-weight:700;color:#9D174D;margin-bottom:4px;">Feature blocks (zigzag content)</div>
+                  <div style="font-size:11.5px;color:#BE185D;line-height:1.55;">The image-left/image-right blocks that fill most of the page (AppSumo / Castmagic style). Each block = heading + 2-4 bullets + screenshot. Use up to 6 blocks for best effect.</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Feature blocks <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(see format below)</span></label>
+                  <textarea class="form-input" name="feature_blocks_text" rows="10" style="font-family:monospace;font-size:12px;" placeholder="Repurpose long-form audio and video&#10;- Upload media from local files, YouTube, Vimeo, Zoom&#10;- Use preset AI prompts to generate titles + blog posts&#10;Image: https://cdn.example.com/feature-1.png&#10;&#10;Do more with custom prompts&#10;- Set up recurring prompts that run on every upload&#10;- Train the AI on each client's unique voice + formatting&#10;Image: https://cdn.example.com/feature-2.png"></textarea>
+                  <div style="font-size:11px;color:#6B7280;margin-top:6px;line-height:1.6;">
+                    <strong>Format:</strong> first line of each block = heading. Lines starting with <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">-</code> or <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">•</code> = bullets. Line starting with <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">Image:</code> or any <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">https://</code> URL = block screenshot. Separate blocks with a blank line.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ─── TAB 3: TRUST (refund + deal terms + company + founder) ─── -->
+              <div class="pf-panel" data-pf-panel="trust" style="display:none;">
+
+                <!-- Trust block — refund + guarantee + deal terms -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);border:1px solid #FDBA74;border-radius:10px;margin-bottom:16px;">
                   <div style="font-size:13px;font-weight:700;color:#9A3412;margin-bottom:4px;">Trust block</div>
-                  <div style="font-size:11.5px;color:#C2410C;line-height:1.55;">Refund window drives the "Refundable up to N days" badge. Deal terms render as a bottom-of-page accordion. Buyers read this before clicking Buy.</div>
+                  <div style="font-size:11.5px;color:#C2410C;line-height:1.55;">Refund window drives the "Refundable up to N days" badge buyers see next to the price. Deal terms render as a bottom-of-page accordion. Buyers read this before clicking Buy.</div>
                 </div>
                 <div class="form-group" style="display:grid;grid-template-columns:160px 1fr;gap:12px;">
                   <div>
@@ -3915,10 +3945,10 @@
                   <textarea class="form-input" name="deal_terms_text" rows="5" placeholder="No codes, no stacking&#10;Must activate within 60 days of purchase&#10;Lifetime tiers cover all future updates"></textarea>
                 </div>
 
-                <!-- ─── NEW: Company / founder card ─── -->
+                <!-- Company card -->
                 <div style="padding:14px 16px;background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:10px;margin:24px 0 16px;">
-                  <div style="font-size:13px;font-weight:700;color:#5B21B6;margin-bottom:4px;">Company &amp; founder card</div>
-                  <div style="font-size:11.5px;color:#6D28D9;line-height:1.55;">Bottom-of-page trust block. AppSumo shows founded date, location, size, growth stage, funding, plus founder photo + LinkedIn. All optional.</div>
+                  <div style="font-size:13px;font-weight:700;color:#5B21B6;margin-bottom:4px;">Company card</div>
+                  <div style="font-size:11.5px;color:#6D28D9;line-height:1.55;">The brand block at the bottom of your product page. AppSumo shows logo, founded date, location, team size, growth stage, funding, and an "about" paragraph. All optional but each one adds trust.</div>
                 </div>
                 <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                   <div>
@@ -3948,7 +3978,7 @@
                     <input type="text" class="form-input" name="company_city" maxlength="80" placeholder="Austin">
                   </div>
                   <div>
-                    <label class="form-label">Country (ISO code)</label>
+                    <label class="form-label">Country (ISO 2-letter)</label>
                     <input type="text" class="form-input" name="company_country_code" maxlength="2" placeholder="US">
                   </div>
                 </div>
@@ -3986,6 +4016,12 @@
                     </select>
                   </div>
                 </div>
+
+                <!-- Founder card -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:10px;margin:24px 0 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#1E40AF;margin-bottom:4px;">Founder card</div>
+                  <div style="font-size:11.5px;color:#1D4ED8;line-height:1.55;">The "made by a real person" signal. Photo + LinkedIn does a lot of work in the buyer's head.</div>
+                </div>
                 <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                   <div>
                     <label class="form-label">Founder name</label>
@@ -4008,7 +4044,7 @@
                 </div>
               </div>
 
-              <!-- ─── TAB 3: FULFILLMENT ─── -->
+              <!-- ─── TAB 4: FULFILLMENT ─── -->
               <div class="pf-panel" data-pf-panel="fulfillment" style="display:none;">
                 <div class="form-group">
                   <label class="form-label">Redemption page URL <span style="font-size:11px;color:#FF2D78;font-weight:600;">required for purchasable products</span></label>
@@ -11635,7 +11671,62 @@
             function pfSerializeScreenshots(arr) {
                 return Array.isArray(arr) ? arr.join('\n') : '';
             }
-            function pfParseScreenshots(text) {
+            // ── Feature blocks (zigzag image-left/image-right content) ─────────
+//    Parses the textarea format:
+//      Heading line
+//      - bullet
+//      - bullet
+//      Image: https://...
+//
+//      Next heading
+//      - bullets
+//      https://image-url-on-its-own-line
+//    Blank line = block boundary.
+function parseFeatureBlocks(text) {
+    if (!text) return [];
+    const chunks = String(text).split(/\n\s*\n+/);
+    const blocks = [];
+    for (const chunk of chunks) {
+        const lines = chunk.split('\n').map((l) => l.trim()).filter(Boolean);
+        if (!lines.length) continue;
+        let heading = null;
+        const bullets = [];
+        let image_url = null;
+        for (const line of lines) {
+            if (/^[-•*]\s+/.test(line)) {
+                bullets.push(line.replace(/^[-•*]\s+/, '').trim());
+            } else if (/^image:\s*/i.test(line)) {
+                image_url = line.replace(/^image:\s*/i, '').trim();
+            } else if (/^https?:\/\//i.test(line) && !heading) {
+                // URL on its own line BEFORE a heading? rare — treat as image
+                image_url = line;
+            } else if (/^https?:\/\//i.test(line) && heading && !bullets.length && !image_url) {
+                image_url = line;
+            } else if (/^https?:\/\//i.test(line) && heading) {
+                image_url = line;
+            } else if (!heading) {
+                heading = line;
+            } else {
+                // Treat as additional bullet so we don't lose it silently
+                bullets.push(line);
+            }
+        }
+        if (heading) blocks.push({ heading, bullets, image_url });
+    }
+    return blocks;
+}
+function serializeFeatureBlocks(blocks) {
+    if (!Array.isArray(blocks) || !blocks.length) return '';
+    return blocks.map((b) => {
+        const lines = [b && b.heading ? String(b.heading) : ''];
+        const bullets = (b && Array.isArray(b.bullets)) ? b.bullets : [];
+        bullets.forEach((bul) => { if (bul) lines.push('- ' + bul); });
+        if (b && b.image_url) lines.push('Image: ' + b.image_url);
+        return lines.filter(Boolean).join('\n');
+    }).join('\n\n');
+}
+
+function pfParseScreenshots(text) {
                 return String(text || '').split('\n').map((s) => s.trim()).filter(Boolean);
             }
             function pfSerializePackageDetails(arr) {
@@ -11693,6 +11784,16 @@
                 modal.dataset.mode = mode;
                 modal.dataset.productId = product ? product.id : '';
                 titleEl.textContent = mode === 'edit' ? 'Edit product' : 'New product';
+                // Preview link — visible only in edit mode, points to the live /p/<id> page
+                const previewLink = document.getElementById('productPreviewLink');
+                if (previewLink) {
+                    if (mode === 'edit' && product && product.id) {
+                        previewLink.href = '/p/' + encodeURIComponent(product.id);
+                        previewLink.style.display = 'inline-flex';
+                    } else {
+                        previewLink.style.display = 'none';
+                    }
+                }
                 submitBtn.textContent = mode === 'edit' ? 'Save changes' : 'Save product';
                 form.reset();
                 errBox.style.display = 'none';
@@ -11724,6 +11825,8 @@
                     if (form.elements.integrations_text)   form.elements.integrations_text.value   = linesOf(product.integrations);
                     if (form.elements.best_for_text)       form.elements.best_for_text.value       = linesOf(product.best_for);
                     if (form.elements.deal_terms_text)     form.elements.deal_terms_text.value     = linesOf(product.deal_terms);
+                    if (form.elements.hero_images_text)    form.elements.hero_images_text.value    = linesOf(product.hero_images);
+                    if (form.elements.feature_blocks_text) form.elements.feature_blocks_text.value = serializeFeatureBlocks(product.feature_blocks);
 
                     // Trust block
                     if (form.elements.refund_window_days)  form.elements.refund_window_days.value  = product.refund_window_days != null ? product.refund_window_days : '';
@@ -12054,6 +12157,8 @@
                     integrations:           linesToArr(v('integrations_text')),
                     best_for:               linesToArr(v('best_for_text')),
                     deal_terms:             linesToArr(v('deal_terms_text')),
+                    hero_images:            linesToArr(v('hero_images_text')),
+                    feature_blocks:         parseFeatureBlocks(v('feature_blocks_text')),
 
                     // Trust block
                     refund_window_days:     v('refund_window_days') === '' ? null : Number(v('refund_window_days')),
