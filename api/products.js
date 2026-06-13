@@ -623,17 +623,69 @@ module.exports = async function handler(req, res) {
       const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
       const q = (req.query.q || "").trim();
 
+      // Affiliate marketplace = products that are status='active' AND
+      // audit_status='approved'. The audit gate ensures every product an
+      // affiliate can promote has been verified to have a real discount
+      // against the seller's own site — see [[pricing-plans-audit-policy]].
+      // Without this filter, affiliates would mint share links for products
+      // that 403 at checkout, leading to broken funnels + lost trust.
       let query = sb
         .from("products")
-        .select("id, name, description, image_url, default_url, default_commission_pct, advertiser_id, created_at", { count: "exact" })
+        .select(`
+          id, name, description, image_url, hero_images,
+          default_url, external_marketing_url,
+          affiliate_pool_pct, default_commission_pct,
+          tldr_bullets, alternative_to, integrations, best_for,
+          company_tagline, founder_name,
+          advertiser_id, created_at
+        `, { count: "exact" })
         .eq("status", "active")
-        .order("default_commission_pct", { ascending: false })  // best commission first
+        .eq("audit_status", "approved")
+        .order("affiliate_pool_pct", { ascending: false })  // best affiliate-budget first
         .range(offset, offset + limit - 1);
       if (q) query = query.ilike("name", `%${q}%`);
 
       const { data, count, error } = await query;
       if (error) return res.status(500).json({ error: error.message });
-      return res.json({ products: data || [], total: count || 0 });
+
+      // Enrich with the lowest-priced active plan so affiliates can compare
+      // (otherwise the catalog row would lack a price entirely now that
+      // pricing moved off products onto pricing_plans).
+      const productIds = (data || []).map((p) => p.id);
+      let plansByProduct = {};
+      if (productIds.length) {
+        const { data: plans } = await sb
+          .from("pricing_plans")
+          .select("product_id, plan_name, price, original_price, currency, billing_period, is_recommended, sort_order")
+          .in("product_id", productIds)
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+        (plans || []).forEach((pl) => {
+          const arr = plansByProduct[pl.product_id] || (plansByProduct[pl.product_id] = []);
+          arr.push(pl);
+        });
+      }
+
+      const enriched = (data || []).map((p) => {
+        const plans = plansByProduct[p.id] || [];
+        const cheapest = plans.length
+          ? plans.slice().sort((a, b) => Number(a.price) - Number(b.price))[0]
+          : null;
+        // Affiliate-relevant commission preview: 70% of the pool, on the
+        // cheapest plan's price (a buyer floor). Helps affiliates eyeball
+        // "is this worth promoting?" without clicking through.
+        const poolPct = Number(p.affiliate_pool_pct) || 0;
+        const projectedCommission = cheapest && cheapest.price != null
+          ? Math.round((Number(cheapest.price) * poolPct / 100 * 0.70) * 100) / 100
+          : null;
+        return Object.assign({}, p, {
+          plans_count:           plans.length,
+          cheapest_plan:         cheapest,
+          projected_commission:  projectedCommission,
+        });
+      });
+
+      return res.json({ products: enriched, total: count || 0 });
     }
 
     // ── CREATE ─────────────────────────────────────────────────────────
