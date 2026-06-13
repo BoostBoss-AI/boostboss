@@ -15,6 +15,10 @@
          Loaded sync because Settings can call it on first open and we'd
          rather block 13KB of JS than show a spinner. -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <!-- Chart.js — used by the per-product Orders sub-page for the clicks +
+         purchases time-series. Loaded defer because Products isn't the
+         landing route; Home doesn't need it. -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     <style>
         * {
             margin: 0;
@@ -3156,6 +3160,98 @@
               </div>
             </div><!-- /[data-shell-route="products"] -->
 
+            <!-- ═══════ ROUTE: product-orders (per-product control panel) ═══════
+                 Hash format: #/product-orders/<product_id>
+                 Loaded by the script at the bottom of the file; reads product_id
+                 from the hash and hydrates the summary cards + chart + orders
+                 table + affiliates table. -->
+            <div data-shell-route="product-orders">
+              <!-- Back link + product header card -->
+              <div style="margin-bottom:18px;">
+                <a href="#/products" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#6B7280;font-size:13px;font-weight:600;padding:6px 0;">
+                  <span style="font-size:14px;">←</span> Back to Products
+                </a>
+              </div>
+
+              <!-- Product header card — name, image, price, status, view-live link -->
+              <div id="poHeader" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+                <div style="padding:24px;color:#9CA3AF;font-size:13px;">Loading product…</div>
+              </div>
+
+              <!-- Summary metric cards (4-up) -->
+              <div id="poSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px;">
+                <!-- populated by JS -->
+              </div>
+
+              <!-- Time-series chart -->
+              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                  <div>
+                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Clicks &amp; purchases over time</div>
+                    <div style="font-size:12px;color:#6B7280;">Daily counts across all affiliates promoting this product.</div>
+                  </div>
+                  <select id="poRangeSelect" style="padding:7px 11px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;cursor:pointer;">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                </div>
+                <div style="position:relative;height:260px;">
+                  <canvas id="poChart" style="max-width:100%;"></canvas>
+                </div>
+              </div>
+
+              <!-- Affiliates promoting this product -->
+              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                  <div>
+                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Affiliates promoting</div>
+                    <div style="font-size:12px;color:#6B7280;">Who's sharing your product, how many clicks, and how much they've earned.</div>
+                  </div>
+                </div>
+                <div id="poAffiliatesTable" style="overflow-x:auto;">
+                  <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading affiliates…</div>
+                </div>
+              </div>
+
+              <!-- Orders table with buyer + voucher management -->
+              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                  <div>
+                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Orders &amp; buyers</div>
+                    <div style="font-size:12px;color:#6B7280;">Every purchase, the buyer's email, voucher status, and redemption control.</div>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <select id="poOrdersStatusFilter" style="padding:7px 11px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit;background:#fff;cursor:pointer;">
+                      <option value="">All statuses</option>
+                      <option value="captured">Captured</option>
+                      <option value="settled">Settled</option>
+                      <option value="refunded">Refunded</option>
+                      <option value="pending">Pending</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button id="poOrdersRefresh" type="button" style="padding:7px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">↻ Refresh</button>
+                  </div>
+                </div>
+                <div id="poOrdersTable" style="overflow-x:auto;">
+                  <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading orders…</div>
+                </div>
+              </div>
+
+              <!-- Danger zone — archive lives here now (out of the main row) -->
+              <div id="poDangerZone" style="background:#FEF2F2;border-radius:12px;border:1px solid #FECACA;padding:18px 22px;margin-bottom:32px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:#991B1B;margin-bottom:2px;">Danger zone</div>
+                    <div style="font-size:12px;color:#7F1D1D;line-height:1.55;">
+                      Archive removes this product from the affiliate marketplace. Existing share links keep working so buyers in-flight still get vouchers; only new affiliates can't pick it up. Reversible via <em>Restore</em>.
+                    </div>
+                  </div>
+                  <button id="poArchiveBtn" type="button" style="padding:8px 16px;border:1px solid #DC2626;border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;white-space:nowrap;">Archive product</button>
+                </div>
+              </div>
+            </div><!-- /[data-shell-route="product-orders"] -->
+
             <!-- ═══════ ROUTE: billing ═══════ -->
             <div data-shell-route="billing">
 
@@ -4708,13 +4804,23 @@
             // [data-shell-route="..."] block via the wrapper's
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
-            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'billing', 'setup'];
+            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
-                const m = (window.location.hash || '').match(/^#\/(\w[\w-]*)/);
+                // Match the first hash segment (kebab-case allowed for multi-word
+                // routes like 'product-orders'). Trailing sub-segments such as
+                // '/<product_id>' are sliced off by the sub-page's own parser.
+                const m = (window.location.hash || '').match(/^#\/([a-z][a-z0-9-]*)/i);
                 const candidate = m ? m[1] : 'home';
                 return VALID_ROUTES.indexOf(candidate) >= 0 ? candidate : 'home';
+            }
+
+            // Extract the trailing UUID from #/product-orders/<uuid>. Returns
+            // null when the route is anything else or the UUID is missing.
+            function productIdFromHash() {
+                const m = (window.location.hash || '').match(/^#\/product-orders\/([0-9a-f-]{36})/i);
+                return m ? m[1] : null;
             }
 
             function applyRoute(route) {
@@ -11435,12 +11541,24 @@
                         ? `<img src="${escHtml(p.image_url)}" alt="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#F3F4F6;" onerror="this.style.display='none'">`
                         : `<div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#FFE4EE,#FFC9DC);display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>`;
                     const created = p.created_at ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                    // Click-on-name opens the live storefront page (/p/<id>) in a
+                    // new tab. No bb_click suffix — the page detects the advertiser
+                    // is the owner via JWT and renders the preview banner instead
+                    // of the gate (see [[mor-product-page-model]] "The gate").
+                    const liveHref = `/p/${encodeURIComponent(p.id)}`;
                     return `
                         <tr data-product-id="${escHtml(p.id)}" ${archived ? 'style="opacity:0.55;"' : ''}>
-                            <td style="padding:14px 18px;">${img}</td>
                             <td style="padding:14px 18px;">
-                                <div style="font-weight:700;color:#111827;font-size:14px;margin-bottom:2px;">${escHtml(p.name)}</div>
-                                <div style="font-size:12px;color:#6B7280;line-height:1.4;max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(p.description || '—')}</div>
+                                <a href="${escHtml(liveHref)}" target="_blank" rel="noopener" data-action="view" title="Open live product page (creator preview)" style="display:inline-block;line-height:0;">${img}</a>
+                            </td>
+                            <td style="padding:14px 18px;">
+                                <a href="${escHtml(liveHref)}" target="_blank" rel="noopener" data-action="view" title="Open live product page (creator preview)" style="text-decoration:none;color:inherit;">
+                                    <div style="font-weight:700;color:#111827;font-size:14px;margin-bottom:2px;display:inline-flex;align-items:center;gap:6px;">
+                                        <span style="border-bottom:1px dashed transparent;transition:border-color 120ms ease;" class="bb-product-link-name">${escHtml(p.name)}</span>
+                                        <span aria-hidden="true" style="color:#9CA3AF;font-size:11px;">↗</span>
+                                    </div>
+                                    <div style="font-size:12px;color:#6B7280;line-height:1.4;max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(p.description || '—')}</div>
+                                </a>
                             </td>
                             <td style="padding:14px 18px;font-size:13px;color:#FF2D78;font-weight:700;">${(Number(p.default_commission_pct) || 0).toFixed(2)}%</td>
                             <td style="padding:14px 18px;font-size:12px;color:#6B7280;">${escHtml(created)}</td>
@@ -11451,7 +11569,7 @@
                                 <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">Edit</button>
                                 ${archived
                                     ? '<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;">Restore</button>'
-                                    : '<button type="button" data-action="archive" style="padding:6px 12px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;">Archive</button>'}
+                                    : '<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">Orders →</button>'}
                             </td>
                         </tr>`;
                 }).join('');
@@ -11500,7 +11618,11 @@
                 }
             }
 
-            // Delegated click handler for the rendered table rows
+            // Delegated click handler for the rendered table rows.
+            // Buttons drive edit/orders/restore actions; <a data-action="view">
+            // anchors are NOT intercepted — the browser handles them via
+            // their href + target="_blank" so cmd-click + middle-click open
+            // the live page like any normal link.
             list.addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-action]');
                 if (!btn) return;
@@ -11510,6 +11632,12 @@
                 const product = productsCache.find((p) => p.id === id);
                 const action = btn.dataset.action;
                 if (action === 'edit')    return openModal('edit', product);
+                if (action === 'orders')  {
+                    // Navigate into the per-product control panel. Hash sub-segment
+                    // carries the product UUID — the route parser slices it off.
+                    window.location.hash = '#/product-orders/' + encodeURIComponent(id);
+                    return;
+                }
                 if (action === 'archive') return archiveProduct(id);
                 if (action === 'restore') return restoreProduct(id);
             });
@@ -11618,6 +11746,511 @@
             setTimeout(() => clearInterval(authPollInterval), 15000);
             // And once immediately in case we're already on the route.
             setTimeout(maybeLoad, 100);
+        })();
+    </script>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         Product Orders sub-page — per-product control panel.
+         Hash: #/product-orders/<product_id>
+         API:  /api/product-orders (summary, orders, timeseries, affiliates,
+               revoke_voucher).
+         Owns: #poHeader, #poSummaryCards, #poChart, #poAffiliatesTable,
+               #poOrdersTable, #poRangeSelect, #poOrdersStatusFilter,
+               #poOrdersRefresh, #poArchiveBtn.
+         Loads on hashchange when route resolves to 'product-orders'.
+         ═════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            'use strict';
+
+            // Reuse the shell's escHtml helper; fall back to a local copy
+            // if for any reason it isn't on window yet.
+            function esc(s) {
+                if (typeof window.escHtml === 'function') return window.escHtml(s);
+                return String(s == null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
+
+            function fmtMoney(n, ccy) {
+                const v = Number(n) || 0;
+                const cur = (ccy || 'USD').toUpperCase();
+                try {
+                    return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: 2 }).format(v);
+                } catch (_) {
+                    return '$' + v.toFixed(2);
+                }
+            }
+            function fmtInt(n) {
+                const v = Number(n) || 0;
+                try { return new Intl.NumberFormat().format(v); } catch (_) { return String(v); }
+            }
+            function fmtDate(s) {
+                if (!s) return '—';
+                try {
+                    const d = new Date(s);
+                    if (Number.isNaN(d.getTime())) return '—';
+                    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                } catch (_) { return s; }
+            }
+            function fmtDay(s) {
+                if (!s) return '—';
+                try {
+                    const d = new Date(s);
+                    if (Number.isNaN(d.getTime())) return '—';
+                    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                } catch (_) { return s; }
+            }
+
+            // Pull the product UUID from the hash. Same regex as the route
+            // parser above — kept in lockstep.
+            function productIdFromHash() {
+                const m = (window.location.hash || '').match(/^#\/product-orders\/([0-9a-f-]{36})/i);
+                return m ? m[1] : null;
+            }
+
+            let currentProductId = null;
+            let currentRange = 30;
+            let currentStatusFilter = '';
+            let chartInstance = null;
+
+            const headerEl     = () => document.getElementById('poHeader');
+            const summaryEl    = () => document.getElementById('poSummaryCards');
+            const affiliatesEl = () => document.getElementById('poAffiliatesTable');
+            const ordersEl     = () => document.getElementById('poOrdersTable');
+            const chartCanvas  = () => document.getElementById('poChart');
+
+            function getToken() {
+                // currentUser is owned by the outer auth script; we just read it.
+                if (typeof window.currentUser !== 'undefined' && window.currentUser && window.currentUser.token) {
+                    return window.currentUser.token;
+                }
+                return null;
+            }
+
+            async function apiGet(action, params) {
+                const token = getToken();
+                if (!token) throw new Error('not authenticated');
+                const q = new URLSearchParams(Object.assign({ action, product_id: currentProductId }, params || {}));
+                const r = await fetch('/api/product-orders?' + q.toString(), {
+                    headers: { 'Authorization': 'Bearer ' + token },
+                });
+                const j = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(j.error || 'Request failed');
+                return j;
+            }
+            async function apiPost(action, body) {
+                const token = getToken();
+                if (!token) throw new Error('not authenticated');
+                const r = await fetch('/api/product-orders?action=' + encodeURIComponent(action), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(body || {}),
+                });
+                const j = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(j.error || 'Request failed');
+                return j;
+            }
+
+            // ── Renderers ────────────────────────────────────────────────
+
+            function renderHeader(summary) {
+                const p = summary.product || {};
+                const archived = p.status === 'archived';
+                const img = p.image_url
+                    ? `<img src="${esc(p.image_url)}" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;background:#F3F4F6;flex-shrink:0;" onerror="this.style.display='none'">`
+                    : `<div style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,#FFE4EE,#FFC9DC);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📦</div>`;
+                const liveUrl = '/p/' + encodeURIComponent(p.id);
+                const statusBadge = archived
+                    ? `<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Archived</span>`
+                    : `<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:#ECFDF5;color:#059669;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Active</span>`;
+                headerEl().innerHTML = `
+                    ${img}
+                    <div style="flex:1;min-width:240px;">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+                            <div style="font-size:20px;font-weight:700;color:#111827;">${esc(p.name || 'Untitled')}</div>
+                            ${statusBadge}
+                        </div>
+                        <div style="display:flex;gap:18px;color:#6B7280;font-size:13px;flex-wrap:wrap;">
+                            <div><strong style="color:#111827;">${fmtMoney(p.price, p.currency)}</strong> · ${esc(p.sku_type || 'one_time')}</div>
+                            <div>${(Number(p.default_commission_pct) || 0).toFixed(2)}% commission</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <a href="${esc(liveUrl)}" target="_blank" rel="noopener" style="padding:9px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">View live page <span style="color:#9CA3AF;font-size:11px;">↗</span></a>
+                    </div>
+                `;
+            }
+
+            function metricCard(label, value, sub, accent) {
+                const color = accent || '#FF2D78';
+                return `
+                    <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:16px 18px;">
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">${esc(label)}</div>
+                        <div style="font-size:24px;font-weight:700;color:${color};line-height:1.1;margin-bottom:4px;">${esc(value)}</div>
+                        <div style="font-size:11px;color:#9CA3AF;">${esc(sub || '')}</div>
+                    </div>`;
+            }
+
+            function renderSummaryCards(s) {
+                const captured = (s.orders && s.orders.captured) || 0;
+                const settled  = (s.orders && s.orders.settled)  || 0;
+                const refunded = (s.orders && s.orders.refunded) || 0;
+                const completed = captured + settled;
+                const revenue = (s.money && s.money.revenue) || 0;
+                const sellerNet = (s.money && s.money.seller_settlement) || 0;
+                const affiliateCom = (s.money && s.money.affiliate_commission) || 0;
+                summaryEl().innerHTML = [
+                    metricCard('Affiliates promoting',  fmtInt(s.affiliates), fmtInt(s.share_links) + ' share link' + (s.share_links === 1 ? '' : 's')),
+                    metricCard('Total clicks',          fmtInt(s.clicks),     'Lifetime, all affiliates', '#0EA5E9'),
+                    metricCard('Purchases',             fmtInt(completed),    refunded + ' refunded', '#059669'),
+                    metricCard('Revenue',               fmtMoney(revenue, (s.product && s.product.currency) || 'USD'),
+                                                        'Your net: ' + fmtMoney(sellerNet, (s.product && s.product.currency) || 'USD'), '#FF2D78'),
+                ].join('');
+            }
+
+            function renderChart(series) {
+                const canvas = chartCanvas();
+                if (!canvas) return;
+                // Chart.js is loaded with defer — it may not be ready when
+                // the user first lands on this route. Retry up to ~3s.
+                if (typeof Chart === 'undefined') {
+                    if (renderChart._tries == null) renderChart._tries = 0;
+                    if (renderChart._tries++ > 30) return;
+                    setTimeout(() => renderChart(series), 100);
+                    return;
+                }
+                renderChart._tries = 0;
+                const labels    = series.map((d) => fmtDay(d.date));
+                const clicks    = series.map((d) => d.clicks);
+                const purchases = series.map((d) => d.purchases);
+
+                if (chartInstance) {
+                    chartInstance.data.labels = labels;
+                    chartInstance.data.datasets[0].data = clicks;
+                    chartInstance.data.datasets[1].data = purchases;
+                    chartInstance.update();
+                    return;
+                }
+                chartInstance = new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Clicks',
+                                data: clicks,
+                                borderColor: '#0EA5E9',
+                                backgroundColor: 'rgba(14,165,233,0.08)',
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 2,
+                                pointHoverRadius: 4,
+                                borderWidth: 2,
+                            },
+                            {
+                                label: 'Purchases',
+                                data: purchases,
+                                borderColor: '#FF2D78',
+                                backgroundColor: 'rgba(255,45,120,0.10)',
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 2,
+                                pointHoverRadius: 4,
+                                borderWidth: 2,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+                            tooltip: { padding: 10 },
+                        },
+                        scales: {
+                            x: { ticks: { font: { size: 10 }, maxRotation: 0, autoSkipPadding: 16 }, grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { font: { size: 10 }, precision: 0 } },
+                        },
+                    },
+                });
+            }
+
+            function renderAffiliates(rows) {
+                if (!rows || !rows.length) {
+                    affiliatesEl().innerHTML = `
+                        <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">
+                            No affiliates have picked up this product yet. When one mints a share link via Get Link, they'll appear here.
+                        </div>`;
+                    return;
+                }
+                const head = `
+                    <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Affiliate</th>
+                        <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Links</th>
+                        <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Clicks</th>
+                        <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Conversions</th>
+                        <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Commission</th>
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Last click</th>
+                    </tr>`;
+                const body = rows.map((a) => {
+                    const ident = a.display_name || a.email || (a.affiliate_id ? a.affiliate_id.slice(0, 8) + '…' : 'Unknown');
+                    return `
+                        <tr style="border-bottom:1px solid #F3F4F6;">
+                            <td style="padding:12px 14px;font-size:13px;color:#111827;">
+                                <div style="font-weight:600;">${esc(ident)}</div>
+                                ${a.email && a.email !== ident ? `<div style="font-size:11px;color:#9CA3AF;">${esc(a.email)}</div>` : ''}
+                            </td>
+                            <td style="padding:12px 14px;text-align:right;font-size:13px;color:#6B7280;">${fmtInt(a.share_links)}</td>
+                            <td style="padding:12px 14px;text-align:right;font-size:13px;color:#0EA5E9;font-weight:600;">${fmtInt(a.clicks)}</td>
+                            <td style="padding:12px 14px;text-align:right;font-size:13px;color:#059669;font-weight:600;">${fmtInt(a.conversions)}</td>
+                            <td style="padding:12px 14px;text-align:right;font-size:13px;color:#FF2D78;font-weight:700;">${fmtMoney(a.commission)}</td>
+                            <td style="padding:12px 14px;font-size:12px;color:#6B7280;">${esc(a.last_click_at ? fmtDate(a.last_click_at) : '—')}</td>
+                        </tr>`;
+                }).join('');
+                affiliatesEl().innerHTML = `
+                    <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+                        <thead>${head}</thead>
+                        <tbody>${body}</tbody>
+                    </table>`;
+            }
+
+            // Status badge styling for orders + voucher status
+            const STATUS_BADGE = {
+                captured:  { bg: '#ECFDF5', color: '#059669', label: 'Captured' },
+                settled:   { bg: '#EFF6FF', color: '#2563EB', label: 'Settled' },
+                pending:   { bg: '#FEF3C7', color: '#92400E', label: 'Pending' },
+                refunded:  { bg: '#FEF2F2', color: '#DC2626', label: 'Refunded' },
+                cancelled: { bg: '#F3F4F6', color: '#6B7280', label: 'Cancelled' },
+                failed:    { bg: '#FEF2F2', color: '#DC2626', label: 'Failed' },
+                issued:    { bg: '#FEF3C7', color: '#92400E', label: 'Issued' },
+                redeemed:  { bg: '#ECFDF5', color: '#059669', label: 'Redeemed' },
+                expired:   { bg: '#F3F4F6', color: '#6B7280', label: 'Expired' },
+                revoked:   { bg: '#FEF2F2', color: '#DC2626', label: 'Revoked' },
+            };
+            function badge(status) {
+                const s = STATUS_BADGE[status] || { bg: '#F3F4F6', color: '#6B7280', label: status || '—' };
+                return `<span style="display:inline-block;padding:3px 9px;border-radius:11px;background:${s.bg};color:${s.color};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">${esc(s.label)}</span>`;
+            }
+
+            function renderOrders(orders) {
+                if (!orders || !orders.length) {
+                    ordersEl().innerHTML = `
+                        <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">
+                            No orders yet. When buyers complete checkout via /p/${esc(currentProductId)}, they'll appear here.
+                        </div>`;
+                    return;
+                }
+                const head = `
+                    <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Date</th>
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Buyer</th>
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Affiliate</th>
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Order</th>
+                        <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Voucher</th>
+                        <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Amount</th>
+                        <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Actions</th>
+                    </tr>`;
+                const body = orders.map((o) => {
+                    const aff = o.affiliate ? (o.affiliate.display_name || o.affiliate.email || '—') : '<span style="color:#9CA3AF;">Direct</span>';
+                    const voucherBlock = o.voucher
+                        ? `<div style="display:flex;flex-direction:column;gap:3px;">
+                              <code style="font-size:11px;background:#F3F4F6;padding:2px 6px;border-radius:4px;color:#111827;letter-spacing:0.04em;">${esc(o.voucher.code)}</code>
+                              <div>${badge(o.voucher.status)}</div>
+                              ${o.voucher.redeemed_at ? `<div style="font-size:10px;color:#6B7280;">Redeemed ${esc(fmtDate(o.voucher.redeemed_at))}</div>` : ''}
+                          </div>`
+                        : '<span style="color:#9CA3AF;font-size:12px;">No voucher</span>';
+                    const canRevoke = o.voucher && (o.voucher.status === 'issued' || o.voucher.status === 'expired');
+                    const actions = canRevoke
+                        ? `<button type="button" data-action="revoke" data-voucher-id="${esc(o.voucher.id)}" data-voucher-code="${esc(o.voucher.code)}" style="padding:6px 11px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;">Revoke</button>`
+                        : '<span style="color:#D1D5DB;font-size:11px;">—</span>';
+                    return `
+                        <tr style="border-bottom:1px solid #F3F4F6;">
+                            <td style="padding:12px 14px;font-size:12px;color:#6B7280;white-space:nowrap;">${esc(fmtDate(o.captured_at || o.created_at))}</td>
+                            <td style="padding:12px 14px;font-size:13px;color:#111827;">
+                                <div style="font-weight:600;">${esc(o.buyer_email || '—')}</div>
+                                ${o.paypal_payer_email && o.paypal_payer_email !== o.buyer_email ? `<div style="font-size:11px;color:#9CA3AF;">PayPal: ${esc(o.paypal_payer_email)}</div>` : ''}
+                            </td>
+                            <td style="padding:12px 14px;font-size:13px;color:#6B7280;">${aff}</td>
+                            <td style="padding:12px 14px;">${badge(o.status)}</td>
+                            <td style="padding:12px 14px;">${voucherBlock}</td>
+                            <td style="padding:12px 14px;text-align:right;font-size:13px;color:#111827;font-weight:700;white-space:nowrap;">${fmtMoney(o.amount, o.currency)}</td>
+                            <td style="padding:12px 14px;text-align:right;white-space:nowrap;">${actions}</td>
+                        </tr>`;
+                }).join('');
+                ordersEl().innerHTML = `
+                    <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+                        <thead>${head}</thead>
+                        <tbody>${body}</tbody>
+                    </table>`;
+            }
+
+            // ── Loaders ───────────────────────────────────────────────────
+
+            async function loadSummary() {
+                try {
+                    const data = await apiGet('summary');
+                    renderHeader(data);
+                    renderSummaryCards(data);
+                    // Hide archive button if already archived (use Restore from products list instead)
+                    const archBtn = document.getElementById('poArchiveBtn');
+                    if (archBtn) archBtn.style.display = (data.product && data.product.status === 'archived') ? 'none' : '';
+                } catch (e) {
+                    headerEl().innerHTML = `<div style="color:#DC2626;font-size:13px;">Failed to load product: ${esc(e.message)}</div>`;
+                }
+            }
+            async function loadTimeseries() {
+                try {
+                    const data = await apiGet('timeseries', { days: String(currentRange) });
+                    renderChart(data.series || []);
+                } catch (e) {
+                    // Chart errors aren't catastrophic — just leave the canvas blank
+                    console.warn('[product-orders] timeseries failed:', e.message);
+                }
+            }
+            async function loadAffiliates() {
+                try {
+                    const data = await apiGet('affiliates');
+                    renderAffiliates(data.affiliates || []);
+                } catch (e) {
+                    affiliatesEl().innerHTML = `<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">${esc(e.message)}</div>`;
+                }
+            }
+            async function loadOrders() {
+                ordersEl().innerHTML = '<div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading orders…</div>';
+                try {
+                    const params = {};
+                    if (currentStatusFilter) params.status = currentStatusFilter;
+                    const data = await apiGet('orders', params);
+                    renderOrders(data.orders || []);
+                } catch (e) {
+                    ordersEl().innerHTML = `<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">${esc(e.message)}</div>`;
+                }
+            }
+
+            async function loadAll() {
+                if (!currentProductId) return;
+                // Run in parallel — they all hit the same product but different
+                // tables, so no serialization needed.
+                await Promise.all([
+                    loadSummary(),
+                    loadTimeseries(),
+                    loadAffiliates(),
+                    loadOrders(),
+                ]);
+            }
+
+            // ── Wiring ────────────────────────────────────────────────────
+
+            function wireOnce() {
+                const range = document.getElementById('poRangeSelect');
+                if (range) {
+                    range.addEventListener('change', () => {
+                        currentRange = parseInt(range.value, 10) || 30;
+                        loadTimeseries();
+                    });
+                }
+                const statusFilter = document.getElementById('poOrdersStatusFilter');
+                if (statusFilter) {
+                    statusFilter.addEventListener('change', () => {
+                        currentStatusFilter = statusFilter.value;
+                        loadOrders();
+                    });
+                }
+                const refresh = document.getElementById('poOrdersRefresh');
+                if (refresh) {
+                    refresh.addEventListener('click', () => loadAll());
+                }
+                // Revoke voucher — delegated
+                const ordersTbl = document.getElementById('poOrdersTable');
+                if (ordersTbl) {
+                    ordersTbl.addEventListener('click', async (e) => {
+                        const btn = e.target.closest('button[data-action="revoke"]');
+                        if (!btn) return;
+                        const voucherId   = btn.dataset.voucherId;
+                        const voucherCode = btn.dataset.voucherCode;
+                        if (!voucherId) return;
+                        if (!confirm('Revoke voucher ' + voucherCode + '?\n\nThis prevents the buyer from redeeming it. Does NOT trigger a refund — use PayPal for that.')) return;
+                        btn.disabled = true;
+                        btn.textContent = 'Revoking…';
+                        try {
+                            await apiPost('revoke_voucher', { voucher_id: voucherId });
+                            await loadOrders();
+                            await loadSummary();
+                        } catch (err) {
+                            alert('Revoke failed: ' + err.message);
+                            btn.disabled = false;
+                            btn.textContent = 'Revoke';
+                        }
+                    });
+                }
+                // Archive product
+                const archBtn = document.getElementById('poArchiveBtn');
+                if (archBtn) {
+                    archBtn.addEventListener('click', async () => {
+                        if (!currentProductId) return;
+                        if (!confirm('Archive this product?\n\nIt disappears from the affiliate marketplace and new share links won\'t be mintable. Existing share links keep working so in-flight buyers still get vouchers. Reversible from the Products list (Restore).')) return;
+                        archBtn.disabled = true;
+                        archBtn.textContent = 'Archiving…';
+                        try {
+                            const token = getToken();
+                            const r = await fetch('/api/products?action=archive', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                body: JSON.stringify({ id: currentProductId }),
+                            });
+                            if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Archive failed'); }
+                            // Bounce back to products list — the row will now show "Archived".
+                            window.location.hash = '#/products';
+                        } catch (err) {
+                            alert(err.message);
+                            archBtn.disabled = false;
+                            archBtn.textContent = 'Archive product';
+                        }
+                    });
+                }
+            }
+
+            // Route guard — only run loaders when this is the active route
+            function maybeLoad() {
+                const wrap = document.querySelector('[data-shell-active-route]');
+                const active = wrap && wrap.getAttribute('data-shell-active-route');
+                if (active !== 'product-orders') return;
+                const pid = productIdFromHash();
+                if (!pid) {
+                    // Bad hash — bounce back to products list
+                    window.location.hash = '#/products';
+                    return;
+                }
+                if (pid === currentProductId) return;  // already loaded
+                currentProductId = pid;
+                // Reset range/filter UI on product switch
+                const range = document.getElementById('poRangeSelect');
+                if (range) range.value = '30';
+                currentRange = 30;
+                const sf = document.getElementById('poOrdersStatusFilter');
+                if (sf) sf.value = '';
+                currentStatusFilter = '';
+                // Tear down any existing chart so the new product gets a fresh one
+                if (chartInstance) { try { chartInstance.destroy(); } catch (_) {} chartInstance = null; }
+                if (getToken()) loadAll();
+            }
+
+            // Boot — wire UI, listen for hash changes, poll briefly for token
+            document.addEventListener('DOMContentLoaded', wireOnce);
+            // DOMContentLoaded may already have fired (this script runs late):
+            if (document.readyState !== 'loading') wireOnce();
+
+            window.addEventListener('hashchange', maybeLoad);
+            const poAuthInterval = setInterval(() => {
+                if (getToken()) {
+                    clearInterval(poAuthInterval);
+                    maybeLoad();
+                }
+            }, 400);
+            setTimeout(() => clearInterval(poAuthInterval), 15000);
+            setTimeout(maybeLoad, 200);
         })();
     </script>
 

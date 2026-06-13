@@ -499,18 +499,19 @@
 [data-shell-route] {
     display: none;
 }
-.shell-wrap[data-shell-active-route="home"]         [data-shell-route="home"],
-.shell-wrap[data-shell-active-route="performance"]  [data-shell-route="performance"],
-.shell-wrap[data-shell-active-route="campaigns"]    [data-shell-route="campaigns"],
-.shell-wrap[data-shell-active-route="products"]     [data-shell-route="products"],
-.shell-wrap[data-shell-active-route="billing"]      [data-shell-route="billing"],
-.shell-wrap[data-shell-active-route="setup"]        [data-shell-route="setup"],
-.shell-wrap[data-shell-active-route="integrations"] [data-shell-route="integrations"],
-.shell-wrap[data-shell-active-route="placements"]   [data-shell-route="placements"],
-.shell-wrap[data-shell-active-route="payouts"]      [data-shell-route="payouts"],
-.shell-wrap[data-shell-active-route="promote"]      [data-shell-route="promote"],
-.shell-wrap[data-shell-active-route="usage"]        [data-shell-route="usage"],
-.shell-wrap[data-shell-active-route="api"]          [data-shell-route="api"] {
+.shell-wrap[data-shell-active-route="home"]            [data-shell-route="home"],
+.shell-wrap[data-shell-active-route="performance"]     [data-shell-route="performance"],
+.shell-wrap[data-shell-active-route="campaigns"]       [data-shell-route="campaigns"],
+.shell-wrap[data-shell-active-route="products"]        [data-shell-route="products"],
+.shell-wrap[data-shell-active-route="product-orders"]  [data-shell-route="product-orders"],
+.shell-wrap[data-shell-active-route="billing"]         [data-shell-route="billing"],
+.shell-wrap[data-shell-active-route="setup"]           [data-shell-route="setup"],
+.shell-wrap[data-shell-active-route="integrations"]    [data-shell-route="integrations"],
+.shell-wrap[data-shell-active-route="placements"]      [data-shell-route="placements"],
+.shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],
+.shell-wrap[data-shell-active-route="promote"]         [data-shell-route="promote"],
+.shell-wrap[data-shell-active-route="usage"]           [data-shell-route="usage"],
+.shell-wrap[data-shell-active-route="api"]             [data-shell-route="api"] {
     display: block;
 }
 /* Onboarding banner / full-width announcements that should appear on
