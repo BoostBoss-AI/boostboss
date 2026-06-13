@@ -6,6 +6,7 @@
   <title>Loading product… · Boost Boss</title>
   <link rel="icon" href="/favicon.ico">
   <meta name="robots" content="noindex">  <!-- Buyers arrive via affiliate links, not SEO -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ── Design tokens ─────────────────────────────────────────────── */
     :root {
@@ -15,389 +16,495 @@
       --ink: #111827;
       --ink-soft: #374151;
       --muted: #6B7280;
+      --muted-2: #9CA3AF;
       --line: #E5E7EB;
-      --line-soft: #F3F4F6;
-      --bg: #F9FAFB;
-      --bg-card: #ffffff;
+      --bg: #FAFAF7;
+      --bg-card: #FFFFFF;
       --green: #059669;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 14px rgba(0,0,0,0.07);
-      --shadow-lg: 0 16px 36px rgba(0,0,0,0.10);
+      --amber: #D97706;
+      --max: 1240px;
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; line-height: 1.55; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: var(--bg); color: var(--ink); font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.01em; }
+    a { color: var(--pink); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .hidden { display: none !important; }
+    img { max-width: 100%; display: block; }
 
-    /* ── Page chrome ────────────────────────────────────────────────── */
-    .topbar {
-      background: var(--bg-card); border-bottom: 1px solid var(--line);
-      padding: 14px 28px; display: flex; align-items: center; gap: 14px;
-    }
-    .topbar img { width: 26px; height: 26px; }
-    .topbar .name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
-    .topbar .tag {
-      font-size: 10.5px; font-weight: 700; color: var(--pink); padding: 3px 8px;
-      border-radius: 99px; background: rgba(255,45,120,0.10); letter-spacing: 0.4px;
-    }
-    .topbar .right { margin-left: auto; font-size: 13px; color: var(--muted); }
-    .topbar a { color: var(--ink-soft); text-decoration: none; font-weight: 500; }
+    /* ── Loading / Error states ────────────────────────────────────── */
+    .loading, .error-state { padding: 120px 24px; text-align: center; }
+    .loading .spinner { width: 48px; height: 48px; border: 4px solid var(--line); border-top-color: var(--pink); border-radius: 50%; margin: 0 auto 20px; animation: spin 800ms linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p, .error-state p { color: var(--muted); }
+    .error-state h2 { font-size: 26px; margin-bottom: 12px; }
 
-    /* Affiliate-source pill — shown only when bb_click is present */
-    .aff-pill {
-      display: none; background: var(--pink-soft); color: var(--pink);
-      padding: 10px 28px; font-size: 13px; font-weight: 600;
-      text-align: center; border-bottom: 1px solid #FECDD3;
+    /* ── Sticky top nav ────────────────────────────────────────────── */
+    .bb-topnav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
     }
-    .aff-pill.show { display: block; }
+    .bb-topnav-inner {
+      max-width: var(--max); margin: 0 auto;
+      padding: 14px 24px; display: flex; align-items: center; gap: 18px;
+    }
+    .bb-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .bb-brand-logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--pink), var(--pink-dark)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 16px; }
+    .bb-brand-name { font-size: 16px; font-weight: 700; color: var(--ink); }
+    .bb-brand-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; background: var(--pink-soft); color: var(--pink); letter-spacing: 0.04em; text-transform: uppercase; }
+    .bb-nav-links { display: flex; gap: 24px; margin-left: 18px; flex: 1; flex-wrap: wrap; }
+    .bb-nav-links a { color: var(--muted); font-size: 13.5px; font-weight: 600; text-decoration: none; }
+    .bb-nav-links a:hover { color: var(--ink); }
+    .bb-topnav-cta { padding: 8px 16px; background: var(--pink); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none !important; }
+    .bb-topnav-cta:hover { background: var(--pink-dark); }
+
+    /* ── Banners (affiliate pill, preview, audit-pending) ──────────── */
+    .aff-pill, .preview-banner, .audit-banner {
+      max-width: var(--max); margin: 14px auto 0; padding: 12px 20px;
+      border-radius: 12px; display: none; align-items: center; gap: 10px;
+      font-size: 13.5px; font-weight: 500;
+    }
+    .aff-pill { background: var(--pink-soft); color: var(--pink-dark); border: 1px solid #FBCFE8; }
+    .aff-pill.show { display: flex; }
+    .preview-banner { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .preview-banner.show { display: flex; }
+    .audit-banner { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .audit-banner.show { display: flex; }
+
+    /* ── Page wrapper ─────────────────────────────────────────────── */
+    .page { max-width: var(--max); margin: 0 auto; padding: 28px 24px 80px; }
 
     /* ── Hero ──────────────────────────────────────────────────────── */
-    .hero {
-      max-width: 1080px; margin: 0 auto; padding: 48px 28px 40px;
-      display: grid; grid-template-columns: 1fr 380px; gap: 48px;
+    .hero-grid {
+      display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 36px;
+      align-items: flex-start;
     }
-    @media (max-width: 880px) { .hero { grid-template-columns: 1fr; padding: 32px 18px; } }
+    @media (max-width: 920px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+    .hero-left h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+    .hero-lede { font-size: 16.5px; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.6; }
+    .hero-img-main {
+      width: 100%; aspect-ratio: 16/10; border-radius: 14px;
+      background: linear-gradient(135deg, var(--pink-soft), #FCE7F3);
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px; margin-bottom: 14px;
+    }
+    .hero-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .hero-thumb {
+      width: 88px; aspect-ratio: 16/10; border-radius: 8px;
+      background-size: cover; background-position: center;
+      background-color: var(--bg-card);
+      border: 2px solid transparent; cursor: pointer;
+      transition: border-color 120ms ease;
+    }
+    .hero-thumb.active, .hero-thumb:hover { border-color: var(--pink); }
 
-    .hero-img {
-      width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, var(--pink-soft), #FFC9DC);
-      border-radius: 16px; background-size: cover; background-position: center;
-      box-shadow: var(--shadow-md);
-      display: flex; align-items: center; justify-content: center; font-size: 64px;
+    /* ── Purchase card (right rail, sticky on desktop) ────────────── */
+    .buy-card {
+      background: var(--bg-card); border-radius: 16px; border: 2px solid var(--pink);
+      padding: 22px; position: sticky; top: 80px;
+      box-shadow: 0 4px 24px rgba(255,45,120,0.08);
     }
-    .hero-info h1 {
-      font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700;
-      letter-spacing: -0.6px; margin: 0 0 10px; line-height: 1.15;
-    }
-    .hero-info .lede {
-      font-size: 17px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 28px;
-    }
-    .price-card {
-      background: var(--bg-card); border: 1.5px solid var(--pink); border-radius: 14px;
-      padding: 22px 24px; margin-bottom: 18px;
-    }
-    .price-card .row {
-      display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px;
-    }
-    .price-card .price {
-      font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700; color: var(--ink);
-      letter-spacing: -1px; line-height: 1;
-    }
-    .price-card .currency { font-size: 16px; color: var(--muted); font-weight: 600; }
-    .price-card .sku {
-      margin-left: auto; font-size: 11px; font-weight: 700; padding: 4px 10px;
-      border-radius: 99px; background: var(--pink-soft); color: var(--pink);
-      text-transform: uppercase; letter-spacing: 0.4px;
+    .buy-card-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .buy-card-brand img { width: 28px; height: 28px; border-radius: 6px; }
+    .buy-card-brand-name { font-size: 16px; font-weight: 700; }
+    .buy-card-discount { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+    .buy-card-discount .pct { color: var(--pink); font-weight: 700; font-size: 14px; }
+    .buy-card-discount .strike { color: var(--muted); text-decoration: line-through; font-size: 14px; }
+    .buy-card-price { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .buy-card-price .now { font-size: 32px; font-weight: 800; color: var(--ink); line-height: 1; }
+    .buy-card-price .ccy { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
+    .buy-card-price .pill { background: var(--pink-soft); color: var(--pink); padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .plan-select-row { margin: 16px 0 8px; }
+    .plan-select-row label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); display: block; margin-bottom: 6px; }
+    .plan-select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+      background: var(--bg); font-size: 14px; font-family: inherit; font-weight: 500;
+      cursor: pointer; color: var(--ink);
     }
     .buy-btn {
-      display: block; width: 100%; background: var(--pink); color: #fff;
-      border: none; padding: 16px 24px; border-radius: 10px;
-      font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit;
-      box-shadow: var(--shadow-md); transition: transform 0.08s, filter 0.12s;
-      text-align: center; text-decoration: none;
+      display: block; width: 100%; padding: 14px 16px; margin-top: 12px;
+      background: var(--pink); color: #fff; text-align: center;
+      border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer;
+      transition: background 120ms ease;
     }
-    .buy-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
-    .buy-btn:active { transform: translateY(0); }
-    .price-card .meta {
-      font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px;
-      line-height: 1.5;
-    }
-    .price-card .meta strong { color: var(--ink); }
-    .ext-cta {
-      display: block; text-align: center; padding: 12px 18px; border: 1px solid var(--line);
-      border-radius: 10px; text-decoration: none; color: var(--ink-soft); font-size: 13px;
-      font-weight: 600;
-    }
-    .ext-cta:hover { background: var(--bg); border-color: var(--ink-soft); }
+    .buy-btn:hover { background: var(--pink-dark); text-decoration: none; }
+    .buy-btn.preview-disabled { background: var(--muted-2); cursor: not-allowed; pointer-events: none; opacity: 0.85; }
+    .buy-card-meta { font-size: 11.5px; color: var(--muted); margin-top: 12px; line-height: 1.55; text-align: center; }
 
-    /* ── Long description + content sections ──────────────────────── */
-    .content {
-      max-width: 1080px; margin: 0 auto; padding: 24px 28px 80px;
-      display: grid; grid-template-columns: 1fr 380px; gap: 48px;
+    /* Trust badges below the purchase card */
+    .trust-row {
+      display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+      justify-content: center; font-size: 12.5px;
     }
-    @media (max-width: 880px) { .content { grid-template-columns: 1fr; padding: 16px 18px 60px; } }
+    .trust-badge { display: inline-flex; align-items: center; gap: 6px; color: var(--green); font-weight: 600; }
+    .trust-badge .icon { width: 18px; height: 18px; border-radius: 6px; background: #ECFDF5; color: var(--green); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
 
-    .content main h2 {
-      font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700;
-      letter-spacing: -0.3px; margin: 36px 0 16px; line-height: 1.25;
-    }
-    .content main h2:first-child { margin-top: 8px; }
-    .content main .long-desc { font-size: 16px; line-height: 1.7; color: var(--ink-soft); white-space: pre-wrap; }
-    .content main .long-desc p { margin: 0 0 14px; }
+    /* ── Sections ──────────────────────────────────────────────────── */
+    .section { margin-top: 56px; }
+    .section h2 { font-size: 24px; font-weight: 700; margin-bottom: 18px; }
 
-    /* ── Demo video ────────────────────────────────────────────────── */
-    .demo-video {
-      position: relative; aspect-ratio: 16/9; background: #000;
-      border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-md);
+    /* TL;DR */
+    .tldr-list { list-style: none; padding: 0; margin: 0; }
+    .tldr-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px; background: var(--bg-card); border-radius: 10px;
+      margin-bottom: 8px; font-size: 15px; line-height: 1.55;
     }
-    .demo-video iframe { width: 100%; height: 100%; border: none; }
-
-    /* ── Screenshots ──────────────────────────────────────────────── */
-    .screenshots-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
-    }
-    .screenshots-grid img {
-      width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px;
-      background: var(--line-soft); cursor: pointer; transition: transform 0.12s;
-    }
-    .screenshots-grid img:hover { transform: scale(1.02); }
-
-    /* ── Package details ─────────────────────────────────────────── */
-    .pkg-list { list-style: none; padding: 0; margin: 0; }
-    .pkg-list li {
-      display: flex; align-items: flex-start; gap: 12px; padding: 10px 0;
-      border-bottom: 1px solid var(--line-soft); font-size: 15px;
-    }
-    .pkg-list li:last-child { border-bottom: none; }
-    .pkg-list .check { color: var(--green); font-weight: 700; font-size: 18px; line-height: 1; flex-shrink: 0; }
-    .pkg-list .cross { color: var(--muted); font-weight: 700; font-size: 18px; line-height: 1; flex-shrink: 0; }
-    .pkg-list .excluded { color: var(--muted); text-decoration: line-through; }
-
-    /* ── FAQ ─────────────────────────────────────────────────────── */
-    .faq-list { display: flex; flex-direction: column; gap: 8px; }
-    .faq-item {
-      background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px;
-      padding: 16px 20px;
-    }
-    .faq-item .q {
-      font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px;
-    }
-    .faq-item .a { font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; white-space: pre-wrap; }
-
-    /* ── Testimonials ──────────────────────────────────────────── */
-    .test-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;
-    }
-    .test-card {
-      background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
-      padding: 20px 22px;
-    }
-    .test-card .quote {
-      font-size: 15px; color: var(--ink); line-height: 1.6; margin-bottom: 12px;
-      font-style: italic;
-    }
-    .test-card .author {
-      font-size: 13px; font-weight: 700; color: var(--ink);
-    }
-    .test-card .role { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-
-    /* ── Sticky sidebar on desktop ─────────────────────────────── */
-    .content aside { align-self: flex-start; position: sticky; top: 24px; }
-    @media (max-width: 880px) { .content aside { position: static; } }
-
-    /* ── Footer ────────────────────────────────────────────────── */
-    .footer {
-      max-width: 1080px; margin: 0 auto; padding: 24px 28px 48px;
-      border-top: 1px solid var(--line); color: var(--muted); font-size: 13px;
-      text-align: center; line-height: 1.6;
-    }
-    .footer a { color: var(--ink-soft); text-decoration: none; font-weight: 600; }
-    .footer .meta { margin-top: 8px; font-size: 12px; }
-
-    /* ── Loading / error states ────────────────────────────────── */
-    .loading, .error-state {
-      max-width: 720px; margin: 80px auto; text-align: center; padding: 0 24px;
-    }
-    .loading { color: var(--muted); font-size: 15px; }
-    .error-state h2 { font-size: 26px; margin-bottom: 12px; }
-    .error-state p { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
-    .error-state a {
-      display: inline-block; background: var(--pink); color: #fff;
-      padding: 12px 22px; border-radius: 10px; text-decoration: none;
-      font-weight: 700;
+    .tldr-list .check {
+      width: 22px; height: 22px; border-radius: 50%; background: var(--green);
+      color: #fff; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
     }
 
-    /* ── Gated state ────────────────────────────────────────────────
-       Shown to anonymous visitors without bb_click. Reveals product
-       name + image (already public via affiliate promotion) but hides
-       everything else (price, description, FAQ, Buy button). See
-       [[mor-product-page-model]] "The gate" section. */
-    .gate-wrap {
-      max-width: 640px; margin: 64px auto 80px; padding: 0 24px;
-      text-align: center;
+    /* At-a-glance card */
+    .glance {
+      background: var(--bg-card); border-radius: 16px; border: 1px solid var(--line);
+      padding: 22px 24px;
     }
-    .gate-product {
-      background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px;
-      padding: 36px 32px 32px; box-shadow: var(--shadow-md);
+    .glance-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .glance-head h3 { font-size: 18px; font-weight: 700; }
+    .glance-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; }
+    .glance-col h4 { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .glance-col p { font-size: 14.5px; color: var(--ink-soft); }
+
+    /* Centered intro H2 */
+    .center-h2 {
+      text-align: center; font-size: clamp(26px, 3.5vw, 36px);
+      font-weight: 700; max-width: 740px; margin: 80px auto 0; line-height: 1.25;
     }
-    .gate-img {
-      width: 120px; height: 120px; margin: 0 auto 22px; border-radius: 14px;
-      background: linear-gradient(135deg, var(--pink-soft), #FFC9DC);
+
+    /* Feature blocks (zigzag) */
+    .feature-block {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+      align-items: center; margin-top: 64px;
+    }
+    .feature-block.reverse > .fb-text { order: 1; }
+    .feature-block.reverse > .fb-img  { order: 0; }
+    @media (max-width: 820px) {
+      .feature-block, .feature-block.reverse { grid-template-columns: 1fr; gap: 24px; }
+      .feature-block.reverse > .fb-text { order: 0; }
+    }
+    .fb-text h3 { font-size: 24px; font-weight: 700; margin-bottom: 14px; line-height: 1.25; }
+    .fb-text ul { list-style: none; padding: 0; margin: 0; }
+    .fb-text li {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 0; font-size: 15.5px; color: var(--ink-soft);
+    }
+    .fb-text li::before { content: "•"; color: var(--pink); font-size: 22px; line-height: 1; flex-shrink: 0; }
+    .fb-img {
+      aspect-ratio: 16/10; border-radius: 14px;
+      background: linear-gradient(135deg, #E0E7FF, #DBEAFE);
       background-size: cover; background-position: center;
-      display: flex; align-items: center; justify-content: center; font-size: 48px;
-    }
-    .gate-name {
-      font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
-      letter-spacing: -0.3px; margin: 0 0 8px;
-    }
-    .gate-lock {
-      display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px;
-      background: var(--pink-soft); color: var(--pink); border-radius: 99px;
-      font-size: 12.5px; font-weight: 700; letter-spacing: 0.3px;
-      text-transform: uppercase; margin-bottom: 22px;
-    }
-    .gate-explain {
-      font-size: 15px; color: var(--ink-soft); line-height: 1.65; margin: 0 0 26px;
-      max-width: 460px; margin-left: auto; margin-right: auto;
-    }
-    .gate-cta {
-      display: inline-block; background: var(--pink); color: #fff;
-      padding: 14px 28px; border-radius: 10px; text-decoration: none;
-      font-weight: 700; font-size: 15px; box-shadow: var(--shadow-md);
-      transition: filter 0.12s, transform 0.08s;
-    }
-    .gate-cta:hover { filter: brightness(1.06); transform: translateY(-1px); }
-    .gate-sub {
-      margin-top: 16px; font-size: 13px; color: var(--muted);
-    }
-    .gate-sub a { color: var(--ink-soft); font-weight: 600; }
-
-    /* ── Preview banner (advertiser viewing their own product) ─── */
-    .preview-banner {
-      background: #FEF3C7; border-bottom: 1px solid #FDE68A;
-      padding: 12px 28px; font-size: 13.5px; color: #92400E;
-      text-align: center; font-weight: 600;
-    }
-    .preview-banner .pill {
-      background: #FBBF24; color: #78350F; font-size: 10.5px; font-weight: 700;
-      padding: 3px 8px; border-radius: 99px; margin-right: 8px;
-      letter-spacing: 0.4px; text-transform: uppercase;
-    }
-    .buy-btn.preview-disabled {
-      background: #D1D5DB; color: #6B7280; cursor: not-allowed;
-      box-shadow: none; pointer-events: none;
     }
 
-    .hidden { display: none !important; }
+    /* Pricing tier cards */
+    .tiers-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px; margin-top: 28px;
+    }
+    .tier-card {
+      background: var(--bg-card); border: 2px solid var(--line); border-radius: 14px;
+      padding: 24px 22px; position: relative;
+    }
+    .tier-card.recommended { border-color: var(--pink); box-shadow: 0 4px 24px rgba(255,45,120,0.06); }
+    .tier-card.recommended::before {
+      content: 'Recommended'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--pink); color: #fff; font-size: 10.5px; font-weight: 700;
+      padding: 4px 10px; border-radius: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .tier-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; text-align: center; }
+    .tier-price { font-size: 32px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+    .tier-price .ccy { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .tier-original { text-align: center; color: var(--muted); text-decoration: line-through; font-size: 14px; margin-bottom: 4px; }
+    .tier-discount { text-align: center; color: var(--pink); font-weight: 700; font-size: 12.5px; margin-bottom: 14px; }
+    .tier-billing { text-align: center; color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
+    .tier-buy {
+      display: block; padding: 12px 14px; background: var(--pink); color: #fff;
+      text-align: center; border-radius: 10px; font-weight: 700; font-size: 14.5px;
+      margin-bottom: 18px;
+    }
+    .tier-buy:hover { background: var(--pink-dark); text-decoration: none; }
+    .tier-features { list-style: none; padding: 0; margin: 0; }
+    .tier-features li {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0; font-size: 13.5px; color: var(--ink-soft); line-height: 1.5;
+    }
+    .tier-features .check { color: var(--green); flex-shrink: 0; }
+
+    /* Trust strip (refund + guarantee, below tiers) */
+    .trust-strip {
+      display: flex; justify-content: center; gap: 32px;
+      margin: 32px 0 0; padding: 18px; flex-wrap: wrap;
+      font-size: 14px; color: var(--ink-soft);
+    }
+    .trust-strip > div { display: inline-flex; align-items: center; gap: 8px; }
+    .trust-strip .ico { font-size: 18px; }
+
+    /* Deal terms accordion */
+    .terms-accordion {
+      background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+      overflow: hidden;
+    }
+    .terms-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 22px; cursor: pointer; font-size: 17px; font-weight: 700;
+    }
+    .terms-body { padding: 0 22px 18px; border-top: 1px solid var(--line); display: none; }
+    .terms-body.open { display: block; padding-top: 14px; }
+    .terms-body ul { list-style: none; padding: 0; margin: 0; }
+    .terms-body li {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 8px 0; font-size: 14.5px; color: var(--ink-soft);
+    }
+    .terms-body li::before { content: "✓"; color: var(--ink); font-weight: 700; flex-shrink: 0; }
+
+    /* Founder / company card */
+    .founder-card {
+      background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 32px; display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px;
+      align-items: flex-start;
+    }
+    @media (max-width: 720px) {
+      .founder-card { grid-template-columns: 1fr; gap: 24px; }
+    }
+    .founder-meta {
+      background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px;
+    }
+    .founder-meta img.logo { max-height: 36px; margin-bottom: 14px; }
+    .founder-meta .meta-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; font-size: 14px; color: var(--ink-soft);
+      border-bottom: 1px solid var(--line);
+    }
+    .founder-meta .meta-row:last-child { border-bottom: 0; }
+    .founder-meta .meta-row .icon { font-size: 16px; color: var(--muted); }
+    .founder-body h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .founder-body p { font-size: 15.5px; color: var(--ink-soft); margin-bottom: 14px; }
+    .founder-person { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+    .founder-person img { width: 56px; height: 56px; border-radius: 50%; }
+    .founder-person .name { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .founder-person .role { font-size: 13.5px; color: var(--muted); }
+    .founder-li { width: 18px; height: 18px; background: #0A66C2; border-radius: 3px; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+
+    /* ── Footer ────────────────────────────────────────────────────── */
+    .footer-strip {
+      max-width: var(--max); margin: 56px auto 0; padding: 28px 24px;
+      border-top: 1px solid var(--line); text-align: center;
+      color: var(--muted); font-size: 13.5px;
+    }
+    .footer-strip a { color: var(--ink-soft); }
+    .footer-strip .meta { font-size: 11.5px; color: var(--muted-2); margin-top: 6px; }
+
+    /* ── Gate state ────────────────────────────────────────────────── */
+    .gate-wrap { padding: 80px 24px; max-width: 640px; margin: 0 auto; text-align: center; }
+    .gate-img {
+      width: 200px; aspect-ratio: 16/10; border-radius: 16px;
+      background: linear-gradient(135deg, var(--pink-soft), #FCE7F3);
+      background-size: cover; background-position: center;
+      margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;
+      font-size: 64px;
+    }
+    .gate-wrap h2 { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
+    .gate-pill { display: inline-block; background: var(--pink-soft); color: var(--pink); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 14px; }
+    .gate-wrap p { color: var(--muted); font-size: 15.5px; margin-bottom: 28px; }
+    .gate-cta { display: inline-block; padding: 14px 28px; background: var(--pink); color: #fff; border-radius: 10px; font-weight: 700; font-size: 15px; }
+    .gate-cta:hover { background: var(--pink-dark); text-decoration: none; }
+    .gate-sub { display: block; font-size: 13px; color: var(--muted); margin-top: 18px; }
+    .gate-sub a { color: var(--pink); }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════ CHROME ════════════════════ -->
-<div class="topbar">
-  <img src="/email-logo.png" alt="Boost Boss" onerror="this.style.display='none'">
-  <span class="name">Boost Boss</span>
-  <span class="tag">STORE</span>
-  <span class="right"><a href="https://boostboss.ai">boostboss.ai</a></span>
-</div>
-
-<!-- Shown when bb_click is in URL/sessionStorage. Reassures the buyer
-     that we know who referred them and they're not paying a hidden fee. -->
-<div class="aff-pill" id="affPill">
-  ✨ You arrived via an affiliate's recommendation — buying here supports them at no extra cost to you
-</div>
-
-<!-- ════════════════════ LOADING ════════════════════ -->
+<!-- LOADING -->
 <div id="loading" class="loading">
-  Loading product…
+  <div class="spinner"></div>
+  <p>Loading product…</p>
 </div>
 
-<!-- ════════════════════ ERROR ════════════════════ -->
+<!-- ERROR -->
 <div id="errorState" class="error-state hidden">
-  <h2 id="errorTitle">Product not found</h2>
-  <p id="errorBody">This product link may be expired or invalid.</p>
-  <a href="https://boostboss.ai">Back to Boost Boss</a>
+  <h2 id="errorTitle">Couldn't load product</h2>
+  <p id="errorBody">Please try again in a moment.</p>
 </div>
 
-<!-- ════════════════════ GATE ════════════════════
-     Shown when the visitor lacks bb_click AND isn't the product owner.
-     See [[mor-product-page-model]] "The gate" section. -->
+<!-- GATE (no affiliate link) -->
 <div id="gateState" class="gate-wrap hidden">
-  <div class="gate-product">
-    <div class="gate-img" id="gateImg">📦</div>
-    <h2 class="gate-name" id="gateName">—</h2>
-    <div class="gate-lock">🔒 Affiliate-only product</div>
-    <p class="gate-explain">
-      Boost Boss products are exclusively available through trusted affiliates. To access pricing, full details, and purchase this product, you need to arrive via an affiliate's share link.
-    </p>
-    <a class="gate-cta" href="https://affiliate.boostboss.ai">Become a Boost Boss affiliate →</a>
-    <div class="gate-sub">
-      Already affiliated? Use your share link to access this product.<br>
-      <a href="mailto:support@boostboss.ai">Need help finding an affiliate?</a>
-    </div>
-  </div>
+  <div class="gate-img" id="gateImg">🔒</div>
+  <h1 id="gateName">—</h1>
+  <span class="gate-pill">🔒 Affiliate-only product</span>
+  <p>Boost Boss products are exclusively available through trusted affiliates. To access pricing, full details, and purchase this product, you need to arrive via an affiliate's share link.</p>
+  <a class="gate-cta" href="/affiliate.html">Become a Boost Boss affiliate →</a>
+  <span class="gate-sub">Already affiliated? Use your share link to access this product.<br><a href="mailto:support@boostboss.ai">Need help finding an affiliate?</a></span>
 </div>
 
-<!-- ════════════════════ PREVIEW BANNER ════════════════════
-     Shown when the advertiser is viewing their own product page. -->
-<div id="previewBanner" class="preview-banner hidden">
-  <span class="pill">Preview</span>
-  This is how buyers see your product page. Purchases require an affiliate link — your <a href="/ads/dashboard#/products" style="color:#92400E;text-decoration:underline;">Products dashboard</a> still works normally.
-</div>
-
-<!-- ════════════════════ PRODUCT PAGE ════════════════════ -->
+<!-- FULL PRODUCT PAGE -->
 <div id="productPage" class="hidden">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-img" id="heroImg">📦</div>
-    <div class="hero-info">
-      <h1 id="prodName">—</h1>
-      <p class="lede" id="prodLede"></p>
-
-      <div class="price-card">
-        <div class="row">
-          <span class="price" id="prodPrice">—</span>
-          <span class="currency" id="prodCurrency">USD</span>
-          <span class="sku" id="prodSku"></span>
-        </div>
-        <a class="buy-btn" id="buyBtn" href="#">Buy now</a>
-        <div class="meta">
-          <strong>Boost Boss</strong> handles payment securely via PayPal.
-          You'll receive a redemption code by email immediately after purchase.
-        </div>
+  <!-- Sticky top nav -->
+  <nav class="bb-topnav">
+    <div class="bb-topnav-inner">
+      <div class="bb-brand">
+        <div class="bb-brand-logo">B</div>
+        <span class="bb-brand-name">Boost Boss</span>
+        <span class="bb-brand-pill">Store</span>
       </div>
-
-      <a class="ext-cta hidden" id="extCta" href="#" target="_blank" rel="noopener">
-        Read full details on seller's site →
-      </a>
+      <div class="bb-nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#about">About the seller</a>
+      </div>
+      <a class="bb-topnav-cta" href="#pricing">Choose Plan</a>
     </div>
-  </section>
+  </nav>
 
-  <!-- CONTENT GRID -->
-  <div class="content">
-    <main>
-      <!-- LONG DESC -->
-      <div id="longDescWrap" class="hidden">
-        <h2>About this product</h2>
-        <div class="long-desc" id="longDesc"></div>
-      </div>
-
-      <!-- DEMO VIDEO -->
-      <div id="demoVideoWrap" class="hidden">
-        <h2>Demo</h2>
-        <div class="demo-video"><iframe id="demoVideoFrame" allowfullscreen></iframe></div>
-      </div>
-
-      <!-- SCREENSHOTS -->
-      <div id="screenshotsWrap" class="hidden">
-        <h2>Screenshots</h2>
-        <div class="screenshots-grid" id="screenshotsGrid"></div>
-      </div>
-
-      <!-- WHAT'S INCLUDED -->
-      <div id="packageWrap" class="hidden">
-        <h2>What's included</h2>
-        <ul class="pkg-list" id="packageList"></ul>
-      </div>
-
-      <!-- FAQ -->
-      <div id="faqWrap" class="hidden">
-        <h2>Frequently asked</h2>
-        <div class="faq-list" id="faqList"></div>
-      </div>
-
-      <!-- TESTIMONIALS -->
-      <div id="testWrap" class="hidden">
-        <h2>What buyers say</h2>
-        <div class="test-grid" id="testGrid"></div>
-      </div>
-    </main>
-    <aside><!-- Reserved for future "summary card / similar products" --></aside>
+  <!-- Banners stack below sticky nav -->
+  <div id="affPill" class="aff-pill">
+    ✨ You arrived via an affiliate's recommendation — buying here supports them at no extra cost to you.
+  </div>
+  <div id="previewBanner" class="preview-banner">
+    👁 <strong>PREVIEW</strong> &mdash; This is how buyers see your product page. Purchases require an affiliate link — your Products dashboard still works normally.
+  </div>
+  <div id="auditBanner" class="audit-banner">
+    🛑 <strong>Pending audit</strong> &mdash; This product page is in your seller's audit queue. Buyers can preview but can't purchase until an admin approves.
   </div>
 
-  <div class="footer">
-    Buying via <strong>Boost Boss</strong> — your purchase is processed securely. Refund policy: 14 days, no questions.
-    <div class="meta">
-      Boost Boss is the Merchant of Record for this transaction. <a href="https://boostboss.ai/terms">Terms</a> · <a href="https://boostboss.ai/privacy">Privacy</a>
+  <div class="page">
+
+    <!-- HERO -->
+    <section id="overview" class="hero-grid">
+      <div class="hero-left">
+        <h1 id="prodName">—</h1>
+        <p class="hero-lede" id="prodLede"></p>
+
+        <div class="hero-img-main" id="heroImgMain">📦</div>
+        <div class="hero-thumbs" id="heroThumbs"></div>
+      </div>
+
+      <aside class="buy-card" id="buyCard">
+        <div class="buy-card-brand">
+          <img id="buyCardLogo" src="" alt="" style="display:none;">
+          <span class="buy-card-brand-name" id="buyCardBrand">—</span>
+        </div>
+
+        <div id="discountRow" class="buy-card-discount" style="display:none;">
+          <span class="pct" id="discountPct">—</span>
+          <span class="strike" id="originalPrice">—</span>
+        </div>
+
+        <div class="buy-card-price">
+          <span class="now" id="prodPrice">—</span>
+          <span class="ccy" id="prodCurrency">USD</span>
+          <span class="pill" id="prodSku" style="display:none;">—</span>
+        </div>
+
+        <div class="plan-select-row" id="planSelectRow" style="display:none;">
+          <label for="planSelect">Select a plan</label>
+          <select class="plan-select" id="planSelect"></select>
+        </div>
+
+        <a class="buy-btn" id="buyBtn" href="#">Buy now</a>
+
+        <div class="buy-card-meta">
+          <strong>Boost Boss</strong> handles payment securely via PayPal. Click <strong>Activate your account</strong> in the confirmation email — paid plan turns on instantly.
+        </div>
+
+        <div class="trust-row" id="trustRow"></div>
+      </aside>
+    </section>
+
+    <!-- TL;DR -->
+    <div id="tldrWrap" class="section hidden">
+      <h2>TL;DR</h2>
+      <ul class="tldr-list" id="tldrList"></ul>
     </div>
+
+    <!-- At-a-glance -->
+    <div id="glanceWrap" class="section hidden">
+      <div class="glance">
+        <div class="glance-head">
+          <h3>At-a-glance</h3>
+          <a id="glanceLink" href="#" target="_blank" rel="noopener" style="font-size:13.5px;font-weight:600;">visit website ↗</a>
+        </div>
+        <div class="glance-cols" id="glanceCols"></div>
+      </div>
+    </div>
+
+    <!-- Centered intro H2 + feature blocks -->
+    <div id="featureWrap" class="hidden">
+      <h2 class="center-h2" id="featureIntro">—</h2>
+      <div id="featureBlocks"></div>
+    </div>
+
+    <!-- About / long description -->
+    <div id="longDescWrap" class="section hidden">
+      <h2>About this product</h2>
+      <p style="font-size:15.5px;color:var(--ink-soft);white-space:pre-line;" id="longDesc"></p>
+    </div>
+
+    <!-- Demo video -->
+    <div id="demoVideoWrap" class="section hidden">
+      <h2>Demo</h2>
+      <div style="aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;"><iframe id="demoVideoFrame" style="width:100%;height:100%;border:0;" allowfullscreen></iframe></div>
+    </div>
+
+    <!-- Pricing tier cards -->
+    <div id="pricing" class="section">
+      <h2 style="text-align:center;font-size:28px;">Choose the plan that's right for you</h2>
+      <p style="text-align:center;color:var(--muted);margin-top:6px;font-size:14.5px;" id="pricingSubtitle">
+        Feel secure in your purchase with our money-back guarantee.
+      </p>
+      <div class="tiers-grid" id="tiersGrid"></div>
+
+      <div class="trust-strip" id="trustStrip"></div>
+    </div>
+
+    <!-- Deal terms accordion -->
+    <div id="termsWrap" class="section hidden">
+      <div class="terms-accordion">
+        <div class="terms-head" id="termsHead">
+          <span>Deal terms &amp; conditions</span>
+          <span id="termsToggle" style="font-size:22px;color:var(--muted);">▾</span>
+        </div>
+        <div class="terms-body" id="termsBody">
+          <ul id="termsList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Founder / Company card -->
+    <div id="about" class="section">
+      <div id="founderCard" class="founder-card hidden">
+        <div class="founder-meta" id="founderMeta"></div>
+        <div class="founder-body">
+          <h2 id="founderTagline">—</h2>
+          <div id="founderAbout"></div>
+          <div class="founder-person" id="founderPerson" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div id="faqWrap" class="section hidden">
+      <h2>Frequently asked</h2>
+      <div id="faqList"></div>
+    </div>
+
+    <!-- Testimonials -->
+    <div id="testWrap" class="section hidden">
+      <h2>What buyers say</h2>
+      <div id="testGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-strip">
+      Buying via <strong>Boost Boss</strong> — your purchase is processed securely.
+      <div class="meta">Boost Boss is the Merchant of Record for this transaction. <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></div>
+    </div>
+
   </div>
 </div>
 
@@ -405,18 +512,8 @@
 (function () {
   const API_BASE = window.location.origin;
 
-  // ── Resolve product token + bb_click from URL ────────────────────────
-  // Vercel rewrites are SERVER-SIDE — the browser URL stays as /p/<uuid>
-  // and only the served file changes. So we can't read ?id= from
-  // window.location.search (the rewrite's destination params aren't
-  // reflected in the browser). We parse the UUID out of the pathname
-  // instead, falling back to ?id=/?token= for the case where someone
-  // opens /product.html directly (admin testing, no rewrite).
-  //
-  // The bb_click param IS in the actual browser URL so URLSearchParams
-  // sees it correctly. Persist to sessionStorage so the buy button
-  // forwards it to /buy/<token>?bb_click=<id> even if the buyer
-  // navigates around between landing and clicking Buy.
+  // ── URL parsing ───────────────────────────────────────────────────────
+  // Vercel rewrites are server-side. Parse productId from pathname.
   const params = new URLSearchParams(window.location.search);
   const pathMatch = window.location.pathname.match(/^\/p\/([^/?#]+)/i);
   const productId = (pathMatch && pathMatch[1]) || params.get('id') || params.get('token');
@@ -424,40 +521,23 @@
 
   if (bbClick) {
     try { sessionStorage.setItem('bbx_click', bbClick); } catch (_) {}
-    document.getElementById('affPill').classList.add('show');
-  } else {
-    try {
-      const stored = sessionStorage.getItem('bbx_click');
-      if (stored) document.getElementById('affPill').classList.add('show');
-    } catch (_) {}
   }
+  const effectiveClick = bbClick || (function () {
+    try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; }
+  })();
 
   if (!productId) {
     showError('Missing product ID', 'This URL is incomplete. Did you mean to visit a specific product page?');
     return;
   }
 
-  // ── Fetch + render ───────────────────────────────────────────────────
-  //
-  // Build the API URL with bb_click if we have it (URL or sessionStorage),
-  // so the gate decision happens server-side. Pull the advertiser auth
-  // token from the bb_session_token localStorage (set by the advertiser
-  // dashboard) so the owner-preview path works if they're signed in.
+  // ── Build the fetch ───────────────────────────────────────────────────
   const apiUrl = new URL(`${API_BASE}/api/products?action=public&id=${encodeURIComponent(productId)}`);
-  const effectiveClick = bbClick || (function () {
-    try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; }
-  })();
   if (effectiveClick) apiUrl.searchParams.set('bb_click', effectiveClick);
 
   const fetchOpts = { method: 'GET' };
   try {
-    // The advertiser dashboard signs in via Supabase auth and stashes the
-    // session in localStorage as JSON {token, user_id, ...} under
-    // bb_session_token. We need to JSON.parse and pull .token — sending the
-    // raw stringified object would make the server reject "Bearer {..json..}".
-    //
-    // Also fall back to the /ads/signup pre-bridge keys (bb_adv_token /
-    // bb_token) for users whose dashboard hasn't run checkSession yet.
+    // bb_session_token stores JSON {token, user_id} — parse for advertiser-preview
     let advToken = null;
     const raw = localStorage.getItem('bb_session_token');
     if (raw) {
@@ -465,16 +545,13 @@
         const parsed = JSON.parse(raw);
         advToken = parsed && parsed.token ? parsed.token : null;
       } catch (_) {
-        // Not JSON — old format or someone wrote a plain string. Treat as token.
-        advToken = raw;
+        if (typeof raw === 'string' && raw.length > 20 && !raw.startsWith('{')) advToken = raw;
       }
     }
     if (!advToken) {
       advToken = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token') || null;
     }
-    if (advToken) {
-      fetchOpts.headers = { 'Authorization': 'Bearer ' + advToken };
-    }
+    if (advToken) fetchOpts.headers = { 'Authorization': 'Bearer ' + advToken };
   } catch (_) {}
 
   fetch(apiUrl.toString(), fetchOpts)
@@ -485,38 +562,67 @@
     })
     .then((j) => {
       const access = j.access || {};
-      if (access.gated) {
-        renderGate(j.product);
-      } else {
-        render(j.product, access.is_owner === true);
-      }
+      if (access.gated) return renderGate(j.product);
+      render(j.product, access);
     })
     .catch((err) => {
       if (err.message === 'not_found') {
         showError('Product not found', 'This product link may be expired, archived, or invalid.');
       } else {
-        showError('Couldn\'t load product', 'Please try again in a moment. If the problem persists, contact support@boostboss.ai.');
+        showError("Couldn't load product", 'Please try again in a moment. If the problem persists, contact support@boostboss.ai.');
       }
     });
 
-  // Gate state — visitor has no bb_click and isn't the advertiser.
-  // Show minimal product identity + "become an affiliate" CTA.
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+  function fmtMoney(amount, currency) {
+    if (amount == null || amount === '') return '—';
+    const n = Number(amount);
+    if (!Number.isFinite(n)) return '—';
+    const ccy = (currency || 'USD').toUpperCase();
+    try {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: ccy, maximumFractionDigits: 2 }).format(n);
+    } catch (_) {
+      return '$' + n.toFixed(2);
+    }
+  }
+  function fmtDate(s) {
+    if (!s) return '—';
+    try {
+      const d = new Date(s);
+      if (Number.isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    } catch (_) { return '—'; }
+  }
+  function billingLabel(period) {
+    return ({
+      one_time: 'One-time payment',
+      monthly:  'Monthly',
+      annual:   'Annual',
+      lifetime: 'Lifetime',
+    })[period] || 'One-time';
+  }
+  function countryFlag(code) {
+    if (!code || code.length !== 2) return '';
+    try {
+      return String.fromCodePoint(...code.toUpperCase().split('').map((c) => 0x1F1E6 - 65 + c.charCodeAt(0)));
+    } catch (_) { return ''; }
+  }
+
+  // ── Gate state renderer ──────────────────────────────────────────────
   function renderGate(p) {
-    document.title = p.name + ' · Boost Boss';
-    document.getElementById('gateName').textContent = p.name;
+    document.title = (p.name || 'Product') + ' · Boost Boss';
+    document.getElementById('gateName').textContent = p.name || 'Product';
     if (p.image_url) {
       const img = document.getElementById('gateImg');
       img.style.backgroundImage = `url("${p.image_url.replace(/"/g, '%22')}")`;
       img.textContent = '';
     }
     document.getElementById('loading').classList.add('hidden');
-    document.getElementById('affPill').classList.remove('show');  // hide aff-pill in gate state
     document.getElementById('gateState').classList.remove('hidden');
-  }
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
   function showError(title, body) {
@@ -527,72 +633,208 @@
     document.title = title + ' · Boost Boss';
   }
 
-  function render(p, isOwner) {
-    // Preview banner — advertiser viewing their own product page
+  // ── Main render ───────────────────────────────────────────────────────
+  function render(p, access) {
+    const isOwner     = access && access.is_owner === true;
+    const purchasable = access && access.purchasable === true;
+
+    // Page title
+    document.title = (p.name || 'Product') + ' · Boost Boss';
+
+    // Banners (top of page)
+    if (effectiveClick && !isOwner) {
+      document.getElementById('affPill').classList.add('show');
+    }
     if (isOwner) {
-      document.getElementById('previewBanner').classList.remove('hidden');
-      document.getElementById('affPill').classList.remove('show');  // don't double-banner
+      document.getElementById('previewBanner').classList.add('show');
+    }
+    if (!purchasable && !isOwner) {
+      // Buyer with a valid bb_click but product audit isn't approved.
+      // Show a "pending audit" banner so they know what's going on.
+      document.getElementById('auditBanner').classList.add('show');
     }
 
-    // Page chrome
-    document.title = p.name + ' · Boost Boss';
-    document.getElementById('prodName').textContent = p.name;
+    // ── Hero ──────────────────────────────────────────────────────────
+    document.getElementById('prodName').textContent = p.name || 'Untitled';
     document.getElementById('prodLede').textContent = p.description || '';
 
-    // Hero image (graceful fallback to emoji background)
-    if (p.image_url) {
-      const hero = document.getElementById('heroImg');
-      hero.style.backgroundImage = `url("${p.image_url.replace(/"/g, '%22')}")`;
-      hero.textContent = '';  // hide the emoji placeholder
+    // Hero image carousel — hero_images[] takes precedence, image_url as fallback
+    const heroImages = (Array.isArray(p.hero_images) && p.hero_images.length)
+      ? p.hero_images.slice()
+      : [];
+    if (!heroImages.length && p.image_url) heroImages.push(p.image_url);
+    const main = document.getElementById('heroImgMain');
+    if (heroImages.length) {
+      main.style.backgroundImage = `url("${heroImages[0].replace(/"/g, '%22')}")`;
+      main.textContent = '';
+    }
+    // Thumbnails (only if more than 1 image)
+    if (heroImages.length > 1) {
+      const thumbs = document.getElementById('heroThumbs');
+      thumbs.innerHTML = heroImages.map((u, i) =>
+        `<div class="hero-thumb${i === 0 ? ' active' : ''}" data-i="${i}" style="background-image:url('${u.replace(/'/g, "\\'")}');"></div>`
+      ).join('');
+      thumbs.addEventListener('click', (e) => {
+        const t = e.target.closest('.hero-thumb');
+        if (!t) return;
+        const idx = parseInt(t.dataset.i, 10);
+        main.style.backgroundImage = `url("${heroImages[idx].replace(/"/g, '%22')}")`;
+        thumbs.querySelectorAll('.hero-thumb').forEach((el) => el.classList.toggle('active', el === t));
+      });
     }
 
-    // Price + SKU type
-    const priceEl = document.getElementById('prodPrice');
-    if (p.price != null && p.price !== '') {
-      const fmt = Number(p.price).toFixed(p.price >= 100 ? 0 : 2);
-      priceEl.textContent = '$' + fmt;
-    } else {
-      priceEl.textContent = 'Inquire';
+    // ── Purchase card ─────────────────────────────────────────────────
+    // Brand block — company logo if present
+    const logo = document.getElementById('buyCardLogo');
+    if (p.company_logo_url) {
+      logo.src = p.company_logo_url;
+      logo.style.display = 'inline-block';
     }
-    document.getElementById('prodCurrency').textContent = p.currency || 'USD';
-    const skuLabel = {
-      one_time: 'one-time',
-      bundle: 'bundle',
-      lifetime: 'lifetime',
-      subscription_pack: p.package_duration_days
-        ? Math.round(p.package_duration_days / 30) + '-month pack'
-        : 'subscription pack',
-    }[p.sku_type] || '';
-    document.getElementById('prodSku').textContent = skuLabel;
+    document.getElementById('buyCardBrand').textContent = p.name || '—';
 
-    // Buy button — preserve bb_click into the /buy URL. In owner-preview
-    // mode the button is visibly disabled with "Preview only" text and the
-    // .preview-disabled class blocks clicks via CSS pointer-events.
+    // Plans
+    const plans = Array.isArray(p.pricing_plans) ? p.pricing_plans.slice() : [];
+    let selectedPlan = plans.find((pl) => pl.is_recommended) || plans[0] || null;
+
+    function paintPrice(plan) {
+      const priceEl    = document.getElementById('prodPrice');
+      const ccyEl      = document.getElementById('prodCurrency');
+      const skuEl      = document.getElementById('prodSku');
+      const discountRow = document.getElementById('discountRow');
+      const discountPct = document.getElementById('discountPct');
+      const originalEl = document.getElementById('originalPrice');
+
+      if (plan) {
+        priceEl.textContent = fmtMoney(plan.price, plan.currency).replace(/\.00$/, '');
+        ccyEl.textContent = (plan.currency || 'USD').toUpperCase();
+        skuEl.style.display = 'inline-block';
+        skuEl.textContent = billingLabel(plan.billing_period);
+        if (plan.discount_pct && plan.original_price) {
+          discountPct.textContent = '−' + plan.discount_pct + '%';
+          originalEl.textContent = fmtMoney(plan.original_price, plan.currency);
+          discountRow.style.display = 'flex';
+        } else {
+          discountRow.style.display = 'none';
+        }
+      } else if (p.price != null) {
+        // Fallback for legacy single-price products
+        priceEl.textContent = fmtMoney(p.price, p.currency).replace(/\.00$/, '');
+        ccyEl.textContent = (p.currency || 'USD').toUpperCase();
+      } else {
+        priceEl.textContent = 'Inquire';
+        ccyEl.textContent = '';
+      }
+    }
+    paintPrice(selectedPlan);
+
+    if (plans.length > 1) {
+      const sel = document.getElementById('planSelect');
+      sel.innerHTML = plans.map((pl, i) => {
+        const label = `${pl.plan_name}: ${fmtMoney(pl.price, pl.currency)}${pl.original_price ? ' (was ' + fmtMoney(pl.original_price, pl.currency) + ')' : ''}`;
+        const selected = pl === selectedPlan ? ' selected' : '';
+        return `<option value="${i}"${selected}>${esc(label)}</option>`;
+      }).join('');
+      document.getElementById('planSelectRow').style.display = 'block';
+      sel.addEventListener('change', () => {
+        selectedPlan = plans[Number(sel.value)] || null;
+        paintPrice(selectedPlan);
+        updateBuyBtn();
+      });
+    }
+
+    // Buy button
     const buyBtn = document.getElementById('buyBtn');
-    if (isOwner) {
-      buyBtn.textContent = 'Buy (Preview — purchases require an affiliate link)';
-      buyBtn.classList.add('preview-disabled');
-      buyBtn.removeAttribute('href');
-    } else {
-      const bb = bbClick || (function () { try { return sessionStorage.getItem('bbx_click'); } catch (_) { return null; } })();
-      const buyUrl = '/buy/' + encodeURIComponent(p.id) + (bb ? '?bb_click=' + encodeURIComponent(bb) : '');
-      buyBtn.href = buyUrl;
+    function updateBuyBtn() {
+      if (isOwner) {
+        buyBtn.textContent = 'Preview — purchases require an affiliate link';
+        buyBtn.classList.add('preview-disabled');
+        buyBtn.removeAttribute('href');
+      } else if (!purchasable) {
+        buyBtn.textContent = 'Pending audit — not yet purchasable';
+        buyBtn.classList.add('preview-disabled');
+        buyBtn.removeAttribute('href');
+      } else {
+        let url = '/buy/' + encodeURIComponent(p.id);
+        const qs = [];
+        if (effectiveClick) qs.push('bb_click=' + encodeURIComponent(effectiveClick));
+        if (selectedPlan && selectedPlan.id) qs.push('plan=' + encodeURIComponent(selectedPlan.id));
+        if (qs.length) url += '?' + qs.join('&');
+        buyBtn.href = url;
+        buyBtn.classList.remove('preview-disabled');
+        buyBtn.textContent = 'Buy now';
+      }
+    }
+    updateBuyBtn();
+
+    // Trust row (small badges below Buy button) — refund + guarantee
+    const trustParts = [];
+    if (p.refund_window_days) {
+      trustParts.push(`<span class="trust-badge"><span class="icon">✓</span>Refundable up to ${p.refund_window_days} days</span>`);
+    }
+    if (p.guarantee_label) {
+      trustParts.push(`<span class="trust-badge"><span class="icon">🛡</span>${esc(p.guarantee_label)}</span>`);
+    }
+    if (trustParts.length) {
+      document.getElementById('trustRow').innerHTML = trustParts.join('');
     }
 
-    // Optional external "read more" CTA
-    if (p.external_marketing_url) {
-      const cta = document.getElementById('extCta');
-      cta.href = p.external_marketing_url;
-      cta.classList.remove('hidden');
+    // ── TL;DR ─────────────────────────────────────────────────────────
+    if (Array.isArray(p.tldr_bullets) && p.tldr_bullets.length) {
+      document.getElementById('tldrList').innerHTML = p.tldr_bullets
+        .map((b) => `<li><span class="check">✓</span><span>${esc(b)}</span></li>`).join('');
+      document.getElementById('tldrWrap').classList.remove('hidden');
     }
 
-    // Long description
+    // ── At-a-glance ───────────────────────────────────────────────────
+    const altTo = Array.isArray(p.alternative_to) ? p.alternative_to.filter(Boolean) : [];
+    const integ = Array.isArray(p.integrations)   ? p.integrations.filter(Boolean)   : [];
+    const bestFor = Array.isArray(p.best_for)     ? p.best_for.filter(Boolean)       : [];
+    if (altTo.length || integ.length || bestFor.length || p.company_website_url) {
+      const cols = [];
+      if (altTo.length)  cols.push(`<div class="glance-col"><h4>Alternative to</h4><p>${esc(altTo.join(', '))}</p></div>`);
+      if (integ.length)  cols.push(`<div class="glance-col"><h4>Integrations</h4><p>${esc(integ.join(', '))}</p></div>`);
+      if (bestFor.length) cols.push(`<div class="glance-col"><h4>Best for</h4><p>${esc(bestFor.join(', '))}</p></div>`);
+      document.getElementById('glanceCols').innerHTML = cols.join('');
+      if (p.company_website_url) {
+        const link = document.getElementById('glanceLink');
+        link.href = p.company_website_url;
+        try { link.textContent = new URL(p.company_website_url).hostname + ' ↗'; } catch (_) { link.textContent = 'visit website ↗'; }
+      } else {
+        document.getElementById('glanceLink').style.display = 'none';
+      }
+      document.getElementById('glanceWrap').classList.remove('hidden');
+    }
+
+    // ── Feature blocks (zigzag) ───────────────────────────────────────
+    if (Array.isArray(p.feature_blocks) && p.feature_blocks.length) {
+      document.getElementById('featureIntro').textContent = p.company_tagline
+        ? p.company_tagline
+        : `Everything you need with ${p.name}`;
+      document.getElementById('featureBlocks').innerHTML = p.feature_blocks.map((b, i) => {
+        const reverse = i % 2 === 1;  // alternate
+        const img = b.image_url
+          ? `<div class="fb-img" style="background-image:url('${(b.image_url || '').replace(/'/g, "\\'")}');"></div>`
+          : `<div class="fb-img"></div>`;
+        const bullets = (Array.isArray(b.bullets) ? b.bullets : []).filter(Boolean);
+        return `
+          <div class="feature-block${reverse ? ' reverse' : ''}">
+            <div class="fb-text">
+              <h3>${esc(b.heading || '')}</h3>
+              ${bullets.length ? `<ul>${bullets.map((bb) => `<li><span>${esc(bb)}</span></li>`).join('')}</ul>` : ''}
+            </div>
+            ${img}
+          </div>`;
+      }).join('');
+      document.getElementById('featureWrap').classList.remove('hidden');
+    }
+
+    // ── Long description ─────────────────────────────────────────────
     if (p.long_description && p.long_description.trim()) {
       document.getElementById('longDesc').textContent = p.long_description;
       document.getElementById('longDescWrap').classList.remove('hidden');
     }
 
-    // Demo video — supports YouTube + Vimeo
+    // ── Demo video ────────────────────────────────────────────────────
     if (p.demo_video_url) {
       const embed = videoEmbed(p.demo_video_url);
       if (embed) {
@@ -601,61 +843,123 @@
       }
     }
 
-    // Screenshots
-    if (Array.isArray(p.screenshots) && p.screenshots.length) {
-      const grid = document.getElementById('screenshotsGrid');
-      grid.innerHTML = p.screenshots.map((u) =>
-        `<img src="${esc(u)}" alt="" onclick="window.open(this.src, '_blank')" loading="lazy">`
-      ).join('');
-      document.getElementById('screenshotsWrap').classList.remove('hidden');
-    }
-
-    // Package details (what's included)
-    if (Array.isArray(p.package_details) && p.package_details.length) {
-      const list = document.getElementById('packageList');
-      list.innerHTML = p.package_details.map((it) => {
-        const included = it.included !== false;
-        return `<li>
-          <span class="${included ? 'check' : 'cross'}">${included ? '✓' : '✗'}</span>
-          <span class="${included ? '' : 'excluded'}">${esc(it.label || '')}</span>
-        </li>`;
+    // ── Pricing tier cards ────────────────────────────────────────────
+    if (plans.length) {
+      document.getElementById('tiersGrid').innerHTML = plans.map((pl) => {
+        const featRaw = Array.isArray(pl.features) ? pl.features : [];
+        const featHtml = featRaw.map((f) => {
+          const label    = typeof f === 'string' ? f : (f && f.label) || '';
+          const included = typeof f === 'string' ? true : (f && f.included !== false);
+          if (!label) return '';
+          return `<li>${included ? '<span class="check">✓</span>' : '<span style="color:#DC2626;flex-shrink:0;">✗</span>'}<span>${esc(label)}</span></li>`;
+        }).filter(Boolean).join('');
+        const buyHref = (purchasable && !isOwner)
+          ? '/buy/' + encodeURIComponent(p.id) + '?' + (effectiveClick ? 'bb_click=' + encodeURIComponent(effectiveClick) + '&' : '') + 'plan=' + encodeURIComponent(pl.id)
+          : '#';
+        const buyClass = (!purchasable || isOwner) ? ' style="background:#D1D5DB;pointer-events:none;"' : '';
+        return `
+          <div class="tier-card${pl.is_recommended ? ' recommended' : ''}">
+            <h3>${esc(pl.plan_name || '—')}</h3>
+            <div class="tier-price">${esc(fmtMoney(pl.price, pl.currency).replace(/\.00$/, ''))} <span class="ccy">${esc((pl.currency || 'USD').toUpperCase())}</span></div>
+            ${pl.original_price ? `<div class="tier-original">${esc(fmtMoney(pl.original_price, pl.currency))}</div>` : ''}
+            ${pl.discount_pct ? `<div class="tier-discount">−${pl.discount_pct}% off</div>` : ''}
+            <div class="tier-billing">${esc(billingLabel(pl.billing_period))}</div>
+            <a class="tier-buy" href="${esc(buyHref)}"${buyClass}>${(!purchasable || isOwner) ? 'Preview only' : 'Buy now'}</a>
+            ${featHtml ? `<ul class="tier-features">${featHtml}</ul>` : ''}
+          </div>`;
       }).join('');
-      document.getElementById('packageWrap').classList.remove('hidden');
     }
 
-    // FAQ
+    // Trust strip under tiers
+    const stripParts = [];
+    if (p.refund_window_days) {
+      stripParts.push(`<div><span class="ico">📅</span><span>Refundable up to ${p.refund_window_days} days</span></div>`);
+    }
+    if (p.guarantee_label) {
+      stripParts.push(`<div><span class="ico">🛡</span><span>${esc(p.guarantee_label)}</span></div>`);
+    }
+    if (stripParts.length) {
+      document.getElementById('trustStrip').innerHTML = stripParts.join('');
+    }
+
+    // ── Deal terms accordion ──────────────────────────────────────────
+    if (Array.isArray(p.deal_terms) && p.deal_terms.length) {
+      document.getElementById('termsList').innerHTML = p.deal_terms.map((t) => `<li><span>${esc(t)}</span></li>`).join('');
+      document.getElementById('termsWrap').classList.remove('hidden');
+      document.getElementById('termsHead').addEventListener('click', () => {
+        const body = document.getElementById('termsBody');
+        const tog  = document.getElementById('termsToggle');
+        body.classList.toggle('open');
+        tog.textContent = body.classList.contains('open') ? '▴' : '▾';
+      });
+    }
+
+    // ── Founder/Company card ─────────────────────────────────────────
+    const hasFounder = p.founder_name || p.founder_photo_url || p.founder_linkedin_url;
+    const hasCompany = p.company_tagline || p.company_about || p.company_logo_url || p.company_founded_date;
+    if (hasFounder || hasCompany) {
+      const metaRows = [];
+      if (p.company_founded_date) metaRows.push(`<div class="meta-row"><span class="icon">🏁</span><span>Founded ${esc(fmtDate(p.company_founded_date))}</span></div>`);
+      if (p.company_city || p.company_country_code) {
+        const flag = countryFlag(p.company_country_code || '');
+        metaRows.push(`<div class="meta-row"><span class="icon">📍</span><span>${flag ? flag + '&nbsp;' : ''}${esc([p.company_city, p.company_country_code].filter(Boolean).join(', '))}</span></div>`);
+      }
+      if (p.company_size)           metaRows.push(`<div class="meta-row"><span class="icon">👥</span><span>${esc(p.company_size)} employees</span></div>`);
+      if (p.company_growth_stage)   metaRows.push(`<div class="meta-row"><span class="icon">📈</span><span>${esc(p.company_growth_stage)}</span></div>`);
+      if (p.company_funding_status) metaRows.push(`<div class="meta-row"><span class="icon">💰</span><span>${esc(p.company_funding_status)}</span></div>`);
+      if (p.company_website_url) {
+        try {
+          metaRows.push(`<div class="meta-row"><span class="icon">🌐</span><a href="${esc(p.company_website_url)}" target="_blank" rel="noopener">${esc(new URL(p.company_website_url).hostname)}</a></div>`);
+        } catch (_) {}
+      }
+      const logoHtml = p.company_logo_url ? `<img class="logo" src="${esc(p.company_logo_url)}" alt="">` : '';
+      document.getElementById('founderMeta').innerHTML = logoHtml + metaRows.join('');
+
+      if (p.company_tagline) document.getElementById('founderTagline').textContent = p.company_tagline;
+      if (p.company_about) {
+        document.getElementById('founderAbout').innerHTML = String(p.company_about).split(/\n+/).map((para) => `<p>${esc(para)}</p>`).join('');
+      }
+      if (hasFounder) {
+        const photo = p.founder_photo_url
+          ? `<img src="${esc(p.founder_photo_url)}" alt="">`
+          : '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FFE4EE,#FFC9DC);display:flex;align-items:center;justify-content:center;font-size:22px;">👤</div>';
+        const li = p.founder_linkedin_url ? `<a href="${esc(p.founder_linkedin_url)}" target="_blank" rel="noopener" class="founder-li">in</a>` : '';
+        document.getElementById('founderPerson').innerHTML = `${photo}<div><div class="name">${esc(p.founder_name || 'Founder')}${li}</div><div class="role">${esc(p.founder_role || 'Founder')}</div></div>`;
+        document.getElementById('founderPerson').style.display = 'flex';
+      }
+      document.getElementById('founderCard').classList.remove('hidden');
+    }
+
+    // ── FAQ ───────────────────────────────────────────────────────────
     if (Array.isArray(p.faq) && p.faq.length) {
       document.getElementById('faqList').innerHTML = p.faq.map((qa) => `
-        <div class="faq-item">
-          <div class="q">${esc(qa.q || '')}</div>
-          <div class="a">${esc(qa.a || '')}</div>
+        <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+          <div style="font-weight:700;color:var(--ink);margin-bottom:6px;">${esc(qa.q || '')}</div>
+          <div style="color:var(--ink-soft);font-size:14.5px;">${esc(qa.a || '')}</div>
         </div>`).join('');
       document.getElementById('faqWrap').classList.remove('hidden');
     }
 
-    // Testimonials
+    // ── Testimonials ──────────────────────────────────────────────────
     if (Array.isArray(p.testimonials) && p.testimonials.length) {
       document.getElementById('testGrid').innerHTML = p.testimonials.map((t) => `
-        <div class="test-card">
-          <div class="quote">"${esc(t.body || '')}"</div>
-          ${t.author ? `<div class="author">${esc(t.author)}</div>` : ''}
-          ${t.role ? `<div class="role">${esc(t.role)}</div>` : ''}
+        <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;">
+          <div style="font-size:14.5px;color:var(--ink);line-height:1.55;">"${esc(t.body || '')}"</div>
+          ${t.author ? `<div style="margin-top:10px;font-size:13px;font-weight:700;color:var(--ink);">${esc(t.author)}</div>` : ''}
+          ${t.role ? `<div style="font-size:12.5px;color:var(--muted);">${esc(t.role)}</div>` : ''}
         </div>`).join('');
       document.getElementById('testWrap').classList.remove('hidden');
     }
 
-    // Reveal the page
+    // Reveal page
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('productPage').classList.remove('hidden');
   }
 
-  // ── Video embed resolver ──────────────────────────────────────────────
-  // Accepts YouTube + Vimeo URLs in any common form, returns an embed URL
-  // suitable for an iframe src. Returns null if the URL isn't recognized.
+  // ── Video embed resolver — YouTube + Vimeo ───────────────────────────
   function videoEmbed(url) {
     try {
       const u = new URL(url);
-      // YouTube
       if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
         let id = null;
         if (u.hostname.includes('youtu.be')) id = u.pathname.slice(1);
@@ -663,7 +967,6 @@
         else if (u.pathname.startsWith('/embed/')) id = u.pathname.slice(7);
         if (id) return 'https://www.youtube.com/embed/' + encodeURIComponent(id);
       }
-      // Vimeo
       if (u.hostname.includes('vimeo.com')) {
         const id = u.pathname.split('/').filter(Boolean).pop();
         if (id) return 'https://player.vimeo.com/video/' + encodeURIComponent(id);
@@ -673,5 +976,6 @@
   }
 })();
 </script>
+
 </body>
 </html>

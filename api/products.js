@@ -527,15 +527,26 @@ module.exports = async function handler(req, res) {
       const hasValidClick = typeof bbClick === "string" && /^[0-9a-fA-F-]{8,40}$/.test(bbClick);
 
       // Pull all fields — we'll decide what to expose based on access mode.
+      // Includes the full marketing payload (TL;DR, at-a-glance, feature
+      // blocks, founder card, trust block) needed for the Pass-5 product
+      // page redesign. See [[mor-product-page-model]].
       const { data, error } = await sb
         .from("products")
         .select(`
           id, advertiser_id, name, description, image_url, status,
-          price, currency, sku_type,
+          price, currency, sku_type, audit_status,
           long_description, screenshots, demo_video_url,
           package_details, faq, testimonials,
           external_marketing_url, default_url,
-          default_commission_pct, redemption_window_days, package_duration_days
+          default_commission_pct, affiliate_pool_pct,
+          redemption_window_days, package_duration_days,
+          hero_images, feature_blocks,
+          tldr_bullets, alternative_to, integrations, best_for,
+          refund_window_days, guarantee_label, deal_terms,
+          company_logo_url, company_website_url, company_tagline, company_about,
+          company_founded_date, company_city, company_country_code,
+          company_size, company_growth_stage, company_funding_status,
+          founder_name, founder_role, founder_photo_url, founder_linkedin_url
         `)
         .eq("id", id)
         .maybeSingle();
@@ -578,11 +589,41 @@ module.exports = async function handler(req, res) {
       }
 
       // FULL access — buyer with valid bb_click, or advertiser previewing.
+      // Fetch active pricing plans so the buyer page can render the tier
+      // picker. Plans that aren't audit-approved on the product level
+      // are still purchasable IF the product is approved (audit lives on
+      // the product, not the plan — see [[pricing-plans-audit-policy]]).
+      let plans = [];
+      {
+        const { data: planRows } = await sb
+          .from("pricing_plans")
+          .select("id, plan_name, description, price, original_price, currency, billing_period, features, is_recommended, sort_order")
+          .eq("product_id", data.id)
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true });
+        plans = (planRows || []).map((pl) => {
+          const op = Number(pl.original_price) || 0;
+          const bp = Number(pl.price) || 0;
+          const discount = (op > 0 && bp > 0 && bp < op)
+            ? Math.round((1 - bp / op) * 100)
+            : null;
+          return Object.assign({}, pl, { discount_pct: discount });
+        });
+      }
+
+      // Buyer page is purchasable only when the PRODUCT audit is approved.
+      // For owner-preview the page still renders fully but the Buy button
+      // shows "Preview — purchases require an affiliate link" / "Pending
+      // audit". The frontend decides the CTA copy based on these flags.
+      const purchasable = data.audit_status === "approved";
+
       const safe = {
         id:                       data.id,
         name:                     data.name,
         description:              data.description,
         image_url:                data.image_url,
+        hero_images:              Array.isArray(data.hero_images) ? data.hero_images : [],
         price:                    data.price,
         currency:                 data.currency,
         sku_type:                 data.sku_type,
@@ -596,13 +637,46 @@ module.exports = async function handler(req, res) {
         default_url:              data.default_url,
         commission_pct_display:   data.default_commission_pct,
         package_duration_days:    data.package_duration_days,
+
+        // Pass-5 marketing payload
+        feature_blocks:           Array.isArray(data.feature_blocks) ? data.feature_blocks : [],
+        tldr_bullets:             Array.isArray(data.tldr_bullets)   ? data.tldr_bullets   : [],
+        alternative_to:           Array.isArray(data.alternative_to) ? data.alternative_to : [],
+        integrations:             Array.isArray(data.integrations)   ? data.integrations   : [],
+        best_for:                 Array.isArray(data.best_for)       ? data.best_for       : [],
+
+        // Trust block
+        refund_window_days:       data.refund_window_days,
+        guarantee_label:          data.guarantee_label,
+        deal_terms:               Array.isArray(data.deal_terms) ? data.deal_terms : [],
+
+        // Company + founder card
+        company_logo_url:         data.company_logo_url,
+        company_website_url:      data.company_website_url,
+        company_tagline:          data.company_tagline,
+        company_about:            data.company_about,
+        company_founded_date:     data.company_founded_date,
+        company_city:             data.company_city,
+        company_country_code:     data.company_country_code,
+        company_size:             data.company_size,
+        company_growth_stage:     data.company_growth_stage,
+        company_funding_status:   data.company_funding_status,
+        founder_name:             data.founder_name,
+        founder_role:             data.founder_role,
+        founder_photo_url:        data.founder_photo_url,
+        founder_linkedin_url:     data.founder_linkedin_url,
+
+        // Pricing tiers — what buyers actually pick from
+        pricing_plans:            plans,
       };
       return res.json({
         product: safe,
         access: {
-          gated:    false,
-          reason:   isOwner ? "preview" : "affiliate",
-          is_owner: isOwner,
+          gated:        false,
+          reason:       isOwner ? "preview" : "affiliate",
+          is_owner:     isOwner,
+          purchasable,
+          audit_status: data.audit_status,
         },
       });
     }
