@@ -11821,10 +11821,27 @@
             const chartCanvas  = () => document.getElementById('poChart');
 
             function getToken() {
-                // currentUser is owned by the outer auth script; we just read it.
-                if (typeof window.currentUser !== 'undefined' && window.currentUser && window.currentUser.token) {
-                    return window.currentUser.token;
-                }
+                // The outer auth script declares `let currentUser` at script
+                // scope — that doesn't put it on window, so cross-script
+                // reads return undefined. Read straight from localStorage
+                // instead. Format matches what checkSession() writes:
+                // bb_session_token = JSON.stringify({token, user_id, ...}).
+                // See [[feedback-bb-session-token-format]].
+                try {
+                    const raw = localStorage.getItem('bb_session_token');
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            if (parsed && parsed.token) return parsed.token;
+                        } catch (_) {
+                            // Legacy plain-string fallback
+                            if (typeof raw === 'string' && raw.length > 20 && !raw.startsWith('{')) return raw;
+                        }
+                    }
+                    // Pre-bridge keys set by /ads/signup before checkSession runs
+                    const adv = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token');
+                    if (adv) return adv;
+                } catch (_) {}
                 return null;
             }
 
