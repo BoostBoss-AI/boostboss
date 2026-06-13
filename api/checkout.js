@@ -513,16 +513,22 @@ async function handleCaptureOrder(req, res) {
   }
 
   // ── Step 5: Send buyer the purchase confirmation email ──────────────
-  // Build the redemption URL (seller's page + ?code=<voucher>) and the
-  // permanent repeat-purchase URL (preserves the original bb_click so
-  // the same affiliate gets credit on future buys — see
+  // ACTIVATION LINK MODEL (default since 2026-06-13):
+  // The buyer clicks the email CTA → lands on the seller's signup/activation
+  // page with the voucher code embedded in the URL as `?bb_token=<code>`.
+  // The seller's signup endpoint validates the token via BB's API at
+  // form-submit time and creates the account already-paid. The token
+  // param is named bb_token to disambiguate from seller's internal params.
+  //
+  // The permanent repeat-purchase URL preserves the original bb_click so
+  // the same affiliate gets credit on future buys (see
   // [[mor-product-page-model]] "Receipt-attribution trick").
   const PUBLIC_BASE_LOCAL = PUBLIC_BASE;
   const redemptionUrl = product.fulfillment_redirect_url
     ? (product.fulfillment_redirect_url.includes("?")
-        ? `${product.fulfillment_redirect_url}&code=${encodeURIComponent(voucher.code)}`
-        : `${product.fulfillment_redirect_url}?code=${encodeURIComponent(voucher.code)}`)
-    : `${PUBLIC_BASE_LOCAL}/redeem?code=${encodeURIComponent(voucher.code)}`;
+        ? `${product.fulfillment_redirect_url}&bb_token=${encodeURIComponent(voucher.code)}`
+        : `${product.fulfillment_redirect_url}?bb_token=${encodeURIComponent(voucher.code)}`)
+    : `${PUBLIC_BASE_LOCAL}/redeem?bb_token=${encodeURIComponent(voucher.code)}`;
 
   const repeatPurchaseUrl = tx.bb_click
     ? `${PUBLIC_BASE_LOCAL}/p/${product.id}?bb_click=${encodeURIComponent(tx.bb_click)}`
@@ -595,10 +601,12 @@ async function handleGetVoucher(req, res) {
       : Promise.resolve({ data: null }),
   ]);
 
+  // Activation URL — same format as the email CTA (bb_token query param).
+  // See checkout.js handleCaptureOrder for the model rationale.
   const redemptionUrl = (voucher && product && product.fulfillment_redirect_url)
     ? (product.fulfillment_redirect_url.includes("?")
-        ? `${product.fulfillment_redirect_url}&code=${encodeURIComponent(voucher.code)}`
-        : `${product.fulfillment_redirect_url}?code=${encodeURIComponent(voucher.code)}`)
+        ? `${product.fulfillment_redirect_url}&bb_token=${encodeURIComponent(voucher.code)}`
+        : `${product.fulfillment_redirect_url}?bb_token=${encodeURIComponent(voucher.code)}`)
     : null;
 
   return res.json({

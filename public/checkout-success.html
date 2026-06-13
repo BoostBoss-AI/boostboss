@@ -107,16 +107,17 @@
     <div style="text-align: center;">
       <div class="check">✓</div>
       <h1>Payment received</h1>
-      <p class="sub">Thanks for your purchase. Your redemption code is ready below — we've also emailed a copy.</p>
+      <p class="sub">Click the button below to activate your account. The seller will see your purchase and set up your paid plan automatically. We've also emailed a backup copy of the activation link + code.</p>
     </div>
 
-    <div class="voucher-card">
-      <div class="lbl">Your redemption code</div>
+    <a class="redeem-btn" id="redeemBtn" href="#" target="_blank" rel="noopener">Activate your account →</a>
+
+    <div class="voucher-card" style="opacity:0.9;margin-top:18px;">
+      <div class="lbl">Activation code (backup)</div>
       <div class="code" id="voucherCode">—</div>
       <button class="copy-btn" type="button" id="copyBtn">Copy code</button>
+      <div style="font-size:11px;color:var(--muted, #6B7280);margin-top:10px;line-height:1.5;">If the button above doesn't open the seller's signup page, sign up at the seller's site directly and paste this code when asked.</div>
     </div>
-
-    <a class="redeem-btn" id="redeemBtn" href="#" target="_blank" rel="noopener">Redeem now →</a>
 
     <div class="info-card">
       <h3>Receipt</h3>
@@ -183,7 +184,7 @@
     const p  = j.product || {};
     const v  = j.voucher || {};
 
-    // Voucher card
+    // Voucher card + activation CTA — see [[fulfillment-activation-link-model]]
     if (v.code) {
       document.getElementById('voucherCode').textContent = v.code;
       if (v.redemption_url) {

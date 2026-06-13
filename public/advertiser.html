@@ -4046,10 +4046,22 @@
 
               <!-- ─── TAB 4: FULFILLMENT ─── -->
               <div class="pf-panel" data-pf-panel="fulfillment" style="display:none;">
+                <!-- Activation-link model explainer -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:1px solid #C7D2FE;border-radius:10px;margin-bottom:16px;">
+                  <div style="font-size:13px;font-weight:700;color:#4338CA;margin-bottom:4px;">How activation works</div>
+                  <div style="font-size:12px;color:#3730A3;line-height:1.6;">After payment, BB emails the buyer a one-click <strong>"Activate your account"</strong> button linking to your signup page with the token appended as <code style="background:#fff;padding:1px 6px;border-radius:3px;font-size:11px;">?bb_token=&lt;code&gt;</code>. Your signup endpoint validates the token via BB's API and creates the account already on the paid plan — no separate redemption page needed.</div>
+                </div>
                 <div class="form-group">
-                  <label class="form-label">Redemption page URL <span style="font-size:11px;color:#FF2D78;font-weight:600;">required for purchasable products</span></label>
-                  <input type="url" class="form-input" name="fulfillment_redirect_url" placeholder="https://example.com/bb-redeem">
-                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">After payment, buyer is sent here with <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-size:11px;">?code=&lt;voucher&gt;</code>. Your page validates via BB API and grants access.</div>
+                  <label class="form-label">Activation page URL <span style="font-size:11px;color:#FF2D78;font-weight:600;">required for purchasable products</span></label>
+                  <input type="url" class="form-input" name="fulfillment_redirect_url" placeholder="https://example.com/signup">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:6px;line-height:1.55;">
+                    Usually your signup / register page. BB appends <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:11px;">?bb_token=&lt;code&gt;</code> when the buyer clicks the email CTA. Your signup endpoint should:
+                    <br>1. Read <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:11px;">bb_token</code> from the URL
+                    <br>2. On form submit, POST it to <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:11px;">/v1/vouchers/validate</code> with your seller secret
+                    <br>3. If valid, create the account already on the paid plan + call <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:11px;">/v1/vouchers/redeem</code> to mark consumed
+                    <br>
+                    <br><strong>Two-path support:</strong> handle both "new email → create account" and "existing email → log in + upgrade plan". The buyer's purchase email is in the validate response.
+                  </div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Fulfillment webhook URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — S2S notification on purchase)</span></label>
