@@ -452,10 +452,26 @@
   const fetchOpts = { method: 'GET' };
   try {
     // The advertiser dashboard signs in via Supabase auth and stashes the
-    // session token in localStorage. If present, send it as Bearer so the
-    // server can detect ownership and return is_owner=true. Anonymous
-    // visitors don't have this and the gate kicks in.
-    const advToken = localStorage.getItem('bb_session_token');
+    // session in localStorage as JSON {token, user_id, ...} under
+    // bb_session_token. We need to JSON.parse and pull .token — sending the
+    // raw stringified object would make the server reject "Bearer {..json..}".
+    //
+    // Also fall back to the /ads/signup pre-bridge keys (bb_adv_token /
+    // bb_token) for users whose dashboard hasn't run checkSession yet.
+    let advToken = null;
+    const raw = localStorage.getItem('bb_session_token');
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        advToken = parsed && parsed.token ? parsed.token : null;
+      } catch (_) {
+        // Not JSON — old format or someone wrote a plain string. Treat as token.
+        advToken = raw;
+      }
+    }
+    if (!advToken) {
+      advToken = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token') || null;
+    }
     if (advToken) {
       fetchOpts.headers = { 'Authorization': 'Bearer ' + advToken };
     }

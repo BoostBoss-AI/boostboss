@@ -12212,7 +12212,14 @@
                 }
             }
 
-            // Route guard — only run loaders when this is the active route
+            // Route guard — only run loaders when this is the active route.
+            //
+            // Race-condition note: maybeLoad can fire BEFORE the auth flow has
+            // populated currentUser.token (we land on the route via direct link
+            // or initial hash). If we set currentProductId without a token in
+            // hand, the next poll-driven maybeLoad short-circuits with
+            // "pid === currentProductId" and we never actually load. So bail
+            // out BEFORE mutating currentProductId when the token isn't ready.
             function maybeLoad() {
                 const wrap = document.querySelector('[data-shell-active-route]');
                 const active = wrap && wrap.getAttribute('data-shell-active-route');
@@ -12223,7 +12230,8 @@
                     window.location.hash = '#/products';
                     return;
                 }
-                if (pid === currentProductId) return;  // already loaded
+                if (!getToken()) return;             // wait — auth poller will retry
+                if (pid === currentProductId) return;  // already loaded for this product
                 currentProductId = pid;
                 // Reset range/filter UI on product switch
                 const range = document.getElementById('poRangeSelect');
@@ -12234,7 +12242,7 @@
                 currentStatusFilter = '';
                 // Tear down any existing chart so the new product gets a fresh one
                 if (chartInstance) { try { chartInstance.destroy(); } catch (_) {} chartInstance = null; }
-                if (getToken()) loadAll();
+                loadAll();
             }
 
             // Boot — wire UI, listen for hash changes, poll briefly for token
