@@ -2466,20 +2466,95 @@ function inferCategory(p) {
   return 'other';
 }
 
+// Helper — format USD-ish money. Currencies are always shown explicitly when
+// not USD so affiliates don't accidentally think every price is in dollars.
+function _fmtPrice(amount, currency) {
+  const n = Number(amount) || 0;
+  const cur = (currency || 'USD').toUpperCase();
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: 2 }).format(n);
+  } catch (_) {
+    return '$' + n.toFixed(2);
+  }
+}
+
+// Pull the first usable hero image — hero_images[] (carousel) takes
+// precedence; image_url is the legacy fallback.
+function _heroImageUrl(p) {
+  if (Array.isArray(p.hero_images) && p.hero_images.length && p.hero_images[0]) return p.hero_images[0];
+  return p.image_url || null;
+}
+
+// Friendly billing-period label
+function _billingLabel(period) {
+  return ({
+    one_time:  'One-time',
+    monthly:   'Monthly',
+    annual:    'Annual',
+    lifetime:  'Lifetime',
+  })[period] || period || 'One-time';
+}
+
 function renderProductCard(p) {
-  const img = p.image_url
-    ? `<div class="img" style="background-image:url('${esc(p.image_url)}');"></div>`
+  const heroUrl = _heroImageUrl(p);
+  const img = heroUrl
+    ? `<div class="img" style="background-image:url('${esc(heroUrl)}');"></div>`
     : `<div class="img"><span>📦</span></div>`;
-  const comm = (Number(p.default_commission_pct) || 0).toFixed(2);
+
+  // TL;DR — up to 2 bullets so the card stays scannable
+  const tldr = Array.isArray(p.tldr_bullets) ? p.tldr_bullets.filter(Boolean).slice(0, 2) : [];
+  const tldrHtml = tldr.length
+    ? `<ul class="card-tldr" style="margin:6px 0 8px;padding-left:0;list-style:none;">
+         ${tldr.map((b) => `<li style="display:flex;gap:6px;align-items:flex-start;font-size:11.5px;color:#374151;line-height:1.45;margin-bottom:3px;"><span style="color:#059669;flex-shrink:0;">✓</span><span>${esc(b)}</span></li>`).join('')}
+       </ul>`
+    : '';
+
+  // At-a-glance chips — alternative_to + best_for, max 2 each
+  const tagChip = (label, bg, color) => `<span style="display:inline-block;font-size:10px;font-weight:700;background:${bg};color:${color};padding:2px 7px;border-radius:8px;letter-spacing:0.04em;text-transform:uppercase;">${esc(label)}</span>`;
+  const altTo  = Array.isArray(p.alternative_to) ? p.alternative_to.filter(Boolean).slice(0, 2) : [];
+  const bestFor = Array.isArray(p.best_for)       ? p.best_for.filter(Boolean).slice(0, 2)      : [];
+  const chips = [
+    ...altTo.map((a) => `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10.5px;color:#6B7280;margin-right:6px;">vs. <strong style="color:#111827;font-weight:600;">${esc(a)}</strong></span>`),
+    ...(bestFor.length ? [`<span style="display:inline-block;font-size:10.5px;color:#6B7280;">for <strong style="color:#111827;font-weight:600;">${esc(bestFor.join(', '))}</strong></span>`] : []),
+  ].join('');
+  const chipsHtml = chips ? `<div style="margin:6px 0 8px;line-height:1.6;">${chips}</div>` : '';
+
+  // Cheapest plan — anchor for "starting from $X"
+  const plan = p.cheapest_plan || null;
+  const planHtml = plan
+    ? `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin:2px 0 8px;">
+         <span style="font-size:14px;font-weight:700;color:#111827;">${esc(_fmtPrice(plan.price, plan.currency))}</span>
+         ${plan.original_price ? `<span style="font-size:11px;color:#9CA3AF;text-decoration:line-through;">${esc(_fmtPrice(plan.original_price, plan.currency))}</span>` : ''}
+         <span style="font-size:10.5px;color:#6B7280;">· ${esc(_billingLabel(plan.billing_period))}${(p.plans_count || 1) > 1 ? ` · ${p.plans_count} tiers` : ''}</span>
+       </div>`
+    : '';
+
+  // Affiliate earnings — projected $ amount is the killer info.
+  // Pre-computed by api/products.js browse handler as
+  //   cheapest_price × affiliate_pool_pct/100 × 0.70 (the 70% share)
+  const earn = (p.projected_commission != null) ? Number(p.projected_commission) : null;
+  const poolPct = Number(p.affiliate_pool_pct);
+  const earnHtml = earn != null
+    ? `<div style="background:linear-gradient(135deg,#FFF1F6,#FCE7F3);border:1px solid #FBCFE8;border-radius:8px;padding:7px 10px;margin-top:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+         <div style="display:flex;flex-direction:column;line-height:1.2;">
+           <span style="font-size:14px;font-weight:700;color:#9D174D;">${esc(_fmtPrice(earn, plan && plan.currency))} per sale</span>
+           <span style="font-size:10px;color:#BE185D;">70% of ${Number.isFinite(poolPct) ? poolPct.toFixed(0) : '—'}% pool</span>
+         </div>
+       </div>`
+    : `<div style="font-size:11.5px;color:#FF2D78;font-weight:700;margin-top:6px;">${(Number(p.default_commission_pct) || 0).toFixed(2)}% commission</div>`;
+
   return `
     <div class="product-card" data-product-id="${esc(p.id)}">
       ${img}
       <div class="body">
         <div class="name" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="desc">${esc(p.description || '—')}</div>
-        <div class="meta">
-          <span class="comm">${comm}% commission</span>
-          <button class="get-link-btn" type="button" data-act="get-link" data-product-id="${esc(p.id)}" data-product-url="${esc(p.default_url)}">Get Link</button>
+        ${tldrHtml}
+        ${chipsHtml}
+        ${planHtml}
+        ${earnHtml}
+        <div class="meta" style="margin-top:10px;">
+          <button class="get-link-btn" type="button" data-act="get-link" data-product-id="${esc(p.id)}" data-product-url="${esc(p.default_url)}" style="width:100%;">Get Link</button>
         </div>
       </div>
     </div>`;
@@ -2511,8 +2586,13 @@ async function loadCatalog() {
     items.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   } else if (_activeSort === 'name') {
     items.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-  } else { // commission default
-    items.sort((a, b) => (Number(b.default_commission_pct) || 0) - (Number(a.default_commission_pct) || 0));
+  } else { // commission default — prefer projected $ amount, fall back to %
+    items.sort((a, b) => {
+      const ea = Number(a.projected_commission);
+      const eb = Number(b.projected_commission);
+      if (Number.isFinite(eb) && Number.isFinite(ea) && (eb !== ea)) return eb - ea;
+      return (Number(b.default_commission_pct) || 0) - (Number(a.default_commission_pct) || 0);
+    });
   }
 
   if (!items.length) {
@@ -2539,8 +2619,13 @@ async function loadPartners() {
   // is product-level here (since we don't have a shops table yet); when the
   // advertisers table grows we'll switch to a per-shop aggregation.
   const top = (j.products || [])
-    .filter((p) => (Number(p.default_commission_pct) || 0) >= 15)
-    .sort((a, b) => (Number(b.default_commission_pct) || 0) - (Number(a.default_commission_pct) || 0))
+    .filter((p) => (Number(p.affiliate_pool_pct) || Number(p.default_commission_pct) || 0) >= 15)
+    .sort((a, b) => {
+      const ea = Number(a.projected_commission);
+      const eb = Number(b.projected_commission);
+      if (Number.isFinite(eb) && Number.isFinite(ea) && (eb !== ea)) return eb - ea;
+      return (Number(b.affiliate_pool_pct) || Number(b.default_commission_pct) || 0) - (Number(a.affiliate_pool_pct) || Number(a.default_commission_pct) || 0);
+    })
     .slice(0, 12);
 
   if (!top.length) {

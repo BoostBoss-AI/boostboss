@@ -12134,9 +12134,21 @@ function pfParseScreenshots(text) {
                             </td>
                             <td style="padding:14px 18px;font-size:13px;color:#FF2D78;font-weight:700;">${(Number(p.default_commission_pct) || 0).toFixed(2)}%</td>
                             <td style="padding:14px 18px;font-size:12px;color:#6B7280;">${escHtml(created)}</td>
-                            <td style="padding:14px 18px;font-size:12px;">${archived
-                                ? '<span style="color:#9CA3AF;font-weight:600;">Archived</span>'
-                                : '<span style="color:#059669;font-weight:600;">Active</span>'}</td>
+                            <td style="padding:14px 18px;font-size:12px;">
+                                ${archived
+                                    ? '<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Archived</span></div>'
+                                    : (() => {
+                                        const s = p.audit_status || 'pending';
+                                        const styles = {
+                                            approved:          { bg: '#ECFDF5', color: '#059669', label: 'Live' },
+                                            pending:           { bg: '#FEF3C7', color: '#92400E', label: 'Pending audit' },
+                                            rejected:          { bg: '#FEF2F2', color: '#DC2626', label: 'Rejected' },
+                                            changes_requested: { bg: '#FFF7ED', color: '#C2410C', label: 'Changes requested' },
+                                        }[s] || { bg: '#F3F4F6', color: '#6B7280', label: s };
+                                        return `<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:${styles.bg};color:${styles.color};font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">${styles.label}</span></div>`;
+                                    })()
+                                }
+                            </td>
                             <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
                                 <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">Edit</button>
                                 ${archived
