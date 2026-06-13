@@ -198,17 +198,9 @@ function normalizePlan(body, { partial = false } = {}) {
   return { row: out };
 }
 
-// Detect if an update touches price-related fields. If so, the plan
-// needs re-audit — we reset audit_status to 'pending'.
-function changesPriceFields(updates) {
-  return (
-    Object.prototype.hasOwnProperty.call(updates, "price") ||
-    Object.prototype.hasOwnProperty.call(updates, "original_price") ||
-    Object.prototype.hasOwnProperty.call(updates, "original_price_proof_url") ||
-    Object.prototype.hasOwnProperty.call(updates, "currency") ||
-    Object.prototype.hasOwnProperty.call(updates, "billing_period")
-  );
-}
+// (deprecated) — audit now lives on the product, not the plan. Editing a
+// plan no longer flips its own audit status. The seller can re-submit the
+// whole PRODUCT for audit when ready via POST /api/products?action=submit_for_audit.
 
 // ──────────────────────────────────────────────────────────────────────
 // GET /api/pricing-plans?action=list&product_id=X
@@ -311,13 +303,9 @@ async function handleUpdate(req, res) {
   if (n.error) return res.status(400).json({ error: n.error });
   if (!Object.keys(n.row).length) return res.status(400).json({ error: "No updatable fields supplied" });
 
-  // Price-related change → re-audit
-  if (changesPriceFields(n.row) && plan.audit_status === "approved") {
-    n.row.audit_status = "pending";
-    n.row.audit_reviewer_id = null;
-    n.row.audit_reviewed_at = null;
-    n.row.audit_review_notes = null;
-  }
+  // Audit is now a product-level decision (see [[pricing-plans-audit-policy]]).
+  // Plan edits no longer flip plan audit_status. Sellers re-submit the whole
+  // product for audit via POST /api/products?action=submit_for_audit when ready.
 
   const { data: updated, error: upErr } = await client
     .from("pricing_plans")
@@ -390,12 +378,9 @@ async function handleDelete(req, res) {
   return res.json({ success: true, deleted: true });
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// POST /api/pricing-plans?action=submit_for_audit  Body: { plan_id }
-// ──────────────────────────────────────────────────────────────────────
-//
-// Explicit "please review this plan now" action. Refuses if proof URL is
-// missing — the seller has to give the admin something to verify.
+// (DEPRECATED) — per-plan submit_for_audit. Kept as a no-op redirect so
+// older clients calling this endpoint don't 404. Real action moved to
+// POST /api/products?action=submit_for_audit.
 async function handleSubmitForAudit(req, res) {
   const body = req.body || {};
   const planId = body.plan_id;
@@ -407,47 +392,39 @@ async function handleSubmitForAudit(req, res) {
   const client = sbAdmin();
   if (!client) return res.status(500).json({ error: "Supabase not configured" });
 
+  // Look up the plan → its product → submit the product instead.
   const { data: plan } = await client
     .from("pricing_plans")
-    .select("id, product_id, original_price_proof_url, original_price, audit_status")
+    .select("id, product_id")
     .eq("id", planId)
     .maybeSingle();
   if (!plan) return res.status(404).json({ error: "Plan not found" });
 
   const { data: product } = await client
     .from("products")
-    .select("id, advertiser_id")
+    .select("id, advertiser_id, audit_status")
     .eq("id", plan.product_id)
     .maybeSingle();
   if (!product || product.advertiser_id !== user.id) {
     return res.status(403).json({ error: "Forbidden" });
   }
 
-  if (!plan.original_price_proof_url) {
-    return res.status(400).json({
-      error: "Attach original_price_proof_url before submitting for audit. The reviewer needs a link to the seller's own pricing page.",
-      code:  "proof_required",
-    });
-  }
-  if (plan.original_price == null) {
-    return res.status(400).json({
-      error: "Set original_price before submitting for audit. The audit verifies the discount against this number.",
-      code:  "original_price_required",
-    });
-  }
-
   const { error: upErr } = await client
-    .from("pricing_plans")
+    .from("products")
     .update({
       audit_status:        "pending",
       audit_reviewer_id:   null,
       audit_reviewed_at:   null,
       audit_review_notes:  null,
     })
-    .eq("id", planId);
+    .eq("id", product.id);
   if (upErr) return res.status(500).json({ error: upErr.message });
 
-  return res.json({ success: true, audit_status: "pending" });
+  return res.json({
+    success: true,
+    audit_status: "pending",
+    note: "Audit is product-level now. The whole product page was submitted.",
+  });
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -1,38 +1,33 @@
 /**
- * Boost Boss — Admin pricing-plan audit queue
+ * Boost Boss — Admin product audit queue
  *
- * Admin-facing surface for reviewing seller pricing plans before they go
- * live to affiliates. Implements the legitimacy moat described in
- * [[pricing-plans-audit-policy]]: every plan needs a proof URL pointing
- * to the seller's own pricing page; admin verifies the discount is real.
+ * Reviews the WHOLE product page (marketing + every pricing tier + every
+ * proof URL) in one decision. Audit happens at the product level — not
+ * per-plan. See [[pricing-plans-audit-policy]] (revised model).
  *
  * Endpoints (all require ADMIN_TOKEN bearer):
  *
- *   GET   /api/admin-audits?action=list
- *     Returns pricing plans awaiting review (audit_status IN
- *     ('pending', 'changes_requested')), joined with product name +
- *     seller display info. Default ordered by created_at ASC (FIFO).
+ *   GET   /api/admin-audits?action=list&status=queue
+ *     Returns products awaiting review (audit_status IN ('pending',
+ *     'changes_requested')) joined with EVERY pricing plan + seller info
+ *     + all marketing content. One row = one product page = one decision.
  *
  *   GET   /api/admin-audits?action=summary
- *     Tiny aggregate for the sidebar badge count: how many plans are
- *     waiting + how many of each status.
+ *     Aggregate counts by audit_status for sidebar badge.
  *
- *   POST  /api/admin-audits?action=approve   Body: { plan_id, notes? }
- *     Flip audit_status → 'approved'. Plan becomes immediately purchasable.
+ *   POST  /api/admin-audits?action=approve   Body: { product_id, notes? }
+ *     Whole product becomes purchasable. All active plans go live.
  *
- *   POST  /api/admin-audits?action=reject    Body: { plan_id, notes (required) }
- *     Flip audit_status → 'rejected'. notes is required and shown to the
- *     seller on their pricing-plans page.
+ *   POST  /api/admin-audits?action=reject    Body: { product_id, notes (required) }
+ *     Product blocked. Seller sees reviewer notes.
  *
- *   POST  /api/admin-audits?action=request_changes  Body: { plan_id, notes (required) }
- *     Flip audit_status → 'changes_requested'. Same as reject but the
- *     seller's UI shows it as "fix and re-submit" rather than terminal.
+ *   POST  /api/admin-audits?action=request_changes  Body: { product_id, notes (required) }
+ *     Soft reject — seller's UI shows "fix and re-submit."
  *
  * Auth model
  * ──────────
- * Same single-key pattern as api/campaigns.js requireAdmin — the admin
- * console at /admin stores ADMIN_TOKEN in localStorage.bb_admin_token and
- * sends it as Authorization: Bearer ... on every call.
+ * Same single-key static-bearer pattern as api/campaigns and api/payouts
+ * (ADMIN_TOKEN / BBX_ADMIN_KEY env var).
  */
 
 "use strict";
@@ -50,7 +45,6 @@ function sb() {
   return _sb;
 }
 
-// ── Admin auth — matches the requireAdmin pattern in campaigns.js ─────
 function requireAdmin(req) {
   const authHeader = (req.headers && req.headers.authorization) || "";
   const token = authHeader.replace(/^Bearer\s+/i, "");
@@ -63,7 +57,7 @@ function requireAdmin(req) {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// GET ?action=list&status=pending  (also accepts: changes_requested, all)
+// GET ?action=list&status=queue
 // ──────────────────────────────────────────────────────────────────────
 async function handleList(req, res) {
   const client = sb();
@@ -71,94 +65,130 @@ async function handleList(req, res) {
 
   const filter = (req.query && req.query.status) || "queue";
 
-  let query = client
-    .from("pricing_plans")
+  // 1. Pull the product rows for the requested filter.
+  let prodQuery = client
+    .from("products")
     .select("*")
+    .order("audit_reviewed_at", { ascending: false, nullsFirst: true })
     .order("created_at", { ascending: true })
     .limit(200);
 
   if (filter === "queue") {
-    query = query.in("audit_status", ["pending", "changes_requested"]);
-  } else if (filter === "all") {
-    // no filter — recent history of all decisions
-    query = client
-      .from("pricing_plans")
-      .select("*")
-      .order("audit_reviewed_at", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false })
-      .limit(200);
+    prodQuery = prodQuery.in("audit_status", ["pending", "changes_requested"]);
   } else if (["pending", "approved", "rejected", "changes_requested"].includes(filter)) {
-    query = query.eq("audit_status", filter);
-  }
+    prodQuery = prodQuery.eq("audit_status", filter);
+  } // 'all' returns everything
 
-  const { data: plans, error } = await query;
+  const { data: products, error } = await prodQuery;
   if (error) return res.status(500).json({ error: error.message });
-  const rows = plans || [];
+  const productList = products || [];
 
-  // Fan-out: fetch product + advertiser display info in batches
-  const productIds = Array.from(new Set(rows.map((r) => r.product_id).filter(Boolean)));
-  let productsById = {};
-  if (productIds.length) {
-    const { data: prods } = await client
-      .from("products")
-      .select("id, name, image_url, advertiser_id, status, default_url, external_marketing_url, affiliate_pool_pct")
-      .in("id", productIds);
-    (prods || []).forEach((p) => { productsById[p.id] = p; });
-  }
+  // 2. Fan out for related data
+  const productIds   = productList.map((p) => p.id);
+  const advertiserIds = Array.from(new Set(productList.map((p) => p.advertiser_id).filter(Boolean)));
 
-  const advertiserIds = Array.from(new Set(
-    Object.values(productsById).map((p) => p.advertiser_id).filter(Boolean)
-  ));
-  let advertisersById = {};
-  if (advertiserIds.length) {
-    const { data: advs } = await client
-      .from("advertisers")
-      .select("id, email, company_name, display_name")
-      .in("id", advertiserIds);
-    (advs || []).forEach((a) => { advertisersById[a.id] = a; });
-  }
+  const [{ data: plans }, { data: advs }] = await Promise.all([
+    productIds.length
+      ? client.from("pricing_plans")
+          .select("id, product_id, plan_name, description, price, original_price, currency, billing_period, features, original_price_proof_url, original_price_proof_notes, is_active, is_recommended, sort_order")
+          .in("product_id", productIds)
+          .order("sort_order", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    advertiserIds.length
+      ? client.from("advertisers")
+          .select("id, email, company_name, display_name")
+          .in("id", advertiserIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const plansByProduct = {};
+  (plans || []).forEach((pl) => {
+    if (!plansByProduct[pl.product_id]) plansByProduct[pl.product_id] = [];
+    plansByProduct[pl.product_id].push(pl);
+  });
+  const advById = {};
+  (advs || []).forEach((a) => { advById[a.id] = a; });
 
-  const items = rows.map((r) => {
-    const product = productsById[r.product_id] || null;
-    const advertiser = product && product.advertiser_id ? advertisersById[product.advertiser_id] || null : null;
-    const discountPct = (r.original_price && r.price && Number(r.original_price) > 0 && Number(r.price) < Number(r.original_price))
-      ? Math.round((1 - Number(r.price) / Number(r.original_price)) * 100)
-      : null;
+  // 3. Shape the response — everything an admin needs to render the
+  //    review card in one screen, with no extra requests.
+  const items = productList.map((p) => {
+    const productPlans = plansByProduct[p.id] || [];
+    const advertiser   = p.advertiser_id ? advById[p.advertiser_id] || null : null;
+
     return {
-      id:                          r.id,
-      product_id:                  r.product_id,
-      plan_name:                   r.plan_name,
-      description:                 r.description,
-      price:                       r.price,
-      original_price:              r.original_price,
-      currency:                    r.currency,
-      billing_period:              r.billing_period,
-      discount_pct:                discountPct,
-      original_price_proof_url:    r.original_price_proof_url,
-      original_price_proof_notes:  r.original_price_proof_notes,
-      audit_status:                r.audit_status,
-      audit_review_notes:          r.audit_review_notes,
-      audit_reviewed_at:           r.audit_reviewed_at,
-      audit_reviewer_id:           r.audit_reviewer_id,
-      features:                    Array.isArray(r.features) ? r.features : [],
-      is_active:                   r.is_active,
-      is_recommended:              r.is_recommended,
-      created_at:                  r.created_at,
-      product: product ? {
-        id:                       product.id,
-        name:                     product.name,
-        image_url:                product.image_url,
-        status:                   product.status,
-        default_url:              product.default_url,
-        external_marketing_url:   product.external_marketing_url,
-        affiliate_pool_pct:       product.affiliate_pool_pct,
-      } : null,
+      id:                   p.id,
+      name:                 p.name,
+      description:          p.description,
+      image_url:            p.image_url,
+      default_url:          p.default_url,
+      external_marketing_url: p.external_marketing_url,
+      status:               p.status,
+      currency:             p.currency,
+      affiliate_pool_pct:   p.affiliate_pool_pct,
+
+      // Marketing content (the buyer-facing page)
+      tldr_bullets:         Array.isArray(p.tldr_bullets) ? p.tldr_bullets : [],
+      alternative_to:       Array.isArray(p.alternative_to) ? p.alternative_to : [],
+      integrations:         Array.isArray(p.integrations) ? p.integrations : [],
+      best_for:             Array.isArray(p.best_for) ? p.best_for : [],
+      deal_terms:           Array.isArray(p.deal_terms) ? p.deal_terms : [],
+      long_description:     p.long_description,
+      refund_window_days:   p.refund_window_days,
+      guarantee_label:      p.guarantee_label,
+
+      // Company/founder card
+      company_logo_url:     p.company_logo_url,
+      company_website_url:  p.company_website_url,
+      company_tagline:      p.company_tagline,
+      company_about:        p.company_about,
+      company_founded_date: p.company_founded_date,
+      company_city:         p.company_city,
+      company_country_code: p.company_country_code,
+      company_size:         p.company_size,
+      company_growth_stage: p.company_growth_stage,
+      company_funding_status: p.company_funding_status,
+      founder_name:         p.founder_name,
+      founder_role:         p.founder_role,
+      founder_photo_url:    p.founder_photo_url,
+      founder_linkedin_url: p.founder_linkedin_url,
+
+      // Audit
+      audit_status:         p.audit_status,
+      audit_review_notes:   p.audit_review_notes,
+      audit_reviewed_at:    p.audit_reviewed_at,
+      audit_reviewer_id:    p.audit_reviewer_id,
+      created_at:           p.created_at,
+      updated_at:           p.updated_at,
+
+      // Pricing tiers — what the admin needs to verify
+      plans: productPlans.map((pl) => {
+        const discount = (pl.original_price && pl.price && Number(pl.original_price) > 0 && Number(pl.price) < Number(pl.original_price))
+          ? Math.round((1 - Number(pl.price) / Number(pl.original_price)) * 100)
+          : null;
+        return {
+          id:                          pl.id,
+          plan_name:                   pl.plan_name,
+          description:                 pl.description,
+          price:                       pl.price,
+          original_price:              pl.original_price,
+          discount_pct:                discount,
+          currency:                    pl.currency,
+          billing_period:              pl.billing_period,
+          features:                    Array.isArray(pl.features) ? pl.features : [],
+          original_price_proof_url:    pl.original_price_proof_url,
+          original_price_proof_notes:  pl.original_price_proof_notes,
+          is_active:                   pl.is_active,
+          is_recommended:              pl.is_recommended,
+        };
+      }),
+
+      // Seller info
       advertiser: advertiser ? {
         id:           advertiser.id,
         email:        advertiser.email,
         company_name: advertiser.company_name,
         display_name: advertiser.display_name,
       } : null,
+      live_page_url: `/p/${p.id}`,
     };
   });
 
@@ -173,7 +203,7 @@ async function handleSummary(req, res) {
   if (!client) return res.status(500).json({ error: "Supabase not configured" });
 
   const { data: rows, error } = await client
-    .from("pricing_plans")
+    .from("products")
     .select("audit_status");
   if (error) return res.status(500).json({ error: error.message });
 
@@ -183,56 +213,59 @@ async function handleSummary(req, res) {
     if (counts.hasOwnProperty(r.audit_status)) counts[r.audit_status] += 1;
     if (r.audit_status === "pending" || r.audit_status === "changes_requested") counts.queue += 1;
   });
-
   return res.json({ counts });
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Shared decision helper — used by approve/reject/request_changes
+// Shared decision helper
 // ──────────────────────────────────────────────────────────────────────
 async function applyDecision(req, res, newStatus, { requireNotes }) {
   const client = sb();
   if (!client) return res.status(500).json({ error: "Supabase not configured" });
 
   const body = req.body || {};
-  const planId = body.plan_id;
-  const notes  = (body.notes || "").toString().trim();
+  // Accept either product_id (new) or plan_id (legacy; resolve to its product)
+  let productId = body.product_id;
+  const planId  = body.plan_id;
+  const notes   = (body.notes || "").toString().trim();
 
-  if (!planId || !/^[0-9a-f-]{36}$/i.test(planId)) {
-    return res.status(400).json({ error: "plan_id is required" });
+  if (!productId && planId) {
+    if (!/^[0-9a-f-]{36}$/i.test(planId)) {
+      return res.status(400).json({ error: "plan_id (legacy) must be a UUID" });
+    }
+    const { data: plan } = await client
+      .from("pricing_plans").select("product_id").eq("id", planId).maybeSingle();
+    if (plan) productId = plan.product_id;
+  }
+  if (!productId || !/^[0-9a-f-]{36}$/i.test(productId)) {
+    return res.status(400).json({ error: "product_id is required" });
   }
   if (requireNotes && !notes) {
     return res.status(400).json({ error: "notes is required when rejecting or requesting changes" });
   }
 
-  const { data: plan } = await client
-    .from("pricing_plans")
-    .select("id, audit_status, audit_reviewer_id")
-    .eq("id", planId)
-    .maybeSingle();
-  if (!plan) return res.status(404).json({ error: "Plan not found" });
+  const { data: product } = await client
+    .from("products").select("id, audit_status").eq("id", productId).maybeSingle();
+  if (!product) return res.status(404).json({ error: "Product not found" });
 
   const updates = {
     audit_status:        newStatus,
     audit_reviewed_at:   new Date().toISOString(),
     audit_review_notes:  notes || null,
   };
-  // Reviewer id — we don't have a user id under the static-key flow,
-  // so stamp a placeholder if env says so. Future: when admins have
-  // individual accounts, derive from JWT.
   if (process.env.ADMIN_DEFAULT_REVIEWER_ID) {
     updates.audit_reviewer_id = process.env.ADMIN_DEFAULT_REVIEWER_ID;
   }
 
   const { data: updated, error: upErr } = await client
-    .from("pricing_plans")
+    .from("products")
     .update(updates)
-    .eq("id", planId)
-    .select("id, audit_status, audit_reviewed_at, audit_review_notes")
+    .eq("id", productId)
+    .select("id, audit_status, audit_reviewed_at, audit_review_notes, name")
     .maybeSingle();
   if (upErr) return res.status(500).json({ error: upErr.message });
 
-  return res.json({ success: true, plan: updated, prior_status: plan.audit_status });
+  return res.json({ success: true, product: updated, prior_status: product.audit_status });
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -244,7 +277,6 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  // Admin gate
   if (!requireAdmin(req)) {
     return res.status(401).json({ error: "Admin authentication required" });
   }

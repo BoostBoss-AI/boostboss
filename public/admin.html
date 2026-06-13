@@ -2339,51 +2339,128 @@ function renderAuditList(items) {
       <div class="empty-state" style="padding:64px 16px;text-align:center;color:var(--muted);">
         <div style="font-size:36px;margin-bottom:12px;">🎉</div>
         <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Queue is empty</div>
-        <div style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.55;">No pricing plans waiting for review. New seller submissions land here automatically.</div>
+        <div style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.55;">No product pages waiting for review. New seller submissions land here automatically.</div>
       </div>`;
     return;
   }
   listEl.innerHTML = items.map((a) => {
-    const sellerName = (a.advertiser && (a.advertiser.company_name || a.advertiser.display_name || a.advertiser.email)) || "—";
+    const sellerName  = (a.advertiser && (a.advertiser.company_name || a.advertiser.display_name || a.advertiser.email)) || "—";
     const sellerEmail = (a.advertiser && a.advertiser.email) || "";
-    const productName = (a.product && a.product.name) || "—";
-    const proofHtml = a.original_price_proof_url
-      ? `<a href="${escHtml(a.original_price_proof_url)}" target="_blank" rel="noopener" style="color:var(--pink);text-decoration:none;font-size:12px;">${escHtml(a.original_price_proof_url.length > 80 ? a.original_price_proof_url.slice(0, 80) + "…" : a.original_price_proof_url)} ↗</a>`
-      : `<span style="color:var(--pink);font-size:12px;">⚠ No proof URL attached</span>`;
-    const proofNotes = a.original_price_proof_notes ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;">"${escHtml(a.original_price_proof_notes)}"</div>` : "";
+    const isQueue     = (a.audit_status === "pending" || a.audit_status === "changes_requested");
     const reviewNotes = a.audit_review_notes ? `<div style="font-size:12px;background:var(--bg-soft);border-left:3px solid var(--orange);padding:8px 10px;margin-top:8px;border-radius:0 6px 6px 0;color:var(--text);"><strong>Prior reviewer notes:</strong> ${escHtml(a.audit_review_notes)}</div>` : "";
-    const isQueue = (a.audit_status === "pending" || a.audit_status === "changes_requested");
-    const discount = a.discount_pct ? `<span style="background:#FEE2E2;color:#B91C1C;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;">-${a.discount_pct}%</span>` : "";
+
+    // Plans table — each tier on its own row with proof URL
+    const plansHtml = (a.plans || []).map((pl) => {
+      const dpct = pl.discount_pct ? `<span style="background:#FEE2E2;color:#B91C1C;padding:1px 7px;border-radius:8px;font-size:10.5px;font-weight:700;">-${pl.discount_pct}%</span>` : "";
+      const proof = pl.original_price_proof_url
+        ? `<a href="${escHtml(pl.original_price_proof_url)}" target="_blank" rel="noopener" style="color:var(--pink);font-size:11.5px;text-decoration:none;">${escHtml(pl.original_price_proof_url.length > 70 ? pl.original_price_proof_url.slice(0,70) + "…" : pl.original_price_proof_url)} ↗</a>`
+        : `<span style="color:var(--pink);font-size:11.5px;">⚠ No proof URL</span>`;
+      const proofNotes = pl.original_price_proof_notes ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic;">"${escHtml(pl.original_price_proof_notes)}"</div>` : "";
+      return `
+        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:220px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:700;color:var(--text);">${escHtml(pl.plan_name)}</span>
+                ${pl.is_recommended ? '<span style="background:var(--pink);color:#fff;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;letter-spacing:0.04em;">★ Recommended</span>' : ""}
+                ${!pl.is_active ? '<span style="background:var(--bg-soft);color:var(--muted);padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;letter-spacing:0.04em;">Inactive</span>' : ""}
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:16px;font-weight:700;color:var(--text);">${escHtml(fmtUsd(pl.price))}</span>
+                ${pl.original_price ? `<span style="font-size:12px;color:var(--muted);text-decoration:line-through;">${escHtml(fmtUsd(pl.original_price))}</span>` : ""}
+                ${dpct}
+                <span style="font-size:10.5px;color:var(--muted);">${escHtml(pl.billing_period || "one_time")}</span>
+              </div>
+              ${pl.description ? `<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">${escHtml(pl.description)}</div>` : ""}
+            </div>
+            <div style="text-align:right;min-width:200px;">${proof}${proofNotes}</div>
+          </div>
+        </div>`;
+    }).join("") || `<div style="font-size:12px;color:var(--pink);padding:8px;">⚠ No pricing plans attached</div>`;
+
+    // Marketing content surface — TL;DR, at-a-glance, founder card, etc.
+    const tagOr = (xs, color) => (xs && xs.length) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">${xs.map((s) => `<span style="font-size:11px;background:${color};color:var(--text);padding:2px 8px;border-radius:8px;">${escHtml(s)}</span>`).join("")}</div>` : `<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:4px;">—</div>`;
+    const marketingHtml = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px;">
+        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">TL;DR</div>
+          ${a.tldr_bullets.length ? `<ul style="margin:0;padding-left:18px;font-size:11.5px;color:var(--text);">${a.tldr_bullets.map((b) => `<li>${escHtml(b)}</li>`).join("")}</ul>` : `<div style="font-size:11px;color:var(--muted);font-style:italic;">—</div>`}
+        </div>
+        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Alternative to</div>
+          ${tagOr(a.alternative_to, "var(--bg-soft)")}
+        </div>
+        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Integrations</div>
+          ${tagOr(a.integrations, "var(--bg-soft)")}
+        </div>
+        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Best for</div>
+          ${tagOr(a.best_for, "var(--bg-soft)")}
+        </div>
+      </div>`;
+
+    const founderHtml = (a.founder_name || a.company_tagline || a.company_about) ? `
+      <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+        <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">Company &amp; founder</div>
+        ${a.company_tagline ? `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">${escHtml(a.company_tagline)}</div>` : ""}
+        ${a.company_about ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">${escHtml(a.company_about)}</div>` : ""}
+        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--text);">
+          ${a.founder_name ? `<div>👤 ${escHtml(a.founder_name)}${a.founder_role ? ` · ${escHtml(a.founder_role)}` : ""}</div>` : ""}
+          ${a.founder_linkedin_url ? `<a href="${escHtml(a.founder_linkedin_url)}" target="_blank" rel="noopener" style="color:var(--pink);text-decoration:none;">LinkedIn ↗</a>` : ""}
+          ${a.company_website_url ? `<a href="${escHtml(a.company_website_url)}" target="_blank" rel="noopener" style="color:var(--pink);text-decoration:none;">Website ↗</a>` : ""}
+          ${a.company_city ? `<div>📍 ${escHtml(a.company_city)}${a.company_country_code ? `, ${escHtml(a.company_country_code)}` : ""}</div>` : ""}
+          ${a.company_size ? `<div>👥 ${escHtml(a.company_size)}</div>` : ""}
+          ${a.company_growth_stage ? `<div>📈 ${escHtml(a.company_growth_stage)}</div>` : ""}
+          ${a.company_funding_status ? `<div>💰 ${escHtml(a.company_funding_status)}</div>` : ""}
+        </div>
+      </div>` : "";
+
+    const dealTermsHtml = (a.deal_terms && a.deal_terms.length) ? `
+      <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
+        <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">Deal terms</div>
+        <ul style="margin:0;padding-left:18px;font-size:11.5px;color:var(--text);">${a.deal_terms.map((t) => `<li>${escHtml(t)}</li>`).join("")}</ul>
+      </div>` : "";
+
+    const trustHtml = (a.refund_window_days != null || a.guarantee_label) ? `
+      <div style="margin-top:8px;font-size:11.5px;color:var(--muted);">
+        ${a.refund_window_days != null ? `🛡 Refundable up to ${a.refund_window_days} days` : ""}
+        ${a.guarantee_label ? ` · ${escHtml(a.guarantee_label)}` : ""}
+      </div>` : "";
+
     return `
       <div data-audit-id="${escHtml(a.id)}" class="audit-card" style="background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px;">
+        <!-- Header: product identity + audit status + seller -->
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
-          <div style="flex:1;min-width:260px;">
+          <div style="flex:1;min-width:280px;">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
-              <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">${escHtml(productName)}</div>
+              ${a.image_url ? `<img src="${escHtml(a.image_url)}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--bg);" onerror="this.style.display='none'">` : ""}
+              <div>
+                <div style="font-size:17px;font-weight:700;color:var(--text);">${escHtml(a.name)}</div>
+                ${a.description ? `<div style="font-size:12px;color:var(--muted);">${escHtml(a.description)}</div>` : ""}
+              </div>
               ${auditBadge(a.audit_status)}
             </div>
-            <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px;">${escHtml(a.plan_name)}</div>
-            ${a.description ? `<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">${escHtml(a.description)}</div>` : ""}
-            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
-              <span style="font-size:22px;font-weight:700;color:var(--text);">${escHtml(fmtUsd(a.price))}</span>
-              ${a.original_price ? `<span style="font-size:13px;color:var(--muted);text-decoration:line-through;">${escHtml(fmtUsd(a.original_price))}</span>` : ""}
-              ${discount}
-              <span style="font-size:11px;color:var(--muted);">${escHtml(a.billing_period || "one_time")} · ${escHtml(a.currency || "USD")}</span>
-            </div>
+            ${trustHtml}
+            <a href="${escHtml(a.live_page_url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:11.5px;color:var(--pink);text-decoration:none;">↗ Open live page</a>
           </div>
           <div style="text-align:right;min-width:200px;">
             <div style="font-size:12px;font-weight:600;color:var(--text);">${escHtml(sellerName)}</div>
             ${sellerEmail && sellerEmail !== sellerName ? `<div style="font-size:11px;color:var(--muted);">${escHtml(sellerEmail)}</div>` : ""}
-            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Submitted ${new Date(a.created_at).toLocaleString()}</div>
-            ${a.audit_reviewed_at ? `<div style="font-size:11px;color:var(--muted);">Reviewed ${new Date(a.audit_reviewed_at).toLocaleString()}</div>` : ""}
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Created ${new Date(a.created_at).toLocaleString()}</div>
+            ${a.audit_reviewed_at ? `<div style="font-size:11px;color:var(--muted);">Last reviewed ${new Date(a.audit_reviewed_at).toLocaleString()}</div>` : ""}
           </div>
         </div>
 
-        <div style="margin:14px 0;padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--line);">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">Proof of original price</div>
-          ${proofHtml}
-          ${proofNotes}
-        </div>
+        <!-- Pricing tiers section -->
+        <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;">Pricing tiers (${(a.plans || []).length}) — verify each proof URL matches the price</div>
+        ${plansHtml}
+
+        <!-- Marketing content -->
+        ${marketingHtml}
+        ${founderHtml}
+        ${dealTermsHtml}
+
         ${reviewNotes}
 
         ${isQueue ? `
@@ -2391,7 +2468,7 @@ function renderAuditList(items) {
             <textarea data-notes-input rows="2" placeholder="Notes to the seller (required when rejecting or requesting changes)…" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;resize:vertical;"></textarea>
           </div>
           <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-            <button class="btn-sm btn-action" data-action="approve" data-audit-id="${escHtml(a.id)}" style="background:#059669;color:#fff;border-color:#059669;">✓ Approve</button>
+            <button class="btn-sm btn-action" data-action="approve" data-audit-id="${escHtml(a.id)}" style="background:#059669;color:#fff;border-color:#059669;">✓ Approve product</button>
             <button class="btn-sm btn-action" data-action="request_changes" data-audit-id="${escHtml(a.id)}" style="background:#F59E0B;color:#fff;border-color:#F59E0B;">✎ Request changes</button>
             <button class="btn-sm btn-action" data-action="reject" data-audit-id="${escHtml(a.id)}" style="background:#DC2626;color:#fff;border-color:#DC2626;">✕ Reject</button>
           </div>
@@ -2399,7 +2476,7 @@ function renderAuditList(items) {
       </div>`;
   }).join("");
 
-  // Delegated handler — single per-render listener avoids accumulation
+  // Delegated handler
   listEl.onclick = async (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;
@@ -2410,11 +2487,9 @@ function renderAuditList(items) {
     const notesInput = card.querySelector("[data-notes-input]");
     const needsNotes = action === "reject" || action === "request_changes";
 
-    // Reveal notes textarea on first click if hidden and required
     if (needsNotes && notesRow.style.display === "none") {
       notesRow.style.display = "block";
       notesInput.focus();
-      btn.dataset.confirmed = "1";
       return;
     }
     const notes = (notesInput && notesInput.value || "").trim();
@@ -2423,22 +2498,22 @@ function renderAuditList(items) {
       notesInput.focus();
       return;
     }
-    if (!confirm(`${action.replace(/_/g, " ")} this plan?`)) return;
+    if (!confirm(`${action.replace(/_/g, " ")} this product page?`)) return;
     btn.disabled = true;
     btn.textContent = "Submitting…";
     try {
       const r = await adminFetch("/api/admin-audits?action=" + action, {
         method: "POST",
-        body: JSON.stringify({ plan_id: id, notes }),
+        body: JSON.stringify({ product_id: id, notes }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
-      toast(`Plan ${action.replace(/_/g, " ")}d`, "success");
+      toast(`Product ${action.replace(/_/g, " ")}d`, "success");
       await loadAuditsPanel();
     } catch (err) {
       toast("Failed: " + err.message, "error");
       btn.disabled = false;
-      btn.textContent = action === "approve" ? "✓ Approve" : action === "reject" ? "✕ Reject" : "✎ Request changes";
+      btn.textContent = action === "approve" ? "✓ Approve product" : action === "reject" ? "✕ Reject" : "✎ Request changes";
     }
   };
 }

@@ -711,8 +711,68 @@ module.exports = async function handler(req, res) {
       return res.json({ product: data });
     }
 
+    // ── SUBMIT FOR AUDIT (product-level) ───────────────────────────────
+    // Seller signals "I'm ready — review my whole product page."
+    // Resets audit_status to 'pending' (from any non-pending state),
+    // clears prior reviewer notes. Verifies at least one active plan
+    // exists with a price + proof URL so the reviewer has something to
+    // verify the discount against. See [[pricing-plans-audit-policy]].
+    if (req.method === "POST" && action === "submit_for_audit") {
+      const auth = await requireAdvertiser(req);
+      if (auth.error) return res.status(auth.status).json({ error: auth.error });
+
+      const id = body.id || req.query.id;
+      if (!id || !/^[0-9a-f-]{36}$/i.test(id)) {
+        return res.status(400).json({ error: "Product id is required" });
+      }
+
+      // Ownership + existence check
+      const { data: product, error: pErr } = await sb
+        .from("products")
+        .select("id, advertiser_id, audit_status, status, name")
+        .eq("id", id)
+        .maybeSingle();
+      if (pErr)     return res.status(500).json({ error: pErr.message });
+      if (!product) return res.status(404).json({ error: "Product not found" });
+      if (product.advertiser_id !== auth.advertiserId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      if (product.status !== "active") {
+        return res.status(400).json({ error: "Archived products can't be submitted for audit. Restore it first." });
+      }
+
+      // Eligibility: at least one active plan with price > 0 and a proof URL
+      const { data: plans } = await sb
+        .from("pricing_plans")
+        .select("id, price, original_price_proof_url, is_active")
+        .eq("product_id", id);
+      const plansArr = Array.isArray(plans) ? plans : [];
+      const eligible = plansArr.filter((p) => p.is_active && Number(p.price) > 0 && p.original_price_proof_url);
+      if (!eligible.length) {
+        return res.status(400).json({
+          error: "Add at least one active pricing plan with a proof URL before submitting for audit.",
+          code:  "no_eligible_plan",
+        });
+      }
+
+      const { data: updated, error: uErr } = await sb
+        .from("products")
+        .update({
+          audit_status:        "pending",
+          audit_reviewer_id:   null,
+          audit_reviewed_at:   null,
+          audit_review_notes:  null,
+        })
+        .eq("id", id)
+        .select("id, audit_status, audit_reviewed_at, name")
+        .maybeSingle();
+      if (uErr) return res.status(500).json({ error: uErr.message });
+
+      return res.json({ success: true, product: updated });
+    }
+
     return res.status(400).json({
-      error: "Unknown action. Use: (GET) list/get/browse, (POST) create/archive/restore, (PATCH) update",
+      error: "Unknown action. Use: (GET) list/get/browse, (POST) create/archive/restore/submit_for_audit, (PATCH) update",
     });
   } catch (err) {
     console.error("[products] handler error:", err);

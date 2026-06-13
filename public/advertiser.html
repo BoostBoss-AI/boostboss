@@ -4135,11 +4135,17 @@
                 </div>
               </div>
 
+              <!-- Audit status banner — hidden in CREATE mode, populated by JS in EDIT mode -->
+              <div id="productAuditBanner" style="display:none;margin-top:20px;padding:14px 18px;border-radius:10px;font-size:13px;line-height:1.55;">
+                <div id="productAuditBannerInner"></div>
+              </div>
+
               <div id="productFormErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;margin-top:14px;"></div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid #F3F4F6;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid #F3F4F6;flex-wrap:wrap;">
                 <div style="font-size:11.5px;color:#9CA3AF;">Tab fields marked optional can be filled later — save anytime.</div>
-                <div style="display:flex;gap:8px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
                   <button type="button" class="new-campaign-btn" id="productCancelBtn" style="background:#fff;color:#374151;border:1px solid #E5E7EB;">Cancel</button>
+                  <button type="button" id="productSubmitForAuditBtn" style="display:none;padding:9px 16px;border:1px solid #4338CA;border-radius:8px;background:#EEF2FF;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#4338CA;">Submit for audit</button>
                   <button type="submit" class="new-campaign-btn" id="productSubmitBtn">Save product</button>
                 </div>
               </div>
@@ -11748,8 +11754,11 @@
 
                     // Pricing & Affiliate
                     if (form.elements.affiliate_pool_pct) form.elements.affiliate_pool_pct.value = product.affiliate_pool_pct != null ? product.affiliate_pool_pct : (product.default_commission_pct != null ? product.default_commission_pct : 20);
+                    // Product-level audit banner
+                    paintAuditBanner(product);
                 } else {
                     if (form.elements.affiliate_pool_pct) form.elements.affiliate_pool_pct.value = 20;
+                    paintAuditBanner(null);
                 }
                 // Tee up the inline pricing-plans state for this product.
                 // For CREATE mode there's no product_id yet — the list shows
@@ -11759,6 +11768,78 @@
                 modal.classList.add('active');
                 setTimeout(() => form.elements.name.focus(), 50);
             }
+            // ── Product-level audit banner + Submit-for-audit button ──────
+            // Audit happens at the product level (see [[pricing-plans-audit-policy]]).
+            // The banner inside the modal reflects current audit_status; the
+            // Submit-for-audit button only shows in EDIT mode and only when the
+            // product isn't already pending.
+            function paintAuditBanner(product) {
+                const banner = document.getElementById('productAuditBanner');
+                const inner  = document.getElementById('productAuditBannerInner');
+                const submitBtn = document.getElementById('productSubmitForAuditBtn');
+                if (!banner || !inner || !submitBtn) return;
+                if (!product) {
+                    banner.style.display = 'none';
+                    submitBtn.style.display = 'none';
+                    return;
+                }
+                const status = product.audit_status || 'pending';
+                const styles = {
+                    pending:           { bg: '#FEF3C7', border: '#FCD34D', color: '#92400E', label: 'Pending audit', sub: 'Andy will review your product page (all tiers + content) and approve, reject, or request changes.' },
+                    approved:          { bg: '#ECFDF5', border: '#A7F3D0', color: '#065F46', label: 'Approved — live', sub: 'Buyers can purchase any active plan. Resubmit if you change pricing or marketing content.' },
+                    rejected:          { bg: '#FEF2F2', border: '#FECACA', color: '#991B1B', label: 'Rejected', sub: 'Address the reviewer notes below, then resubmit.' },
+                    changes_requested: { bg: '#FFF7ED', border: '#FDBA74', color: '#9A3412', label: 'Changes requested', sub: 'Fix the issues below and resubmit.' },
+                };
+                const s = styles[status] || styles.pending;
+                banner.style.background = s.bg;
+                banner.style.border     = '1px solid ' + s.border;
+                banner.style.color      = s.color;
+                inner.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:240px;">
+                            <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;opacity:0.85;">Audit status</div>
+                            <div style="font-size:15px;font-weight:700;margin-bottom:4px;">${escHtml(s.label)}</div>
+                            <div style="font-size:12.5px;opacity:0.9;line-height:1.55;">${escHtml(s.sub)}</div>
+                            ${product.audit_review_notes && (status === 'rejected' || status === 'changes_requested') ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.75);border-radius:6px;font-size:12.5px;"><strong>Reviewer notes:</strong> ${escHtml(product.audit_review_notes)}</div>` : ''}
+                        </div>
+                        ${product.audit_reviewed_at ? `<div style="font-size:11px;opacity:0.7;white-space:nowrap;">Last reviewed: ${escHtml(new Date(product.audit_reviewed_at).toLocaleString())}</div>` : ''}
+                    </div>`;
+                banner.style.display = 'block';
+                // Submit-for-audit only useful when NOT already pending
+                submitBtn.style.display = (status === 'pending') ? 'none' : 'inline-flex';
+                submitBtn.dataset.productId = product.id;
+            }
+
+            // Wire Submit-for-audit button (once)
+            (function () {
+                const submitBtn = document.getElementById('productSubmitForAuditBtn');
+                if (!submitBtn) return;
+                submitBtn.addEventListener('click', async () => {
+                    const id = submitBtn.dataset.productId;
+                    if (!id) return;
+                    if (!confirm('Submit this product page for audit?\n\nAndy will review your marketing content, pricing tiers, and proof URLs. Buyers can\'t purchase until approved.')) return;
+                    submitBtn.disabled = true;
+                    const orig = submitBtn.textContent;
+                    submitBtn.textContent = 'Submitting…';
+                    try {
+                        const r = await fetch('/api/products?action=submit_for_audit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                            body: JSON.stringify({ id }),
+                        });
+                        const j = await r.json();
+                        if (!r.ok) throw new Error(j.error || 'Submit failed');
+                        paintAuditBanner(j.product);
+                        await loadProducts();
+                    } catch (e) {
+                        alert(e.message);
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = orig;
+                    }
+                });
+            })();
+
             function closeModal() {
                 modal.classList.remove('active');
                 errBox.style.display = 'none';
@@ -12688,7 +12769,6 @@
                                         <span style="font-size:14px;font-weight:700;color:#111827;">${esc(p.plan_name)}</span>
                                         ${p.is_recommended ? '<span style="background:#FF2D78;color:#fff;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">★ Recommended</span>' : ''}
                                         ${!p.is_active ? '<span style="background:#F3F4F6;color:#6B7280;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Inactive</span>' : ''}
-                                        ${auditBadge(p.audit_status)}
                                     </div>
                                     <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:18px;font-weight:700;color:#111827;">${esc(fmtMoney(p.price, p.currency))}</span>
@@ -12696,12 +12776,10 @@
                                         ${dpct ? `<span style="font-size:10.5px;background:#FEE2E2;color:#B91C1C;padding:1px 7px;border-radius:8px;font-weight:700;">-${dpct}%</span>` : ''}
                                         <span style="font-size:10.5px;color:#9CA3AF;">${esc(p.billing_period || 'one_time')}</span>
                                     </div>
-                                    ${proofMissing ? '<div style="font-size:11px;color:#DC2626;margin-top:6px;">⚠ Missing proof URL — required before audit</div>' : ''}
-                                    ${p.audit_review_notes && (p.audit_status === 'rejected' || p.audit_status === 'changes_requested') ? `<div style="font-size:11px;color:#7F1D1D;background:#FEF2F2;border-left:3px solid #DC2626;padding:6px 9px;margin-top:6px;border-radius:0 4px 4px 0;">Reviewer: ${esc(p.audit_review_notes)}</div>` : ''}
+                                    ${proofMissing ? '<div style="font-size:11px;color:#DC2626;margin-top:6px;">⚠ Missing proof URL — required for audit</div>' : `<div style="font-size:11px;color:#6B7280;margin-top:6px;">Proof: <a href="${esc(p.original_price_proof_url)}" target="_blank" rel="noopener" style="color:#4338CA;text-decoration:none;">${esc(p.original_price_proof_url.length > 60 ? p.original_price_proof_url.slice(0,60) + '…' : p.original_price_proof_url)} ↗</a></div>`}
                                 </div>
                                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
                                     <button type="button" data-pp-action="edit" data-pp-id="${esc(p.id)}" style="padding:5px 10px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Edit</button>
-                                    ${p.audit_status !== 'approved' && p.original_price_proof_url ? `<button type="button" data-pp-action="submit" data-pp-id="${esc(p.id)}" style="padding:5px 10px;border:1px solid #4338CA;border-radius:6px;background:#EEF2FF;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#4338CA;">Submit for audit</button>` : ''}
                                     <button type="button" data-pp-action="delete" data-pp-id="${esc(p.id)}" style="padding:5px 10px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;">Delete</button>
                                 </div>
                             </div>
@@ -12832,7 +12910,6 @@
                     const plan = _plansCache.find((p) => p.id === id);
                     if (action === 'edit')   return openEditor('edit', plan);
                     if (action === 'delete') return deletePlan(id);
-                    if (action === 'submit') return submitForAudit(id);
                 });
             });
         })();

@@ -203,22 +203,29 @@ async function handleCreateOrder(req, res) {
     return res.status(400).json({ error: "buyer_email is required and must be a valid email" });
   }
 
-  // Resolve product (must be active)
+  // Resolve product (must be active + audit-approved at the PRODUCT level)
+  // See [[pricing-plans-audit-policy]] — audit_status lives on products now.
   const { data: product, error: prodErr } = await client
     .from("products")
-    .select("id, advertiser_id, name, currency, status, affiliate_pool_pct, default_commission_pct")
+    .select("id, advertiser_id, name, currency, status, audit_status, affiliate_pool_pct, default_commission_pct")
     .eq("id", productId)
     .maybeSingle();
   if (prodErr) return res.status(500).json({ error: prodErr.message });
   if (!product || product.status !== "active") {
     return res.status(404).json({ error: "Product not found or unavailable" });
   }
+  if (product.audit_status !== "approved") {
+    return res.status(403).json({
+      error: "This product is awaiting audit and isn't yet purchasable.",
+      code:  "product_pending_audit",
+    });
+  }
 
   // ── Resolve the pricing plan ──────────────────────────────────────
-  // If the caller passed plan_id, verify it belongs to this product and
-  // is purchasable. Otherwise pick the lowest sort_order approved+active
-  // plan as the default (the migration sets sort_order=0 on the backfilled
-  // legacy plans, so single-plan products work without any client change).
+  // Plans are children of an approved product. They no longer carry
+  // their own audit_status — they just need to be active and belong to
+  // the product. If the caller passed plan_id, validate ownership;
+  // otherwise pick the lowest sort_order active plan as the default.
   let plan = null;
   if (planIdArg) {
     if (!/^[0-9a-f-]{36}$/i.test(planIdArg)) {
@@ -226,7 +233,7 @@ async function handleCreateOrder(req, res) {
     }
     const { data: planRow } = await client
       .from("pricing_plans")
-      .select("id, product_id, plan_name, price, currency, billing_period, audit_status, is_active")
+      .select("id, product_id, plan_name, price, currency, billing_period, is_active")
       .eq("id", planIdArg)
       .maybeSingle();
     if (!planRow || planRow.product_id !== product.id) {
@@ -236,9 +243,8 @@ async function handleCreateOrder(req, res) {
   } else {
     const { data: planRow } = await client
       .from("pricing_plans")
-      .select("id, product_id, plan_name, price, currency, billing_period, audit_status, is_active")
+      .select("id, product_id, plan_name, price, currency, billing_period, is_active")
       .eq("product_id", product.id)
-      .eq("audit_status", "approved")
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true })
@@ -249,14 +255,8 @@ async function handleCreateOrder(req, res) {
 
   if (!plan) {
     return res.status(400).json({
-      error: "This product has no approved pricing plans available for purchase.",
+      error: "This product has no active pricing plans available for purchase.",
       code:  "no_plan_available",
-    });
-  }
-  if (plan.audit_status !== "approved") {
-    return res.status(403).json({
-      error: "This plan is awaiting price audit and is not yet purchasable.",
-      code:  "plan_pending_audit",
     });
   }
   if (!plan.is_active) {
