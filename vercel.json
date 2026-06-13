@@ -30,6 +30,8 @@
     { "source": "/buy/:token", "destination": "/checkout.html?id=:token" },
     { "source": "/buy/:token/success", "destination": "/checkout-success.html?id=:token" },
     { "source": "/buy/:token/cancelled", "destination": "/checkout-cancelled.html?id=:token" },
+    { "source": "/v1/vouchers/validate", "destination": "/api/vouchers?action=validate" },
+    { "source": "/v1/vouchers/redeem",   "destination": "/api/vouchers?action=redeem" },
     { "source": "/api/conversions/postback", "destination": "/api/conversions?action=postback" },
     { "source": "/v1/conversion", "destination": "/api/conversions?action=postback" },
     { "source": "/en", "destination": "/index.html" },
