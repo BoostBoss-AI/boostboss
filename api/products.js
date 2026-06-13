@@ -110,9 +110,22 @@ async function requireAffiliate(req) {
   return { user, affiliateId: user.id };
 }
 
+// Allowlist of SKU types — must match the products_sku_type_check
+// constraint in MIGRATION-mor-storefront.sql.
+const SKU_TYPES = new Set(["one_time", "bundle", "lifetime", "subscription_pack"]);
+
 // Normalize + validate a product row from the request body. Returns
 // either { row } (the cleaned row ready for insert/update) or { error }
 // (a validation error to return as 400).
+//
+// Fields fall into three groups (see [[mor-product-page-model]]):
+//   Basics       name, description, image_url, default_url, default_commission_pct
+//                + price, currency, sku_type
+//   Storefront   long_description, screenshots[], demo_video_url,
+//                package_details[], faq[], testimonials[], external_marketing_url
+//   Fulfillment  fulfillment_redirect_url, fulfillment_webhook_url,
+//                fulfillment_webhook_secret, redemption_window_days,
+//                package_duration_days
 function normalizeProduct(body, { partial = false } = {}) {
   if (!body || typeof body !== "object") return { error: "Missing body" };
 
@@ -124,6 +137,7 @@ function normalizeProduct(body, { partial = false } = {}) {
 
   const row = {};
 
+  // ── Basics ───────────────────────────────────────────────────────────
   if (body.name !== undefined)
     row.name = String(body.name).trim().slice(0, 240);
   if (body.description !== undefined)
@@ -139,7 +153,131 @@ function normalizeProduct(body, { partial = false } = {}) {
     const pct = Number(body.default_commission_pct);
     if (!Number.isFinite(pct)) return { error: "default_commission_pct must be a number" };
     if (pct < 0 || pct > 100) return { error: "default_commission_pct must be between 0 and 100" };
-    row.default_commission_pct = Math.round(pct * 100) / 100;  // 2 decimal places
+    row.default_commission_pct = Math.round(pct * 100) / 100;
+  }
+  if (body.price !== undefined) {
+    if (body.price === null || body.price === "") {
+      row.price = null;
+    } else {
+      const price = Number(body.price);
+      if (!Number.isFinite(price)) return { error: "price must be a number" };
+      if (price < 0 || price > 100000) return { error: "price must be between 0 and 100000" };
+      row.price = Math.round(price * 100) / 100;
+    }
+  }
+  if (body.currency !== undefined) {
+    const c = String(body.currency || "USD").toUpperCase().slice(0, 8);
+    if (!/^[A-Z]{3,8}$/.test(c)) return { error: "currency must be a 3-letter ISO code (USD, EUR, etc.)" };
+    row.currency = c;
+  }
+  if (body.sku_type !== undefined) {
+    if (!SKU_TYPES.has(body.sku_type)) {
+      return { error: `sku_type must be one of: ${Array.from(SKU_TYPES).join(", ")}` };
+    }
+    row.sku_type = body.sku_type;
+  }
+
+  // ── Storefront (rich product page content) ──────────────────────────
+  if (body.long_description !== undefined)
+    row.long_description = body.long_description == null
+      ? null : String(body.long_description).slice(0, 20000);
+  if (body.demo_video_url !== undefined) {
+    if (body.demo_video_url == null || body.demo_video_url === "") {
+      row.demo_video_url = null;
+    } else {
+      const u = String(body.demo_video_url).trim();
+      if (!/^https?:\/\//i.test(u)) return { error: "demo_video_url must be a valid URL" };
+      row.demo_video_url = u.slice(0, 2000);
+    }
+  }
+  if (body.external_marketing_url !== undefined) {
+    if (body.external_marketing_url == null || body.external_marketing_url === "") {
+      row.external_marketing_url = null;
+    } else {
+      const u = String(body.external_marketing_url).trim();
+      if (!/^https?:\/\//i.test(u)) return { error: "external_marketing_url must be a valid URL" };
+      row.external_marketing_url = u.slice(0, 2000);
+    }
+  }
+  // JSONB arrays — validate shape, cap size, sanitize each entry
+  if (body.screenshots !== undefined) {
+    if (!Array.isArray(body.screenshots)) return { error: "screenshots must be an array of URLs" };
+    if (body.screenshots.length > 10) return { error: "screenshots: max 10 images" };
+    const shots = [];
+    for (const s of body.screenshots) {
+      const u = String(s || "").trim();
+      if (!u) continue;
+      if (!/^https?:\/\//i.test(u)) return { error: "each screenshot must be a valid URL" };
+      shots.push(u.slice(0, 2000));
+    }
+    row.screenshots = shots;
+  }
+  if (body.package_details !== undefined) {
+    if (!Array.isArray(body.package_details)) return { error: "package_details must be an array" };
+    if (body.package_details.length > 30) return { error: "package_details: max 30 items" };
+    row.package_details = body.package_details.map((item) => ({
+      label:    String((item && item.label) || "").slice(0, 240),
+      included: item && item.included === false ? false : true,
+    })).filter((x) => x.label);
+  }
+  if (body.faq !== undefined) {
+    if (!Array.isArray(body.faq)) return { error: "faq must be an array of {q, a}" };
+    if (body.faq.length > 30) return { error: "faq: max 30 items" };
+    row.faq = body.faq.map((item) => ({
+      q: String((item && item.q) || "").slice(0, 500),
+      a: String((item && item.a) || "").slice(0, 5000),
+    })).filter((x) => x.q && x.a);
+  }
+  if (body.testimonials !== undefined) {
+    if (!Array.isArray(body.testimonials)) return { error: "testimonials must be an array" };
+    if (body.testimonials.length > 20) return { error: "testimonials: max 20 items" };
+    row.testimonials = body.testimonials.map((item) => ({
+      author: String((item && item.author) || "").slice(0, 120),
+      role:   String((item && item.role)   || "").slice(0, 120),
+      body:   String((item && item.body)   || "").slice(0, 2000),
+    })).filter((x) => x.body);
+  }
+
+  // ── Fulfillment ─────────────────────────────────────────────────────
+  if (body.fulfillment_redirect_url !== undefined) {
+    if (body.fulfillment_redirect_url == null || body.fulfillment_redirect_url === "") {
+      row.fulfillment_redirect_url = null;
+    } else {
+      const u = String(body.fulfillment_redirect_url).trim();
+      if (!/^https?:\/\//i.test(u)) return { error: "fulfillment_redirect_url must be a valid URL" };
+      row.fulfillment_redirect_url = u.slice(0, 2000);
+    }
+  }
+  if (body.fulfillment_webhook_url !== undefined) {
+    if (body.fulfillment_webhook_url == null || body.fulfillment_webhook_url === "") {
+      row.fulfillment_webhook_url = null;
+    } else {
+      const u = String(body.fulfillment_webhook_url).trim();
+      if (!/^https?:\/\//i.test(u)) return { error: "fulfillment_webhook_url must be a valid URL" };
+      row.fulfillment_webhook_url = u.slice(0, 2000);
+    }
+  }
+  if (body.fulfillment_webhook_secret !== undefined) {
+    row.fulfillment_webhook_secret = body.fulfillment_webhook_secret == null
+      ? null : String(body.fulfillment_webhook_secret).slice(0, 240);
+  }
+  if (body.redemption_window_days !== undefined) {
+    const n = parseInt(body.redemption_window_days, 10);
+    if (!Number.isFinite(n) || n < 1 || n > 3650) {
+      return { error: "redemption_window_days must be between 1 and 3650 (10 years)" };
+    }
+    row.redemption_window_days = n;
+  }
+  if (body.package_duration_days !== undefined) {
+    if (body.package_duration_days == null || body.package_duration_days === "") {
+      row.package_duration_days = null;
+    } else {
+      const n = parseInt(body.package_duration_days, 10);
+      if (!Number.isFinite(n) || n < 1 || n > 3650) {
+        return { error: "package_duration_days must be between 1 and 3650 (10 years)" };
+      }
+      row.package_duration_days = n;
+    }
   }
 
   return { row };

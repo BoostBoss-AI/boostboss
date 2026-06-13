@@ -1,9 +1,33 @@
 -- ════════════════════════════════════════════════════════════════════════
--- Boost Boss — MoR Storefront migration
+-- Boost Boss — MoR Storefront migration (v2 — renamed to avoid collision
+-- with the existing billing `transactions` table)
 -- ════════════════════════════════════════════════════════════════════════
 --
 -- Run in: Supabase Dashboard → SQL Editor → New query → Paste → Run.
 -- Safe to re-run (uses IF NOT EXISTS / DROP CONSTRAINT IF EXISTS).
+--
+-- IMPORTANT — RECOVERY NOTE
+-- -------------------------
+-- v1 of this migration tried to attach a CHECK constraint to the existing
+-- `public.transactions` table (which is BB's billing/Stripe deposits table).
+-- That ALTER failed at the CHECK step, but a preceding
+--   ALTER TABLE public.transactions DROP CONSTRAINT IF EXISTS transactions_status_check
+-- already succeeded. So your billing `transactions` table is currently
+-- missing its original status CHECK.
+--
+-- Before running this v2 migration, restore that constraint by FIRST
+-- inspecting what statuses currently exist:
+--
+--   SELECT status, COUNT(*) FROM public.transactions GROUP BY status;
+--
+-- Then re-add a CHECK matching those values, e.g.:
+--
+--   ALTER TABLE public.transactions
+--     ADD CONSTRAINT transactions_status_check
+--     CHECK (status IN ('pending','succeeded','failed','refunded'));
+--
+-- (Substitute the actual status values you see.)
+-- ════════════════════════════════════════════════════════════════════════
 --
 -- WHAT THIS DOES
 -- --------------
@@ -122,7 +146,7 @@ COMMENT ON COLUMN public.products.fulfillment_redirect_url IS
 -- denormalized from bb_click at insert time so the row stays valid even
 -- if upstream tables change.
 
-CREATE TABLE IF NOT EXISTS public.transactions (
+CREATE TABLE IF NOT EXISTS public.storefront_transactions (
   id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Product + seller side
@@ -169,42 +193,42 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   updated_at               TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.transactions
-  DROP CONSTRAINT IF EXISTS transactions_status_check;
-ALTER TABLE public.transactions
-  ADD CONSTRAINT transactions_status_check
+ALTER TABLE public.storefront_transactions
+  DROP CONSTRAINT IF EXISTS storefront_transactions_status_check;
+ALTER TABLE public.storefront_transactions
+  ADD CONSTRAINT storefront_transactions_status_check
   CHECK (status IN ('pending', 'captured', 'refunded', 'settled', 'failed', 'cancelled'));
 
 -- Lookup by PayPal order id when webhook fires
-CREATE UNIQUE INDEX IF NOT EXISTS transactions_paypal_order_idx
-  ON public.transactions (paypal_order_id)
+CREATE UNIQUE INDEX IF NOT EXISTS storefront_transactions_paypal_order_idx
+  ON public.storefront_transactions (paypal_order_id)
   WHERE paypal_order_id IS NOT NULL;
 
 -- Per-affiliate purchase history (affiliate's Sales Report)
-CREATE INDEX IF NOT EXISTS transactions_affiliate_idx
-  ON public.transactions (affiliate_id, created_at DESC)
+CREATE INDEX IF NOT EXISTS storefront_transactions_affiliate_idx
+  ON public.storefront_transactions (affiliate_id, created_at DESC)
   WHERE affiliate_id IS NOT NULL;
 
 -- Per-advertiser purchase history (seller's revenue dashboard)
-CREATE INDEX IF NOT EXISTS transactions_advertiser_idx
-  ON public.transactions (advertiser_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS storefront_transactions_advertiser_idx
+  ON public.storefront_transactions (advertiser_id, created_at DESC);
 
 -- Per-product purchase counts (per-share-link analytics)
-CREATE INDEX IF NOT EXISTS transactions_product_idx
-  ON public.transactions (product_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS storefront_transactions_product_idx
+  ON public.storefront_transactions (product_id, created_at DESC);
 
 -- Per-share-link counts (Q: "how many sales did affiliate A's link
 -- AAAA generate?")
-CREATE INDEX IF NOT EXISTS transactions_share_link_idx
-  ON public.transactions (share_link_id, status)
+CREATE INDEX IF NOT EXISTS storefront_transactions_share_link_idx
+  ON public.storefront_transactions (share_link_id, status)
   WHERE share_link_id IS NOT NULL;
 
 -- Status sweep for settlement cron + refund recon
-CREATE INDEX IF NOT EXISTS transactions_status_idx
-  ON public.transactions (status, captured_at)
+CREATE INDEX IF NOT EXISTS storefront_transactions_status_idx
+  ON public.storefront_transactions (status, captured_at)
   WHERE status IN ('captured', 'pending');
 
-COMMENT ON TABLE public.transactions IS
+COMMENT ON TABLE public.storefront_transactions IS
   'Every BB-mediated purchase. One row per checkout attempt. Status flows '
   'pending → captured → settled. Refunds and cancellations short-circuit. '
   'Attribution chain (affiliate, share_link) denormalized at insert via '
@@ -223,7 +247,7 @@ COMMENT ON TABLE public.transactions IS
 
 CREATE TABLE IF NOT EXISTS public.vouchers (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  transaction_id      UUID NOT NULL REFERENCES public.transactions(id) ON DELETE CASCADE,
+  transaction_id      UUID NOT NULL REFERENCES public.storefront_transactions(id) ON DELETE CASCADE,
 
   -- The code shown to buyer + emailed + entered on seller's redemption page.
   -- Format: BB-XXXX-XXXX-XXXX (12 alphanumeric chars in groups of 4, hyphen-separated)
@@ -286,10 +310,10 @@ CREATE INDEX IF NOT EXISTS vouchers_expiry_idx
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'transactions_voucher_id_fkey'
+    SELECT 1 FROM pg_constraint WHERE conname = 'storefront_transactions_voucher_id_fkey'
   ) THEN
-    ALTER TABLE public.transactions
-      ADD CONSTRAINT transactions_voucher_id_fkey
+    ALTER TABLE public.storefront_transactions
+      ADD CONSTRAINT storefront_transactions_voucher_id_fkey
       FOREIGN KEY (voucher_id) REFERENCES public.vouchers(id) ON DELETE SET NULL;
   END IF;
 END $$;
@@ -303,20 +327,20 @@ COMMENT ON TABLE public.vouchers IS
 -- 4. RLS — affiliates see own conversions, advertisers see own transactions
 -- ────────────────────────────────────────────────────────────────────────
 
-ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.storefront_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vouchers     ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "transactions_aff_read"  ON public.transactions;
-DROP POLICY IF EXISTS "transactions_adv_read"  ON public.transactions;
+DROP POLICY IF EXISTS "storefront_transactions_aff_read"  ON public.storefront_transactions;
+DROP POLICY IF EXISTS "storefront_transactions_adv_read"  ON public.storefront_transactions;
 DROP POLICY IF EXISTS "vouchers_buyer_read"    ON public.vouchers;
 
-CREATE POLICY "transactions_aff_read"
-  ON public.transactions
+CREATE POLICY "storefront_transactions_aff_read"
+  ON public.storefront_transactions
   FOR SELECT
   USING (auth.uid() = affiliate_id);
 
-CREATE POLICY "transactions_adv_read"
-  ON public.transactions
+CREATE POLICY "storefront_transactions_adv_read"
+  ON public.storefront_transactions
   FOR SELECT
   USING (auth.uid() = advertiser_id);
 
@@ -329,16 +353,16 @@ CREATE POLICY "transactions_adv_read"
 -- 5. updated_at triggers
 -- ────────────────────────────────────────────────────────────────────────
 
-CREATE OR REPLACE FUNCTION public.tg_transactions_updated_at()
+CREATE OR REPLACE FUNCTION public.tg_storefront_transactions_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS transactions_updated_at_trg ON public.transactions;
-CREATE TRIGGER transactions_updated_at_trg
-  BEFORE UPDATE ON public.transactions
+DROP TRIGGER IF EXISTS storefront_transactions_updated_at_trg ON public.storefront_transactions;
+CREATE TRIGGER storefront_transactions_updated_at_trg
+  BEFORE UPDATE ON public.storefront_transactions
   FOR EACH ROW
-  EXECUTE FUNCTION public.tg_transactions_updated_at();
+  EXECUTE FUNCTION public.tg_storefront_transactions_updated_at();
 
 CREATE OR REPLACE FUNCTION public.tg_vouchers_updated_at()
 RETURNS TRIGGER AS $$
@@ -362,4 +386,4 @@ CREATE TRIGGER vouchers_updated_at_trg
 --                          'long_description','screenshots','package_details');
 --
 --   SELECT table_name FROM information_schema.tables
---   WHERE table_schema = 'public' AND table_name IN ('transactions','vouchers');
+--   WHERE table_schema = 'public' AND table_name IN ('storefront_transactions','vouchers');

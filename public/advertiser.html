@@ -3669,43 +3669,159 @@
              is "create" the form POSTs to /api/products?action=create; when
              it's "edit" the form PATCHes /api/products?action=update with
              the row id in productModal.dataset.productId. -->
+        <!-- ═══════════════════════════════════════════════════════════════════
+             Product modal — 3-tab form for the MoR storefront model.
+             See [[mor-product-page-model]]. Sellers fill what makes sense for
+             their tier — Tier 1 sellers fill everything (BB hosts their page),
+             Tier 2 sellers can skip Storefront tab and link out via the
+             "external_marketing_url" field. Fulfillment tab is required for
+             any product that buyers will purchase via /buy/<token>.
+             ═══════════════════════════════════════════════════════════════ -->
         <div id="productModal" class="modal" data-mode="create">
-          <div class="modal-content">
+          <div class="modal-content" style="max-width: 720px;">
             <div class="modal-header">
               <h2 class="modal-title" id="productModalTitle">New Product</h2>
               <button class="modal-close" type="button" id="productModalCloseBtn">×</button>
             </div>
+
+            <!-- Tab strip -->
+            <div class="pf-tabs" style="display:flex;gap:2px;border-bottom:1px solid #E5E7EB;margin-bottom:20px;">
+              <button type="button" class="pf-tab pf-tab-active" data-pf-tab="basics" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;">Basics</button>
+              <button type="button" class="pf-tab" data-pf-tab="storefront" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Storefront</button>
+              <button type="button" class="pf-tab" data-pf-tab="fulfillment" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Fulfillment</button>
+            </div>
+
             <form id="productForm">
-              <div class="form-group">
-                <label class="form-label">Product name</label>
-                <input type="text" class="form-input" name="name" required maxlength="240" placeholder="e.g. Stripe Atlas">
+              <!-- ─── TAB 1: BASICS ─── -->
+              <div class="pf-panel" data-pf-panel="basics">
+                <div class="form-group">
+                  <label class="form-label">Product name</label>
+                  <input type="text" class="form-input" name="name" required maxlength="240" placeholder="e.g. Stripe Atlas Lifetime Bundle">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Short description <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(1-2 sentences, shown on cards + at top of product page)</span></label>
+                  <textarea class="form-input" name="description" rows="2" maxlength="5000" placeholder="One-liner that explains what the buyer is getting"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hero image URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(square or 4:3, hosted on a CDN)</span></label>
+                  <input type="url" class="form-input" name="image_url" placeholder="https://cdn.example.com/product.png">
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 120px 160px;gap:12px;">
+                  <div>
+                    <label class="form-label">Price</label>
+                    <input type="number" class="form-input" name="price" min="0" max="100000" step="0.01" placeholder="49.00">
+                    <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Leave empty for postback-only products.</div>
+                  </div>
+                  <div>
+                    <label class="form-label">Currency</label>
+                    <select class="form-input" name="currency">
+                      <option value="USD" selected>USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                      <option value="JPY">JPY</option>
+                      <option value="TWD">TWD</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">SKU type</label>
+                    <select class="form-input" name="sku_type">
+                      <option value="one_time" selected>One-time purchase</option>
+                      <option value="bundle">Bundle</option>
+                      <option value="lifetime">Lifetime access</option>
+                      <option value="subscription_pack">Subscription pack</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Default destination URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(fallback when no BB page)</span></label>
+                  <input type="url" class="form-input" name="default_url" required placeholder="https://example.com/product">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Default commission %</label>
+                  <input type="number" class="form-input" name="default_commission_pct" min="0" max="100" step="0.01" value="0" required>
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">What affiliates earn per converting customer.</div>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Description <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional, shown in marketplace)</span></label>
-                <textarea class="form-input" name="description" rows="2" maxlength="5000" placeholder="One-liner that helps an affiliate understand what they're promoting"></textarea>
+
+              <!-- ─── TAB 2: STOREFRONT ─── -->
+              <div class="pf-panel" data-pf-panel="storefront" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">Long description <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(markdown supported)</span></label>
+                  <textarea class="form-input" name="long_description" rows="6" maxlength="20000" placeholder="Full sales copy. Describe the product, who it's for, what they'll get..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Demo video URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(YouTube or Vimeo)</span></label>
+                  <input type="url" class="form-input" name="demo_video_url" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Screenshots <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(one URL per line, up to 10)</span></label>
+                  <textarea class="form-input" name="screenshots_text" rows="3" placeholder="https://cdn.example.com/screen1.png&#10;https://cdn.example.com/screen2.png"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">What's included <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(one item per line; prefix with ✗ for excluded)</span></label>
+                  <textarea class="form-input" name="package_details_text" rows="5" placeholder="Lifetime access&#10;All future updates&#10;Priority email support&#10;✗ Custom integrations"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">FAQ <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(format: Q on one line, A on next, blank line between items)</span></label>
+                  <textarea class="form-input" name="faq_text" rows="6" placeholder="Q: Can I use this on multiple sites?&#10;A: Yes, license covers up to 3 domains.&#10;&#10;Q: Is there a refund policy?&#10;A: 14-day no-questions refund."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Testimonials <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(format: "Quote" — Name, Role; blank line between)</span></label>
+                  <textarea class="form-input" name="testimonials_text" rows="5" placeholder='"This saved me weeks of setup." — Jane Doe, CTO at ACME&#10;&#10;"Best onboarding experience I have ever had." — John Smith, Founder'></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">External marketing URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — links from BB page to your full marketing site)</span></label>
+                  <input type="url" class="form-input" name="external_marketing_url" placeholder="https://example.com/full-product-page">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">When set, BB shows a "Read full details →" link on the product page.</div>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Image URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(square or 4:3, hosted on a CDN)</span></label>
-                <input type="url" class="form-input" name="image_url" placeholder="https://cdn.example.com/product.png">
+
+              <!-- ─── TAB 3: FULFILLMENT ─── -->
+              <div class="pf-panel" data-pf-panel="fulfillment" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">Redemption page URL <span style="font-size:11px;color:#FF2D78;font-weight:600;">required for purchasable products</span></label>
+                  <input type="url" class="form-input" name="fulfillment_redirect_url" placeholder="https://example.com/bb-redeem">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">After payment, buyer is sent here with <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-size:11px;">?code=&lt;voucher&gt;</code>. Your page validates via BB API and grants access.</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Fulfillment webhook URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — S2S notification on purchase)</span></label>
+                  <input type="url" class="form-input" name="fulfillment_webhook_url" placeholder="https://example.com/api/bb-purchase-webhook">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">BB fires a signed POST here when a payment captures. Lets you pre-provision before the buyer hits the redemption page.</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Webhook signing secret <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(for HMAC verification)</span></label>
+                  <input type="text" class="form-input" name="fulfillment_webhook_secret" maxlength="240" placeholder="any random string ≥ 32 chars">
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Redemption window (days)</label>
+                    <input type="number" class="form-input" name="redemption_window_days" min="1" max="3650" value="90">
+                    <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Days buyer has to redeem voucher.</div>
+                  </div>
+                  <div>
+                    <label class="form-label">Package duration (days) <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional)</span></label>
+                    <input type="number" class="form-input" name="package_duration_days" min="1" max="3650" placeholder="365">
+                    <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">For subscription packs: how long access lasts after redemption.</div>
+                  </div>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Default destination URL</label>
-                <input type="url" class="form-input" name="default_url" required placeholder="https://example.com/product">
-                <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Where the share-link redirect lands by default. Individual campaigns can override.</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Default commission %</label>
-                <input type="number" class="form-input" name="default_commission_pct" min="0" max="100" step="0.01" value="0" required>
-                <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">What affiliates earn per converting customer. Higher commission → better marketplace placement.</div>
-              </div>
-              <div id="productFormErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;"></div>
-              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
-                <button type="button" class="new-campaign-btn" id="productCancelBtn" style="background:#fff;color:#374151;border:1px solid #E5E7EB;">Cancel</button>
-                <button type="submit" class="new-campaign-btn" id="productSubmitBtn">Save product</button>
+
+              <div id="productFormErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;margin-top:14px;"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid #F3F4F6;">
+                <div style="font-size:11.5px;color:#9CA3AF;">Tab fields marked optional can be filled later — save anytime.</div>
+                <div style="display:flex;gap:8px;">
+                  <button type="button" class="new-campaign-btn" id="productCancelBtn" style="background:#fff;color:#374151;border:1px solid #E5E7EB;">Cancel</button>
+                  <button type="submit" class="new-campaign-btn" id="productSubmitBtn">Save product</button>
+                </div>
               </div>
             </form>
           </div>
         </div>
+
+        <style>
+          .pf-tab.pf-tab-active { color: var(--accent-primary, #FF2D78) !important; border-bottom-color: var(--accent-primary, #FF2D78) !important; }
+          .pf-tab:hover:not(.pf-tab-active) { color: #374151 !important; }
+        </style>
 
         <div id="campaignModal" class="modal">
             <div class="modal-content">
@@ -11147,6 +11263,87 @@
                 );
             }
 
+            // Switch the active tab in the product form. The clicked button
+            // gets the active class, and the panel with matching data-pf-panel
+            // becomes visible. See [[mor-product-page-model]] for the rationale
+            // of grouping the form into Basics / Storefront / Fulfillment.
+            function pfSwitchTab(tabKey) {
+                modal.querySelectorAll('.pf-tab').forEach((b) => {
+                    b.classList.toggle('pf-tab-active', b.getAttribute('data-pf-tab') === tabKey);
+                });
+                modal.querySelectorAll('.pf-panel').forEach((p) => {
+                    p.style.display = (p.getAttribute('data-pf-panel') === tabKey) ? 'block' : 'none';
+                });
+            }
+            // Wire tab buttons once. Inside the modal so each open doesn't
+            // re-attach listeners.
+            modal.querySelectorAll('.pf-tab').forEach((b) => {
+                b.addEventListener('click', () => pfSwitchTab(b.getAttribute('data-pf-tab')));
+            });
+
+            // Helpers: serialize an array/objects-of-strings to and from the
+            // textarea-friendly format we expose to sellers.
+            //   screenshots:   one URL per line
+            //   package_details:  one item per line, prefix ✗ for excluded
+            //   faq:           "Q: ...\nA: ...\n\n" repeated
+            //   testimonials:  '"Quote" — Name, Role' repeated, blank line between
+            function pfSerializeScreenshots(arr) {
+                return Array.isArray(arr) ? arr.join('\n') : '';
+            }
+            function pfParseScreenshots(text) {
+                return String(text || '').split('\n').map((s) => s.trim()).filter(Boolean);
+            }
+            function pfSerializePackageDetails(arr) {
+                if (!Array.isArray(arr)) return '';
+                return arr.map((x) => (x.included === false ? '✗ ' : '') + (x.label || '')).join('\n');
+            }
+            function pfParsePackageDetails(text) {
+                return String(text || '').split('\n')
+                    .map((line) => line.trim())
+                    .filter(Boolean)
+                    .map((line) => {
+                        if (line.startsWith('✗') || line.startsWith('x ')) {
+                            return { label: line.replace(/^(✗|x)\s*/, '').trim(), included: false };
+                        }
+                        return { label: line, included: true };
+                    });
+            }
+            function pfSerializeFaq(arr) {
+                if (!Array.isArray(arr)) return '';
+                return arr.map((x) => `Q: ${x.q || ''}\nA: ${x.a || ''}`).join('\n\n');
+            }
+            function pfParseFaq(text) {
+                const blocks = String(text || '').split(/\n\s*\n/);
+                const out = [];
+                for (const block of blocks) {
+                    const m = block.match(/^Q:\s*([\s\S]*?)\n\s*A:\s*([\s\S]+)$/i);
+                    if (m) out.push({ q: m[1].trim(), a: m[2].trim() });
+                }
+                return out;
+            }
+            function pfSerializeTestimonials(arr) {
+                if (!Array.isArray(arr)) return '';
+                return arr.map((x) => {
+                    let line = `"${x.body || ''}"`;
+                    const who = [x.author, x.role].filter(Boolean).join(', ');
+                    if (who) line += ` — ${who}`;
+                    return line;
+                }).join('\n\n');
+            }
+            function pfParseTestimonials(text) {
+                const blocks = String(text || '').split(/\n\s*\n/);
+                const out = [];
+                for (const block of blocks) {
+                    const m = block.trim().match(/^"([\s\S]+?)"\s*(?:—|--|-)\s*(.+?)(?:,\s*(.+))?$/);
+                    if (m) {
+                        out.push({ body: m[1].trim(), author: (m[2] || '').trim(), role: (m[3] || '').trim() });
+                    } else if (block.trim()) {
+                        out.push({ body: block.trim().replace(/^"|"$/g, ''), author: '', role: '' });
+                    }
+                }
+                return out;
+            }
+
             function openModal(mode, product) {
                 modal.dataset.mode = mode;
                 modal.dataset.productId = product ? product.id : '';
@@ -11154,13 +11351,35 @@
                 submitBtn.textContent = mode === 'edit' ? 'Save changes' : 'Save product';
                 form.reset();
                 errBox.style.display = 'none';
+                pfSwitchTab('basics');  // always land on Basics tab when opening
+
                 if (product) {
+                    // Basics
                     form.elements.name.value = product.name || '';
                     form.elements.description.value = product.description || '';
                     form.elements.image_url.value = product.image_url || '';
                     form.elements.default_url.value = product.default_url || '';
                     form.elements.default_commission_pct.value = product.default_commission_pct != null
                         ? product.default_commission_pct : 0;
+                    if (form.elements.price)     form.elements.price.value     = product.price != null ? product.price : '';
+                    if (form.elements.currency)  form.elements.currency.value  = product.currency || 'USD';
+                    if (form.elements.sku_type)  form.elements.sku_type.value  = product.sku_type || 'one_time';
+
+                    // Storefront
+                    if (form.elements.long_description)       form.elements.long_description.value       = product.long_description || '';
+                    if (form.elements.demo_video_url)         form.elements.demo_video_url.value         = product.demo_video_url || '';
+                    if (form.elements.external_marketing_url) form.elements.external_marketing_url.value = product.external_marketing_url || '';
+                    if (form.elements.screenshots_text)        form.elements.screenshots_text.value       = pfSerializeScreenshots(product.screenshots);
+                    if (form.elements.package_details_text)    form.elements.package_details_text.value   = pfSerializePackageDetails(product.package_details);
+                    if (form.elements.faq_text)                form.elements.faq_text.value               = pfSerializeFaq(product.faq);
+                    if (form.elements.testimonials_text)       form.elements.testimonials_text.value      = pfSerializeTestimonials(product.testimonials);
+
+                    // Fulfillment
+                    if (form.elements.fulfillment_redirect_url)   form.elements.fulfillment_redirect_url.value   = product.fulfillment_redirect_url || '';
+                    if (form.elements.fulfillment_webhook_url)    form.elements.fulfillment_webhook_url.value    = product.fulfillment_webhook_url || '';
+                    if (form.elements.fulfillment_webhook_secret) form.elements.fulfillment_webhook_secret.value = product.fulfillment_webhook_secret || '';
+                    if (form.elements.redemption_window_days)     form.elements.redemption_window_days.value     = product.redemption_window_days != null ? product.redemption_window_days : 90;
+                    if (form.elements.package_duration_days)      form.elements.package_duration_days.value      = product.package_duration_days != null ? product.package_duration_days : '';
                 }
                 modal.classList.add('active');
                 setTimeout(() => form.elements.name.focus(), 50);
@@ -11310,16 +11529,43 @@
                 if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
             });
 
-            // Form submit — create or update depending on dataset.mode
+            // Form submit — create or update depending on dataset.mode.
+            // Builds a rich payload covering all 3 tabs. Optional fields
+            // are sent as null when empty so the backend can clear them
+            // on update. See api/products.js normalizeProduct() for the
+            // matching validation.
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 errBox.style.display = 'none';
+                const v = (name) => form.elements[name] ? form.elements[name].value : '';
+                const trim = (s) => String(s || '').trim();
+
                 const payload = {
-                    name:        form.elements.name.value.trim(),
-                    description: form.elements.description.value.trim() || null,
-                    image_url:   form.elements.image_url.value.trim() || null,
-                    default_url: form.elements.default_url.value.trim(),
-                    default_commission_pct: Number(form.elements.default_commission_pct.value),
+                    // Basics
+                    name:        trim(v('name')),
+                    description: trim(v('description')) || null,
+                    image_url:   trim(v('image_url')) || null,
+                    default_url: trim(v('default_url')),
+                    default_commission_pct: Number(v('default_commission_pct')),
+                    price:       v('price') === '' ? null : Number(v('price')),
+                    currency:    v('currency') || 'USD',
+                    sku_type:    v('sku_type') || 'one_time',
+
+                    // Storefront — text fields direct, structured fields via parsers
+                    long_description:       trim(v('long_description')) || null,
+                    demo_video_url:         trim(v('demo_video_url')) || null,
+                    external_marketing_url: trim(v('external_marketing_url')) || null,
+                    screenshots:            pfParseScreenshots(v('screenshots_text')),
+                    package_details:        pfParsePackageDetails(v('package_details_text')),
+                    faq:                    pfParseFaq(v('faq_text')),
+                    testimonials:           pfParseTestimonials(v('testimonials_text')),
+
+                    // Fulfillment
+                    fulfillment_redirect_url:   trim(v('fulfillment_redirect_url')) || null,
+                    fulfillment_webhook_url:    trim(v('fulfillment_webhook_url')) || null,
+                    fulfillment_webhook_secret: trim(v('fulfillment_webhook_secret')) || null,
+                    redemption_window_days:     v('redemption_window_days') === '' ? 90 : Number(v('redemption_window_days')),
+                    package_duration_days:      v('package_duration_days') === '' ? null : Number(v('package_duration_days')),
                 };
                 if (!payload.name) return showFormErr('Product name is required.');
                 if (!payload.default_url) return showFormErr('Default URL is required.');
