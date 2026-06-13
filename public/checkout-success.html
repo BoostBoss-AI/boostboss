@@ -6,7 +6,8 @@
   <title>Thanks for your purchase · Boost Boss</title>
   <meta name="robots" content="noindex">
   <style>
-    :root { --pink:#FF2D78; --ink:#111827; --muted:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --green:#059669; }
+    :root { --pink:#FF2D78; --pink-soft:#FFF0F6; --ink:#111827; --ink-soft:#374151;
+            --muted:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --green:#059669; }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; line-height: 1.6; }
@@ -14,18 +15,76 @@
     .topbar img { width: 26px; height: 26px; }
     .topbar .name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
     .topbar .tag { font-size: 10.5px; font-weight: 700; color: var(--pink); padding: 3px 8px; border-radius: 99px; background: rgba(255,45,120,0.10); letter-spacing: 0.4px; }
-    .wrap { max-width: 560px; margin: 60px auto 80px; padding: 0 24px; text-align: center; }
+    .wrap { max-width: 640px; margin: 50px auto 80px; padding: 0 24px; }
     .check { width: 72px; height: 72px; border-radius: 50%; background: #DCFCE7; color: var(--green); display: inline-flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 24px; font-weight: 700; }
-    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 12px; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 10px; }
     .sub { font-size: 16px; color: var(--muted); margin: 0 0 28px; line-height: 1.6; }
-    .info-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; text-align: left; margin-bottom: 22px; }
-    .info-card .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6; font-size: 13.5px; }
+
+    /* Voucher card — biggest visual element. The code itself is monospace
+       and color-emphasized; the copy button is right next to it. */
+    .voucher-card {
+      background: #fff; border: 2px solid var(--pink); border-radius: 16px;
+      padding: 28px 26px 24px; text-align: center; margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(255, 45, 120, 0.15);
+    }
+    .voucher-card .lbl {
+      font-size: 11.5px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+    }
+    .voucher-card .code {
+      font-family: 'Courier New', monospace; font-size: 26px; font-weight: 700;
+      color: var(--pink); letter-spacing: 1.5px; word-break: break-all;
+      margin-bottom: 14px;
+    }
+    .voucher-card .copy-btn {
+      background: var(--ink); color: #fff; border: none;
+      padding: 10px 22px; border-radius: 8px; font-size: 13.5px;
+      font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: background 0.12s;
+    }
+    .voucher-card .copy-btn:hover { background: #000; }
+    .voucher-card .copy-btn.copied { background: var(--green); }
+
+    .redeem-btn {
+      display: block; width: 100%; background: var(--pink); color: #fff;
+      border: none; padding: 16px 24px; border-radius: 10px;
+      font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit;
+      text-align: center; text-decoration: none; margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(255, 45, 120, 0.15);
+      transition: filter 0.12s, transform 0.08s;
+    }
+    .redeem-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+
+    .info-card {
+      background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      padding: 22px 24px; margin-bottom: 22px;
+    }
+    .info-card h3 { margin: 0 0 14px; font-size: 14px; font-weight: 700; }
+    .info-card .row {
+      display: flex; justify-content: space-between; padding: 9px 0;
+      border-bottom: 1px solid #F3F4F6; font-size: 14px;
+    }
     .info-card .row:last-child { border-bottom: none; }
     .info-card .label { color: var(--muted); }
-    .info-card .val { color: var(--ink); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
-    .legal { font-size: 12.5px; color: var(--muted); margin-top: 18px; line-height: 1.5; }
+    .info-card .val { color: var(--ink); font-weight: 600;
+      font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+
+    .repeat-link {
+      background: var(--pink-soft); border: 1px solid #FECDD3; border-radius: 12px;
+      padding: 16px 20px; margin-bottom: 18px;
+    }
+    .repeat-link .lbl { font-size: 12.5px; font-weight: 700; color: var(--pink);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .repeat-link p { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 8px; line-height: 1.55; }
+    .repeat-link code { background: #fff; padding: 7px 10px; border-radius: 6px;
+      display: block; font-size: 11.5px; word-break: break-all; color: var(--ink); border: 1px solid var(--line); }
+
+    .legal { font-size: 12.5px; color: var(--muted); margin-top: 18px; line-height: 1.55; text-align: center; }
     .legal a { color: var(--pink); font-weight: 600; text-decoration: none; }
-    .placeholder-banner { background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; padding: 14px 18px; border-radius: 10px; font-size: 13px; margin-bottom: 22px; line-height: 1.5; text-align: left; }
+
+    .loading-state, .err-state { text-align: center; padding: 60px 0; color: var(--muted); }
+    .err-state strong { color: var(--ink); display: block; margin-bottom: 8px; font-size: 18px; font-weight: 700; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -37,32 +96,151 @@
 </div>
 
 <div class="wrap">
-  <div class="check">✓</div>
-  <h1>Payment received</h1>
-  <p class="sub">Thanks for your purchase. Your transaction is confirmed and we're processing your redemption code.</p>
+  <div id="loading" class="loading-state">Fetching your receipt…</div>
 
-  <div class="info-card">
-    <div class="row"><span class="label">Transaction ID</span><span class="val" id="txId">—</span></div>
-    <div class="row"><span class="label">Status</span><span class="val" style="color: var(--green);">Captured</span></div>
+  <div id="errState" class="err-state hidden">
+    <strong>Couldn't load your receipt</strong>
+    <p>Your payment was processed, but we couldn't fetch the receipt details. Please check your email — we sent a copy of your voucher to your inbox. Contact <a href="mailto:support@boostboss.ai">support@boostboss.ai</a> if it didn't arrive.</p>
   </div>
 
-  <!-- MoR #4 scope ends here. Voucher code + email-with-buy-again-link land in MoR #5. -->
-  <div class="placeholder-banner">
-    <strong>📬 Your redemption code is on the way.</strong><br>
-    Voucher issuance + email delivery + seller-side fulfillment ship in the next push (MoR #5). Your payment is fully captured — you'll receive the voucher code by email shortly.
-  </div>
+  <div id="success" class="hidden">
+    <div style="text-align: center;">
+      <div class="check">✓</div>
+      <h1>Payment received</h1>
+      <p class="sub">Thanks for your purchase. Your redemption code is ready below — we've also emailed a copy.</p>
+    </div>
 
-  <p class="legal">
-    Receipt available at <a href="javascript:window.print()">print this page</a>.
-    Questions? <a href="mailto:support@boostboss.ai">support@boostboss.ai</a>
-  </p>
+    <div class="voucher-card">
+      <div class="lbl">Your redemption code</div>
+      <div class="code" id="voucherCode">—</div>
+      <button class="copy-btn" type="button" id="copyBtn">Copy code</button>
+    </div>
+
+    <a class="redeem-btn" id="redeemBtn" href="#" target="_blank" rel="noopener">Redeem now →</a>
+
+    <div class="info-card">
+      <h3>Receipt</h3>
+      <div class="row"><span class="label">Product</span><span class="val" id="pname">—</span></div>
+      <div class="row"><span class="label">Amount</span><span class="val" id="amount">—</span></div>
+      <div class="row"><span class="label">Status</span><span class="val" style="color: var(--green);">Captured</span></div>
+      <div class="row"><span class="label">Email</span><span class="val" id="buyerEmail">—</span></div>
+      <div class="row"><span class="label">Voucher expires</span><span class="val" id="expires">—</span></div>
+      <div class="row"><span class="label">Transaction ID</span><span class="val" id="txId">—</span></div>
+    </div>
+
+    <!-- Repeat-purchase link (the [[mor-product-page-model]] "Receipt-attribution trick"):
+         shown only when bb_click was present so the affiliate keeps credit for future buys. -->
+    <div id="repeatBlock" class="repeat-link hidden">
+      <div class="lbl">📬 Want to buy this again later?</div>
+      <p>Bookmark this link — it preserves the affiliate who referred you so they earn on future purchases:</p>
+      <code id="repeatLink">—</code>
+    </div>
+
+    <p class="legal">
+      14-day refund window. Questions? <a href="mailto:support@boostboss.ai">support@boostboss.ai</a><br>
+      Boost Boss is the Merchant of Record for this transaction.
+    </p>
+  </div>
 </div>
 
 <script>
 (function () {
+  const API_BASE = window.location.origin;
   const params = new URLSearchParams(window.location.search);
   const txId = params.get('tx');
-  if (txId) document.getElementById('txId').textContent = txId;
+
+  if (!txId) return showError();
+
+  // Build the repeat-purchase URL from sessionStorage's bb_click (set on
+  // the original /p/<uuid>?bb_click=... landing). Survives the entire
+  // checkout flow since the browser tab didn't navigate away.
+  let bbClick = null;
+  try { bbClick = sessionStorage.getItem('bbx_click'); } catch (_) {}
+
+  fetch(`${API_BASE}/api/checkout?action=get_voucher&tx=${encodeURIComponent(txId)}`)
+    .then((r) => { if (!r.ok) throw new Error('fetch failed'); return r.json(); })
+    .then((j) => render(j))
+    .catch((e) => { console.error(e); showError(); });
+
+  function esc(s) { return String(s == null ? '' : s); }
+
+  function showError() {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('errState').classList.remove('hidden');
+  }
+
+  function fmtMoney(amount, currency) {
+    if (amount == null) return '—';
+    const fixed = Number(amount).toFixed(2);
+    return (currency === 'USD' ? '$' : '') + fixed + (currency !== 'USD' ? ' ' + currency : '');
+  }
+
+  function render(j) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('success').classList.remove('hidden');
+
+    const tx = j.transaction || {};
+    const p  = j.product || {};
+    const v  = j.voucher || {};
+
+    // Voucher card
+    if (v.code) {
+      document.getElementById('voucherCode').textContent = v.code;
+      if (v.redemption_url) {
+        document.getElementById('redeemBtn').href = v.redemption_url;
+      } else {
+        document.getElementById('redeemBtn').textContent = 'Use your code with the seller';
+        document.getElementById('redeemBtn').style.opacity = 0.55;
+      }
+    } else {
+      document.getElementById('voucherCode').textContent = 'Issuing…';
+      document.getElementById('redeemBtn').style.display = 'none';
+    }
+
+    // Receipt card
+    document.getElementById('pname').textContent = p.name || '—';
+    document.getElementById('amount').textContent = fmtMoney(tx.amount, tx.currency);
+    document.getElementById('buyerEmail').textContent = tx.buyer_email || '—';
+    document.getElementById('expires').textContent = v.expires_at
+      ? new Date(v.expires_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+      : '—';
+    document.getElementById('txId').textContent = tx.id;
+    document.title = `Receipt: ${p.name || 'purchase'} · Boost Boss`;
+
+    // Repeat purchase link (only if we have the affiliate click_id)
+    if (bbClick && tx.id) {
+      // Pull product_id from sessionStorage — we set it when buyer
+      // landed on the product page. Fallback to fetching not needed
+      // since the product page handed off via redirect.
+      const repeatUrl = `${API_BASE}/p/${encodeURIComponent(getProductIdFromUrl(tx) || '')}?bb_click=${encodeURIComponent(bbClick)}`;
+      document.getElementById('repeatLink').textContent = repeatUrl;
+      document.getElementById('repeatBlock').classList.remove('hidden');
+    }
+  }
+
+  // The success URL is /buy/<product_id>/success?tx=<tx_id>, so we can
+  // pull product_id from the pathname rather than relying on the
+  // get_voucher response to expose it.
+  function getProductIdFromUrl(tx) {
+    const m = window.location.pathname.match(/^\/buy\/([^/?#]+)\/success/i);
+    return m ? m[1] : '';
+  }
+
+  // Copy button
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    const code = document.getElementById('voucherCode').textContent;
+    if (!code || code === '—') return;
+    const btn = this;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy code'; btn.classList.remove('copied'); }, 2000);
+      });
+    } else {
+      window.prompt('Copy this code:', code);
+    }
+  });
 })();
 </script>
 </body>

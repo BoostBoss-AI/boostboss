@@ -246,6 +246,61 @@ function payoutSentEmail({ amountUsd, payoutMethod, payoutId, dashboardUrl, expe
   };
 }
 
+// MoR Storefront — purchase confirmation. Shows the voucher code in a big
+// highlighted card, the redemption link, and the permanent affiliate-attribution
+// link for repeat purchases. See [[mor-product-page-model]].
+function purchaseConfirmationEmail({
+  productName, voucherCode, redemptionUrl, repeatPurchaseUrl,
+  amountUsd, currency, transactionId, redemptionWindowDays,
+  packageDurationDays, skuType,
+}) {
+  const curr = (currency || "USD").toUpperCase();
+  const amountDisplay = curr === "USD" ? `$${formatUsd(amountUsd)}` : `${formatUsd(amountUsd)} ${curr}`;
+  const skuLabel = ({
+    one_time: "One-time purchase",
+    bundle: "Bundle",
+    lifetime: "Lifetime access",
+    subscription_pack: packageDurationDays
+      ? `${Math.round(packageDurationDays / 30)}-month pack`
+      : "Subscription pack",
+  })[skuType] || "Purchase";
+  const window = redemptionWindowDays
+    ? `Redeem within ${redemptionWindowDays} days of purchase.`
+    : "Redeem at your convenience.";
+
+  return {
+    subject: `Your ${productName} is ready — redemption code inside`,
+    html: renderEmail({
+      title: "Payment received",
+      preheader: `Your redemption code for ${productName} is ${voucherCode}.`,
+      bodyHtml: `
+        <p>Thanks for your purchase! Boost Boss processed your payment securely via PayPal. Your redemption code for <strong>${escapeHtml(productName)}</strong> is below.</p>
+
+        <!-- The voucher code itself — biggest visual element. -->
+        <div style="background:${BRAND.surface};border:2px solid ${BRAND.primary};border-radius:14px;padding:24px 22px;text-align:center;margin:22px 0;">
+          <div style="font-size:11px;font-weight:700;color:${BRAND.muted};text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Your redemption code</div>
+          <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;color:${BRAND.primary};letter-spacing:1px;word-break:break-all;">${escapeHtml(voucherCode)}</div>
+          <div style="font-size:12px;color:${BRAND.muted};margin-top:10px;">Copy this code and enter it on the seller's redemption page.</div>
+        </div>
+
+        <table class="stats-table" role="presentation">
+          <tr><td>Product</td><td>${escapeHtml(productName)}</td></tr>
+          <tr><td>Type</td><td>${escapeHtml(skuLabel)}</td></tr>
+          <tr><td>Amount paid</td><td style="color:${BRAND.primary};">${escapeHtml(amountDisplay)}</td></tr>
+          <tr><td>Payment</td><td>PayPal</td></tr>
+          <tr><td>Order reference</td><td><code style="font-size:12.5px;color:${BRAND.muted};">${escapeHtml(transactionId || "—")}</code></td></tr>
+        </table>
+
+        <div class="panel success" style="margin-top:18px;"><strong>How to redeem:</strong> Click the button below, paste your code, and you'll be set up. ${escapeHtml(window)}</div>
+      `,
+      cta: { label: "Redeem now →", url: redemptionUrl || "#" },
+      footerNote: repeatPurchaseUrl
+        ? `<strong>Want to buy this again or upgrade later?</strong><br>Use this link to come back via the same affiliate (supports them at no extra cost):<br><a href="${repeatPurchaseUrl}" style="color:${BRAND.primary};font-weight:600;word-break:break-all;">${repeatPurchaseUrl}</a><br><br>14-day refund window. Reply to this email or contact support@boostboss.ai if anything goes wrong. Boost Boss is the Merchant of Record for this transaction.`
+        : `14-day refund window. Reply to this email or contact support@boostboss.ai if anything goes wrong. Boost Boss is the Merchant of Record for this transaction.`,
+    }),
+  };
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────
 function formatUsd(n) {
   const num = Number(n) || 0;
@@ -267,5 +322,6 @@ module.exports = {
   welcomeEmail,
   depositSuccessEmail,
   payoutSentEmail,
+  purchaseConfirmationEmail,
   BRAND,
 };

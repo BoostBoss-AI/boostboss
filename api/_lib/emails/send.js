@@ -24,6 +24,7 @@ const {
   welcomeEmail,
   depositSuccessEmail,
   payoutSentEmail,
+  purchaseConfirmationEmail,
 } = require("./templates");
 
 const PUBLIC_BASE =
@@ -35,11 +36,12 @@ const PUBLIC_BASE =
 // admin@boostboss.ai → see launch-kit/EMAIL-TEMPLATES.md "Workspace setup"
 // notes. Resend allows any sender within the verified boostboss.ai domain.
 const SENDERS = {
-  welcome:        { name: "Boost Boss",          alias: "hello"   },
-  billing:        { name: "Boost Boss Billing",  alias: "billing" },
-  payouts:        { name: "Boost Boss Payouts",  alias: "payouts" },
-  alerts:         { name: "Boost Boss Alerts",   alias: "alerts"  },
-  support:        { name: "Boost Boss Support",  alias: "support" },
+  welcome:        { name: "Boost Boss",          alias: "hello"    },
+  billing:        { name: "Boost Boss Billing",  alias: "billing"  },
+  payouts:        { name: "Boost Boss Payouts",  alias: "payouts"  },
+  alerts:         { name: "Boost Boss Alerts",   alias: "alerts"   },
+  support:        { name: "Boost Boss Support",  alias: "support"  },
+  receipts:       { name: "Boost Boss Store",    alias: "receipts" },
 };
 
 const REPLY_TO = "support@boostboss.ai";
@@ -131,10 +133,27 @@ async function sendPayoutSent({ to, amountUsd, payoutMethod, payoutId, expectedD
   return send({ kind: "payouts", to, subject, html });
 }
 
+// MoR Storefront — purchase confirmation. Buyer receives this immediately
+// after PayPal capture. Contains the voucher code, the seller's redemption
+// link, and the permanent affiliate-attribution link for repeat purchases.
+// See [[mor-product-page-model]] "Receipt-attribution trick".
+async function sendPurchaseConfirmation({
+  to, productName, voucherCode, redemptionUrl, repeatPurchaseUrl,
+  amountUsd, currency, transactionId, redemptionWindowDays, packageDurationDays, skuType,
+}) {
+  const { subject, html } = purchaseConfirmationEmail({
+    productName, voucherCode, redemptionUrl, repeatPurchaseUrl,
+    amountUsd, currency, transactionId, redemptionWindowDays,
+    packageDurationDays, skuType,
+  });
+  return send({ kind: "receipts", to, subject, html });
+}
+
 module.exports = {
   sendWelcome,
   sendDepositSuccess,
   sendPayoutSent,
+  sendPurchaseConfirmation,
   // Lower-level API in case future code needs custom emails:
   send,
   SENDERS,
