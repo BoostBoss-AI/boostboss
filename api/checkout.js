@@ -33,10 +33,26 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "";
 const PUBLIC_BASE = process.env.PUBLIC_BASE || process.env.PUBLIC_BASE_URL || "https://boostboss.ai";
 
-// Boost Boss take rate — split-time, hardcoded for now. Future: per-advertiser
-// overrides via a take_rate column on products or advertisers.
-// See [[mor-product-page-model]].
-const BB_TAKE_PCT = 15.00;
+// ─────────────────────────────────────────────────────────────────────
+// Commission model (post-2026-06-13 policy change)
+// ─────────────────────────────────────────────────────────────────────
+//
+// The seller picks ONE number: affiliate_pool_pct on the product. From it:
+//
+//   affiliate_pool   = order_amount × (affiliate_pool_pct / 100)
+//   bb_take          = affiliate_pool × BB_POOL_SHARE        (30%)
+//   affiliate_payout = affiliate_pool × (1 - BB_POOL_SHARE)  (70%)
+//   seller_net       = order_amount  - affiliate_pool
+//
+// BB no longer takes a top-line cut from the seller. BB's revenue comes
+// entirely out of the seller's chosen affiliate marketing budget.
+//
+// If a sale has no attributed affiliate (direct visit, bb_click missing),
+// the pool isn't allocated at all — seller gets 100% of the gross, BB
+// gets nothing on that sale. This matches the "BB shares the affiliate
+// budget" mental model: no affiliate involved, no budget to share.
+// ─────────────────────────────────────────────────────────────────────
+const BB_POOL_SHARE = 0.30;
 
 let _sb = null;
 function sb() {
@@ -148,14 +164,37 @@ async function resolveAttribution(bbClick) {
 // ──────────────────────────────────────────────────────────────────────
 // POST /api/checkout?action=create_order
 // ──────────────────────────────────────────────────────────────────────
+//
+// Body params:
+//   product_id    (required) — BB product UUID
+//   buyer_email   (required)
+//   bb_click      (optional) — affiliate attribution UUID from the URL
+//   plan_id       (optional) — specific pricing_plans.id to buy
+//                              defaults to the product's first approved+active
+//                              plan (sort_order ASC) if omitted
+//
+// Plan selection
+// ──────────────
+// Every purchasable product has at least one pricing_plan row (the migration
+// backfilled one for every legacy product). The plan carries the price; the
+// product carries the seller's chosen affiliate_pool_pct. We snapshot both
+// onto the transaction so future rate changes don't retroactively rewrite
+// historical splits.
+//
+// Audit gate
+// ──────────
+// Only pricing_plans with audit_status='approved' AND is_active=true are
+// purchasable. A non-approved plan returns 403 with a code the frontend
+// can show as "this plan is pending review."
 async function handleCreateOrder(req, res) {
   const client = sb();
   if (!client) return res.status(500).json({ error: "Supabase not configured" });
 
   const body = req.body || {};
-  const productId = (body.product_id || "").toString().trim();
+  const productId  = (body.product_id  || "").toString().trim();
   const buyerEmail = (body.buyer_email || "").toString().trim().toLowerCase();
-  const bbClick = (body.bb_click || "").toString().trim();
+  const bbClick    = (body.bb_click    || "").toString().trim();
+  const planIdArg  = (body.plan_id     || "").toString().trim();
 
   if (!productId) {
     return res.status(400).json({ error: "product_id is required" });
@@ -164,36 +203,97 @@ async function handleCreateOrder(req, res) {
     return res.status(400).json({ error: "buyer_email is required and must be a valid email" });
   }
 
-  // Resolve product (must be active + purchasable, i.e. have a price)
+  // Resolve product (must be active)
   const { data: product, error: prodErr } = await client
     .from("products")
-    .select("id, advertiser_id, name, price, currency, status, default_commission_pct")
+    .select("id, advertiser_id, name, currency, status, affiliate_pool_pct, default_commission_pct")
     .eq("id", productId)
     .maybeSingle();
   if (prodErr) return res.status(500).json({ error: prodErr.message });
   if (!product || product.status !== "active") {
     return res.status(404).json({ error: "Product not found or unavailable" });
   }
-  const price = Number(product.price);
-  if (!Number.isFinite(price) || price <= 0) {
-    return res.status(400).json({ error: "Product is not configured for direct purchase (no price set)" });
+
+  // ── Resolve the pricing plan ──────────────────────────────────────
+  // If the caller passed plan_id, verify it belongs to this product and
+  // is purchasable. Otherwise pick the lowest sort_order approved+active
+  // plan as the default (the migration sets sort_order=0 on the backfilled
+  // legacy plans, so single-plan products work without any client change).
+  let plan = null;
+  if (planIdArg) {
+    if (!/^[0-9a-f-]{36}$/i.test(planIdArg)) {
+      return res.status(400).json({ error: "plan_id must be a UUID" });
+    }
+    const { data: planRow } = await client
+      .from("pricing_plans")
+      .select("id, product_id, plan_name, price, currency, billing_period, audit_status, is_active")
+      .eq("id", planIdArg)
+      .maybeSingle();
+    if (!planRow || planRow.product_id !== product.id) {
+      return res.status(404).json({ error: "Plan not found for this product" });
+    }
+    plan = planRow;
+  } else {
+    const { data: planRow } = await client
+      .from("pricing_plans")
+      .select("id, product_id, plan_name, price, currency, billing_period, audit_status, is_active")
+      .eq("product_id", product.id)
+      .eq("audit_status", "approved")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    plan = planRow || null;
   }
 
-  // Resolve affiliate attribution from bb_click (if present + valid)
+  if (!plan) {
+    return res.status(400).json({
+      error: "This product has no approved pricing plans available for purchase.",
+      code:  "no_plan_available",
+    });
+  }
+  if (plan.audit_status !== "approved") {
+    return res.status(403).json({
+      error: "This plan is awaiting price audit and is not yet purchasable.",
+      code:  "plan_pending_audit",
+    });
+  }
+  if (!plan.is_active) {
+    return res.status(400).json({
+      error: "This plan is not active.",
+      code:  "plan_inactive",
+    });
+  }
+  const price = Number(plan.price);
+  if (!Number.isFinite(price) || price <= 0) {
+    return res.status(400).json({ error: "Plan has no valid price." });
+  }
+
+  // ── Resolve affiliate attribution from bb_click (if present + valid)
   const { affiliateId, shareLinkId } = await resolveAttribution(bbClick);
 
-  // Compute commission + BB take + seller settlement up front. Snapshot
-  // commission_pct so the split is stable even if the seller changes
-  // their rate later.
-  const commissionPct = affiliateId ? (Number(product.default_commission_pct) || 0) : 0;
-  const affiliateCommission = Math.round((price * commissionPct / 100) * 100) / 100;
-  const bbTake             = Math.round((price * BB_TAKE_PCT / 100) * 100) / 100;
-  const sellerSettlement   = Math.round((price - affiliateCommission - bbTake) * 100) / 100;
+  // ── Compute split under the new commission model ──────────────────
+  //
+  //   No affiliate? Seller gets 100% of gross. BB gets nothing this sale.
+  //   This is the "BB shares the affiliate marketing budget" model —
+  //   no affiliate involved, no budget to share.
+  //
+  //   Affiliate? pool = price × pool_pct; bb_take = pool × 30%;
+  //              affiliate_payout = pool × 70%; seller = price - pool.
+  const round2 = (n) => Math.round(n * 100) / 100;
+  const poolPctSnapshot = Number(product.affiliate_pool_pct);
+  const effectivePoolPct = (affiliateId && Number.isFinite(poolPctSnapshot)) ? poolPctSnapshot : 0;
+  const affiliatePool   = round2(price * effectivePoolPct / 100);
+  const bbTake          = round2(affiliatePool * BB_POOL_SHARE);
+  const affiliatePayout = round2(affiliatePool - bbTake);  // floats-safe (matches pool × 0.70)
+  const sellerNet       = round2(price - affiliatePool);
 
   // Mint a transaction row in 'pending' state. PayPal will reference this
   // via invoice_id; the capture webhook will look it up to mark captured.
   const txRow = {
     product_id:           product.id,
+    pricing_plan_id:      plan.id,
     advertiser_id:        product.advertiser_id,
     affiliate_id:         affiliateId,
     share_link_id:        shareLinkId,
@@ -201,12 +301,15 @@ async function handleCreateOrder(req, res) {
     buyer_email:          buyerEmail,
     buyer_ip:             clientIp(req),
     amount:               price,
-    currency:             product.currency || "USD",
-    commission_pct:       commissionPct,
-    affiliate_commission: affiliateCommission,
-    bb_take_pct:          BB_TAKE_PCT,
+    currency:             plan.currency || product.currency || "USD",
+    // ── snapshot the seller's pool %, store the calculated pool $$ —
+    //    so the split is auditable in DB even if we tweak the formula later
+    commission_pct:       effectivePoolPct,        // snapshot of affiliate_pool_pct at sale time
+    affiliate_pool:       affiliatePool,
+    affiliate_commission: affiliatePayout,         // what affiliate actually gets (70% of pool)
+    bb_take_pct:          BB_POOL_SHARE * 100,     // 30 — kept for reporting compat
     bb_take:              bbTake,
-    seller_settlement:    sellerSettlement,
+    seller_settlement:    sellerNet,
     status:               "pending",
   };
   const { data: tx, error: txErr } = await client
@@ -221,7 +324,7 @@ async function handleCreateOrder(req, res) {
   try {
     order = await paypal.createCheckoutOrder({
       transactionId: tx.id,
-      productName:   product.name,
+      productName:   product.name + (plan.plan_name && plan.plan_name !== "Standard" ? ` (${plan.plan_name})` : ""),
       amountUsd:     price,
       bbClick:       bbClick || null,
       affiliateId:   affiliateId,
@@ -251,6 +354,13 @@ async function handleCreateOrder(req, res) {
     order_id:       order.order_id,
     approval_url:   order.approval_url,
     mode:           order.mode,  // 'paypal' in prod, 'demo' if creds missing
+    plan: {
+      id:             plan.id,
+      name:           plan.plan_name,
+      price:          price,
+      currency:       plan.currency || product.currency || "USD",
+      billing_period: plan.billing_period,
+    },
   });
 }
 
