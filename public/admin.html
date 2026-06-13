@@ -253,6 +253,8 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats <span class="kbd">4</span></button>
     <button class="nav-item" data-panel="users"><span class="icon">👥</span> Users <span class="kbd">5</span></button>
     <button class="nav-item" data-panel="payouts"><span class="icon">💸</span> Payouts <span class="badge-count" id="payout-pending-count">0</span></button>
+    <button class="nav-item" data-panel="audits"><span class="icon">🛡️</span> Audit Queue <span class="badge-count" id="audit-pending-count">0</span></button>
+    <button class="nav-item" data-panel="affiliate-program"><span class="icon">🤝</span> Affiliate Program</button>
 
     <div class="sidebar-footer">
       <p class="meta">Mode: <span id="auth-mode-badge" class="mono">—</span></p>
@@ -856,6 +858,104 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
         </div>
       </div>
     </div>
+
+    <!-- ── AUDIT QUEUE ── Pass 4: pricing-plan audits ─────────────────── -->
+    <div class="panel" id="panel-audits">
+      <div class="section-header">
+        <h1>Pricing-plan audit queue</h1>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="audit-filter" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg-soft);color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;">
+            <option value="queue" selected>Queue (pending + changes requested)</option>
+            <option value="pending">Pending only</option>
+            <option value="changes_requested">Changes requested</option>
+            <option value="approved">Approved (history)</option>
+            <option value="rejected">Rejected (history)</option>
+            <option value="all">All (recent first)</option>
+          </select>
+          <button class="btn-sm btn-action" onclick="loadAuditsPanel()">Refresh</button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        Every pricing plan needs an audited discount before it can sell to affiliates. The seller lists the same package on their own site at <code>original_price</code> + attaches proof. You verify the discount is real before approving. See <a href="https://docs.claude.com" style="color:var(--pink);">audit policy</a>.
+      </p>
+
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="label">In queue</div><div class="value" style="color:var(--orange)" id="audit-stat-queue">—</div></div>
+        <div class="stat-card"><div class="label">Pending</div><div class="value yellow" id="audit-stat-pending">—</div></div>
+        <div class="stat-card"><div class="label">Changes requested</div><div class="value pink" id="audit-stat-changes">—</div></div>
+        <div class="stat-card"><div class="label">Approved (total)</div><div class="value green" id="audit-stat-approved">—</div></div>
+        <div class="stat-card"><div class="label">Rejected (total)</div><div class="value pink" id="audit-stat-rejected">—</div></div>
+      </div>
+
+      <div class="section">
+        <div id="audits-list">
+          <div class="empty-state" style="padding:48px 16px;text-align:center;color:var(--muted);">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AFFILIATE PROGRAM ── Pass 4: platform-wide affiliate metrics ── -->
+    <div class="panel" id="panel-affiliate-program">
+      <div class="section-header">
+        <h1>Affiliate program</h1>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="aff-range" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg-soft);color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="all">All time</option>
+          </select>
+          <button class="btn-sm btn-action" onclick="loadAffiliateProgramPanel()">Refresh</button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        Platform-wide affiliate program performance under the new commission model: <strong>seller picks <code>affiliate_pool_pct</code> · BB takes 30% of that pool · affiliate gets 70%</strong>. BB only earns when an affiliate drives the sale.
+      </p>
+
+      <!-- Top-line metrics — the four numbers Andy wants -->
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="label">Total affiliate sales</div><div class="value cyan" id="aff-stat-sales">—</div></div>
+        <div class="stat-card"><div class="label">Total gross revenue</div><div class="value green" id="aff-stat-gross">—</div></div>
+        <div class="stat-card"><div class="label">Total affiliate rewards paid</div><div class="value pink" id="aff-stat-payout">—</div></div>
+        <div class="stat-card"><div class="label">Total BB take (from pool)</div><div class="value" style="color:#7C3AED" id="aff-stat-take">—</div></div>
+      </div>
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="label">Total seller net</div><div class="value" id="aff-stat-seller">—</div></div>
+        <div class="stat-card"><div class="label">Total marketing pool</div><div class="value" style="color:#0EA5E9" id="aff-stat-pool">—</div></div>
+        <div class="stat-card"><div class="label">Refunded sales</div><div class="value pink" id="aff-stat-refunds">—</div></div>
+        <div class="stat-card"><div class="label">Pending (abandoned)</div><div class="value yellow" id="aff-stat-pending">—</div></div>
+      </div>
+
+      <!-- Top 10 products + top 10 affiliates side-by-side -->
+      <div class="section">
+        <div class="section-header"><h2>Top 10 products by gross</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Sales</th><th>Gross</th><th>Pool</th><th>Affiliate paid</th><th>BB take</th></tr>
+            </thead>
+            <tbody id="aff-products-body">
+              <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>Top 10 affiliates by earnings</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Affiliate</th><th>Sales driven</th><th>Gross</th><th>Earned (70% of pool)</th><th>BB share (30%)</th></tr>
+            </thead>
+            <tbody id="aff-affiliates-body">
+              <tr><td colspan="5" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -962,6 +1062,8 @@ function switchPanel(name) {
   else stopLiveActivity();
   if (name === "money") loadMoneyFlow();
   if (name === "inspector") loadAuctionInspector();
+  if (name === "audits") loadAuditsPanel();
+  if (name === "affiliate-program") loadAffiliateProgramPanel();
 }
 
 // ── Users panel ─────────────────────────────────────────────────────
@@ -2099,6 +2201,8 @@ const searchItems = [
   { label: 'DSP Seats', panel: 'seats' },
   { label: 'Users', panel: 'users' },
   { label: 'Payouts — Cron health, blocked publishers, manual controls', panel: 'payouts' },
+  { label: 'Audit Queue — Pricing-plan discount verification', panel: 'audits' },
+  { label: 'Affiliate Program — Platform-wide commission metrics', panel: 'affiliate-program' },
   { label: 'Benna Playground', href: '/playground.html' },
   { label: 'System Status', href: '/status.html' },
   { label: 'API Docs', href: '/docs' },
@@ -2150,6 +2254,274 @@ document.getElementById('searchInput').addEventListener('keydown', function(e) {
     active?.click();
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// PASS 4 — Audit Queue + Affiliate Program panels
+// ═══════════════════════════════════════════════════════════════════════
+
+function adminFetch(path, opts = {}) {
+  const headers = Object.assign({}, opts.headers || {}, {
+    "Authorization": "Bearer " + (token || localStorage.getItem("bb_admin_token") || ""),
+  });
+  if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+  return fetch(path, Object.assign({}, opts, { headers }));
+}
+
+function fmtUsd(n) {
+  const v = Number(n) || 0;
+  try { return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(v); }
+  catch (_) { return "$" + v.toFixed(2); }
+}
+function fmtInt(n) {
+  const v = Number(n) || 0;
+  try { return new Intl.NumberFormat().format(v); } catch (_) { return String(v); }
+}
+function escHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+// ─── Audit Queue ───────────────────────────────────────────────────────
+
+const AUDIT_BADGE_STYLES = {
+  pending:            "background:#FEF3C7;color:#92400E;",
+  approved:           "background:#ECFDF5;color:#059669;",
+  rejected:           "background:#FEF2F2;color:#DC2626;",
+  changes_requested:  "background:#FFF7ED;color:#C2410C;",
+};
+function auditBadge(status) {
+  const s = AUDIT_BADGE_STYLES[status] || "background:#F3F4F6;color:#6B7280;";
+  const label = (status || "—").replace(/_/g, " ").toUpperCase();
+  return `<span style="${s}padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;letter-spacing:0.04em;">${escHtml(label)}</span>`;
+}
+
+async function loadAuditsPanel() {
+  await Promise.all([loadAuditSummary(), loadAuditList()]);
+}
+
+async function loadAuditSummary() {
+  try {
+    const r = await adminFetch("/api/admin-audits?action=summary");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    const c = j.counts || {};
+    document.getElementById("audit-stat-queue").textContent     = fmtInt(c.queue);
+    document.getElementById("audit-stat-pending").textContent   = fmtInt(c.pending);
+    document.getElementById("audit-stat-changes").textContent   = fmtInt(c.changes_requested);
+    document.getElementById("audit-stat-approved").textContent  = fmtInt(c.approved);
+    document.getElementById("audit-stat-rejected").textContent  = fmtInt(c.rejected);
+    const badge = document.getElementById("audit-pending-count");
+    if (badge) badge.textContent = String(c.queue || 0);
+  } catch (e) {
+    console.warn("[admin] audit summary failed:", e.message);
+  }
+}
+
+async function loadAuditList() {
+  const listEl = document.getElementById("audits-list");
+  const filter = document.getElementById("audit-filter")?.value || "queue";
+  listEl.innerHTML = `<div class="empty-state" style="padding:48px 16px;text-align:center;color:var(--muted);">Loading…</div>`;
+  try {
+    const r = await adminFetch("/api/admin-audits?action=list&status=" + encodeURIComponent(filter));
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    renderAuditList(j.audits || []);
+  } catch (e) {
+    listEl.innerHTML = `<div class="empty-state" style="padding:48px 16px;text-align:center;color:var(--pink);">Failed to load: ${escHtml(e.message)}</div>`;
+  }
+}
+
+function renderAuditList(items) {
+  const listEl = document.getElementById("audits-list");
+  if (!items.length) {
+    listEl.innerHTML = `
+      <div class="empty-state" style="padding:64px 16px;text-align:center;color:var(--muted);">
+        <div style="font-size:36px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Queue is empty</div>
+        <div style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.55;">No pricing plans waiting for review. New seller submissions land here automatically.</div>
+      </div>`;
+    return;
+  }
+  listEl.innerHTML = items.map((a) => {
+    const sellerName = (a.advertiser && (a.advertiser.company_name || a.advertiser.display_name || a.advertiser.email)) || "—";
+    const sellerEmail = (a.advertiser && a.advertiser.email) || "";
+    const productName = (a.product && a.product.name) || "—";
+    const proofHtml = a.original_price_proof_url
+      ? `<a href="${escHtml(a.original_price_proof_url)}" target="_blank" rel="noopener" style="color:var(--pink);text-decoration:none;font-size:12px;">${escHtml(a.original_price_proof_url.length > 80 ? a.original_price_proof_url.slice(0, 80) + "…" : a.original_price_proof_url)} ↗</a>`
+      : `<span style="color:var(--pink);font-size:12px;">⚠ No proof URL attached</span>`;
+    const proofNotes = a.original_price_proof_notes ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;">"${escHtml(a.original_price_proof_notes)}"</div>` : "";
+    const reviewNotes = a.audit_review_notes ? `<div style="font-size:12px;background:var(--bg-soft);border-left:3px solid var(--orange);padding:8px 10px;margin-top:8px;border-radius:0 6px 6px 0;color:var(--text);"><strong>Prior reviewer notes:</strong> ${escHtml(a.audit_review_notes)}</div>` : "";
+    const isQueue = (a.audit_status === "pending" || a.audit_status === "changes_requested");
+    const discount = a.discount_pct ? `<span style="background:#FEE2E2;color:#B91C1C;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;">-${a.discount_pct}%</span>` : "";
+    return `
+      <div data-audit-id="${escHtml(a.id)}" class="audit-card" style="background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+          <div style="flex:1;min-width:260px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+              <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">${escHtml(productName)}</div>
+              ${auditBadge(a.audit_status)}
+            </div>
+            <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px;">${escHtml(a.plan_name)}</div>
+            ${a.description ? `<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">${escHtml(a.description)}</div>` : ""}
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+              <span style="font-size:22px;font-weight:700;color:var(--text);">${escHtml(fmtUsd(a.price))}</span>
+              ${a.original_price ? `<span style="font-size:13px;color:var(--muted);text-decoration:line-through;">${escHtml(fmtUsd(a.original_price))}</span>` : ""}
+              ${discount}
+              <span style="font-size:11px;color:var(--muted);">${escHtml(a.billing_period || "one_time")} · ${escHtml(a.currency || "USD")}</span>
+            </div>
+          </div>
+          <div style="text-align:right;min-width:200px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text);">${escHtml(sellerName)}</div>
+            ${sellerEmail && sellerEmail !== sellerName ? `<div style="font-size:11px;color:var(--muted);">${escHtml(sellerEmail)}</div>` : ""}
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Submitted ${new Date(a.created_at).toLocaleString()}</div>
+            ${a.audit_reviewed_at ? `<div style="font-size:11px;color:var(--muted);">Reviewed ${new Date(a.audit_reviewed_at).toLocaleString()}</div>` : ""}
+          </div>
+        </div>
+
+        <div style="margin:14px 0;padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--line);">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">Proof of original price</div>
+          ${proofHtml}
+          ${proofNotes}
+        </div>
+        ${reviewNotes}
+
+        ${isQueue ? `
+          <div data-notes-row style="margin-top:14px;display:none;">
+            <textarea data-notes-input rows="2" placeholder="Notes to the seller (required when rejecting or requesting changes)…" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button class="btn-sm btn-action" data-action="approve" data-audit-id="${escHtml(a.id)}" style="background:#059669;color:#fff;border-color:#059669;">✓ Approve</button>
+            <button class="btn-sm btn-action" data-action="request_changes" data-audit-id="${escHtml(a.id)}" style="background:#F59E0B;color:#fff;border-color:#F59E0B;">✎ Request changes</button>
+            <button class="btn-sm btn-action" data-action="reject" data-audit-id="${escHtml(a.id)}" style="background:#DC2626;color:#fff;border-color:#DC2626;">✕ Reject</button>
+          </div>
+        ` : ""}
+      </div>`;
+  }).join("");
+
+  // Delegated handler — single per-render listener avoids accumulation
+  listEl.onclick = async (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.auditId;
+    const card = btn.closest(".audit-card");
+    const notesRow = card.querySelector("[data-notes-row]");
+    const notesInput = card.querySelector("[data-notes-input]");
+    const needsNotes = action === "reject" || action === "request_changes";
+
+    // Reveal notes textarea on first click if hidden and required
+    if (needsNotes && notesRow.style.display === "none") {
+      notesRow.style.display = "block";
+      notesInput.focus();
+      btn.dataset.confirmed = "1";
+      return;
+    }
+    const notes = (notesInput && notesInput.value || "").trim();
+    if (needsNotes && !notes) {
+      toast("Notes are required when rejecting or requesting changes", "error");
+      notesInput.focus();
+      return;
+    }
+    if (!confirm(`${action.replace(/_/g, " ")} this plan?`)) return;
+    btn.disabled = true;
+    btn.textContent = "Submitting…";
+    try {
+      const r = await adminFetch("/api/admin-audits?action=" + action, {
+        method: "POST",
+        body: JSON.stringify({ plan_id: id, notes }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+      toast(`Plan ${action.replace(/_/g, " ")}d`, "success");
+      await loadAuditsPanel();
+    } catch (err) {
+      toast("Failed: " + err.message, "error");
+      btn.disabled = false;
+      btn.textContent = action === "approve" ? "✓ Approve" : action === "reject" ? "✕ Reject" : "✎ Request changes";
+    }
+  };
+}
+
+// Wire the filter dropdown
+document.getElementById("audit-filter")?.addEventListener("change", () => loadAuditList());
+
+// ─── Affiliate Program metrics ─────────────────────────────────────────
+
+async function loadAffiliateProgramPanel() {
+  const range = document.getElementById("aff-range")?.value || "30";
+  document.getElementById("aff-products-body").innerHTML = `<tr><td colspan="6" class="empty-state">Loading…</td></tr>`;
+  document.getElementById("aff-affiliates-body").innerHTML = `<tr><td colspan="5" class="empty-state">Loading…</td></tr>`;
+  try {
+    const r = await adminFetch("/api/admin-metrics?action=affiliate_program&range=" + encodeURIComponent(range));
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    renderAffiliateProgram(j);
+  } catch (e) {
+    document.getElementById("aff-products-body").innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
+    document.getElementById("aff-affiliates-body").innerHTML = `<tr><td colspan="5" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+function renderAffiliateProgram(data) {
+  const t = data.totals || {};
+  document.getElementById("aff-stat-sales").textContent   = fmtInt(t.sales);
+  document.getElementById("aff-stat-gross").textContent   = fmtUsd(t.gross);
+  document.getElementById("aff-stat-payout").textContent  = fmtUsd(t.affiliate_payout);
+  document.getElementById("aff-stat-take").textContent    = fmtUsd(t.bb_take);
+  document.getElementById("aff-stat-seller").textContent  = fmtUsd(t.seller_net);
+  document.getElementById("aff-stat-pool").textContent    = fmtUsd(t.pool);
+  document.getElementById("aff-stat-refunds").textContent = fmtInt(t.refunded_count) + " · " + fmtUsd(t.refunded_amount);
+  document.getElementById("aff-stat-pending").textContent = fmtInt(t.pending_count);
+
+  const prodBody = document.getElementById("aff-products-body");
+  if (!data.by_product || !data.by_product.length) {
+    prodBody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--muted);">No sales in this window yet.</td></tr>`;
+  } else {
+    prodBody.innerHTML = data.by_product.map((p) => `
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:10px;">${p.image_url ? `<img src="${escHtml(p.image_url)}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'">` : ""}<span>${escHtml(p.name || "—")}</span></div></td>
+        <td>${fmtInt(p.sales)}</td>
+        <td>${fmtUsd(p.gross)}</td>
+        <td>${fmtUsd(p.pool)}</td>
+        <td style="color:var(--pink);font-weight:600;">${fmtUsd(p.payout)}</td>
+        <td style="color:#7C3AED;font-weight:600;">${fmtUsd(p.take)}</td>
+      </tr>`).join("");
+  }
+
+  const affBody = document.getElementById("aff-affiliates-body");
+  if (!data.by_affiliate || !data.by_affiliate.length) {
+    affBody.innerHTML = `<tr><td colspan="5" class="empty-state" style="color:var(--muted);">No attributed sales in this window yet.</td></tr>`;
+  } else {
+    affBody.innerHTML = data.by_affiliate.map((a) => {
+      const ident = a.display_name || a.email || (a.affiliate_id || "").slice(0, 8) + "…";
+      return `
+        <tr>
+          <td><div style="font-weight:600;">${escHtml(ident)}</div>${a.email && a.email !== ident ? `<div style="font-size:11px;color:var(--muted);">${escHtml(a.email)}</div>` : ""}</td>
+          <td>${fmtInt(a.sales)}</td>
+          <td>${fmtUsd(a.gross)}</td>
+          <td style="color:var(--pink);font-weight:600;">${fmtUsd(a.payout)}</td>
+          <td style="color:#7C3AED;font-weight:600;">${fmtUsd(a.take)}</td>
+        </tr>`;
+    }).join("");
+  }
+}
+
+document.getElementById("aff-range")?.addEventListener("change", () => loadAffiliateProgramPanel());
+
+// Refresh the audit-queue badge count on login so the sidebar reflects
+// reality even before the operator opens the panel.
+(function bootAuditBadge() {
+  let tries = 0;
+  const iv = setInterval(() => {
+    tries += 1;
+    if (token || tries > 30) {
+      clearInterval(iv);
+      if (token) loadAuditSummary().catch(() => {});
+    }
+  }, 500);
+})();
+
 </script>
 </body>
 </html>
