@@ -299,6 +299,113 @@ function normalizeProduct(body, { partial = false } = {}) {
     }
   }
 
+  // ── Pricing & Affiliate (commission model v2) ──────────────────────
+  // affiliate_pool_pct replaces default_commission_pct semantically.
+  // The DB trigger (in MIGRATION-pricing-plans.sql) keeps the two
+  // columns in sync, so writing either populates both. We accept and
+  // route through both names — newer clients use affiliate_pool_pct.
+  if (body.affiliate_pool_pct !== undefined) {
+    const pct = Number(body.affiliate_pool_pct);
+    if (!Number.isFinite(pct)) return { error: "affiliate_pool_pct must be a number" };
+    if (pct < 0 || pct > 80) return { error: "affiliate_pool_pct must be between 0 and 80" };
+    row.affiliate_pool_pct = Math.round(pct * 100) / 100;
+  }
+
+  // ── New marketing content fields (Restructure-4) ────────────────────
+  // String-array fields. Each entry trimmed, empties dropped. Caps keep
+  // any one product from blowing up the row size.
+  const arrayField = (key, max, maxLen) => {
+    if (body[key] === undefined) return;
+    if (!Array.isArray(body[key])) return { error: `${key} must be an array of strings` };
+    if (body[key].length > max) return { error: `${key}: max ${max} items` };
+    row[key] = body[key]
+      .map((s) => String(s == null ? "" : s).trim().slice(0, maxLen))
+      .filter(Boolean);
+    return null;
+  };
+  let arrErr;
+  if ((arrErr = arrayField("tldr_bullets",   5, 240)))  return arrErr;
+  if ((arrErr = arrayField("alternative_to", 10, 80)))  return arrErr;
+  if ((arrErr = arrayField("integrations",   20, 80)))  return arrErr;
+  if ((arrErr = arrayField("best_for",       10, 80)))  return arrErr;
+  if ((arrErr = arrayField("deal_terms",     20, 500))) return arrErr;
+
+  // Trust block
+  if (body.refund_window_days !== undefined) {
+    if (body.refund_window_days == null || body.refund_window_days === "") {
+      row.refund_window_days = null;
+    } else {
+      const n = parseInt(body.refund_window_days, 10);
+      if (!Number.isFinite(n) || n < 0 || n > 365) {
+        return { error: "refund_window_days must be between 0 and 365" };
+      }
+      row.refund_window_days = n;
+    }
+  }
+  if (body.guarantee_label !== undefined) {
+    row.guarantee_label = body.guarantee_label == null
+      ? null : String(body.guarantee_label).trim().slice(0, 120) || null;
+  }
+
+  // Company card — all optional text + a couple of constrained selects
+  const textField = (key, max) => {
+    if (body[key] === undefined) return;
+    row[key] = body[key] == null ? null : String(body[key]).trim().slice(0, max) || null;
+  };
+  const urlField = (key) => {
+    if (body[key] === undefined) return;
+    if (body[key] == null || body[key] === "") { row[key] = null; return; }
+    const u = String(body[key]).trim();
+    if (!/^https?:\/\//i.test(u)) return { error: `${key} must be a valid URL` };
+    row[key] = u.slice(0, 2000);
+    return null;
+  };
+
+  let urlErr;
+  if ((urlErr = urlField("company_logo_url")))    return urlErr;
+  if ((urlErr = urlField("company_website_url"))) return urlErr;
+  if ((urlErr = urlField("founder_photo_url")))   return urlErr;
+  if ((urlErr = urlField("founder_linkedin_url"))) return urlErr;
+
+  textField("company_tagline", 240);
+  textField("company_about",   5000);
+  textField("company_city",    120);
+  textField("founder_name",    120);
+  textField("founder_role",    120);
+
+  if (body.company_country_code !== undefined) {
+    if (body.company_country_code == null || body.company_country_code === "") {
+      row.company_country_code = null;
+    } else {
+      const cc = String(body.company_country_code).trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(cc)) return { error: "company_country_code must be a 2-letter ISO code (US, TW, etc.)" };
+      row.company_country_code = cc;
+    }
+  }
+
+  // Constrained dropdowns — accept the seller's choice as-is from the
+  // allowlist used in the modal. Lenient: anything outside the list is
+  // coerced to null rather than erroring (UI keeps the seller honest).
+  const oneOf = (key, allowed) => {
+    if (body[key] === undefined) return;
+    if (body[key] == null || body[key] === "") { row[key] = null; return; }
+    const v = String(body[key]).trim();
+    row[key] = allowed.includes(v) ? v : null;
+  };
+  oneOf("company_size",           ["1-10", "11-50", "51-200", "201-500", "501+"]);
+  oneOf("company_growth_stage",   ["Idea", "Pre-revenue", "Growth", "Profitable"]);
+  oneOf("company_funding_status", ["Bootstrapped", "Pre-seed", "Seed", "Series A", "Series B+"]);
+
+  if (body.company_founded_date !== undefined) {
+    if (body.company_founded_date == null || body.company_founded_date === "") {
+      row.company_founded_date = null;
+    } else {
+      const d = String(body.company_founded_date).trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return { error: "company_founded_date must be YYYY-MM-DD" };
+      row.company_founded_date = d;
+    }
+  }
+
   return { row };
 }
 

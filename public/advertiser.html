@@ -3251,143 +3251,6 @@
                 </div>
               </div>
             </div><!-- /[data-shell-route="product-orders"] -->
-
-            <!-- ═══════ ROUTE: product-plans (per-product pricing manager) ═══════
-                 Hash format: #/product-plans/<product_id>
-                 Seller manages multiple price tiers per product. Each plan has
-                 its own audit gate (must list at original_price on seller's own
-                 site + attach proof URL). Only audit_status='approved' plans
-                 are purchasable. See [[pricing-plans-audit-policy]]. -->
-            <div data-shell-route="product-plans">
-              <div style="margin-bottom:18px;">
-                <a href="#/products" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#6B7280;font-size:13px;font-weight:600;padding:6px 0;">
-                  <span style="font-size:14px;">←</span> Back to Products
-                </a>
-              </div>
-
-              <!-- Product header card -->
-              <div id="ppHeader" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
-                <div style="padding:24px;color:#9CA3AF;font-size:13px;">Loading product…</div>
-              </div>
-
-              <!-- Policy explainer card — clarifies what the audit gate is -->
-              <div style="background:linear-gradient(135deg,#EEF2FF,#FFF1F6);border:1px solid #C7D2FE;border-radius:12px;padding:18px 22px;margin-bottom:18px;">
-                <div style="font-size:13px;font-weight:700;color:#4338CA;margin-bottom:6px;">How the audit gate works</div>
-                <div style="font-size:13px;color:#374151;line-height:1.6;">
-                  Every pricing plan must list the identical package on your own site at the <strong>original price</strong> you set here. Attach the proof URL (your own pricing page). Andy manually verifies the discount is real before the plan goes live for affiliates. Without an approved audit, buyers can't purchase the plan.
-                </div>
-                <div style="font-size:12px;color:#6B7280;margin-top:8px;line-height:1.55;">
-                  Your affiliate marketing budget is set at the <strong>product</strong> level — Boost Boss takes 30% of that budget, your affiliate gets 70%. You keep the rest of each sale.
-                </div>
-              </div>
-
-              <!-- Plan list + add button -->
-              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-                  <div>
-                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Pricing plans</div>
-                    <div style="font-size:12px;color:#6B7280;">Each plan is a separate price tier. Buyers pick one on the product page.</div>
-                  </div>
-                  <button id="ppAddBtn" type="button" class="new-campaign-btn" style="padding:9px 14px;">+ Add plan</button>
-                </div>
-                <div id="ppPlansList">
-                  <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading plans…</div>
-                </div>
-              </div>
-            </div><!-- /[data-shell-route="product-plans"] -->
-
-            <!-- Pricing-plan editor modal — shared by create + edit. Same
-                 chrome as the product modal, separate form. -->
-            <div id="planModal" class="modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.45);z-index:1000;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;">
-              <div style="background:#fff;border-radius:16px;width:100%;max-width:680px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F3F4F6;">
-                  <div>
-                    <div id="planModalTitle" style="font-size:16px;font-weight:700;color:#111827;">New pricing plan</div>
-                    <div style="font-size:12px;color:#6B7280;margin-top:2px;">Each plan must point to a matching package on your own site at the original price.</div>
-                  </div>
-                  <button id="planModalClose" type="button" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;line-height:1;padding:4px 8px;">×</button>
-                </div>
-                <form id="planForm" style="padding:24px;">
-                  <div id="planFormErr" style="display:none;padding:10px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#DC2626;font-size:12px;margin-bottom:16px;"></div>
-
-                  <!-- Identity -->
-                  <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Plan name <span style="color:#DC2626;">*</span></label>
-                    <input type="text" name="plan_name" required maxlength="120" placeholder="e.g. Lifetime Tier 1" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;">
-                  </div>
-                  <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Plan description (optional)</label>
-                    <input type="text" name="description" maxlength="240" placeholder="One-line subtitle shown under the plan card" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;">
-                  </div>
-
-                  <!-- Pricing -->
-                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
-                    <div>
-                      <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">BB price <span style="color:#DC2626;">*</span></label>
-                      <input type="number" name="price" required step="0.01" min="0" placeholder="49.00" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;">
-                    </div>
-                    <div>
-                      <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Original price</label>
-                      <input type="number" name="original_price" step="0.01" min="0" placeholder="468.00" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;">
-                    </div>
-                    <div>
-                      <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Currency</label>
-                      <select name="currency" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;">
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Billing period</label>
-                    <select name="billing_period" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;">
-                      <option value="one_time">One-time payment</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="annual">Annual</option>
-                      <option value="lifetime">Lifetime</option>
-                    </select>
-                  </div>
-
-                  <!-- Audit fields -->
-                  <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
-                    <div style="font-size:12px;font-weight:700;color:#4338CA;margin-bottom:4px;">Audit proof</div>
-                    <div style="font-size:11px;color:#6B7280;margin-bottom:12px;line-height:1.55;">Link to your own pricing page where this exact plan is listed at the original price. Required before submitting for audit.</div>
-                    <div style="margin-bottom:10px;">
-                      <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Proof URL</label>
-                      <input type="url" name="original_price_proof_url" placeholder="https://your-site.com/pricing" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;">
-                    </div>
-                    <div>
-                      <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Notes for the reviewer (optional)</label>
-                      <textarea name="original_price_proof_notes" rows="2" placeholder="e.g. 'Scroll to the second pricing card on this page'" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
-                    </div>
-                  </div>
-
-                  <!-- Features -->
-                  <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">Features (one per line)</label>
-                    <textarea name="features_text" rows="4" placeholder="Unlimited foo&#10;10GB bar&#10;Priority support" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
-                    <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Each line becomes a green-check bullet on the plan card.</div>
-                  </div>
-
-                  <!-- Flags -->
-                  <div style="display:flex;gap:18px;margin-bottom:20px;flex-wrap:wrap;">
-                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;">
-                      <input type="checkbox" name="is_active" checked> Active (visible to buyers)
-                    </label>
-                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;">
-                      <input type="checkbox" name="is_recommended"> Mark as recommended
-                    </label>
-                  </div>
-
-                  <div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #F3F4F6;padding-top:18px;">
-                    <button type="button" id="planFormCancel" style="padding:9px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Cancel</button>
-                    <button type="submit" id="planFormSubmit" class="new-campaign-btn" style="padding:9px 18px;">Save plan</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-
             <!-- ═══════ ROUTE: billing ═══════ -->
             <div data-shell-route="billing">
 
@@ -3917,10 +3780,11 @@
             </div>
 
             <!-- Tab strip -->
-            <div class="pf-tabs" style="display:flex;gap:2px;border-bottom:1px solid #E5E7EB;margin-bottom:20px;">
+            <div class="pf-tabs" style="display:flex;gap:2px;border-bottom:1px solid #E5E7EB;margin-bottom:20px;flex-wrap:wrap;">
               <button type="button" class="pf-tab pf-tab-active" data-pf-tab="basics" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;">Basics</button>
               <button type="button" class="pf-tab" data-pf-tab="storefront" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Storefront</button>
               <button type="button" class="pf-tab" data-pf-tab="fulfillment" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Fulfillment</button>
+              <button type="button" class="pf-tab" data-pf-tab="pricing" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;">Pricing &amp; Affiliate</button>
             </div>
 
             <form id="productForm">
@@ -3968,11 +3832,6 @@
                   <label class="form-label">Default destination URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(fallback when no BB page)</span></label>
                   <input type="url" class="form-input" name="default_url" required placeholder="https://example.com/product">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Default commission %</label>
-                  <input type="number" class="form-input" name="default_commission_pct" min="0" max="100" step="0.01" value="0" required>
-                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">What affiliates earn per converting customer.</div>
-                </div>
               </div>
 
               <!-- ─── TAB 2: STOREFRONT ─── -->
@@ -4006,6 +3865,147 @@
                   <input type="url" class="form-input" name="external_marketing_url" placeholder="https://example.com/full-product-page">
                   <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">When set, BB shows a "Read full details →" link on the product page.</div>
                 </div>
+
+                <!-- ─── NEW: TL;DR bullets ─── -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border:1px solid #BBF7D0;border-radius:10px;margin:24px 0 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:4px;">TL;DR (top-of-page bullets)</div>
+                  <div style="font-size:11.5px;color:#047857;line-height:1.55;">Short value-prop sentences shown as green-check bullets at the top of your product page. AppSumo / Castmagic style. 2–5 bullets, one per line.</div>
+                </div>
+                <div class="form-group">
+                  <textarea class="form-input" name="tldr_bullets_text" rows="4" placeholder="Transcribe long-form audio and video into ready-to-publish content&#10;Automate your content workflow from your media library"></textarea>
+                </div>
+
+                <!-- ─── NEW: At-a-glance card ─── -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:10px;margin:24px 0 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#1E40AF;margin-bottom:4px;">At-a-glance card</div>
+                  <div style="font-size:11.5px;color:#1D4ED8;line-height:1.55;">3-column info box buyers scan in a second. One item per line in each field.</div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Alternative to</label>
+                    <textarea class="form-input" name="alternative_to_text" rows="3" placeholder="Descript&#10;Otter.ai"></textarea>
+                  </div>
+                  <div>
+                    <label class="form-label">Integrations</label>
+                    <textarea class="form-input" name="integrations_text" rows="3" placeholder="Google Drive&#10;Zapier&#10;Zoom"></textarea>
+                  </div>
+                  <div>
+                    <label class="form-label">Best for</label>
+                    <textarea class="form-input" name="best_for_text" rows="3" placeholder="Content creators&#10;Online coaches&#10;Podcasters"></textarea>
+                  </div>
+                </div>
+
+                <!-- ─── NEW: Trust block (refund + guarantee + deal terms) ─── -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);border:1px solid #FDBA74;border-radius:10px;margin:24px 0 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#9A3412;margin-bottom:4px;">Trust block</div>
+                  <div style="font-size:11.5px;color:#C2410C;line-height:1.55;">Refund window drives the "Refundable up to N days" badge. Deal terms render as a bottom-of-page accordion. Buyers read this before clicking Buy.</div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:160px 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Refund window (days)</label>
+                    <input type="number" class="form-input" name="refund_window_days" min="0" max="365" placeholder="60">
+                  </div>
+                  <div>
+                    <label class="form-label">Guarantee label</label>
+                    <input type="text" class="form-input" name="guarantee_label" maxlength="120" placeholder="60-day money-back guarantee">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Deal terms <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(one bullet per line; rendered as an expandable accordion)</span></label>
+                  <textarea class="form-input" name="deal_terms_text" rows="5" placeholder="No codes, no stacking&#10;Must activate within 60 days of purchase&#10;Lifetime tiers cover all future updates"></textarea>
+                </div>
+
+                <!-- ─── NEW: Company / founder card ─── -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:10px;margin:24px 0 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#5B21B6;margin-bottom:4px;">Company &amp; founder card</div>
+                  <div style="font-size:11.5px;color:#6D28D9;line-height:1.55;">Bottom-of-page trust block. AppSumo shows founded date, location, size, growth stage, funding, plus founder photo + LinkedIn. All optional.</div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Company logo URL</label>
+                    <input type="url" class="form-input" name="company_logo_url" placeholder="https://cdn.example.com/logo.svg">
+                  </div>
+                  <div>
+                    <label class="form-label">Company website</label>
+                    <input type="url" class="form-input" name="company_website_url" placeholder="https://example.com">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Company tagline</label>
+                  <input type="text" class="form-input" name="company_tagline" maxlength="240" placeholder="Effortless AI content repurposing">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">About the company <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(2–3 sentences)</span></label>
+                  <textarea class="form-input" name="company_about" rows="3" placeholder="Castmagic emerged to solve the tedious challenge of turning long-form audio and video into publish-ready assets..."></textarea>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:140px 1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Founded</label>
+                    <input type="date" class="form-input" name="company_founded_date">
+                  </div>
+                  <div>
+                    <label class="form-label">City</label>
+                    <input type="text" class="form-input" name="company_city" maxlength="80" placeholder="Austin">
+                  </div>
+                  <div>
+                    <label class="form-label">Country (ISO code)</label>
+                    <input type="text" class="form-input" name="company_country_code" maxlength="2" placeholder="US">
+                  </div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Team size</label>
+                    <select class="form-input" name="company_size">
+                      <option value="">—</option>
+                      <option value="1-10">1–10</option>
+                      <option value="11-50">11–50</option>
+                      <option value="51-200">51–200</option>
+                      <option value="201-500">201–500</option>
+                      <option value="501+">501+</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Growth stage</label>
+                    <select class="form-input" name="company_growth_stage">
+                      <option value="">—</option>
+                      <option value="Idea">Idea</option>
+                      <option value="Pre-revenue">Pre-revenue</option>
+                      <option value="Growth">Growth</option>
+                      <option value="Profitable">Profitable</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Funding</label>
+                    <select class="form-input" name="company_funding_status">
+                      <option value="">—</option>
+                      <option value="Bootstrapped">Bootstrapped</option>
+                      <option value="Pre-seed">Pre-seed</option>
+                      <option value="Seed">Seed</option>
+                      <option value="Series A">Series A</option>
+                      <option value="Series B+">Series B+</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Founder name</label>
+                    <input type="text" class="form-input" name="founder_name" maxlength="120" placeholder="Blaine Bolus">
+                  </div>
+                  <div>
+                    <label class="form-label">Founder role</label>
+                    <input type="text" class="form-input" name="founder_role" maxlength="120" placeholder="Founder">
+                  </div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div>
+                    <label class="form-label">Founder photo URL</label>
+                    <input type="url" class="form-input" name="founder_photo_url" placeholder="https://cdn.example.com/headshot.jpg">
+                  </div>
+                  <div>
+                    <label class="form-label">Founder LinkedIn</label>
+                    <input type="url" class="form-input" name="founder_linkedin_url" placeholder="https://www.linkedin.com/in/...">
+                  </div>
+                </div>
               </div>
 
               <!-- ─── TAB 3: FULFILLMENT ─── -->
@@ -4034,6 +4034,103 @@
                     <label class="form-label">Package duration (days) <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional)</span></label>
                     <input type="number" class="form-input" name="package_duration_days" min="1" max="3650" placeholder="365">
                     <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">For subscription packs: how long access lasts after redemption.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ─── TAB 4: PRICING & AFFILIATE ─── -->
+              <div class="pf-panel" data-pf-panel="pricing" style="display:none;">
+
+                <!-- Affiliate marketing budget (product-level) -->
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF1F6,#FCE7F3);border:1px solid #F9A8D4;border-radius:10px;margin-bottom:18px;">
+                  <div style="font-size:13px;font-weight:700;color:#9D174D;margin-bottom:4px;">Affiliate marketing budget</div>
+                  <div style="font-size:11.5px;color:#BE185D;line-height:1.55;">
+                    Pick what % of each sale funds your affiliate program. <strong>BB takes 30% of that budget · your affiliate gets 70% · you keep the rest of the sale.</strong> Higher pool = stronger affiliate motivation.
+                  </div>
+                </div>
+                <div class="form-group" style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:end;">
+                  <div>
+                    <label class="form-label">Affiliate pool % <span style="color:#FF2D78;">*</span></label>
+                    <input type="number" class="form-input" name="affiliate_pool_pct" min="0" max="80" step="0.5" value="20" required>
+                  </div>
+                  <div style="padding:10px 14px;background:#FFFFFF;border:1px solid #FBCFE8;border-radius:8px;font-size:11.5px;color:#6B7280;line-height:1.7;" id="poolSplitPreview">
+                    On a $100 sale: <strong style="color:#111827;">$80 to you</strong> · <strong style="color:#FF2D78;">$14 to affiliate</strong> · <strong style="color:#7C3AED;">$6 to BB</strong>
+                  </div>
+                </div>
+
+                <!-- Pricing plans inline editor -->
+                <div style="margin-top:24px;padding-top:18px;border-top:1px solid #F3F4F6;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:700;color:#111827;">Pricing plans</div>
+                      <div style="font-size:11.5px;color:#6B7280;margin-top:2px;">Multiple tiers ship to the buyer page as a plan picker. Each plan needs original_price + proof URL before going live.</div>
+                    </div>
+                    <button type="button" id="ppInlineAddBtn" style="padding:8px 14px;border:1px solid #FF2D78;border-radius:8px;background:#FFF1F6;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">+ Add plan</button>
+                  </div>
+                  <div id="ppInlineList" style="margin-top:12px;">
+                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:12.5px;background:#F9FAFB;border-radius:8px;border:1px dashed #E5E7EB;">Save the product first, then add pricing plans here.</div>
+                  </div>
+                </div>
+
+                <!-- Inline plan editor (hidden until + Add plan is clicked or Edit on a plan) -->
+                <div id="ppInlineEditor" style="display:none;margin-top:16px;padding:16px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#111827;" id="ppInlineEditorTitle">New plan</div>
+                    <button type="button" id="ppInlineEditorClose" style="background:none;border:none;font-size:20px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 4px;">×</button>
+                  </div>
+                  <input type="hidden" name="pp_plan_id" id="ppPlanId">
+                  <div style="display:grid;grid-template-columns:1fr 120px;gap:12px;margin-bottom:12px;">
+                    <div>
+                      <label class="form-label">Plan name *</label>
+                      <input type="text" class="form-input" id="ppPlanName" placeholder="e.g. Lifetime Tier 1">
+                    </div>
+                    <div>
+                      <label class="form-label">Currency</label>
+                      <select class="form-input" id="ppPlanCurrency">
+                        <option value="USD" selected>USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description (optional)</label>
+                    <input type="text" class="form-input" id="ppPlanDesc" placeholder="One-line subtitle under the plan card">
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div>
+                      <label class="form-label">BB price *</label>
+                      <input type="number" class="form-input" id="ppPlanPrice" min="0" step="0.01" placeholder="49.00">
+                    </div>
+                    <div>
+                      <label class="form-label">Original price</label>
+                      <input type="number" class="form-input" id="ppPlanOriginal" min="0" step="0.01" placeholder="468.00">
+                    </div>
+                    <div>
+                      <label class="form-label">Billing</label>
+                      <select class="form-input" id="ppPlanBilling">
+                        <option value="one_time">One-time</option><option value="monthly">Monthly</option><option value="annual">Annual</option><option value="lifetime">Lifetime</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Proof URL <span style="font-size:11px;color:#FF2D78;">(required before audit)</span></label>
+                    <input type="url" class="form-input" id="ppPlanProofUrl" placeholder="https://your-site.com/pricing">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Notes for the reviewer (optional)</label>
+                    <textarea class="form-input" id="ppPlanProofNotes" rows="2" placeholder="e.g. 'Scroll to the second pricing card on this page'"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Features (one per line)</label>
+                    <textarea class="form-input" id="ppPlanFeatures" rows="3" placeholder="Unlimited foo&#10;10GB bar&#10;Priority support"></textarea>
+                  </div>
+                  <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;"><input type="checkbox" id="ppPlanActive" checked> Active</label>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;"><input type="checkbox" id="ppPlanRecommended"> Recommended</label>
+                  </div>
+                  <div id="ppInlineEditorErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:10px;"></div>
+                  <div style="display:flex;justify-content:flex-end;gap:8px;">
+                    <button type="button" id="ppInlineEditorCancel" style="padding:8px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Cancel</button>
+                    <button type="button" id="ppInlineEditorSave" style="padding:8px 16px;border:none;border-radius:8px;background:#FF2D78;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">Save plan</button>
                   </div>
                 </div>
               </div>
@@ -4940,7 +5037,7 @@
             // [data-shell-route="..."] block via the wrapper's
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
-            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'product-orders', 'product-plans', 'billing', 'setup'];
+            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -11601,13 +11698,11 @@
                     form.elements.description.value = product.description || '';
                     form.elements.image_url.value = product.image_url || '';
                     form.elements.default_url.value = product.default_url || '';
-                    form.elements.default_commission_pct.value = product.default_commission_pct != null
-                        ? product.default_commission_pct : 0;
                     if (form.elements.price)     form.elements.price.value     = product.price != null ? product.price : '';
                     if (form.elements.currency)  form.elements.currency.value  = product.currency || 'USD';
                     if (form.elements.sku_type)  form.elements.sku_type.value  = product.sku_type || 'one_time';
 
-                    // Storefront
+                    // Storefront (existing)
                     if (form.elements.long_description)       form.elements.long_description.value       = product.long_description || '';
                     if (form.elements.demo_video_url)         form.elements.demo_video_url.value         = product.demo_video_url || '';
                     if (form.elements.external_marketing_url) form.elements.external_marketing_url.value = product.external_marketing_url || '';
@@ -11616,13 +11711,51 @@
                     if (form.elements.faq_text)                form.elements.faq_text.value               = pfSerializeFaq(product.faq);
                     if (form.elements.testimonials_text)       form.elements.testimonials_text.value      = pfSerializeTestimonials(product.testimonials);
 
+                    // Storefront (new marketing fields — one-per-line arrays)
+                    const linesOf = (a) => Array.isArray(a) ? a.filter(Boolean).map(String).join('\n') : (a || '');
+                    if (form.elements.tldr_bullets_text)   form.elements.tldr_bullets_text.value   = linesOf(product.tldr_bullets);
+                    if (form.elements.alternative_to_text) form.elements.alternative_to_text.value = linesOf(product.alternative_to);
+                    if (form.elements.integrations_text)   form.elements.integrations_text.value   = linesOf(product.integrations);
+                    if (form.elements.best_for_text)       form.elements.best_for_text.value       = linesOf(product.best_for);
+                    if (form.elements.deal_terms_text)     form.elements.deal_terms_text.value     = linesOf(product.deal_terms);
+
+                    // Trust block
+                    if (form.elements.refund_window_days)  form.elements.refund_window_days.value  = product.refund_window_days != null ? product.refund_window_days : '';
+                    if (form.elements.guarantee_label)     form.elements.guarantee_label.value     = product.guarantee_label || '';
+
+                    // Company + founder
+                    if (form.elements.company_logo_url)       form.elements.company_logo_url.value       = product.company_logo_url || '';
+                    if (form.elements.company_website_url)    form.elements.company_website_url.value    = product.company_website_url || '';
+                    if (form.elements.company_tagline)        form.elements.company_tagline.value        = product.company_tagline || '';
+                    if (form.elements.company_about)          form.elements.company_about.value          = product.company_about || '';
+                    if (form.elements.company_founded_date)   form.elements.company_founded_date.value   = (product.company_founded_date || '').slice(0, 10);
+                    if (form.elements.company_city)           form.elements.company_city.value           = product.company_city || '';
+                    if (form.elements.company_country_code)   form.elements.company_country_code.value   = (product.company_country_code || '').toUpperCase();
+                    if (form.elements.company_size)           form.elements.company_size.value           = product.company_size || '';
+                    if (form.elements.company_growth_stage)   form.elements.company_growth_stage.value   = product.company_growth_stage || '';
+                    if (form.elements.company_funding_status) form.elements.company_funding_status.value = product.company_funding_status || '';
+                    if (form.elements.founder_name)           form.elements.founder_name.value           = product.founder_name || '';
+                    if (form.elements.founder_role)           form.elements.founder_role.value           = product.founder_role || '';
+                    if (form.elements.founder_photo_url)      form.elements.founder_photo_url.value      = product.founder_photo_url || '';
+                    if (form.elements.founder_linkedin_url)   form.elements.founder_linkedin_url.value   = product.founder_linkedin_url || '';
+
                     // Fulfillment
                     if (form.elements.fulfillment_redirect_url)   form.elements.fulfillment_redirect_url.value   = product.fulfillment_redirect_url || '';
                     if (form.elements.fulfillment_webhook_url)    form.elements.fulfillment_webhook_url.value    = product.fulfillment_webhook_url || '';
                     if (form.elements.fulfillment_webhook_secret) form.elements.fulfillment_webhook_secret.value = product.fulfillment_webhook_secret || '';
                     if (form.elements.redemption_window_days)     form.elements.redemption_window_days.value     = product.redemption_window_days != null ? product.redemption_window_days : 90;
                     if (form.elements.package_duration_days)      form.elements.package_duration_days.value      = product.package_duration_days != null ? product.package_duration_days : '';
+
+                    // Pricing & Affiliate
+                    if (form.elements.affiliate_pool_pct) form.elements.affiliate_pool_pct.value = product.affiliate_pool_pct != null ? product.affiliate_pool_pct : (product.default_commission_pct != null ? product.default_commission_pct : 20);
+                } else {
+                    if (form.elements.affiliate_pool_pct) form.elements.affiliate_pool_pct.value = 20;
                 }
+                // Tee up the inline pricing-plans state for this product.
+                // For CREATE mode there's no product_id yet — the list shows
+                // the "save the product first" placeholder until they save.
+                ppInlineInit(product ? product.id : null);
+                ppInlineUpdateSplitPreview();
                 modal.classList.add('active');
                 setTimeout(() => form.elements.name.focus(), 50);
             }
@@ -11705,8 +11838,7 @@
                                 <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">Edit</button>
                                 ${archived
                                     ? '<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;">Restore</button>'
-                                    : `<button type="button" data-action="plans" style="padding:6px 12px;border:1px solid #C7D2FE;border-radius:6px;background:#EEF2FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#4338CA;margin-right:6px;">Plans</button>
-                                       <button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">Orders →</button>`}
+                                    : '<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">Orders →</button>'}
                             </td>
                         </tr>`;
                 }).join('');
@@ -11769,11 +11901,6 @@
                 const product = productsCache.find((p) => p.id === id);
                 const action = btn.dataset.action;
                 if (action === 'edit')    return openModal('edit', product);
-                if (action === 'plans')   {
-                    // Navigate to the per-product pricing-plans manager.
-                    window.location.hash = '#/product-plans/' + encodeURIComponent(id);
-                    return;
-                }
                 if (action === 'orders')  {
                     // Navigate into the per-product control panel. Hash sub-segment
                     // carries the product UUID — the route parser slices it off.
@@ -11810,16 +11937,26 @@
                 const v = (name) => form.elements[name] ? form.elements[name].value : '';
                 const trim = (s) => String(s || '').trim();
 
+                // One-per-line text → trimmed array helper (used for the new
+                // marketing-content text fields). Drops empty lines automatically.
+                const linesToArr = (s) => String(s || '').split('\n').map((l) => l.trim()).filter(Boolean);
+
+                const poolPctRaw = v('affiliate_pool_pct');
+                const poolPct    = poolPctRaw === '' ? 20 : Number(poolPctRaw);
+
                 const payload = {
                     // Basics
                     name:        trim(v('name')),
                     description: trim(v('description')) || null,
                     image_url:   trim(v('image_url')) || null,
                     default_url: trim(v('default_url')),
-                    default_commission_pct: Number(v('default_commission_pct')),
                     price:       v('price') === '' ? null : Number(v('price')),
                     currency:    v('currency') || 'USD',
                     sku_type:    v('sku_type') || 'one_time',
+
+                    // Pricing & Affiliate (the seller-set pool %, drives the split formula)
+                    affiliate_pool_pct:     poolPct,
+                    default_commission_pct: poolPct,  // legacy column kept in sync by DB trigger
 
                     // Storefront — text fields direct, structured fields via parsers
                     long_description:       trim(v('long_description')) || null,
@@ -11829,6 +11966,33 @@
                     package_details:        pfParsePackageDetails(v('package_details_text')),
                     faq:                    pfParseFaq(v('faq_text')),
                     testimonials:           pfParseTestimonials(v('testimonials_text')),
+
+                    // Storefront — new marketing content fields
+                    tldr_bullets:           linesToArr(v('tldr_bullets_text')),
+                    alternative_to:         linesToArr(v('alternative_to_text')),
+                    integrations:           linesToArr(v('integrations_text')),
+                    best_for:               linesToArr(v('best_for_text')),
+                    deal_terms:             linesToArr(v('deal_terms_text')),
+
+                    // Trust block
+                    refund_window_days:     v('refund_window_days') === '' ? null : Number(v('refund_window_days')),
+                    guarantee_label:        trim(v('guarantee_label')) || null,
+
+                    // Company + founder card
+                    company_logo_url:       trim(v('company_logo_url')) || null,
+                    company_website_url:    trim(v('company_website_url')) || null,
+                    company_tagline:        trim(v('company_tagline')) || null,
+                    company_about:          trim(v('company_about')) || null,
+                    company_founded_date:   trim(v('company_founded_date')) || null,
+                    company_city:           trim(v('company_city')) || null,
+                    company_country_code:   trim(v('company_country_code')).toUpperCase() || null,
+                    company_size:           trim(v('company_size')) || null,
+                    company_growth_stage:   trim(v('company_growth_stage')) || null,
+                    company_funding_status: trim(v('company_funding_status')) || null,
+                    founder_name:           trim(v('founder_name')) || null,
+                    founder_role:           trim(v('founder_role')) || null,
+                    founder_photo_url:      trim(v('founder_photo_url')) || null,
+                    founder_linkedin_url:   trim(v('founder_linkedin_url')) || null,
 
                     // Fulfillment
                     fulfillment_redirect_url:   trim(v('fulfillment_redirect_url')) || null,
@@ -12420,12 +12584,12 @@
             setTimeout(maybeLoad, 200);
         })();
     </script>
-
     <!-- ═════════════════════════════════════════════════════════════════
-         Pricing-Plans sub-page — per-product pricing manager.
-         Hash: #/product-plans/<product_id>
-         API:  /api/pricing-plans (list/create/update/delete/submit_for_audit)
-         Owns: #ppHeader, #ppPlansList, #ppAddBtn, #planModal + form
+         Pricing & Affiliate inline editor — Tab 4 of the product modal.
+         Replaces the old standalone #/product-plans/<id> subpage. All
+         pricing-plan management happens inline against /api/pricing-plans.
+         Exposed globally as `ppInlineInit(productId)` (called from openModal)
+         and `ppInlineUpdateSplitPreview()` (called on pool_pct input).
          ═════════════════════════════════════════════════════════════════ -->
     <script>
         (function () {
@@ -12440,27 +12604,16 @@
             function fmtMoney(n, ccy) {
                 const v = Number(n) || 0;
                 const cur = (ccy || 'USD').toUpperCase();
-                try {
-                    return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: 2 }).format(v);
-                } catch (_) {
-                    return '$' + v.toFixed(2);
-                }
+                try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: 2 }).format(v); }
+                catch (_) { return '$' + v.toFixed(2); }
             }
-            function fmtPct(orig, bb) {
+            function discountPct(orig, bb) {
                 const o = Number(orig) || 0;
                 const b = Number(bb) || 0;
                 if (o <= 0 || b <= 0 || o <= b) return null;
                 return Math.round((1 - b / o) * 100);
             }
-
-            function productIdFromHash() {
-                const m = (window.location.hash || '').match(/^#\/product-plans\/([0-9a-f-]{36})/i);
-                return m ? m[1] : null;
-            }
-
             function getToken() {
-                // Same approach as the product-orders block — read straight from
-                // localStorage, JSON.parse, pull .token. See [[feedback-bb-session-token-format]].
                 try {
                     const raw = localStorage.getItem('bb_session_token');
                     if (raw) {
@@ -12471,311 +12624,217 @@
                             if (typeof raw === 'string' && raw.length > 20 && !raw.startsWith('{')) return raw;
                         }
                     }
-                    const adv = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token');
-                    if (adv) return adv;
-                } catch (_) {}
-                return null;
+                    return localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token') || null;
+                } catch (_) { return null; }
             }
 
-            let currentProductId = null;
-            let plansCache = [];
+            const AUDIT_BADGE = {
+                pending:           { bg: '#FEF3C7', color: '#92400E', label: 'Pending audit' },
+                approved:          { bg: '#ECFDF5', color: '#059669', label: 'Approved — live' },
+                rejected:          { bg: '#FEF2F2', color: '#DC2626', label: 'Rejected' },
+                changes_requested: { bg: '#FFF7ED', color: '#C2410C', label: 'Changes requested' },
+            };
+            function auditBadge(status) {
+                const s = AUDIT_BADGE[status] || { bg: '#F3F4F6', color: '#6B7280', label: status || '—' };
+                return `<span style="display:inline-block;padding:3px 8px;border-radius:10px;background:${s.bg};color:${s.color};font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">${esc(s.label)}</span>`;
+            }
 
-            const headerEl = () => document.getElementById('ppHeader');
-            const listEl   = () => document.getElementById('ppPlansList');
-            const modalEl  = () => document.getElementById('planModal');
-            const formEl   = () => document.getElementById('planForm');
-            const errEl    = () => document.getElementById('planFormErr');
+            let _productId = null;
+            let _plansCache = [];
 
             async function api(method, action, params, body) {
-                const token = getToken();
-                if (!token) throw new Error('not authenticated');
+                const tk = getToken();
+                if (!tk) throw new Error('not authenticated');
                 const q = new URLSearchParams(Object.assign({ action }, params || {}));
-                const opts = {
-                    method,
-                    headers: { 'Authorization': 'Bearer ' + token },
-                };
-                if (body) {
-                    opts.headers['Content-Type'] = 'application/json';
-                    opts.body = JSON.stringify(body);
-                }
+                const opts = { method, headers: { 'Authorization': 'Bearer ' + tk } };
+                if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
                 const r = await fetch('/api/pricing-plans?' + q.toString(), opts);
                 const j = await r.json().catch(() => ({}));
                 if (!r.ok) throw new Error(j.error || 'Request failed');
                 return j;
             }
 
-            // ─── Renderers ────────────────────────────────────────────────
-
-            function renderHeader(product) {
-                if (!product) return;
-                headerEl().innerHTML = `
-                    <div style="flex:1;min-width:240px;">
-                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Managing plans for</div>
-                        <div style="font-size:20px;font-weight:700;color:#111827;">${esc(product.name || 'Untitled product')}</div>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <a href="#/product-orders/${esc(product.id)}" style="padding:9px 14px;border:1px solid #FF2D78;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#FF2D78;text-decoration:none;">Orders →</a>
-                        <a href="/p/${esc(product.id)}" target="_blank" rel="noopener" style="padding:9px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">View live page <span style="color:#9CA3AF;font-size:11px;">↗</span></a>
-                    </div>
-                `;
-            }
-
-            const AUDIT_BADGE = {
-                pending:            { bg: '#FEF3C7', color: '#92400E', label: 'Pending audit' },
-                approved:           { bg: '#ECFDF5', color: '#059669', label: 'Approved — live' },
-                rejected:           { bg: '#FEF2F2', color: '#DC2626', label: 'Rejected' },
-                changes_requested:  { bg: '#FFF7ED', color: '#C2410C', label: 'Changes requested' },
-            };
-            function auditBadge(status) {
-                const s = AUDIT_BADGE[status] || { bg: '#F3F4F6', color: '#6B7280', label: status || '—' };
-                return `<span style="display:inline-block;padding:4px 10px;border-radius:12px;background:${s.bg};color:${s.color};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">${esc(s.label)}</span>`;
-            }
-
-            function renderPlans(plans) {
-                if (!plans || !plans.length) {
-                    listEl().innerHTML = `
-                        <div style="padding:48px 24px;text-align:center;background:#F9FAFB;border-radius:10px;border:1px dashed #D1D5DB;">
-                            <div style="font-size:28px;margin-bottom:10px;">💸</div>
-                            <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:6px;">No pricing plans yet</div>
-                            <div style="font-size:12px;color:#6B7280;max-width:420px;margin:0 auto 16px;line-height:1.55;">
-                                Add at least one plan to make this product purchasable. Each plan goes through audit review before going live.
-                            </div>
-                            <button type="button" class="new-campaign-btn" onclick="document.getElementById('ppAddBtn').click()">+ Add your first plan</button>
-                        </div>`;
+            async function loadList() {
+                const listEl = document.getElementById('ppInlineList');
+                if (!listEl) return;
+                if (!_productId) {
+                    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:12.5px;background:#F9FAFB;border-radius:8px;border:1px dashed #E5E7EB;">Save the product first, then add pricing plans here.</div>';
                     return;
                 }
-                const rows = plans.map((p) => {
-                    const features = Array.isArray(p.features) ? p.features : [];
-                    const featBullets = features.slice(0, 6).map((f) => {
-                        const label = typeof f === 'string' ? f : (f && f.label) || '';
-                        const included = typeof f === 'string' ? true : (f && f.included !== false);
-                        if (!label) return '';
-                        const mark = included ? '<span style="color:#059669;">✓</span>' : '<span style="color:#DC2626;">✕</span>';
-                        return `<li style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#374151;line-height:1.5;margin-bottom:4px;">${mark} <span>${esc(label)}</span></li>`;
-                    }).filter(Boolean).join('');
-                    const moreCount = Math.max(0, features.length - 6);
-                    const discount = fmtPct(p.original_price, p.price);
-                    const priceBlock = `
-                        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
-                            <span style="font-size:24px;font-weight:700;color:#111827;">${esc(fmtMoney(p.price, p.currency))}</span>
-                            ${p.original_price ? `<span style="font-size:14px;color:#9CA3AF;text-decoration:line-through;">${esc(fmtMoney(p.original_price, p.currency))}</span>` : ''}
-                            ${discount ? `<span style="font-size:11px;background:#FEE2E2;color:#B91C1C;padding:2px 8px;border-radius:8px;font-weight:700;">-${discount}%</span>` : ''}
-                        </div>
-                        <div style="font-size:11px;color:#6B7280;margin-top:4px;">${esc(p.billing_period || 'one_time')}</div>
-                    `;
-                    const proofRow = p.original_price_proof_url
-                        ? `<div style="font-size:11px;color:#6B7280;margin-top:8px;">Proof: <a href="${esc(p.original_price_proof_url)}" target="_blank" rel="noopener" style="color:#4338CA;text-decoration:none;">${esc(p.original_price_proof_url.length > 60 ? p.original_price_proof_url.slice(0, 60) + '…' : p.original_price_proof_url)} ↗</a></div>`
-                        : `<div style="font-size:11px;color:#DC2626;margin-top:8px;">⚠ No proof URL attached — required before audit</div>`;
-                    const reviewNotes = p.audit_status === 'rejected' || p.audit_status === 'changes_requested'
-                        ? (p.audit_review_notes ? `<div style="font-size:11px;color:#7F1D1D;background:#FEF2F2;border-left:3px solid #DC2626;padding:8px 10px;margin-top:10px;border-radius:0 6px 6px 0;"><strong>Reviewer notes:</strong> ${esc(p.audit_review_notes)}</div>` : '')
-                        : '';
-                    const submitBtn = (p.audit_status === 'pending' && p.original_price_proof_url)
-                        ? '' // already pending, no need to re-submit
-                        : (p.audit_status !== 'approved'
-                            ? `<button type="button" data-action="submit" data-plan-id="${esc(p.id)}" style="padding:7px 12px;border:1px solid #4338CA;border-radius:6px;background:#EEF2FF;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#4338CA;">Submit for audit</button>`
-                            : '');
+                listEl.innerHTML = '<div style="padding:18px;text-align:center;color:#9CA3AF;font-size:12.5px;">Loading plans…</div>';
+                try {
+                    const data = await api('GET', 'list', { product_id: _productId });
+                    _plansCache = data.plans || [];
+                    renderList();
+                } catch (e) {
+                    listEl.innerHTML = `<div style="padding:18px;text-align:center;color:#DC2626;font-size:12.5px;">${esc(e.message)}</div>`;
+                }
+            }
+
+            function renderList() {
+                const listEl = document.getElementById('ppInlineList');
+                if (!_plansCache.length) {
+                    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:12.5px;background:#F9FAFB;border-radius:8px;border:1px dashed #E5E7EB;">No plans yet. Click <strong>+ Add plan</strong> above.</div>';
+                    return;
+                }
+                listEl.innerHTML = _plansCache.map((p) => {
+                    const dpct = discountPct(p.original_price, p.price);
+                    const proofMissing = !p.original_price_proof_url;
                     return `
-                        <div data-plan-id="${esc(p.id)}" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;margin-bottom:12px;${!p.is_active ? 'opacity:0.6;' : ''}">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
-                                <div style="flex:1;min-width:240px;">
-                                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
-                                        <span style="font-size:16px;font-weight:700;color:#111827;">${esc(p.plan_name)}</span>
-                                        ${p.is_recommended ? '<span style="background:#FF2D78;color:#fff;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Recommended</span>' : ''}
-                                        ${!p.is_active ? '<span style="background:#F3F4F6;color:#6B7280;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Inactive</span>' : ''}
+                        <div data-plan-id="${esc(p.id)}" style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px;margin-bottom:10px;${!p.is_active ? 'opacity:0.6;' : ''}">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
+                                <div style="flex:1;min-width:220px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                                        <span style="font-size:14px;font-weight:700;color:#111827;">${esc(p.plan_name)}</span>
+                                        ${p.is_recommended ? '<span style="background:#FF2D78;color:#fff;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">★ Recommended</span>' : ''}
+                                        ${!p.is_active ? '<span style="background:#F3F4F6;color:#6B7280;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Inactive</span>' : ''}
                                         ${auditBadge(p.audit_status)}
                                     </div>
-                                    ${p.description ? `<div style="font-size:13px;color:#6B7280;margin-bottom:10px;">${esc(p.description)}</div>` : ''}
-                                    ${priceBlock}
-                                    ${featBullets ? `<ul style="list-style:none;padding:0;margin:14px 0 0 0;">${featBullets}${moreCount ? `<li style="font-size:11px;color:#9CA3AF;margin-top:4px;">+${moreCount} more…</li>` : ''}</ul>` : ''}
-                                    ${proofRow}
-                                    ${reviewNotes}
+                                    <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:18px;font-weight:700;color:#111827;">${esc(fmtMoney(p.price, p.currency))}</span>
+                                        ${p.original_price ? `<span style="font-size:12px;color:#9CA3AF;text-decoration:line-through;">${esc(fmtMoney(p.original_price, p.currency))}</span>` : ''}
+                                        ${dpct ? `<span style="font-size:10.5px;background:#FEE2E2;color:#B91C1C;padding:1px 7px;border-radius:8px;font-weight:700;">-${dpct}%</span>` : ''}
+                                        <span style="font-size:10.5px;color:#9CA3AF;">${esc(p.billing_period || 'one_time')}</span>
+                                    </div>
+                                    ${proofMissing ? '<div style="font-size:11px;color:#DC2626;margin-top:6px;">⚠ Missing proof URL — required before audit</div>' : ''}
+                                    ${p.audit_review_notes && (p.audit_status === 'rejected' || p.audit_status === 'changes_requested') ? `<div style="font-size:11px;color:#7F1D1D;background:#FEF2F2;border-left:3px solid #DC2626;padding:6px 9px;margin-top:6px;border-radius:0 4px 4px 0;">Reviewer: ${esc(p.audit_review_notes)}</div>` : ''}
                                 </div>
-                                <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-                                    <button type="button" data-action="edit" data-plan-id="${esc(p.id)}" style="padding:7px 14px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;min-width:90px;">Edit</button>
-                                    ${submitBtn}
-                                    <button type="button" data-action="delete" data-plan-id="${esc(p.id)}" style="padding:7px 14px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;min-width:90px;">Delete</button>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button type="button" data-pp-action="edit" data-pp-id="${esc(p.id)}" style="padding:5px 10px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Edit</button>
+                                    ${p.audit_status !== 'approved' && p.original_price_proof_url ? `<button type="button" data-pp-action="submit" data-pp-id="${esc(p.id)}" style="padding:5px 10px;border:1px solid #4338CA;border-radius:6px;background:#EEF2FF;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#4338CA;">Submit for audit</button>` : ''}
+                                    <button type="button" data-pp-action="delete" data-pp-id="${esc(p.id)}" style="padding:5px 10px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;">Delete</button>
                                 </div>
                             </div>
                         </div>`;
                 }).join('');
-                listEl().innerHTML = rows;
             }
 
-            // ─── Loaders ─────────────────────────────────────────────────
-
-            async function loadAll() {
-                if (!currentProductId) return;
-                listEl().innerHTML = '<div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading plans…</div>';
-                try {
-                    const data = await api('GET', 'list', { product_id: currentProductId });
-                    plansCache = data.plans || [];
-                    renderHeader(data.product);
-                    renderPlans(plansCache);
-                } catch (e) {
-                    headerEl().innerHTML = `<div style="color:#DC2626;font-size:13px;">Failed to load: ${esc(e.message)}</div>`;
-                    listEl().innerHTML = '';
-                }
+            function openEditor(mode, plan) {
+                document.getElementById('ppInlineEditor').style.display = 'block';
+                document.getElementById('ppInlineEditorTitle').textContent = mode === 'edit' ? 'Edit plan' : 'New plan';
+                document.getElementById('ppInlineEditorErr').style.display = 'none';
+                document.getElementById('ppPlanId').value          = plan ? plan.id : '';
+                document.getElementById('ppPlanName').value        = (plan && plan.plan_name) || '';
+                document.getElementById('ppPlanDesc').value        = (plan && plan.description) || '';
+                document.getElementById('ppPlanPrice').value       = plan && plan.price != null ? plan.price : '';
+                document.getElementById('ppPlanOriginal').value    = plan && plan.original_price != null ? plan.original_price : '';
+                document.getElementById('ppPlanCurrency').value    = (plan && plan.currency) || 'USD';
+                document.getElementById('ppPlanBilling').value     = (plan && plan.billing_period) || 'one_time';
+                document.getElementById('ppPlanProofUrl').value    = (plan && plan.original_price_proof_url) || '';
+                document.getElementById('ppPlanProofNotes').value  = (plan && plan.original_price_proof_notes) || '';
+                document.getElementById('ppPlanActive').checked    = plan ? plan.is_active !== false : true;
+                document.getElementById('ppPlanRecommended').checked = plan ? !!plan.is_recommended : false;
+                const features = (plan && Array.isArray(plan.features)) ? plan.features : [];
+                document.getElementById('ppPlanFeatures').value =
+                    features.map((f) => typeof f === 'string' ? f : (f && f.label) || '').filter(Boolean).join('\n');
+                setTimeout(() => document.getElementById('ppPlanName').focus(), 30);
+            }
+            function closeEditor() {
+                document.getElementById('ppInlineEditor').style.display = 'none';
             }
 
-            // ─── Modal ───────────────────────────────────────────────────
-
-            function openModal(mode, plan) {
-                const modal = modalEl();
-                const form  = formEl();
-                form.reset();
-                errEl().style.display = 'none';
-                document.getElementById('planModalTitle').textContent = mode === 'edit' ? 'Edit pricing plan' : 'New pricing plan';
-                modal.dataset.mode    = mode;
-                modal.dataset.planId  = (plan && plan.id) || '';
-                if (mode === 'edit' && plan) {
-                    if (form.elements.plan_name)                form.elements.plan_name.value                = plan.plan_name || '';
-                    if (form.elements.description)              form.elements.description.value              = plan.description || '';
-                    if (form.elements.price)                    form.elements.price.value                    = plan.price != null ? plan.price : '';
-                    if (form.elements.original_price)           form.elements.original_price.value           = plan.original_price != null ? plan.original_price : '';
-                    if (form.elements.currency)                 form.elements.currency.value                 = plan.currency || 'USD';
-                    if (form.elements.billing_period)           form.elements.billing_period.value           = plan.billing_period || 'one_time';
-                    if (form.elements.original_price_proof_url) form.elements.original_price_proof_url.value = plan.original_price_proof_url || '';
-                    if (form.elements.original_price_proof_notes) form.elements.original_price_proof_notes.value = plan.original_price_proof_notes || '';
-                    if (form.elements.features_text) {
-                        const feats = Array.isArray(plan.features) ? plan.features : [];
-                        form.elements.features_text.value = feats.map((f) => typeof f === 'string' ? f : (f && f.label) || '').filter(Boolean).join('\n');
-                    }
-                    if (form.elements.is_active)      form.elements.is_active.checked      = plan.is_active !== false;
-                    if (form.elements.is_recommended) form.elements.is_recommended.checked = !!plan.is_recommended;
-                }
-                modal.style.display = 'flex';
-                setTimeout(() => form.elements.plan_name && form.elements.plan_name.focus(), 50);
-            }
-            function closeModal() {
-                modalEl().style.display = 'none';
-                errEl().style.display = 'none';
-            }
-            function showFormErr(msg) {
-                errEl().textContent = msg;
-                errEl().style.display = 'block';
-            }
-
-            function collectPayload() {
-                const form = formEl();
-                const v = (n) => form.elements[n] ? form.elements[n].value : '';
-                const featuresText = (v('features_text') || '').trim();
-                const features = featuresText
-                    ? featuresText.split('\n').map((s) => s.trim()).filter(Boolean)
-                    : [];
+            function collect() {
+                const ft = (document.getElementById('ppPlanFeatures').value || '').trim();
                 return {
-                    plan_name:                 v('plan_name').trim(),
-                    description:               v('description').trim() || null,
-                    price:                     v('price') === '' ? null : Number(v('price')),
-                    original_price:            v('original_price') === '' ? null : Number(v('original_price')),
-                    currency:                  v('currency') || 'USD',
-                    billing_period:            v('billing_period') || 'one_time',
-                    original_price_proof_url:  v('original_price_proof_url').trim() || null,
-                    original_price_proof_notes: v('original_price_proof_notes').trim() || null,
-                    features,
-                    is_active:                 !!(form.elements.is_active && form.elements.is_active.checked),
-                    is_recommended:            !!(form.elements.is_recommended && form.elements.is_recommended.checked),
+                    plan_name:                  (document.getElementById('ppPlanName').value || '').trim(),
+                    description:                (document.getElementById('ppPlanDesc').value || '').trim() || null,
+                    price:                      document.getElementById('ppPlanPrice').value === '' ? null : Number(document.getElementById('ppPlanPrice').value),
+                    original_price:             document.getElementById('ppPlanOriginal').value === '' ? null : Number(document.getElementById('ppPlanOriginal').value),
+                    currency:                   document.getElementById('ppPlanCurrency').value || 'USD',
+                    billing_period:             document.getElementById('ppPlanBilling').value || 'one_time',
+                    original_price_proof_url:   (document.getElementById('ppPlanProofUrl').value || '').trim() || null,
+                    original_price_proof_notes: (document.getElementById('ppPlanProofNotes').value || '').trim() || null,
+                    features:                   ft ? ft.split('\n').map((s) => s.trim()).filter(Boolean) : [],
+                    is_active:                  document.getElementById('ppPlanActive').checked,
+                    is_recommended:             document.getElementById('ppPlanRecommended').checked,
                 };
             }
 
-            async function submitForm(e) {
-                e.preventDefault();
-                errEl().style.display = 'none';
-                const payload = collectPayload();
-                if (!payload.plan_name) return showFormErr('Plan name is required.');
-                if (payload.price == null || !Number.isFinite(payload.price) || payload.price < 0) return showFormErr('BB price is required and must be a non-negative number.');
-                const submitBtn = document.getElementById('planFormSubmit');
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Saving…';
+            async function savePlan() {
+                const errEl = document.getElementById('ppInlineEditorErr');
+                errEl.style.display = 'none';
+                const payload = collect();
+                if (!payload.plan_name) { errEl.textContent = 'Plan name is required.'; errEl.style.display = 'block'; return; }
+                if (payload.price == null || payload.price < 0) { errEl.textContent = 'BB price is required.'; errEl.style.display = 'block'; return; }
+                const id = document.getElementById('ppPlanId').value;
+                const btn = document.getElementById('ppInlineEditorSave');
+                btn.disabled = true; btn.textContent = 'Saving…';
                 try {
-                    const modal = modalEl();
-                    if (modal.dataset.mode === 'edit' && modal.dataset.planId) {
-                        await api('PATCH', 'update', null, Object.assign({ plan_id: modal.dataset.planId }, payload));
-                    } else {
-                        await api('POST', 'create', null, Object.assign({ product_id: currentProductId }, payload));
-                    }
-                    closeModal();
-                    await loadAll();
+                    if (id) await api('PATCH', 'update', null, Object.assign({ plan_id: id }, payload));
+                    else    await api('POST',  'create', null, Object.assign({ product_id: _productId }, payload));
+                    closeEditor();
+                    await loadList();
                 } catch (err) {
-                    showFormErr(err.message || 'Save failed');
+                    errEl.textContent = err.message || 'Save failed';
+                    errEl.style.display = 'block';
                 } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Save plan';
+                    btn.disabled = false; btn.textContent = 'Save plan';
                 }
             }
 
-            async function submitForAudit(planId) {
+            async function deletePlan(id) {
+                if (!confirm('Delete this plan?\n\nIf it has historical orders, it will be deactivated instead of hard-deleted.')) return;
                 try {
-                    await api('POST', 'submit_for_audit', null, { plan_id: planId });
-                    await loadAll();
-                } catch (err) {
-                    alert(err.message || 'Submit failed');
-                }
+                    const r = await api('POST', 'delete', null, { plan_id: id });
+                    if (r.soft_deleted) alert('Plan has historical orders, so it was deactivated rather than deleted.');
+                    await loadList();
+                } catch (err) { alert(err.message || 'Delete failed'); }
             }
 
-            async function deletePlan(planId) {
-                if (!confirm('Delete this plan?\n\nIf any historical orders reference it, it will be deactivated instead of deleted.')) return;
+            async function submitForAudit(id) {
                 try {
-                    const r = await api('POST', 'delete', null, { plan_id: planId });
-                    if (r.soft_deleted) alert('This plan has historical orders, so it was deactivated rather than deleted.');
-                    await loadAll();
-                } catch (err) {
-                    alert(err.message || 'Delete failed');
-                }
+                    await api('POST', 'submit_for_audit', null, { plan_id: id });
+                    await loadList();
+                } catch (err) { alert(err.message || 'Submit failed'); }
             }
 
-            // ─── Wiring ──────────────────────────────────────────────────
+            window.ppInlineInit = function (productId) {
+                _productId = productId || null;
+                _plansCache = [];
+                closeEditor();
+                loadList();
+            };
 
-            function wireOnce() {
-                const addBtn = document.getElementById('ppAddBtn');
-                if (addBtn) addBtn.addEventListener('click', () => openModal('create', null));
+            window.ppInlineUpdateSplitPreview = function () {
+                const el = document.getElementById('poolSplitPreview');
+                const input = document.querySelector('input[name="affiliate_pool_pct"]');
+                if (!el || !input) return;
+                const pct = Math.max(0, Math.min(80, Number(input.value) || 0));
+                const pool = 100 * pct / 100;
+                const seller = 100 - pool;
+                const bb     = pool * 0.30;
+                const aff    = pool * 0.70;
+                el.innerHTML = `On a $100 sale: <strong style="color:#111827;">$${seller.toFixed(2)} to you</strong> · <strong style="color:#FF2D78;">$${aff.toFixed(2)} to affiliate</strong> · <strong style="color:#7C3AED;">$${bb.toFixed(2)} to BB</strong>`;
+            };
 
-                const modal = modalEl();
-                document.getElementById('planModalClose').addEventListener('click', closeModal);
-                document.getElementById('planFormCancel').addEventListener('click', closeModal);
-                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+            document.addEventListener('DOMContentLoaded', () => {
+                const addBtn   = document.getElementById('ppInlineAddBtn');
+                const closeBtn = document.getElementById('ppInlineEditorClose');
+                const cancel   = document.getElementById('ppInlineEditorCancel');
+                const save     = document.getElementById('ppInlineEditorSave');
+                const list     = document.getElementById('ppInlineList');
+                const poolInp  = document.querySelector('input[name="affiliate_pool_pct"]');
+
+                if (addBtn) addBtn.addEventListener('click', () => {
+                    if (!_productId) { alert('Save the product first (Basics tab), then add pricing plans.'); return; }
+                    openEditor('create', null);
                 });
-                formEl().addEventListener('submit', submitForm);
+                if (closeBtn) closeBtn.addEventListener('click', closeEditor);
+                if (cancel)   cancel.addEventListener('click', closeEditor);
+                if (save)     save.addEventListener('click', savePlan);
+                if (poolInp)  poolInp.addEventListener('input', window.ppInlineUpdateSplitPreview);
 
-                listEl().addEventListener('click', (e) => {
-                    const btn = e.target.closest('button[data-action]');
+                if (list) list.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-pp-action]');
                     if (!btn) return;
-                    const planId = btn.dataset.planId;
-                    const plan = plansCache.find((p) => p.id === planId);
-                    const action = btn.dataset.action;
-                    if (action === 'edit')   return openModal('edit', plan);
-                    if (action === 'submit') return submitForAudit(planId);
-                    if (action === 'delete') return deletePlan(planId);
+                    const id = btn.dataset.ppId;
+                    const action = btn.dataset.ppAction;
+                    const plan = _plansCache.find((p) => p.id === id);
+                    if (action === 'edit')   return openEditor('edit', plan);
+                    if (action === 'delete') return deletePlan(id);
+                    if (action === 'submit') return submitForAudit(id);
                 });
-            }
-
-            function maybeLoad() {
-                const wrap = document.querySelector('[data-shell-active-route]');
-                const active = wrap && wrap.getAttribute('data-shell-active-route');
-                if (active !== 'product-plans') return;
-                const pid = productIdFromHash();
-                if (!pid) {
-                    window.location.hash = '#/products';
-                    return;
-                }
-                if (!getToken()) return;
-                if (pid === currentProductId) return;
-                currentProductId = pid;
-                loadAll();
-            }
-
-            document.addEventListener('DOMContentLoaded', wireOnce);
-            if (document.readyState !== 'loading') wireOnce();
-            window.addEventListener('hashchange', maybeLoad);
-            const ppAuthInterval = setInterval(() => {
-                if (getToken()) {
-                    clearInterval(ppAuthInterval);
-                    maybeLoad();
-                }
-            }, 400);
-            setTimeout(() => clearInterval(ppAuthInterval), 15000);
-            setTimeout(maybeLoad, 200);
+            });
         })();
     </script>
 
