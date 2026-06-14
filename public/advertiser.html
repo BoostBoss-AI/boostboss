@@ -2574,6 +2574,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.billing">Billing</span>
             </button>
+            <button class="shell-nav-item" data-shell-section="payouts">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.payouts">Payouts</span>
+            </button>
             <button class="shell-nav-item" data-shell-section="setup">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.setup">Setup</span>
@@ -3293,6 +3297,94 @@
             </div>
 
             </div><!-- /[data-shell-route="billing"] -->
+
+            <!-- ═══════ ROUTE: payouts (seller MoR settlements) ═══════
+                 Where sellers see what BB owes them from MoR captures,
+                 configure their PayPal payout email, and review history.
+                 See [[payouts_cycle]] + [[taiwan_entity_single_provider]]. -->
+            <div data-shell-route="payouts">
+              <div class="shell-page-head">
+                <div>
+                  <h1 class="shell-page-title">Payouts</h1>
+                  <div class="shell-page-sub">Money Boost Boss owes you from MoR captures. Sellers settle biweekly Friday via PayPal.</div>
+                </div>
+              </div>
+
+              <!-- Top stat cards: available + lifetime + next payout date -->
+              <div id="payoutsStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px;">
+                <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Available for next payout</div>
+                  <div style="font-size:26px;font-weight:700;color:#059669;line-height:1.1;margin-bottom:4px;" id="poAvailable">—</div>
+                  <div style="font-size:11.5px;color:#6B7280;" id="poUnsettledCount">—</div>
+                </div>
+                <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Next payout</div>
+                  <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.2;margin-bottom:4px;" id="poNextDate">—</div>
+                  <div style="font-size:11.5px;color:#6B7280;" id="poNextStatus">—</div>
+                </div>
+                <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Lifetime paid</div>
+                  <div style="font-size:22px;font-weight:700;color:#0EA5E9;line-height:1.1;margin-bottom:4px;" id="poLifetimePaid">—</div>
+                  <div style="font-size:11.5px;color:#6B7280;">Already settled to your PayPal</div>
+                </div>
+                <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Lifetime captured</div>
+                  <div style="font-size:22px;font-weight:700;color:#FF2D78;line-height:1.1;margin-bottom:4px;" id="poLifetimeCaptured">—</div>
+                  <div style="font-size:11.5px;color:#6B7280;" id="poRefunded">—</div>
+                </div>
+              </div>
+
+              <!-- Hold banner — shown when no payout method configured -->
+              <div id="poHoldBanner" style="display:none;background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:14px 18px;margin-bottom:18px;color:#92400E;">
+                <strong>⚠ Add your PayPal email below to receive payouts.</strong> Until you do, captured sales stay held in Boost Boss's account. Your funds aren't lost — they release the next payout cycle after you save your details.
+              </div>
+
+              <!-- Payout method form -->
+              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
+                <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;">Payout method</div>
+                <div style="font-size:12.5px;color:#6B7280;margin-bottom:16px;">Boost Boss sends your settled funds to this PayPal address every biweekly Friday. Make sure the email matches a verified PayPal account, otherwise payments will be held.</div>
+                <form id="poMethodForm" style="display:grid;grid-template-columns:2fr 1fr 120px auto;gap:12px;align-items:end;">
+                  <div>
+                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">PayPal email <span style="color:#DC2626;">*</span></label>
+                    <input type="email" name="paypal_email" required class="form-input" placeholder="you@example.com">
+                  </div>
+                  <div>
+                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Display name <span style="color:#9CA3AF;">(on statement)</span></label>
+                    <input type="text" name="display_name" maxlength="240" class="form-input" placeholder="Your name or business">
+                  </div>
+                  <div>
+                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Country</label>
+                    <input type="text" name="country_code" maxlength="2" class="form-input" placeholder="US" style="text-transform:uppercase;">
+                  </div>
+                  <button type="submit" class="new-campaign-btn" id="poMethodSubmit">Save</button>
+                </form>
+                <div id="poMethodErr" style="display:none;margin-top:10px;padding:9px 12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:8px;font-size:12.5px;"></div>
+                <div id="poMethodOk" style="display:none;margin-top:10px;padding:9px 12px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;border-radius:8px;font-size:12.5px;">✓ Payout method saved</div>
+              </div>
+
+              <!-- Upcoming line items — what's in the next payout -->
+              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                  <div>
+                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Upcoming payout — line items</div>
+                    <div style="font-size:12px;color:#6B7280;">Captures waiting to settle to your PayPal on the next biweekly Friday.</div>
+                  </div>
+                  <button type="button" id="poRefreshUpcoming" style="padding:7px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">↻ Refresh</button>
+                </div>
+                <div id="poUpcoming" style="overflow-x:auto;">
+                  <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>
+                </div>
+              </div>
+
+              <!-- Payout history -->
+              <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;">
+                <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Payout history</div>
+                <div style="font-size:12px;color:#6B7280;margin-bottom:14px;">Every batch BB has dispatched to your PayPal.</div>
+                <div id="poHistory" style="overflow-x:auto;">
+                  <div style="padding:24px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>
+                </div>
+              </div>
+            </div><!-- /[data-shell-route="payouts"] -->
 
             <!-- ═══════ ROUTE: setup ═══════ -->
             <div data-shell-route="setup">
@@ -5370,7 +5462,7 @@
             // [data-shell-route="..."] block via the wrapper's
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
-            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'setup'];
+            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'payouts', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -13456,6 +13548,243 @@ function pfParseScreenshots(text) {
                     if (action === 'delete') return deletePlan(id);
                 });
             });
+        })();
+    </script>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         Seller Payouts route — /ads/dashboard#/payouts
+         API: /api/seller-payouts (balance, method, history, upcoming)
+         Owns: #payoutsStats, #poHoldBanner, #poMethodForm, #poUpcoming, #poHistory
+         ═════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            'use strict';
+
+            function esc(s) {
+                if (typeof window.escHtml === 'function') return window.escHtml(s);
+                return String(s == null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
+            function fmtMoney(n, ccy) {
+                const v = Number(n) || 0;
+                try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: (ccy || 'USD').toUpperCase(), maximumFractionDigits: 2 }).format(v); }
+                catch (_) { return '$' + v.toFixed(2); }
+            }
+            function fmtDate(s, opts) {
+                if (!s) return '—';
+                try {
+                    const d = new Date(s);
+                    if (Number.isNaN(d.getTime())) return '—';
+                    return d.toLocaleString(undefined, opts || { month: 'short', day: 'numeric', year: 'numeric' });
+                } catch (_) { return '—'; }
+            }
+            function getToken() {
+                try {
+                    const raw = localStorage.getItem('bb_session_token');
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            if (parsed && parsed.token) return parsed.token;
+                        } catch (_) {
+                            if (typeof raw === 'string' && raw.length > 20 && !raw.startsWith('{')) return raw;
+                        }
+                    }
+                    return localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token') || null;
+                } catch (_) { return null; }
+            }
+
+            async function api(method, action, params, body) {
+                const tk = getToken();
+                if (!tk) throw new Error('not authenticated');
+                const q = new URLSearchParams(Object.assign({ action }, params || {}));
+                const opts = { method, headers: { 'Authorization': 'Bearer ' + tk } };
+                if (body) {
+                    opts.headers['Content-Type'] = 'application/json';
+                    opts.body = JSON.stringify(body);
+                }
+                const r = await fetch('/api/seller-payouts?' + q.toString(), opts);
+                const j = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(j.error || 'Request failed');
+                return j;
+            }
+
+            async function loadBalance() {
+                try {
+                    const j = await api('GET', 'balance');
+                    const b = j.balance || {};
+                    const np = j.next_payout || {};
+                    document.getElementById('poAvailable').textContent = fmtMoney(b.available_for_payout);
+                    document.getElementById('poUnsettledCount').textContent = (b.unsettled_count || 0) + ' captured sale' + ((b.unsettled_count || 0) === 1 ? '' : 's');
+                    document.getElementById('poNextDate').textContent = fmtDate(np.date_iso, { month: 'short', day: 'numeric', year: 'numeric' });
+                    document.getElementById('poNextStatus').innerHTML = np.payout_ready
+                        ? '<span style="color:#059669;">✓ Ready — PayPal email saved</span>'
+                        : '<span style="color:#92400E;">⚠ Hold — add your PayPal email below</span>';
+                    document.getElementById('poLifetimePaid').textContent = fmtMoney(b.lifetime_paid);
+                    document.getElementById('poLifetimeCaptured').textContent = fmtMoney(b.lifetime_captured);
+                    document.getElementById('poRefunded').textContent = (b.refunded > 0 ? fmtMoney(b.refunded) + ' refunded' : '—');
+                    document.getElementById('poHoldBanner').style.display = np.payout_ready ? 'none' : 'block';
+                } catch (e) {
+                    console.warn('[payouts] balance failed:', e.message);
+                }
+            }
+
+            async function loadMethod() {
+                try {
+                    const j = await api('GET', 'method');
+                    const m = j.method;
+                    const form = document.getElementById('poMethodForm');
+                    if (form && m) {
+                        if (form.elements.paypal_email) form.elements.paypal_email.value = m.paypal_email || '';
+                        if (form.elements.display_name) form.elements.display_name.value = m.display_name || '';
+                        if (form.elements.country_code) form.elements.country_code.value = m.country_code || '';
+                    }
+                } catch (_) {}
+            }
+
+            async function loadUpcoming() {
+                const wrap = document.getElementById('poUpcoming');
+                wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>';
+                try {
+                    const j = await api('GET', 'upcoming_transactions');
+                    const txs = j.transactions || [];
+                    if (!txs.length) {
+                        wrap.innerHTML = '<div style="padding:32px;text-align:center;color:#9CA3AF;font-size:13px;background:#F9FAFB;border-radius:8px;">No captures waiting. When a buyer pays, the line item shows up here.</div>';
+                        return;
+                    }
+                    wrap.innerHTML = `
+                        <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+                            <thead>
+                                <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Captured</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Product</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Buyer</th>
+                                    <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Gross</th>
+                                    <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Your net</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${txs.map((t) => `
+                                    <tr style="border-bottom:1px solid #F3F4F6;">
+                                        <td style="padding:11px 14px;font-size:12px;color:#6B7280;white-space:nowrap;">${esc(fmtDate(t.captured_at, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))}</td>
+                                        <td style="padding:11px 14px;font-size:13px;color:#111827;">${esc(t.product_name || '—')}</td>
+                                        <td style="padding:11px 14px;font-size:12.5px;color:#6B7280;">${esc(t.buyer_email_masked || '—')}</td>
+                                        <td style="padding:11px 14px;text-align:right;font-size:13px;color:#111827;white-space:nowrap;">${esc(fmtMoney(t.amount, t.currency))}</td>
+                                        <td style="padding:11px 14px;text-align:right;font-size:13px;color:#059669;font-weight:700;white-space:nowrap;">${esc(fmtMoney(t.seller_settlement, t.currency))}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>`;
+                } catch (e) {
+                    wrap.innerHTML = `<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">${esc(e.message)}</div>`;
+                }
+            }
+
+            async function loadHistory() {
+                const wrap = document.getElementById('poHistory');
+                wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>';
+                try {
+                    const j = await api('GET', 'history');
+                    const items = j.payouts || [];
+                    if (!items.length) {
+                        wrap.innerHTML = '<div style="padding:32px;text-align:center;color:#9CA3AF;font-size:13px;background:#F9FAFB;border-radius:8px;">No payouts dispatched yet. Your first payout lands on the biweekly Friday after you save your PayPal email.</div>';
+                        return;
+                    }
+                    const statusBadge = (s) => {
+                        const styles = {
+                            pending:    { bg:'#FEF3C7', color:'#92400E', label:'Pending' },
+                            dispatched: { bg:'#EFF6FF', color:'#2563EB', label:'Dispatched' },
+                            completed:  { bg:'#ECFDF5', color:'#059669', label:'Completed' },
+                            failed:     { bg:'#FEF2F2', color:'#DC2626', label:'Failed' },
+                            on_hold:    { bg:'#FFF7ED', color:'#C2410C', label:'On hold' },
+                        }[s] || { bg:'#F3F4F6', color:'#6B7280', label: s || '—' };
+                        return `<span style="display:inline-block;padding:3px 9px;border-radius:11px;background:${styles.bg};color:${styles.color};font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">${esc(styles.label)}</span>`;
+                    };
+                    wrap.innerHTML = `
+                        <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+                            <thead>
+                                <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Date</th>
+                                    <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Amount</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Sales</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">PayPal email</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map((p) => `
+                                    <tr style="border-bottom:1px solid #F3F4F6;">
+                                        <td style="padding:11px 14px;font-size:12.5px;color:#6B7280;white-space:nowrap;">${esc(fmtDate(p.dispatched_at || p.created_at))}</td>
+                                        <td style="padding:11px 14px;text-align:right;font-size:13px;color:#111827;font-weight:700;white-space:nowrap;">${esc(fmtMoney(p.amount, p.currency))}</td>
+                                        <td style="padding:11px 14px;font-size:12.5px;color:#6B7280;">${esc(p.tx_count)} sale${p.tx_count === 1 ? '' : 's'}</td>
+                                        <td style="padding:11px 14px;font-size:12px;color:#6B7280;">${esc(p.paypal_email || '—')}</td>
+                                        <td style="padding:11px 14px;">${statusBadge(p.status)}${p.failure_reason ? `<div style="font-size:11px;color:#DC2626;margin-top:3px;">${esc(p.failure_reason)}</div>` : ''}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>`;
+                } catch (e) {
+                    wrap.innerHTML = `<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">${esc(e.message)}</div>`;
+                }
+            }
+
+            async function loadAll() {
+                await Promise.all([loadBalance(), loadMethod(), loadUpcoming(), loadHistory()]);
+            }
+
+            // Form submit — save payout method
+            function wireOnce() {
+                const form = document.getElementById('poMethodForm');
+                if (form && !form.dataset.wired) {
+                    form.dataset.wired = '1';
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const errEl = document.getElementById('poMethodErr');
+                        const okEl  = document.getElementById('poMethodOk');
+                        errEl.style.display = 'none';
+                        okEl.style.display = 'none';
+                        const btn = document.getElementById('poMethodSubmit');
+                        btn.disabled = true;
+                        btn.textContent = 'Saving…';
+                        try {
+                            await api('POST', 'set_method', null, {
+                                paypal_email:  form.elements.paypal_email.value.trim(),
+                                display_name:  form.elements.display_name.value.trim() || null,
+                                country_code:  form.elements.country_code.value.trim() || null,
+                            });
+                            okEl.style.display = 'block';
+                            await loadBalance();  // refresh ready-state banner
+                        } catch (err) {
+                            errEl.textContent = err.message || 'Save failed';
+                            errEl.style.display = 'block';
+                        } finally {
+                            btn.disabled = false;
+                            btn.textContent = 'Save';
+                        }
+                    });
+                }
+                const refreshBtn = document.getElementById('poRefreshUpcoming');
+                if (refreshBtn && !refreshBtn.dataset.wired) {
+                    refreshBtn.dataset.wired = '1';
+                    refreshBtn.addEventListener('click', () => loadUpcoming());
+                }
+            }
+
+            function maybeLoad() {
+                const wrap = document.querySelector('[data-shell-active-route]');
+                const active = wrap && wrap.getAttribute('data-shell-active-route');
+                if (active !== 'payouts') return;
+                if (!getToken()) return;
+                wireOnce();
+                loadAll();
+            }
+
+            window.addEventListener('hashchange', maybeLoad);
+            const poAuth = setInterval(() => {
+                if (getToken()) { clearInterval(poAuth); maybeLoad(); }
+            }, 400);
+            setTimeout(() => clearInterval(poAuth), 15000);
+            setTimeout(maybeLoad, 200);
         })();
     </script>
 
