@@ -4282,7 +4282,19 @@
                   <div style="font-size:12px;color:#3730A3;line-height:1.6;">After payment, BB emails the buyer a one-click <strong>"Activate your account"</strong> button linking to your signup page with the token appended as <code style="background:#fff;padding:1px 6px;border-radius:3px;font-size:11px;">?bb_token=&lt;code&gt;</code>. Your signup endpoint validates the token via BB's API and creates the account already on the paid plan — no separate redemption page needed.</div>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Activation page URL <span style="font-size:11px;color:#FF2D78;font-weight:600;">required for purchasable products</span></label>
+                  <label class="form-label" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span>Activation page URL</span>
+                    <span class="bb-tip" tabindex="0" aria-label="What is the activation page URL?" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#4338CA;color:#fff;font-size:10px;font-weight:700;cursor:help;line-height:1;">
+                      i
+                      <span class="bb-tip__bubble" style="position:absolute;left:22px;top:50%;transform:translateY(-50%);width:320px;padding:12px 14px;background:#1F2937;color:#F9FAFB;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.2);font-size:12px;font-weight:400;line-height:1.55;letter-spacing:0;z-index:1000;opacity:0;visibility:hidden;transition:opacity 0.15s ease;pointer-events:none;text-align:left;">
+                        <strong style="display:block;color:#FCD34D;margin-bottom:6px;">Get this right the first time.</strong>
+                        BB sends the buyer an email with a one-click <em>"Activate your account"</em> button. The button links to <strong>this URL</strong> with <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;font-size:11px;">?bb_token=&lt;code&gt;</code> appended. Your signup endpoint validates the token via BB's API and creates the paid account — no per-order action from you.
+                        <br><br>
+                        <strong style="color:#FCA5A5;">Once your product is approved, this field is locked.</strong> Changing it requires duplicating the product as a new draft. Triple-check the URL before submitting for audit.
+                      </span>
+                    </span>
+                    <span style="font-size:11px;color:#FF2D78;font-weight:600;">required for purchasable products</span>
+                  </label>
                   <input type="url" class="form-input" name="fulfillment_redirect_url" placeholder="https://example.com/signup">
                   <div style="font-size:11px;color:#9CA3AF;margin-top:6px;line-height:1.55;">
                     Usually your signup / register page. BB appends <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:11px;">?bb_token=&lt;code&gt;</code> when the buyer clicks the email CTA. Your signup endpoint should:
@@ -4444,6 +4456,38 @@
         <style>
           .pf-tab.pf-tab-active { color: var(--accent-primary, #FF2D78) !important; border-bottom-color: var(--accent-primary, #FF2D78) !important; }
           .pf-tab:hover:not(.pf-tab-active) { color: #374151 !important; }
+
+          /* Tooltip — shown on hover or keyboard focus of the info chip */
+          .bb-tip:hover .bb-tip__bubble,
+          .bb-tip:focus .bb-tip__bubble,
+          .bb-tip:focus-within .bb-tip__bubble {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto;
+          }
+          /* Little arrow pointing back at the icon */
+          .bb-tip__bubble::before {
+            content: "";
+            position: absolute;
+            left: -6px; top: 50%;
+            transform: translateY(-50%);
+            border-width: 6px 6px 6px 0;
+            border-style: solid;
+            border-color: transparent #1F2937 transparent transparent;
+          }
+          /* Flip the bubble to the left when there's no room on the right
+             (e.g. when the modal pushes it past the viewport edge) */
+          @media (max-width: 900px) {
+            .bb-tip__bubble {
+              left: auto !important; right: 22px !important;
+              transform: translateY(-50%) !important;
+            }
+            .bb-tip__bubble::before {
+              left: auto; right: -6px;
+              border-width: 6px 0 6px 6px;
+              border-color: transparent transparent transparent #1F2937;
+            }
+          }
         </style>
 
         <div id="campaignModal" class="modal">
