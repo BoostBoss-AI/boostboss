@@ -3802,10 +3802,17 @@
                   <label class="form-label">Short description <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(1-2 sentences, shown on cards + at top of product page)</span></label>
                   <textarea class="form-input" name="description" rows="2" maxlength="5000" placeholder="One-liner that explains what the buyer is getting"></textarea>
                 </div>
+                <!-- Product video (optional) — when set, replaces the image at the top of the buyer page -->
+                <div class="form-group">
+                  <label class="form-label">Product video <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — autoplay-muted-loop at the top of buyer page, like AppSumo)</span></label>
+                  <input type="url" class="form-input" name="hero_video_url" placeholder="https://cdn.example.com/product-demo.mp4">
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Click 🎬 Upload to attach an mp4 / webm / mov. When set, takes the primary visual slot on the buyer page; the image carousel below still works.</div>
+                </div>
+
                 <div class="form-group">
                   <label class="form-label">Primary hero image URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(square or 4:3 — shown above all other images)</span></label>
                   <input type="url" class="form-input" name="image_url" placeholder="https://cdn.example.com/product.png">
-                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">→ Upload to imgur.com, Cloudinary, or your own CDN, then paste the URL.</div>
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Click 📷 Upload to pick a file, drag it onto the field, or paste a URL.</div>
                 </div>
                 <div class="form-group" style="display:grid;grid-template-columns:1fr 120px 160px;gap:12px;">
                   <div>
@@ -4651,6 +4658,268 @@
 
         // API Base URL (adjust if needed)
         const API_BASE = window.location.origin;
+
+        // ════════════════════════════════════════════════════════════════════
+        // BBUpload — reusable Supabase Storage upload helper
+        //
+        //   Bucket:  product-images (public read, owner-write via RLS)
+        //   Path:    <advertiser_id>/<timestamp>-<random>.<ext>
+        //   Max:     100 MB per file (enforced by bucket policy)
+        //   Types:   image/png, jpg, webp, gif, svg + video/mp4, webm, mov
+        //
+        // The widget builds a Supabase JS client with the advertiser's JWT
+        // and uploads directly browser → bucket. No backend hop. RLS on the
+        // bucket guarantees they can only write to their own folder.
+        //
+        // API:
+        //   BBUpload.uploadFile(file, { onProgress, accept })  → { url, path }
+        //   BBUpload.attachToInput(input, { accept, onUploaded, multiple })
+        //     Attaches a 📷 Upload button (and click-to-upload) to a URL input.
+        //   BBUpload.attachToTextarea(textarea, { accept, label })
+        //     Attaches a 📷 Upload images button that appends URLs as new lines.
+        // ════════════════════════════════════════════════════════════════════
+        const BBUpload = (function () {
+            let _client = null;
+            function getClient() {
+                if (_client) return _client;
+                if (!window.supabase || !window.supabase.createClient) return null;
+                _client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                return _client;
+            }
+
+            // Get current user's id — needed for the storage path's first segment
+            // (RLS enforces it). Sourced from currentUserData.user_id (auth.uid).
+            function getAdvertiserId() {
+                try {
+                    if (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.user_id) {
+                        return currentUserData.user_id;
+                    }
+                } catch (_) {}
+                try {
+                    const raw = localStorage.getItem('bb_user_data');
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && parsed.user_id) return parsed.user_id;
+                    }
+                } catch (_) {}
+                return null;
+            }
+
+            // The Supabase client needs a session set so RLS-protected uploads
+            // identify auth.uid() correctly. We re-set it on every upload to
+            // avoid stale-session issues if the user's token has refreshed.
+            async function ensureSession() {
+                const c = getClient();
+                if (!c) throw new Error('Supabase client not loaded');
+                let access_token = null;
+                let refresh_token = null;
+                try {
+                    const raw = localStorage.getItem('bb_session_token');
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            if (parsed && parsed.token) access_token = parsed.token;
+                            if (parsed && parsed.refresh_token) refresh_token = parsed.refresh_token;
+                        } catch (_) {
+                            access_token = raw;
+                        }
+                    }
+                    if (!access_token) {
+                        access_token = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token') || null;
+                    }
+                } catch (_) {}
+                if (!access_token) throw new Error('Not authenticated');
+                await c.auth.setSession({ access_token, refresh_token: refresh_token || access_token });
+                return c;
+            }
+
+            // Pick a safe extension from the file (mime → ext fallback).
+            function extFromFile(f) {
+                if (f.name) {
+                    const m = f.name.match(/\.([a-z0-9]+)$/i);
+                    if (m) return m[1].toLowerCase();
+                }
+                const t = (f.type || '').toLowerCase();
+                if (t === 'image/jpeg' || t === 'image/jpg') return 'jpg';
+                if (t === 'image/png')  return 'png';
+                if (t === 'image/webp') return 'webp';
+                if (t === 'image/gif')  return 'gif';
+                if (t === 'image/svg+xml') return 'svg';
+                if (t === 'video/mp4')  return 'mp4';
+                if (t === 'video/webm') return 'webm';
+                if (t === 'video/quicktime') return 'mov';
+                return 'bin';
+            }
+
+            function randomId(n) {
+                const c = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                let s = '';
+                for (let i = 0; i < n; i++) s += c[Math.floor(Math.random() * c.length)];
+                return s;
+            }
+
+            async function uploadFile(file, opts) {
+                if (!file) throw new Error('No file provided');
+                opts = opts || {};
+                const advId = getAdvertiserId();
+                if (!advId) throw new Error('Advertiser id not available — try reloading the page');
+                const client = await ensureSession();
+                const ext = extFromFile(file);
+                const name = Date.now() + '-' + randomId(6) + '.' + ext;
+                const path = advId + '/' + name;
+
+                if (typeof opts.onProgress === 'function') opts.onProgress(0);
+
+                const { error } = await client
+                    .storage
+                    .from('product-images')
+                    .upload(path, file, {
+                        cacheControl: '3600',
+                        upsert: false,
+                        contentType: file.type || undefined,
+                    });
+                if (error) throw new Error(error.message || 'Upload failed');
+
+                if (typeof opts.onProgress === 'function') opts.onProgress(100);
+
+                const { data } = client.storage.from('product-images').getPublicUrl(path);
+                const url = data && data.publicUrl;
+                if (!url) throw new Error('Could not resolve public URL');
+                return { url, path };
+            }
+
+            // Attach a small upload affordance next to a URL <input>.
+            // The widget renders a button to the right of the input, accepts
+            // drag-and-drop on the input itself, and on success populates the
+            // input value with the uploaded URL + shows a thumbnail preview.
+            function attachToInput(input, opts) {
+                if (!input || input.dataset.bbUpload === '1') return;
+                input.dataset.bbUpload = '1';
+                opts = opts || {};
+                const accept = opts.accept || 'image/*';
+                const isVideo = accept.indexOf('video') >= 0;
+
+                // Wrap the input in a flex container so the button sits to its right
+                const wrap = document.createElement('div');
+                wrap.style.display = 'flex'; wrap.style.gap = '6px'; wrap.style.alignItems = 'stretch';
+                input.parentNode.insertBefore(wrap, input);
+                wrap.appendChild(input);
+                input.style.flex = '1';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = isVideo ? '🎬 Upload' : '📷 Upload';
+                btn.style.cssText = 'padding:0 14px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;white-space:nowrap;';
+                wrap.appendChild(btn);
+
+                const hidden = document.createElement('input');
+                hidden.type = 'file';
+                hidden.accept = accept;
+                hidden.style.display = 'none';
+                wrap.appendChild(hidden);
+
+                // Preview row below the input
+                const preview = document.createElement('div');
+                preview.style.cssText = 'margin-top:6px;display:none;font-size:11px;color:#6B7280;align-items:center;gap:8px;';
+                input.parentNode.insertBefore(preview, input.nextSibling);
+                wrap.parentNode.insertBefore(preview, wrap.nextSibling);
+
+                function showPreview(url) {
+                    if (!url) { preview.style.display = 'none'; return; }
+                    if (isVideo) {
+                        preview.innerHTML = '<video src="' + url + '" style="height:48px;border-radius:6px;background:#000;" muted></video><span>Uploaded</span>';
+                    } else {
+                        preview.innerHTML = '<img src="' + url + '" style="height:48px;width:48px;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;"><span>Uploaded</span>';
+                    }
+                    preview.style.display = 'flex';
+                }
+                if (input.value) showPreview(input.value);
+
+                async function doUpload(file) {
+                    if (!file) return;
+                    btn.disabled = true;
+                    const orig = btn.textContent;
+                    btn.textContent = 'Uploading…';
+                    try {
+                        const { url } = await uploadFile(file);
+                        input.value = url;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        showPreview(url);
+                        if (typeof opts.onUploaded === 'function') opts.onUploaded(url);
+                    } catch (e) {
+                        alert('Upload failed: ' + (e.message || e));
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = orig;
+                    }
+                }
+
+                btn.addEventListener('click', () => hidden.click());
+                hidden.addEventListener('change', (e) => { if (e.target.files[0]) doUpload(e.target.files[0]); });
+                // Click input to also trigger picker if empty (intuitive)
+                // Drag-and-drop on the input
+                input.addEventListener('dragover', (e) => { e.preventDefault(); input.style.background = '#FFF7FB'; });
+                input.addEventListener('dragleave', () => { input.style.background = ''; });
+                input.addEventListener('drop', (e) => {
+                    e.preventDefault(); input.style.background = '';
+                    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+                    if (f) doUpload(f);
+                });
+                // Manual URL pastes still work — re-render preview on change
+                input.addEventListener('input', () => showPreview(input.value));
+            }
+
+            // Attach a multi-upload button above a textarea where each line
+            // is a URL. Each file uploaded gets its URL appended on a new
+            // line. Supports selecting many files at once.
+            function attachToTextarea(textarea, opts) {
+                if (!textarea || textarea.dataset.bbUpload === '1') return;
+                textarea.dataset.bbUpload = '1';
+                opts = opts || {};
+                const accept = opts.accept || 'image/*';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = opts.label || '📷 Upload images (one or many)';
+                btn.style.cssText = 'margin-bottom:6px;padding:8px 14px;border:1px solid #FBCFE8;border-radius:8px;background:#FFF1F6;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;';
+
+                const hidden = document.createElement('input');
+                hidden.type = 'file';
+                hidden.accept = accept;
+                hidden.multiple = true;
+                hidden.style.display = 'none';
+
+                textarea.parentNode.insertBefore(btn, textarea);
+                textarea.parentNode.insertBefore(hidden, textarea);
+
+                btn.addEventListener('click', () => hidden.click());
+
+                async function doUploadMany(files) {
+                    if (!files || !files.length) return;
+                    const orig = btn.textContent;
+                    btn.disabled = true;
+                    let ok = 0;
+                    for (let i = 0; i < files.length; i++) {
+                        btn.textContent = 'Uploading ' + (i+1) + '/' + files.length + '…';
+                        try {
+                            const { url } = await uploadFile(files[i]);
+                            const cur = textarea.value.trim();
+                            textarea.value = (cur ? cur + '\n' : '') + url;
+                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            ok++;
+                        } catch (e) {
+                            console.warn('upload failed:', e.message);
+                        }
+                    }
+                    btn.disabled = false;
+                    btn.textContent = orig;
+                    if (ok < files.length) alert((files.length - ok) + ' file(s) failed to upload. Check console for details.');
+                }
+                hidden.addEventListener('change', (e) => doUploadMany(e.target.files));
+            }
+
+            return { uploadFile, attachToInput, attachToTextarea };
+        })();
 
         // State
         let currentUser = null;
@@ -6735,23 +7004,39 @@
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const formData = new FormData(campaignForm);
 
-            // Build media_url — Phase E.5: prefer uploaded file, then URL-autofill og:image,
-            // finally placeholder. Production would upload to CDN.
+            // Build media_url — preference order:
+            //   1. File uploaded via the dropzone → upload to Supabase Storage,
+            //      use the resulting public CDN URL
+            //   2. URL-autofill from og:image fetch
+            //   3. Placeholder
+            //
+            // The bucket upload replaces the old base64 data-URL trick (which
+            // stuffed the full encoded image into the DB row). Uses the same
+            // BBUpload helper as the product modal. See [[fulfillment-activation-link-model]]
+            // for the upload infrastructure.
             const uploadedFile = fileInput.files && fileInput.files[0];
             const fetchedMediaUrl = campaignForm.dataset.fetchedMediaUrl || '';
             let mediaUrl = fetchedMediaUrl
                 || 'https://placehold.co/540x304/1a1a2e/ffffff?text=' + encodeURIComponent(formData.get('name') || 'Ad');
             if (uploadedFile) {
-                // Convert to base64 data URL so it persists (blob URLs expire)
                 try {
-                    mediaUrl = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(uploadedFile);
-                    });
-                } catch (_) {
-                    // Fall back to whatever mediaUrl was already set above
+                    const { url } = await BBUpload.uploadFile(uploadedFile);
+                    mediaUrl = url;
+                } catch (e) {
+                    console.warn('[Campaign] bucket upload failed, falling back to base64:', e.message);
+                    // Last-ditch fallback for the (rare) case the bucket is
+                    // unreachable — keeps the old base64 behavior so the
+                    // campaign still saves. Existing rows in this format
+                    // also keep rendering. A future migration can convert
+                    // any base64-tagged rows to bucket URLs.
+                    try {
+                        mediaUrl = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(uploadedFile);
+                        });
+                    } catch (_) {}
                 }
             }
 
@@ -11848,6 +12133,7 @@ function pfParseScreenshots(text) {
                     if (form.elements.best_for_text)       form.elements.best_for_text.value       = linesOf(product.best_for);
                     if (form.elements.deal_terms_text)     form.elements.deal_terms_text.value     = linesOf(product.deal_terms);
                     if (form.elements.hero_images_text)    form.elements.hero_images_text.value    = linesOf(product.hero_images);
+                    if (form.elements.hero_video_url)      form.elements.hero_video_url.value      = product.hero_video_url || '';
                     if (form.elements.feature_blocks_text) form.elements.feature_blocks_text.value = serializeFeatureBlocks(product.feature_blocks);
 
                     // Trust block
@@ -11899,6 +12185,27 @@ function pfParseScreenshots(text) {
                 // the "save the product first" placeholder until they save.
                 ppInlineInit(product ? product.id : null);
                 ppInlineUpdateSplitPreview();
+
+                // Wire upload widgets to every image/video field in the modal.
+                // Idempotent — each field is marked once so reopening the
+                // modal doesn't double-attach.
+                try {
+                    const single = (name, accept) => {
+                        const el = form.elements[name];
+                        if (el && el.tagName === 'INPUT') BBUpload.attachToInput(el, { accept: accept || 'image/*' });
+                    };
+                    const multi = (name, accept, label) => {
+                        const el = form.elements[name];
+                        if (el && el.tagName === 'TEXTAREA') BBUpload.attachToTextarea(el, { accept: accept || 'image/*', label });
+                    };
+                    single('image_url',          'image/*');
+                    single('hero_video_url',     'video/*');
+                    single('company_logo_url',   'image/*');
+                    single('founder_photo_url',  'image/*');
+                    multi('hero_images_text',    'image/*', '📷 Upload images (one or many)');
+                    multi('screenshots_text',    'image/*', '📷 Upload screenshots (one or many)');
+                } catch (_) {}
+
                 modal.classList.add('active');
                 setTimeout(() => form.elements.name.focus(), 50);
             }
@@ -12289,6 +12596,7 @@ function pfParseScreenshots(text) {
                     best_for:               linesToArr(v('best_for_text')),
                     deal_terms:             linesToArr(v('deal_terms_text')),
                     hero_images:            linesToArr(v('hero_images_text')),
+                    hero_video_url:         trim(v('hero_video_url')) || null,
                     feature_blocks:         parseFeatureBlocks(v('feature_blocks_text')),
 
                     // Trust block

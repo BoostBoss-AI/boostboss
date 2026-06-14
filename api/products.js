@@ -415,6 +415,17 @@ function normalizeProduct(body, { partial = false } = {}) {
     }
   }
 
+  // ── Product hero video ───────────────────────────────────────────
+  if (body.hero_video_url !== undefined) {
+    if (body.hero_video_url == null || body.hero_video_url === "") {
+      row.hero_video_url = null;
+    } else {
+      const u = String(body.hero_video_url).trim();
+      if (!/^https?:\/\//i.test(u)) return { error: "hero_video_url must be a valid http(s) URL" };
+      row.hero_video_url = u.slice(0, 2000);
+    }
+  }
+
   // ── Hero image carousel ───────────────────────────────────────────
   // Silently skip lines that aren't valid URLs (auto-prepend https:// if the
   // line looks like a domain) instead of erroring out on the whole save.
@@ -563,7 +574,7 @@ module.exports = async function handler(req, res) {
           external_marketing_url, default_url,
           default_commission_pct, affiliate_pool_pct,
           redemption_window_days, package_duration_days,
-          hero_images, feature_blocks,
+          hero_images, hero_video_url, feature_blocks,
           tldr_bullets, alternative_to, integrations, best_for,
           refund_window_days, guarantee_label, deal_terms,
           company_logo_url, company_website_url, company_tagline, company_about,
@@ -647,6 +658,7 @@ module.exports = async function handler(req, res) {
         description:              data.description,
         image_url:                data.image_url,
         hero_images:              Array.isArray(data.hero_images) ? data.hero_images : [],
+        hero_video_url:           data.hero_video_url,
         price:                    data.price,
         currency:                 data.currency,
         sku_type:                 data.sku_type,

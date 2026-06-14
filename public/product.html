@@ -380,6 +380,10 @@
         <h1 id="prodName">—</h1>
         <p class="hero-lede" id="prodLede"></p>
 
+        <!-- Hero VIDEO takes the top slot when set; image carousel falls below as
+             a thumbnail strip. When no video, the image becomes the primary visual. -->
+        <video id="heroVideo" style="display:none;width:100%;aspect-ratio:16/10;border-radius:14px;background:#000;object-fit:cover;margin-bottom:14px;"
+               autoplay muted loop playsinline></video>
         <div class="hero-img-main" id="heroImgMain">📦</div>
         <div class="hero-thumbs" id="heroThumbs"></div>
       </div>
@@ -658,13 +662,23 @@
     document.getElementById('prodName').textContent = p.name || 'Untitled';
     document.getElementById('prodLede').textContent = p.description || '';
 
+    // Hero video — autoplay/muted/loop at the top when set, AppSumo / Apple style.
+    // If a video is set, the main image slot becomes a smaller thumbnail row.
+    const video = document.getElementById('heroVideo');
+    const main  = document.getElementById('heroImgMain');
+    if (p.hero_video_url) {
+      video.src = p.hero_video_url;
+      if (p.image_url) video.poster = p.image_url;  // image shows while video loads
+      video.style.display = 'block';
+      main.style.display = 'none';
+    }
+
     // Hero image carousel — hero_images[] takes precedence, image_url as fallback
     const heroImages = (Array.isArray(p.hero_images) && p.hero_images.length)
       ? p.hero_images.slice()
       : [];
     if (!heroImages.length && p.image_url) heroImages.push(p.image_url);
-    const main = document.getElementById('heroImgMain');
-    if (heroImages.length) {
+    if (heroImages.length && !p.hero_video_url) {
       main.style.backgroundImage = `url("${heroImages[0].replace(/"/g, '%22')}")`;
       main.textContent = '';
     }
