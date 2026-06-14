@@ -538,6 +538,39 @@ async function supabaseHandler(action, body, req, res) {
     });
   }
 
+  // ── Refresh access token via refresh_token ─────────────────────────
+  // Supabase access tokens expire after ~1 hour. Rather than force
+  // sign-in every hour, the dashboard's auth-guard catches 401s, posts
+  // the refresh_token from saveSession, and gets back a fresh
+  // access_token + (rotated) refresh_token. The original request is
+  // then retried with the new bearer.
+  //
+  // Body: { refresh_token: "..." }
+  // Public — no Authorization required (the refresh_token IS the credential).
+  if (action === "refresh") {
+    const refresh_token = (body && body.refresh_token) || "";
+    if (!refresh_token) return res.status(400).json({ error: "Missing refresh_token" });
+    const { data, error } = await supabaseAnon.auth.refreshSession({ refresh_token });
+    if (error || !data || !data.session) {
+      // Refresh failed — usually because the refresh_token itself is
+      // expired or revoked. Caller should clear local session and
+      // bounce the user to /signin.
+      return res.status(401).json({ error: error?.message || "Refresh failed", code: "refresh_failed" });
+    }
+    // Keep the cross-origin cookie in sync so benna.ai notices.
+    setSessionCookie(res, data.session.access_token);
+    return res.json({
+      success: true,
+      session: {
+        access_token:  data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_in:    data.session.expires_in,
+        token_type:    "Bearer",
+      },
+      user: data.user ? { id: data.user.id, email: data.user.email } : null,
+    });
+  }
+
   // ── Cross-role onboarding: complete the missing profile ──
   // Companion endpoint to the login `needs_profile` branch. The user has
   // already authenticated at the Supabase auth level (their email+password
@@ -2017,7 +2050,7 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ saved: data || [], total: count || 0 });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, complete_role_profile, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved, affiliate_create_share_link, affiliate_list_share_links, affiliate_revoke_share_link" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, complete_role_profile, refresh, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved, affiliate_create_share_link, affiliate_list_share_links, affiliate_revoke_share_link" });
 }
 
 // ── helper: build the email confirmation redirect URL for a given role ──

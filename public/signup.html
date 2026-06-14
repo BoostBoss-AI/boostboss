@@ -852,6 +852,42 @@ function showToast(msg, type='info', dur=2500) {
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
 }
 
+// ── Session-expired bounce handling ─────────────────────────────
+// /auth-guard.js redirects expired sessions here with ?expired=1.
+// Surface a friendly toast + pre-fill the email field so the user
+// only has to type their password again. Runs as soon as the form
+// elements are present.
+(function handleExpiredBounce() {
+  try {
+    var q = new URLSearchParams(window.location.search || '');
+    if (q.get('expired') !== '1') return;
+
+    // Wait until the login form is in the DOM (lockRoleFromPath() may
+    // tweak it). Then prefill email + show the toast.
+    var prefillEmail = localStorage.getItem('bb_last_email') || '';
+    var apply = function () {
+      var emailInput = document.getElementById('login-email');
+      if (emailInput && prefillEmail) {
+        emailInput.value = prefillEmail;
+        // Move focus to the password field so the user can type immediately.
+        var pw = document.getElementById('login-password');
+        if (pw) pw.focus();
+      }
+      showToast('Your session expired — please sign in again.', 'info', 4500);
+      // Strip ?expired from the URL so a refresh doesn't re-show the toast.
+      try {
+        var clean = window.location.pathname + window.location.hash;
+        window.history.replaceState(null, '', clean);
+      } catch (_) {}
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', apply);
+    } else {
+      apply();
+    }
+  } catch (_) {}
+})();
+
 const API = "/api/auth";
 let selectedRole = "advertiser";
 
@@ -1683,13 +1719,17 @@ function roleNs(role) { return role === "developer" ? "bb_pub" : "bb_adv"; }
 function saveSession(j) {
   const role = j.user?.role || selectedRole;
   const ns = roleNs(role);
-  if (j.session?.access_token) localStorage.setItem(ns + "_token", j.session.access_token);
-  if (j.user)                  localStorage.setItem(ns + "_user",  JSON.stringify(j.user));
-  if (j.profile)               localStorage.setItem(ns + "_profile", JSON.stringify(j.profile));
+  if (j.session?.access_token)  localStorage.setItem(ns + "_token",   j.session.access_token);
+  if (j.session?.refresh_token) localStorage.setItem(ns + "_refresh", j.session.refresh_token);
+  if (j.user)                   localStorage.setItem(ns + "_user",    JSON.stringify(j.user));
+  if (j.profile)                localStorage.setItem(ns + "_profile", JSON.stringify(j.profile));
   // Also set the legacy generic keys so any un-migrated consumers keep working.
-  if (j.session?.access_token) localStorage.setItem("bb_token", j.session.access_token);
-  if (j.user)                  localStorage.setItem("bb_user",  JSON.stringify(j.user));
-  if (j.profile)               localStorage.setItem("bb_profile", JSON.stringify(j.profile));
+  if (j.session?.access_token)  localStorage.setItem("bb_token",   j.session.access_token);
+  if (j.session?.refresh_token) localStorage.setItem("bb_refresh", j.session.refresh_token);
+  if (j.user)                   localStorage.setItem("bb_user",    JSON.stringify(j.user));
+  if (j.profile)                localStorage.setItem("bb_profile", JSON.stringify(j.profile));
+  // Cache the email so the signin page can pre-fill after auto-bounce.
+  if (j.user?.email)            localStorage.setItem("bb_last_email", j.user.email);
 }
 
 function showWelcome(j) {
