@@ -550,9 +550,92 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
   .policy-modal-overlay { padding: 0; align-items: stretch; }
   .policy-modal { max-height: 100vh; border-radius: 0; max-width: 100%; }
 }
+  /* ── Cross-role onboarding modal (needs_profile flow) ─────────
+     Shown when an existing user signs in at a dashboard they
+     haven't been enrolled in yet. They've already authenticated
+     and accepted terms at their original signup, so this is a
+     small role-specific questionnaire — no terms re-check, no
+     second welcome email. */
+  #completeRoleModal {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(15, 15, 26, 0.6);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #completeRoleModal.open { display: flex; }
+  #completeRoleModal .crm-card {
+    background: #fff; border-radius: 14px; max-width: 460px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    overflow: hidden;
+  }
+  #completeRoleModal .crm-head {
+    padding: 22px 24px; background: linear-gradient(135deg, #FF2D78, #FF6B9D);
+    color: #fff;
+  }
+  #completeRoleModal .crm-head h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  #completeRoleModal .crm-head p  { margin: 4px 0 0; font-size: 12.5px; opacity: 0.92; line-height: 1.5; }
+  #completeRoleModal .crm-body { padding: 22px 24px; }
+  #completeRoleModal .crm-body label {
+    display: block; font-size: 12.5px; font-weight: 600;
+    color: #374151; margin-bottom: 6px; margin-top: 14px;
+  }
+  #completeRoleModal .crm-body label:first-child { margin-top: 0; }
+  #completeRoleModal .crm-body input,
+  #completeRoleModal .crm-body select {
+    width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB;
+    border-radius: 8px; font-size: 14px; font-family: inherit; outline: none;
+    background: #fff; box-sizing: border-box;
+  }
+  #completeRoleModal .crm-body input:focus,
+  #completeRoleModal .crm-body select:focus { border-color: #FF2D78; box-shadow: 0 0 0 3px rgba(255,45,120,0.15); }
+  #completeRoleModal .crm-foot {
+    display: flex; gap: 10px; justify-content: flex-end; padding: 0 24px 22px;
+  }
+  #completeRoleModal .crm-foot button {
+    padding: 10px 18px; border-radius: 8px; font-size: 13.5px;
+    font-weight: 600; font-family: inherit; cursor: pointer; border: none;
+  }
+  #completeRoleModal .crm-cancel { background: #fff; border: 1px solid #D1D5DB; color: #374151; }
+  #completeRoleModal .crm-submit { background: #FF2D78; color: #fff; }
+  #completeRoleModal .crm-submit:disabled { opacity: 0.6; cursor: wait; }
 </style>
 </head>
 <body>
+
+<!-- ── Cross-role onboarding modal ────────────────────────────
+     Hidden by default. Opens when the login response includes
+     `needs_profile`. Submit calls /api/auth?action=complete_role_profile
+     using the access_token returned with the login response. -->
+<div id="completeRoleModal" role="dialog" aria-modal="true" aria-labelledby="crmTitle">
+  <div class="crm-card">
+    <div class="crm-head">
+      <h3 id="crmTitle">Welcome back — one quick thing</h3>
+      <p id="crmSub">Tell us a bit about your business so we can set up the right dashboard for you. No second welcome email.</p>
+    </div>
+    <div class="crm-body">
+      <div id="crmFieldsAdvertiser" style="display:none;">
+        <label for="crm_company_name">Company name</label>
+        <input type="text" id="crm_company_name" placeholder="Your company or brand" maxlength="120">
+      </div>
+      <div id="crmFieldsDeveloper" style="display:none;">
+        <label for="crm_app_name">App or project name</label>
+        <input type="text" id="crm_app_name" placeholder="The AI app, extension, or bot you ship" maxlength="120">
+        <label for="crm_integration">Primary integration door</label>
+        <select id="crm_integration">
+          <option value="mcp">MCP server (Claude Desktop, Cursor, Cline)</option>
+          <option value="js_snippet">JS snippet (AI apps, websites)</option>
+          <option value="npm_sdk">NPM SDK (browser extensions, Electron)</option>
+          <option value="rest">REST API (Discord, Telegram, Slack bots)</option>
+        </select>
+      </div>
+    </div>
+    <div class="crm-foot">
+      <button type="button" class="crm-cancel" id="crmCancelBtn">Cancel</button>
+      <button type="button" class="crm-submit" id="crmSubmitBtn">Enter dashboard</button>
+    </div>
+  </div>
+</div>
 
 <!-- Nav -->
 <nav>
@@ -1312,6 +1395,17 @@ document.getElementById("login-form").addEventListener("submit", async e => {
 
     if (!r.ok || j.error) throw new Error(j.error || "Login failed");
 
+    // Cross-role onboarding (added 2026-06-14): existing user, no profile
+    // row for the dashboard they're trying to enter. Pop the inline
+    // questionnaire instead of redirecting straight to a broken dashboard.
+    // The access_token is already valid — we cached the session — so the
+    // questionnaire submit can authenticate against complete_role_profile.
+    if (j.needs_profile) {
+      saveSession(j);
+      openCompleteRoleModal(j.needs_profile);
+      return;
+    }
+
     saveSession(j);
     showToast('Signed in! Redirecting...', 'success');
     // Redirect straight to dashboard
@@ -1327,6 +1421,111 @@ document.getElementById("login-form").addEventListener("submit", async e => {
 
 // Demo buttons + /api/auth?action=demo endpoint removed 2026-05-28 —
 // demo mode is no longer offered.
+
+// ── Cross-role onboarding modal wiring ──────────────────────────
+// Opens when login returns { needs_profile: 'advertiser' | 'developer' }.
+// Collects role-specific fields and posts to complete_role_profile, then
+// redirects to the matching dashboard. No terms re-check, no second
+// welcome email — the user is already authenticated and onboarded.
+function openCompleteRoleModal(role) {
+  const modal   = document.getElementById('completeRoleModal');
+  const advFs   = document.getElementById('crmFieldsAdvertiser');
+  const devFs   = document.getElementById('crmFieldsDeveloper');
+  const title   = document.getElementById('crmTitle');
+  const sub     = document.getElementById('crmSub');
+  const submit  = document.getElementById('crmSubmitBtn');
+  if (!modal) return;
+
+  if (role === 'advertiser') {
+    advFs.style.display = '';
+    devFs.style.display = 'none';
+    title.textContent = 'Welcome — set up your advertiser dashboard';
+    sub.textContent   = 'Tell us your company name. Your existing account stays the same — no second welcome email.';
+    setTimeout(() => document.getElementById('crm_company_name').focus(), 50);
+  } else {
+    advFs.style.display = 'none';
+    devFs.style.display = '';
+    title.textContent = 'Welcome — set up your publisher dashboard';
+    sub.textContent   = 'Tell us what you ship and your primary integration. Your existing account stays the same — no second welcome email.';
+    setTimeout(() => document.getElementById('crm_app_name').focus(), 50);
+  }
+
+  submit.dataset.role = role;
+  submit.disabled = false;
+  submit.textContent = 'Enter dashboard';
+  modal.classList.add('open');
+}
+
+function closeCompleteRoleModal() {
+  document.getElementById('completeRoleModal').classList.remove('open');
+}
+
+document.getElementById('crmCancelBtn').addEventListener('click', () => {
+  closeCompleteRoleModal();
+  // User backed out — clear the half-finished session so they can re-attempt
+  // a different account without weird state hanging around.
+  try { localStorage.removeItem('bb_session'); } catch (_) {}
+});
+
+document.getElementById('crmSubmitBtn').addEventListener('click', async () => {
+  const submit = document.getElementById('crmSubmitBtn');
+  const role   = submit.dataset.role;
+  if (!role) return;
+
+  const body = { role };
+  if (role === 'advertiser') {
+    const cn = document.getElementById('crm_company_name').value.trim();
+    if (!cn) { showToast('Company name is required', 'error'); return; }
+    body.company_name = cn;
+  } else {
+    const an = document.getElementById('crm_app_name').value.trim();
+    if (!an) { showToast('App / project name is required', 'error'); return; }
+    body.app_name = an;
+    // Selected door is stored only as user metadata for now (no schema
+    // change needed). Backend doesn't require it; it's a hint for which
+    // /publish/* doc we'll surface first on the dashboard.
+    body.integration_door = document.getElementById('crm_integration').value;
+  }
+
+  // The session was saved in saveSession(j) right before we opened this
+  // modal. Pull the bearer back out so we can authenticate the upsert.
+  let token = '';
+  try {
+    const raw = localStorage.getItem('bb_session');
+    const sess = raw ? JSON.parse(raw) : null;
+    token = (sess && (sess.session?.access_token || sess.access_token)) || '';
+  } catch (_) {}
+  if (!token) { showToast('Session expired — please sign in again', 'error'); closeCompleteRoleModal(); return; }
+
+  submit.disabled = true;
+  submit.textContent = 'Setting up…';
+  try {
+    const r = await fetch(API + '?action=complete_role_profile', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body:    JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || 'Could not complete setup');
+
+    // Merge the new profile into the cached session so the dashboard's
+    // initial bootstrap picks it up without a round-trip.
+    try {
+      const raw = localStorage.getItem('bb_session');
+      const cached = raw ? JSON.parse(raw) : {};
+      const merged = Object.assign({}, cached, { user: j.user, profile: j.profile });
+      localStorage.setItem('bb_session', JSON.stringify(merged));
+    } catch (_) {}
+
+    showToast('All set — opening your dashboard', 'success');
+    const dest = role === 'developer' ? '/publish/dashboard' : '/ads/dashboard';
+    setTimeout(() => window.location.href = dest, 500);
+  } catch (e) {
+    showToast(e.message || 'Setup failed', 'error');
+    submit.disabled = false;
+    submit.textContent = 'Enter dashboard';
+  }
+});
 
 // ── Google OAuth ────────────────────────────────────────────────
 // Click "Continue with Google" → Supabase redirects to Google OAuth

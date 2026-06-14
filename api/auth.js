@@ -504,9 +504,24 @@ async function supabaseHandler(action, body, req, res) {
     }
 
     if (!profile) {
-      const product = wantedRole === "advertiser" ? "SuperBoost Ads" : "Lumi SDK";
-      return res.status(404).json({
-        error: "This email isn't registered for " + product + ". Please sign up first.",
+      // Cross-role sign-in path (added 2026-06-14). The auth user exists
+      // (their email+password is valid), but they don't have a profile row
+      // for the dashboard they just tried to enter. Instead of forcing them
+      // back to /signup with terms re-check and a second welcome email, we
+      // return a structured response so the signin page can pop an inline
+      // questionnaire — they finish onboarding right there and land on the
+      // dashboard.
+      //
+      // The session IS returned so the signin page can immediately call
+      // the follow-up complete_role_profile endpoint with the Bearer token.
+      // Setting the session cookie too keeps benna.ai in sync.
+      setSessionCookie(res, data.session.access_token);
+      return res.json({
+        success:       true,
+        mode:          "supabase",
+        needs_profile: wantedRole,                 // 'advertiser' | 'developer'
+        user:          { id: data.user.id, email: data.user.email, role: wantedRole },
+        session:       { access_token: data.session.access_token, refresh_token: data.session.refresh_token },
       });
     }
 
@@ -520,6 +535,100 @@ async function supabaseHandler(action, body, req, res) {
       user: { id: data.user.id, email: data.user.email, role: wantedRole },
       profile,
       session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token },
+    });
+  }
+
+  // ── Cross-role onboarding: complete the missing profile ──
+  // Companion endpoint to the login `needs_profile` branch. The user has
+  // already authenticated at the Supabase auth level (their email+password
+  // worked). They land on /ads/signin while only having a developer row
+  // (or vice versa). The signin page captures the Bearer access_token from
+  // the login response and POSTs here with the role-specific fields the
+  // questionnaire collected. We insert the missing row, return the full
+  // session/profile, and the page redirects to the dashboard.
+  //
+  // Why this is separate from signup:
+  //   • Terms are already accepted from the original signup
+  //   • The auth user already exists — Supabase will not fire a second
+  //     "Confirm signup" email (we use signInWithPassword identity, not
+  //     supabaseAnon.auth.signUp)
+  //   • user_metadata.roles[] gets the new role appended so future logins
+  //     remember this account is enrolled in both products
+  //
+  // Body: { role: 'advertiser' | 'developer', company_name?, app_name? }
+  // Auth: Authorization: Bearer <access_token from the login response>
+  if (action === "complete_role_profile") {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "Missing access token. Sign in first." });
+
+    const { role: roleRaw, company_name, app_name } = body || {};
+    const role = roleRaw === "advertiser" || roleRaw === "developer" ? roleRaw : null;
+    if (!role) return res.status(400).json({ error: "Missing or invalid role" });
+
+    const { data: { user }, error: meErr } = await supabaseAnon.auth.getUser(token);
+    if (meErr || !user) return res.status(401).json({ error: "Invalid or expired token. Sign in again." });
+
+    const table = role === "advertiser" ? "advertisers" : "developers";
+
+    // Don't double-insert. If the row already exists this user clicked
+    // back/forward to a stale modal — surface a clean error.
+    const { data: existing } = await supabaseAdmin
+      .from(table).select("id").eq("id", user.id).maybeSingle();
+    if (existing) {
+      const product = role === "advertiser" ? "SuperBoost Ads" : "Lumi SDK";
+      return res.status(409).json({ error: `Already enrolled in ${product}. Please sign in normally.` });
+    }
+
+    // Insert the new role's profile row. Defaults mirror the original
+    // signup path so downstream surfaces (campaign create, payouts) find
+    // the columns they expect.
+    let inserted = null;
+    if (role === "advertiser") {
+      const { data, error } = await supabaseAdmin
+        .from("advertisers")
+        .insert({
+          id:           user.id,
+          email:        user.email,
+          company_name: company_name || (user.email || "").split("@")[0],
+          balance:      0,
+        })
+        .select("*").maybeSingle();
+      if (error) return res.status(500).json({ error: "Could not create advertiser profile: " + error.message });
+      inserted = data;
+    } else {
+      const apiKey = makeApiKey("dev", user.id);
+      const { data, error } = await supabaseAdmin
+        .from("developers")
+        .insert({
+          id:       user.id,
+          email:    user.email,
+          app_name: app_name || (user.email || "").split("@")[0],
+          api_key:  apiKey,
+        })
+        .select("*").maybeSingle();
+      if (error) return res.status(500).json({ error: "Could not create developer profile: " + error.message });
+      inserted = data;
+    }
+
+    // Merge the new role into user_metadata.roles[] so the next login on
+    // either side knows this account spans both products.
+    try {
+      const existingMeta = user.user_metadata || {};
+      const existingRoles = existingMeta.roles || (existingMeta.role ? [existingMeta.role] : []);
+      const mergedRoles = Array.from(new Set([].concat(existingRoles, [role])));
+      const newMeta = Object.assign({}, existingMeta, { role, roles: mergedRoles });
+      if (role === "advertiser" && company_name) newMeta.company_name = company_name;
+      if (role === "developer"  && app_name)     newMeta.app_name     = app_name;
+      await supabaseAdmin.auth.admin.updateUserById(user.id, { user_metadata: newMeta });
+    } catch (e) {
+      console.warn("[Auth] complete_role_profile: user_metadata merge failed:", e.message);
+    }
+
+    return res.json({
+      success: true,
+      mode:    "supabase",
+      user:    { id: user.id, email: user.email, role },
+      profile: inserted,
     });
   }
 
@@ -1903,7 +2012,7 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ saved: data || [], total: count || 0 });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved, affiliate_create_share_link, affiliate_list_share_links, affiliate_revoke_share_link" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, complete_role_profile, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved, affiliate_create_share_link, affiliate_list_share_links, affiliate_revoke_share_link" });
 }
 
 // ── helper: build the email confirmation redirect URL for a given role ──
