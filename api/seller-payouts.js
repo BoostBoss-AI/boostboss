@@ -288,6 +288,17 @@ async function handleConvertToAdCredit(req, res) {
 
   const body = req.body || {};
   const campaignId = body.campaign_id || null;
+  // Optional partial-amount conversion. When provided, we walk captures
+  // FIFO and stop as soon as the running sum covers the requested
+  // amount. Since captures are atomic, the final marked sum may exceed
+  // the request slightly — we credit the actual marked amount so the
+  // accounting balances. Omit `amount` to convert everything.
+  const requestedAmount = (body.amount != null && body.amount !== "")
+    ? Number(body.amount)
+    : null;
+  if (requestedAmount != null && (!Number.isFinite(requestedAmount) || requestedAmount <= 0)) {
+    return res.status(400).json({ error: "amount must be a positive number" });
+  }
 
   // Pull every unsettled captured transaction FIFO
   const { data: txs, error: txErr } = await client
@@ -308,8 +319,31 @@ async function handleConvertToAdCredit(req, res) {
     });
   }
 
-  const txIds = rows.map((t) => t.id);
-  const totalAmount = round2(rows.reduce((a, t) => a + (Number(t.seller_settlement) || 0), 0));
+  // Walk FIFO; pick captures until they cover the requested amount.
+  // For full-balance convert (no amount given), this picks every row.
+  let pickedRows = [];
+  let pickedSum = 0;
+  if (requestedAmount == null) {
+    pickedRows = rows;
+    pickedSum = rows.reduce((a, t) => a + (Number(t.seller_settlement) || 0), 0);
+  } else {
+    for (const t of rows) {
+      if (pickedSum >= requestedAmount) break;
+      pickedRows.push(t);
+      pickedSum += Number(t.seller_settlement) || 0;
+    }
+  }
+  const txIds = pickedRows.map((t) => t.id);
+  const totalAmount = round2(pickedSum);
+  const fullBalance = round2(rows.reduce((a, t) => a + (Number(t.seller_settlement) || 0), 0));
+
+  if (requestedAmount != null && totalAmount < requestedAmount) {
+    return res.status(400).json({
+      error: `Requested $${requestedAmount.toFixed(2)} but only $${fullBalance.toFixed(2)} is available.`,
+      code:  "insufficient_balance",
+      available: fullBalance,
+    });
+  }
 
   if (totalAmount <= 0) {
     return res.status(400).json({ error: "Available balance is zero", code: "zero_balance" });
@@ -347,9 +381,11 @@ async function handleConvertToAdCredit(req, res) {
   return res.json({
     success:           true,
     credit_amount:     totalAmount,
-    converted_count:   rows.length,
+    requested_amount:  requestedAmount,
+    converted_count:   pickedRows.length,
     payout_id:         payout.id,
     campaign_id:       campaignId,
+    rounded_up:        requestedAmount != null && totalAmount > requestedAmount,
     note:              "Funds are now available as ad credit. Money never left BB.",
   });
 }

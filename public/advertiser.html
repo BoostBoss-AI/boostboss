@@ -3467,6 +3467,54 @@
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
               </div>
+              <!-- Convert-to-credit modal (BB-styled — replaces the native browser confirm() prompt) -->
+              <div id="convertModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+                <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.3);overflow:hidden;">
+                  <!-- Header with gradient -->
+                  <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);padding:22px 26px;border-bottom:1px solid #E5E7EB;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                      <div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;margin-bottom:4px;">Convert to ad credit</div>
+                        <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.3;">How much to convert?</div>
+                      </div>
+                      <button type="button" id="convertModalClose" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 4px;">×</button>
+                    </div>
+                  </div>
+
+                  <!-- Body -->
+                  <div style="padding:24px 26px;">
+                    <!-- Available chip -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:18px;">
+                      <span style="font-size:12.5px;color:#6B7280;font-weight:600;">Available MoR balance</span>
+                      <span style="font-size:16px;font-weight:700;color:#111827;">$<span id="convertModalAvailable">0.00</span></span>
+                    </div>
+
+                    <!-- Amount input -->
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:8px;">Amount to convert (USD)</label>
+                    <div style="position:relative;margin-bottom:8px;">
+                      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:#6B7280;">$</span>
+                      <input type="number" id="convertModalAmount" min="0.01" step="0.01" style="width:100%;padding:14px 16px 14px 32px;border:2px solid #C7D2FE;border-radius:10px;font-size:22px;font-weight:700;font-family:inherit;color:#111827;background:#fff;">
+                      <button type="button" id="convertModalMaxBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">MAX</button>
+                    </div>
+                    <div style="font-size:11px;color:#9CA3AF;margin-bottom:18px;line-height:1.5;">Rounds up to the nearest covered sale (MoR captures are atomic — can't be split mid-row).</div>
+
+                    <!-- Trade-off explainer -->
+                    <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#92400E;line-height:1.55;margin-bottom:8px;">
+                      <strong>⚠ One-way conversion.</strong> Once converted, the funds stay inside BB as ad credit — they can no longer be paid out to your PayPal. (Support can reverse it in exceptional cases.)
+                    </div>
+
+                    <!-- Error display -->
+                    <div id="convertModalErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:10px 12px;border-radius:8px;font-size:12.5px;margin-top:12px;"></div>
+                  </div>
+
+                  <!-- Footer with actions -->
+                  <div style="display:flex;justify-content:flex-end;gap:8px;padding:18px 26px;border-top:1px solid #F3F4F6;background:#FAFAFA;">
+                    <button type="button" id="convertModalCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Cancel</button>
+                    <button type="button" id="convertModalConfirm" style="padding:10px 22px;border:none;border-radius:10px;background:linear-gradient(135deg,#FF2D78 0%,#4338CA 100%);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(255,45,120,0.32);">↻ Convert</button>
+                  </div>
+                </div>
+              </div>
+
             </div><!-- /[data-shell-route="promote"] -->
 
             <!-- ═══════ ROUTE: setup ═══════ -->
@@ -13956,20 +14004,57 @@ function pfParseScreenshots(text) {
                 } catch (_) {}
             }
 
-            async function convertEarningsToCredit() {
-                const tk = getToken();
-                if (!tk) return;
+            // ── Custom convert modal ──────────────────────────────────────
+            // Replaces browser confirm() with a BB-styled overlay containing
+            // an editable amount input, MAX button, trade-off warning, inline
+            // errors. Posts amount to /api/seller-payouts?action=convert_to_ad_credit
+            // which walks captures FIFO until the requested amount is covered.
+
+            function openConvertModal() {
+                const modal = document.getElementById('convertModal');
+                if (!modal) return;
                 const balanceEl = document.getElementById('promoteBalance');
                 const balance = balanceEl ? Number(balanceEl.textContent) : 0;
                 if (!(balance > 0)) {
-                    alert('No MoR earnings available to convert.');
+                    return alert('No MoR earnings available to convert.');
+                }
+                document.getElementById('convertModalAvailable').textContent = fmtUsd(balance);
+                const input = document.getElementById('convertModalAmount');
+                input.value = balance.toFixed(2);
+                input.max = balance.toFixed(2);
+                document.getElementById('convertModalErr').style.display = 'none';
+                modal.style.display = 'flex';
+                setTimeout(() => { input.focus(); input.select(); }, 50);
+            }
+
+            function closeConvertModal() {
+                const modal = document.getElementById('convertModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            async function submitConvert() {
+                const tk = getToken();
+                if (!tk) return;
+                const errEl = document.getElementById('convertModalErr');
+                errEl.style.display = 'none';
+                const input = document.getElementById('convertModalAmount');
+                const amount = Number(input.value);
+                const balanceEl = document.getElementById('promoteBalance');
+                const balance = balanceEl ? Number(balanceEl.textContent) : 0;
+                if (!Number.isFinite(amount) || amount <= 0) {
+                    errEl.textContent = 'Enter a positive amount in USD.';
+                    errEl.style.display = 'block';
                     return;
                 }
-                if (!confirm(`Convert $${fmtUsd(balance)} of MoR earnings into ad credit?\n\nYour unsettled captures will be marked as settled and added to your ad-credit pool. This is reversible only by support — once converted, the funds can no longer be paid out via PayPal.`)) {
+                if (amount > balance + 0.001) {
+                    errEl.textContent = `Amount exceeds available balance ($${fmtUsd(balance)}).`;
+                    errEl.style.display = 'block';
                     return;
                 }
-                const btn = document.getElementById('promoteConvertBtn');
-                if (btn) { btn.disabled = true; btn.textContent = 'Converting…'; }
+                const btn = document.getElementById('convertModalConfirm');
+                btn.disabled = true;
+                const origLabel = btn.textContent;
+                btn.textContent = 'Converting…';
                 try {
                     const r = await fetch('/api/seller-payouts?action=convert_to_ad_credit', {
                         method:  'POST',
@@ -13977,17 +14062,22 @@ function pfParseScreenshots(text) {
                             'Content-Type':  'application/json',
                             'Authorization': 'Bearer ' + tk,
                         },
-                        body: JSON.stringify({}),
+                        body: JSON.stringify({ amount }),
                     });
                     const j = await r.json().catch(() => ({}));
                     if (!r.ok) throw new Error(j.error || 'Conversion failed');
-                    // Reload both cards
+                    closeConvertModal();
                     await Promise.all([loadBalance(), loadAdCredit()]);
-                    alert(`Converted $${fmtUsd(j.credit_amount)} (${j.converted_count} sale${j.converted_count === 1 ? '' : 's'}) to ad credit.`);
+                    const roundedNote = j.rounded_up
+                        ? `\n(Rounded up from $${fmtUsd(amount)} → $${fmtUsd(j.credit_amount)} since captures are atomic.)`
+                        : '';
+                    setTimeout(() => alert(`Converted $${fmtUsd(j.credit_amount)} (${j.converted_count} sale${j.converted_count === 1 ? '' : 's'}) to ad credit.${roundedNote}`), 100);
                 } catch (err) {
-                    alert('Conversion failed: ' + err.message);
+                    errEl.textContent = err.message || 'Conversion failed';
+                    errEl.style.display = 'block';
                 } finally {
-                    if (btn) { btn.disabled = false; btn.textContent = '↻ Convert to ad credit'; }
+                    btn.disabled = false;
+                    btn.textContent = origLabel;
                 }
             }
 
@@ -14048,7 +14138,31 @@ function pfParseScreenshots(text) {
                 const convert = document.getElementById('promoteConvertBtn');
                 if (convert && !convert.dataset.wired) {
                     convert.dataset.wired = '1';
-                    convert.addEventListener('click', convertEarningsToCredit);
+                    convert.addEventListener('click', openConvertModal);
+                }
+
+                // Wire convert-modal controls (once)
+                const modal = document.getElementById('convertModal');
+                if (modal && !modal.dataset.wired) {
+                    modal.dataset.wired = '1';
+                    document.getElementById('convertModalClose').addEventListener('click', closeConvertModal);
+                    document.getElementById('convertModalCancel').addEventListener('click', closeConvertModal);
+                    document.getElementById('convertModalConfirm').addEventListener('click', submitConvert);
+                    document.getElementById('convertModalMaxBtn').addEventListener('click', () => {
+                        const input = document.getElementById('convertModalAmount');
+                        const max = Number(input.max);
+                        if (Number.isFinite(max)) input.value = max.toFixed(2);
+                    });
+                    // Click outside content to close
+                    modal.addEventListener('click', (e) => { if (e.target === modal) closeConvertModal(); });
+                    // Esc to close
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && modal.style.display === 'flex') closeConvertModal();
+                    });
+                    // Enter on input to submit
+                    document.getElementById('convertModalAmount').addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); submitConvert(); }
+                    });
                 }
                 const create = document.getElementById('promoteCreateCampaignBtn');
                 if (create && !create.dataset.wired) {
