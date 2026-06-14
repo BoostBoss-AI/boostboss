@@ -649,8 +649,25 @@
     <p>Returns daily series + totals over the time range. Break down by campaign, format, host app, integration method, or day. The publisher-side counterpart is <code>?type=developer&key=&lt;publisher_id&gt;</code>.</p>
 
     <h3 id="adv-billing">Deposit funds</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=create_checkout</span><span class="desc">Start a Stripe Checkout session to add advertiser balance.</span></div>
-    <p>Returns a Stripe Checkout <code>session_id</code> and <code>url</code>. Redirect the user to the URL — on completion, Stripe's webhook credits the advertiser's account. See <a href="#webhooks" class="inline-link">Webhooks</a> for the Stripe + PayPal handler shapes.</p>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=create_paypal_order</span><span class="desc">Start a PayPal order to add advertiser balance.</span></div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=capture_paypal_order</span><span class="desc">Capture the order after the buyer approves on PayPal.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/billing?action=balance&id=&lt;uuid&gt;</span><span class="desc">Current advertiser balance.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/billing?action=history&id=&lt;uuid&gt;</span><span class="desc">Paginated transaction history.</span></div>
+
+    <p>Advertiser deposits run through <strong>PayPal end-to-end</strong>, matching publisher and seller payouts. The single-provider rule (PayPal pay-in + payout, both rails) ships from a Taiwan corporate entity, where local law requires pay-in and payout to flow through the same provider. See <a href="/docs/payouts" class="inline-link">Payouts</a> for the symmetric payout side.</p>
+
+    <h4>Flow</h4>
+    <ol>
+      <li>Frontend POSTs <code>create_paypal_order</code> with the deposit amount. Backend creates a PayPal order and returns an <code>approval_url</code>.</li>
+      <li>Frontend redirects the advertiser to <code>approval_url</code>. PayPal returns them to your configured return URL with the order ID echoed back.</li>
+      <li>Return URL handler POSTs <code>capture_paypal_order</code> with the order ID. Backend calls PayPal Capture, credits the advertiser balance, and returns the new balance.</li>
+      <li>The <a href="#webhooks" class="inline-link">PayPal webhook</a> reconciles asynchronously so dropped captures self-heal.</li>
+    </ol>
+
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>Legacy Stripe fallback.</strong> The codebase still contains a Stripe deposit path behind <code>PAYIN_PROVIDER=stripe</code> for development convenience. It will be removed once the Singapore corp move opens up multi-provider options. Don't integrate against it in production.</div>
+    </div>
 
     <h3 id="adv-conversions">Conversion postback</h3>
     <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/conversion</span><span class="desc">Tell BB a conversion fired against a campaign click.</span></div>
@@ -945,13 +962,21 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
 <span class="k">if</span> (crypto.<span class="f">timingSafeEqual</span>(<span class="n">Buffer</span>.<span class="f">from</span>(sig), <span class="n">Buffer</span>.<span class="f">from</span>(expected))) { <span class="c">// verified</span> }</pre>
     </div>
 
-    <h3>Inbound: Stripe webhook</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/stripe-webhook</span><span class="desc">Receives Stripe events for advertiser deposits.</span></div>
-    <p>Verifies the <code>Stripe-Signature</code> header using <code>STRIPE_WEBHOOK_SECRET</code>. Handles <code>checkout.session.completed</code> (credit advertiser balance) and refund / dispute events.</p>
+    <h3>Inbound: PayPal webhook (every money event)</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/paypal-webhook</span><span class="desc">Single inbound webhook for the entire money flow.</span></div>
+    <p>PayPal is the only payment provider — both rails (advertiser deposits + storefront buyer captures going in, publisher + seller payouts going out) flow through PayPal under the Taiwan-entity single-provider rule. This webhook handles every related event:</p>
+    <ul>
+      <li><code>PAYMENT.CAPTURE.COMPLETED</code> — credits the advertiser balance (deposit) or kicks off the MoR split + voucher issuance (storefront purchase).</li>
+      <li><code>PAYMENT.CAPTURE.REFUNDED</code> — reverses the corresponding ledger row.</li>
+      <li><code>PAYMENT.PAYOUTSBATCH.SUCCESS</code> / <code>DENIED</code> — marks publisher and seller payout batches completed or failed.</li>
+      <li><code>PAYMENT.PAYOUTS-ITEM.SUCCEEDED</code> / <code>FAILED</code> / <code>UNCLAIMED</code> — per-recipient outcome for each payout in a batch.</li>
+    </ul>
+    <p>Verifies the <code>PAYPAL-AUTH-ALGO</code> / <code>PAYPAL-TRANSMISSION-SIG</code> / <code>PAYPAL-TRANSMISSION-ID</code> headers against the configured PayPal webhook ID server-side. Replays are deduped by transmission ID.</p>
 
-    <h3>Inbound: PayPal webhook</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/paypal-webhook</span><span class="desc">Receives PayPal events for storefront captures + refunds.</span></div>
-    <p>Verifies the <code>PAYPAL-AUTH-ALGO</code> / <code>PAYPAL-TRANSMISSION-SIG</code> headers against the configured webhook ID. Handles <code>PAYMENT.CAPTURE.COMPLETED</code>, <code>PAYMENT.CAPTURE.REFUNDED</code>, and the payouts batch events for seller settlement.</p>
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>Legacy Stripe webhook.</strong> A <code>/api/stripe-webhook</code> handler still exists for the legacy Stripe pay-in fallback. It's not part of the supported integration surface; expect it to be removed once the Singapore corp move opens up multi-provider options.</div>
+    </div>
 
     <div class="callout info">
       <span class="icon">i</span>
