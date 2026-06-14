@@ -6190,7 +6190,7 @@
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><strong><a href="#" class="campaign-name-link" data-id="${campaign.id}" style="color: inherit; text-decoration: none; border-bottom: 1px dashed #D1D5DB;">${campaign.name}</a></strong></td>
+                        <td><strong><a href="#" class="campaign-name-link" data-id="${campaign.id}" style="color: inherit; text-decoration: none; border-bottom: 1px dashed #D1D5DB;">${campaign.name}</a></strong>${campaign.credit_funded ? '<span title="Paid with ad credit — no PayPal charge" style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:linear-gradient(135deg,rgba(255,45,120,0.12),rgba(0,255,224,0.12));color:#FF2D78;font-size:10px;font-weight:700;letter-spacing:0.02em;vertical-align:middle;">CREDIT</span>' : ''}</td>
                         <td><span class="badge ${statusBadge}">${statusLabel}</span>${rejectionNote}</td>
                         <td>${bennaChip}</td>
                         <td>${campaign.format || 'N/A'}</td>
@@ -7414,7 +7414,18 @@
                     throw new Error(error.error || 'Failed to create campaign');
                 }
 
-                showToast('Campaign created successfully!', 'success');
+                showToast(
+                    campaignData.use_ad_credit
+                        ? `Campaign created — $${(campaignData.total_budget || 0).toFixed(2)} deducted from ad credit.`
+                        : 'Campaign created successfully!',
+                    'success'
+                );
+                // Phase 3 Promote — if the seller funded this campaign from
+                // ad credit and the Promote page is currently open, refresh
+                // its balance display so it reflects the new spend.
+                if (campaignData.use_ad_credit && typeof window.loadPromoteData === 'function') {
+                    try { window.loadPromoteData(); } catch (_) {}
+                }
                 // If this campaign was started from a saved draft, the draft
                 // has now become a real campaign — remove it.
                 if (loadedDraftId) deleteDraft(loadedDraftId);
@@ -14272,6 +14283,14 @@ function pfParseScreenshots(text) {
                 loadAdCredit();
                 loadActiveCampaigns();
             }
+
+            // Expose a refresh hook so other parts of the page (e.g. the
+            // campaign-create success path) can trigger an ad-credit reload
+            // after they spend credit. Silent no-op if the Promote route
+            // isn't currently mounted.
+            window.loadPromoteData = function () {
+                try { loadBalance(); loadAdCredit(); } catch (_) {}
+            };
 
             window.addEventListener('hashchange', maybeLoad);
             const prAuth = setInterval(() => {
