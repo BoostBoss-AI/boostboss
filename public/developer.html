@@ -2083,6 +2083,36 @@
                 </div>
             </div>
 
+            <!-- ── Cross-door discovery ──────────────────────────────
+                 Reads userProfile.integration_door (set during signup
+                 or cross-role onboarding) and shows the three doors
+                 the publisher has NOT chosen yet as a soft "expand
+                 your reach" surface. Each card opens the install
+                 guide for that door — no automatic provisioning.
+                 Hidden entirely when integration_door is NULL
+                 (legacy accounts pre-2026-06-14) so we don't pester
+                 publishers we don't know about. Dismissible via
+                 localStorage so it goes away once acknowledged. -->
+            <div id="crossDoorCard" style="display:none;margin-top:32px;padding:24px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#fff5f8 0%,#f5fbff 100%);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+                    <div>
+                        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--accent-primary,#FF2D78);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                            Expand your reach
+                        </div>
+                        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin:0;color:var(--ink);">
+                            Add another integration door
+                        </h3>
+                        <p id="crossDoorIntro" style="font-size:13.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.55;max-width:560px;">
+                            You're set up with one door. Add another to monetize a different surface — same publisher account, same payouts, no extra signup.
+                        </p>
+                    </div>
+                    <button id="crossDoorDismiss" type="button" title="Hide for now" style="background:transparent;border:1px solid var(--line);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;flex-shrink:0;">×</button>
+                </div>
+                <div id="crossDoorGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px;">
+                    <!-- Populated by renderCrossDoorCard() -->
+                </div>
+            </div>
+
             </div><!-- /[data-shell-route="home"] -->
 
             <!-- ═══════ ROUTE: performance (mediation / waterfall) ═══════ -->
@@ -3777,6 +3807,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 updateDashboard(stats);
                 showDashboardView();
                 loadEarningsData(); // Load payout details in background
+                renderCrossDoorCard(); // Cross-door discovery (no-op if integration_door unset)
                 // Phase F — start polling integration_verify so the four
                 // verify badges keep updating without a manual refresh.
                 startVerifyPolling(15000);
@@ -5474,6 +5505,82 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 btn.disabled = false;
             }
         }
+
+        // ── Cross-door discovery ──────────────────────────────────────
+        // Reads userProfile.integration_door to know the publisher's primary
+        // door and renders cards for the OTHER three doors. Each card links
+        // to that door's install guide. Dismissible — once hidden, stays
+        // hidden until the publisher manually re-opens it from Settings
+        // (TODO: not yet wired; today they'd have to clear localStorage).
+        const DOOR_CATALOG = {
+            mcp:        { name: 'MCP server',        tag: 'Lumi SDK for MCP',                use_case: 'Monetize tool calls inside Claude Desktop, Cursor, Cline, Continue.', docs: '/docs/mcp',        icon: '🧠' },
+            js_snippet: { name: 'JS snippet',        tag: 'Lumi SDK script tag',             use_case: 'Drop one <script> tag into any AI app or website. Zero backend.',     docs: '/docs/js-snippet', icon: '📄' },
+            npm_sdk:    { name: 'NPM SDK',           tag: 'Lumi SDK for browser extensions', use_case: 'For Chrome/Edge/Firefox extensions and Electron/Tauri desktop apps.', docs: '/docs/npm-sdk',    icon: '🧩' },
+            rest:       { name: 'REST API',          tag: 'Lumi API for Bots',               use_case: 'Server-side calls from Discord, Telegram, Slack — or any backend.',   docs: '/docs/rest-api',   icon: '🤖' },
+        };
+
+        function renderCrossDoorCard() {
+            const card = document.getElementById('crossDoorCard');
+            const grid = document.getElementById('crossDoorGrid');
+            const introEl = document.getElementById('crossDoorIntro');
+            if (!card || !grid) return;
+
+            // No row at all → don't surface anything (legacy account or guest).
+            const primary = userProfile && userProfile.integration_door;
+            if (!primary || !DOOR_CATALOG[primary]) {
+                card.style.display = 'none';
+                return;
+            }
+
+            // Respect the dismissal flag set when the publisher clicks ×.
+            try {
+                if (localStorage.getItem('bb_cross_door_dismissed') === '1') {
+                    card.style.display = 'none';
+                    return;
+                }
+            } catch (_) {}
+
+            const others = Object.keys(DOOR_CATALOG).filter(k => k !== primary);
+            const primaryMeta = DOOR_CATALOG[primary];
+            if (introEl) {
+                introEl.textContent =
+                    `You're set up with ${primaryMeta.name}. Add another door to monetize a different surface — same publisher account, same payouts, no extra signup.`;
+            }
+
+            grid.innerHTML = others.map(key => {
+                const m = DOOR_CATALOG[key];
+                return `
+                    <a href="${m.docs}" target="_blank" rel="noopener" style="
+                        display:block;padding:16px 18px;background:#fff;
+                        border:1px solid var(--line);border-radius:10px;
+                        text-decoration:none;color:inherit;
+                        transition:transform 0.1s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+                    "
+                       onmouseover="this.style.borderColor='var(--accent-primary,#FF2D78)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.06)';"
+                       onmouseout="this.style.borderColor='var(--line)';this.style.transform='translateY(0)';this.style.boxShadow='none';">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <span style="font-size:22px;line-height:1;">${m.icon}</span>
+                            <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--ink);">${m.name}</div>
+                        </div>
+                        <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">${m.tag}</div>
+                        <div style="font-size:13px;color:var(--ink-soft);line-height:1.5;">${m.use_case}</div>
+                        <div style="font-size:12.5px;font-weight:600;color:var(--accent-primary,#FF2D78);margin-top:10px;">View install guide →</div>
+                    </a>`;
+            }).join('');
+
+            card.style.display = 'block';
+        }
+
+        // Dismiss button — persists across reloads, scoped to this account.
+        document.addEventListener('DOMContentLoaded', () => {
+            const dismiss = document.getElementById('crossDoorDismiss');
+            if (!dismiss) return;
+            dismiss.addEventListener('click', () => {
+                try { localStorage.setItem('bb_cross_door_dismissed', '1'); } catch (_) {}
+                const card = document.getElementById('crossDoorCard');
+                if (card) card.style.display = 'none';
+            });
+        });
 
         // PayPal email collection — replaces the Stripe Connect OAuth flow
         // (deprecated 2026-06-11 per the Taiwan-entity single-provider rule).
@@ -9952,5 +10059,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             refreshValidity();
         }
     </script>
+
+    <!-- Boost Boss assistant — floating Q&A copilot scoped to the
+         publisher dashboard. Mirror of the advertiser-side mount in
+         advertiser.html. Same /api/assist endpoint; the data-surface
+         attribute selects the publisher-tailored system prompt
+         (revenue split, placements, four integration doors, etc.). -->
+    <script src="/assist.js" data-surface="publisher" defer></script>
 </body>
 </html>
