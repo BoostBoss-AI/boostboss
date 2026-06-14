@@ -218,18 +218,27 @@ function normalizeProduct(body, { partial = false } = {}) {
       row.external_marketing_url = u.slice(0, 2000);
     }
   }
-  // JSONB arrays — validate shape, cap size, sanitize each entry
+  // JSONB arrays — validate shape, cap size, sanitize each entry.
+  // Same forgiveness as hero_images: silently skip non-URL lines, auto-prepend
+  // https:// when missing, only error if ALL lines are invalid.
   if (body.screenshots !== undefined) {
     if (!Array.isArray(body.screenshots)) return { error: "screenshots must be an array of URLs" };
     if (body.screenshots.length > 10) return { error: "screenshots: max 10 images" };
     const shots = [];
+    let screenshotsSkipped = false;
     for (const s of body.screenshots) {
-      const u = String(s || "").trim();
+      let u = String(s || "").trim();
       if (!u) continue;
-      if (!/^https?:\/\//i.test(u)) return { error: "each screenshot must be a valid URL" };
+      if (!/^https?:\/\//i.test(u) && /^[a-z0-9.-]+\.[a-z]{2,}\//i.test(u)) {
+        u = "https://" + u;
+      }
+      if (!/^https?:\/\//i.test(u)) { screenshotsSkipped = true; continue; }
       shots.push(u.slice(0, 2000));
     }
     row.screenshots = shots;
+    if (screenshotsSkipped && shots.length === 0) {
+      return { error: "screenshots: none of the lines look like a valid URL. Each line should start with https:// or be a domain like cdn.example.com/screen.png" };
+    }
   }
   if (body.package_details !== undefined) {
     if (!Array.isArray(body.package_details)) return { error: "package_details must be an array" };
@@ -407,17 +416,31 @@ function normalizeProduct(body, { partial = false } = {}) {
   }
 
   // ── Hero image carousel ───────────────────────────────────────────
+  // Silently skip lines that aren't valid URLs (auto-prepend https:// if the
+  // line looks like a domain) instead of erroring out on the whole save.
+  // Sellers paste in batches — one typo shouldn't block them.
   if (body.hero_images !== undefined) {
     if (!Array.isArray(body.hero_images)) return { error: "hero_images must be an array of URLs" };
     if (body.hero_images.length > 8) return { error: "hero_images: max 8 images" };
     const urls = [];
+    let skippedAny = false;
     for (const u of body.hero_images) {
-      const s = String(u || "").trim();
+      let s = String(u || "").trim();
       if (!s) continue;
-      if (!/^https?:\/\//i.test(s)) return { error: "each hero_image must be a valid http(s) URL" };
+      // Auto-prepend https:// for inputs like 'cdn.example.com/foo.png'
+      if (!/^https?:\/\//i.test(s) && /^[a-z0-9.-]+\.[a-z]{2,}\//i.test(s)) {
+        s = "https://" + s;
+      }
+      if (!/^https?:\/\//i.test(s)) { skippedAny = true; continue; }
       urls.push(s.slice(0, 2000));
     }
     row.hero_images = urls;
+    // Only error if the seller pasted SOMETHING but none of it parsed —
+    // otherwise their save gets blocked by what's likely a stale empty
+    // field they forgot they touched.
+    if (skippedAny && urls.length === 0) {
+      return { error: "hero_images: none of the lines look like a valid URL. Each line should start with https:// or be a domain like cdn.example.com/image.png" };
+    }
   }
 
   // ── Feature blocks (zigzag content) ───────────────────────────────
