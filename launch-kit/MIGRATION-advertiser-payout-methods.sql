@@ -111,6 +111,18 @@ COMMENT ON TABLE public.advertiser_payouts IS
   'array records which storefront_transactions were rolled into it so '
   'we never double-pay a single sale.';
 
+-- RLS — service role (our backend) bypasses entirely; defense-in-depth
+-- against anon/authenticated keys. Sellers can read their own payout
+-- history via the api/seller-payouts.js endpoint (service-role).
+ALTER TABLE public.advertiser_payouts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS advertiser_payouts_self_read ON public.advertiser_payouts;
+CREATE POLICY advertiser_payouts_self_read
+  ON public.advertiser_payouts FOR SELECT TO authenticated
+  USING (advertiser_id = auth.uid());
+-- No INSERT/UPDATE/DELETE policy: writes happen only via service role
+-- (the admin dispatcher) which bypasses RLS.
+
 -- ─────────────────────────────────────────────────────────────────────
 -- Add settled_to_advertiser_at column on storefront_transactions
 -- so we know which captures have been settled to the seller already.

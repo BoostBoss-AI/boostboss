@@ -270,6 +270,124 @@ function maskEmail(e) {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// POST ?action=convert_to_ad_credit
+//   Body (optional): { campaign_id? }
+//
+// Converts the seller's unsettled MoR captures into in-platform ad credit.
+// Money never leaves BB — settled funds become a budget pool the seller
+// can spend on campaigns. Mirrors the publisher Promote flow.
+//
+// FIFO settle: walks unsettled captures oldest-first until the full
+// available_for_payout amount is covered. Creates one advertiser_payouts
+// row with status='credited' linking all marked transactions.
+// ──────────────────────────────────────────────────────────────────────
+async function handleConvertToAdCredit(req, res) {
+  const auth = await requireAdvertiser(req);
+  if (auth.error) return res.status(auth.status).json({ error: auth.error });
+  const { advertiserId, client } = auth;
+
+  const body = req.body || {};
+  const campaignId = body.campaign_id || null;
+
+  // Pull every unsettled captured transaction FIFO
+  const { data: txs, error: txErr } = await client
+    .from("storefront_transactions")
+    .select("id, seller_settlement, captured_at")
+    .eq("advertiser_id", advertiserId)
+    .eq("status", "captured")
+    .is("advertiser_settled_at", null)
+    .order("captured_at", { ascending: true })
+    .limit(10000);
+  if (txErr) return res.status(500).json({ error: txErr.message });
+
+  const rows = txs || [];
+  if (!rows.length) {
+    return res.status(400).json({
+      error: "No unsettled captures to convert. Earn from MoR sales first.",
+      code:  "no_balance",
+    });
+  }
+
+  const txIds = rows.map((t) => t.id);
+  const totalAmount = round2(rows.reduce((a, t) => a + (Number(t.seller_settlement) || 0), 0));
+
+  if (totalAmount <= 0) {
+    return res.status(400).json({ error: "Available balance is zero", code: "zero_balance" });
+  }
+
+  // 1. Create the credited advertiser_payouts row
+  const now = new Date().toISOString();
+  const { data: payout, error: insErr } = await client
+    .from("advertiser_payouts")
+    .insert({
+      advertiser_id:   advertiserId,
+      amount:          totalAmount,
+      currency:        "USD",
+      status:          "credited",
+      paypal_email:    null,                // not going to PayPal — staying in BB
+      transaction_ids: txIds,
+      bank_snapshot:   { type: "ad_credit", campaign_id: campaignId },
+      dispatched_at:   now,                 // "dispatched" to the ad credit pool
+      completed_at:    now,                 // ad credit is immediately usable
+    })
+    .select()
+    .maybeSingle();
+  if (insErr) return res.status(500).json({ error: insErr.message });
+
+  // 2. Mark the underlying captures as settled to this credited payout
+  const { error: upErr } = await client
+    .from("storefront_transactions")
+    .update({
+      advertiser_payout_id: payout.id,
+      advertiser_settled_at: now,
+    })
+    .in("id", txIds);
+  if (upErr) return res.status(500).json({ error: upErr.message });
+
+  return res.json({
+    success:           true,
+    credit_amount:     totalAmount,
+    converted_count:   rows.length,
+    payout_id:         payout.id,
+    campaign_id:       campaignId,
+    note:              "Funds are now available as ad credit. Money never left BB.",
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// GET ?action=ad_credit_balance
+//   Sum of all 'credited' advertiser_payouts — i.e. lifetime credit
+//   converted from MoR earnings minus any campaign spend that's been
+//   tracked against it. For now, returns the converted-but-not-yet-spent
+//   total. Campaign-spend integration ships next.
+// ──────────────────────────────────────────────────────────────────────
+async function handleAdCreditBalance(req, res) {
+  const auth = await requireAdvertiser(req);
+  if (auth.error) return res.status(auth.status).json({ error: auth.error });
+  const { advertiserId, client } = auth;
+
+  const { data: credits, error } = await client
+    .from("advertiser_payouts")
+    .select("amount, dispatched_at, transaction_ids, bank_snapshot")
+    .eq("advertiser_id", advertiserId)
+    .eq("status", "credited")
+    .order("created_at", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  const rows = credits || [];
+
+  const lifetime = rows.reduce((a, r) => a + (Number(r.amount) || 0), 0);
+
+  return res.json({
+    ad_credit: {
+      available:        round2(lifetime),    // until spend tracking lands, == lifetime
+      lifetime_converted: round2(lifetime),
+      conversion_count: rows.length,
+      latest_conversion_at: rows[0] && rows[0].dispatched_at,
+    },
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
 //                              HANDLER
 // ──────────────────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
@@ -285,10 +403,12 @@ module.exports = async function handler(req, res) {
       if (action === "method")                return await handleGetMethod(req, res);
       if (action === "history")               return await handleHistory(req, res);
       if (action === "upcoming_transactions") return await handleUpcomingTransactions(req, res);
+      if (action === "ad_credit_balance")     return await handleAdCreditBalance(req, res);
       return res.status(400).json({ error: "Unknown GET action" });
     }
     if (req.method === "POST") {
-      if (action === "set_method") return await handleSetMethod(req, res);
+      if (action === "set_method")           return await handleSetMethod(req, res);
+      if (action === "convert_to_ad_credit") return await handleConvertToAdCredit(req, res);
       return res.status(400).json({ error: "Unknown POST action" });
     }
     return res.status(405).json({ error: "Method not allowed" });

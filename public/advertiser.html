@@ -3402,26 +3402,44 @@
                 </div>
               </div>
 
-              <!-- Balance + primary CTA strip -->
-              <div style="background:linear-gradient(135deg,#FFF5F8 0%,#F5FBFF 100%);border:1.5px solid #E5E7EB;border-radius:14px;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
-                <div>
-                  <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7280;font-weight:600;">Available to spend</div>
+              <!-- Two balance cards: MoR earnings + Ad credit -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-bottom:24px;">
+
+                <!-- MoR earnings (cashable / convertible) -->
+                <div style="background:linear-gradient(135deg,#FFF5F8 0%,#F5FBFF 100%);border:1.5px solid #E5E7EB;border-radius:14px;padding:22px 24px;">
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7280;font-weight:700;">MoR earnings (unsettled)</div>
                   <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#111827;margin-top:4px;">
                     $<span id="promoteBalance">0.00</span>
                   </div>
-                  <div style="font-size:13px;color:#374151;margin-top:4px;">
-                    From your settled MoR captures. Add PayPal funds to spend beyond this.
+                  <div style="font-size:12.5px;color:#374151;margin-top:6px;line-height:1.5;">
+                    From settled MoR captures. Cash out via PayPal, or convert to ad credit to spend in BB.
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+                    <button id="promoteCashoutBtn" style="background:#1A1A2E;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
+                      Cash out via PayPal
+                    </button>
+                    <button id="promoteConvertBtn" style="background:#fff;color:#4338CA;border:1px solid #C7D2FE;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+                      ↻ Convert to ad credit
+                    </button>
                   </div>
                 </div>
-                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                  <button id="promoteCashoutBtn" style="background:#1A1A2E;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 6px rgba(15,15,26,0.18);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
-                    Cash out
-                  </button>
-                  <button id="promoteCreateCampaignBtn" style="background:#FF2D78;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(255,45,120,0.32);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Create campaign
-                  </button>
+
+                <!-- Ad credit (spend pool) -->
+                <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);border:1.5px solid #C7D2FE;border-radius:14px;padding:22px 24px;">
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;">Ad credit (available to spend)</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#3730A3;margin-top:4px;">
+                    $<span id="promoteAdCredit">0.00</span>
+                  </div>
+                  <div style="font-size:12.5px;color:#4338CA;margin-top:6px;line-height:1.5;">
+                    Pre-funded ad budget — already inside BB. <span id="promoteAdCreditCount" style="color:#6366F1;">No conversions yet.</span>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+                    <button id="promoteCreateCampaignBtn" style="background:#FF2D78;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(255,45,120,0.32);">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Create campaign
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -13900,7 +13918,77 @@ function pfParseScreenshots(text) {
                     const balance = (j.balance && j.balance.available_for_payout) || 0;
                     const el = document.getElementById('promoteBalance');
                     if (el) el.textContent = fmtUsd(balance);
+                    // Convert button only useful when there's a balance
+                    const convertBtn = document.getElementById('promoteConvertBtn');
+                    if (convertBtn) {
+                        if (balance > 0) {
+                            convertBtn.disabled = false;
+                            convertBtn.style.opacity = '1';
+                            convertBtn.title = `Convert $${fmtUsd(balance)} to ad credit`;
+                        } else {
+                            convertBtn.disabled = true;
+                            convertBtn.style.opacity = '0.5';
+                            convertBtn.title = 'No MoR earnings to convert';
+                        }
+                    }
                 } catch (_) {}
+            }
+
+            async function loadAdCredit() {
+                const tk = getToken();
+                if (!tk) return;
+                try {
+                    const r = await fetch('/api/seller-payouts?action=ad_credit_balance', {
+                        headers: { 'Authorization': 'Bearer ' + tk },
+                    });
+                    if (!r.ok) return;
+                    const j = await r.json();
+                    const avail = (j.ad_credit && j.ad_credit.available) || 0;
+                    const count = (j.ad_credit && j.ad_credit.conversion_count) || 0;
+                    const el = document.getElementById('promoteAdCredit');
+                    if (el) el.textContent = fmtUsd(avail);
+                    const countEl = document.getElementById('promoteAdCreditCount');
+                    if (countEl) {
+                        countEl.textContent = count === 0
+                            ? 'No conversions yet.'
+                            : `${count} conversion${count === 1 ? '' : 's'} so far.`;
+                    }
+                } catch (_) {}
+            }
+
+            async function convertEarningsToCredit() {
+                const tk = getToken();
+                if (!tk) return;
+                const balanceEl = document.getElementById('promoteBalance');
+                const balance = balanceEl ? Number(balanceEl.textContent) : 0;
+                if (!(balance > 0)) {
+                    alert('No MoR earnings available to convert.');
+                    return;
+                }
+                if (!confirm(`Convert $${fmtUsd(balance)} of MoR earnings into ad credit?\n\nYour unsettled captures will be marked as settled and added to your ad-credit pool. This is reversible only by support — once converted, the funds can no longer be paid out via PayPal.`)) {
+                    return;
+                }
+                const btn = document.getElementById('promoteConvertBtn');
+                if (btn) { btn.disabled = true; btn.textContent = 'Converting…'; }
+                try {
+                    const r = await fetch('/api/seller-payouts?action=convert_to_ad_credit', {
+                        method:  'POST',
+                        headers: {
+                            'Content-Type':  'application/json',
+                            'Authorization': 'Bearer ' + tk,
+                        },
+                        body: JSON.stringify({}),
+                    });
+                    const j = await r.json().catch(() => ({}));
+                    if (!r.ok) throw new Error(j.error || 'Conversion failed');
+                    // Reload both cards
+                    await Promise.all([loadBalance(), loadAdCredit()]);
+                    alert(`Converted $${fmtUsd(j.credit_amount)} (${j.converted_count} sale${j.converted_count === 1 ? '' : 's'}) to ad credit.`);
+                } catch (err) {
+                    alert('Conversion failed: ' + err.message);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = '↻ Convert to ad credit'; }
+                }
             }
 
             async function loadActiveCampaigns() {
@@ -13957,6 +14045,11 @@ function pfParseScreenshots(text) {
                     cashout.dataset.wired = '1';
                     cashout.addEventListener('click', () => { window.location.hash = '#/payouts'; });
                 }
+                const convert = document.getElementById('promoteConvertBtn');
+                if (convert && !convert.dataset.wired) {
+                    convert.dataset.wired = '1';
+                    convert.addEventListener('click', convertEarningsToCredit);
+                }
                 const create = document.getElementById('promoteCreateCampaignBtn');
                 if (create && !create.dataset.wired) {
                     create.dataset.wired = '1';
@@ -13983,6 +14076,7 @@ function pfParseScreenshots(text) {
                 if (!getToken()) return;
                 wireOnce();
                 loadBalance();
+                loadAdCredit();
                 loadActiveCampaigns();
             }
 
