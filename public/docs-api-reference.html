@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boost Boss Docs — API reference &amp; SDK guide</title>
-<meta name="description" content="Complete API reference, SDK guides, ad format specs, and webhook reference for the Boost Boss ad network.">
+<title>Boost Boss Docs — API reference</title>
+<meta name="description" content="The full Boost Boss API reference. Publisher, advertiser, seller, and affiliate endpoints with real paths, auth model, and response shapes.">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Boost Boss Docs — API reference & SDK guide">
-<meta name="twitter:description" content="Complete API reference, SDK guides, ad format specs, and webhook reference.">
+<meta name="twitter:title" content="Boost Boss Docs — API reference">
+<meta name="twitter:description" content="API reference for publishers, advertisers, sellers, and affiliates.">
 <link rel="canonical" href="https://boostboss.ai/docs/api-reference">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,24 +34,16 @@
   h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
   code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
 
-  /* NAV */
   nav.top {
     position: sticky; top: 0; z-index: 100;
     background: rgba(255,255,255,0.88);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--line);
   }
-  /* Nav-inner — matched to the landing page (index.html) so the brand
-     sits at the same x-position across landing / docs / api-reference.
-     1200/24 instead of 1280/24. */
   .nav-inner {
     display: flex; align-items: center; justify-content: space-between;
     height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
   }
-  /* Brand sized to match the landing page (index.html .brand-mark and
-     .brand-name) and docs.css — 36px mark, 20px text, -0.5px tracking.
-     Was 32px/-0.4px, which made this page's logo visibly smaller than
-     the two siblings. */
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
   .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
@@ -61,53 +53,12 @@
     padding: 3px 8px; border-radius: 6px; background: var(--yellow);
     margin-left: 4px; letter-spacing: 0.3px;
   }
-  .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
-  .nav-links a:hover { color: var(--ink); }
-  .nav-ctas { display: flex; gap: 8px; align-items: center; }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 13.5px;
-    padding: 7px 14px; border-radius: 7px;
-    border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
-    text-decoration: none; white-space: nowrap;
-  }
-  .btn-ghost { color: var(--ink); background: transparent; }
-  .btn-ghost:hover { background: var(--bg-soft); }
-  .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .btn-primary:hover { background: var(--pink); border-color: var(--pink); }
 
-  /* SEARCH */
-  .search {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 12px; background: var(--bg-soft);
-    border: 1px solid var(--line); border-radius: 8px;
-    width: 240px; color: var(--muted); font-size: 13px;
-    cursor: text;
-  }
-  .search .kbd {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    background: #fff; border: 1px solid var(--line);
-    border-radius: 4px; padding: 1px 6px; margin-left: auto; color: var(--ink);
-  }
-
-  /* LAYOUT — copied from docs.css .docs-shell so this page renders at
-     the exact same widths as /docs, /docs/payouts, /docs/reporting,
-     etc.:
-       sidebar         256px (matches --sidebar-w)
-       sidebar→main    0 gap (content sits flush)
-       max container   1200px (matches landing's .nav-inner so the
-                       brand sits at the same x-position site-wide)
-       gutters         24px
-     The sister docs pages also constrain main to 892px (== content-max
-     780 + 112 padding) — applied below under main.content. */
   .docs-layout {
     max-width: 1200px; margin: 0 auto;
     display: grid; grid-template-columns: 256px 1fr;
     gap: 0; padding: 0 24px;
   }
-
-  /* SIDEBAR */
   aside.sidebar {
     position: sticky; top: 64px;
     align-self: start;
@@ -130,6 +81,7 @@
   .side-group h5 .chip.cyan { background: var(--cyan); }
   .side-group h5 .chip.yellow { background: var(--yellow); }
   .side-group h5 .chip.ink { background: var(--ink); }
+  .side-group h5 .chip.green { background: #10B981; }
   .side-links { list-style: none; }
   .side-links li a {
     display: block; padding: 6px 10px;
@@ -156,13 +108,6 @@
   .method-tag.patch { background: #FFF3D6; color: #8A6A00; }
   .method-tag.del { background: #FFE6EE; color: var(--pink); }
 
-  /* CONTENT — matched to docs.css .docs-main so this page's article
-     column reads at the same width as /docs, /docs/payouts, etc.:
-       horizontal padding   56px (content-max 780 + 2*56 = 892 max)
-       max-width            892px
-     Was: padding 40px 0 80px (no horizontal padding, no max-width) —
-     which let content stretch ~924px wide, visibly wider than the
-     sibling docs pages. */
   main.content {
     padding: 48px 56px 100px;
     max-width: 892px;
@@ -171,40 +116,19 @@
   .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
   .crumbs a { color: var(--ink-soft); }
   .crumbs a:hover { color: var(--pink); }
-  main h1 {
-    font-size: 40px; font-weight: 700;
-    letter-spacing: -0.03em;
-    margin-bottom: 14px;
-  }
-  main h2 {
-    font-size: 26px; font-weight: 700;
-    margin: 56px 0 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
-    letter-spacing: -0.02em;
-  }
+  main h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 14px; }
+  main h2 { font-size: 26px; font-weight: 700; margin: 56px 0 16px; padding-top: 16px; border-top: 1px solid var(--line); letter-spacing: -0.02em; }
   main h2:first-of-type { border-top: none; padding-top: 0; margin-top: 48px; }
-  main h3 {
-    font-size: 19px; font-weight: 700;
-    margin: 32px 0 10px; letter-spacing: -0.01em;
-  }
-  main h4 {
-    font-size: 15px; font-weight: 700;
-    margin: 24px 0 8px;
-  }
+  main h3 { font-size: 19px; font-weight: 700; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  main h4 { font-size: 15px; font-weight: 700; margin: 24px 0 8px; }
   main p { font-size: 15px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.65; }
-  main p code, main li code {
-    background: var(--bg-soft); border: 1px solid var(--line);
-    padding: 1px 6px; border-radius: 4px;
-    font-size: 13px; color: var(--pink);
-  }
+  main p code, main li code { background: var(--bg-soft); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; font-size: 13px; color: var(--pink); }
   main a.inline-link { color: var(--pink); font-weight: 500; border-bottom: 1px dashed var(--pink); }
   main a.inline-link:hover { background: #FFE6EE; }
   main ul { margin-bottom: 16px; padding-left: 22px; }
   main ul li { font-size: 15px; color: var(--ink-soft); margin-bottom: 6px; line-height: 1.6; }
   main strong { color: var(--ink); }
 
-  /* HERO */
   .docs-hero {
     background: var(--bg-soft);
     border: 1.5px solid var(--ink); border-radius: 16px;
@@ -214,15 +138,11 @@
   }
   .docs-hero h1 { font-size: 32px; margin-bottom: 8px; }
   .docs-hero p { font-size: 16px; color: var(--ink-soft); margin-bottom: 0; }
-  .docs-hero .deco {
-    position: absolute; right: -20px; top: -20px;
-    width: 120px; height: 120px; opacity: 0.9;
-  }
+  .docs-hero .deco { position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; opacity: 0.9; }
 
-  /* CODE BLOCKS */
   .code-block {
     background: var(--code-bg); color: #E5E7EB;
-    border-radius: 10px; padding: 18px 20px;
+    border-radius: 10px; padding: 0;
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px; line-height: 1.75;
     overflow-x: auto; margin: 14px 0 18px;
@@ -253,13 +173,13 @@
   .n { color: #F9FAFB; }
   .b { color: #A78BFA; }
 
-  /* ENDPOINT CARD */
   .endpoint {
     border: 1.5px solid var(--ink); border-radius: 10px;
     padding: 14px 16px; margin-bottom: 14px;
     background: #fff;
     display: flex; align-items: center; gap: 14px;
     font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
   }
   .endpoint .method {
     font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
@@ -272,7 +192,6 @@
   .endpoint .path { font-size: 14px; color: var(--ink); font-weight: 600; }
   .endpoint .desc { margin-left: auto; font-size: 12.5px; color: var(--muted); font-family: 'Inter', sans-serif; }
 
-  /* PARAMS TABLE */
   .params {
     width: 100%; border-collapse: separate; border-spacing: 0;
     margin: 14px 0 20px;
@@ -287,18 +206,13 @@
     text-transform: uppercase; letter-spacing: 0.6px;
     color: var(--muted); border-bottom: 1px solid var(--line);
   }
-  .params td {
-    padding: 12px 14px; vertical-align: top;
-    border-bottom: 1px solid var(--line);
-    font-size: 13.5px;
-  }
+  .params td { padding: 12px 14px; vertical-align: top; border-bottom: 1px solid var(--line); font-size: 13.5px; }
   .params tbody tr:last-child td { border-bottom: none; }
   .params td.param-name { font-family: 'JetBrains Mono', monospace; color: var(--ink); font-weight: 600; }
   .params td.param-type { color: var(--pink); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
   .params td.param-desc { color: var(--ink-soft); }
   .params .required { display: inline-block; font-size: 10px; font-weight: 700; background: var(--pink); color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
 
-  /* CALLOUT */
   .callout {
     display: flex; gap: 14px;
     padding: 14px 18px; border-radius: 10px;
@@ -318,194 +232,47 @@
   .callout.tip { background: #FFE6EE; border-color: var(--pink); }
   .callout.tip .icon { background: var(--pink); color: #fff; }
 
-  /* Right TOC styles removed 2026-06-06 with the .toc <aside> itself. */
+  .role-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    border: 1px solid;
+    margin-right: 6px;
+    vertical-align: 2px;
+  }
+  .role-pill.pub { background: #E6F8FF; border-color: var(--cyan); color: #0195CC; }
+  .role-pill.adv { background: #FFE6EE; border-color: var(--pink); color: var(--pink); }
+  .role-pill.sel { background: #FFF3D6; border-color: #D9A800; color: #856100; }
+  .role-pill.aff { background: #DCFCE7; border-color: #10B981; color: #027A48; }
 
-  /* CARD GRID */
-  .card-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
-    margin: 20px 0;
+  .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 22px 0 28px; }
+  @media (max-width: 700px) { .role-grid { grid-template-columns: 1fr; } }
+  .role-jump {
+    display: block; padding: 16px 18px;
+    border: 1px solid var(--line); border-left: 4px solid var(--pink);
+    border-radius: 10px; background: #fff;
+    transition: all 0.15s ease;
   }
-  .doc-card {
-    border: 1.5px solid var(--ink); border-radius: 12px;
-    padding: 22px; background: #fff;
-    transition: all 0.15s; cursor: pointer;
-  }
-  .doc-card:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 var(--ink); }
-  .doc-card .chip {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px; border-radius: 8px;
-    font-size: 18px; margin-bottom: 12px;
-    font-weight: 700;
-  }
-  .doc-card .chip.pink { background: var(--pink); color: #fff; }
-  .doc-card .chip.cyan { background: var(--cyan); color: var(--ink); }
-  .doc-card .chip.yellow { background: var(--yellow); color: var(--ink); }
-  .doc-card .chip.ink { background: var(--ink); color: #fff; }
-  .doc-card h3 { font-size: 17px; margin-bottom: 6px; }
-  .doc-card p { font-size: 14px; color: var(--ink-soft); margin-bottom: 0; }
+  .role-jump:hover { border-color: var(--ink); transform: translateY(-1px); }
+  .role-jump.pub { border-left-color: var(--cyan); }
+  .role-jump.adv { border-left-color: var(--pink); }
+  .role-jump.sel { border-left-color: #D9A800; }
+  .role-jump.aff { border-left-color: #10B981; }
+  .role-jump h3 { font-size: 15px; margin: 0 0 4px; }
+  .role-jump p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
 
-  /* FOOT NAV */
   .foot-nav {
     display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
     margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line);
   }
-  .foot-nav a {
-    padding: 16px 20px; border: 1.5px solid var(--line);
-    border-radius: 10px; transition: all 0.15s;
-  }
+  .foot-nav a { padding: 16px 20px; border: 1.5px solid var(--line); border-radius: 10px; transition: all 0.15s; }
   .foot-nav a:hover { border-color: var(--ink); transform: translateY(-2px); }
   .foot-nav .dir { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
   .foot-nav .ttl { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
   .foot-nav a.next { text-align: right; }
 
-  /* RESPONSE TABS */
-  .resp-tabs { display: flex; gap: 2px; padding: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; width: fit-content; margin-bottom: 0; }
-  .resp-tab {
-    padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
-    color: var(--muted); cursor: pointer; border: none; background: transparent;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .resp-tab.active { background: var(--ink); color: #fff; }
-
-  /* SDK TABS */
-  .sdk-tabs { display: flex; gap: 2px; padding: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; width: fit-content; margin-bottom: 0; }
-  .sdk-tab {
-    padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
-    color: var(--muted); cursor: pointer; border: none; background: transparent;
-    font-family: 'Inter', sans-serif; transition: all 0.15s;
-  }
-  .sdk-tab:hover { color: var(--ink); }
-  .sdk-tab.active { background: var(--ink); color: #fff; }
-  .sdk-panel { display: none; }
-  .sdk-panel.active { display: block; }
-
-  /* SEARCH MODAL */
-  .search-overlay {
-    position: fixed; inset: 0; z-index: 999;
-    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-    display: none; align-items: flex-start; justify-content: center;
-    padding-top: 120px;
-  }
-  .search-overlay.open { display: flex; }
-  .search-modal {
-    background: #fff; border-radius: 14px; border: 1.5px solid var(--ink);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    width: 580px; max-width: 92vw; max-height: 480px;
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  .search-input-wrap {
-    display: flex; align-items: center; gap: 10px;
-    padding: 14px 18px; border-bottom: 1px solid var(--line);
-  }
-  .search-input-wrap svg { flex-shrink: 0; color: var(--muted); }
-  .search-input {
-    flex: 1; border: none; outline: none; font-size: 16px;
-    font-family: 'Inter', sans-serif; color: var(--ink); background: transparent;
-  }
-  .search-input::placeholder { color: var(--muted); }
-  .search-esc {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    background: var(--bg-soft); border: 1px solid var(--line);
-    border-radius: 4px; padding: 2px 6px; color: var(--muted);
-  }
-  .search-results {
-    overflow-y: auto; max-height: 360px; padding: 8px;
-  }
-  .search-results:empty::after {
-    content: 'Type to search docs...';
-    display: block; padding: 24px; text-align: center;
-    color: var(--muted); font-size: 14px;
-  }
-  .search-result {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px; border-radius: 8px; cursor: pointer;
-    transition: background 0.1s;
-  }
-  .search-result:hover, .search-result.focused { background: var(--bg-soft); }
-  .search-result .sr-icon {
-    width: 28px; height: 28px; border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; flex-shrink: 0; font-weight: 700;
-  }
-  .search-result .sr-icon.api { background: #D1FADF; color: #027A48; }
-  .search-result .sr-icon.guide { background: #FFF3D6; color: #8A6A00; }
-  .search-result .sr-icon.sdk { background: #D6F5FE; color: #0195CC; }
-  .search-result .sr-icon.rtb { background: #FFE6EE; color: var(--pink); }
-  .search-result .sr-text { flex: 1; min-width: 0; }
-  .search-result .sr-title { font-size: 14px; font-weight: 600; color: var(--ink); }
-  .search-result .sr-desc { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .search-result .sr-badge {
-    font-size: 10px; font-weight: 700; padding: 2px 6px;
-    border-radius: 4px; background: var(--bg-soft); color: var(--muted);
-    font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
-  }
-
-  /* TOAST */
-  #toastContainer {
-    position: fixed; top: 80px; right: 20px; z-index: 1000;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .toast {
-    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
-    color: #fff; transform: translateX(120%); transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px;
-  }
-  .toast.show { transform: translateX(0); }
-  .toast.success { background: #027A48; }
-  .toast.info { background: var(--ink); }
-
-
-  /* MOBILE MENU */
-  .mobile-toggle {
-    display: none; background: none; border: none; cursor: pointer;
-    padding: 6px; border-radius: 6px;
-  }
-  .mobile-toggle:hover { background: var(--bg-soft); }
-  .sidebar-backdrop {
-    display: none; position: fixed; inset: 0; z-index: 90;
-    background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
-  }
-  .sidebar-backdrop.open { display: block; }
-
-  /* DARK MODE */
-  body.dark {
-    --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF;
-    --line: #374151; --bg: #111827; --bg-soft: #1F2937; --code-bg: #0D1117;
-    --pink: #FF5C94; --pink-dark: #FF2D78; --cyan: #38BDF8; --yellow: #FACC15;
-  }
-  body.dark nav.top { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
-  body.dark .search { background: #1F2937; border-color: #374151; }
-  body.dark .endpoint { background: #1F2937; border-color: #4B5563; }
-  body.dark .doc-card { background: #1F2937; border-color: #4B5563; }
-  body.dark .doc-card:hover { box-shadow: 4px 4px 0 #4B5563; }
-  body.dark .docs-hero { background: #1F2937; border-color: #4B5563; box-shadow: 6px 6px 0 #4B5563; }
-  body.dark .code-block { background: #0D1117; border-color: #374151; }
-  body.dark .code-head { background: #0A0F18; border-bottom-color: #1F2937; }
-  body.dark .params { border-color: #374151; }
-  body.dark .params th { border-bottom-color: #374151; }
-  body.dark .params td { border-bottom-color: #374151; }
-  body.dark .params thead { background: #1F2937; }
-  body.dark main p code, body.dark main li code { background: #1F2937; border-color: #374151; }
-  body.dark .foot-nav a { border-color: #374151; }
-  body.dark .foot-nav a:hover { border-color: #6B7280; }
-  body.dark .search-modal { background: #1F2937; border-color: #4B5563; }
-  body.dark .search-input { color: #F3F4F6; }
-  body.dark .search-result:hover, body.dark .search-result.focused { background: #374151; }
-  body.dark .callout.info { background: #0D2137; border-color: #1E5278; }
-  body.dark .callout.warn { background: #291F00; border-color: #4A3A00; }
-  body.dark .callout.tip { background: #2D0A1A; border-color: #5E1A3B; }
-  body.dark .sdk-tabs { background: #1F2937; border-color: #374151; }
-  body.dark .resp-tabs { background: #1F2937; border-color: #374151; }
-  body.dark .brand-sub { color: var(--ink); }
-  body.dark .side-links li a.active { background: rgba(255,45,120,0.15); }
-  .dark-toggle {
-    background: none; border: 1px solid var(--line); border-radius: 6px;
-    cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1;
-    transition: all 0.15s; color: var(--ink);
-  }
-  .dark-toggle:hover { background: var(--bg-soft); }
-
-  /* BACK TO TOP */
   .back-top {
     position: fixed; bottom: 28px; right: 28px; z-index: 80;
     width: 40px; height: 40px; border-radius: 50%;
@@ -517,837 +284,560 @@
   .back-top.visible { display: flex; }
   .back-top:hover { background: var(--pink); transform: translateY(-2px); }
 
-  /* FEEDBACK */
-  .feedback {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 0; margin-top: 8px; font-size: 13px; color: var(--muted);
-  }
-  .feedback button {
-    background: none; border: 1px solid var(--line); border-radius: 6px;
-    padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--muted);
-    transition: all 0.15s;
-  }
-  .feedback button:hover { background: var(--bg-soft); color: var(--ink); border-color: var(--ink); }
-  .feedback button.voted { background: var(--pink); color: #fff; border-color: var(--pink); }
-
-  /* VERSION PILL */
-  .version-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    padding: 4px 10px; border-radius: 20px;
-    background: var(--bg-soft); border: 1px solid var(--line);
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .version-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
-
-  /* RESPONSIVE */
-  @media (max-width: 1100px) {
-    .docs-layout { grid-template-columns: 240px 1fr; }
-  }
+  @media (max-width: 1100px) { .docs-layout { grid-template-columns: 240px 1fr; } }
   @media (max-width: 768px) {
     .docs-layout { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
     aside.sidebar {
-      position: fixed; top: 0; left: -300px; width: 280px;
-      height: 100vh; z-index: 95; background: var(--bg);
-      padding: 80px 20px 40px; transition: left 0.3s ease;
-      border-right: 1px solid var(--line);
-      overflow-y: auto;
+      position: static; height: auto; overflow: visible;
+      padding: 24px 0 8px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 24px;
     }
-    aside.sidebar.open { left: 0; }
-    .nav-links { display: none; }
-    .search { display: none; }
-    .card-grid { grid-template-columns: 1fr; }
-    .mobile-toggle { display: block; }
+    main.content { padding: 24px 0 60px; }
   }
-
-  /* Footer block + all .foot-* rules removed 2026-06-06. /docs and the
-     sibling docs pages (payouts, reporting, quickstart, etc.) don't have
-     a footer wedge, and the one on this page made it inconsistent with
-     the rest. End of page is now flush with the sidebar's bottom edge,
-     matching how /docs renders. */
-
 </style>
 </head>
 <body>
 
-<!-- TOP NAV -->
 <nav class="top">
   <div class="nav-inner">
     <a class="brand" href="/docs">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
-<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>
-<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
-<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
-<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
       <span class="brand-name">Boost Boss</span>
       <span class="brand-sub">API</span>
     </a>
-    <!-- Nav links / search box / Get API key CTA / mobile-toggle all
-         removed 2026-06-06 — brand-only nav matches the sibling docs
-         pages (/docs, /docs/payouts, /docs/reporting, etc.). The
-         search modal and openSearch / toggleSidebar JS are dead-code
-         from here but harmless; left in place rather than ripped out
-         in case the search comes back later. -->
   </div>
 </nav>
 
-<!-- SEARCH MODAL -->
-<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
-  <div class="search-modal">
-    <div class="search-input-wrap">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="search-input" id="searchInput" placeholder="Search documentation..." autocomplete="off">
-      <span class="search-esc">ESC</span>
-    </div>
-    <div class="search-results" id="searchResults"></div>
-  </div>
-</div>
-
-<!-- SIDEBAR BACKDROP -->
-<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
-
-<!-- TOAST -->
-<div id="toastContainer"></div>
-
-<!-- LAYOUT -->
 <div class="docs-layout">
 
-  <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
     <div class="side-group">
       <h5><span class="chip ink"></span>Getting started</h5>
       <ul class="side-links">
         <li><a href="#introduction" class="active">Introduction</a></li>
-        <li><a href="#quickstart">Quickstart</a></li>
-        <li><a href="#authentication">Authentication</a></li>
+        <li><a href="#auth">Authentication</a></li>
         <li><a href="#environments">Environments</a></li>
+        <li><a href="#common-patterns">Common patterns</a></li>
       </ul>
     </div>
     <div class="side-group">
-      <h5><span class="chip cyan"></span>SDKs</h5>
+      <h5><span class="chip cyan"></span>Publisher</h5>
       <ul class="side-links">
-        <li><a href="#sdk-typescript">All SDKs</a></li>
+        <li><a href="#pub-mcp"><span class="method-tag post">POST</span>MCP JSON-RPC</a></li>
+        <li><a href="#pub-ad-request"><span class="method-tag post">POST</span>Ad request (REST)</a></li>
+        <li><a href="#pub-track"><span class="method-tag post">POST</span>Track event</a></li>
       </ul>
     </div>
     <div class="side-group">
-      <h5><span class="chip pink"></span>API reference</h5>
+      <h5><span class="chip pink"></span>Advertiser</h5>
       <ul class="side-links">
-        <li><a href="#api-fetch-ad"><span class="method-tag post">POST</span>Fetch ad</a></li>
-        <li><a href="#api-impression"><span class="method-tag post">POST</span>Impression beacon</a></li>
-        <li><a href="#api-click"><span class="method-tag post">POST</span>Click beacon</a></li>
-        <li><a href="#api-conversion"><span class="method-tag post">POST</span>Conversion beacon</a></li>
-        <li><a href="#api-campaigns"><span class="method-tag get">GET</span>List campaigns</a></li>
-        <li><a href="#api-create-campaign"><span class="method-tag post">POST</span>Create campaign</a></li>
-        <li><a href="#api-update-campaign"><span class="method-tag patch">PATCH</span>Update campaign</a></li>
-        <li><a href="#api-stats"><span class="method-tag get">GET</span>Get stats</a></li>
-        <li><a href="#api-reports"><span class="method-tag get">GET</span>Get reports <span style="font-size:9.5px;font-weight:600;color:#9CA3AF;background:#F4F4F7;padding:1px 5px;border-radius:3px;margin-left:5px;letter-spacing:0.04em;text-transform:uppercase;">soon</span></a></li>
+        <li><a href="#adv-campaigns"><span class="method-tag get">GET</span>List campaigns</a></li>
+        <li><a href="#adv-create-campaign"><span class="method-tag post">POST</span>Create campaign</a></li>
+        <li><a href="#adv-update-campaign"><span class="method-tag patch">PATCH</span>Update campaign</a></li>
+        <li><a href="#adv-stats"><span class="method-tag get">GET</span>Stats</a></li>
+        <li><a href="#adv-billing"><span class="method-tag post">POST</span>Deposit funds</a></li>
+        <li><a href="#adv-conversions"><span class="method-tag post">POST</span>Conversion postback</a></li>
       </ul>
     </div>
     <div class="side-group">
-      <h5><span class="chip yellow"></span>Guides</h5>
+      <h5><span class="chip yellow"></span>Seller (MoR)</h5>
       <ul class="side-links">
-        <li><a href="#ad-formats">Ad formats</a></li>
-        <li><a href="#ai-targeting">AI-native targeting</a></li>
-        <li><a href="#mcp-integration">MCP integration</a></li>
-        <li><a href="#webhooks">Webhooks</a></li>
-        <li><a href="#rate-limits">Rate limits</a></li>
-        <li><a href="#errors">Error codes</a></li>
+        <li><a href="#sel-products"><span class="method-tag get">GET</span>Products</a></li>
+        <li><a href="#sel-pricing-plans"><span class="method-tag get">GET</span>Pricing plans</a></li>
+        <li><a href="#sel-product-orders"><span class="method-tag get">GET</span>Product orders</a></li>
+        <li><a href="#sel-vouchers-validate"><span class="method-tag post">POST</span>Validate voucher</a></li>
+        <li><a href="#sel-vouchers-redeem"><span class="method-tag post">POST</span>Redeem voucher</a></li>
+        <li><a href="#sel-payouts"><span class="method-tag get">GET</span>Seller payouts</a></li>
       </ul>
     </div>
     <div class="side-group">
-      <h5><span class="chip ink"></span>Benna (ranking engine)</h5>
+      <h5><span class="chip green"></span>Affiliate</h5>
       <ul class="side-links">
-        <li><a href="#benna-overview">Overview &amp; licensing</a></li>
-        <li><a href="#benna-score"><span class="method-tag post">POST</span>Score a bid</a></li>
-        <li><a href="#benna-engine-status"><span class="method-tag get">GET</span>Engine status</a></li>
-        <li><a href="#benna-signals">Signal reference</a></li>
+        <li><a href="#aff-redirect"><span class="method-tag get">GET</span>Share link redirect</a></li>
+        <li><a href="#aff-sales"><span class="method-tag get">GET</span>Sales report</a></li>
       </ul>
     </div>
     <div class="side-group">
-      <h5><span class="chip cyan"></span>OpenRTB 2.6 (BBX)</h5>
+      <h5><span class="chip ink"></span>Benna ranking</h5>
       <ul class="side-links">
-        <li><a href="#rtb-overview">Overview for DSPs</a></li>
+        <li><a href="#benna-overview">Overview</a></li>
+        <li><a href="#benna-predict"><span class="method-tag post">POST</span>Predict</a></li>
+        <li><a href="#benna-status"><span class="method-tag get">GET</span>Engine status</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <h5><span class="chip cyan"></span>BBX OpenRTB 2.6</h5>
+      <ul class="side-links">
+        <li><a href="#rtb-overview">Overview</a></li>
         <li><a href="#rtb-bid"><span class="method-tag post">POST</span>Bid request</a></li>
         <li><a href="#rtb-response">Bid response</a></li>
         <li><a href="#rtb-win-loss"><span class="method-tag get">GET</span>Win / loss notice</a></li>
         <li><a href="#rtb-status"><span class="method-tag get">GET</span>Adapter status</a></li>
-        <li><a href="#rtb-mcp-translation">OpenRTB → MCP map</a></li>
       </ul>
     </div>
     <div class="side-group">
-      <h5><span class="chip ink"></span>Meta</h5>
+      <h5><span class="chip ink"></span>Reference</h5>
       <ul class="side-links">
+        <li><a href="#webhooks">Webhooks</a></li>
+        <li><a href="#rate-limits">Rate limits</a></li>
+        <li><a href="#errors">Error codes</a></li>
         <li><a href="#changelog">Changelog</a></li>
       </ul>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <main class="content">
     <div class="crumbs"><a href="/docs">Docs</a> / <span>API reference</span></div>
 
     <div class="docs-hero">
-      <svg class="deco" viewBox="0 0 80 80" fill="none"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
-<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>
-<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
-<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
-<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-      <h1 id="introduction">Boost Boss API</h1>
-      <p>The monetization and advertising API for the AI era. REST-based, JSON everywhere.</p>
+      <svg class="deco" viewBox="0 0 80 80" fill="none"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/></svg>
+      <h1 id="introduction">Boost Boss API reference</h1>
+      <p>Every shipped endpoint, organized by role. Real paths, real auth, real response shapes pulled from the live handlers.</p>
     </div>
 
-    <div class="callout" style="margin: 18px 0 26px; padding: 16px 20px; background: rgba(255, 230, 0, 0.10); border-left: 3px solid #C9A800; border-radius: 10px;">
-      <strong style="display:block; margin-bottom: 6px; color: var(--ink);">⚠️ Spec, not snapshot.</strong>
-      <p style="margin: 0; font-size: 14.5px; color: var(--ink-soft);">This reference describes the full target surface of the Boost Boss API. Some sections are live today (publisher integration via the <a href="/docs/mcp" style="color: var(--pink); font-weight: 600;">MCP</a> and <a href="/docs/js-snippet" style="color: var(--pink); font-weight: 600;">JS snippet</a> paths); some describe planned behavior on the roadmap. The TypeScript SDK is in beta. Python, Go, Swift, and Kotlin SDKs are not yet published. The OpenRTB 2.6 BBX adapter is documented as the spec advertisers should integrate against; live DSP integrations are in progress. Treat anything here as "what we're building toward," not "what you can paste right now," unless you're working through one of the four <a href="/docs" style="color: var(--pink); font-weight: 600;">live publisher integration paths</a>.</p>
-    </div>
+    <p>Boost Boss exposes a single REST surface at <code>https://boostboss.ai</code> covering four roles: <strong>publishers</strong> (monetizing AI tools), <strong>advertisers</strong> (running campaigns), <strong>sellers</strong> (using the MoR storefront), and <strong>affiliates</strong> (earning commission on share links). The same account model unifies all four — you sign up once, opt into whatever role(s) you need. A machine-readable spec is at <a href="/openapi.json" class="inline-link">/openapi.json</a>.</p>
 
-    <p>The Boost Boss API lets you <strong>fetch ads</strong>, <strong>beacon events</strong>, and <strong>manage campaigns</strong> programmatically. This reference covers every endpoint, every parameter, and every response field. The API is organized around REST — predictable URLs, standard HTTP verbs, standard status codes, JSON request and response bodies.</p>
+    <p>Jump to the role you came here for:</p>
 
-    <p>If you're monetizing an AI app, start with the <a href="#sdk-typescript" class="inline-link">SDK quickstart</a>. If you're running campaigns, skip to <a href="#api-create-campaign" class="inline-link">Create campaign</a>. If you're integrating via OpenRTB 2.6, jump to the <a href="#rtb-overview" class="inline-link">BBX adapter</a>. Licensing Benna into your own mediation stack? Jump to <a href="#benna-overview" class="inline-link">Benna</a>.</p>
-
-    <div class="callout tip">
-      <span class="icon">✦</span>
-      <div><strong>Machine-readable spec.</strong> A full OpenAPI 3.1 description of every endpoint on this page lives at <a href="/openapi.json" class="inline-link"><code>/openapi.json</code></a> — drop it into Postman, Stoplight, or your code generator of choice.</div>
-    </div>
-
-    <div class="card-grid">
-      <a class="doc-card" href="#quickstart">
-        <div class="chip cyan">⚡</div>
-        <h3>Quickstart</h3>
-        <p>Get your first ad served in under 5 minutes. No backend required.</p>
+    <div class="role-grid">
+      <a class="role-jump pub" href="#publisher-overview">
+        <h3><span class="role-pill pub">Pub</span>Publisher endpoints</h3>
+        <p>MCP JSON-RPC auction, REST ad-request, event tracking beacons.</p>
       </a>
-      <a class="doc-card" href="#api-fetch-ad">
-        <div class="chip pink">API</div>
-        <h3>API reference</h3>
-        <p>Full reference for every endpoint — fetch, beacon, campaigns, stats.</p>
+      <a class="role-jump adv" href="#advertiser-overview">
+        <h3><span class="role-pill adv">Adv</span>Advertiser endpoints</h3>
+        <p>Campaigns CRUD, stats, deposits, conversion postback.</p>
       </a>
-      <a class="doc-card" href="#ai-targeting">
-        <div class="chip yellow">🎯</div>
-        <h3>AI-native targeting</h3>
-        <p>Target by intent signals, MCP tools, and session context — not cookies.</p>
+      <a class="role-jump sel" href="#seller-overview">
+        <h3><span class="role-pill sel">Sel</span>Seller (MoR) endpoints</h3>
+        <p>Products, pricing plans, orders, vouchers, payouts.</p>
       </a>
-      <a class="doc-card" href="#webhooks">
-        <div class="chip ink">🔔</div>
-        <h3>Webhooks</h3>
-        <p>Real-time event notifications for impressions, clicks, and conversions.</p>
+      <a class="role-jump aff" href="#affiliate-overview">
+        <h3><span class="role-pill aff">Aff</span>Affiliate endpoints</h3>
+        <p>Share-link redirect, sales report, commission state.</p>
       </a>
     </div>
-
-    <!-- QUICKSTART -->
-    <h2 id="quickstart">Quickstart</h2>
-    <p>Install the SDK, set your API key, fetch your first ad.</p>
-
-    <h4>1. Install</h4>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">bash</span><span class="copy">Copy</span></div>
-      <pre><span class="n">npm install @boostbossai/lumi-sdk</span>
-<span class="c"># or</span>
-<span class="n">pip install boostboss</span>
-<span class="c"># or</span>
-<span class="n">go get github.com/boostboss/go-sdk</span></pre>
-    </div>
-
-    <h4>2. Initialize the client</h4>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
-<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
-
-<span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({
-  apiKey: process.env.<span class="n">BB_API_KEY</span>,
-  environment: <span class="s">'live'</span>, <span class="c">// or 'test'</span>
-});</pre>
-    </div>
-
-    <h4>3. Fetch an ad</h4>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
-<pre><span class="k">const</span> ad = <span class="k">await</span> bb.<span class="f">fetch</span>({
-  format: <span class="s">'native'</span>,
-  context: <span class="s">"help me refactor this python script"</span>,
-  audience: <span class="s">'ai-native'</span>,
-});
-
-<span class="c">// ad.headline  → "Ship better code 10× faster"</span>
-<span class="c">// ad.body      → "The AI coding assistant..."</span>
-<span class="c">// ad.cta_url   → "https://cursor.com/?ref=bb"</span>
-<span class="c">// ad.beacons   → { impression, click, convert }</span></pre>
-    </div>
-
-    <div class="callout tip">
-      <span class="icon">✦</span>
-      <div><strong>Tip:</strong> the SDK automatically fires the impression beacon when you render the ad. You only need to call <code>ad.trackClick()</code> when the user clicks through.</div>
-    </div>
-
-    <!-- AUTHENTICATION -->
-    <h2 id="authentication">Authentication</h2>
-    <p>Boost Boss uses <strong>bearer tokens</strong> for authentication. Your API key must be passed in the <code>Authorization</code> header on every request.</p>
-
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">HTTP</span><span class="copy">Copy</span></div>
-<pre><span class="k">Authorization:</span> Bearer bb_sk_live_1a2b3c4d5e6f...</pre>
-    </div>
-
-    <p>You have two key types:</p>
-    <ul>
-      <li><code>bb_sk_live_*</code> — production secret key. <strong>Never ship to client code.</strong></li>
-      <li><code>bb_pk_live_*</code> — production publishable key. Safe to expose in browser bundles.</li>
-    </ul>
 
     <div class="callout warn">
       <span class="icon">!</span>
-      <div><strong>Key hygiene:</strong> rotate keys from the dashboard → Settings → API keys. Old keys are revoked instantly. We send a webhook and an email when a key is rotated or suspected of being exposed.</div>
+      <div><strong>Spec, not snapshot.</strong> Most endpoints described here are live; a few are marked <em>roadmap</em>. When in doubt, the source of truth is the JS handler in <code>api/&lt;name&gt;.js</code> on <a href="https://github.com/boostboss" class="inline-link">GitHub</a> and the OpenAPI spec at <code>/openapi.json</code>. Benna is currently a deterministic targeting-overlap scorer, not a learned model — see <a href="#benna-overview" class="inline-link">Benna</a> for the honest status.</div>
     </div>
 
-    <!-- ENVIRONMENTS -->
+    <!-- ════════════════════════════════════════════════════════════════
+         AUTH
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="auth">Authentication</h2>
+    <p>Boost Boss uses <strong>JWT bearer tokens</strong> for the authenticated REST endpoints. There are no Stripe-style <code>sk_live_*</code> opaque keys — sign in with email + password, get back a signed JWT, and pass it on every subsequent request.</p>
+
+    <h3>Login</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/auth?action=login</span><span class="desc">Exchange credentials for a JWT.</span></div>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
+<pre><span class="f">curl</span> https://boostboss.ai/api/auth?action=login \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{ "email": "you@example.com", "password": "..." }'</span></pre>
+    </div>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"session"</span>: {
+    <span class="s">"access_token"</span>: <span class="s">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="s">"expires_in"</span>:   <span class="n">2592000</span>,
+    <span class="s">"token_type"</span>:   <span class="s">"Bearer"</span>
+  },
+  <span class="s">"user"</span>: { <span class="s">"id"</span>: <span class="s">"..."</span>, <span class="s">"email"</span>: <span class="s">"you@example.com"</span>, <span class="s">"role"</span>: <span class="s">"advertiser"</span> }
+}</pre>
+    </div>
+    <p>The token is a standard signed JWT — you can decode it client-side to read your user ID and role without making a network call. Pass it back on every subsequent request:</p>
+    <div class="code-block">
+<pre><span class="k">Authorization:</span> Bearer eyJhbGciOiJIUzI1NiIs...</pre>
+    </div>
+
+    <h3>Two special cases</h3>
+    <p>Two surfaces don't use the user JWT. They use shared secrets you configure once per resource:</p>
+
+    <h4>Seller voucher API (<code>seller_secret</code>)</h4>
+    <p>The voucher endpoints (<a href="#sel-vouchers-validate" class="inline-link">validate</a> / <a href="#sel-vouchers-redeem" class="inline-link">redeem</a>) authenticate via a per-product secret passed in the request body as <code>seller_secret</code>. The secret is the <code>fulfillment_webhook_secret</code> field you set on your product in the advertiser dashboard. Compared with <code>crypto.timingSafeEqual</code> server-side; mismatches return <code>401 bad_secret</code>.</p>
+
+    <h4>OpenRTB BBX seat key</h4>
+    <p>DSPs hitting <a href="#rtb-bid" class="inline-link"><code>/api/rtb</code></a> use a seat key issued at integration time, sent as a normal bearer header: <code>Authorization: Bearer bb_seat_&lt;key&gt;</code>. Contact <a href="mailto:support@boostboss.ai" class="inline-link">support@boostboss.ai</a> for seat onboarding.</p>
+
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>Storage gotcha.</strong> The advertiser dashboard stores the token in <code>localStorage.bb_session_token</code> as a JSON-encoded object — not the raw token string. Production frontends must <code>JSON.parse</code> and pull <code>.token</code> before sending. Sending the raw blob causes silent gate-fallthrough on owner-only routes.</div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         ENVIRONMENTS
+         ════════════════════════════════════════════════════════════════ -->
     <h2 id="environments">Environments</h2>
-    <p>Two environments. Both use the same SDKs and endpoints — you switch by using the corresponding keys.</p>
+    <p>One base URL: <code>https://boostboss.ai</code>. There is no separate <code>api.</code> subdomain.</p>
 
     <table class="params">
-      <thead><tr><th>Environment</th><th>Key prefix</th><th>Base URL</th><th>Notes</th></tr></thead>
+      <thead><tr><th>Mode</th><th>How it engages</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td class="param-name">test</td><td class="param-type">bb_sk_test_*</td><td>api.boostboss.ai</td><td class="param-desc">No real spend. No real payouts. Mock ads.</td></tr>
-        <tr><td class="param-name">live</td><td class="param-type">bb_sk_live_*</td><td>api.boostboss.ai</td><td class="param-desc">Real auctions. Real spend. Real earnings.</td></tr>
+        <tr><td class="param-name">production</td><td class="param-desc">Default for the live deployment</td><td class="param-desc">Real campaigns, real money, real PayPal payouts. Requires Supabase env vars set.</td></tr>
+        <tr><td class="param-name">in-memory</td><td class="param-desc">When Supabase env vars are not set</td><td class="param-desc">Used by CI tests, BBX sandbox bidders, and the public exchange page. Same interface, deterministic responses. NOT a user-facing demo mode.</td></tr>
+        <tr><td class="param-name">sandbox keys</td><td class="param-desc"><code>sk_test_*</code> or <code>pub_test_*</code> on the REST ad-request endpoint</td><td class="param-desc">Short-circuits through <code>api/_lib/sandbox.js</code> — returns mock ads without touching the auction. Safe for end-to-end SDK smoke tests.</td></tr>
       </tbody>
     </table>
 
-    <!-- SDKs (TABBED) -->
-    <h2 id="sdk-typescript">SDKs</h2>
-    <p>Official clients for every major language. Zero dependencies, tiny bundles, identical API surface. <span class="version-pill"><span class="dot"></span>v1.0.0</span></p>
+    <!-- ════════════════════════════════════════════════════════════════
+         COMMON PATTERNS
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="common-patterns">Common patterns</h2>
 
-    <div class="sdk-tabs" id="sdkTabs">
-      <button class="sdk-tab active" data-lang="ts">TypeScript</button>
-      <button class="sdk-tab" data-lang="py">Python</button>
-      <button class="sdk-tab" data-lang="go">Go</button>
-      <button class="sdk-tab" data-lang="swift">Swift</button>
-      <button class="sdk-tab" data-lang="kotlin">Kotlin</button>
+    <h3>Request and response shape</h3>
+    <p>All endpoints accept and return JSON with <code>Content-Type: application/json</code>. The only exceptions are <code>/api/track</code> (also accepts a 1×1 GIF beacon GET) and <code>/s/&lt;token&gt;</code> (302 redirect).</p>
+
+    <h3>Action multiplexing</h3>
+    <p>Many endpoints multiplex multiple operations through one URL using an <code>action</code> query param — e.g. <code>/api/campaigns?action=create</code>, <code>/api/auth?action=login</code>. This is a deliberate choice to keep the Vercel function count low; treat each <code>action</code> value as a distinct logical endpoint.</p>
+
+    <h3>Error envelope</h3>
+    <p>Every error returns a JSON body with a machine-readable <code>error</code> field and (where applicable) a <code>code</code> field for programmatic branching. See <a href="#errors" class="inline-link">Error codes</a>.</p>
+    <div class="code-block">
+<pre>{ <span class="s">"error"</span>: <span class="s">"Insufficient ad credit. Available: $34.30, requested: $50.00."</span>,
+  <span class="s">"code"</span>:  <span class="s">"insufficient_credit"</span>,
+  <span class="s">"available"</span>: <span class="n">34.30</span>,
+  <span class="s">"requested"</span>: <span class="n">50.00</span> }</pre>
     </div>
 
-    <div class="sdk-panel active" data-lang="ts" id="sdk-py-anchor">
-      <p style="margin-top:14px">The recommended client for browsers, Node, and Deno. Zero dependencies, 8kb gzipped.</p>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-        <pre>npm install @boostbossai/lumi-sdk</pre>
-      </div>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">TypeScript</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre><span class="k">import</span> { BoostBoss, <span class="n">NativeAd</span> } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
+    <h3>Idempotency</h3>
+    <p>Where it matters — voucher redemption, conversion postback, PayPal capture — endpoints are idempotent. Re-submitting the same operation returns the existing record with a <code>deduped: true</code> flag rather than producing duplicates. The conversion postback also accepts an <code>idempotency_key</code> field on the request body.</p>
 
-<span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({ apiKey: <span class="s">'bb_sk_live_***'</span> });
+    <!-- ════════════════════════════════════════════════════════════════
+         PUBLISHER
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="publisher-overview"><span class="role-pill pub">Pub</span>Publisher endpoints</h2>
+    <p>Publishers monetize AI surfaces — MCP servers, AI apps, browser extensions, Discord/Slack/Telegram bots. Pick the integration matching your deployment surface; all three call the same underlying auction.</p>
+    <ul>
+      <li><strong>MCP servers</strong> → talk to <code>/api/mcp</code> directly via JSON-RPC, or install <code>@boostbossai/lumi-mcp</code>.</li>
+      <li><strong>Browser-side AI apps</strong> → drop in the <code>/lumi.js</code> script tag or install <code>@boostbossai/lumi-sdk</code>.</li>
+      <li><strong>Server-side bots</strong> → POST to <code>/v1/ad-request</code> with a publisher Bearer key.</li>
+    </ul>
+    <p>All publisher revenue settles at <strong>85% to publisher / 15% to BB</strong>. See <a href="/docs/payouts" class="inline-link">Payouts</a> for cycle and provider details.</p>
 
-<span class="k">const</span> ad: NativeAd = <span class="k">await</span> bb.<span class="f">fetch</span>({
-  format: <span class="s">'native'</span>,
-  context: userMessage,
-  mcpTools: [<span class="s">'filesystem'</span>, <span class="s">'github'</span>],
-  model: <span class="s">'claude-sonnet-4'</span>,
-});
+    <h3 id="pub-mcp">MCP JSON-RPC endpoint</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/mcp</span><span class="desc">Model Context Protocol — JSON-RPC 2.0.</span></div>
+    <p>The endpoint the <code>@boostbossai/lumi-mcp</code> SDK talks to. Implements three MCP methods: <code>initialize</code> (handshake), <code>tools/list</code> (enumerate the two tools), and <code>tools/call</code> (invoke <code>get_sponsored_content</code> or <code>track_event</code>). Auth: <code>Authorization: Bearer &lt;publisher_api_key&gt;</code>.</p>
 
-<span class="c">// Render the ad in your UI</span>
-<span class="f">renderCard</span>({
-  headline: ad.headline,
-  body: ad.body,
-  cta: ad.cta_text,
-  onClick: () =&gt; ad.<span class="f">trackClick</span>(),
-});</pre>
-      </div>
+    <h4>Request — <code>tools/call · get_sponsored_content</code></h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON-RPC</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"jsonrpc"</span>: <span class="s">"2.0"</span>,
+  <span class="s">"id"</span>:      <span class="n">1</span>,
+  <span class="s">"method"</span>:  <span class="s">"tools/call"</span>,
+  <span class="s">"params"</span>: {
+    <span class="s">"name"</span>:      <span class="s">"get_sponsored_content"</span>,
+    <span class="s">"arguments"</span>: {
+      <span class="s">"context"</span>:      <span class="s">"refactor this python function to use async"</span>,
+      <span class="s">"active_tools"</span>: [<span class="s">"filesystem"</span>, <span class="s">"github"</span>],
+      <span class="s">"host_app"</span>:     <span class="s">"cursor"</span>,
+      <span class="s">"surface"</span>:      <span class="s">"chat"</span>
+    }
+  }
+}</pre>
     </div>
 
-    <div class="sdk-panel" data-lang="py" id="sdk-python">
-      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:info@boostboss.ai" class="inline-link">info@boostboss.ai</a>.</p>
-    </div>
+    <h4>Response</h4>
+    <p>A Benna-scored first-price auction result wrapped in the standard JSON-RPC envelope. <code>result.content[0].text</code> is a JSON-encoded payload with the ad fields plus signed tracking URLs. Beacons are pre-computed; <code>track_event</code> is provided as a convenience when the SDK can't fire URLs directly.</p>
 
-    <div class="sdk-panel" data-lang="go" id="sdk-go">
-      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:info@boostboss.ai" class="inline-link">info@boostboss.ai</a>.</p>
-    </div>
-
-    <div class="sdk-panel" data-lang="swift" id="sdk-swift">
-      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:info@boostboss.ai" class="inline-link">info@boostboss.ai</a>.</p>
-    </div>
-
-    <div class="sdk-panel" data-lang="kotlin" id="sdk-kotlin">
-      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:info@boostboss.ai" class="inline-link">info@boostboss.ai</a>.</p>
-    </div>
-
-    <!-- FETCH AD -->
-    <h2 id="api-fetch-ad">Fetch ad</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/ads/fetch</span><span class="desc">Run an auction and return the winning ad.</span></div>
-
-    <p>Runs a real-time auction against your targeting parameters and returns the winning ad creative with signed beacon URLs. Designed for sub-100ms response times on the bid path; published latency targets will appear here once we have measured production data.</p>
+    <h3 id="pub-ad-request">REST ad-request</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/ad-request</span><span class="desc">Flat REST wrapper around the MCP auction.</span></div>
+    <p>Designed for server-side bot integrations (Discord, Telegram, Slack) where speaking JSON-RPC is overkill. Same underlying auction; flat input and output. Auth: <code>Authorization: Bearer &lt;publisher_api_key&gt;</code>.</p>
 
     <h4>Request body</h4>
     <table class="params">
       <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td class="param-name">format<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">One of <code>native</code>, <code>tool_result</code>, <code>agent_suggestion</code>, <code>display</code>.</td></tr>
-        <tr><td class="param-name">context</td><td class="param-type">string</td><td class="param-desc">Free-form user intent or session snippet. Up to 2000 chars.</td></tr>
-        <tr><td class="param-name">audience</td><td class="param-type">string</td><td class="param-desc">Audience tier: <code>ai-native</code>, <code>prosumer</code>, or <code>broad</code>.</td></tr>
-        <tr><td class="param-name">mcp_tools</td><td class="param-type">string[]</td><td class="param-desc">Active MCP tool IDs in this session.</td></tr>
-        <tr><td class="param-name">model</td><td class="param-type">string</td><td class="param-desc">Model in use: <code>claude-opus-4</code>, <code>claude-sonnet-4</code>, <code>gpt-5</code>, etc.</td></tr>
-        <tr><td class="param-name">user_id</td><td class="param-type">string</td><td class="param-desc">Stable anonymous user identifier (hashed, not PII).</td></tr>
-        <tr><td class="param-name">frequency_cap</td><td class="param-type">object</td><td class="param-desc">Caps: <code>{ per_session: 3, per_day: 10 }</code>.</td></tr>
+        <tr><td class="param-name">context<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Free-form user intent or session snippet. Up to 2000 chars.</td></tr>
+        <tr><td class="param-name">format</td><td class="param-type">string</td><td class="param-desc">One of <code>embed</code>, <code>card</code>, <code>text</code>, <code>native</code>, <code>banner</code>. Defaults to <code>embed</code>.</td></tr>
+        <tr><td class="param-name">placement</td><td class="param-type">string</td><td class="param-desc">Optional bot framing — <code>card</code>, <code>welcome</code>, <code>buttons</code>, <code>toolrec</code>.</td></tr>
+        <tr><td class="param-name">active_tools</td><td class="param-type">string[]</td><td class="param-desc">MCP tool IDs in this session.</td></tr>
+        <tr><td class="param-name">host_app</td><td class="param-type">string</td><td class="param-desc">Hosting AI app — <code>claude</code>, <code>cursor</code>, <code>discord</code>, etc.</td></tr>
       </tbody>
     </table>
 
-    <h4>Example request</h4>
+    <h4>Example</h4>
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
-<pre><span class="f">curl</span> https://api.boostboss.ai/v1/ads/fetch \
-  -H <span class="s">"Authorization: Bearer bb_sk_live_***"</span> \
+<pre><span class="f">curl</span> https://boostboss.ai/v1/ad-request \
+  -H <span class="s">"Authorization: Bearer &lt;publisher_api_key&gt;"</span> \
   -H <span class="s">"Content-Type: application/json"</span> \
   -d <span class="s">'{
-    "format": "native",
-    "context": "refactor this python function to use async",
-    "audience": "ai-native",
-    "mcp_tools": ["filesystem", "github"],
-    "model": "claude-sonnet-4"
+    "context": "user wants to debug python traceback",
+    "active_tools": ["filesystem", "shell"],
+    "host_app": "cursor",
+    "format": "card"
   }'</span></pre>
     </div>
 
-    <h4>Response</h4>
-    <div class="resp-tabs" data-group="fetch">
-      <button class="resp-tab active" data-tab="fetch-200">200 OK</button>
-      <button class="resp-tab" data-tab="fetch-401">401 Unauthorized</button>
-      <button class="resp-tab" data-tab="fetch-429">429 Rate Limited</button>
-    </div>
-    <div class="resp-panel active" data-tab="fetch-200">
-      <div class="code-block with-head" style="margin-top:0;border-radius:0 0 10px 10px;">
-        <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre>{
-  <span class="s">"id"</span>: <span class="s">"ad_3Xc9wZ8fK4"</span>,
-  <span class="s">"format"</span>: <span class="s">"native"</span>,
-  <span class="s">"headline"</span>: <span class="s">"Ship better code 10× faster"</span>,
-  <span class="s">"body"</span>: <span class="s">"The AI coding assistant that actually reads your codebase."</span>,
-  <span class="s">"cta_text"</span>: <span class="s">"Try Cursor free"</span>,
-  <span class="s">"cta_url"</span>: <span class="s">"https://cursor.com/?ref=bb"</span>,
-  <span class="s">"advertiser"</span>: { <span class="s">"name"</span>: <span class="s">"Cursor"</span>, <span class="s">"verified"</span>: <span class="b">true</span> },
-  <span class="s">"beacons"</span>: {
-    <span class="s">"impression"</span>: <span class="s">"https://api.boostboss.ai/v1/beacon/imp/..."</span>,
-    <span class="s">"click"</span>:      <span class="s">"https://api.boostboss.ai/v1/beacon/clk/..."</span>,
-    <span class="s">"convert"</span>:    <span class="s">"https://api.boostboss.ai/v1/beacon/cvt/..."</span>
-  },
-  <span class="s">"bid_cpm"</span>: <span class="n">3.42</span>,
-  <span class="s">"match_score"</span>: <span class="n">0.91</span>,
-  <span class="s">"latency_ms"</span>: <span class="n">47</span>
-}</pre>
-      </div>
-    </div>
-    <div class="resp-panel" data-tab="fetch-401" style="display:none">
-      <div class="code-block with-head" style="margin-top:0;border-radius:0 0 10px 10px;">
-        <div class="code-head"><span class="lang">JSON · 401 Unauthorized</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre>{
-  <span class="s">"error"</span>: {
-    <span class="s">"code"</span>: <span class="s">"invalid_api_key"</span>,
-    <span class="s">"message"</span>: <span class="s">"API key is missing, revoked, or for the wrong environment."</span>,
-    <span class="s">"request_id"</span>: <span class="s">"req_8f3a2c9d"</span>
-  }
-}</pre>
-      </div>
-    </div>
-    <div class="resp-panel" data-tab="fetch-429" style="display:none">
-      <div class="code-block with-head" style="margin-top:0;border-radius:0 0 10px 10px;">
-        <div class="code-head"><span class="lang">JSON · 429 Too Many Requests</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre>{
-  <span class="s">"error"</span>: {
-    <span class="s">"code"</span>: <span class="s">"rate_limited"</span>,
-    <span class="s">"message"</span>: <span class="s">"Rate limit exceeded. Retry after 1.2s."</span>,
-    <span class="s">"retry_after"</span>: <span class="n">1.2</span>,
-    <span class="s">"request_id"</span>: <span class="s">"req_4b7e1f2a"</span>
-  }
-}</pre>
-      </div>
-    </div>
+    <h3 id="pub-track">Track event (impression / click / close / skip / video_complete)</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/track</span><span class="desc">Beacon — also accepts GET for 1×1 GIF pixel use cases.</span></div>
+    <p>Fires on every ad lifecycle event. Feeds the billing ledger (advertiser spend) and publisher revenue accrual atomically per event.</p>
 
-    <!-- IMPRESSION -->
-    <h2 id="api-impression">Impression beacon</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/beacon/imp/:token</span><span class="desc">Fire when the ad becomes visible.</span></div>
-    <p>The SDK fires this for you automatically on render. If you're hitting the API directly, fire this beacon the first time the ad is visible in the viewport (≥50% pixels, ≥1 second). Idempotent — duplicates are deduped server-side.</p>
-
-    <!-- CLICK -->
-    <h2 id="api-click">Click beacon</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/beacon/clk/:token</span><span class="desc">Fire when the user clicks the ad.</span></div>
-    <p>Fire before redirecting to the CTA URL. Returns 302 to the verified advertiser destination — so you can use it as the anchor's <code>href</code> directly.</p>
-
-    <!-- CONVERSION -->
-    <h2 id="api-conversion">Conversion beacon</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/beacon/cvt/:token</span><span class="desc">Fire when the user completes the advertiser's goal.</span></div>
-    <p>Advertisers use this to report conversions back — signup complete, purchase made, install confirmed. Used by CPA bidders to pay per outcome.</p>
-
-    <!-- LIST CAMPAIGNS -->
-    <h2 id="api-campaigns">List campaigns</h2>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/campaigns</span><span class="desc">List all campaigns for the authenticated advertiser.</span></div>
-
-    <table class="params">
-      <thead><tr><th>Query param</th><th>Type</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">status</td><td class="param-type">string</td><td class="param-desc">Filter: <code>active</code>, <code>paused</code>, <code>review</code>, <code>ended</code>.</td></tr>
-        <tr><td class="param-name">limit</td><td class="param-type">int</td><td class="param-desc">Page size. Default 20, max 100.</td></tr>
-        <tr><td class="param-name">starting_after</td><td class="param-type">string</td><td class="param-desc">Cursor ID for pagination.</td></tr>
-      </tbody>
-    </table>
-
-    <!-- CREATE CAMPAIGN -->
-    <h2 id="api-create-campaign">Create campaign</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/campaigns</span><span class="desc">Launch a new ad campaign.</span></div>
-
+    <h4>Request body</h4>
     <table class="params">
       <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td class="param-name">name<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Human-readable campaign name.</td></tr>
-        <tr><td class="param-name">format<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Ad format to serve.</td></tr>
-        <tr><td class="param-name">headline<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Ad headline, max 60 chars.</td></tr>
-        <tr><td class="param-name">body</td><td class="param-type">string</td><td class="param-desc">Supporting copy, max 200 chars.</td></tr>
-        <tr><td class="param-name">cta_text<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Call-to-action button text.</td></tr>
-        <tr><td class="param-name">cta_url<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Destination URL.</td></tr>
-        <tr><td class="param-name">billing_model<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">One of <code>cpm</code>, <code>cpc</code>, <code>cpa</code>.</td></tr>
-        <tr><td class="param-name">bid_amount<span class="required">req</span></td><td class="param-type">number</td><td class="param-desc">Max bid per unit (CPM, CPC, or CPA target).</td></tr>
-        <tr><td class="param-name">daily_budget<span class="required">req</span></td><td class="param-type">number</td><td class="param-desc">Maximum daily spend in USD.</td></tr>
-        <tr><td class="param-name">intent_signals</td><td class="param-type">string[]</td><td class="param-desc">AI-native intent targets. See <a href="#ai-targeting" class="inline-link">AI targeting</a>.</td></tr>
-        <tr><td class="param-name">host_apps</td><td class="param-type">string[]</td><td class="param-desc">Target AI apps: <code>claude</code>, <code>cursor</code>, etc.</td></tr>
-        <tr><td class="param-name">mcp_tools</td><td class="param-type">string[]</td><td class="param-desc">Target active MCP tools.</td></tr>
+        <tr><td class="param-name">event_type<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">One of <code>impression</code>, <code>click</code>, <code>close</code>, <code>skip</code>, <code>video_complete</code>.</td></tr>
+        <tr><td class="param-name">campaign_id<span class="required">req</span></td><td class="param-type">uuid</td><td class="param-desc">The campaign that served the ad.</td></tr>
+        <tr><td class="param-name">developer_id</td><td class="param-type">uuid</td><td class="param-desc">Publisher ID (auto-resolved from the JWT when present).</td></tr>
+        <tr><td class="param-name">format</td><td class="param-type">string</td><td class="param-desc">Ad format that served. Used for revenue split bookkeeping.</td></tr>
+        <tr><td class="param-name">integration_method</td><td class="param-type">string</td><td class="param-desc">One of <code>mcp</code>, <code>js_snippet</code>, <code>npm_sdk</code>, <code>rest</code>.</td></tr>
       </tbody>
     </table>
 
-    <!-- UPDATE CAMPAIGN -->
-    <h2 id="api-update-campaign">Update campaign</h2>
-    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/v1/campaigns/:id</span><span class="desc">Modify a running campaign.</span></div>
-    <p>Any field from Create campaign can be patched. Patching <code>status</code> to <code>paused</code> halts spend immediately. Patching <code>creative</code> triggers automatic creative re-review (typically under 15 minutes).</p>
+    <h4>GET form (pixel beacon)</h4>
+    <p>For environments where issuing a POST is awkward (HTML image tags, legacy email pixels), the same data can ride as query params on a GET — the response is a 1×1 transparent GIF.</p>
+    <div class="code-block">
+<pre>GET /api/track?event=impression&amp;campaign_id=cam_abc&amp;format=card</pre>
+    </div>
 
-    <!-- STATS (advertiser-side) -->
-    <h2 id="api-stats">Get stats <span style="font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0;">— advertiser</span></h2>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/stats</span><span class="desc">Aggregate performance metrics.</span></div>
-    <p>Returns impressions, clicks, conversions, spend, and derived rates (CTR, CVR, eCPA) across the time range. Break down by <code>campaign</code>, <code>format</code>, <code>host_app</code>, <code>intent_signal</code>, or <code>day</code>.</p>
+    <!-- ════════════════════════════════════════════════════════════════
+         ADVERTISER
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="advertiser-overview"><span class="role-pill adv">Adv</span>Advertiser endpoints</h2>
+    <p>Advertisers run campaigns through the SuperBoost direct path. Auth: JWT bearer obtained from <code>/api/auth?action=login</code> as role <code>advertiser</code>.</p>
 
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+    <h3 id="adv-campaigns">List campaigns</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/campaigns?advertiser_id=&lt;uuid&gt;</span><span class="desc">All campaigns for the authenticated advertiser.</span></div>
+    <p>Returns the array under <code>campaigns</code>. Filters: <code>status</code> (<code>in_review</code> / <code>active</code> / <code>paused</code> / <code>rejected</code>), <code>limit</code>, <code>offset</code>. Use <code>?id=&lt;uuid&gt;</code> to fetch a single campaign.</p>
+
+    <h3 id="adv-create-campaign">Create campaign</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/campaigns?action=create</span><span class="desc">Launch a new campaign (status = in_review).</span></div>
+    <p>First campaign per advertiser auto-approves if the creative passes policy. Subsequent campaigns enter <code>in_review</code> until an admin approves.</p>
+
+    <h4>Required fields</h4>
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">advertiser_id<span class="required">req</span></td><td class="param-type">uuid</td><td class="param-desc">Your user ID.</td></tr>
+        <tr><td class="param-name">headline<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Max 60 chars.</td></tr>
+        <tr><td class="param-name">cta_url<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Destination URL (must be HTTPS).</td></tr>
+        <tr><td class="param-name">billing_model</td><td class="param-type">string</td><td class="param-desc"><code>cpm</code>, <code>cpc</code>, or <code>cpa</code>. Default <code>cpm</code>.</td></tr>
+        <tr><td class="param-name">bid_amount</td><td class="param-type">number</td><td class="param-desc">$0.01 – $1,000 per unit. Default $5.00.</td></tr>
+        <tr><td class="param-name">daily_budget</td><td class="param-type">number</td><td class="param-desc">$1 – $1,000,000. Default $50.</td></tr>
+        <tr><td class="param-name">total_budget</td><td class="param-type">number</td><td class="param-desc">$1 – $10,000,000. Default $1,000.</td></tr>
+        <tr><td class="param-name">target_intent_tokens</td><td class="param-type">string[]</td><td class="param-desc">MCP-native intent targeting. Empty = match any.</td></tr>
+        <tr><td class="param-name">target_active_tools</td><td class="param-type">string[]</td><td class="param-desc">MCP tool IDs to target.</td></tr>
+        <tr><td class="param-name">target_host_apps</td><td class="param-type">string[]</td><td class="param-desc">Specific AI apps to target.</td></tr>
+        <tr><td class="param-name">target_surfaces</td><td class="param-type">string[]</td><td class="param-desc"><code>chat</code>, <code>tool_result</code>, <code>welcome</code>, etc.</td></tr>
+        <tr><td class="param-name">target_integration_methods</td><td class="param-type">string[]</td><td class="param-desc">Per-door opt-in. Empty = all four doors.</td></tr>
+        <tr><td class="param-name">product_id</td><td class="param-type">uuid</td><td class="param-desc">Optional — link the campaign to a Product for affiliate attribution.</td></tr>
+        <tr><td class="param-name">use_ad_credit</td><td class="param-type">boolean</td><td class="param-desc">Fund the campaign from converted MoR earnings (Promote loop) instead of PayPal billing. Validated against your <a href="#sel-payouts" class="inline-link">ad credit balance</a>.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Response (201)</h4>
+    <div class="code-block">
 <pre>{
-  <span class="s">"range"</span>: { <span class="s">"from"</span>: <span class="s">"2026-04-01"</span>, <span class="s">"to"</span>: <span class="s">"2026-04-15"</span> },
-  <span class="s">"totals"</span>: {
-    <span class="s">"impressions"</span>: <span class="n">4_812_400</span>,
-    <span class="s">"clicks"</span>:      <span class="n">218_600</span>,
-    <span class="s">"conversions"</span>: <span class="n">12_840</span>,
-    <span class="s">"spend_usd"</span>:   <span class="n">24810.00</span>,
-    <span class="s">"ctr"</span>:         <span class="n">0.0454</span>,
-    <span class="s">"cvr"</span>:         <span class="n">0.0587</span>,
-    <span class="s">"ecpa_usd"</span>:    <span class="n">1.93</span>
-  },
-  <span class="s">"breakdown"</span>: [ ... ]
+  <span class="s">"campaign"</span>: { <span class="s">"id"</span>: <span class="s">"cam_..."</span>, <span class="s">"status"</span>: <span class="s">"in_review"</span>, ... },
+  <span class="s">"policy"</span>:   { <span class="s">"ok"</span>: <span class="b">true</span>, <span class="s">"violations"</span>: [] },
+  <span class="s">"auto_approved"</span>: <span class="b">true</span>
 }</pre>
     </div>
 
-    <!-- REPORTS (publisher-side, placeholder) -->
-    <h2 id="api-reports">Get reports <span style="font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0;">— publisher</span> <span style="display:inline-block;margin-left:6px;font-size:10.5px;font-weight:600;color:var(--muted);background:var(--bg-soft);padding:2px 8px;border-radius:4px;letter-spacing:0.04em;text-transform:uppercase;">soon</span></h2>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/reports</span><span class="desc">Publisher inventory performance — programmatic access to the same numbers your dashboard shows.</span></div>
-    <p>The publisher-side counterpart to <a href="#api-stats"><code>/v1/stats</code></a>. Returns requests, fills, impressions, clicks, revenue, eCPM, and fill rate across the time range, broken down by placement, format, integration door (MCP, JS, NPM, REST), or day. Built for pulling into a spreadsheet, BI tool, or your own analytics pipeline.</p>
+    <h3 id="adv-update-campaign">Update campaign</h3>
+    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/api/campaigns?action=update</span><span class="desc">Modify fields on an existing campaign.</span></div>
+    <p>Pass <code>id</code> in the body. Any field from create can be updated. Editing creative re-runs policy. Setting <code>status: "paused"</code> halts spend immediately.</p>
 
-    <div class="callout info">
-      <span class="icon">✦</span>
-      <div><strong>Coming soon — no fixed date.</strong> Right now the dashboard's Performance tab is the canonical surface for publisher numbers, and the <a href="/docs/reporting" class="inline-link">Reporting metrics guide</a> explains how to read every figure shown there. The programmatic endpoint lands when a publisher hits a real use case the dashboard doesn't cover — typically the first "I want to pull this into a sheet / warehouse / BI tool" request. If you have that use case today, email <a href="mailto:support@boostboss.ai">support@boostboss.ai</a> with the shape of what you want — concrete asks shape the v1 surface.</div>
-    </div>
+    <h3 id="adv-stats">Get stats</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/stats?type=advertiser&id=&lt;uuid&gt;</span><span class="desc">Aggregate spend, impressions, clicks, conversions.</span></div>
+    <p>Returns daily series + totals over the time range. Break down by campaign, format, host app, integration method, or day. The publisher-side counterpart is <code>?type=developer&key=&lt;publisher_id&gt;</code>.</p>
 
-    <p><strong>What the v1 endpoint will likely look like:</strong></p>
+    <h3 id="adv-billing">Deposit funds</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=create_checkout</span><span class="desc">Start a Stripe Checkout session to add advertiser balance.</span></div>
+    <p>Returns a Stripe Checkout <code>session_id</code> and <code>url</code>. Redirect the user to the URL — on completion, Stripe's webhook credits the advertiser's account. See <a href="#webhooks" class="inline-link">Webhooks</a> for the Stripe + PayPal handler shapes.</p>
+
+    <h3 id="adv-conversions">Conversion postback</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/conversion</span><span class="desc">Tell BB a conversion fired against a campaign click.</span></div>
+    <p>Used by advertisers who want CPA bidding or affiliate attribution to work. Aliased at <code>/api/conversions/postback</code>.</p>
+
+    <h4>Request body</h4>
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">bb_click<span class="required">req</span></td><td class="param-type">uuid</td><td class="param-desc">The click ID from the URL the user landed with. Load-bearing identifier — cookie is fallback only.</td></tr>
+        <tr><td class="param-name">event_type</td><td class="param-type">string</td><td class="param-desc"><code>signup</code>, <code>purchase</code>, <code>trial</code>, or custom string.</td></tr>
+        <tr><td class="param-name">amount</td><td class="param-type">number</td><td class="param-desc">Gross purchase value in USD. Used for ROAS-based bidding.</td></tr>
+        <tr><td class="param-name">currency</td><td class="param-type">string</td><td class="param-desc">ISO 4217 — defaults to <code>USD</code>.</td></tr>
+        <tr><td class="param-name">idempotency_key</td><td class="param-type">string</td><td class="param-desc">Prevents double-credit on retries.</td></tr>
+        <tr><td class="param-name">metadata</td><td class="param-type">object</td><td class="param-desc">Free-form, capped at 2KB JSON.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         SELLER (MoR)
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="seller-overview"><span class="role-pill sel">Sel</span>Seller endpoints (Merchant of Record)</h2>
+    <p>Sellers register products in BB, BB hosts the checkout, splits the proceeds per <a href="/docs#concepts" class="inline-link">Commission model v2</a>, and emails buyers an activation link. The seller's job is to configure their product once and accept an inbound webhook (or call the voucher API on signup) when a buyer activates.</p>
+
+    <p>For the full activation-link integration walk-through with code samples in Node / Python / PHP and a Zapier no-code path, see <a href="/docs/activation-link" class="inline-link">Activation link integration</a>. This section is the API reference; that page is the integration guide.</p>
+
+    <h3 id="sel-products">Products CRUD</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/products</span><span class="desc">List your products.</span></div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/products?action=create</span><span class="desc">Register a new product (enters audit).</span></div>
+    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/api/products?action=update</span><span class="desc">Update an unapproved product.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/products?action=browse</span><span class="desc">Affiliate-facing list of approved products.</span></div>
+
+    <p>Products are the parent entity for campaigns + affiliate saves. Once a product's <code>audit_status</code> is <code>approved</code>, the product is locked — further changes require duplicating as a new draft.</p>
+
+    <h4>Key fields on create / update</h4>
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">name<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Display name on the buyer page.</td></tr>
+        <tr><td class="param-name">tagline</td><td class="param-type">string</td><td class="param-desc">One-line TL;DR.</td></tr>
+        <tr><td class="param-name">hero_images</td><td class="param-type">string[]</td><td class="param-desc">Carousel images at the top of the buyer page.</td></tr>
+        <tr><td class="param-name">hero_video_url</td><td class="param-type">string</td><td class="param-desc">Optional autoplay-muted-loop hero video.</td></tr>
+        <tr><td class="param-name">feature_blocks</td><td class="param-type">object[]</td><td class="param-desc">AppSumo-style zigzag feature sections.</td></tr>
+        <tr><td class="param-name">affiliate_pool_pct</td><td class="param-type">number</td><td class="param-desc">% of each order put into the affiliate pool. BB takes 30% of pool, affiliate gets 70%.</td></tr>
+        <tr><td class="param-name">fulfillment_redirect_url</td><td class="param-type">string</td><td class="param-desc">Your signup page. BB appends <code>?bb_token=&lt;code&gt;</code> when the buyer clicks the activation email.</td></tr>
+        <tr><td class="param-name">fulfillment_webhook_url</td><td class="param-type">string</td><td class="param-desc">Optional S2S notification fired on capture.</td></tr>
+        <tr><td class="param-name">fulfillment_webhook_secret</td><td class="param-type">string</td><td class="param-desc">Random ≥32 char string — also doubles as your <code>seller_secret</code> for the voucher API.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="sel-pricing-plans">Pricing plans</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/pricing-plans?action=list&product_id=&lt;uuid&gt;</span><span class="desc">Plans for one product.</span></div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/pricing-plans?action=create</span><span class="desc">Add a plan (enters audit).</span></div>
+    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/api/pricing-plans?action=update</span><span class="desc">Edit a plan.</span></div>
+
+    <p>One product can have many plans. Each plan independently audit-gated — see <a href="/docs#concepts" class="inline-link">pricing plans audit policy</a>: every plan needs an <code>original_price_proof_url</code> pointing to the seller's own site before going live (backfilled legacy plans auto-approve).</p>
+
+    <h3 id="sel-product-orders">Product orders + analytics</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/product-orders?action=summary&product_id=&lt;uuid&gt;</span><span class="desc">Top-line numbers for one product.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/product-orders?action=orders&product_id=&lt;uuid&gt;</span><span class="desc">Paginated orders list.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/product-orders?action=timeseries&product_id=&lt;uuid&gt;&days=30</span><span class="desc">Daily click + purchase series.</span></div>
+
+    <p>Returns full buyer email — the advertiser owns the order so the affiliate-facing privacy mask doesn't apply. <code>days</code> defaults to 30, max 90.</p>
+
+    <h3 id="sel-vouchers-validate">Validate voucher</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/vouchers/validate</span><span class="desc">Read-only check before granting access.</span></div>
+    <p>Call from your signup endpoint when a buyer lands with <code>?bb_token=&lt;code&gt;</code>. Returns the voucher state + product context + buyer email. The <code>valid</code> boolean is <code>true</code> only when status is <code>issued</code>.</p>
+
     <div class="code-block with-head">
-      <div class="code-head"><span class="lang">JSON · 200 OK (planned shape)</span><span class="copy">Copy</span></div>
-<pre>{
-  <span class="s">"range"</span>: { <span class="s">"from"</span>: <span class="s">"2026-06-01"</span>, <span class="s">"to"</span>: <span class="s">"2026-06-30"</span> },
-  <span class="s">"totals"</span>: {
-    <span class="s">"requests"</span>:        <span class="n">1_240_000</span>,
-    <span class="s">"fills"</span>:           <span class="n">1_058_400</span>,
-    <span class="s">"impressions"</span>:     <span class="n">1_002_800</span>,
-    <span class="s">"clicks"</span>:          <span class="n">28_640</span>,
-    <span class="s">"revenue_usd"</span>:     <span class="n">5_316.40</span>,
-    <span class="s">"fill_rate"</span>:       <span class="n">0.853</span>,
-    <span class="s">"ctr"</span>:             <span class="n">0.0286</span>,
-    <span class="s">"ecpm_usd"</span>:        <span class="n">5.30</span>,
-    <span class="s">"rpm_usd"</span>:         <span class="n">4.29</span>
-  },
-  <span class="s">"breakdown"</span>: [ <span class="cm">// by placement | format | door | day</span> ]
-}</pre>
-    </div>
-    <p>This shape is illustrative — the final fields will track whatever the dashboard is showing at the time we ship. Until then, treat the dashboard as the source of truth.</p>
-
-    <!-- BENNA -->
-    <h2 id="benna-overview">Benna — the ranking engine</h2>
-    <p><strong>Benna</strong> is the model that ranks every bid served through Boost Boss. It's an MCP-native ranker: instead of scoring on cookies, device IDs, and page URLs, it scores on the signals that actually predict conversion in an AI surface — user intent, the MCP tool about to be called, the host application, and session length. Designed to run on the hot path with negligible added latency, returning a full attribution block so every decision is inspectable. (Current implementation is a deterministic stub; the trained ranker is on the roadmap.)</p>
-
-    <p>Benna powers the first-party Boost Boss exchange (BBX) by default. You don't need to call it directly — the SDK does it for you. <strong>But if you operate your own demand stack</strong> and want to plug Benna into an existing mediation waterfall or header bidder, we license the raw inference endpoint at <strong>$0.002 per call</strong>. Every response includes the model version, predicted click &amp; conversion rates, and a signal-by-signal contribution breakdown.</p>
-
-    <div class="callout info">
-      <span class="icon">i</span>
-      <div><strong>When to license Benna directly.</strong> If your network already has demand but your ranker was built for web/mobile contexts, Benna is the fastest way to bolt on MCP-aware scoring. Typical lift in A/B tests: <strong>+28% eCPM</strong> and <strong>+34% CVR</strong> vs. a cookie-trained baseline on the same inventory.</div>
+      <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
+<pre><span class="f">curl</span> https://boostboss.ai/v1/vouchers/validate \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "code":          "BB-A8X3-92K4-7QM2",
+    "seller_secret": "your-fulfillment_webhook_secret"
+  }'</span></pre>
     </div>
 
-    <div class="callout tip">
-      <span class="icon">✦</span>
-      <div><strong>Technical whitepaper.</strong> The full architecture, training protocol, and A/B evaluation are documented in <a href="/benna-whitepaper.pdf" class="inline-link">Benna: MCP-Native Ranking for Agentic Advertising (PDF, 8 pages)</a>. Cite as <code>boostboss.ai/benna-whitepaper.pdf</code>.</div>
+    <h3 id="sel-vouchers-redeem">Redeem voucher</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/vouchers/redeem</span><span class="desc">Mark the voucher consumed (idempotent).</span></div>
+    <p>Call after you've created the paid account on your side. Flips status <code>issued → redeemed</code> and stamps <code>redeemed_at</code>. Re-submitting returns <code>deduped: true</code> without changing state — safe to retry. Refunded / expired / revoked vouchers return 409 with a <code>reason</code> field.</p>
+
+    <p>The optional <code>buyer_metadata</code> field (≤2KB JSON) is stored against the voucher for your audit trail.</p>
+
+    <h3 id="sel-payouts">Seller payouts + ad credit</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=balance</span><span class="desc">Unsettled + lifetime totals.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=method</span><span class="desc">Current PayPal payout email.</span></div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/seller-payouts?action=set_method</span><span class="desc">Update PayPal email + display name.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=history</span><span class="desc">Paginated dispatched payouts.</span></div>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/seller-payouts?action=convert_to_ad_credit</span><span class="desc">Convert MoR earnings to in-platform ad credit.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=ad_credit_balance</span><span class="desc">Available ad credit + conversion history.</span></div>
+
+    <p>The <strong>Promote loop</strong>: seller's MoR earnings can be converted into in-platform ad credit (instead of cashing out to PayPal), and that credit can then fund campaigns directly via <code>use_ad_credit: true</code> on <a href="#adv-create-campaign" class="inline-link">campaign create</a>. Money cycles entirely inside BB.</p>
+
+    <p>Convert accepts an optional <code>amount</code> field — pass nothing to convert the full unsettled balance, or pass a partial amount which FIFO-walks the captured transactions and rounds up to the nearest one (the response includes a <code>rounded_up</code> flag).</p>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         AFFILIATE
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="affiliate-overview"><span class="role-pill aff">Aff</span>Affiliate endpoints</h2>
+    <p>Affiliates save approved products, get a share link, post it anywhere — when someone buys, the affiliate earns 70% of the affiliate pool the seller set. Attribution rides on a <code>bb_click=&lt;uuid&gt;</code> URL parameter that survives Safari ITP and ad blockers.</p>
+
+    <h3 id="aff-redirect">Share link redirect</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/s/:token</span><span class="desc">302 to product page with bb_click appended.</span></div>
+    <p>Reached via the <code>vercel.json</code> rewrite from <code>/s/:token → /api/affiliate-redirect?token=:token</code>. The handler atomically increments the share link's click counters, fires a best-effort click row into <code>affiliate_clicks</code>, sets the <code>bb_aff_&lt;saved_ad_id&gt;</code> cookie (30-day window — fallback only), and 302-redirects to the product page with <code>?bb_click=&lt;uuid&gt;</code> appended along with UTM parameters.</p>
+
+    <p>This is the entire affiliate-side API for the redirect path — there's no JSON response, just the 302. The <code>bb_click</code> UUID in the URL is the load-bearing attribution identifier, not the cookie.</p>
+
+    <h3 id="aff-sales">Sales report</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/affiliate-sales?action=summary</span><span class="desc">Captured count, lifetime revenue, lifetime commission, pending settlement.</span></div>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/affiliate-sales</span><span class="desc">Paginated sales list (MoR captures attributed to you).</span></div>
+
+    <p>Auth: affiliate JWT. Returns rows from <code>storefront_transactions</code> attributed to this affiliate via <code>bb_click</code>. This is the real money trail — captures BB actually processed on the affiliate's behalf — distinct from the legacy <code>/api/conversions</code> postback flow which records attribution before money has settled.</p>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         BENNA
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="benna-overview">Benna ranking engine</h2>
+    <p><strong>Benna</strong> is the model that ranks every bid served through Boost Boss — both the first-party SuperBoost direct path and the BBX OpenRTB exchange.</p>
+
+    <div class="callout warn">
+      <span class="icon">!</span>
+      <div><strong>Honest status.</strong> Benna is currently a <em>deterministic targeting-overlap scorer</em> with fixed signal weights, not a learned model. It scores requests against campaign targeting columns (<code>target_intent_tokens</code>, <code>target_active_tools</code>, <code>target_host_apps</code>, <code>target_surfaces</code>) and returns a bid plus an attribution block showing per-signal contribution. The learned ranker is on the roadmap; we'll swap the per-signal weights for a trained table once we have enough outcome data.</div>
     </div>
 
-    <!-- BENNA SCORE -->
-    <h2 id="benna-score">Score a bid request</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Rank a single bid against your own demand.</span></div>
-    <p>Submit a bid context and a campaign spec; Benna returns an effective bid in USD plus click / convert probabilities and a signal attribution map. Billed at $0.002 per call; latency budget is 20ms end-to-end (model itself is 3–6ms, the rest is network &amp; JSON).</p>
+    <p>Benna powers BBX by default — you don't need to call it directly. The endpoints below exist for transparency (so any auction is inspectable) and for the longer-term plan to license the ranker into other mediation stacks.</p>
+
+    <h3 id="benna-predict">Predict (score a bid context against a campaign)</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Score one bid request × one campaign spec.</span></div>
+    <p>Submit a context object + a campaign object; Benna returns an effective bid plus signal-by-signal contribution. Pricing is not currently billed.</p>
 
     <h4>Request</h4>
     <table class="params">
       <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td class="param-name">context.intent</td><td class="param-type">string</td><td class="param-desc">Normalized intent token. See <a href="#benna-signals" class="inline-link">Signal reference</a>.</td></tr>
-        <tr><td class="param-name">context.mcp_tool</td><td class="param-type">string</td><td class="param-desc">Tool about to be invoked — e.g. <code>shell.exec</code>, <code>file.read</code>, <code>web.search</code>.</td></tr>
-        <tr><td class="param-name">context.host</td><td class="param-type">string</td><td class="param-desc">Host app domain — e.g. <code>cursor.com</code>, <code>claude.ai</code>.</td></tr>
-        <tr><td class="param-name">context.session_len</td><td class="param-type">number</td><td class="param-desc">Minutes elapsed in the current user session.</td></tr>
-        <tr><td class="param-name">context.region</td><td class="param-type">string</td><td class="param-desc">ISO region — <code>us-west</code>, <code>eu-central</code>, etc.</td></tr>
-        <tr><td class="param-name">campaign.target_cpa</td><td class="param-type">number</td><td class="param-desc">Advertiser target CPA in USD.</td></tr>
-        <tr><td class="param-name">campaign.goal</td><td class="param-type">string</td><td class="param-desc"><code>target_cpa</code>, <code>target_roas</code>, <code>max_conversions</code>, or <code>manual</code>.</td></tr>
-        <tr><td class="param-name">campaign.format</td><td class="param-type">string</td><td class="param-desc"><code>image</code>, <code>video</code>, or <code>native</code>.</td></tr>
+        <tr><td class="param-name">context.intent_tokens</td><td class="param-type">string[]</td><td class="param-desc">Normalized intent tokens for this auction.</td></tr>
+        <tr><td class="param-name">context.active_tools</td><td class="param-type">string[]</td><td class="param-desc">Active MCP tools.</td></tr>
+        <tr><td class="param-name">context.host_app</td><td class="param-type">string</td><td class="param-desc">The host app — e.g. <code>cursor</code>, <code>claude</code>.</td></tr>
+        <tr><td class="param-name">context.surface</td><td class="param-type">string</td><td class="param-desc">Surface inside the host app.</td></tr>
+        <tr><td class="param-name">campaign.target_intent_tokens</td><td class="param-type">string[]</td><td class="param-desc">Campaign's intent targeting.</td></tr>
+        <tr><td class="param-name">campaign.target_active_tools</td><td class="param-type">string[]</td><td class="param-desc">Campaign's tool targeting.</td></tr>
+        <tr><td class="param-name">campaign.target_host_apps</td><td class="param-type">string[]</td><td class="param-desc">Campaign's host targeting.</td></tr>
+        <tr><td class="param-name">campaign.target_cpa</td><td class="param-type">number</td><td class="param-desc">Advertiser target CPA.</td></tr>
       </tbody>
     </table>
 
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
-<pre><span class="k">curl</span> <span class="s">"https://boostboss.ai/api/benna"</span> \
-  -H <span class="s">"Authorization: Bearer bb_sk_live_..."</span> \
-  -H <span class="s">"Content-Type: application/json"</span> \
-  -d <span class="s">'{
-    "context": {
-      "intent":      "debug_py",
-      "mcp_tool":    "shell.exec",
-      "host":        "cursor.com",
-      "session_len": 42,
-      "region":      "us-west"
-    },
-    "campaign": {
-      "target_cpa": 8.00,
-      "goal":       "target_cpa",
-      "format":     "native"
-    }
-  }'</span></pre>
-    </div>
-
     <h4>Response</h4>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+    <div class="code-block">
 <pre>{
-  <span class="s">"model_version"</span>: <span class="s">"benna-rc3-2026.04.14"</span>,
-  <span class="s">"bid_usd"</span>:          <span class="n">8.42</span>,
-  <span class="s">"p_click"</span>:          <span class="n">0.031</span>,
-  <span class="s">"p_convert"</span>:        <span class="n">0.0062</span>,
-  <span class="s">"signal_contributions"</span>: {
-    <span class="s">"intent=debug_py"</span>:        <span class="n">0.34</span>,
-    <span class="s">"mcp_tool=shell.exec"</span>:    <span class="n">0.22</span>,
-    <span class="s">"host=cursor.com"</span>:        <span class="n">0.18</span>,
-    <span class="s">"session_len&gt;30m"</span>:       <span class="n">0.13</span>,
-    <span class="s">"region=us-west"</span>:         <span class="n">0.09</span>,
-    <span class="s">"residual"</span>:               <span class="n">0.04</span>
-  },
+  <span class="s">"model_version"</span>: <span class="s">"benna-stub-v1"</span>,
+  <span class="s">"bid_usd"</span>:       <span class="n">8.42</span>,
+  <span class="s">"p_click"</span>:       <span class="n">0.031</span>,
+  <span class="s">"p_convert"</span>:     <span class="n">0.0062</span>,
+  <span class="s">"signal_contributions"</span>: [
+    { <span class="s">"signal"</span>: <span class="s">"intent_overlap"</span>, <span class="s">"weight"</span>: <span class="n">0.34</span> },
+    { <span class="s">"signal"</span>: <span class="s">"tool_overlap"</span>,   <span class="s">"weight"</span>: <span class="n">0.22</span> },
+    { <span class="s">"signal"</span>: <span class="s">"host_match"</span>,     <span class="s">"weight"</span>: <span class="n">0.18</span> }
+  ],
   <span class="s">"latency_ms"</span>: <span class="n">4.2</span>
 }</pre>
     </div>
 
-    <!-- BENNA ENGINE STATUS -->
-    <h2 id="benna-engine-status">Engine status</h2>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/benna?op=engine-status</span><span class="desc">Current model version, training window, and health.</span></div>
-    <p>Use this to confirm which model is live in production, when it was last retrained, and its self-reported calibration metrics. Free to call — not billed. Pair it with your own monitoring to alert on stale models or calibration drift.</p>
+    <h3 id="benna-status">Engine status</h3>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/benna?op=engine-status&advertiser_id=&lt;uuid&gt;</span><span class="desc">Engine metrics, top signals, recent auto-adjustments.</span></div>
+    <p>Free to call. Returns the current model identity + aggregated diagnostics. Use this to alert on any future model swap.</p>
 
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
-<pre>{
-  <span class="s">"model_version"</span>:      <span class="s">"benna-rc3-2026.04.14"</span>,
-  <span class="s">"trained_through"</span>:    <span class="s">"2026-04-12"</span>,
-  <span class="s">"training_examples"</span>: <span class="n">184_000_000</span>,
-  <span class="s">"p50_latency_ms"</span>:     <span class="n">4.1</span>,
-  <span class="s">"p99_latency_ms"</span>:     <span class="n">11.8</span>,
-  <span class="s">"calibration_ece"</span>:    <span class="n">0.021</span>,
-  <span class="s">"status"</span>:             <span class="s">"healthy"</span>
-}</pre>
-    </div>
-
-    <!-- BENNA SIGNAL REFERENCE -->
-    <h2 id="benna-signals">Signal reference</h2>
-    <p>Benna is trained on five MCP-native signals. These are the <strong>only</strong> inputs that affect ranking — there are no cookies, no device fingerprints, no persistent user IDs. Intent strings are matched against a vocabulary server-side; raw text is discarded after normalization.</p>
-
-    <table class="params">
-      <thead><tr><th>Signal</th><th>Type</th><th>Typical weight</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">intent</td><td class="param-type">token</td><td class="param-desc">≈ 0.34</td><td class="param-desc">Normalized from the active user request. Vocabulary &gt; 4,000 tokens.</td></tr>
-        <tr><td class="param-name">mcp_tool</td><td class="param-type">token</td><td class="param-desc">≈ 0.22</td><td class="param-desc">The tool about to execute. High signal — differentiates "reading about X" vs. "doing X".</td></tr>
-        <tr><td class="param-name">host</td><td class="param-type">token</td><td class="param-desc">≈ 0.18</td><td class="param-desc">Host app domain. Proxies for user persona (developer, analyst, consumer).</td></tr>
-        <tr><td class="param-name">session_len</td><td class="param-type">number</td><td class="param-desc">≈ 0.13</td><td class="param-desc">Longer sessions convert at higher rates; bucketed as &lt;10m / 10–30m / &gt;30m.</td></tr>
-        <tr><td class="param-name">region</td><td class="param-type">token</td><td class="param-desc">≈ 0.09</td><td class="param-desc">Coarse region only. Never IP-level.</td></tr>
-      </tbody>
-    </table>
-
-    <p class="param-desc" style="margin-top:12px">Weights shown are the current production contributions averaged across the live exchange; per-request attribution is returned in every <code>/api/benna</code> response so you can inspect the exact mix for any decision.</p>
-
-    <!-- AD FORMATS -->
-    <h2 id="ad-formats">Ad formats</h2>
-    <p>Boost Boss serves four native-first ad formats. Each is rendered by your app — we return the content, you render the chrome that matches your UI.</p>
-
-    <table class="params">
-      <thead><tr><th>Format</th><th>Max chars</th><th>Use case</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">native</td><td class="param-desc">Headline 60 · body 200</td><td class="param-desc">Inline card inside chat / agent output.</td></tr>
-        <tr><td class="param-name">tool_result</td><td class="param-desc">Headline 60 · body 140</td><td class="param-desc">Shown after a tool call returns results.</td></tr>
-        <tr><td class="param-name">agent_suggestion</td><td class="param-desc">Headline 40 · body 100</td><td class="param-desc">"Try this tool" suggestion from an agent.</td></tr>
-        <tr><td class="param-name">display</td><td class="param-desc">Image 300×250 / 728×90</td><td class="param-desc">Traditional IAB banner for legacy contexts.</td></tr>
-      </tbody>
-    </table>
-
-    <!-- AI TARGETING -->
-    <h2 id="ai-targeting">AI-native targeting</h2>
-    <p>Boost Boss replaces cookie-based targeting with three session-level signals gathered from the MCP layer. All signals are anonymized and aggregated — <strong>no PII ever leaves the client</strong>.</p>
-
-    <h4>Intent signals</h4>
-    <p>Free-form intent extracted from the current user request. Examples: <code>"debugging python"</code>, <code>"writing pitch deck"</code>, <code>"refactoring code"</code>. Advertisers bid on the intents that match what they sell.</p>
-
-    <h4>Tool context</h4>
-    <p>Which MCP tools are active in the session — <code>filesystem</code>, <code>github</code>, <code>terminal</code>, <code>browser</code>, <code>slack</code>, etc. Strong proxy for user activity type.</p>
-
-    <h4>Model context</h4>
-    <p>Which AI model is in use — <code>claude-opus-4</code>, <code>gpt-5</code>, <code>gemini-3</code>, etc. Useful for advertisers with model-specific integrations.</p>
-
-    <div class="callout info">
-      <span class="icon">i</span>
-      <div><strong>No PII, ever.</strong> User identifiers are SHA-256 hashed before they leave the client. Intent strings are matched against a vocabulary server-side; raw text is dropped after matching. See our <a href="/trust" class="inline-link">Privacy white paper</a> for the full protocol.</div>
-    </div>
-
-    <!-- MCP INTEGRATION -->
-    <h2 id="mcp-integration">MCP integration</h2>
-    <p>The SDK hooks into your MCP client automatically. On initialization, it registers a listener for tool calls and user messages, uses those signals as <code>context</code> and <code>mcp_tools</code> when fetching ads, and otherwise gets out of your way.</p>
-
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
-<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
-<span class="k">import</span> { McpClient } <span class="k">from</span> <span class="s">'@modelcontextprotocol/sdk'</span>;
-
-<span class="k">const</span> mcp = <span class="f">new</span> <span class="f">McpClient</span>({ /* ... */ });
-<span class="k">const</span> bb  = <span class="f">new</span> <span class="f">BoostBoss</span>({
-  apiKey: <span class="s">'bb_sk_live_***'</span>,
-  mcpClient: mcp, <span class="c">// ← just pass it in</span>
-});
-
-<span class="c">// The SDK now reads context from MCP automatically</span>
-<span class="k">const</span> ad = <span class="k">await</span> bb.<span class="f">fetch</span>({ format: <span class="s">'native'</span> });</pre>
-    </div>
-
-    <!-- WEBHOOKS -->
-    <h2 id="webhooks">Webhooks</h2>
-    <p>Receive real-time notifications for platform events. Configure endpoints in the dashboard → Settings → Webhooks.</p>
-
-    <table class="params">
-      <thead><tr><th>Event</th><th>Fires when</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">ad.served</td><td class="param-desc">A fetch request returned an ad for one of your campaigns.</td></tr>
-        <tr><td class="param-name">ad.impression</td><td class="param-desc">Impression beacon fired.</td></tr>
-        <tr><td class="param-name">ad.click</td><td class="param-desc">User clicked the ad.</td></tr>
-        <tr><td class="param-name">ad.conversion</td><td class="param-desc">Conversion beacon fired.</td></tr>
-        <tr><td class="param-name">campaign.approved</td><td class="param-desc">Campaign passed review and is now live.</td></tr>
-        <tr><td class="param-name">campaign.rejected</td><td class="param-desc">Campaign was rejected. Reason in payload.</td></tr>
-        <tr><td class="param-name">campaign.ended</td><td class="param-desc">Campaign finished (budget exhausted or end date reached).</td></tr>
-        <tr><td class="param-name">payout.initiated</td><td class="param-desc">A weekly publisher payout started processing.</td></tr>
-        <tr><td class="param-name">payout.completed</td><td class="param-desc">Payout landed in the publisher's bank / wallet.</td></tr>
-      </tbody>
-    </table>
-
-    <h4>Signature verification</h4>
-    <p>Every webhook is signed with HMAC-SHA256. Verify with the signing secret from your dashboard:</p>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">Node</span><span class="copy">Copy</span></div>
-<pre><span class="k">import</span> crypto <span class="k">from</span> <span class="s">'crypto'</span>;
-
-<span class="k">const</span> sig = req.headers[<span class="s">'bb-signature'</span>];
-<span class="k">const</span> expected = crypto.<span class="f">createHmac</span>(<span class="s">'sha256'</span>, SECRET)
-  .<span class="f">update</span>(req.rawBody).<span class="f">digest</span>(<span class="s">'hex'</span>);
-
-<span class="k">if</span> (crypto.<span class="f">timingSafeEqual</span>(
-  <span class="n">Buffer</span>.<span class="f">from</span>(sig),
-  <span class="n">Buffer</span>.<span class="f">from</span>(expected)
-)) {
-  <span class="c">// ✓ verified — process event</span>
-}</pre>
-    </div>
-
-    <!-- RATE LIMITS -->
-    <h2 id="rate-limits">Rate limits</h2>
-    <p>We rate-limit per API key to protect both us and you. Limits are applied at the second and minute level with a rolling window.</p>
-
-    <table class="params">
-      <thead><tr><th>Endpoint</th><th>Limit</th><th>Burst</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">POST /v1/ads/fetch</td><td class="param-desc">500/s per key</td><td class="param-desc">1000 over 10s</td></tr>
-        <tr><td class="param-name">POST /v1/beacon/*</td><td class="param-desc">Unlimited</td><td class="param-desc">—</td></tr>
-        <tr><td class="param-name">POST /v1/campaigns</td><td class="param-desc">30/min per key</td><td class="param-desc">—</td></tr>
-        <tr><td class="param-name">GET /v1/stats</td><td class="param-desc">60/min per key</td><td class="param-desc">—</td></tr>
-      </tbody>
-    </table>
-
-    <p>Responses include three headers on every request:</p>
-    <div class="code-block">
-<pre><span class="f">X-RateLimit-Limit</span>:      <span class="n">500</span>
-<span class="f">X-RateLimit-Remaining</span>:  <span class="n">487</span>
-<span class="f">X-RateLimit-Reset</span>:      <span class="n">1760521200</span></pre>
-    </div>
-
-    <!-- ERRORS -->
-    <h2 id="errors">Error codes</h2>
-    <p>Errors return a JSON body with a machine-readable <code>code</code>, a human <code>message</code>, and a <code>request_id</code> you can cite when contacting support.</p>
-
-    <table class="params">
-      <thead><tr><th>HTTP</th><th>Code</th><th>Meaning</th></tr></thead>
-      <tbody>
-        <tr><td class="param-type">400</td><td class="param-name">invalid_request</td><td class="param-desc">Malformed body or missing required field.</td></tr>
-        <tr><td class="param-type">401</td><td class="param-name">invalid_api_key</td><td class="param-desc">Key missing, revoked, or for the wrong environment.</td></tr>
-        <tr><td class="param-type">402</td><td class="param-name">billing_required</td><td class="param-desc">No payment method on file.</td></tr>
-        <tr><td class="param-type">403</td><td class="param-name">forbidden</td><td class="param-desc">Authenticated but not authorized for this resource.</td></tr>
-        <tr><td class="param-type">404</td><td class="param-name">not_found</td><td class="param-desc">Resource does not exist.</td></tr>
-        <tr><td class="param-type">409</td><td class="param-name">conflict</td><td class="param-desc">State conflict (e.g. editing a campaign under review).</td></tr>
-        <tr><td class="param-type">429</td><td class="param-name">rate_limited</td><td class="param-desc">Too many requests. Back off and retry with jitter.</td></tr>
-        <tr><td class="param-type">500</td><td class="param-name">server_error</td><td class="param-desc">Something broke on our side. Auto-retried up to 3×.</td></tr>
-      </tbody>
-    </table>
-
-    <!-- OPENRTB 2.6 ADAPTER ========================================= -->
+    <!-- ════════════════════════════════════════════════════════════════
+         OPENRTB BBX
+         ════════════════════════════════════════════════════════════════ -->
     <h2 id="rtb-overview">OpenRTB 2.6 — BBX adapter</h2>
-    <p><strong>BBX</strong> (Boost Boss Exchange) exposes an <a href="https://iabtechlab.com/wp-content/uploads/2022/04/OpenRTB-2-6_FINAL.pdf" class="inline-link" target="_blank" rel="noopener">OpenRTB 2.6</a> endpoint so that any compliant DSP — The Trade Desk, DV360, Amazon DSP, Criteo, or your in-house demand stack — can bid into MCP-native inventory without writing a bespoke integration. One URL, first-price auction, win/loss notices, native 1.2 + VAST 4.2 markup. The adapter sits in front of Benna: every bid is scored and every response includes a full attribution block in <code>bid.ext.benna</code>.</p>
-
-    <div class="callout tip">
-      <span class="icon">✦</span>
-      <div><strong>Why bid here.</strong> MCP surfaces are the highest-intent inventory on the internet — a user calling <code>filesystem.read</code> on a traceback is a conversion event waiting to happen. BBX translates those signals into OpenRTB fields DSPs already understand, so your existing bidder works out of the box.</div>
-    </div>
+    <p><strong>BBX</strong> (Boost Boss Exchange) exposes an <a href="https://iabtechlab.com/wp-content/uploads/2022/04/OpenRTB-2-6_FINAL.pdf" class="inline-link" target="_blank" rel="noopener">OpenRTB 2.6</a> endpoint so any compliant DSP can bid into MCP-native inventory. First-price auction, native 1.2 + VAST 4.2 markup, Benna scoring on every bid with attribution in <code>bid.ext.benna</code>.</p>
 
     <h4>Endpoint summary</h4>
     <table class="params">
       <thead><tr><th>Operation</th><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td class="param-name">Bid</td><td class="param-type">POST</td><td class="param-desc"><code>/api/rtb</code></td><td class="param-desc">Send an OpenRTB 2.6 BidRequest; get back a BidResponse or <code>204 No Content</code>.</td></tr>
+        <tr><td class="param-name">Bid</td><td class="param-type">POST</td><td class="param-desc"><code>/api/rtb</code></td><td class="param-desc">Send OpenRTB 2.6 BidRequest; get a BidResponse or <code>204 No Content</code>.</td></tr>
         <tr><td class="param-name">Win notice</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=win</code></td><td class="param-desc">DSPs hit <code>bid.nurl</code> with <code>${AUCTION_PRICE}</code> substituted. Returns a 1×1 GIF.</td></tr>
         <tr><td class="param-name">Loss notice</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=loss</code></td><td class="param-desc">DSPs hit <code>bid.lurl</code> with <code>${AUCTION_LOSS}</code>. Returns a 1×1 GIF.</td></tr>
-        <tr><td class="param-name">Status</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=status</code></td><td class="param-desc">Adapter metadata — OpenRTB version, supported formats, auction type, Benna build.</td></tr>
+        <tr><td class="param-name">Status</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=status</code></td><td class="param-desc">Adapter metadata — OpenRTB version, supported formats, Benna build.</td></tr>
       </tbody>
     </table>
 
-    <div class="callout info">
-      <span class="icon">i</span>
-      <div><strong>Machine-readable.</strong> Full JSON Schema for every object on this page is in <a href="/openapi.json" class="inline-link"><code>/openapi.json</code></a> under the <code>RTB</code> tag. Drop it into your DSP's QA harness.</div>
-    </div>
+    <h3 id="rtb-bid">Bid request</h3>
+    <p>Send a standard OpenRTB 2.6 <code>BidRequest</code> as the body. Supported objects: <code>imp[]</code>, <code>site</code> / <code>app</code>, <code>device</code>, <code>user</code>, <code>source</code>, <code>regs</code>, <code>bcat</code>, <code>badv</code>. Native 1.2 asset requests pass through unchanged.</p>
 
-    <h2 id="rtb-bid">Bid request</h2>
-    <p>Send a standard OpenRTB 2.6 <code>BidRequest</code> as the body. All supported objects — <code>imp[]</code>, <code>site</code> / <code>app</code>, <code>device</code>, <code>user</code>, <code>source</code>, <code>regs</code>, <code>bcat</code>, <code>badv</code> — are honored. Native 1.2 asset requests pass through unchanged; the adapter parses <code>imp.native.request</code> and returns matching asset IDs in the response <code>adm</code>.</p>
-
-    <p>Minimum viable request: a <code>BidRequest.id</code>, a single <code>imp</code> with one of <code>native</code> / <code>banner</code> / <code>video</code>, and enough context to score. A realistic Trade Desk-style request looks like this:</p>
+    <p>Minimum viable request: <code>BidRequest.id</code>, one <code>imp</code> with one of <code>native</code> / <code>banner</code> / <code>video</code>, and enough context to score. A Trade Desk-style request:</p>
 
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">cURL · POST /api/rtb</span><span class="copy">Copy</span></div>
@@ -1366,42 +856,15 @@
       "bidfloor": 1.50,
       "bidfloorcur": "USD",
       "secure": 1,
-      "native": {
-        "ver": "1.2",
-        "request": "{\"ver\":\"1.2\",\"assets\":[{\"id\":1,\"required\":1,\"title\":{\"len\":60}},{\"id\":2,\"required\":1,\"img\":{\"type\":3,\"w\":1200,\"h\":628}},{\"id\":4,\"required\":1,\"data\":{\"type\":12,\"len\":25}}]}"
-      }
+      "native": { "ver": "1.2", "request": "..." }
     }],
-    "site": {
-      "id": "site_cursor_1",
-      "domain": "cursor.com",
-      "page": "https://cursor.com/editor",
-      "keywords": "python debugging traceback editor",
-      "publisher": { "id": "pub_cursor", "name": "Cursor Labs" }
-    },
-    "device": {
-      "ua": "Mozilla/5.0 ...",
-      "ip": "192.0.2.1",
-      "geo": { "country": "USA", "region": "us-west" },
-      "devicetype": 2
-    },
-    "user": { "id": "anon_sess_a1b2c3", "ext": { "session_len_min": 42 } },
-    "source": { "tid": "tx_42f8", "fd": 1 },
-    "bcat": ["IAB7-39", "IAB8-18"],
-    "badv": ["bad-competitor.com"]
+    "site": { "id": "site_cursor_1", "domain": "cursor.com", "page": "https://cursor.com/editor", "keywords": "python debugging" },
+    "device": { "geo": { "country": "USA", "region": "us-west" } },
+    "user": { "id": "anon_sess_a1b2c3", "ext": { "session_len_min": 42 } }
   }'</span></pre>
     </div>
 
-    <p class="param-desc" style="margin-top:12px">If your DSP already computes MCP signals server-side, pass them explicitly via <code>imp.ext.mcp_context</code> — they will override any values the adapter would otherwise infer. Example:</p>
-
-    <div class="code-block">
-<pre>{ <span class="s">"imp"</span>: [{ <span class="s">"id"</span>: <span class="s">"1"</span>, <span class="s">"ext"</span>: { <span class="s">"mcp_context"</span>: {
-  <span class="s">"intent"</span>: <span class="s">"debug_py"</span>,
-  <span class="s">"mcp_tool"</span>: <span class="s">"filesystem.read"</span>,
-  <span class="s">"host"</span>: <span class="s">"cursor.com"</span>,
-  <span class="s">"region"</span>: <span class="s">"us-west"</span>,
-  <span class="s">"session_len"</span>: <span class="n">42</span>
-} } }] }</pre>
-    </div>
+    <p>If your DSP already computes MCP signals server-side, pass them via <code>imp.ext.mcp_context</code> — they override whatever the adapter would otherwise infer.</p>
 
     <h4>No-bid codes (NBR)</h4>
     <table class="params">
@@ -1413,8 +876,8 @@
       </tbody>
     </table>
 
-    <h2 id="rtb-response">Bid response</h2>
-    <p>On a win, the adapter returns a standard <code>BidResponse</code> with a single <code>seatbid</code> (seat = <code>boostboss</code>). Each bid carries CPM price (USD), creative markup, tracking URLs with the standard auction macros, and — critically — a <code>bid.ext.benna</code> attribution block that tells you exactly why the bid was scored the way it was.</p>
+    <h3 id="rtb-response">Bid response</h3>
+    <p>Standard <code>BidResponse</code> with a single <code>seatbid</code> (seat = <code>boostboss</code>). Each bid carries CPM in USD, creative markup, tracking URLs with the standard auction macros, and a <code>bid.ext.benna</code> attribution block.</p>
 
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">BidResponse — 200 OK</span><span class="copy">Copy</span></div>
@@ -1427,364 +890,185 @@
     <span class="s">"bid"</span>: [{
       <span class="s">"id"</span>: <span class="s">"bbx_b1f42a6c3d9e"</span>,
       <span class="s">"impid"</span>: <span class="s">"1"</span>,
-      <span class="s">"price"</span>: <span class="n">148.20</span>,
-      <span class="s">"adid"</span>: <span class="s">"cam_datadog_001"</span>,
-      <span class="s">"crid"</span>: <span class="s">"cr_datadog_apm_v3"</span>,
-      <span class="s">"cid"</span>: <span class="s">"cam_datadog_001"</span>,
+      <span class="s">"price"</span>: <span class="n">3.42</span>,
+      <span class="s">"adid"</span>: <span class="s">"cam_..."</span>,
       <span class="s">"adomain"</span>: [<span class="s">"datadoghq.com"</span>],
-      <span class="s">"cat"</span>: [<span class="s">"IAB19-6"</span>],
       <span class="s">"nurl"</span>: <span class="s">"https://boostboss.ai/api/rtb?op=win&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;price=${AUCTION_PRICE}"</span>,
       <span class="s">"lurl"</span>: <span class="s">"https://boostboss.ai/api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=${AUCTION_LOSS}"</span>,
-      <span class="s">"adm"</span>: <span class="s">"{\"native\":{\"ver\":\"1.2\",\"assets\":[...],\"link\":{\"url\":\"https://...\"},\"eventtrackers\":[...]}}"</span>,
+      <span class="s">"adm"</span>: <span class="s">"{\"native\":{...}}"</span>,
       <span class="s">"ext"</span>: {
-        <span class="s">"benna"</span>: {
-          <span class="s">"model_version"</span>: <span class="s">"benna-rc3-2026.04.14"</span>,
-          <span class="s">"p_click"</span>: <span class="n">0.0500</span>,
-          <span class="s">"p_convert"</span>: <span class="n">0.0119</span>,
-          <span class="s">"latency_ms"</span>: <span class="n">4</span>,
-          <span class="s">"signal_contributions"</span>: [
-            { <span class="s">"signal"</span>: <span class="s">"intent=debug_py"</span>,    <span class="s">"weight"</span>: <span class="n">0.34</span>, <span class="s">"lift"</span>: <span class="n">33.5</span> },
-            { <span class="s">"signal"</span>: <span class="s">"host=cursor.com"</span>,    <span class="s">"weight"</span>: <span class="n">0.18</span>, <span class="s">"lift"</span>: <span class="n">21.9</span> },
-            { <span class="s">"signal"</span>: <span class="s">"region=us-west"</span>,     <span class="s">"weight"</span>: <span class="n">0.09</span>, <span class="s">"lift"</span>: <span class="n">11.2</span> }
-          ]
-        }
+        <span class="s">"benna"</span>: { <span class="s">"model_version"</span>: <span class="s">"benna-stub-v1"</span>, <span class="s">"p_click"</span>: <span class="n">0.03</span>, <span class="s">"signal_contributions"</span>: [...] }
       }
     }]
   }]
 }</pre>
     </div>
 
-    <h4>Key fields</h4>
-    <table class="params">
-      <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">price</td><td class="param-type">number</td><td class="param-desc">First-price CPM in USD. Always ≥ <code>imp.bidfloor</code>.</td></tr>
-        <tr><td class="param-name">adomain</td><td class="param-type">string[]</td><td class="param-desc">Advertiser domain(s) for brand-safety checks.</td></tr>
-        <tr><td class="param-name">adm</td><td class="param-type">string</td><td class="param-desc">JSON for native (1.2 payload), HTML for banner, VAST 4.2 XML for video.</td></tr>
-        <tr><td class="param-name">nurl</td><td class="param-type">string</td><td class="param-desc">Win notice URL — substitute <code>${AUCTION_PRICE}</code>, fire on win.</td></tr>
-        <tr><td class="param-name">lurl</td><td class="param-type">string</td><td class="param-desc">Loss notice URL — substitute <code>${AUCTION_LOSS}</code>, fire on loss.</td></tr>
-        <tr><td class="param-name">ext.benna</td><td class="param-type">object</td><td class="param-desc">Attribution block — model version, p_click, p_convert, per-signal lift.</td></tr>
-      </tbody>
-    </table>
-
-    <h2 id="rtb-win-loss">Win / loss notices</h2>
-    <p>Both notices are idempotent <code>GET</code>s that return a 43-byte 1×1 transparent GIF with <code>Content-Type: image/gif</code>. Fire them when your DSP resolves the auction. Substitute the standard OpenRTB macros before fetching:</p>
-
+    <h3 id="rtb-win-loss">Win / loss notices</h3>
+    <p>Both notices are idempotent <code>GET</code>s that return a 43-byte 1×1 transparent GIF. Substitute the standard OpenRTB macros before fetching:</p>
     <div class="code-block">
-<pre><span class="c"># Win: substitute ${AUCTION_PRICE} with the clearing price in USD</span>
-GET /api/rtb?op=win&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;price=148.20
+<pre><span class="c"># Win: substitute ${AUCTION_PRICE}</span>
+GET /api/rtb?op=win&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;price=3.42
 
-<span class="c"># Loss: substitute ${AUCTION_LOSS} with the OpenRTB loss reason code</span>
+<span class="c"># Loss: substitute ${AUCTION_LOSS}</span>
 GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
     </div>
 
-    <p class="param-desc" style="margin-top:12px">Common loss reasons (OpenRTB §5.24): <code>1</code> internal error, <code>2</code> impression opportunity expired, <code>3</code> invalid bid response, <code>102</code> below deal floor, <code>1001</code> lost to higher bid. BBX logs every notice and reconciles against Benna's internal price book.</p>
-
-    <h2 id="rtb-status">Adapter status</h2>
-    <p>A lightweight metadata endpoint for DSP discovery and health checks. Returns adapter version, supported formats, and Benna build info — useful for sandboxed QA and for your bidder's capability-negotiation phase.</p>
-
+    <h3 id="rtb-status">Adapter status</h3>
+    <p>Lightweight metadata endpoint for DSP discovery and health checks.</p>
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">GET /api/rtb?op=status</span><span class="copy">Copy</span></div>
 <pre>{
   <span class="s">"adapter"</span>: <span class="s">"bbx-rtb-adapter"</span>,
-  <span class="s">"adapter_version"</span>: <span class="s">"1.0.0"</span>,
   <span class="s">"openrtb_version"</span>: <span class="s">"2.6"</span>,
   <span class="s">"auction_type"</span>: <span class="n">1</span>,
   <span class="s">"supported_formats"</span>: [<span class="s">"native"</span>, <span class="s">"banner"</span>, <span class="s">"video"</span>],
-  <span class="s">"native_version"</span>: <span class="s">"1.2"</span>,
-  <span class="s">"vast_version"</span>: <span class="s">"4.2"</span>,
-  <span class="s">"benna_version"</span>: <span class="s">"benna-rc3-2026.04.14"</span>,
+  <span class="s">"benna_version"</span>: <span class="s">"benna-stub-v1"</span>,
   <span class="s">"currencies"</span>: [<span class="s">"USD"</span>]
 }</pre>
     </div>
 
-    <h2 id="rtb-mcp-translation">OpenRTB → MCP signal map</h2>
-    <p>BBX bridges OpenRTB's cookie/URL world and the MCP signal world that Benna actually scores on. The table below shows how the adapter infers MCP signals from standard OpenRTB fields. <strong>Any explicit <code>imp.ext.mcp_context</code> always wins</strong> — set it if your DSP has richer signal than the adapter can derive.</p>
+    <!-- ════════════════════════════════════════════════════════════════
+         WEBHOOKS
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="webhooks">Webhooks</h2>
+    <p>There is no unified webhook subscription system today. Three concrete webhook surfaces ship:</p>
 
-    <table class="params">
-      <thead><tr><th>MCP signal</th><th>Inferred from</th><th>Rules</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">host</td><td class="param-desc"><code>site.domain</code> → <code>app.bundle</code> → <code>app.name</code> → <code>imp.tagid</code></td><td class="param-desc">First non-empty wins. Used as a strong persona proxy.</td></tr>
-        <tr><td class="param-name">intent</td><td class="param-desc"><code>site.keywords</code> + <code>site.page</code> + <code>imp.tagid</code></td><td class="param-desc">Vocabulary match: <code>debug|error|traceback|bug</code> → <code>debug_*</code>; <code>doc|tutorial|guide|learn</code> → <code>docs_lookup</code>; language tokens (<code>python</code>, <code>rust</code>, …) attach a suffix.</td></tr>
-        <tr><td class="param-name">mcp_tool</td><td class="param-desc"><code>imp.ext.mcp_context.mcp_tool</code> only</td><td class="param-desc">Not inferred — DSPs must pass it explicitly. Highest-lift signal when supplied.</td></tr>
-        <tr><td class="param-name">region</td><td class="param-desc"><code>device.geo.region</code> → <code>device.geo.country</code></td><td class="param-desc">Country mapping: USA→<code>us-west</code>, CAN→<code>us-east</code>, DEU/GBR/FRA→<code>eu-central</code>, JPN/KOR/SGP→<code>apac</code>, others→<code>global</code>.</td></tr>
-        <tr><td class="param-name">session_len</td><td class="param-desc"><code>user.ext.session_len_min</code></td><td class="param-desc">Integer minutes. Bucketed at &lt;10 / 10–30 / &gt;30. Sessions &gt; 30 min carry the strongest lift.</td></tr>
-      </tbody>
-    </table>
+    <h3>Outbound: per-product fulfillment webhook</h3>
+    <p>When a buyer's PayPal capture succeeds, BB fires an HTTPS POST to your product's <code>fulfillment_webhook_url</code> (if set). Use this for non-API server-side provisioning. Payload includes the transaction ID, buyer email, product ID, captured amount, and the voucher code.</p>
+    <p>Verify the <code>X-BB-Signature</code> header against the <code>fulfillment_webhook_secret</code> you set on the product:</p>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">Node</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> crypto <span class="k">from</span> <span class="s">'crypto'</span>;
+<span class="k">const</span> sig = req.headers[<span class="s">'x-bb-signature'</span>];
+<span class="k">const</span> expected = crypto.<span class="f">createHmac</span>(<span class="s">'sha256'</span>, SECRET).<span class="f">update</span>(req.rawBody).<span class="f">digest</span>(<span class="s">'hex'</span>);
+<span class="k">if</span> (crypto.<span class="f">timingSafeEqual</span>(<span class="n">Buffer</span>.<span class="f">from</span>(sig), <span class="n">Buffer</span>.<span class="f">from</span>(expected))) { <span class="c">// verified</span> }</pre>
+    </div>
+
+    <h3>Inbound: Stripe webhook</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/stripe-webhook</span><span class="desc">Receives Stripe events for advertiser deposits.</span></div>
+    <p>Verifies the <code>Stripe-Signature</code> header using <code>STRIPE_WEBHOOK_SECRET</code>. Handles <code>checkout.session.completed</code> (credit advertiser balance) and refund / dispute events.</p>
+
+    <h3>Inbound: PayPal webhook</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/paypal-webhook</span><span class="desc">Receives PayPal events for storefront captures + refunds.</span></div>
+    <p>Verifies the <code>PAYPAL-AUTH-ALGO</code> / <code>PAYPAL-TRANSMISSION-SIG</code> headers against the configured webhook ID. Handles <code>PAYMENT.CAPTURE.COMPLETED</code>, <code>PAYMENT.CAPTURE.REFUNDED</code>, and the payouts batch events for seller settlement.</p>
 
     <div class="callout info">
       <span class="icon">i</span>
-      <div><strong>Brand safety.</strong> Standard OpenRTB <code>bcat</code> (blocked IAB categories) and <code>badv</code> (blocked advertiser domains) are honored at the campaign-eligibility layer. A request that blocks every eligible campaign returns <code>204 No Content</code>, not a 400.</div>
+      <div><strong>Roadmap.</strong> A unified event-bus model (subscribe to events like <code>ad.served</code>, <code>campaign.approved</code>, <code>voucher.redeemed</code>) is on the longer-term plan but not shipped. Today the dashboard is the canonical surface for these state changes.</div>
     </div>
 
-    <h4>Response headers</h4>
-    <p>Every BidResponse carries three BBX-specific headers for observability:</p>
-    <div class="code-block">
-<pre><span class="f">x-openrtb-version</span>:     <span class="s">2.6</span>
-<span class="f">x-bbx-adapter</span>:         <span class="s">bbx-rtb-adapter/1.0.0</span>
-<span class="f">x-bbx-processing-ms</span>:   <span class="n">4</span></pre>
-    </div>
+    <!-- ════════════════════════════════════════════════════════════════
+         RATE LIMITS
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="rate-limits">Rate limits</h2>
+    <p>The platform applies coarse per-IP rate limits at the Vercel edge and per-account limits inside the handlers. The exact thresholds are tuned for normal operation rather than published as a hard contract — if you're approaching them legitimately, email <a href="mailto:support@boostboss.ai" class="inline-link">support@boostboss.ai</a> with the integration profile and we'll raise them. Beacon endpoints (<code>/api/track</code>) are effectively unlimited per impression; auction endpoints are protected to absorb bursts but not unlimited. We'll publish a fixed contract here once production load patterns are stable.</p>
 
-    <!-- CHANGELOG -->
+    <!-- ════════════════════════════════════════════════════════════════
+         ERROR CODES
+         ════════════════════════════════════════════════════════════════ -->
+    <h2 id="errors">Error codes</h2>
+    <p>Errors return a JSON body with at least an <code>error</code> field (human-readable). Many endpoints also include a <code>code</code> field for programmatic branching:</p>
+
+    <table class="params">
+      <thead><tr><th>HTTP</th><th>Code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="param-type">400</td><td class="param-name">invalid_request</td><td class="param-desc">Malformed body or missing required field.</td></tr>
+        <tr><td class="param-type">400</td><td class="param-name">insufficient_credit</td><td class="param-desc">Tried to fund a campaign with <code>use_ad_credit</code> but balance &lt; budget. Response includes <code>available</code> + <code>requested</code>.</td></tr>
+        <tr><td class="param-type">401</td><td class="param-name">invalid_token</td><td class="param-desc">JWT missing, expired, or malformed.</td></tr>
+        <tr><td class="param-type">401</td><td class="param-name">bad_secret</td><td class="param-desc">Voucher API: <code>seller_secret</code> doesn't match the product's <code>fulfillment_webhook_secret</code>.</td></tr>
+        <tr><td class="param-type">401</td><td class="param-name">no_secret</td><td class="param-desc">Voucher API: no secret configured on the product.</td></tr>
+        <tr><td class="param-type">403</td><td class="param-name">forbidden</td><td class="param-desc">Authenticated but not authorized for this resource (e.g. another seller's product).</td></tr>
+        <tr><td class="param-type">404</td><td class="param-name">voucher_not_found</td><td class="param-desc">Voucher code doesn't exist.</td></tr>
+        <tr><td class="param-type">404</td><td class="param-name">product_missing</td><td class="param-desc">Voucher references a product that's been deleted.</td></tr>
+        <tr><td class="param-type">405</td><td class="param-name">—</td><td class="param-desc">Wrong HTTP method. Body usually names the allowed method.</td></tr>
+        <tr><td class="param-type">409</td><td class="param-name">refunded / expired / revoked</td><td class="param-desc">Voucher in a non-redeemable state. The <code>reason</code> field names which.</td></tr>
+        <tr><td class="param-type">429</td><td class="param-name">rate_limited</td><td class="param-desc">Too many requests. Back off and retry with jitter.</td></tr>
+        <tr><td class="param-type">500</td><td class="param-name">—</td><td class="param-desc">Server error. Auto-retry safe.</td></tr>
+        <tr><td class="param-type">503</td><td class="param-name">demo_mode</td><td class="param-desc">Operation requires Supabase mode (e.g. ad credit funding) but the deployment is in in-memory mode.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         CHANGELOG
+         ════════════════════════════════════════════════════════════════ -->
     <h2 id="changelog">Changelog</h2>
+
     <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
-      <h4 style="margin-top:0">v0.x — 2026 (in development)</h4>
-      <p>Surface API specified across Fetch Ad, Beacon, Campaign Management, Stats, Benna scoring, and the OpenRTB 2.6 adapter (BBX). TypeScript SDK in beta; Python, Go, Swift, Kotlin clients on the roadmap. Live publisher integration paths are documented separately under <a href="/docs" class="inline-link">/docs</a>.</p>
+      <h4 style="margin-top:0">2026-06-14 — Promote loop (Phase 3)</h4>
+      <p>Campaign create accepts <code>use_ad_credit: true</code> — validates available credit, writes deduction row, stamps <code>credit_funded</code> on the campaign. Closes the MoR earnings → ad credit → campaign funding loop entirely inside BB.</p>
     </div>
 
-    <!-- FEEDBACK -->
-    <div style="background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-top:32px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <strong style="font-size:15px">Was this page helpful?</strong>
-          <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">Help us improve the docs by sharing your feedback.</p>
-        </div>
-        <div class="feedback" style="margin:0;padding:0;">
-          <button onclick="voteFeedback(this,'up')">👍 Yes</button>
-          <button onclick="voteFeedback(this,'down')">👎 Could be better</button>
-        </div>
-      </div>
+    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
+      <h4 style="margin-top:0">2026-06-13 — Activation link fulfillment is default</h4>
+      <p>Buyer activation now uses one-click links (<code>?bb_token=&lt;code&gt;</code>) into the seller's signup URL by default, replacing the multi-step "paste this code" UX. Voucher API unchanged; only the fulfillment ergonomics improved. <a href="/docs/activation-link" class="inline-link">Integration guide</a>.</p>
+    </div>
+
+    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
+      <h4 style="margin-top:0">2026-06-11 — Seller payouts + admin dispatch</h4>
+      <p>Sellers configure a PayPal payout email via <code>/api/seller-payouts</code>. Admin dispatch endpoint + Saturday cron settle eligible sellers via PayPal Payouts API. Single-provider rule (PayPal pay-in + payout) per the Taiwan-entity setup.</p>
+    </div>
+
+    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
+      <h4 style="margin-top:0">2026 — Commission Model v2</h4>
+      <p>Replaces the legacy 15% top-line take with a per-product affiliate pool model: seller sets <code>affiliate_pool_pct</code>, BB takes 30% of the pool, affiliate gets 70%, seller keeps the rest. BB only earns when an affiliate drives the sale. Direct (non-affiliate) sales are seller-only minus processor fees.</p>
+    </div>
+
+    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
+      <h4 style="margin-top:0">2026 — MoR storefront live</h4>
+      <p>Buyer-facing product pages at <code>/p/&lt;uuid&gt;</code> with BB-hosted PayPal checkout. Vouchers issued on capture, fulfillment webhook fires to seller. <code>bb_click=&lt;uuid&gt;</code> attribution survives Safari ITP and ad blockers.</p>
     </div>
 
     <div class="foot-nav">
-      <a href="/publish" class="prev">
-        <div class="dir">← Overview</div>
-        <div class="ttl">Boost Boss Publish</div>
+      <a href="/docs" class="prev">
+        <div class="dir">← Back</div>
+        <div class="ttl">Documentation overview</div>
       </a>
-      <a href="/publish/dashboard" class="next">
+      <a href="/docs/activation-link" class="next">
         <div class="dir">Next →</div>
-        <div class="ttl">Get your API key</div>
+        <div class="ttl">Activation link integration</div>
       </a>
     </div>
   </main>
-  <!-- Right "On this page" TOC removed 2026-06-06 — duplicated the left
-       sidebar. Grid template-columns dropped from 3-col to 2-col below. -->
 </div>
 
-<!-- BACK TO TOP -->
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
-  // ── Toast ──
-  function showToast(message, type = 'success', duration = 2500) {
-    const c = document.getElementById('toastContainer');
-    const t = document.createElement('div');
-    t.className = 'toast ' + type;
-    t.textContent = message;
-    c.appendChild(t);
-    requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, duration);
+  // ── Scroll-spy on the left sidebar ──
+  const sideLinks = document.querySelectorAll('aside.sidebar .side-links a');
+  const headings  = document.querySelectorAll('main h2, main h3');
+  function onScroll() {
+    let current = 'introduction';
+    headings.forEach(h => { if (h.id && h.getBoundingClientRect().top < 180) current = h.id; });
+    sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    document.getElementById('backTop').classList.toggle('visible', window.scrollY > 600);
   }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
-  // ── Copy code ──
+  // ── Smooth anchor links ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', a.getAttribute('href')); }
+    });
+  });
+
+  // ── Copy code buttons ──
   function copyCode(btn) {
     const block = btn.closest('.code-block');
     const text = block.querySelector('pre').innerText;
     navigator.clipboard.writeText(text).then(() => {
       const orig = btn.textContent;
       btn.textContent = 'Copied ✓';
-      showToast('Copied to clipboard');
       setTimeout(() => btn.textContent = orig, 1400);
     });
   }
-  // Also wire up any .copy buttons that don't have onclick
-  document.querySelectorAll('.copy').forEach(btn => {
-    if (!btn.getAttribute('onclick')) {
-      btn.addEventListener('click', () => copyCode(btn));
-    }
+  document.querySelectorAll('.code-head .copy').forEach(btn => {
+    btn.addEventListener('click', () => copyCode(btn));
   });
-
-  // ── Scroll-spy ──
-  // Tracks the left sidebar's endpoint links only — the right TOC was
-  // removed 2026-06-06 since it duplicated this list.
-  const sideLinks = document.querySelectorAll('aside.sidebar .side-links a');
-  const headings = document.querySelectorAll('main h2, main h1');
-
-  function onScroll() {
-    let current = 'introduction';
-    headings.forEach(h => {
-      if (h.getBoundingClientRect().top < 180) current = h.id;
-    });
-    sideLinks.forEach(a => {
-      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-    });
-    // Back to top visibility
-    document.getElementById('backTop').classList.toggle('visible', window.scrollY > 600);
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-
-  // ── SDK Tabs ──
-  document.querySelectorAll('.sdk-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const lang = tab.dataset.lang;
-      document.querySelectorAll('.sdk-tab').forEach(t => t.classList.toggle('active', t.dataset.lang === lang));
-      document.querySelectorAll('.sdk-panel').forEach(p => p.classList.toggle('active', p.dataset.lang === lang));
-    });
-  });
-
-  // ── Response Tabs ──
-  document.querySelectorAll('.resp-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const group = tab.closest('.resp-tabs').dataset.group;
-      const target = tab.dataset.tab;
-      tab.closest('.resp-tabs').querySelectorAll('.resp-tab').forEach(t => t.classList.toggle('active', t === tab));
-      // Find sibling resp-panels
-      let el = tab.closest('.resp-tabs').nextElementSibling;
-      while (el && el.classList.contains('resp-panel')) {
-        el.style.display = el.dataset.tab === target ? 'block' : 'none';
-        el.classList.toggle('active', el.dataset.tab === target);
-        el = el.nextElementSibling;
-      }
-    });
-  });
-
-  // ── Search ──
-  const searchIndex = [];
-  function buildSearchIndex() {
-    const sections = document.querySelectorAll('main h2, main h3');
-    sections.forEach(h => {
-      if (!h.id) return;
-      const parent = h.closest('main');
-      let desc = '';
-      let next = h.nextElementSibling;
-      while (next && !['H2','H3'].includes(next.tagName)) {
-        if (next.tagName === 'P') desc += next.textContent + ' ';
-        next = next.nextElementSibling;
-      }
-      let cat = 'guide';
-      if (h.id.startsWith('api-') || h.id.startsWith('benna-score')) cat = 'api';
-      else if (h.id.startsWith('sdk-')) cat = 'sdk';
-      else if (h.id.startsWith('rtb-')) cat = 'rtb';
-      searchIndex.push({
-        id: h.id, title: h.textContent.trim(),
-        desc: desc.trim().substring(0, 120), cat
-      });
-    });
-  }
-  buildSearchIndex();
-
-  function openSearch() {
-    document.getElementById('searchOverlay').classList.add('open');
-    const input = document.getElementById('searchInput');
-    input.value = '';
-    input.focus();
-    document.getElementById('searchResults').innerHTML = '';
-  }
-  function closeSearch() {
-    document.getElementById('searchOverlay').classList.remove('open');
-  }
-
-  document.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
-    if (e.key === 'Escape') closeSearch();
-  });
-
-  let focusedIdx = -1;
-  document.getElementById('searchInput').addEventListener('input', function() {
-    const q = this.value.toLowerCase().trim();
-    const results = document.getElementById('searchResults');
-    focusedIdx = -1;
-    if (!q) { results.innerHTML = ''; return; }
-    const matches = searchIndex.filter(s =>
-      s.title.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q)
-    ).slice(0, 10);
-    results.innerHTML = matches.map((m, i) => `
-      <div class="search-result" data-href="#${m.id}" onclick="goToResult(this)">
-        <div class="sr-icon ${m.cat}">${m.cat === 'api' ? 'API' : m.cat === 'sdk' ? 'SDK' : m.cat === 'rtb' ? 'RTB' : '📖'}</div>
-        <div class="sr-text">
-          <div class="sr-title">${highlightMatch(m.title, q)}</div>
-          <div class="sr-desc">${m.desc}</div>
-        </div>
-        <span class="sr-badge">${m.cat}</span>
-      </div>
-    `).join('');
-  });
-
-  document.getElementById('searchInput').addEventListener('keydown', function(e) {
-    const items = document.querySelectorAll('.search-result');
-    if (!items.length) return;
-    if (e.key === 'ArrowDown') { e.preventDefault(); focusedIdx = Math.min(focusedIdx + 1, items.length - 1); updateFocus(items); }
-    if (e.key === 'ArrowUp') { e.preventDefault(); focusedIdx = Math.max(focusedIdx - 1, 0); updateFocus(items); }
-    if (e.key === 'Enter' && focusedIdx >= 0) { e.preventDefault(); goToResult(items[focusedIdx]); }
-  });
-
-  function updateFocus(items) {
-    items.forEach((it, i) => it.classList.toggle('focused', i === focusedIdx));
-    if (focusedIdx >= 0) items[focusedIdx].scrollIntoView({ block: 'nearest' });
-  }
-
-  function goToResult(el) {
-    const href = el.dataset.href;
-    closeSearch();
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      history.replaceState(null, '', href);
-    }
-  }
-
-  function highlightMatch(text, q) {
-    const idx = text.toLowerCase().indexOf(q);
-    if (idx < 0) return text;
-    return text.substring(0, idx) + '<strong style="color:var(--pink)">' + text.substring(idx, idx + q.length) + '</strong>' + text.substring(idx + q.length);
-  }
-
-  // ── Mobile sidebar ──
-  function toggleSidebar() {
-    const sidebar = document.querySelector('aside.sidebar');
-    const backdrop = document.getElementById('sidebarBackdrop');
-    sidebar.classList.toggle('open');
-    backdrop.classList.toggle('open');
-  }
-  // Close sidebar on link click (mobile)
-  document.querySelectorAll('aside.sidebar a').forEach(a => {
-    a.addEventListener('click', () => {
-      if (window.innerWidth <= 768) toggleSidebar();
-    });
-  });
-
-  // ── Feedback ──
-  function voteFeedback(btn, type) {
-    btn.closest('.feedback').querySelectorAll('button').forEach(b => b.classList.remove('voted'));
-    btn.classList.add('voted');
-    showToast(type === 'up' ? 'Thanks for your feedback!' : 'Thanks — we\'ll work on improving this.', 'info');
-  }
-
-  // ── Smooth anchor links ──
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        history.replaceState(null, '', a.getAttribute('href'));
-      }
-    });
-  });
-
-  // ── Update breadcrumb on scroll ──
-  const crumbSpan = document.querySelector('.crumbs span:last-child');
-  const crumbSections = {
-    'introduction': 'Introduction', 'quickstart': 'Quickstart', 'authentication': 'Authentication',
-    'environments': 'Environments', 'sdk-typescript': 'SDKs', 'api-fetch-ad': 'Fetch ad',
-    'api-impression': 'Beacons', 'api-campaigns': 'Campaigns', 'api-create-campaign': 'Create campaign',
-    'api-update-campaign': 'Update campaign', 'api-stats': 'Stats', 'api-reports': 'Reports', 'benna-overview': 'Benna',
-    'benna-score': 'Score a bid', 'benna-engine-status': 'Engine status', 'benna-signals': 'Signal reference',
-    'ad-formats': 'Ad formats', 'ai-targeting': 'AI targeting', 'mcp-integration': 'MCP integration',
-    'webhooks': 'Webhooks', 'rate-limits': 'Rate limits', 'errors': 'Errors',
-    'rtb-overview': 'OpenRTB (BBX)', 'rtb-bid': 'Bid request', 'rtb-response': 'Bid response',
-    'rtb-win-loss': 'Win / loss', 'rtb-status': 'Adapter status', 'rtb-mcp-translation': 'MCP signal map',
-    'changelog': 'Changelog'
-  };
-  function updateBreadcrumb() {
-    let current = 'introduction';
-    headings.forEach(h => { if (h.getBoundingClientRect().top < 180) current = h.id; });
-    if (crumbSpan && crumbSections[current]) crumbSpan.textContent = crumbSections[current];
-  }
-  window.addEventListener('scroll', updateBreadcrumb, { passive: true });
 </script>
-
 
 </body>
 </html>
