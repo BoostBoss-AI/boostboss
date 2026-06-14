@@ -402,6 +402,7 @@ async function handleAdCreditBalance(req, res) {
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
   const { advertiserId, client } = auth;
 
+  // 1. Sum credited payouts (the lifetime-converted side)
   const { data: credits, error } = await client
     .from("advertiser_payouts")
     .select("amount, dispatched_at, transaction_ids, bank_snapshot")
@@ -410,16 +411,97 @@ async function handleAdCreditBalance(req, res) {
     .order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   const rows = credits || [];
-
   const lifetime = rows.reduce((a, r) => a + (Number(r.amount) || 0), 0);
+
+  // 2. Sum spend (the deduction side) — table may not exist yet on early
+  //    deploys, so we swallow that specific error and treat as zero spend.
+  let spendTotal = 0;
+  try {
+    const { data: spend, error: sErr } = await client
+      .from("advertiser_credit_spend")
+      .select("amount")
+      .eq("advertiser_id", advertiserId);
+    if (!sErr) spendTotal = (spend || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  } catch (_) {}
+
+  const available = round2(lifetime - spendTotal);
 
   return res.json({
     ad_credit: {
-      available:        round2(lifetime),    // until spend tracking lands, == lifetime
-      lifetime_converted: round2(lifetime),
-      conversion_count: rows.length,
+      available:            Math.max(0, available),
+      lifetime_converted:   round2(lifetime),
+      lifetime_spent:       round2(spendTotal),
+      conversion_count:     rows.length,
       latest_conversion_at: rows[0] && rows[0].dispatched_at,
     },
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// POST ?action=consume_credit
+//   Body: { amount, campaign_id?, note? }
+//
+// Deducts from the seller's ad-credit pool. Used by api/campaigns.js
+// when creating a credit-funded campaign. Returns the new available
+// balance for the caller to refresh UI.
+//
+// Validates: amount > 0, amount <= available_credit. Atomic insert of
+// one advertiser_credit_spend row.
+// ──────────────────────────────────────────────────────────────────────
+async function handleConsumeCredit(req, res) {
+  const auth = await requireAdvertiser(req);
+  if (auth.error) return res.status(auth.status).json({ error: auth.error });
+  const { advertiserId, client } = auth;
+
+  const body = req.body || {};
+  const amount = Number(body.amount);
+  const campaignId = (body.campaign_id || "").toString().trim() || null;
+  const note = body.note ? String(body.note).slice(0, 500) : null;
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({ error: "amount must be a positive number" });
+  }
+
+  // Compute available credit (same logic as handleAdCreditBalance)
+  const { data: credits } = await client
+    .from("advertiser_payouts")
+    .select("amount")
+    .eq("advertiser_id", advertiserId)
+    .eq("status", "credited");
+  const lifetime = (credits || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  const { data: spend } = await client
+    .from("advertiser_credit_spend")
+    .select("amount")
+    .eq("advertiser_id", advertiserId);
+  const spendTotal = (spend || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  const available = round2(lifetime - spendTotal);
+
+  if (amount > available + 0.001) {
+    return res.status(400).json({
+      error: `Requested $${amount.toFixed(2)} but only $${available.toFixed(2)} ad credit available.`,
+      code:  "insufficient_credit",
+      available,
+    });
+  }
+
+  const { data: row, error } = await client
+    .from("advertiser_credit_spend")
+    .insert({
+      advertiser_id: advertiserId,
+      campaign_id:   campaignId,
+      amount:        round2(amount),
+      currency:      "USD",
+      note,
+    })
+    .select()
+    .maybeSingle();
+  if (error) return res.status(500).json({ error: error.message });
+
+  return res.json({
+    success:         true,
+    spend_id:        row.id,
+    spent_amount:    round2(amount),
+    available_after: round2(available - amount),
   });
 }
 
@@ -445,6 +527,7 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST") {
       if (action === "set_method")           return await handleSetMethod(req, res);
       if (action === "convert_to_ad_credit") return await handleConvertToAdCredit(req, res);
+      if (action === "consume_credit")       return await handleConsumeCredit(req, res);
       return res.status(400).json({ error: "Unknown POST action" });
     }
     return res.status(405).json({ error: "Method not allowed" });

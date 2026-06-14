@@ -394,6 +394,39 @@ async function handleCreate(req, res) {
     return res.status(400).json({ error: "total_budget must be between $1 and $10,000,000" });
   }
 
+  // ── Ad-credit funding gate (Phase 3 of Promote flow) ────────────────
+  // When use_ad_credit=true, validate the seller has enough credit pool
+  // to cover the total_budget BEFORE creating the campaign. If yes, the
+  // campaign is stamped credit_funded=true and a corresponding
+  // advertiser_credit_spend row is written after the INSERT succeeds.
+  let useAdCredit = !!b.use_ad_credit;
+  if (useAdCredit) {
+    const sbCheck = supa();
+    if (!sbCheck) {
+      return res.status(503).json({ error: "Ad credit funding requires Supabase mode", code: "demo_mode" });
+    }
+    const { data: credits } = await sbCheck
+      .from("advertiser_payouts")
+      .select("amount")
+      .eq("advertiser_id", b.advertiser_id)
+      .eq("status", "credited");
+    const lifetimeCredit = (credits || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+    const { data: spend } = await sbCheck
+      .from("advertiser_credit_spend")
+      .select("amount")
+      .eq("advertiser_id", b.advertiser_id);
+    const spendTotal = (spend || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
+    const available = Math.round((lifetimeCredit - spendTotal) * 100) / 100;
+    if (totalBudget > available + 0.001) {
+      return res.status(400).json({
+        error: `Insufficient ad credit. Available: $${available.toFixed(2)}, requested: $${totalBudget.toFixed(2)}.`,
+        code:  "insufficient_credit",
+        available,
+        requested: totalBudget,
+      });
+    }
+  }
+
   const now = new Date().toISOString();
   const row = {
     // UUID required — Supabase campaigns.id is a UUID column. The old
@@ -452,6 +485,11 @@ async function handleCreate(req, res) {
     // Parent product. Nullable for back-compat with pre-Products campaigns
     // and for the "standalone campaign" path. See [[products-as-parent]].
     product_id: b.product_id || null,
+    // Ad-credit funding marker (Phase 3 of Promote flow). When true, this
+    // campaign's total_budget was pre-funded from advertiser_credit_spend
+    // — no PayPal charge for the budget itself.
+    credit_funded:        useAdCredit,
+    credit_funded_amount: useAdCredit ? totalBudget : 0,
     created_at: now, updated_at: now,
   };
 
@@ -502,9 +540,26 @@ async function handleCreate(req, res) {
     const { data, error } = await sb.from("campaigns").insert(row).select().single();
     if (error) return res.status(500).json({ error: error.message });
     // Phase E.5 — persist per-door creative rows alongside the campaign.
-    // Always writes a 'default' row mirroring the top-level copy; writes
-    // per-door rows only when the advertiser overrode that door.
     await upsertCampaignCreatives(sb, data.id, row, b.per_door_creatives);
+
+    // Phase 3 of Promote — write the credit deduction row AFTER the
+    // campaign INSERT succeeds, linking the two. If the deduction insert
+    // fails for any reason we don't unwind the campaign (operator can
+    // refund the credit manually); logging is enough for the rare case.
+    if (useAdCredit) {
+      try {
+        await sb.from("advertiser_credit_spend").insert({
+          advertiser_id: b.advertiser_id,
+          campaign_id:   data.id,
+          amount:        totalBudget,
+          currency:      "USD",
+          note:          `Campaign: ${row.name || data.id}`,
+        });
+      } catch (e) {
+        console.error(`[campaigns] credit_spend insert failed for campaign ${data.id}:`, e.message);
+      }
+    }
+
     return res.status(201).json({ campaign: data, policy, auto_approved: autoApproved });
   }
   DEMO_CAMPAIGNS.set(row.id, row);

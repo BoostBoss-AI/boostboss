@@ -4826,6 +4826,26 @@
                         </div>
                     </div>
 
+                    <!-- Ad-credit funding toggle (Phase 3 of Promote flow).
+                         When the seller has converted MoR earnings into ad
+                         credit, surface a one-click option to pay for this
+                         campaign out of that credit instead of PayPal. -->
+                    <div class="form-group" id="adCreditFundGroup" style="display:none;">
+                        <label style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(255,45,120,0.25);border-radius:10px;background:linear-gradient(135deg,rgba(255,45,120,0.06),rgba(0,255,224,0.04));cursor:pointer;">
+                            <input type="checkbox" id="useAdCreditCheckbox" name="use_ad_credit" style="margin-top:3px;width:18px;height:18px;accent-color:#FF2D78;cursor:pointer;">
+                            <div style="flex:1;">
+                                <div style="font-weight:700;color:var(--text);font-size:14px;">
+                                    Fund from ad credit
+                                    <span id="adCreditBalChip" style="margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(0,255,224,0.15);color:#00C9B0;font-size:11px;font-weight:700;">$0.00 available</span>
+                                </div>
+                                <div style="font-size:12px;color:#6B7280;margin-top:4px;">
+                                    Use your converted MoR earnings to pay for this campaign — no PayPal charge.
+                                </div>
+                                <div id="adCreditValidationMsg" style="display:none;margin-top:6px;font-size:12px;color:#DC2626;font-weight:600;"></div>
+                            </div>
+                        </label>
+                    </div>
+
                     <!-- Schedule -->
                     <div class="form-group">
                         <label class="form-label" data-t="newc.schedule">Schedule (optional)</label>
@@ -6503,7 +6523,62 @@
             // Refresh products on every open in case the advertiser added
             // one from another tab.
             loadProductOptions();
+            // Phase 3 Promote — load ad-credit balance so we can show the
+            // "Fund from ad credit" toggle only when there's credit to use.
+            loadAdCreditForCampaignModal();
         }
+
+        // Fetch the seller's available ad credit and surface the funding
+        // toggle if any is available. Silent failure — no credit just hides
+        // the toggle, falling back to the standard PayPal billing path.
+        async function loadAdCreditForCampaignModal() {
+            const group = document.getElementById('adCreditFundGroup');
+            const chip  = document.getElementById('adCreditBalChip');
+            const cb    = document.getElementById('useAdCreditCheckbox');
+            const msg   = document.getElementById('adCreditValidationMsg');
+            if (!group || !cb) return;
+            // Reset state on each open
+            cb.checked = false;
+            if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+            group.style.display = 'none';
+            window.__adCreditAvailable = 0;
+            if (!currentUser || !currentUser.token) return;
+            try {
+                const r = await fetch('/api/seller-payouts?action=ad_credit_balance', {
+                    headers: { 'Authorization': 'Bearer ' + currentUser.token },
+                });
+                if (!r.ok) return;
+                const j = await r.json();
+                const available = Number(j.available || 0);
+                window.__adCreditAvailable = available;
+                if (available > 0) {
+                    if (chip) chip.textContent = '$' + available.toFixed(2) + ' available';
+                    group.style.display = 'block';
+                }
+            } catch (_) { /* silent */ }
+        }
+
+        // Live-validate the budget against available credit whenever the
+        // toggle changes or the total budget input is edited.
+        document.addEventListener('DOMContentLoaded', () => {
+            const cb       = document.getElementById('useAdCreditCheckbox');
+            const budgetIn = document.querySelector('#campaignForm [name="total_budget"]');
+            const msg      = document.getElementById('adCreditValidationMsg');
+            if (!cb || !budgetIn || !msg) return;
+            const validate = () => {
+                if (!cb.checked) { msg.style.display = 'none'; return; }
+                const avail   = Number(window.__adCreditAvailable || 0);
+                const wanted  = parseFloat(budgetIn.value) || 0;
+                if (wanted > avail + 0.001) {
+                    msg.textContent  = `Budget $${wanted.toFixed(2)} exceeds available credit $${avail.toFixed(2)}. Lower the budget or uncheck this option.`;
+                    msg.style.display = 'block';
+                } else {
+                    msg.style.display = 'none';
+                }
+            };
+            cb.addEventListener('change', validate);
+            budgetIn.addEventListener('input',  validate);
+        });
 
         function closeModal() {
             campaignModal.classList.remove('active');
@@ -7318,6 +7393,10 @@
                 // [[products-as-parent]] — links the campaign to a product so
                 // affiliate saves and share-link redirects can route through it.
                 product_id: (formData.get('product_id') || '').toString().trim() || null,
+                // Phase 3 Promote — pay this campaign out of converted MoR
+                // earnings rather than PayPal. Backend validates available
+                // credit ≥ total_budget and writes the deduction row.
+                use_ad_credit: !!(document.getElementById('useAdCreditCheckbox') && document.getElementById('useAdCreditCheckbox').checked),
             };
 
             try {
