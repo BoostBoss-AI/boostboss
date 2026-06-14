@@ -255,6 +255,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <button class="nav-item" data-panel="payouts"><span class="icon">💸</span> Payouts <span class="badge-count" id="payout-pending-count">0</span></button>
     <button class="nav-item" data-panel="audits"><span class="icon">🛡️</span> Audit Queue <span class="badge-count" id="audit-pending-count">0</span></button>
     <button class="nav-item" data-panel="affiliate-program"><span class="icon">🤝</span> Affiliate Program</button>
+    <button class="nav-item" data-panel="seller-payouts"><span class="icon">💵</span> Seller Payouts <span class="badge-count" id="seller-payouts-eligible-count">0</span></button>
 
     <div class="sidebar-footer">
       <p class="meta">Mode: <span id="auth-mode-badge" class="mono">—</span></p>
@@ -956,6 +957,55 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
       </div>
     </div>
 
+    <!-- ── SELLER PAYOUTS ── MoR settlement to advertisers ─────────────── -->
+    <div class="panel" id="panel-seller-payouts">
+      <div class="section-header">
+        <h1>Seller Payouts</h1>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-sm btn-action" onclick="loadSellerPayoutsPanel()">↻ Refresh</button>
+          <button class="btn-sm btn-action" id="seller-payouts-dispatch-all" onclick="dispatchAllEligibleSellers()" style="background:#059669;color:#fff;border-color:#059669;">▶ Dispatch all eligible</button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        Sellers settle biweekly Friday + Saturday catch-up via PayPal Payouts API. Eligible = unsettled balance ≥ $1 AND payout method configured. Manual dispatch button + the Saturday cron both call the same endpoint.
+      </p>
+
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="label">Eligible (ready to pay)</div><div class="value green" id="sp-stat-eligible">—</div></div>
+        <div class="stat-card"><div class="label">Total due</div><div class="value pink" id="sp-stat-total">—</div></div>
+        <div class="stat-card"><div class="label">No payout method</div><div class="value yellow" id="sp-stat-no-method">—</div></div>
+        <div class="stat-card"><div class="label">Below min ($1)</div><div class="value" style="color:var(--muted);" id="sp-stat-below-min">—</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>Eligible sellers</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Seller</th><th>PayPal email</th><th>Sales</th><th>Amount</th><th>Earliest</th><th>Action</th></tr>
+            </thead>
+            <tbody id="sp-eligible-body">
+              <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>Held — no PayPal email configured</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Seller</th><th>Sales</th><th>Amount</th><th>Earliest captured</th></tr>
+            </thead>
+            <tbody id="sp-held-body">
+              <tr><td colspan="4" class="empty-state">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -1064,6 +1114,7 @@ function switchPanel(name) {
   if (name === "inspector") loadAuctionInspector();
   if (name === "audits") loadAuditsPanel();
   if (name === "affiliate-program") loadAffiliateProgramPanel();
+  if (name === "seller-payouts") loadSellerPayoutsPanel();
 }
 
 // ── Users panel ─────────────────────────────────────────────────────
@@ -2203,6 +2254,7 @@ const searchItems = [
   { label: 'Payouts — Cron health, blocked publishers, manual controls', panel: 'payouts' },
   { label: 'Audit Queue — Pricing-plan discount verification', panel: 'audits' },
   { label: 'Affiliate Program — Platform-wide commission metrics', panel: 'affiliate-program' },
+  { label: 'Seller Payouts — Dispatch MoR settlements via PayPal', panel: 'seller-payouts' },
   { label: 'Benna Playground', href: '/playground.html' },
   { label: 'System Status', href: '/status.html' },
   { label: 'API Docs', href: '/docs' },
@@ -2583,6 +2635,132 @@ function renderAffiliateProgram(data) {
 }
 
 document.getElementById("aff-range")?.addEventListener("change", () => loadAffiliateProgramPanel());
+
+// ─── Seller Payouts ────────────────────────────────────────────────────
+
+let _sellerPayoutsCache = null;
+
+async function loadSellerPayoutsPanel() {
+  const tbody = document.getElementById("sp-eligible-body");
+  const held  = document.getElementById("sp-held-body");
+  tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Loading…</td></tr>`;
+  held.innerHTML  = `<tr><td colspan="4" class="empty-state">Loading…</td></tr>`;
+  try {
+    const r = await adminFetch("/api/admin-seller-payouts?action=eligible_sellers");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    _sellerPayoutsCache = j;
+    renderSellerPayouts(j);
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
+    held.innerHTML  = `<tr><td colspan="4" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+function renderSellerPayouts(data) {
+  const eligible = (data && data.eligible) || [];
+  const noMethod = (data && data.not_eligible_no_method) || [];
+  const belowMin = (data && data.not_eligible_below_min) || [];
+
+  // Stat cards
+  document.getElementById("sp-stat-eligible").textContent  = fmtInt(eligible.length);
+  const totalDue = eligible.reduce((a, e) => a + Number(e.total_usd || 0), 0);
+  document.getElementById("sp-stat-total").textContent      = fmtUsd(totalDue);
+  document.getElementById("sp-stat-no-method").textContent = fmtInt(noMethod.length);
+  document.getElementById("sp-stat-below-min").textContent = fmtInt(belowMin.length);
+
+  // Sidebar badge — eligible count
+  const badge = document.getElementById("seller-payouts-eligible-count");
+  if (badge) badge.textContent = String(eligible.length);
+
+  // Eligible table
+  const tbody = document.getElementById("sp-eligible-body");
+  if (!eligible.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--muted);">No sellers eligible right now. Either no captured sales, or all sellers below \$1 min, or no PayPal email configured.</td></tr>`;
+  } else {
+    tbody.innerHTML = eligible.map((e) => `
+      <tr>
+        <td>
+          <div style="font-weight:600;">${escHtml(e.seller_name)}</div>
+          ${e.seller_email ? `<div style="font-size:11px;color:var(--muted);">${escHtml(e.seller_email)}</div>` : ""}
+          <div style="font-size:10.5px;color:var(--muted);font-family:monospace;">${escHtml(e.advertiser_id.slice(0,8))}…</div>
+        </td>
+        <td><code style="font-size:12px;">${escHtml(e.paypal_email)}</code></td>
+        <td>${fmtInt(e.sales)}</td>
+        <td style="color:var(--pink);font-weight:700;">${fmtUsd(e.total_usd)}</td>
+        <td style="font-size:11px;color:var(--muted);">${escHtml(new Date(e.earliest_captured).toLocaleDateString())}</td>
+        <td>
+          <button class="btn-sm btn-action" data-action="dispatch-one" data-advertiser-id="${escHtml(e.advertiser_id)}" style="background:#059669;color:#fff;border-color:#059669;">▶ Pay now</button>
+        </td>
+      </tr>`).join("");
+    tbody.onclick = async (ev) => {
+      const btn = ev.target.closest("button[data-action='dispatch-one']");
+      if (!btn) return;
+      const advId = btn.dataset.advertiserId;
+      await dispatchSellers([advId], btn);
+    };
+  }
+
+  // Held — no method
+  const heldBody = document.getElementById("sp-held-body");
+  if (!noMethod.length) {
+    heldBody.innerHTML = `<tr><td colspan="4" class="empty-state" style="color:var(--muted);">No sellers held. Everyone with captured sales has a PayPal email on file.</td></tr>`;
+  } else {
+    heldBody.innerHTML = noMethod.map((e) => `
+      <tr>
+        <td>
+          <div style="font-weight:600;">${escHtml(e.seller_name)}</div>
+          ${e.seller_email ? `<div style="font-size:11px;color:var(--muted);">${escHtml(e.seller_email)}</div>` : ""}
+        </td>
+        <td>${fmtInt(e.sales)}</td>
+        <td style="color:var(--pink);font-weight:700;">${fmtUsd(e.total_usd)}</td>
+        <td style="font-size:11px;color:var(--muted);">${escHtml(new Date(e.earliest_captured).toLocaleDateString())}</td>
+      </tr>`).join("");
+  }
+}
+
+async function dispatchSellers(advertiserIds, btn) {
+  const label = (advertiserIds && advertiserIds.length === 1) ? "this seller" : "all eligible sellers";
+  if (!confirm(`Dispatch payouts to ${label}?\n\nThis sends real money via PayPal Payouts API. Cannot be undone.`)) return;
+  if (btn) { btn.disabled = true; btn.textContent = "Dispatching…"; }
+  try {
+    const r = await adminFetch("/api/admin-seller-payouts?action=dispatch_batch", {
+      method: "POST",
+      body: JSON.stringify(advertiserIds ? { advertiser_ids: advertiserIds } : {}),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+    toast(`Dispatched ${j.dispatched_count} payout(s) totalling ${fmtUsd(j.total_usd || 0)}${j.mode === "demo" ? " (demo mode — no real money sent)" : ""}`, "success");
+    await loadSellerPayoutsPanel();
+  } catch (e) {
+    toast("Dispatch failed: " + e.message, "error");
+    if (btn) { btn.disabled = false; btn.textContent = "▶ Pay now"; }
+  }
+}
+
+async function dispatchAllEligibleSellers() {
+  await dispatchSellers(null, document.getElementById("seller-payouts-dispatch-all"));
+}
+
+// Refresh the eligible-sellers badge count on login
+(function bootSellerPayoutsBadge() {
+  let tries = 0;
+  const iv = setInterval(() => {
+    tries += 1;
+    if (token || tries > 30) {
+      clearInterval(iv);
+      if (token) {
+        adminFetch("/api/admin-seller-payouts?action=eligible_sellers")
+          .then((r) => r.ok ? r.json() : null)
+          .then((j) => {
+            const badge = document.getElementById("seller-payouts-eligible-count");
+            if (badge && j) badge.textContent = String((j.eligible || []).length);
+          })
+          .catch(() => {});
+      }
+    }
+  }, 500);
+})();
 
 // Refresh the audit-queue badge count on login so the sidebar reflects
 // reality even before the operator opens the panel.

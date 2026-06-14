@@ -194,6 +194,10 @@
       "schedule": "0 12 * * 6"
     },
     {
+      "path": "/api/admin-seller-payouts?action=dispatch_batch",
+      "schedule": "30 12 * * 6"
+    },
+    {
       "path": "/api/conversions?action=auto_confirm",
       "schedule": "30 12 * * *"
     }
