@@ -743,7 +743,7 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
             <span>
               I have read and agree to the
               <button type="button" class="policy-link" id="open-agreement">Boost Boss Agreement</button>
-              <span class="consent-sub">(Terms of Service, Privacy Policy, Acceptable Use Policy, and <span id="role-specific-terms-label">Advertiser Terms</span>).</span>
+              <span class="consent-sub">(Terms of Service, Privacy Policy, Acceptable Use Policy, Publisher Agreement, and Advertiser Terms — both roles apply because one Boost Boss account can act in either).</span>
             </span>
           </label>
           <div class="consent-hint" id="consent-hint">Open the agreement and scroll to the end to enable this checkbox.</div>
@@ -1072,19 +1072,16 @@ document.getElementById("switch-signup").addEventListener("click", e => {
 });
 
 // ── Role-specific terms label ──
-// Updates just the inline-text label after "and" inside the consent
-// sentence (Advertiser Terms ↔ Publisher Agreement). The single agreement
-// modal pulls the matching URL via Agreement.urls() at fetch time. If the
-// user changes role after accepting, we revoke the acceptance and force
-// them to re-read so they actually see the role-specific doc.
-function updateRoleTermsLabel() {
-  var label = document.getElementById("role-specific-terms-label");
-  if (!label) return;
-  var newName = selectedRole === "developer" ? "Publisher Agreement" : "Advertiser Terms";
-  if (label.textContent === newName) return;   // no-op on first load
-  label.textContent = newName;
-  if (window.Agreement) Agreement.revokeIfAccepted();
-}
+// 2026-06-14: signing up at /ads or /publish creates a single Boost Boss
+// account that can act in either role via the cross-role onboarding modal
+// (see [[unified-account-model]]). The terms surface therefore covers
+// BOTH the Publisher Agreement AND the Advertiser Terms regardless of
+// which signup URL the user came from — there is no role-specific
+// agreement swap anymore. updateRoleTermsLabel is kept as a no-op shim
+// in case any legacy caller still invokes it; revokeIfAccepted is no
+// longer triggered on role change because the same combined agreement
+// covers every signup path.
+function updateRoleTermsLabel() { /* unified agreement — no-op */ }
 
 // ── Apple-style single-scroll agreement ──
 // One modal, one body containing Terms + Privacy + AUP + role-specific
@@ -1109,14 +1106,16 @@ const Agreement = (function () {
   const consentLb = document.getElementById("consent-label");
   const consentHt = document.getElementById("consent-hint");
 
+  // Both role-specific documents are always included so the single
+  // signup covers either dashboard the user may later opt into via
+  // the cross-role onboarding modal. See [[unified-account-model]].
   function urls() {
     return [
       { title: "Terms of Service",      url: "/terms" },
       { title: "Privacy Policy",        url: "/privacy" },
       { title: "Acceptable Use Policy", url: "/aup" },
-      selectedRole === "developer"
-        ? { title: "Publisher Agreement", url: "/publisher-agreement" }
-        : { title: "Advertiser Terms",    url: "/advertiser-terms" },
+      { title: "Publisher Agreement",   url: "/publisher-agreement" },
+      { title: "Advertiser Terms",      url: "/advertiser-terms" },
     ];
   }
 
@@ -1335,12 +1334,16 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     // terms_acceptances (db/21_terms_acceptances.sql) with the request IP
     // and user-agent for GDPR/CCPA/PIPL/TW compliance audit trail.
     const TERMS_VERSION = "1.0";
-    const roleSpecificDoc = selectedRole === "developer" ? "publisher_agreement" : "advertiser_terms";
+    // Record acceptance of BOTH role-specific documents regardless of
+    // which signup URL the user came from. One Boost Boss account can
+    // act in either role via the cross-role onboarding modal — the
+    // legal coverage must extend to both. See [[unified-account-model]].
     const acceptedDocs = [
       { type: "terms_of_service",      version: TERMS_VERSION, url: "/terms" },
       { type: "privacy_policy",        version: TERMS_VERSION, url: "/privacy" },
       { type: "acceptable_use_policy", version: TERMS_VERSION, url: "/aup" },
-      { type: roleSpecificDoc,         version: TERMS_VERSION, url: selectedRole === "developer" ? "/publisher-agreement" : "/advertiser-terms" },
+      { type: "publisher_agreement",   version: TERMS_VERSION, url: "/publisher-agreement" },
+      { type: "advertiser_terms",      version: TERMS_VERSION, url: "/advertiser-terms" },
     ];
 
     const payload = {
