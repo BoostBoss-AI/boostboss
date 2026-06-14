@@ -369,7 +369,7 @@
         <div class="comp-icon pink">PCI</div>
         <h4>PCI DSS · SAQ-A</h4>
         <div class="status">Active</div>
-        <p>Card payments tokenized via Stripe. We never touch PAN data. Eligible for SAQ-A, the lightest PCI scope.</p>
+        <p>All payments processed via PayPal. We never touch PAN or card data. Eligible for SAQ-A, the lightest PCI scope.</p>
       </div>
       <div class="comp-card">
         <div class="comp-icon ink">ISO</div>
@@ -544,7 +544,7 @@ SUBDOMAIN=exchange.boostboss.ai</pre>
         <tr><td><strong>Vercel</strong></td><td>Edge runtime &amp; CDN</td><td>Anonymous request metadata</td><td>Global (multi-region)</td></tr>
         <tr><td><strong>Supabase</strong></td><td>Postgres &amp; auth</td><td>Account &amp; campaign data</td><td>US-East / EU-West</td></tr>
         <tr><td><strong>Cloudflare</strong></td><td>DDoS &amp; WAF</td><td>Edge request headers</td><td>Global</td></tr>
-        <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Billing &amp; tax data</td><td>US</td></tr>
+        <tr><td><strong>PayPal</strong></td><td>Payments &amp; payouts</td><td>Billing, tax &amp; payout data</td><td>US</td></tr>
         <tr><td><strong>Datadog</strong></td><td>Observability &amp; APM</td><td>Service telemetry (no PII)</td><td>US</td></tr>
         <tr><td><strong>Anthropic</strong></td><td>Creative review LLM</td><td>Ad copy text only</td><td>US</td></tr>
         <tr><td><strong>AWS S3</strong></td><td>Long-term log archive</td><td>Aggregated auction logs</td><td>us-east-1 (KMS-encrypted)</td></tr>

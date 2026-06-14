@@ -160,7 +160,7 @@ function welcomeEmail({ role, firstName, dashboardUrl }) {
        </ul>`
     : `<p><strong>Next steps:</strong></p>
        <ul style="font-size:15px; line-height:1.7; color:${BRAND.inkSoft}; padding-left:22px; margin:0 0 16px;">
-         <li>Fund your account (PayPal or Stripe)</li>
+         <li>Fund your account via PayPal</li>
          <li>Launch your first campaign in under 60 seconds</li>
          <li>Reach AI-native users via SuperBoost Ads — see real intent, not cookies</li>
        </ul>`;

@@ -7560,11 +7560,11 @@
         });
 
         // ── Pay-in provider resolution ──────────────────────────────
-        // The backend decides which rail to use based on PAYIN_PROVIDER env
-        // var + which provider creds are configured. We fetch this once on
-        // page load and cache it so the deposit button knows where to send
-        // the request (PayPal create_paypal_order vs Stripe create_checkout
-        // vs demo direct-credit).
+        // Boost Boss is PayPal end-to-end per the Taiwan-entity single-
+        // provider rule. The /api/billing?action=payin_provider endpoint
+        // still reports the resolved provider for defensive label-rendering
+        // (in case a deploy is misconfigured), but the only real choice the
+        // UI presents is PayPal. Demo mode short-circuits to direct-credit.
         let _payinProviderCache = null;
         async function getPayinProvider() {
             if (_payinProviderCache) return _payinProviderCache;
@@ -7589,29 +7589,23 @@
         // can be empty; we only render them when set so flex-gap doesn't
         // create dead space around the logo.
         const PAYIN_T = {
-            en:      { cta_paypal: 'Continue to PayPal',   cta_stripe: 'Continue to Stripe',   cta_generic: 'Deposit',
+            en:      { cta_paypal: 'Continue to PayPal',  cta_generic: 'Deposit',
                        note_before: 'Securely processed by', note_after: '',
-                       note_stripe: 'Payments processed securely by Stripe. Funds are available instantly.',
                        note_demo:   'Demo mode — no real charge.' },
-            zh:      { cta_paypal: '继续前往 PayPal',       cta_stripe: '继续前往 Stripe',       cta_generic: '充值',
-                       note_before: '由',                   note_after: '安全处理',
-                       note_stripe: '由 Stripe 安全处理。充值后即时到账。',
+            zh:      { cta_paypal: '继续前往 PayPal',      cta_generic: '充值',
+                       note_before: '由',                  note_after: '安全处理',
                        note_demo:   '演示模式 — 不会产生实际费用。' },
-            'zh-TW': { cta_paypal: '繼續前往 PayPal',       cta_stripe: '繼續前往 Stripe',       cta_generic: '儲值',
-                       note_before: '由',                   note_after: '安全處理',
-                       note_stripe: '由 Stripe 安全處理。儲值後即時到帳。',
+            'zh-TW': { cta_paypal: '繼續前往 PayPal',      cta_generic: '儲值',
+                       note_before: '由',                  note_after: '安全處理',
                        note_demo:   '演示模式 — 不會產生實際費用。' },
-            ja:      { cta_paypal: 'PayPal に進む',         cta_stripe: 'Stripe に進む',         cta_generic: '入金',
-                       note_before: '',                     note_after: 'により安全に決済',
-                       note_stripe: 'Stripe により安全に処理されます。入金後すぐにご利用いただけます。',
+            ja:      { cta_paypal: 'PayPal に進む',        cta_generic: '入金',
+                       note_before: '',                    note_after: 'により安全に決済',
                        note_demo:   'デモモード — 実際の請求はありません。' },
-            ko:      { cta_paypal: 'PayPal로 계속',          cta_stripe: 'Stripe로 계속',          cta_generic: '충전',
-                       note_before: '',                     note_after: '(으)로 안전하게 결제',
-                       note_stripe: 'Stripe로 안전하게 처리됩니다. 충전 즉시 사용 가능합니다.',
+            ko:      { cta_paypal: 'PayPal로 계속',         cta_generic: '충전',
+                       note_before: '',                    note_after: '(으)로 안전하게 결제',
                        note_demo:   '데모 모드 — 실제 결제는 없습니다.' },
-            vi:      { cta_paypal: 'Tiếp tục với PayPal',  cta_stripe: 'Tiếp tục với Stripe',  cta_generic: 'Nạp tiền',
+            vi:      { cta_paypal: 'Tiếp tục với PayPal', cta_generic: 'Nạp tiền',
                        note_before: 'Thanh toán an toàn qua', note_after: '',
-                       note_stripe: 'Xử lý an toàn bởi Stripe. Số dư khả dụng ngay lập tức.',
                        note_demo:   'Chế độ thử nghiệm — không phát sinh phí.' },
         };
         function _payinLang() {
@@ -7649,9 +7643,12 @@
             getPayinProvider().then((p) => {
                 btn.removeAttribute('data-t');
                 const t = PAYIN_T[_payinLang()] || PAYIN_T.en;
-                if (p === 'paypal')      btn.textContent = t.cta_paypal;
-                else if (p === 'stripe') btn.textContent = t.cta_stripe;
-                else                     btn.textContent = t.cta_generic;
+                // Anything other than 'demo' is treated as PayPal — the
+                // only supported pay-in rail. Legacy 'stripe' resolves
+                // here under PAYIN_PROVIDER=stripe dev configs and we
+                // still render the PayPal label so the UI never advertises
+                // a rail we no longer support.
+                btn.textContent = (p === 'demo') ? t.cta_generic : t.cta_paypal;
             });
         }
         // Expose so the Settings language-switch handler can call this
@@ -7659,15 +7656,16 @@
         window.refreshDepositCtaLabel = refreshDepositCtaLabel;
         refreshDepositCtaLabel();
 
-        // Provider-branded processing note under the CTA — replaces the
-        // legacy "由 Stripe 安全處理" line with the PayPal wordmark when
-        // PayPal is the active rail. Uses official PayPal brand SVG.
+        // Provider-branded processing note under the CTA — renders the
+        // official PayPal wordmark when PayPal is the active rail. Demo
+        // mode shows a "no real charge" notice. There is no Stripe branch
+        // since Stripe is not a supported pay-in rail.
         function refreshDepositProviderNote() {
             const el = document.getElementById('depositProviderNote');
             if (!el) return;
             getPayinProvider().then((p) => {
                 const t = PAYIN_T[_payinLang()] || PAYIN_T.en;
-                if (p === 'paypal') {
+                if (p !== 'demo') {
                     const before = t.note_before ? `<span>${t.note_before}</span>` : '';
                     const after  = t.note_after  ? `<span>${t.note_after}</span>`  : '';
                     el.innerHTML = `
@@ -7686,8 +7684,6 @@
                         </svg>
                         ${after}
                     `;
-                } else if (p === 'stripe') {
-                    el.innerHTML = `<span>${t.note_stripe}</span>`;
                 } else {
                     el.innerHTML = `<span>${t.note_demo}</span>`;
                 }
@@ -7709,7 +7705,12 @@
             btn.disabled = true;
             try {
                 const provider = await getPayinProvider();
-                const action = provider === 'paypal' ? 'create_paypal_order' : 'create_checkout';
+                // PayPal is the only supported pay-in action. Demo mode
+                // also routes through create_paypal_order (the demo branch
+                // inside the handler short-circuits and credits the
+                // balance directly). The legacy Stripe create_checkout
+                // path is no longer reachable from this UI.
+                const action = 'create_paypal_order';
 
                 const r = await fetch(`${API_BASE}/api/billing?action=${action}`, {
                     method: 'POST',
@@ -7728,11 +7729,6 @@
                 // PayPal path — redirect to PayPal's hosted approval page
                 if (j.approval_url) {
                     window.location.href = j.approval_url;
-                    return;
-                }
-                // Stripe path — redirect to Checkout
-                if (j.checkout_url) {
-                    window.location.href = j.checkout_url;
                     return;
                 }
                 // Demo path — balance was credited synchronously
@@ -8566,7 +8562,7 @@
                 _billingHistory = [
                     { date: new Date(now - 86400000 * 0).toISOString(), description: '[Sample] Campaign spend — Q2 Launch', type: 'spend', amount: -42.18, balance: 457.82, status: 'settled' },
                     { date: new Date(now - 86400000 * 1).toISOString(), description: '[Sample] Campaign spend — Brand Awareness', type: 'spend', amount: -28.50, balance: 500.00, status: 'settled' },
-                    { date: new Date(now - 86400000 * 3).toISOString(), description: '[Sample] Deposit via Stripe', type: 'deposit', amount: 500.00, balance: 528.50, status: 'completed' },
+                    { date: new Date(now - 86400000 * 3).toISOString(), description: '[Sample] Deposit via PayPal', type: 'deposit', amount: 500.00, balance: 528.50, status: 'completed' },
                     { date: new Date(now - 86400000 * 7).toISOString(), description: '[Sample] Campaign spend — Retargeting', type: 'spend', amount: -15.32, balance: 28.50, status: 'settled' },
                     { date: new Date(now - 86400000 * 10).toISOString(), description: '[Sample] Initial deposit', type: 'deposit', amount: 100.00, balance: 43.82, status: 'completed' },
                 ];
@@ -9168,7 +9164,7 @@
                     'billing.balance_label': 'Account balance',
                     'billing.balance_hint': 'Campaign spend is deducted from this balance as your ads run.',
                     'billing.add_funds': '+ Add funds',
-                    'billing.add_funds_hint': 'Opens the Stripe-powered deposit flow.',
+                    'billing.add_funds_hint': 'Opens the PayPal-powered deposit flow.',
                     'billing.history_title': 'Billing history',
                     'billing.history_hint': 'A full transaction & receipt history is coming in the next settings update.',
                     'api.key_label': 'API key',
@@ -9525,7 +9521,7 @@
                     'billing.balance_label': '账户余额',
                     'billing.balance_hint': '广告投放支出会从此余额扣除。',
                     'billing.add_funds': '+ 充值',
-                    'billing.add_funds_hint': '打开 Stripe 充值流程。',
+                    'billing.add_funds_hint': '打开 PayPal 充值流程。',
                     'billing.history_title': '账单历史',
                     'billing.history_hint': '完整的交易和收据历史将在下个版本中推出。',
                     'api.key_label': 'API 密钥',
@@ -9754,7 +9750,7 @@
                     'deposit.custom': '自定义金额',
                     'deposit.custom_ph': '输入金额（最低 10 美元）',
                     'deposit.confirm': '充值',
-                    // deposit.note rendered dynamically (PayPal logo / Stripe text per provider)
+                    // deposit.note rendered dynamically — PayPal logo (live) or demo notice
                     'rule.title': '创建规则',
                     'rule.name': '规则名称',
                     'rule.name_ph': '例如：暂停低 CTR 广告',
@@ -9882,7 +9878,7 @@
                     'billing.balance_label': '帳戶餘額',
                     'billing.balance_hint': '廣告支出將自此餘額扣除。',
                     'billing.add_funds': '+ 加值',
-                    'billing.add_funds_hint': '開啟 Stripe 充值流程。',
+                    'billing.add_funds_hint': '開啟 PayPal 充值流程。',
                     'billing.history_title': '帳單歷史',
                     'billing.history_hint': '完整的交易與收據歷史將於下一個設定版本推出。',
                     'api.key_label': 'API 金鑰',
@@ -10111,7 +10107,7 @@
                     'deposit.custom': '自訂金額',
                     'deposit.custom_ph': '輸入金額（最低 10 美元）',
                     'deposit.confirm': '儲值',
-                    // deposit.note rendered dynamically (PayPal logo / Stripe text per provider)
+                    // deposit.note rendered dynamically — PayPal logo (live) or demo notice
                     'rule.title': '建立規則',
                     'rule.name': '規則名稱',
                     'rule.name_ph': '例如：暫停低 CTR 廣告',
@@ -10239,7 +10235,7 @@
                     'billing.balance_label': 'アカウント残高',
                     'billing.balance_hint': 'キャンペーン支出はこの残高から差し引かれます。',
                     'billing.add_funds': '+ 入金',
-                    'billing.add_funds_hint': 'Stripe による入金フローを開きます。',
+                    'billing.add_funds_hint': 'PayPal による入金フローを開きます。',
                     'billing.history_title': '請求履歴',
                     'billing.history_hint': '完全な取引・領収書履歴は次回の設定アップデートで提供されます。',
                     'api.key_label': 'API キー',
@@ -10468,7 +10464,7 @@
                     'deposit.custom': 'カスタム金額',
                     'deposit.custom_ph': '金額を入力（最低 10 ドル）',
                     'deposit.confirm': '入金',
-                    // deposit.note rendered dynamically (PayPal logo / Stripe text per provider)
+                    // deposit.note rendered dynamically — PayPal logo (live) or demo notice
                     'rule.title': 'ルール作成',
                     'rule.name': 'ルール名',
                     'rule.name_ph': '例：CTR の低いキャンペーンを一時停止',
@@ -10596,7 +10592,7 @@
                     'billing.balance_label': '계정 잔액',
                     'billing.balance_hint': '캠페인 지출은 이 잔액에서 차감됩니다.',
                     'billing.add_funds': '+ 자금 추가',
-                    'billing.add_funds_hint': 'Stripe 기반 입금 흐름을 엽니다.',
+                    'billing.add_funds_hint': 'PayPal 기반 입금 흐름을 엽니다.',
                     'billing.history_title': '청구 내역',
                     'billing.history_hint': '전체 거래 및 영수증 내역은 다음 설정 업데이트에서 제공됩니다.',
                     'api.key_label': 'API 키',
@@ -10825,7 +10821,7 @@
                     'deposit.custom': '직접 입력',
                     'deposit.custom_ph': '금액 입력 (최소 $10)',
                     'deposit.confirm': '충전',
-                    // deposit.note rendered dynamically (PayPal logo / Stripe text per provider)
+                    // deposit.note rendered dynamically — PayPal logo (live) or demo notice
                     'rule.title': '규칙 만들기',
                     'rule.name': '규칙 이름',
                     'rule.name_ph': '예: 낮은 CTR 캠페인 일시중지',
@@ -10953,7 +10949,7 @@
                     'billing.balance_label': 'Số dư tài khoản',
                     'billing.balance_hint': 'Chi tiêu chiến dịch được trừ từ số dư này khi quảng cáo chạy.',
                     'billing.add_funds': '+ Thêm tiền',
-                    'billing.add_funds_hint': 'Mở luồng nạp tiền qua Stripe.',
+                    'billing.add_funds_hint': 'Mở luồng nạp tiền qua PayPal.',
                     'billing.history_title': 'Lịch sử thanh toán',
                     'billing.history_hint': 'Lịch sử giao dịch & biên lai đầy đủ sẽ có trong bản cập nhật cài đặt tiếp theo.',
                     'api.key_label': 'API key',
@@ -11182,7 +11178,7 @@
                     'deposit.custom': 'Số tiền tùy chỉnh',
                     'deposit.custom_ph': 'Nhập số tiền (tối thiểu $10)',
                     'deposit.confirm': 'Nạp tiền',
-                    // deposit.note rendered dynamically (PayPal logo / Stripe text per provider)
+                    // deposit.note rendered dynamically — PayPal logo (live) or demo notice
                     'rule.title': 'Tạo quy tắc',
                     'rule.name': 'Tên quy tắc',
                     'rule.name_ph': 'VD: Tạm dừng chiến dịch CTR thấp',

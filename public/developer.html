@@ -2953,7 +2953,7 @@ await message.reply({
             <div class="section">
                 <div class="section-title" data-t="payout.title">Payout Settings</div>
                 <p style="font-size:13px;color:#6B7280;margin:0 0 14px;line-height:1.55;" data-t="payout.intro">
-                    Earn at least $25 in publisher accruals, connect Stripe, and the next Friday
+                    Earn at least $25 in publisher accruals, add your PayPal email, and the next Friday
                     cron pays you out automatically. Most publishers see their first payout 1–3 weeks
                     after installation, depending on traffic.
                 </p>
@@ -2973,14 +2973,14 @@ await message.reply({
                 </div>
                 <div id="payoutStatusBanner" style="display:none; margin-bottom: 16px; padding: 14px 16px; border-radius: 10px; font-size: 13px; line-height: 1.5;"></div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically every Friday when your balance reaches $25 and Stripe Connect is linked" data-t="payout.request_btn" data-t-title="payout.request_tip">Request Payout</button>
-                    <button id="connectStripeBtn" onclick="connectStripe()" style="
-                        padding: 12px 24px; background: #635BFF; color: #fff;
+                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically every Friday when your balance reaches $25 and your PayPal email is set" data-t="payout.request_btn" data-t-title="payout.request_tip">Request Payout</button>
+                    <button id="setPaypalEmailBtn" onclick="openPayoutMethodModal()" style="
+                        padding: 12px 24px; background: #0070BA; color: #fff;
                         border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px;
                     ">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-                        <span id="connectStripeLabel" data-t="payout.connect_stripe">Connect Stripe</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788l.038-.198.732-4.65.047-.255a.92.92 0 0 1 .92-.787h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.467z"/></svg>
+                        <span id="setPaypalEmailLabel" data-t="payout.connect_paypal">Set PayPal Email</span>
                     </button>
                 </div>
             </div>
@@ -3222,15 +3222,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             document.documentElement.style.scrollBehavior = 'smooth';
             initMediationWaterfall();
 
-            // Handle Stripe Connect return
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('stripe') === 'connected') {
-                setTimeout(() => showToast('Stripe Connect linked successfully! Payouts are now enabled.', 'success', 5000), 500);
-                window.history.replaceState({}, '', window.location.pathname);
-            } else if (params.get('stripe') === 'refresh') {
-                setTimeout(() => showToast('Stripe onboarding incomplete. Please try again.', 'error', 5000), 500);
-                window.history.replaceState({}, '', window.location.pathname);
-            }
+            // Legacy Stripe Connect return params — removed 2026-06-14 with
+            // the PayPal-only pivot. PayPal email collection is in-page; no
+            // OAuth round-trip means no return URL handler is needed.
         });
 
         // ───────────── Mediation waterfall wiring ─────────────
@@ -5373,7 +5367,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 if (!r.ok) return;
                 const s = await r.json();
                 const banner = document.getElementById('payoutStatusBanner');
-                const btnLabel = document.getElementById('connectStripeLabel');
+                const btnLabel = document.getElementById('setPaypalEmailLabel');
                 if (!banner) return;
                 // Update threshold display from API (single source of truth)
                 if (s.balance != null) {
@@ -5396,9 +5390,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     const eligible = s.payouts_enabled && !s.payout_blocked && balance >= 25;
                     btn.disabled = !eligible;
                     btn.title = !s.payouts_enabled
-                        ? 'Connect Stripe first to enable payouts'
+                        ? 'Add your PayPal email first to enable payouts'
                         : s.payout_blocked
-                            ? 'Resolve the Stripe issue above first'
+                            ? 'Resolve the payout issue above first'
                             : balance < 25
                                 ? `Minimum payout threshold is $25.00`
                                 : 'Request your payout now';
@@ -5406,72 +5400,48 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 // Render next-payout label
                 const nextEl = document.getElementById('nextPayoutDate');
                 if (s.next_payout_eta === 'blocked')          nextEl.textContent = 'Action Required';
-                else if (s.next_payout_eta === 'setup_required') nextEl.textContent = 'Set up Stripe';
+                else if (s.next_payout_eta === 'setup_required') nextEl.textContent = 'Add PayPal email';
                 else if (s.next_payout_eta === 'threshold_pending') nextEl.textContent = 'Below $25 threshold';
                 else if (s.next_payout_eta && s.next_payout_eta.includes('T')) {
                     const d = new Date(s.next_payout_eta);
                     nextEl.textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 }
-                // Render banner
+                // Render banner. Status now keys on `paypal_email_set` (per
+                // publisher_payout_methods.paypal_email being non-null) instead
+                // of the legacy `stripe_account_id` field. Backend still reports
+                // `payouts_enabled` and `payout_blocked` for those terminal states.
+                const hasEmail = !!(s.paypal_email_set || s.payouts_enabled);
                 if (s.payout_blocked) {
                     banner.style.display = 'block';
                     banner.style.background = '#FEF3E2';
                     banner.style.border = '1px solid #F59E0B';
                     banner.style.color = '#92400E';
                     banner.innerHTML = `
-                        <strong>Action required:</strong> ${escapeHtml(s.payout_blocked_reason || 'Stripe needs more info to enable payouts')}.
-                        <button onclick="resolveStripeIssue()" style="margin-left:10px; padding:6px 14px; background:#F59E0B; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Resolve in Stripe</button>
+                        <strong>Action required:</strong> ${escapeHtml(s.payout_blocked_reason || 'PayPal flagged a recent payout. Please update your PayPal email or contact support.')}
+                        <button onclick="openPayoutMethodModal()" style="margin-left:10px; padding:6px 14px; background:#F59E0B; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Update PayPal Email</button>
                     `;
-                    if (btnLabel) btnLabel.textContent = 'Reconnect Stripe';
-                } else if (!s.payouts_enabled && !s.stripe_account_id) {
+                    if (btnLabel) btnLabel.textContent = 'Update PayPal Email';
+                } else if (!hasEmail) {
                     banner.style.display = 'block';
-                    banner.style.background = '#EEF2FF';
-                    banner.style.border = '1px solid #6366F1';
-                    banner.style.color = '#3730A3';
-                    banner.innerHTML = `<strong>Get paid weekly.</strong> Connect Stripe (5 min) to receive automatic payouts every Friday when your balance hits $25.`;
-                    if (btnLabel) btnLabel.textContent = 'Connect Stripe';
-                } else if (!s.payouts_enabled && s.stripe_account_id) {
-                    banner.style.display = 'block';
-                    banner.style.background = '#FEF3E2';
-                    banner.style.border = '1px solid #F59E0B';
-                    banner.style.color = '#92400E';
-                    banner.innerHTML = `
-                        <strong>Stripe onboarding incomplete.</strong> Finish the verification steps to enable payouts.
-                        <button onclick="resolveStripeIssue()" style="margin-left:10px; padding:6px 14px; background:#F59E0B; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Finish Setup</button>
-                    `;
-                    if (btnLabel) btnLabel.textContent = 'Finish Setup';
+                    banner.style.background = '#F0FBFF';
+                    banner.style.border = '1px solid #0EA5E9';
+                    banner.style.color = '#0C4A6E';
+                    banner.innerHTML = `<strong>Get paid weekly.</strong> Add your PayPal email (30 seconds) to receive automatic payouts every Friday when your balance hits $25.`;
+                    if (btnLabel) btnLabel.textContent = 'Set PayPal Email';
                 } else {
-                    // payouts_enabled — hide banner, label the button "Manage Stripe"
+                    // PayPal email is set — hide banner, label the button "Update PayPal Email"
                     banner.style.display = 'none';
-                    if (btnLabel) btnLabel.textContent = 'Manage Stripe';
+                    if (btnLabel) btnLabel.textContent = 'Update PayPal Email';
                 }
             } catch (e) {
                 console.error('Payout status load error:', e);
             }
         }
 
-        // Banner click → mint a fresh Account Link via backend (HARD-3:
-        // never store the URL; it expires in ~5 minutes and is single-use).
-        async function resolveStripeIssue() {
-            if (!userProfile || !userProfile.id) return;
-            try {
-                const r = await fetch(`${API_BASE}/api/billing?action=refresh_connect`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ developer_id: userProfile.id }),
-                });
-                const data = await r.json();
-                if (data.onboarding_url) {
-                    window.location.href = data.onboarding_url;
-                } else if (data.mode === 'demo') {
-                    showToast('Demo mode — no Stripe to refresh', 'success');
-                } else {
-                    showToast(data.error || 'Could not refresh Stripe link', 'error');
-                }
-            } catch (e) {
-                showToast('Refresh failed: ' + e.message, 'error');
-            }
-        }
+        // resolveStripeIssue() removed 2026-06-14 — payout issues now route
+        // through openPayoutMethodModal() since PayPal payout problems are
+        // always resolvable by updating the recipient email (no separate
+        // OAuth onboarding step like Stripe Connect required).
 
         function escapeHtml(s) {
             return String(s || '').replace(/[&<>"']/g, (c) => ({
@@ -5479,7 +5449,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }[c]));
         }
 
-        // ───────────── STRIPE CONNECT PAYOUT ─────────────
+        // ───────────── PAYPAL PAYOUT REQUEST ─────────────
         async function requestPayout() {
             const session = JSON.parse(localStorage.getItem('bb_dev_session') || '{}');
             const btn = document.querySelector('.payout-btn');
@@ -5505,27 +5475,83 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
         }
 
-        async function connectStripe() {
+        // PayPal email collection — replaces the Stripe Connect OAuth flow
+        // (deprecated 2026-06-11 per the Taiwan-entity single-provider rule).
+        // Backend endpoints live on /api/auth: get_payout_method reads the
+        // current row from publisher_payout_methods; save_payout_method
+        // upserts the paypal_email.
+        async function openPayoutMethodModal() {
             const session = JSON.parse(localStorage.getItem('bb_dev_session') || '{}');
+            // Prefill with the current value if any
+            let current = '';
             try {
-                const r = await fetch(`${API_BASE}/api/billing?action=create_connect`, {
+                const r = await fetch(`${API_BASE}/api/auth?action=get_payout_method`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
-                    body: JSON.stringify({ developer_id: userProfile.id, email: userProfile.email })
+                });
+                if (r.ok) {
+                    const j = await r.json();
+                    current = (j.method && j.method.paypal_email) || '';
+                }
+            } catch (_) { /* silent — modal will open empty */ }
+
+            const modal = document.createElement('div');
+            modal.id = 'paypalEmailModal';
+            modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;padding:20px;';
+            modal.innerHTML = `
+                <div style="background:#fff;border-radius:14px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;">
+                    <div style="padding:18px 22px;background:linear-gradient(135deg,#0070BA,#003087);color:#fff;">
+                        <div style="font-size:17px;font-weight:700;">Set your PayPal email</div>
+                        <div style="font-size:12px;opacity:0.92;margin-top:2px;">Where Boost Boss sends your weekly payouts.</div>
+                    </div>
+                    <div style="padding:20px 22px;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;">PayPal email</label>
+                        <input type="email" id="paypalEmailInput" placeholder="you@example.com" value="${escapeHtml(current)}" style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;font-family:inherit;outline:none;" required>
+                        <div style="margin-top:10px;padding:10px 12px;background:#F0FBFF;border:1px solid #BAE6FD;border-radius:8px;font-size:11.5px;color:#0C4A6E;line-height:1.55;">
+                            Must be the email tied to a verified PayPal account. PayPal will send you a separate receipt for each payout. You can change this anytime, but changes require 2FA when MFA is enabled.
+                        </div>
+                        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+                            <button type="button" onclick="closePayoutMethodModal()" style="padding:10px 18px;background:#fff;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">Cancel</button>
+                            <button type="button" id="paypalEmailSaveBtn" onclick="savePayoutMethod()" style="padding:10px 18px;background:#0070BA;border:none;border-radius:8px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;">Save</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            setTimeout(() => document.getElementById('paypalEmailInput').focus(), 50);
+        }
+
+        function closePayoutMethodModal() {
+            const m = document.getElementById('paypalEmailModal');
+            if (m) m.remove();
+        }
+
+        async function savePayoutMethod() {
+            const session = JSON.parse(localStorage.getItem('bb_dev_session') || '{}');
+            const input = document.getElementById('paypalEmailInput');
+            const email = (input.value || '').trim().toLowerCase();
+            if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                showToast('Please enter a valid PayPal email', 'error');
+                input.focus();
+                return;
+            }
+            const btn = document.getElementById('paypalEmailSaveBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            try {
+                const r = await fetch(`${API_BASE}/api/auth?action=save_payout_method`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                    body: JSON.stringify({ paypal_email: email }),
                 });
                 const data = await r.json();
-                if (!r.ok) {
-                    throw new Error(data.error || `Server returned ${r.status}`);
-                }
-                if (data.onboarding_url) {
-                    window.location.href = data.onboarding_url;
-                } else if (data.mode === 'demo') {
-                    showToast('Stripe Connect linked (demo mode)', 'success');
-                } else {
-                    showToast(data.error || 'Failed to start Stripe Connect', 'error');
-                }
+                if (!r.ok) throw new Error(data.error || `Server returned ${r.status}`);
+                showToast('PayPal email saved — payouts enabled', 'success');
+                closePayoutMethodModal();
+                loadPayoutStatus();
             } catch (e) {
-                showToast('Stripe Connect failed: ' + e.message, 'error');
+                showToast('Save failed: ' + e.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Save';
             }
         }
 
@@ -5994,7 +6020,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'brand.iab22': 'Shopping',
                     'notifs.intro': 'Email me when…',
                     'notifs.payout_sent_title': 'A payout is sent',
-                    'notifs.payout_sent_desc': 'Confirmation each time a payout reaches your Stripe account.',
+                    'notifs.payout_sent_desc': 'Confirmation each time a payout reaches your PayPal account.',
                     'notifs.payout_failed_title': 'A payout fails',
                     'notifs.payout_failed_desc': 'Alerts if a payout could not be completed so you can fix it fast.',
                     'notifs.monthly_title': 'Monthly earnings summary',
@@ -6158,13 +6184,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'placements.intent': 'Intent',
                     'placements.hint_d': 'means Benna is matching the right ads to that placement\'s context.',
                     'payout.title': 'Payout Settings',
-                    'payout.intro': 'Earn at least $25 in publisher accruals, connect Stripe, and the next Friday cron pays you out automatically. Most publishers see their first payout 1–3 weeks after installation, depending on traffic.',
+                    'payout.intro': 'Earn at least $25 in publisher accruals, add your PayPal email, and the next Friday cron pays you out automatically. Most publishers see their first payout 1–3 weeks after installation, depending on traffic.',
                     'payout.next_date': 'Next Payout Date',
                     'payout.pending': 'Pending Payout',
                     'payout.min_threshold': 'Minimum Threshold',
                     'payout.request_btn': 'Request Payout',
-                    'payout.request_tip': 'Payouts are processed automatically every Friday when your balance reaches $25 and Stripe Connect is linked',
-                    'payout.connect_stripe': 'Connect Stripe',
+                    'payout.request_tip': 'Payouts are processed automatically every Friday when your balance reaches $25 and your PayPal email is set',
+                    'payout.connect_paypal': 'Set PayPal Email',
                     'qs.title': 'Quick Start',
                     'qs.full_docs': 'Full Documentation',
                     'qs.try_playground': 'Try sandbox',
@@ -6390,7 +6416,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'brand.iab22': '购物',
                     'notifs.intro': '在以下情况给我发邮件…',
                     'notifs.payout_sent_title': '已发出打款',
-                    'notifs.payout_sent_desc': '每次打款到达您的 Stripe 账户时的确认邮件。',
+                    'notifs.payout_sent_desc': '每次打款到达您的 PayPal 账户时的确认邮件。',
                     'notifs.payout_failed_title': '打款失败',
                     'notifs.payout_failed_desc': '如果打款无法完成,会发送提醒以便您快速处理。',
                     'notifs.monthly_title': '月度收益摘要',
@@ -6551,13 +6577,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'placements.intent': '意图',
                     'placements.hint_d': '表示 Benna 正在为该版位的上下文匹配合适的广告。',
                     'payout.title': '打款设置',
-                    'payout.intro': '累计至少 $25 的发布商收益,连接 Stripe,下一个周五的定时任务会自动打款给您。大多数发布商在安装后 1–3 周内收到首笔打款,具体取决于流量。',
+                    'payout.intro': '累计至少 $25 的发布商收益,设置您的 PayPal 邮箱,下一个周五的定时任务会自动打款给您。大多数发布商在安装后 1–3 周内收到首笔打款,具体取决于流量。',
                     'payout.next_date': '下次打款日期',
                     'payout.pending': '待处理打款',
                     'payout.min_threshold': '最低门槛',
                     'payout.request_btn': '申请打款',
-                    'payout.request_tip': '每个周五,当余额达到 $25 且已连接 Stripe Connect 时,会自动处理打款',
-                    'payout.connect_stripe': '连接 Stripe',
+                    'payout.request_tip': '每个周五,当余额达到 $25 且已设置 PayPal 邮箱时,会自动处理打款',
+                    'payout.connect_paypal': '设置 PayPal 邮箱',
                     'qs.title': '快速开始',
                     'qs.full_docs': '完整文档',
                     'qs.try_playground': '沙盒试用',
@@ -6783,7 +6809,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'brand.iab22': '購物',
                     'notifs.intro': '在以下情況寄 Email 給我…',
                     'notifs.payout_sent_title': '撥款已寄出',
-                    'notifs.payout_sent_desc': '每次撥款到達您的 Stripe 帳戶時的確認 Email。',
+                    'notifs.payout_sent_desc': '每次撥款到達您的 PayPal 帳戶時的確認 Email。',
                     'notifs.payout_failed_title': '撥款失敗',
                     'notifs.payout_failed_desc': '如果撥款無法完成,會發送提醒以便您快速處理。',
                     'notifs.monthly_title': '月度收益摘要',
@@ -6944,13 +6970,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'placements.intent': '意圖',
                     'placements.hint_d': '表示 Benna 正在為該版位的情境匹配合適的廣告。',
                     'payout.title': '撥款設定',
-                    'payout.intro': '累計至少 $25 的發布商收益,連接 Stripe,下一個週五的排程任務會自動撥款給您。多數發布商會在安裝後 1–3 週內收到首筆撥款,實際取決於流量。',
+                    'payout.intro': '累計至少 $25 的發布商收益,設定您的 PayPal 信箱,下一個週五的排程任務會自動撥款給您。多數發布商會在安裝後 1–3 週內收到首筆撥款,實際取決於流量。',
                     'payout.next_date': '下次撥款日期',
                     'payout.pending': '待處理撥款',
                     'payout.min_threshold': '最低門檻',
                     'payout.request_btn': '申請撥款',
-                    'payout.request_tip': '每個週五,當餘額達到 $25 且已連接 Stripe Connect 時,會自動處理撥款',
-                    'payout.connect_stripe': '連接 Stripe',
+                    'payout.request_tip': '每個週五,當餘額達到 $25 且已設定 PayPal 信箱時,會自動處理撥款',
+                    'payout.connect_paypal': '設定 PayPal 信箱',
                     'qs.title': '快速開始',
                     'qs.full_docs': '完整文件',
                     'qs.try_playground': '沙盒試用',
@@ -7176,7 +7202,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'brand.iab22': 'ショッピング',
                     'notifs.intro': '次の場合にメール通知…',
                     'notifs.payout_sent_title': '支払いが送信された',
-                    'notifs.payout_sent_desc': '支払いが Stripe アカウントに届くたびに送信される確認メール。',
+                    'notifs.payout_sent_desc': '支払いが PayPal アカウントに届くたびに送信される確認メール。',
                     'notifs.payout_failed_title': '支払いに失敗した',
                     'notifs.payout_failed_desc': '支払いが完了できなかった場合、迅速に対処できるよう通知します。',
                     'notifs.monthly_title': '月次収益サマリー',
@@ -7337,13 +7363,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'placements.intent': 'インテント',
                     'placements.hint_d': 'が高いほど、Benna がその配置のコンテキストに合う広告をマッチしています。',
                     'payout.title': '支払い設定',
-                    'payout.intro': 'パブリッシャー残高で少なくとも $25 を稼ぎ、Stripe を接続すると、次の金曜日の cron が自動的に支払います。多くのパブリッシャーは、トラフィックに応じてインストール後 1〜3 週間で初回支払いを受け取ります。',
+                    'payout.intro': 'パブリッシャー残高で少なくとも $25 を稼ぎ、PayPal メールアドレスを設定すると、次の金曜日の cron が自動的に支払います。多くのパブリッシャーは、トラフィックに応じてインストール後 1〜3 週間で初回支払いを受け取ります。',
                     'payout.next_date': '次回支払日',
                     'payout.pending': '保留中の支払い',
                     'payout.min_threshold': '最低しきい値',
                     'payout.request_btn': '支払いをリクエスト',
-                    'payout.request_tip': '残高が $25 に達し、Stripe Connect がリンクされている毎週金曜日に支払いが自動処理されます',
-                    'payout.connect_stripe': 'Stripe を接続',
+                    'payout.request_tip': '残高が $25 に達し、PayPal メールアドレスが設定されている毎週金曜日に支払いが自動処理されます',
+                    'payout.connect_paypal': 'PayPal メールを設定',
                     'qs.title': 'クイックスタート',
                     'qs.full_docs': '完全ドキュメント',
                     'qs.try_playground': 'サンドボックスで試す',
@@ -7569,7 +7595,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'brand.iab22': '쇼핑',
                     'notifs.intro': '다음 경우 이메일 알림…',
                     'notifs.payout_sent_title': '정산이 전송됨',
-                    'notifs.payout_sent_desc': '정산이 Stripe 계정에 도달할 때마다 확인 이메일이 전송됩니다.',
+                    'notifs.payout_sent_desc': '정산이 PayPal 계정에 도달할 때마다 확인 이메일이 전송됩니다.',
                     'notifs.payout_failed_title': '정산 실패',
                     'notifs.payout_failed_desc': '정산이 완료되지 않으면 빠르게 조치할 수 있도록 알립니다.',
                     'notifs.monthly_title': '월간 수익 요약',
@@ -7730,13 +7756,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'placements.intent': '의도',
                     'placements.hint_d': '는 Benna가 해당 위치의 컨텍스트에 맞는 광고를 매칭하고 있음을 의미합니다.',
                     'payout.title': '정산 설정',
-                    'payout.intro': '퍼블리셔 적립금으로 최소 $25를 벌고 Stripe를 연결하면 다음 금요일 cron이 자동으로 정산합니다. 대부분 퍼블리셔는 트래픽에 따라 설치 후 1–3주 안에 첫 정산을 받습니다.',
+                    'payout.intro': '퍼블리셔 적립금으로 최소 $25를 벌고 PayPal 이메일을 설정하면 다음 금요일 cron이 자동으로 정산합니다. 대부분 퍼블리셔는 트래픽에 따라 설치 후 1–3주 안에 첫 정산을 받습니다.',
                     'payout.next_date': '다음 정산일',
                     'payout.pending': '대기 중인 정산',
                     'payout.min_threshold': '최소 임계값',
                     'payout.request_btn': '정산 요청',
-                    'payout.request_tip': '잔액이 $25에 도달하고 Stripe Connect가 연결되면 매주 금요일 자동으로 정산됩니다',
-                    'payout.connect_stripe': 'Stripe 연결',
+                    'payout.request_tip': '잔액이 $25에 도달하고 PayPal 이메일이 설정되면 매주 금요일 자동으로 정산됩니다',
+                    'payout.connect_paypal': 'PayPal 이메일 설정',
                     'qs.title': '빠른 시작',
                     'qs.full_docs': '전체 문서',
                     'qs.try_playground': '샌드박스 시도',
@@ -7962,7 +7988,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'brand.iab22': 'Mua sắm',
                     'notifs.intro': 'Gửi email cho tôi khi…',
                     'notifs.payout_sent_title': 'Đã gửi thanh toán',
-                    'notifs.payout_sent_desc': 'Email xác nhận mỗi lần thanh toán đến tài khoản Stripe của bạn.',
+                    'notifs.payout_sent_desc': 'Email xác nhận mỗi lần thanh toán đến tài khoản PayPal của bạn.',
                     'notifs.payout_failed_title': 'Thanh toán thất bại',
                     'notifs.payout_failed_desc': 'Cảnh báo nếu thanh toán không thể hoàn tất để bạn xử lý nhanh.',
                     'notifs.monthly_title': 'Tóm tắt doanh thu hàng tháng',
@@ -8123,13 +8149,13 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'placements.intent': 'Intent',
                     'placements.hint_d': 'cao hơn có nghĩa Benna đang khớp đúng ad với context của placement đó.',
                     'payout.title': 'Cài đặt thanh toán',
-                    'payout.intro': 'Kiếm tối thiểu $25 tích lũy publisher, kết nối Stripe, cron thứ Sáu kế tiếp sẽ tự động thanh toán cho bạn. Phần lớn publisher nhận thanh toán đầu tiên trong vòng 1–3 tuần sau cài đặt, tùy traffic.',
+                    'payout.intro': 'Kiếm tối thiểu $25 tích lũy publisher, đặt email PayPal của bạn, cron thứ Sáu kế tiếp sẽ tự động thanh toán cho bạn. Phần lớn publisher nhận thanh toán đầu tiên trong vòng 1–3 tuần sau cài đặt, tùy traffic.',
                     'payout.next_date': 'Ngày thanh toán tiếp theo',
                     'payout.pending': 'Thanh toán chờ xử lý',
                     'payout.min_threshold': 'Ngưỡng tối thiểu',
                     'payout.request_btn': 'Yêu cầu thanh toán',
-                    'payout.request_tip': 'Thanh toán xử lý tự động mỗi thứ Sáu khi số dư đạt $25 và Stripe Connect đã liên kết',
-                    'payout.connect_stripe': 'Kết nối Stripe',
+                    'payout.request_tip': 'Thanh toán xử lý tự động mỗi thứ Sáu khi số dư đạt $25 và email PayPal đã được đặt',
+                    'payout.connect_paypal': 'Đặt email PayPal',
                     'qs.title': 'Bắt đầu nhanh',
                     'qs.full_docs': 'Tài liệu đầy đủ',
                     'qs.try_playground': 'Thử sandbox',
