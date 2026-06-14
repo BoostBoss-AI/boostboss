@@ -561,9 +561,13 @@ async function supabaseHandler(action, body, req, res) {
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (!token) return res.status(401).json({ error: "Missing access token. Sign in first." });
 
-    const { role: roleRaw, company_name, app_name } = body || {};
+    const { role: roleRaw, company_name, app_name, integration_door: doorRaw } = body || {};
     const role = roleRaw === "advertiser" || roleRaw === "developer" ? roleRaw : null;
     if (!role) return res.status(400).json({ error: "Missing or invalid role" });
+    // Whitelist the integration door so a misbehaving client can't shove
+    // arbitrary strings into the column behind the CHECK constraint.
+    const ALLOWED_DOORS = new Set(["mcp", "js_snippet", "npm_sdk", "rest"]);
+    const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorRaw)) ? doorRaw : null;
 
     const { data: { user }, error: meErr } = await supabaseAnon.auth.getUser(token);
     if (meErr || !user) return res.status(401).json({ error: "Invalid or expired token. Sign in again." });
@@ -600,10 +604,11 @@ async function supabaseHandler(action, body, req, res) {
       const { data, error } = await supabaseAdmin
         .from("developers")
         .insert({
-          id:       user.id,
-          email:    user.email,
-          app_name: app_name || (user.email || "").split("@")[0],
-          api_key:  apiKey,
+          id:                user.id,
+          email:             user.email,
+          app_name:          app_name || (user.email || "").split("@")[0],
+          api_key:           apiKey,
+          integration_door:  integration_door,  // nullable; whitelisted above
         })
         .select("*").maybeSingle();
       if (error) return res.status(500).json({ error: "Could not create developer profile: " + error.message });
@@ -2029,11 +2034,14 @@ function resetRedirectFor(role) {
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
-  const { email, password, role, company_name, app_name } = body;
+  const { email, password, role, company_name, app_name, integration_door: doorRaw } = body;
   if (!email || !password || !role) return res.status(400).json({ error: "Missing email, password, or role" });
   if (role !== "advertiser" && role !== "developer") {
     return res.status(400).json({ error: "Invalid role" });
   }
+  // Whitelist integration_door before it touches the DB CHECK constraint.
+  const ALLOWED_DOORS = new Set(["mcp", "js_snippet", "npm_sdk", "rest"]);
+  const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorRaw)) ? doorRaw : null;
 
   // Phase 3A change (2026-06-10): replaced the previous
   // `supabaseAdmin.auth.admin.createUser({ email_confirm: true })` bypass
@@ -2141,6 +2149,7 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     const { error } = await supabaseAdmin.from("developers").insert({
       id: userId, email, app_name: app_name || "My AI App",
       api_key: apiKey, status: "active",
+      integration_door: integration_door,  // nullable; whitelisted above
     });
     if (error) console.error("[Auth] Developer insert error:", error.message);
   }
