@@ -242,6 +242,7 @@
           <a href="/vi" data-lang="vi">Tiếng Việt</a>
         </div>
       </div>
+      <a class="btn btn-ghost" href="/publish/signin" data-i18n="publish.cta.sign_in">Sign in</a>
       <a class="btn btn-primary" href="/publish/signup" data-i18n="publish.cta.start_earning">Start earning</a>
     </div>
   </div>
@@ -540,32 +541,60 @@
   </div>
 </section>
 
-<!-- SITE FOOTER -->
-<footer class="site-footer">
-  <div class="wrap footer-inner">
-    <a class="brand footer-brand" href="/">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
-      <span class="brand-name">Boost Boss</span>
-    </a>
-    <div class="footer-links">
-      <a href="/publish" data-i18n="pubfoot.publishers">Publishers</a>
-      <a href="/publish/ai-apps">AI Apps</a>
-      <a href="/publish/extensions">Extensions</a>
-      <a href="/publish/bots">Bots</a>
-      <a href="/publish/no-code">Custom GPTs</a>
-      <a href="/docs" data-i18n="pubfoot.docs">Docs</a>
-      <a href="/trust" data-i18n="pubfoot.trust">Trust</a>
+<!-- SITE FOOTER — universal (matches /index.html) -->
+<footer style="background:#FAFAF7;border-top:1px solid #EAEAEF;padding:56px 0 32px;">
+  <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
+    <div class="foot-grid" style="display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:48px;margin-bottom:40px;">
+      <div>
+        <div class="foot-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <img src="/favicon.svg?v=rocket-20260421" alt="" style="width:32px;height:32px;">
+          <span class="brand-name" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:-0.5px;">Boost Boss</span>
+        </div>
+        <p class="foot-tag" style="font-size:14px;color:#4B4B5E;line-height:1.6;">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
+      </div>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Product</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/publish" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Publishers</a></li>
+          <li style="padding:5px 0;"><a href="/ads" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SuperBoost</a></li>
+          <li style="padding:5px 0;"><a href="/exchange" style="font-size:14px;color:#4B4B5E;text-decoration:none;">BBX</a></li>
+          <li style="padding:5px 0;"><a href="/pricing" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Pricing</a></li>
+          <li style="padding:5px 0;"><a href="/demo" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Live demo</a></li>
+          <li style="padding:5px 0;"><a href="https://affiliate.boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Affiliate</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Resources</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/docs" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Documentation</a></li>
+          <li style="padding:5px 0;"><a href="/docs/api-reference" style="font-size:14px;color:#4B4B5E;text-decoration:none;">API reference</a></li>
+          <li style="padding:5px 0;"><a href="/docs/api-reference#sdks" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SDK</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Company</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/about" style="font-size:14px;color:#4B4B5E;text-decoration:none;">About</a></li>
+          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Contact</a></li>
+          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Legal</h4>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:5px 0;"><a href="/terms" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Terms of Service</a></li>
+          <li style="padding:5px 0;"><a href="/privacy" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Privacy Policy</a></li>
+          <li style="padding:5px 0;"><a href="/refunds" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Refund Policy</a></li>
+          <li style="padding:5px 0;"><a href="/aup" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Acceptable Use</a></li>
+          <li style="padding:5px 0;"><a href="/cookies" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Cookie Policy</a></li>
+          <li style="padding:5px 0;"><a href="/trust" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Trust center</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="footer-links footer-legal-links">
-      <a href="/publisher-agreement">Publisher Agreement</a>
-      <a href="/terms">Terms</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/aup">Acceptable Use</a>
-      <a href="/cookies">Cookies</a>
-      <a href="/about">About</a>
-      <a href="/pricing">Pricing</a>
+    <div class="foot-bottom" style="padding-top:28px;border-top:1px solid #EAEAEF;font-size:13px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <span>© 2026 Boost Boss · All rights reserved.</span>
+      <span>Made for the AI era.</span>
     </div>
-    <div class="footer-copy" data-i18n="pubfoot.copy">© 2026 Boost Boss</div>
   </div>
 </footer>
 <script>
