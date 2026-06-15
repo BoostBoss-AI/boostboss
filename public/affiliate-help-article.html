@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help Center — Boost Boss Affiliate</title>
+<meta name="description" content="Boost Boss Affiliate help center article.">
+<link rel="canonical" href="https://affiliate.boostboss.ai/help">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF2D78; --pink-dark: #E01E65;
+    --cyan: #04BEFE; --yellow: #FFE600;
+    --ink: #0F0F1A; --ink-soft: #4B4B5E;
+    --muted: #6B7280; --line: #EAEAEF; --line-soft: #F1F1F4;
+    --bg: #FFFFFF; --bg-soft: #FAFAF7;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.7; font-size: 15.5px;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--pink); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.015em; color: var(--ink); }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: var(--bg-soft); padding: 2px 6px; border-radius: 4px; color: var(--pink); }
+
+  nav.help-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.help-nav .inner {
+    max-width: 1000px; margin: 0 auto; padding: 0 24px;
+    height: 64px; display: flex; align-items: center; gap: 18px;
+  }
+  nav.help-nav .brand {
+    display: flex; align-items: center; gap: 10px; color: inherit;
+  }
+  nav.help-nav .brand img { width: 32px; height: 32px; }
+  nav.help-nav .brand .name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px; font-weight: 700; color: var(--ink);
+  }
+  nav.help-nav .brand .tag {
+    font-size: 10px; font-weight: 700; color: var(--pink);
+    padding: 2px 8px; border-radius: 99px;
+    background: rgba(255,45,120,0.10); letter-spacing: 0.5px;
+  }
+  nav.help-nav .spacer { flex: 1; }
+  nav.help-nav .back {
+    font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none;
+    padding: 7px 14px; border-radius: 7px;
+    border: 1px solid var(--line); transition: border-color 0.15s, background 0.15s;
+  }
+  nav.help-nav .back:hover { border-color: var(--ink); background: var(--bg-soft); }
+
+  .crumbs {
+    max-width: 800px; margin: 0 auto; padding: 24px 24px 8px;
+    font-size: 13.5px; color: var(--ink-soft);
+  }
+  .crumbs a { color: var(--ink-soft); text-decoration: none; }
+  .crumbs a:hover { color: var(--ink); text-decoration: underline; }
+  .crumbs .sep { margin: 0 8px; color: var(--muted); }
+
+  article {
+    max-width: 800px; margin: 0 auto; padding: 16px 24px 80px;
+  }
+  article h1 {
+    font-size: 34px; font-weight: 700; line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  article .lede {
+    font-size: 17px; color: var(--ink-soft); margin-bottom: 32px;
+    padding-bottom: 24px; border-bottom: 1px solid var(--line);
+  }
+  article h2 {
+    font-size: 22px; font-weight: 700;
+    margin: 40px 0 12px; padding-top: 8px;
+  }
+  article h3 {
+    font-size: 17px; font-weight: 700;
+    margin: 28px 0 10px;
+  }
+  article p { color: var(--ink-soft); margin-bottom: 14px; }
+  article ul, article ol { color: var(--ink-soft); padding-left: 24px; margin-bottom: 16px; }
+  article li { margin-bottom: 8px; }
+  article strong { color: var(--ink); }
+  article .callout {
+    background: var(--bg-soft); border-left: 3px solid var(--pink);
+    padding: 14px 18px; border-radius: 0 8px 8px 0;
+    margin: 20px 0; font-size: 14.5px; color: var(--ink-soft);
+  }
+  article .callout strong { color: var(--ink); }
+  article .callout.info { border-left-color: var(--cyan); background: #F0FBFF; }
+  article .callout.warn { border-left-color: #F59E0B; background: #FFFBEB; }
+
+  article pre {
+    background: #0F0F1A; color: #E5E7EB; padding: 16px 18px;
+    border-radius: 8px; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.7; overflow-x: auto;
+    margin: 18px 0;
+  }
+  article pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+  /* Related articles tile-list at the bottom of each article. */
+  .related {
+    max-width: 800px; margin: 0 auto 56px; padding: 0 24px;
+  }
+  .related h3 {
+    font-size: 16px; font-weight: 700; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 14px; padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .related-list {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  }
+  @media (max-width: 600px) { .related-list { grid-template-columns: 1fr; } }
+  .related-list a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border: 1px solid var(--line);
+    border-radius: 9px; color: var(--ink); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .related-list a:hover {
+    border-color: var(--ink); background: var(--bg-soft);
+  }
+  .related-list a .arrow { color: var(--muted); flex-shrink: 0; margin-left: auto; font-size: 13px; }
+
+  /* Contact-us strip — minor variant of the landing version. */
+  .contact-band {
+    background: var(--bg-soft); border-top: 1px solid var(--line);
+    padding: 40px 24px 52px; text-align: center;
+  }
+  .contact-band h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .contact-band a {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; background: #fff; border: 1px solid var(--line);
+    border-radius: 10px; color: var(--ink); text-decoration: none;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(15,15,26,0.04);
+    transition: border-color 0.15s;
+  }
+  .contact-band a:hover { border-color: var(--ink); }
+
+  /* Article-not-found state */
+  .notfound {
+    max-width: 600px; margin: 80px auto; padding: 0 24px; text-align: center;
+  }
+  .notfound h1 { font-size: 28px; margin-bottom: 12px; }
+  .notfound p { color: var(--ink-soft); margin-bottom: 24px; }
+  .notfound a {
+    display: inline-block; padding: 10px 24px;
+    background: var(--pink); color: #fff; border-radius: 8px;
+    font-weight: 600; text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<nav class="help-nav">
+  <div class="inner">
+    <a class="brand" href="/help">
+      <img src="/email-logo.png" alt="Boost Boss">
+      <span class="name">Boost Boss</span>
+      <span class="tag">AFFILIATE</span>
+    </a>
+    <div class="spacer"></div>
+    <a class="back" href="/affiliate">← Back to dashboard</a>
+  </div>
+</nav>
+
+<div id="article-mount"></div>
+
+<section class="contact-band">
+  <h3>Still need help?</h3>
+  <a href="mailto:affiliate@boostboss.ai?subject=Affiliate%20help">📧 affiliate@boostboss.ai</a>
+</section>
+
+<script>
+  // ════════════════════════════════════════════════════════════════════
+  //  Article store — each entry is one help-center article.
+  //  Body is plain HTML. Keep things tight: lede + 2-5 H2 sections
+  //  + a few practical bullets each. Sidebar 'related' surfaces 4
+  //  cross-links per article.
+  // ════════════════════════════════════════════════════════════════════
+  var ARTICLES = {
+
+    'getting-started': {
+      title: 'Getting started as a Boost Boss affiliate',
+      lede: 'Boost Boss is an MCP-native ad network. As an affiliate you save ads you discover inside AI tools, share them with your audience, and earn when they buy. Here\'s the 60-second tour.',
+      related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+      body: '\
+<h2>What Boost Boss is, in one paragraph</h2>\
+<p>Boost Boss serves sponsored content inside AI surfaces — Claude Desktop, Cursor, ChatGPT plugins, Discord and Slack bots, browser extensions. Advertisers run campaigns and pay per impression / click / purchase. Affiliates promote products from the catalog and earn a commission when buyers convert through their share link.</p>\
+\
+<h2>Three things to do in your first 10 minutes</h2>\
+<ol>\
+  <li><strong>Browse the catalog.</strong> Open <a href="/affiliate#catalog">Product Catalog</a> in the sidebar and look at what advertisers have registered. Sort by commission to find high-converting offers.</li>\
+  <li><strong>Mint your first share link.</strong> Click "Get Link" on any product you want to promote. The link routes through <code>/s/&lt;token&gt;</code> which redirects with a <code>bb_click=&lt;UUID&gt;</code> attribution parameter.</li>\
+  <li><strong>Set up your payout method.</strong> Go to <a href="/affiliate#payouts">Payout Record</a> and add the PayPal email where you want to be paid. Without this, earnings accrue but don\'t settle.</li>\
+</ol>\
+\
+<h2>How earnings work</h2>\
+<p>When someone clicks your share link and buys, you earn a share of what Boost Boss calls the <strong>Affiliate Pool</strong> — a percentage of the order that the seller specifically funds for affiliate marketing. The split is <strong>70% to you / 30% to Boost Boss</strong>. See <a href="/affiliate/help/article?id=commission-model">Commission Model v2 explained</a>.</p>\
+\
+<div class="callout info"><strong>Plain version:</strong> if a product has a 20% affiliate pool and someone buys $100 worth, Boost Boss takes the $20 pool, gives you $14 (70% of the pool), and keeps $6 (30%). The seller gets the remaining $80 minus PayPal\'s processor fees.</div>\
+\
+<h2>What to do next</h2>\
+<ul>\
+  <li>Read <a href="/affiliate/help/article?id=share-links">how attribution works</a> so you understand the data behind your link clicks.</li>\
+  <li>Skim <a href="/affiliate/help/article?id=ftc-disclosure">FTC disclosure rules</a> — every public promotion needs a sponsorship disclosure.</li>\
+  <li>Choose where you\'ll promote: <a href="/affiliate/help/article?id=promote-social">social media</a>, <a href="/affiliate/help/article?id=promote-newsletter">newsletter</a>, or both.</li>\
+</ul>'
+    },
+
+    'saving-ads': {
+      title: 'Saving ads & browsing the catalog',
+      lede: 'Two ways to find products to promote: save an ad you spot inside an AI tool, or browse the full advertiser catalog from your dashboard.',
+      related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+      body: '\
+<h2>Saving from inside an AI tool</h2>\
+<p>When you see a Boost Boss-served ad in a tool like Cursor, Claude Desktop, or a Discord bot, tap the bookmark icon. The product lands in your <a href="/affiliate#saves">My Saves</a> view with one click — no manual entry, no copy-paste.</p>\
+<p>What gets saved: the product (parent), not the individual creative. So if the advertiser runs multiple campaigns or seasonal variants for the same product, your saved entry still points at the right destination. New campaigns automatically use the best-active match at click-time.</p>\
+\
+<h2>Browsing the catalog</h2>\
+<p><a href="/affiliate#catalog">Product Catalog</a> shows every advertiser product that\'s passed audit. Two filters matter most:</p>\
+<ul>\
+  <li><strong>Commission</strong> — sorts products by their affiliate pool percentage. Higher is more upside per sale.</li>\
+  <li><strong>Category</strong> — narrows to a vertical (SaaS, infra, content tools, etc.) so you can match products to your audience.</li>\
+</ul>\
+\
+<h2>What "audit-approved" means</h2>\
+<p>Every product visible in the catalog has passed Boost Boss\'s audit — accurate description, working fulfilment URL, honest "original price" comparison (if displayed), valid refund path. Audit-rejected products don\'t appear in the catalog and can\'t be promoted.</p>\
+<div class="callout"><strong>Why this matters to you:</strong> products in the catalog are vetted, so the conversion risk on your end is lower. You\'re not stuck promoting something that breaks at checkout or never delivers.</div>'
+    },
+
+    'share-links': {
+      title: 'Share links & bb_click attribution',
+      lede: 'How Boost Boss knows a sale came from your link, why the system survives cookie loss and Safari ITP, and what to put in your share links so analytics work for both you and the advertiser.',
+      related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+      body: '\
+<h2>The basic flow</h2>\
+<ol>\
+  <li>You mint a share link in the dashboard. It looks like <code>https://boostboss.ai/s/&lt;token&gt;</code>.</li>\
+  <li>Someone clicks it. Our redirect server appends <code>?bb_click=&lt;UUID&gt;</code> to the destination URL and 302-redirects them to the advertiser\'s product page.</li>\
+  <li>The UUID is logged with your affiliate ID, click timestamp, referring URL, and a coarse region. We also drop a first-party cookie as fallback.</li>\
+  <li>If a sale follows within the 30-day clawback window, the <code>bb_click</code> UUID on the buyer\'s purchase URL is what attributes the sale back to you.</li>\
+</ol>\
+\
+<h2>Why URL-based attribution is load-bearing</h2>\
+<p>Most affiliate networks rely on third-party cookies — which are blocked or capped by Safari ITP, Firefox ETP, and increasingly Chrome. Boost Boss treats the cookie as a fallback. The <strong>bb_click UUID in the URL is the load-bearing identifier</strong>. As long as the URL parameter survives to the conversion event, attribution works regardless of what the browser does.</p>\
+\
+<h2>What gets stripped</h2>\
+<p>Some platforms strip URL parameters when users share links:</p>\
+<ul>\
+  <li><strong>Twitter/X</strong> generally preserves them.</li>\
+  <li><strong>iMessage / SMS</strong> preserves them.</li>\
+  <li><strong>Some Facebook posts</strong> add their own fbclid but preserve yours.</li>\
+  <li><strong>Some email clients</strong> shorten URLs through a redirect — usually still preserves params.</li>\
+</ul>\
+<p>If your audience converts at a much lower rate than your clicks, check whether the URL is being mangled at the channel.</p>\
+\
+<h2>Sub IDs for channel tracking</h2>\
+<p>When minting a link, you can add up to 5 Sub IDs (a-z, A-Z, 0-9). These don\'t affect attribution — they\'re tags you assign so you can later tell which channel brought the click. Example: <code>sub1=twitter</code>, <code>sub1=newsletter-may</code>. Visible in your <a href="/affiliate#conv-soon">Sales Report</a>.</p>'
+    },
+
+    'commission-model': {
+      title: 'Commission Model v2 — 70/30 split explained',
+      lede: 'How Boost Boss splits a sale between the seller, you, and the platform. The new model replaced a flat 15% top-line take with a per-product affiliate pool — clearer incentives and only earning when an affiliate drives the sale.',
+      related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+      body: '\
+<h2>The shape of a sale</h2>\
+<p>Every product on the catalog has an <strong>Affiliate Pool Percentage</strong> set by the seller. That\'s the share of the order that funds affiliate marketing. Boost Boss splits the pool 70 / 30 between the affiliate and the platform:</p>\
+<ul>\
+  <li><strong>70%</strong> → you (the affiliate who drove the sale)</li>\
+  <li><strong>30%</strong> → Boost Boss</li>\
+  <li><strong>Remainder</strong> → seller (the order value minus the affiliate pool minus PayPal processor fees)</li>\
+</ul>\
+\
+<h2>A worked example</h2>\
+<p>Product priced at <strong>$100</strong>, affiliate pool set by seller at <strong>20%</strong>.</p>\
+<pre><code>Order value         $100.00\
+Affiliate pool       $20.00  (20% of order)\
+  → Affiliate         $14.00  (70% of pool)\
+  → Boost Boss         $6.00  (30% of pool)\
+Seller settles       $80.00  minus PayPal fees</code></pre>\
+\
+<h2>Direct vs affiliate sales</h2>\
+<p>If a buyer purchases without an affiliate link (direct sale), Boost Boss takes no commission on the order value beyond standard payment processor pass-through. The seller keeps the entire order net of fees, taxes, and refunds. We only earn when an affiliate actually drove the sale.</p>\
+<div class="callout info"><strong>Why this matters:</strong> the v2 model aligns our incentives with yours — Boost Boss only makes money when affiliates do. Under the old 15% flat top-line take, we earned on direct sales you had no part in.</div>\
+\
+<h2>CPS by default, CPC and CPA on opt-in</h2>\
+<p>The default is <strong>cost-per-sale (CPS)</strong>: you earn only when a sale actually captures. Some advertisers opt their products into <strong>CPC</strong> (cost-per-click) or <strong>CPA</strong> (cost-per-action — e.g. signup) instead. When that\'s the case, you see the model on the catalog row and you earn on qualifying clicks or actions whether or not they convert to revenue.</p>'
+    },
+
+    'payout-setup': {
+      title: 'Setting up your PayPal payout',
+      lede: 'Boost Boss settles all affiliate payouts through PayPal. Add your PayPal email once in the dashboard and every biweekly Friday payout goes there automatically.',
+      related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+      body: '\
+<h2>Where to add your PayPal email</h2>\
+<p>Go to <a href="/affiliate#payouts">Payout Record</a> in the sidebar. There\'s a Payout method form with one required field: <strong>PayPal email</strong>. Use the email tied to a verified PayPal account.</p>\
+\
+<h2>Why PayPal only, for now</h2>\
+<p>Boost Boss operates on a single payment provider for both inbound payments (advertiser deposits, buyer storefront captures) and outbound payments (publisher, seller, and affiliate payouts). PayPal is the current provider because Taiwan\'s corporate law requires pay-in and payout through the same provider, and PayPal serves the largest cross-section of the global market. Additional methods are on the roadmap once we open up multi-provider options.</p>\
+\
+<h2>Account requirements</h2>\
+<ul>\
+  <li><strong>Verified PayPal account</strong> on the receiving end. Unverified accounts may hold funds.</li>\
+  <li><strong>Country supported by PayPal Payouts API</strong> — 200+ countries supported; only a few aren\'t.</li>\
+  <li><strong>Sanctions screening</strong> — Boost Boss can\'t pay accounts in jurisdictions under US or international sanctions (Iran, North Korea, Cuba, Crimea, Syria, etc.).</li>\
+</ul>\
+\
+<h2>Changing your PayPal email later</h2>\
+<p>You can change it anytime from the same screen, but the change requires <strong>two-factor authentication</strong>. We do this on purpose — anyone who can quietly rewrite your destination address can intercept your earnings. See <a href="/affiliate/help/article?id=two-factor">Two-factor authentication</a>.</p>\
+\
+<div class="callout warn"><strong>Triple-check the spelling.</strong> If you mistype your PayPal email, the funds bounce back and you need to re-request the payout. Most "where\'s my payout?" tickets we get are typos.</div>'
+    },
+
+    'payout-schedule': {
+      title: 'Payout schedule — biweekly Friday, Tuesday cutoff',
+      lede: 'Boost Boss pays affiliates on a fixed biweekly cycle. Earn by Tuesday → get paid that Friday. Earn after Tuesday → wait two weeks. Minimum payout is $1 USD.',
+      related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+      body: '\
+<h2>The cycle in one paragraph</h2>\
+<p>Payouts run <strong>every other Friday</strong>. The cutoff is the immediately preceding <strong>Tuesday at 23:59 UTC</strong>. Earnings booked by the cutoff are included in that Friday\'s batch; earnings booked after the cutoff roll to the next Friday two weeks later.</p>\
+\
+<h2>What ends up in a batch</h2>\
+<ul>\
+  <li>Commissions on sales that captured by Tuesday cutoff</li>\
+  <li>Minus the 30-day clawback hold on any sale still within its refund window — those release into the next eligible batch</li>\
+  <li>Minus refunds and chargebacks that landed in the period</li>\
+</ul>\
+\
+<h2>How fast funds arrive</h2>\
+<p>When the PayPal Payouts API dispatches at Friday 12:00 UTC, most recipients see funds in their PayPal balance within minutes. The recipient already needs a PayPal account to receive — if they don\'t, PayPal holds the transfer until they sign up. "Up to 30 minutes" is the planning window we tell affiliates, but most arrive in 1-2 minutes.</p>\
+\
+<h2>Minimum and rollover</h2>\
+<p><strong>Minimum payout: $1 USD.</strong> Anything below stays in your balance and accrues across cycles until it crosses the threshold. There\'s no expiration — your balance is yours indefinitely.</p>\
+\
+<h2>2FA on cashout</h2>\
+<p>Every cashout request must be confirmed with a one-time code from your registered authenticator app. We don\'t rely on SMS — too easy to SIM-swap. Set up your authenticator in <a href="/affiliate#settings">Settings</a> before you expect your first payout. See <a href="/affiliate/help/article?id=two-factor">Two-factor authentication</a>.</p>\
+\
+<div class="callout info"><strong>Holiday weeks:</strong> if a US bank holiday lands on the Friday, PayPal\'s Payouts API still runs on schedule. You won\'t see a delay.</div>'
+    },
+
+    'ftc-disclosure': {
+      title: 'FTC disclosure & affiliate standards',
+      lede: 'Every public promotion of a Boost Boss affiliate link must clearly disclose the affiliate relationship. This is a US FTC requirement and we expect it in every jurisdiction.',
+      related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+      body: '\
+<h2>The rule, plain English</h2>\
+<p>When you share an affiliate link on social media, in a newsletter, on a website, in a video, or anywhere a third party might see it, you must clearly say you\'re an affiliate. The disclosure has to be <strong>before</strong> the link, <strong>noticeable</strong>, and <strong>understandable</strong>.</p>\
+\
+<h2>What counts as a good disclosure</h2>\
+<ul>\
+  <li><strong>In tweets / posts:</strong> <code>#ad</code>, <code>#sponsored</code>, or <code>#affiliate</code> at the start or end. All three are FTC-acceptable.</li>\
+  <li><strong>In videos:</strong> say it out loud near the start AND show it on screen. Just an end-card isn\'t enough.</li>\
+  <li><strong>In newsletters:</strong> "This post contains affiliate links — I earn a small commission if you buy through them." at the top of the post.</li>\
+  <li><strong>In blog posts:</strong> same as newsletters. Footer disclosure alone usually isn\'t enough.</li>\
+</ul>\
+\
+<h2>What doesn\'t count</h2>\
+<ul>\
+  <li><strong>Just <code>#partner</code></strong> — too vague, FTC has flagged this. Use <code>#ad</code> or <code>#sponsored</code>.</li>\
+  <li><strong>Buried-in-bio disclosures</strong> — your bio mentioning affiliate links doesn\'t cover individual posts.</li>\
+  <li><strong>Smallprint footer</strong> — easy to miss, not FTC-compliant by itself.</li>\
+</ul>\
+\
+<h2>The Boost Boss-specific rules</h2>\
+<p>On top of FTC compliance, Boost Boss\'s <a href="/aup">Acceptable Use Policy</a> prohibits:</p>\
+<ul>\
+  <li><strong>Misleading promotion</strong> — fake testimonials, fabricated screenshots, guaranteed-results claims.</li>\
+  <li><strong>Self-dealing</strong> — buying through your own link to capture the commission, or coordinating with friends/family.</li>\
+  <li><strong>Spam</strong> — unsolicited email or SMS, deceptive SEO (cloaking, doorway pages), incentivized-click traffic.</li>\
+  <li><strong>Trademark abuse</strong> — bidding on the seller\'s brand keywords in paid search, registering lookalike domains.</li>\
+</ul>\
+\
+<div class="callout warn"><strong>Self-dealing detection.</strong> We monitor click-to-conversion patterns. Sustained suspicious patterns trigger a clawback of accrued commissions and may result in account suspension.</div>'
+    },
+
+    'clawback': {
+      title: 'Conversions, clicks & the 30-day clawback',
+      lede: 'How long do you have to convert a click into a sale, and what happens to your commission if a buyer refunds? Two windows to know.',
+      related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+      body: '\
+<h2>The attribution window</h2>\
+<p>When someone clicks your share link, the <code>bb_click</code> UUID stays attached for <strong>30 days</strong>. Any sale that happens within that window using the same URL parameter (or the fallback cookie) attributes back to you — regardless of how many other devices, sites, or sessions the buyer visited in between.</p>\
+\
+<h2>The clawback window</h2>\
+<p>Commissions are paid out per the <a href="/affiliate/help/article?id=payout-schedule">biweekly Friday schedule</a>, but each individual commission is held for a <strong>30-day clawback window</strong> after the sale captures. If the buyer refunds or successfully charges back within that window, the corresponding commission is reversed.</p>\
+\
+<h2>In practice</h2>\
+<ul>\
+  <li>Sale captures on day 0 → commission is "pending"</li>\
+  <li>Day 1-30 → commission stays pending while refund/chargeback risk exists</li>\
+  <li>Day 30+ → commission is "released" and eligible for the next biweekly batch</li>\
+  <li>Refund or chargeback during the 30 days → commission cancelled, balance adjusted</li>\
+</ul>\
+\
+<h2>Sales report semantics</h2>\
+<p>Your <a href="/affiliate#conv-soon">Sales Report</a> shows three statuses:</p>\
+<ul>\
+  <li><strong>Pending</strong> — sale captured but still within the 30-day window</li>\
+  <li><strong>Released</strong> — past the window, eligible for the next payout batch</li>\
+  <li><strong>Reversed</strong> — buyer refunded or successfully chargeback\'d; commission cancelled</li>\
+</ul>\
+\
+<div class="callout"><strong>Why 30 days?</strong> Most products have 14-30 day refund windows. After 30 days the refund risk is low, so we can release commission with confidence and dispatch it on the next biweekly Friday.</div>'
+    },
+
+    'promote-social': {
+      title: 'Promoting on social — X, IG, TikTok, FB',
+      lede: 'Practical conversion tips for each major social platform. None of this is magic; it\'s about matching the product to the audience and disclosing properly.',
+      related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+      body: '\
+<h2>X (formerly Twitter)</h2>\
+<ul>\
+  <li><strong>Disclosure:</strong> <code>#ad</code> at the start of the tweet.</li>\
+  <li><strong>What works:</strong> a single-tweet review with one screenshot/video and the link in the same tweet (don\'t reply-link it). Threads convert better than single tweets for higher-priced products.</li>\
+  <li><strong>What doesn\'t:</strong> bot-style "RT to win!" giveaways with your affiliate link. Twitter mutes engagement-bait.</li>\
+</ul>\
+\
+<h2>Instagram</h2>\
+<ul>\
+  <li><strong>Disclosure:</strong> Use IG\'s built-in "Paid partnership" tag if available, OR <code>#ad</code> at the start of the caption.</li>\
+  <li><strong>What works:</strong> story → swipe-up to your share link (legacy), or link-in-bio + a recent post pointing at it. Reels with the link in the description perform better than posts for software products.</li>\
+  <li><strong>What doesn\'t:</strong> long affiliate URLs in captions — they get cut. Use a clean share link, not a redirect.</li>\
+</ul>\
+\
+<h2>TikTok</h2>\
+<ul>\
+  <li><strong>Disclosure:</strong> "This is sponsored" verbally in the first 3 seconds AND <code>#ad</code> on screen.</li>\
+  <li><strong>What works:</strong> demos. Show the product in action for 15-30 seconds. Link in bio + comment with "Link in bio ↑" pinned.</li>\
+  <li><strong>What doesn\'t:</strong> using the link directly in the video description — it doesn\'t auto-link, viewers won\'t copy-paste.</li>\
+</ul>\
+\
+<h2>Facebook</h2>\
+<ul>\
+  <li><strong>Disclosure:</strong> <code>#ad</code> at the start of the post.</li>\
+  <li><strong>What works:</strong> long-form text posts with a clear use-case story. Facebook\'s algorithm rewards conversations, so ask a question in the post and reply to comments.</li>\
+  <li><strong>What doesn\'t:</strong> raw affiliate links in comments — FB throttles these. Put them in the post body.</li>\
+</ul>\
+\
+<h2>Universal advice</h2>\
+<p>Match the product to the audience. A productivity SaaS converts on r/productivity, not on r/aww. A coding tool converts in dev Twitter, not in art communities. Look at your followers\' interests and pick from the catalog accordingly.</p>'
+    },
+
+    'promote-newsletter': {
+      title: 'Promoting in newsletters & email',
+      lede: 'Newsletters convert better than social for B2B and prosumer products. A few patterns that work for Boost Boss affiliates.',
+      related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+      body: '\
+<h2>Why newsletters are good</h2>\
+<p>Email gets opened with intent. Your audience already trusts you enough to give you their inbox. Conversion rates on newsletter affiliate links typically run 5-10x higher than social for software products.</p>\
+\
+<h2>The disclosure pattern that works</h2>\
+<p>Most successful affiliate newsletters use a one-paragraph disclosure block at the top of any post that contains affiliate links:</p>\
+<div class="callout"><em>"A few of the tools below are affiliate links — I earn a small commission if you sign up through them. It doesn\'t change the price. I only recommend things I use or have vetted thoroughly."</em></div>\
+<p>Place it before the first link, not in the footer.</p>\
+\
+<h2>Tactical patterns</h2>\
+<ul>\
+  <li><strong>Tool roundups.</strong> "5 tools that made me 10x faster at X" — pick 5, link affiliates where they exist, link non-affiliate where they don\'t. Honesty builds trust.</li>\
+  <li><strong>Tutorial → tool.</strong> Walk through doing something cool, mention the tool you used, link affiliate. Conversion is naturally higher because the use case is obvious.</li>\
+  <li><strong>Deal alerts.</strong> When BB has an Exclusive Offer or limited-time discount, send a short focused email — these convert because of urgency.</li>\
+  <li><strong>Weekly digest with one promoted slot.</strong> Reserve one consistent slot in your normal newsletter for an affiliate product. Subscribers learn to expect it and you don\'t spam them.</li>\
+</ul>\
+\
+<h2>What kills conversion in newsletters</h2>\
+<ul>\
+  <li>Too many links per email. Pick one or two — links compete with each other for attention.</li>\
+  <li>Hidden disclosure. If readers feel ambushed by a "wait, was that an ad?" moment, they unsubscribe.</li>\
+  <li>Stale offers. If the affiliate product\'s status changed (price went up, deal expired), update or remove the link before it costs you credibility.</li>\
+</ul>\
+\
+<div class="callout info"><strong>Use Sub IDs.</strong> Mint your newsletter share links with a Sub ID like <code>nl-2026-06</code> so you can see in <a href="/affiliate#conv-soon">Sales Report</a> which newsletter issue drove which sales. Helps you double down on what works.</div>'
+    },
+
+    'exclusive-offers': {
+      title: 'Exclusive Offers & Premium Partners',
+      lede: 'Two upgrades to the standard affiliate experience: time-limited discounts negotiated by Boost Boss, and direct relationships with advertisers who reach out at scale.',
+      related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+      body: '\
+<h2>Exclusive Offers</h2>\
+<p>Advertisers occasionally negotiate Boost Boss-only discount codes or bonus commission rates. These appear on your <a href="/affiliate#exclusive">Exclusive Offers</a> screen. They\'re time-limited and only available to active affiliates.</p>\
+<p>Why advertisers do it: limited-time exclusives drive urgency, which converts better. Why we do it: better commercial terms for you = more reason to promote.</p>\
+\
+<h2>Premium Partners</h2>\
+<p>Once you accumulate sustained traffic — typically <strong>10k+ clicks across the network</strong> — advertisers in your niche may reach out directly with bespoke rates. We surface these opportunities in <a href="/affiliate#partners">Premium Partners</a>. Boost Boss facilitates the introduction; the commercial terms are between you and the advertiser.</p>\
+<p>You don\'t have to apply — it\'s pull-not-push. Keep promoting, hit volume, partners come to you.</p>\
+\
+<h2>How exclusives appear in attribution</h2>\
+<p>Exclusive Offer codes work as <strong>coupon attribution</strong>: when a buyer enters the code at checkout, the sale is attributed to you regardless of whether they clicked your <code>bb_click</code> URL first. This makes exclusives unusually good for "broadcast" promotions (newsletters, podcasts, video descriptions) where URL clicks are noisy but code entry is high-intent.</p>\
+\
+<div class="callout"><strong>If you have an audience, ask.</strong> Have a podcast, popular newsletter, or strong following in a niche? Email <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> with your audience profile. We may have an Exclusive Offer that fits or can broker an introduction directly.</div>'
+    },
+
+    'two-factor': {
+      title: 'Account settings & two-factor authentication',
+      lede: 'Two-factor authentication (2FA) is required for the most sensitive actions on your affiliate account — cashing out and changing your PayPal email. Set it up before your first payout.',
+      related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+      body: '\
+<h2>Why we require 2FA</h2>\
+<p>Anyone who gets access to your Boost Boss account can quietly change your PayPal email and intercept your earnings. SMS-based 2FA is easy to SIM-swap, so we use TOTP (time-based one-time password) authenticator apps instead.</p>\
+\
+<h2>Setting it up</h2>\
+<ol>\
+  <li>Go to <a href="/affiliate#settings">Settings → Security</a>.</li>\
+  <li>Click "Enable two-factor authentication".</li>\
+  <li>Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password, anything TOTP-compatible).</li>\
+  <li>Enter the 6-digit code from the app to confirm.</li>\
+</ol>\
+\
+<h2>What 2FA gates</h2>\
+<ul>\
+  <li><strong>Every cashout request</strong> — you\'ll be asked for the current 6-digit code.</li>\
+  <li><strong>Changing your PayPal payout email</strong> — same.</li>\
+  <li><strong>Disabling 2FA itself</strong> — you need a fresh code to turn it off.</li>\
+</ul>\
+<p>Normal sign-in doesn\'t require a code — that\'s your password\'s job. 2FA only kicks in on actions that touch money.</p>\
+\
+<h2>If you lose your authenticator device</h2>\
+<p>Without recovery codes, you can\'t cash out or change your payout method. Email <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> with your affiliate ID. We\'ll guide you through an identity-verification process to reset 2FA — typically takes one business day.</p>\
+\
+<div class="callout warn"><strong>Save your authenticator backup.</strong> Most authenticator apps support cloud backup (Authy, 1Password). Turn it on. Losing your phone without a backup is the #1 reason for account recovery tickets.</div>\
+\
+<h2>Other settings worth knowing</h2>\
+<ul>\
+  <li><strong>Tax form (W-9 / W-8BEN).</strong> US affiliates earning above $600/year need a W-9 on file. Non-US affiliates need a W-8BEN. We surface the form in Settings → Tax when you cross the threshold.</li>\
+  <li><strong>Display name on payouts.</strong> The name PayPal will see in the transaction. Defaults to your account name; change in Settings → Payout method.</li>\
+  <li><strong>Notification preferences.</strong> Control which events trigger an email (new commission, payout sent, dispute notice, etc.) from Settings → Notifications.</li>\
+</ul>'
+    }
+  };
+
+  // ── Cross-link metadata (small subset for related cards) ───────────
+  // Title comes from ARTICLES; this map is just so the related cards
+  // can render without re-finding the article.
+
+  function getArticleTitle(id) {
+    var a = ARTICLES[id];
+    return a ? a.title : id.replace(/-/g, ' ');
+  }
+
+  // ── Renderer ─────────────────────────────────────────────────────────
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"\']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function render() {
+    var id = (new URLSearchParams(location.search).get('id') || '').toLowerCase();
+    var mount = document.getElementById('article-mount');
+    var article = ARTICLES[id];
+
+    if (!article) {
+      mount.innerHTML = '\
+        <div class="notfound">\
+          <h1>Article not found</h1>\
+          <p>The article you\'re looking for doesn\'t exist or has been renamed.</p>\
+          <a href="/help">← Back to Help Center</a>\
+        </div>';
+      document.title = 'Help Center — Boost Boss Affiliate';
+      return;
+    }
+
+    document.title = article.title + ' — Boost Boss Affiliate Help';
+
+    var relatedHtml = '';
+    if (article.related && article.related.length) {
+      relatedHtml = '\
+        <div class="related">\
+          <h3>Related articles</h3>\
+          <div class="related-list">' +
+            article.related.map(function (rid) {
+              return '<a href="/affiliate/help/article?id=' + encodeURIComponent(rid) + '">' +
+                       '<span>' + escapeHtml(getArticleTitle(rid)) + '</span>' +
+                       '<span class="arrow">→</span>' +
+                     '</a>';
+            }).join('') +
+          '</div>\
+        </div>';
+    }
+
+    mount.innerHTML = '\
+      <div class="crumbs">\
+        <a href="/help">Help Center</a>\
+        <span class="sep">/</span>\
+        <span>' + escapeHtml(article.title) + '</span>\
+      </div>\
+      <article>\
+        <h1>' + escapeHtml(article.title) + '</h1>\
+        <p class="lede">' + escapeHtml(article.lede) + '</p>\
+        ' + article.body + '\
+      </article>\
+      ' + relatedHtml;
+  }
+
+  render();
+  window.addEventListener('popstate', render);
+</script>
+
+</body>
+</html>
