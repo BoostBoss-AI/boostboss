@@ -363,9 +363,24 @@ function geoMultiplier(country) {
   return GEO_MULTIPLIERS[code] ?? GEO_DEFAULT;
 }
 
+// Coerce pgvector's PostgREST string format ("[0.1,0.2,...]") to a real
+// number array. Supabase returns vector columns as JSON-encoded strings,
+// not as arrays. The cache lookup in api/_lib/embeddings.js handles this
+// for hit vectors, but campaign.intent_embedding flows in straight from
+// the campaigns SELECT, so it arrives as a raw string. Without this
+// coercion, cosineSimilarity below sees a string (Array.isArray = false)
+// and silently returns null, dropping every auction into the Jaccard
+// fallback — that's the 2026-06-15 production-debug bug.
+function _coerceVector(v) {
+  if (typeof v !== "string") return v;
+  try { return JSON.parse(v); } catch (_) { return null; }
+}
+
 // Cosine similarity for two equal-length numeric arrays. Returns null
 // if the inputs are unusable (lets caller fall back to Jaccard).
 function cosineSimilarity(a, b) {
+  a = _coerceVector(a);
+  b = _coerceVector(b);
   if (!Array.isArray(a) || !Array.isArray(b) || a.length === 0 || a.length !== b.length) {
     return null;
   }

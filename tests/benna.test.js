@@ -212,6 +212,32 @@ const baseCmp = {
     assert.strictEqual(benna._cosineSimilarity([1, 0, 0, 0], [0, 1, 0, 0]), 0);
   });
 
+  // Regression test for the 2026-06-15 production bug — pgvector returns
+  // vector columns as JSON-encoded strings via PostgREST, not as arrays.
+  // The cache lookup parsed them but campaign.intent_embedding bypassed
+  // that path, so cosineSimilarity received a string and returned null,
+  // silently dropping every auction into the Jaccard fallback.
+  await test("_cosineSimilarity handles pgvector string format on either side", () => {
+    const arr = [1, 0, 0, 0];
+    const str = "[1, 0, 0, 0]";
+    assert.strictEqual(benna._cosineSimilarity(arr, str), 1, "arr × pgvector-string");
+    assert.strictEqual(benna._cosineSimilarity(str, arr), 1, "pgvector-string × arr");
+    assert.strictEqual(benna._cosineSimilarity(str, str), 1, "pgvector-string × pgvector-string");
+    // Malformed string falls back to null (Jaccard takes over) rather
+    // than throwing — protocol guarantees graceful degradation.
+    assert.strictEqual(benna._cosineSimilarity(arr, "not-json-{]"), null);
+  });
+
+  await test("_intentMatchScore: cosine fires when campaign embedding is pgvector string", () => {
+    const score = benna._intentMatchScore(["x"], ["x"], {
+      requestEmbedding:  [1, 0, 0, 0],
+      campaignEmbedding: "[1, 0, 0, 0]",   // ← simulates raw Supabase return
+    });
+    // Identical vectors → cosine 1 → score 1.5 (ceiling)
+    assert.strictEqual(score, 1.5,
+      "campaign embedding as pgvector string MUST trigger cosine, not Jaccard fallback");
+  });
+
   await test("_intentMatchScore: identical embeddings → ceiling 1.5", () => {
     const score = benna._intentMatchScore(["x"], ["x"], {
       requestEmbedding:  [1, 0, 0, 0],
