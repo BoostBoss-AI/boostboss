@@ -1723,30 +1723,13 @@
             box-shadow: 0 8px 24px rgba(255,45,120,0.35);
         }
 
-        /* Footer — anchored to the same vertical position across every
-           dashboard route (2026-06-15). Mirrors the advertiser-side
-           footer treatment so /publish/dashboard and /ads/dashboard
-           land the © line at the same Y position. Two minimal changes
-           vs the prior treatment, otherwise unchanged:
-             1. .container is a flex column with min-height filling the
-                viewport (minus the top nav band). margin-top:auto on
-                the footer pushes it to the bottom edge.
-             2. Top padding bumped from 1.25rem to 2rem so the footer
-                sits a touch lower with a bit more breathing room.
-           Color, font-size, and link styling are unchanged. */
-        .container {
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 96px);
-        }
-        .container > footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 0.5rem 0;             /* minimal footer area height — just enough for the © line itself */
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            line-height: 1.2;
-        }
+        /* Footer removed 2026-06-15 — was a "Lumi SDK © 2026 ·
+           ← Back to boostboss.ai/publish" line at the bottom of
+           every dashboard route. Andy asked for it gone; the top
+           nav handles brand + sign-out, no need to repeat it at
+           the bottom. The flex-column .container anchor that lived
+           here was only for positioning that footer, so it goes
+           with it. */
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -3241,13 +3224,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             </div><!-- /[data-shell-route="integrations"] (Quick Start) -->
 
-        <!-- Footer — MUST live inside .container so the
-             `.container > footer` rule applies (flex anchor + centered
-             text). Previously sat outside .container which made it
-             left-aligned and skipped the bottom-anchor (2026-06-15). -->
-        <footer>
-            Lumi SDK © 2026 · <a href="/publish" style="color: #04BEFE; text-decoration: none;">← Back to boostboss.ai/publish</a>
-        </footer>
+        <!-- Footer removed 2026-06-15 -->
 
         </div><!-- /.container -->
           </div><!-- /.shell-main__inner -->

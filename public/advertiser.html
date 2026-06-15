@@ -2410,31 +2410,13 @@
             color: var(--text-secondary);
         }
 
-        /* Footer — anchored to the same vertical position across every
-           dashboard route (2026-06-15). Two minimal changes vs the prior
-           treatment, otherwise unchanged:
-             1. .container is a flex column with min-height filling the
-                viewport (minus the top nav band). margin-top:auto on
-                the footer pushes it to the bottom edge so every route
-                lands the © line at the same Y position regardless of
-                how short the current route's content is.
-             2. Top padding bumped from 1.25rem to 2rem so the footer
-                sits a touch lower, with a bit more breathing room
-                above it.
-           Color, font-size, and link styling are unchanged. */
-        .container {
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 96px);
-        }
-        .container > footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 0.5rem 0;             /* minimal footer area height — just enough for the © line itself */
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            line-height: 1.2;
-        }
+        /* Footer removed 2026-06-15 — was a "SuperBoost © 2026 ·
+           ← Back to boostboss.ai/ads" line at the bottom of every
+           dashboard route. Andy asked for it gone; the top nav
+           handles brand + sign-out, no need to repeat it at the
+           bottom. The flex-column .container anchor that lived
+           here was only for positioning that footer, so it goes
+           with it. */
         /* Toast notifications */
         .toast-container {
             position: fixed; top: 20px; right: 20px; z-index: 10000;
@@ -4938,10 +4920,7 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <footer>
-            SuperBoost © 2026 · <a href="/ads" style="color: #FF2D78; text-decoration: none;" data-t="foot.back">← Back to boostboss.ai/ads</a>
-        </footer>
+        <!-- Footer removed 2026-06-15 -->
 
         </div><!-- /.container -->
           </div><!-- /.shell-main__inner -->
