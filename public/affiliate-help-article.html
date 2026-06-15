@@ -209,15 +209,15 @@
 </ol>\
 \
 <h2>How earnings work</h2>\
-<p>When someone clicks your share link and buys, you earn a share of what Boost Boss calls the <strong>Affiliate Pool</strong> — a percentage of the order that the seller specifically funds for affiliate marketing. The split is <strong>70% to you / 30% to Boost Boss</strong>. See <a href="/affiliate/help/article?id=commission-model">Commission Model v2 explained</a>.</p>\
+<p>When someone clicks your share link and buys, you earn a share of what Boost Boss calls the <strong>Affiliate Pool</strong> — a percentage of the order that the seller specifically funds for affiliate marketing. The split is <strong>70% to you / 30% to Boost Boss</strong>. See <a href="/help/article?id=commission-model">Commission Model v2 explained</a>.</p>\
 \
 <div class="callout info"><strong>Plain version:</strong> if a product has a 20% affiliate pool and someone buys $100 worth, Boost Boss takes the $20 pool, gives you $14 (70% of the pool), and keeps $6 (30%). The seller gets the remaining $80 minus PayPal\'s processor fees.</div>\
 \
 <h2>What to do next</h2>\
 <ul>\
-  <li>Read <a href="/affiliate/help/article?id=share-links">how attribution works</a> so you understand the data behind your link clicks.</li>\
-  <li>Skim <a href="/affiliate/help/article?id=ftc-disclosure">FTC disclosure rules</a> — every public promotion needs a sponsorship disclosure.</li>\
-  <li>Choose where you\'ll promote: <a href="/affiliate/help/article?id=promote-social">social media</a>, <a href="/affiliate/help/article?id=promote-newsletter">newsletter</a>, or both.</li>\
+  <li>Read <a href="/help/article?id=share-links">how attribution works</a> so you understand the data behind your link clicks.</li>\
+  <li>Skim <a href="/help/article?id=ftc-disclosure">FTC disclosure rules</a> — every public promotion needs a sponsorship disclosure.</li>\
+  <li>Choose where you\'ll promote: <a href="/help/article?id=promote-social">social media</a>, <a href="/help/article?id=promote-newsletter">newsletter</a>, or both.</li>\
 </ul>'
     },
 
@@ -320,7 +320,7 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
 </ul>\
 \
 <h2>Changing your PayPal email later</h2>\
-<p>You can change it anytime from the same screen, but the change requires <strong>two-factor authentication</strong>. We do this on purpose — anyone who can quietly rewrite your destination address can intercept your earnings. See <a href="/affiliate/help/article?id=two-factor">Two-factor authentication</a>.</p>\
+<p>You can change it anytime from the same screen, but the change requires <strong>two-factor authentication</strong>. We do this on purpose — anyone who can quietly rewrite your destination address can intercept your earnings. See <a href="/help/article?id=two-factor">Two-factor authentication</a>.</p>\
 \
 <div class="callout warn"><strong>Triple-check the spelling.</strong> If you mistype your PayPal email, the funds bounce back and you need to re-request the payout. Most "where\'s my payout?" tickets we get are typos.</div>'
     },
@@ -347,7 +347,7 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
 <p><strong>Minimum payout: $1 USD.</strong> Anything below stays in your balance and accrues across cycles until it crosses the threshold. There\'s no expiration — your balance is yours indefinitely.</p>\
 \
 <h2>2FA on cashout</h2>\
-<p>Every cashout request must be confirmed with a one-time code from your registered authenticator app. We don\'t rely on SMS — too easy to SIM-swap. Set up your authenticator in <a href="/affiliate#settings">Settings</a> before you expect your first payout. See <a href="/affiliate/help/article?id=two-factor">Two-factor authentication</a>.</p>\
+<p>Every cashout request must be confirmed with a one-time code from your registered authenticator app. We don\'t rely on SMS — too easy to SIM-swap. Set up your authenticator in <a href="/affiliate#settings">Settings</a> before you expect your first payout. See <a href="/help/article?id=two-factor">Two-factor authentication</a>.</p>\
 \
 <div class="callout info"><strong>Holiday weeks:</strong> if a US bank holiday lands on the Friday, PayPal\'s Payouts API still runs on schedule. You won\'t see a delay.</div>'
     },
@@ -396,7 +396,7 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
 <p>When someone clicks your share link, the <code>bb_click</code> UUID stays attached for <strong>30 days</strong>. Any sale that happens within that window using the same URL parameter (or the fallback cookie) attributes back to you — regardless of how many other devices, sites, or sessions the buyer visited in between.</p>\
 \
 <h2>The clawback window</h2>\
-<p>Commissions are paid out per the <a href="/affiliate/help/article?id=payout-schedule">biweekly Friday schedule</a>, but each individual commission is held for a <strong>30-day clawback window</strong> after the sale captures. If the buyer refunds or successfully charges back within that window, the corresponding commission is reversed.</p>\
+<p>Commissions are paid out per the <a href="/help/article?id=payout-schedule">biweekly Friday schedule</a>, but each individual commission is held for a <strong>30-day clawback window</strong> after the sale captures. If the buyer refunds or successfully charges back within that window, the corresponding commission is reversed.</p>\
 \
 <h2>In practice</h2>\
 <ul>\
@@ -583,7 +583,7 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
           <h3>Related articles</h3>\
           <div class="related-list">' +
             article.related.map(function (rid) {
-              return '<a href="/affiliate/help/article?id=' + encodeURIComponent(rid) + '">' +
+              return '<a href="/help/article?id=' + encodeURIComponent(rid) + '">' +
                        '<span>' + escapeHtml(getArticleTitle(rid)) + '</span>' +
                        '<span class="arrow">→</span>' +
                      '</a>';

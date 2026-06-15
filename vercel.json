@@ -37,6 +37,8 @@
     { "source": "/affiliate", "destination": "/affiliate.html" },
     { "source": "/affiliate/help", "destination": "/affiliate-help.html" },
     { "source": "/affiliate/help/article", "destination": "/affiliate-help-article.html" },
+    { "source": "/help", "destination": "/affiliate-help.html" },
+    { "source": "/help/article", "destination": "/affiliate-help-article.html" },
     { "source": "/s/:token", "destination": "/api/affiliate-redirect?token=:token" },
     { "source": "/p/:token", "destination": "/product.html?id=:token" },
     { "source": "/buy/:token", "destination": "/checkout.html?id=:token" },
