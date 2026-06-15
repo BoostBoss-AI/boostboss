@@ -36,7 +36,7 @@
     border-bottom: 1px solid var(--line);
   }
   nav.help-nav .inner {
-    max-width: 1000px; margin: 0 auto; padding: 0 24px;
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
     height: 64px; display: flex; align-items: center; gap: 18px;
   }
   nav.help-nav .brand {
@@ -60,16 +60,64 @@
   }
   nav.help-nav .back:hover { border-color: var(--ink); background: var(--bg-soft); }
 
+  /* ── Two-column layout: left index sidebar + main content. ───────── */
+  .help-layout {
+    max-width: 1200px; margin: 0 auto; padding: 32px 24px 16px;
+    display: grid; grid-template-columns: 260px 1fr; gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .help-layout { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
+  }
+  aside.help-side {
+    position: sticky; top: 84px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 8px 18px;
+    max-height: calc(100vh - 100px); overflow-y: auto;
+  }
+  @media (max-width: 880px) { aside.help-side { position: static; max-height: none; } }
+  .hs-group { padding: 4px 0; }
+  .hs-group + .hs-group { border-top: 1px solid var(--line-soft); }
+  .hs-group-head {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; background: none; border: none; cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14.5px; font-weight: 700; color: var(--ink);
+    padding: 10px 12px; border-radius: 7px;
+    text-align: left; transition: background 0.15s;
+  }
+  .hs-group-head:hover { background: var(--bg-soft); }
+  .hs-group-head .chev {
+    width: 14px; height: 14px; color: var(--muted);
+    transition: transform 0.18s ease;
+  }
+  .hs-group.collapsed .hs-group-head .chev { transform: rotate(-90deg); }
+  .hs-list { list-style: none; padding: 2px 0 8px 0; margin: 0; }
+  .hs-group.collapsed .hs-list { display: none; }
+  .hs-list a {
+    display: block; padding: 8px 12px 8px 24px;
+    font-size: 13.5px; line-height: 1.4; color: var(--ink-soft);
+    text-decoration: none;
+    border-left: 2px solid transparent; border-radius: 0 6px 6px 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .hs-list a:hover { color: var(--ink); background: var(--bg-soft); text-decoration: none; }
+  .hs-list a.active {
+    color: var(--pink); font-weight: 600;
+    border-left-color: var(--pink); background: rgba(255,45,120,0.05);
+  }
+
+  main.help-main { min-width: 0; }
+
   .crumbs {
-    max-width: 800px; margin: 0 auto; padding: 24px 24px 8px;
-    font-size: 13.5px; color: var(--ink-soft);
+    padding: 0 0 8px; font-size: 13.5px; color: var(--ink-soft);
   }
   .crumbs a { color: var(--ink-soft); text-decoration: none; }
   .crumbs a:hover { color: var(--ink); text-decoration: underline; }
   .crumbs .sep { margin: 0 8px; color: var(--muted); }
 
   article {
-    max-width: 800px; margin: 0 auto; padding: 16px 24px 80px;
+    padding: 0 0 64px;
   }
   article h1 {
     font-size: 34px; font-weight: 700; line-height: 1.2;
@@ -110,7 +158,7 @@
 
   /* Related articles tile-list at the bottom of each article. */
   .related {
-    max-width: 800px; margin: 0 auto 56px; padding: 0 24px;
+    margin: 0 0 40px; padding: 0;
   }
   .related h3 {
     font-size: 16px; font-weight: 700; color: var(--ink);
@@ -177,7 +225,10 @@
   </div>
 </nav>
 
-<div id="article-mount"></div>
+<div class="help-layout">
+  <aside class="help-side" id="help-side"></aside>
+  <main class="help-main" id="article-mount"></main>
+</div>
 
 <section class="contact-band">
   <h3>Still need help?</h3>
@@ -558,10 +609,79 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
     });
   }
 
+  // ─── Help Center index (mirrored from affiliate-help.html) ───
+  // Keep both files in sync if articles are added or renamed.
+  var HELP_INDEX = [
+    { id: 'start', title: 'Getting started', articles: [
+      ['getting-started',   'Getting started as a Boost Boss affiliate'],
+      ['saving-ads',        'Saving ads & browsing the catalog'],
+    ]},
+    { id: 'links', title: 'Share links & attribution', articles: [
+      ['share-links',       'Share links & bb_click attribution'],
+      ['clawback',          'Conversions, clicks & the 30-day clawback'],
+    ]},
+    { id: 'commission', title: 'Commissions & payouts', articles: [
+      ['commission-model',  'Commission Model v2 — 70/30 split'],
+      ['payout-setup',      'Setting up your PayPal payout'],
+      ['payout-schedule',   'Payout schedule — biweekly Friday'],
+    ]},
+    { id: 'promote', title: 'Promotion', articles: [
+      ['promote-social',    'Promoting on social — X, IG, TikTok, FB'],
+      ['promote-newsletter','Promoting in newsletters & email'],
+      ['exclusive-offers',  'Exclusive Offers & Premium Partners'],
+    ]},
+    { id: 'account', title: 'Compliance & account', articles: [
+      ['ftc-disclosure',    'FTC disclosure & affiliate standards'],
+      ['two-factor',        'Two-factor authentication & account'],
+    ]},
+  ];
+
+  function findGroupFor(articleId) {
+    for (var i = 0; i < HELP_INDEX.length; i++) {
+      var g = HELP_INDEX[i];
+      for (var j = 0; j < g.articles.length; j++) {
+        if (g.articles[j][0] === articleId) return g.id;
+      }
+    }
+    return null;
+  }
+
+  function renderHelpSidebar(activeArticleId) {
+    var side = document.getElementById('help-side');
+    if (!side) return;
+    var activeGroup = activeArticleId ? findGroupFor(activeArticleId) : null;
+    var html = HELP_INDEX.map(function (g) {
+      var listHtml = g.articles.map(function (a) {
+        var aid = a[0], atitle = a[1];
+        var cls = (activeArticleId && activeArticleId === aid) ? ' class="active"' : '';
+        return '<li><a' + cls + ' href="/help/article?id=' + encodeURIComponent(aid) + '">' + atitle + '</a></li>';
+      }).join('');
+      // Only the group containing the current article stays expanded on
+      // article pages; the rest start collapsed for a tidier index.
+      var groupCls = (activeGroup && activeGroup !== g.id) ? ' collapsed' : '';
+      return '\
+        <div class="hs-group' + groupCls + '" data-group="' + g.id + '">\
+          <button class="hs-group-head" type="button">\
+            <span>' + g.title + '</span>\
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>\
+          </button>\
+          <ul class="hs-list">' + listHtml + '</ul>\
+        </div>';
+    }).join('');
+    side.innerHTML = html;
+    Array.prototype.forEach.call(side.querySelectorAll('.hs-group-head'), function (btn) {
+      btn.addEventListener('click', function () {
+        btn.parentElement.classList.toggle('collapsed');
+      });
+    });
+  }
+
   function render() {
     var id = (new URLSearchParams(location.search).get('id') || '').toLowerCase();
     var mount = document.getElementById('article-mount');
     var article = ARTICLES[id];
+
+    renderHelpSidebar(id || null);
 
     if (!article) {
       mount.innerHTML = '\

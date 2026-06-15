@@ -88,36 +88,94 @@
   .hero .search-wrap button:hover { background: var(--pink-dark); }
   .hero .search-wrap button svg { width: 22px; height: 22px; }
 
-  /* Category grid. */
-  main { max-width: 1200px; margin: 0 auto; padding: 64px 24px; }
-  main h2 {
-    font-size: 24px; font-weight: 700; margin-bottom: 24px;
+  /* ── Two-column layout: left index sidebar + main content. ───────── */
+  .help-layout {
+    max-width: 1200px; margin: 0 auto; padding: 48px 24px 16px;
+    display: grid; grid-template-columns: 260px 1fr; gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .help-layout { grid-template-columns: 1fr; gap: 24px; padding-top: 32px; }
+  }
+
+  /* Left sidebar — collapsible groups + article index. */
+  aside.help-side {
+    position: sticky; top: 84px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 8px 18px;
+    max-height: calc(100vh - 100px); overflow-y: auto;
+  }
+  @media (max-width: 880px) { aside.help-side { position: static; max-height: none; } }
+  .hs-group { padding: 4px 0; }
+  .hs-group + .hs-group { border-top: 1px solid var(--line-soft); }
+  .hs-group-head {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; background: none; border: none; cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14.5px; font-weight: 700; color: var(--ink);
+    padding: 10px 12px; border-radius: 7px;
+    text-align: left; transition: background 0.15s;
+  }
+  .hs-group-head:hover { background: var(--bg-soft); }
+  .hs-group-head .chev {
+    width: 14px; height: 14px; color: var(--muted);
+    transition: transform 0.18s ease;
+  }
+  .hs-group.collapsed .hs-group-head .chev { transform: rotate(-90deg); }
+  .hs-list {
+    list-style: none; padding: 2px 0 8px 0; margin: 0;
+    overflow: hidden; transition: max-height 0.18s ease;
+  }
+  .hs-group.collapsed .hs-list { display: none; }
+  .hs-list a {
+    display: block; padding: 8px 12px 8px 24px;
+    font-size: 13.5px; line-height: 1.4; color: var(--ink-soft);
+    border-left: 2px solid transparent; border-radius: 0 6px 6px 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .hs-list a:hover { color: var(--ink); background: var(--bg-soft); }
+  .hs-list a.active {
+    color: var(--pink); font-weight: 600;
+    border-left-color: var(--pink); background: rgba(255,45,120,0.05);
+  }
+
+  /* Main content column. */
+  main.help-main { min-width: 0; }
+  main.help-main h2 {
+    font-size: 22px; font-weight: 700; margin: 0 0 16px;
+  }
+  main.help-main h2 + .cat-grid { margin-bottom: 36px; }
+  main.help-main .group-block + .group-block { margin-top: 36px; }
+  main.help-main .group-block h2 {
+    font-size: 18px; font-weight: 700; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
   }
   .cat-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
   }
-  @media (max-width: 900px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 520px) { .cat-grid { grid-template-columns: 1fr; } }
   .cat-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 12px;
-    padding: 20px 20px 22px; display: flex; align-items: center; gap: 14px;
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
     cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
   }
   .cat-card:hover {
-    border-color: var(--ink); transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(15,15,26,0.08);
+    border-color: var(--ink); transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(15,15,26,0.06);
   }
   .cat-card .ico {
-    width: 48px; height: 48px; border-radius: 10px;
+    width: 38px; height: 38px; border-radius: 9px;
     background: rgba(255,45,120,0.10); color: var(--pink);
     display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0;
+    font-size: 19px; flex-shrink: 0;
   }
   .cat-card .ico.cyan { background: rgba(4,190,254,0.10); color: var(--cyan); }
   .cat-card .ico.amber { background: rgba(255,179,0,0.12); color: #C2410C; }
   .cat-card .ico.violet { background: rgba(139,92,246,0.10); color: #7C3AED; }
   .cat-card .label {
-    font-family: 'Space Grotesk', sans-serif; font-size: 15.5px;
+    font-family: 'Space Grotesk', sans-serif; font-size: 14px;
     font-weight: 600; color: var(--ink); line-height: 1.3;
   }
 
@@ -177,72 +235,92 @@
   </div>
 </section>
 
-<main>
-  <h2>All categories</h2>
-  <div class="cat-grid">
+<div class="help-layout">
 
-    <a class="cat-card" href="/help/article?id=getting-started">
-      <div class="ico">🚀</div>
-      <div class="label">Getting started as a Boost Boss affiliate</div>
-    </a>
+  <aside class="help-side" id="help-side"></aside>
 
-    <a class="cat-card" href="/help/article?id=saving-ads">
-      <div class="ico cyan">🛒</div>
-      <div class="label">Saving ads & browsing the catalog</div>
-    </a>
+  <main class="help-main">
 
-    <a class="cat-card" href="/help/article?id=share-links">
-      <div class="ico violet">🔗</div>
-      <div class="label">Share links & <code style="font-family:inherit;background:none;padding:0;">bb_click</code> attribution</div>
-    </a>
+    <div class="group-block">
+      <h2>Getting started</h2>
+      <div class="cat-grid">
+        <a class="cat-card" href="/help/article?id=getting-started">
+          <div class="ico">🚀</div>
+          <div class="label">Getting started as a Boost Boss affiliate</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=saving-ads">
+          <div class="ico cyan">🛒</div>
+          <div class="label">Saving ads & browsing the catalog</div>
+        </a>
+      </div>
+    </div>
 
-    <a class="cat-card" href="/help/article?id=commission-model">
-      <div class="ico amber">💰</div>
-      <div class="label">Commission Model v2 — 70/30 split explained</div>
-    </a>
+    <div class="group-block">
+      <h2>Share links & attribution</h2>
+      <div class="cat-grid">
+        <a class="cat-card" href="/help/article?id=share-links">
+          <div class="ico violet">🔗</div>
+          <div class="label">Share links & <code style="font-family:inherit;background:none;padding:0;">bb_click</code> attribution</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=clawback">
+          <div class="ico amber">📊</div>
+          <div class="label">Conversions, clicks & the 30-day clawback</div>
+        </a>
+      </div>
+    </div>
 
-    <a class="cat-card" href="/help/article?id=payout-setup">
-      <div class="ico">💳</div>
-      <div class="label">Setting up your PayPal payout</div>
-    </a>
+    <div class="group-block">
+      <h2>Commissions & payouts</h2>
+      <div class="cat-grid">
+        <a class="cat-card" href="/help/article?id=commission-model">
+          <div class="ico amber">💰</div>
+          <div class="label">Commission Model v2 — 70/30 split explained</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=payout-setup">
+          <div class="ico">💳</div>
+          <div class="label">Setting up your PayPal payout</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=payout-schedule">
+          <div class="ico cyan">📅</div>
+          <div class="label">Payout schedule — biweekly Friday, Tuesday cutoff</div>
+        </a>
+      </div>
+    </div>
 
-    <a class="cat-card" href="/help/article?id=payout-schedule">
-      <div class="ico cyan">📅</div>
-      <div class="label">Payout schedule — biweekly Friday, Tuesday cutoff</div>
-    </a>
+    <div class="group-block">
+      <h2>Promotion</h2>
+      <div class="cat-grid">
+        <a class="cat-card" href="/help/article?id=promote-social">
+          <div class="ico">📱</div>
+          <div class="label">Promoting on social — X, IG, TikTok, FB</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=promote-newsletter">
+          <div class="ico cyan">📨</div>
+          <div class="label">Promoting in newsletters & email</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=exclusive-offers">
+          <div class="ico violet">⭐</div>
+          <div class="label">Exclusive Offers & Premium Partners</div>
+        </a>
+      </div>
+    </div>
 
-    <a class="cat-card" href="/help/article?id=ftc-disclosure">
-      <div class="ico violet">📋</div>
-      <div class="label">FTC disclosure & affiliate standards</div>
-    </a>
+    <div class="group-block">
+      <h2>Compliance & account</h2>
+      <div class="cat-grid">
+        <a class="cat-card" href="/help/article?id=ftc-disclosure">
+          <div class="ico violet">📋</div>
+          <div class="label">FTC disclosure & affiliate standards</div>
+        </a>
+        <a class="cat-card" href="/help/article?id=two-factor">
+          <div class="ico amber">⚙️</div>
+          <div class="label">Account settings & two-factor authentication</div>
+        </a>
+      </div>
+    </div>
 
-    <a class="cat-card" href="/help/article?id=clawback">
-      <div class="ico amber">📊</div>
-      <div class="label">Conversions, clicks & the 30-day clawback</div>
-    </a>
-
-    <a class="cat-card" href="/help/article?id=promote-social">
-      <div class="ico">📱</div>
-      <div class="label">Promoting on social — X, IG, TikTok, FB</div>
-    </a>
-
-    <a class="cat-card" href="/help/article?id=promote-newsletter">
-      <div class="ico cyan">📨</div>
-      <div class="label">Promoting in newsletters & email</div>
-    </a>
-
-    <a class="cat-card" href="/help/article?id=exclusive-offers">
-      <div class="ico violet">⭐</div>
-      <div class="label">Exclusive Offers & Premium Partners</div>
-    </a>
-
-    <a class="cat-card" href="/help/article?id=two-factor">
-      <div class="ico amber">⚙️</div>
-      <div class="label">Account settings & two-factor authentication</div>
-    </a>
-
-  </div>
-</main>
+  </main>
+</div>
 
 <section class="contact-band">
   <h3>Still have a question?</h3>
@@ -256,25 +334,73 @@
 </section>
 
 <script>
+  // ─── Help Center index (mirrored from affiliate-help-article.html) ───
+  // Keep both files in sync if articles are added or renamed.
+  var HELP_INDEX = [
+    { id: 'start', title: 'Getting started', articles: [
+      ['getting-started',   'Getting started as a Boost Boss affiliate'],
+      ['saving-ads',        'Saving ads & browsing the catalog'],
+    ]},
+    { id: 'links', title: 'Share links & attribution', articles: [
+      ['share-links',       'Share links & bb_click attribution'],
+      ['clawback',          'Conversions, clicks & the 30-day clawback'],
+    ]},
+    { id: 'commission', title: 'Commissions & payouts', articles: [
+      ['commission-model',  'Commission Model v2 — 70/30 split'],
+      ['payout-setup',      'Setting up your PayPal payout'],
+      ['payout-schedule',   'Payout schedule — biweekly Friday'],
+    ]},
+    { id: 'promote', title: 'Promotion', articles: [
+      ['promote-social',    'Promoting on social — X, IG, TikTok, FB'],
+      ['promote-newsletter','Promoting in newsletters & email'],
+      ['exclusive-offers',  'Exclusive Offers & Premium Partners'],
+    ]},
+    { id: 'account', title: 'Compliance & account', articles: [
+      ['ftc-disclosure',    'FTC disclosure & affiliate standards'],
+      ['two-factor',        'Two-factor authentication & account'],
+    ]},
+  ];
+
+  function renderHelpSidebar(activeArticleId) {
+    var side = document.getElementById('help-side');
+    if (!side) return;
+    var html = HELP_INDEX.map(function (g) {
+      var listHtml = g.articles.map(function (a) {
+        var aid = a[0], atitle = a[1];
+        var cls = (activeArticleId && activeArticleId === aid) ? ' class="active"' : '';
+        return '<li><a' + cls + ' href="/help/article?id=' + encodeURIComponent(aid) + '">' + atitle + '</a></li>';
+      }).join('');
+      return '\
+        <div class="hs-group" data-group="' + g.id + '">\
+          <button class="hs-group-head" type="button">\
+            <span>' + g.title + '</span>\
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>\
+          </button>\
+          <ul class="hs-list">' + listHtml + '</ul>\
+        </div>';
+    }).join('');
+    side.innerHTML = html;
+    // Wire collapse toggles.
+    Array.prototype.forEach.call(side.querySelectorAll('.hs-group-head'), function (btn) {
+      btn.addEventListener('click', function () {
+        btn.parentElement.classList.toggle('collapsed');
+      });
+    });
+  }
+
+  renderHelpSidebar(null);
+
   // Pre-fill the search box from ?q= when arriving from another page.
   (function () {
     try {
       var q = new URLSearchParams(location.search).get('q');
       if (q) document.getElementById('help-search').value = q;
     } catch (_) {}
-    // Submit on Enter → for now, just no-op highlighting until we wire
-    // a real article store. Cards above act as the directory.
     document.getElementById('help-search').addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       e.preventDefault();
-      // Scroll to the categories and emphasize them briefly.
-      var grid = document.querySelector('.cat-grid');
-      if (grid) {
-        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        grid.style.transition = 'box-shadow 0.5s ease';
-        grid.style.boxShadow = '0 0 0 4px rgba(255,45,120,0.18)';
-        setTimeout(function () { grid.style.boxShadow = 'none'; }, 1200);
-      }
+      var main = document.querySelector('main.help-main');
+      if (main) main.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   })();
 </script>
