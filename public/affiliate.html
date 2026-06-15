@@ -266,26 +266,117 @@
   .affiliate-topnav .topnav-actions {
     display: flex; align-items: center; gap: 8px; flex-shrink: 0;
   }
-  .affiliate-topnav .topnav-user {
-    font-size: 13px; color: var(--ink-soft);
-    padding: 0 10px; max-width: 220px;
+  /* Icon-only buttons in the top nav (language, notifications). */
+  .affiliate-topnav .topnav-iconbtn {
+    background: none; border: none; padding: 7px; border-radius: 8px;
+    cursor: pointer; color: var(--ink-soft); display: inline-flex;
+    align-items: center; justify-content: center; transition: background 0.15s, color 0.15s;
+    font-family: inherit; position: relative;
+  }
+  .affiliate-topnav .topnav-iconbtn:hover { background: var(--bg-soft); color: var(--ink); }
+  .affiliate-topnav .topnav-iconbtn svg { width: 20px; height: 20px; }
+  /* Optional dot indicator for the notifications bell. Hidden by default;
+     toggle via JS when there's an unread item. */
+  .affiliate-topnav .topnav-iconbtn .dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 7px; height: 7px; background: var(--pink);
+    border-radius: 50%; box-shadow: 0 0 0 2px var(--bg-card);
+    display: none;
+  }
+  .affiliate-topnav .topnav-iconbtn.has-unread .dot { display: block; }
+  /* User-button with name + caret. Wider so the name fits. */
+  .affiliate-topnav .topnav-userbtn {
+    background: none; border: none; padding: 7px 10px; border-radius: 8px;
+    cursor: pointer; color: var(--ink); font-size: 13.5px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px; font-family: inherit;
+    transition: background 0.15s; max-width: 200px;
+  }
+  .affiliate-topnav .topnav-userbtn:hover { background: var(--bg-soft); }
+  .affiliate-topnav .topnav-userbtn .caret { width: 12px; height: 12px; stroke-width: 2.5; }
+  .affiliate-topnav .topnav-userbtn .uname {
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .affiliate-topnav .topnav-logout {
+  /* Slim 1px divider between groups in the topnav. */
+  .affiliate-topnav .topnav-divider {
+    width: 1px; height: 28px; background: var(--line);
+    margin: 0 2px;
+  }
+  /* Help-Center pill — outlined, slightly larger than the icon buttons. */
+  .affiliate-topnav .topnav-help {
     background: none; border: 1px solid var(--line);
-    padding: 7px 14px; border-radius: 7px;
-    font-size: 13px; font-weight: 600; color: var(--ink-soft);
-    cursor: pointer; font-family: inherit;
-    transition: border-color 0.15s, color 0.15s;
+    padding: 7px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    cursor: pointer; font-family: inherit; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color 0.15s, background 0.15s;
+    white-space: nowrap;
   }
-  .affiliate-topnav .topnav-logout:hover {
-    border-color: var(--ink); color: var(--ink);
+  .affiliate-topnav .topnav-help:hover {
+    border-color: var(--ink); background: var(--bg-soft);
   }
-  @media (max-width: 700px) {
+  /* Dropdown panels anchored under their trigger buttons. */
+  .affiliate-topnav .topnav-dd {
+    position: absolute; top: 100%; right: 0; margin-top: 10px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 10px; box-shadow: 0 8px 24px rgba(15,15,26,0.12);
+    min-width: 200px; padding: 6px; z-index: 100;
+    display: none; font-size: 14px;
+  }
+  .affiliate-topnav .topnav-dd.open { display: block; }
+  .affiliate-topnav .topnav-dd .dd-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 7px;
+    color: var(--ink); text-decoration: none;
+    background: none; border: none; width: 100%; text-align: left;
+    cursor: pointer; font-family: inherit; font-size: 14px;
+    transition: background 0.1s;
+  }
+  .affiliate-topnav .topnav-dd .dd-item:hover { background: var(--bg-soft); }
+  .affiliate-topnav .topnav-dd .dd-item.active {
+    color: var(--pink); font-weight: 600;
+  }
+  .affiliate-topnav .topnav-dd .dd-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--ink-soft); }
+  .affiliate-topnav .topnav-dd .dd-divider {
+    height: 1px; background: var(--line-soft); margin: 4px 0;
+  }
+  /* Notifications dropdown is wider with tabbed header + empty state. */
+  .affiliate-topnav .topnav-dd-notif { min-width: 320px; padding: 0; }
+  .affiliate-topnav .topnav-dd-notif .nf-tabs {
+    display: flex; border-bottom: 1px solid var(--line);
+  }
+  .affiliate-topnav .topnav-dd-notif .nf-tab {
+    flex: 1; padding: 12px 14px; text-align: center;
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
+    border-bottom: 2px solid transparent;
+  }
+  .affiliate-topnav .topnav-dd-notif .nf-tab.active {
+    color: var(--pink); border-bottom-color: var(--pink);
+  }
+  .affiliate-topnav .topnav-dd-notif .nf-body {
+    padding: 32px 18px; text-align: center; color: var(--ink-soft);
+    font-size: 13px;
+  }
+  .affiliate-topnav .topnav-dd-notif .nf-empty-icon {
+    font-size: 36px; margin-bottom: 10px; opacity: 0.7;
+  }
+  .affiliate-topnav .topnav-dd-notif .nf-foot {
+    border-top: 1px solid var(--line); padding: 11px;
+    text-align: center; font-size: 13px; font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  /* Each topnav action wrapper is `position: relative` so its dropdown
+     anchors inside it. */
+  .affiliate-topnav .topnav-actions > .has-dd { position: relative; }
+
+  @media (max-width: 800px) {
     .affiliate-topnav { padding: 0 14px; gap: 10px; }
     .affiliate-topnav .topnav-brand .name { display: none; }
     .affiliate-topnav .topnav-section { display: none; }
-    .affiliate-topnav .topnav-user { display: none; }
+    .affiliate-topnav .topnav-userbtn .uname { display: none; }
+    .affiliate-topnav .topnav-help { display: none; }
+    .affiliate-topnav .topnav-divider { display: none; }
   }
   .side-nav { display: flex; flex-direction: column; gap: 2px; padding-bottom: 18px; }
 
@@ -1142,8 +1233,86 @@
       <div class="topnav-section" id="topnav-section">Dashboard</div>
       <div class="topnav-spacer"></div>
       <div class="topnav-actions">
-        <span class="topnav-user" id="side-user-email">—</span>
-        <button class="topnav-logout" id="side-logout" type="button">Sign out</button>
+
+        <!-- Language switcher — anchored dropdown of available locales. -->
+        <div class="has-dd" id="tn-lang-wrap">
+          <button class="topnav-iconbtn" id="tn-lang-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Language">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </button>
+          <div class="topnav-dd" id="tn-lang-dd" role="menu">
+            <a href="/en" class="dd-item" data-locale="en">English</a>
+            <a href="/zh-TW" class="dd-item" data-locale="zh-TW">繁體中文</a>
+            <a href="/zh" class="dd-item" data-locale="zh">简体中文</a>
+            <a href="/ja" class="dd-item" data-locale="ja">日本語</a>
+            <a href="/ko" class="dd-item" data-locale="ko">한국어</a>
+            <a href="/vi" class="dd-item" data-locale="vi">Tiếng Việt</a>
+          </div>
+        </div>
+
+        <!-- User dropdown — Refer / Account / Payment / Sign out.
+             #side-logout kept as the menu's Sign out item so the
+             existing click handler in JS still binds. The email lives
+             at the top of the menu in a read-only header row. -->
+        <div class="has-dd" id="tn-user-wrap">
+          <button class="topnav-userbtn" id="tn-user-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span class="uname" id="tn-user-name">Account</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="topnav-dd" id="tn-user-dd" role="menu">
+            <div class="dd-item" style="cursor:default;flex-direction:column;align-items:flex-start;gap:2px;background:var(--bg-soft);">
+              <span style="font-size:11px;color:var(--ink-soft);font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Signed in as</span>
+              <span id="side-user-email" style="font-size:13px;color:var(--ink);word-break:break-all;">—</span>
+            </div>
+            <div class="dd-divider"></div>
+            <a href="#settings" class="dd-item" onclick="switchSection('settings');document.getElementById('tn-user-dd').classList.remove('open');return false;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Account settings</span>
+            </a>
+            <a href="#payouts" class="dd-item" onclick="switchSection('payouts');document.getElementById('tn-user-dd').classList.remove('open');return false;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M14 12a2 2 0 0 1 4 0"/></svg>
+              <span>Payment settings</span>
+            </a>
+            <a href="#bill" class="dd-item" onclick="switchSection('bill');document.getElementById('tn-user-dd').classList.remove('open');return false;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 5v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7l-4-4H7a2 2 0 0 0-2 2z"/></svg>
+              <span>Commission bill</span>
+            </a>
+            <div class="dd-divider"></div>
+            <button class="dd-item" id="side-logout" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="topnav-divider" aria-hidden="true"></div>
+
+        <!-- Notifications bell — empty state by default. The .has-unread
+             class on the button shows a small pink dot. -->
+        <div class="has-dd" id="tn-notif-wrap">
+          <button class="topnav-iconbtn" id="tn-notif-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span class="dot"></span>
+          </button>
+          <div class="topnav-dd topnav-dd-notif" id="tn-notif-dd" role="menu">
+            <div class="nf-tabs">
+              <button class="nf-tab active" type="button">News</button>
+              <button class="nf-tab" type="button">System</button>
+            </div>
+            <div class="nf-body">
+              <div class="nf-empty-icon">📭</div>
+              <div>No messages yet.</div>
+              <div style="font-size:12px;margin-top:4px;color:var(--ink-soft);opacity:0.75;">Announcements and system updates will land here.</div>
+            </div>
+            <div class="nf-foot">View all →</div>
+          </div>
+        </div>
+
+        <!-- Help Center pill — outlined button linking to the affiliate
+             help portal. -->
+        <a class="topnav-help" href="/affiliate/help" id="tn-help-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Help Center</span>
+        </a>
       </div>
     </header>
 
@@ -2066,6 +2235,73 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
 document.getElementById('side-logout').addEventListener('click', () => {
   clearSession(); showView('welcome');
 });
+// ── Top-nav dropdown plumbing ─────────────────────────────────────────
+// Three dropdowns (language / user / notifications). Each opens on
+// click of its trigger and closes on outside-click or Escape. We track
+// only one at a time — opening one closes the others.
+(function initTopnavDropdowns() {
+  var DDS = [
+    { btn: 'tn-lang-btn',  dd: 'tn-lang-dd'  },
+    { btn: 'tn-user-btn',  dd: 'tn-user-dd'  },
+    { btn: 'tn-notif-btn', dd: 'tn-notif-dd' },
+  ];
+  function closeAll() {
+    DDS.forEach(function (x) {
+      var el = document.getElementById(x.dd);
+      if (el) el.classList.remove('open');
+      var btn = document.getElementById(x.btn);
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+  DDS.forEach(function (x) {
+    var btn = document.getElementById(x.btn);
+    var dd  = document.getElementById(x.dd);
+    if (!btn || !dd) return;
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = dd.classList.contains('open');
+      closeAll();
+      if (!wasOpen) {
+        dd.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+    // Stop propagation inside the panel so clicks inside don't close it
+    // before the click target's handler fires.
+    dd.addEventListener('click', function (e) { e.stopPropagation(); });
+  });
+  document.addEventListener('click', closeAll);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+
+  // Mark the currently-active locale in the language menu so the user
+  // sees which one they're on. Read from the URL's first segment, falling
+  // back to 'en' for the legacy unprefixed routes.
+  try {
+    var loc = (location.pathname || '/').split('/')[1] || '';
+    if (!loc || loc === '' ) loc = 'en';
+    var item = document.querySelector('#tn-lang-dd .dd-item[data-locale="' + loc + '"]');
+    if (item) item.classList.add('active');
+  } catch (_) {}
+})();
+
+// Sync the user button's name from the signed-in user's email handle.
+(function syncTopnavUserName() {
+  function applyName() {
+    try {
+      var email = (document.getElementById('side-user-email') || {}).textContent || '';
+      var name = (email.split('@')[0] || '').trim();
+      var nameEl = document.getElementById('tn-user-name');
+      if (nameEl && name && name !== '—') nameEl.textContent = name;
+    } catch (_) {}
+  }
+  // Observe the email element so when checkAuth fills it later, we pick up.
+  var emailEl = document.getElementById('side-user-email');
+  if (emailEl && typeof MutationObserver !== 'undefined') {
+    new MutationObserver(applyName).observe(emailEl, { childList: true, characterData: true, subtree: true });
+  }
+  applyName();
+})();
+
 // ── Sidebar: leaf-button click → switchSection ─────────────────────────
 // Scope to .grp-items so the group-header buttons (.grp) don't get
 // captured here — those have their own toggle handler below.

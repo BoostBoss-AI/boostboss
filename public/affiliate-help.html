@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help Center — Boost Boss Affiliate</title>
+<meta name="description" content="Boost Boss Affiliate help center. Quick answers on share links, attribution, commissions, payouts, and promotion best practices for AI-tool affiliates.">
+<link rel="canonical" href="https://affiliate.boostboss.ai/help">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF2D78; --pink-dark: #E01E65;
+    --cyan: #04BEFE; --yellow: #FFE600;
+    --ink: #0F0F1A; --ink-soft: #4B4B5E;
+    --muted: #6B7280; --line: #EAEAEF; --line-soft: #F1F1F4;
+    --bg: #FFFFFF; --bg-soft: #FAFAF7;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.65; font-size: 15.5px;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.015em; }
+
+  /* Top nav — mirrors affiliate-topnav from the dashboard but standalone. */
+  nav.help-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.help-nav .inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
+    height: 64px; display: flex; align-items: center; gap: 18px;
+  }
+  nav.help-nav .brand {
+    display: flex; align-items: center; gap: 10px; color: inherit;
+  }
+  nav.help-nav .brand img { width: 34px; height: 34px; }
+  nav.help-nav .brand .name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 700; color: var(--ink);
+  }
+  nav.help-nav .brand .tag {
+    font-size: 10.5px; font-weight: 700; color: var(--pink);
+    padding: 3px 9px; border-radius: 99px;
+    background: rgba(255,45,120,0.10); letter-spacing: 0.5px;
+  }
+  nav.help-nav .spacer { flex: 1; }
+  nav.help-nav .back {
+    font-size: 13.5px; font-weight: 600; color: var(--ink);
+    padding: 8px 16px; border-radius: 8px;
+    border: 1px solid var(--line); transition: border-color 0.15s, background 0.15s;
+  }
+  nav.help-nav .back:hover { border-color: var(--ink); background: var(--bg-soft); }
+
+  /* Hero — big search prompt over a pink panel. */
+  .hero {
+    background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);
+    color: #fff; padding: 72px 24px 88px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 42px; font-weight: 700; margin-bottom: 36px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .hero .search-wrap {
+    max-width: 720px; margin: 0 auto;
+    background: #fff; border-radius: 14px; overflow: hidden;
+    display: flex; box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  }
+  .hero .search-wrap input {
+    flex: 1; padding: 18px 20px; font-size: 15.5px;
+    border: none; outline: none; color: var(--ink);
+    font-family: inherit;
+  }
+  .hero .search-wrap input::placeholder { color: var(--muted); }
+  .hero .search-wrap button {
+    background: var(--pink); border: none; color: #fff;
+    padding: 0 28px; cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+  }
+  .hero .search-wrap button:hover { background: var(--pink-dark); }
+  .hero .search-wrap button svg { width: 22px; height: 22px; }
+
+  /* Category grid. */
+  main { max-width: 1200px; margin: 0 auto; padding: 64px 24px; }
+  main h2 {
+    font-size: 24px; font-weight: 700; margin-bottom: 24px;
+  }
+  .cat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  @media (max-width: 900px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .cat-grid { grid-template-columns: 1fr; } }
+  .cat-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 20px 22px; display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .cat-card:hover {
+    border-color: var(--ink); transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15,15,26,0.08);
+  }
+  .cat-card .ico {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: rgba(255,45,120,0.10); color: var(--pink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .cat-card .ico.cyan { background: rgba(4,190,254,0.10); color: var(--cyan); }
+  .cat-card .ico.amber { background: rgba(255,179,0,0.12); color: #C2410C; }
+  .cat-card .ico.violet { background: rgba(139,92,246,0.10); color: #7C3AED; }
+  .cat-card .label {
+    font-family: 'Space Grotesk', sans-serif; font-size: 15.5px;
+    font-weight: 600; color: var(--ink); line-height: 1.3;
+  }
+
+  /* Contact-us footer band. */
+  .contact-band {
+    background: var(--bg-soft); border-top: 1px solid var(--line);
+    padding: 56px 24px 72px; text-align: center; margin-top: 80px;
+  }
+  .contact-band h3 {
+    font-size: 22px; font-weight: 700; margin-bottom: 24px;
+  }
+  .contact-card {
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 16px 28px; background: #fff; border: 1px solid var(--line);
+    border-radius: 12px; box-shadow: 0 4px 12px rgba(15,15,26,0.04);
+    text-decoration: none;
+  }
+  .contact-card .ico {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(255,45,120,0.10); color: var(--pink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .contact-card .text {
+    text-align: left; line-height: 1.3;
+  }
+  .contact-card .text .label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 2px;
+  }
+  .contact-card .text .sub {
+    font-size: 13px; color: var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<nav class="help-nav">
+  <div class="inner">
+    <a class="brand" href="/affiliate">
+      <img src="/email-logo.png" alt="Boost Boss">
+      <span class="name">Boost Boss</span>
+      <span class="tag">AFFILIATE</span>
+    </a>
+    <div class="spacer"></div>
+    <a class="back" href="/affiliate">← Back to dashboard</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>Hi, how can we help?</h1>
+  <div class="search-wrap" role="search">
+    <input type="search" id="help-search" placeholder="Search the help center — try 'share link', 'commission', 'payout'…" autofocus>
+    <button type="button" aria-label="Search" onclick="document.getElementById('help-search').focus();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </div>
+</section>
+
+<main>
+  <h2>All categories</h2>
+  <div class="cat-grid">
+
+    <a class="cat-card" href="/affiliate#home">
+      <div class="ico">🚀</div>
+      <div class="label">Getting started as a Boost Boss affiliate</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#catalog">
+      <div class="ico cyan">🛒</div>
+      <div class="label">Saving ads & browsing the catalog</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#links">
+      <div class="ico violet">🔗</div>
+      <div class="label">Share links & <code style="font-family:inherit;background:none;padding:0;">bb_click</code> attribution</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#bill">
+      <div class="ico amber">💰</div>
+      <div class="label">Commission Model v2 — 70/30 split explained</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#payouts">
+      <div class="ico">💳</div>
+      <div class="label">Setting up your PayPal payout</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#payouts">
+      <div class="ico cyan">📅</div>
+      <div class="label">Payout schedule — biweekly Friday, Tuesday cutoff</div>
+    </a>
+
+    <a class="cat-card" href="/aup">
+      <div class="ico violet">📋</div>
+      <div class="label">FTC disclosure & affiliate standards</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#conv-soon">
+      <div class="ico amber">📊</div>
+      <div class="label">Conversions, clicks & the 30-day clawback</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#links">
+      <div class="ico">📱</div>
+      <div class="label">Promoting on social — X, IG, TikTok, FB</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#links">
+      <div class="ico cyan">📨</div>
+      <div class="label">Promoting in newsletters & email</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#exclusive">
+      <div class="ico violet">⭐</div>
+      <div class="label">Exclusive Offers & Premium Partners</div>
+    </a>
+
+    <a class="cat-card" href="/affiliate#settings">
+      <div class="ico amber">⚙️</div>
+      <div class="label">Account settings & two-factor authentication</div>
+    </a>
+
+  </div>
+</main>
+
+<section class="contact-band">
+  <h3>Still have a question?</h3>
+  <a class="contact-card" href="mailto:affiliate@boostboss.ai?subject=Affiliate%20help%20question">
+    <div class="ico">📧</div>
+    <div class="text">
+      <div class="label">Contact us</div>
+      <div class="sub">affiliate@boostboss.ai · we reply within one business day</div>
+    </div>
+  </a>
+</section>
+
+<script>
+  // Pre-fill the search box from ?q= when arriving from another page.
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get('q');
+      if (q) document.getElementById('help-search').value = q;
+    } catch (_) {}
+    // Submit on Enter → for now, just no-op highlighting until we wire
+    // a real article store. Cards above act as the directory.
+    document.getElementById('help-search').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      // Scroll to the categories and emphasize them briefly.
+      var grid = document.querySelector('.cat-grid');
+      if (grid) {
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        grid.style.transition = 'box-shadow 0.5s ease';
+        grid.style.boxShadow = '0 0 0 4px rgba(255,45,120,0.18)';
+        setTimeout(function () { grid.style.boxShadow = 'none'; }, 1200);
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
