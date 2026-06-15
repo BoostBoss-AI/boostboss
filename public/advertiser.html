@@ -2410,16 +2410,38 @@
             color: var(--text-secondary);
         }
 
-        /* Footer — quiet single line at the bottom of the dashboard.
-           Was 2rem padding + 1px border-top divider; Andy asked for the
-           divider removed and the footer to just sit as a single line
-           (2026-06-10). Kept light vertical padding so it doesn't crowd
-           the last content block. */
-        footer {
+        /* Footer — anchored to the bottom of the viewport across every
+           dashboard route (2026-06-15). The previous treatment let the
+           footer float wherever route content happened to end, which
+           meant /home put it mid-screen while /products + /payouts on a
+           tall screen pushed it way down — visually inconsistent and
+           the © line caught the eye on quiet routes.
+           Fix:
+             • .container is a flex column with min-height filling the
+               viewport (minus the top nav). margin-top:auto on the
+               footer makes it always land at the bottom edge.
+             • Lower visual weight: smaller font, muted color, lower
+               opacity so it stops snagging the eye. Hover restores
+               full opacity so the link still reads as interactive. */
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 96px);
+        }
+        .container > footer {
+            margin-top: auto;
             text-align: center;
-            padding: 1.25rem 0 0.75rem;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+            padding: 3.5rem 0 1.5rem;
+            color: #9CA3AF;
+            font-size: 0.72rem;
+            letter-spacing: 0.02em;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        .container > footer:hover { opacity: 0.95; }
+        .container > footer a {
+            font-weight: 500;
+            opacity: 0.85;
         }
         /* Toast notifications */
         .toast-container {

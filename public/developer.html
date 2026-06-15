@@ -1723,16 +1723,38 @@
             box-shadow: 0 8px 24px rgba(255,45,120,0.35);
         }
 
-        /* Footer — quiet single line at the bottom of the dashboard.
-           Was 2rem padding + 1px border-top divider + 3rem margin-top;
-           Andy asked for the divider removed and the footer to just sit
-           as a single line (2026-06-10). Mirrors the advertiser footer
-           treatment. */
-        footer {
+        /* Footer — anchored to the bottom of the viewport across every
+           dashboard route (2026-06-15). Mirrors the advertiser footer
+           treatment exactly so /publish/dashboard and /ads/dashboard
+           land the © line at the same vertical position regardless of
+           which route is active.
+           Fix:
+             • .container is a flex column with min-height filling the
+               viewport (minus the top nav). margin-top:auto on the
+               footer pushes it to the bottom edge.
+             • Lower visual weight (smaller font, muted color, lower
+               opacity) so the line stops snagging the eye. Hover
+               restores full opacity so the link still reads as
+               interactive. */
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 96px);
+        }
+        .container > footer {
+            margin-top: auto;
             text-align: center;
-            padding: 1.25rem 0 0.75rem;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+            padding: 3.5rem 0 1.5rem;
+            color: #9CA3AF;
+            font-size: 0.72rem;
+            letter-spacing: 0.02em;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        .container > footer:hover { opacity: 0.95; }
+        .container > footer a {
+            font-weight: 500;
+            opacity: 0.85;
         }
 
         /* Responsive */
