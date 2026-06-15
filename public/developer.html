@@ -2145,17 +2145,17 @@
             <div id="crossDoorCard" style="display:none;margin-top:32px;padding:24px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#fff5f8 0%,#f5fbff 100%);">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
                     <div>
-                        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--accent-primary,#FF2D78);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--accent-primary,#FF2D78);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;" data-t="page.home.cross_kicker">
                             Expand your reach
                         </div>
-                        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin:0;color:var(--ink);">
+                        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin:0;color:var(--ink);" data-t="page.home.cross_h">
                             Add another integration door
                         </h3>
-                        <p id="crossDoorIntro" style="font-size:13.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.55;max-width:560px;">
+                        <p id="crossDoorIntro" style="font-size:13.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.55;max-width:560px;" data-t="page.home.cross_intro">
                             You're set up with one door. Add another to monetize a different surface — same publisher account, same payouts, no extra signup.
                         </p>
                     </div>
-                    <button id="crossDoorDismiss" type="button" title="Hide for now" style="background:transparent;border:1px solid var(--line);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;flex-shrink:0;">×</button>
+                    <button id="crossDoorDismiss" type="button" title="Hide for now" data-t-title="page.home.cross_dismiss_tip" style="background:transparent;border:1px solid var(--line);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;flex-shrink:0;">×</button>
                 </div>
                 <div id="crossDoorGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px;">
                     <!-- Populated by renderCrossDoorCard() -->
@@ -2324,10 +2324,10 @@
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
                     <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#04BEFE,#FF2D78);display:flex;align-items:center;justify-content:center;font-size:20px;">🚀</div>
                     <div>
-                        <div style="font-weight:700;font-size:16px;color:#1A1A2E;">Welcome, <span id="obAppName">there</span>! Let's ship your first ad</div>
+                        <div style="font-weight:700;font-size:16px;color:#1A1A2E;"><span data-t="ob.welcome_pre">Welcome,</span> <span id="obAppName">there</span><span data-t="ob.welcome_post">! Let's ship your first ad</span></div>
                         <div style="font-size:12px;color:#6B7280;">
-                            <span id="obStepsDone">0</span> of 4 complete
-                            <span style="margin-left:8px;color:#9CA3AF;">· ~10 min total</span>
+                            <span id="obStepsDone">0</span> <span data-t="ob.of_4_complete">of 4 complete</span>
+                            <span style="margin-left:8px;color:#9CA3AF;" data-t="ob.eta_10min">· ~10 min total</span>
                         </div>
                     </div>
                 </div>
@@ -2697,10 +2697,10 @@ await message.reply({
                              primary post-test visual. -->
                         <div id="testResults" style="display:none;margin-top:16px;padding-top:14px;border-top:1px dashed #E5E7EB;">
                             <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#6B7280;align-items:center;">
-                                <span><strong style="color:#1A1A2E;" id="tm-status">—</strong> <span style="font-size:11px;">status</span></span>
-                                <span><strong style="color:#04BEFE;" id="tm-latency">—</strong> <span style="font-size:11px;">latency</span></span>
-                                <span><strong style="color:#9D7AFF;" id="tm-bid">—</strong> <span style="font-size:11px;">bid</span></span>
-                                <span><strong style="color:#FF2D78;" id="tm-payout">—</strong> <span style="font-size:11px;">your payout</span></span>
+                                <span><strong style="color:#1A1A2E;" id="tm-status">—</strong> <span style="font-size:11px;" data-t="verify.tm_status">status</span></span>
+                                <span><strong style="color:#04BEFE;" id="tm-latency">—</strong> <span style="font-size:11px;" data-t="verify.tm_latency">latency</span></span>
+                                <span><strong style="color:#9D7AFF;" id="tm-bid">—</strong> <span style="font-size:11px;" data-t="verify.tm_bid">bid</span></span>
+                                <span><strong style="color:#FF2D78;" id="tm-payout">—</strong> <span style="font-size:11px;" data-t="verify.tm_payout">your payout</span></span>
                             </div>
                             <details style="background:#0A0A14;border-radius:8px;overflow:hidden;margin-top:12px;">
                                 <summary style="padding:10px 14px;color:#9D7AFF;font-size:12px;font-weight:600;cursor:pointer;font-family:'SFMono-Regular',Consolas,monospace;" data-t="verify.raw_mcp">Raw MCP Response</summary>
@@ -2740,16 +2740,16 @@ await message.reply({
                 overflow-x: auto;
             " role="tablist" aria-label="Switch integration door">
                 <button class="placement-door-tab" data-door="mcp"        type="button" role="tab" onclick="selectDoorTab('mcp')">
-                    <span class="placement-door-tab__label">Lumi MCP</span>
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_mcp">Lumi MCP</span>
                 </button>
                 <button class="placement-door-tab" data-door="js-snippet" type="button" role="tab" onclick="selectDoorTab('js-snippet')">
-                    <span class="placement-door-tab__label">Lumi Web</span>
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_web">Lumi Web</span>
                 </button>
                 <button class="placement-door-tab" data-door="npm-sdk"    type="button" role="tab" onclick="selectDoorTab('npm-sdk')">
-                    <span class="placement-door-tab__label">Lumi Extension</span>
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_ext">Lumi Extension</span>
                 </button>
                 <button class="placement-door-tab" data-door="rest-api"   type="button" role="tab" onclick="selectDoorTab('rest-api')">
-                    <span class="placement-door-tab__label">Lumi Bot</span>
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_bot">Lumi Bot</span>
                 </button>
             </div>
 
@@ -6414,6 +6414,23 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.graduate_link': 'Open advertiser dashboard',
                     'page.promote.cashout_btn': 'Cash out',
                     'page.promote.history_h': 'Recent payouts',
+                    // ─── APAC i18n sweep additions ───
+                    'page.home.cross_kicker': 'Expand your reach',
+                    'page.home.cross_h': 'Add another integration door',
+                    'page.home.cross_intro': "You're set up with one door. Add another to monetize a different surface — same publisher account, same payouts, no extra signup.",
+                    'page.home.cross_dismiss_tip': 'Hide for now',
+                    'ob.welcome_pre': 'Welcome,',
+                    'ob.welcome_post': "! Let's ship your first ad",
+                    'ob.of_4_complete': 'of 4 complete',
+                    'ob.eta_10min': '· ~10 min total',
+                    'verify.tm_status': 'status',
+                    'verify.tm_latency': 'latency',
+                    'verify.tm_bid': 'bid',
+                    'verify.tm_payout': 'your payout',
+                    'page.placements.tab_mcp': 'Lumi MCP',
+                    'page.placements.tab_web': 'Lumi Web',
+                    'page.placements.tab_ext': 'Lumi Extension',
+                    'page.placements.tab_bot': 'Lumi Bot',
                     'cashout.title': 'Cash out to your PayPal',
                     'cashout.amount_label': 'Amount to cash out',
                     'cashout.amount_min': 'Minimum $1.00 USD.',
@@ -6813,6 +6830,23 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.graduate_link': '打开广告主面板',
                     'page.promote.cashout_btn': '提现',
                     'page.promote.history_h': '近期提现',
+                    // ─── APAC i18n sweep additions ───
+                    'page.home.cross_kicker': '扩大覆盖范围',
+                    'page.home.cross_h': '添加另一种集成方式',
+                    'page.home.cross_intro': '您已配置一种接入方式。再添加一种,即可在另一个表面变现 — 同一个发布商账户,同一笔打款,无需重新注册。',
+                    'page.home.cross_dismiss_tip': '暂时隐藏',
+                    'ob.welcome_pre': '欢迎,',
+                    'ob.welcome_post': '!来开启您的第一个广告吧',
+                    'ob.of_4_complete': '/ 4 已完成',
+                    'ob.eta_10min': '· 约 10 分钟',
+                    'verify.tm_status': '状态',
+                    'verify.tm_latency': '延迟',
+                    'verify.tm_bid': '出价',
+                    'verify.tm_payout': '您的分成',
+                    'page.placements.tab_mcp': 'Lumi MCP',
+                    'page.placements.tab_web': 'Lumi 网页',
+                    'page.placements.tab_ext': 'Lumi 扩展',
+                    'page.placements.tab_bot': 'Lumi Bot',
                     'cashout.title': '提现到您的 PayPal 账户',
                     'cashout.amount_label': '提现金额',
                     'cashout.amount_min': '最低 $1.00 美元。',
@@ -7212,6 +7246,23 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.graduate_link': '開啟廣告主面板',
                     'page.promote.cashout_btn': '提領',
                     'page.promote.history_h': '近期撥款',
+                    // ─── APAC i18n sweep additions ───
+                    'page.home.cross_kicker': '擴大觸及範圍',
+                    'page.home.cross_h': '新增另一種整合方式',
+                    'page.home.cross_intro': '您已設定一種接入方式。再新增一種即可在另一個介面變現 — 同一個發布商帳戶、同一筆撥款,無需重新註冊。',
+                    'page.home.cross_dismiss_tip': '暫時隱藏',
+                    'ob.welcome_pre': '歡迎,',
+                    'ob.welcome_post': '!來推出您的第一個廣告吧',
+                    'ob.of_4_complete': '/ 4 已完成',
+                    'ob.eta_10min': '· 約 10 分鐘',
+                    'verify.tm_status': '狀態',
+                    'verify.tm_latency': '延遲',
+                    'verify.tm_bid': '出價',
+                    'verify.tm_payout': '您的分潤',
+                    'page.placements.tab_mcp': 'Lumi MCP',
+                    'page.placements.tab_web': 'Lumi 網頁',
+                    'page.placements.tab_ext': 'Lumi 擴充功能',
+                    'page.placements.tab_bot': 'Lumi Bot',
                     'cashout.title': '提領至您的 PayPal 帳戶',
                     'cashout.amount_label': '提領金額',
                     'cashout.amount_min': '最低 $1.00 美元。',
@@ -7611,6 +7662,23 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.graduate_link': '広告主ダッシュボードを開く',
                     'page.promote.cashout_btn': '出金',
                     'page.promote.history_h': '最近の出金',
+                    // ─── APAC i18n sweep additions ───
+                    'page.home.cross_kicker': 'リーチを拡大',
+                    'page.home.cross_h': '別の連携ドアを追加',
+                    'page.home.cross_intro': '現在 1 つのドアを設定済みです。別のドアを追加して別のサーフェスでも収益化できます — 同じパブリッシャーアカウント、同じ支払い、追加登録は不要です。',
+                    'page.home.cross_dismiss_tip': '今は非表示',
+                    'ob.welcome_pre': 'ようこそ、',
+                    'ob.welcome_post': 'さん！最初の広告を配信しましょう',
+                    'ob.of_4_complete': '/ 4 完了',
+                    'ob.eta_10min': '· 合計 約 10 分',
+                    'verify.tm_status': 'ステータス',
+                    'verify.tm_latency': 'レイテンシ',
+                    'verify.tm_bid': '入札',
+                    'verify.tm_payout': 'あなたの収益',
+                    'page.placements.tab_mcp': 'Lumi MCP',
+                    'page.placements.tab_web': 'Lumi Web',
+                    'page.placements.tab_ext': 'Lumi 拡張機能',
+                    'page.placements.tab_bot': 'Lumi Bot',
                     'cashout.title': 'PayPal アカウントへ出金',
                     'cashout.amount_label': '出金額',
                     'cashout.amount_min': '最低 $1.00 USD。',
@@ -8010,6 +8078,23 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.graduate_link': '광고주 대시보드 열기',
                     'page.promote.cashout_btn': '출금',
                     'page.promote.history_h': '최근 출금',
+                    // ─── APAC i18n sweep additions ───
+                    'page.home.cross_kicker': '도달 범위 확장',
+                    'page.home.cross_h': '다른 연동 도어 추가',
+                    'page.home.cross_intro': '현재 도어 한 개로 설정되어 있습니다. 도어를 더 추가하면 다른 서피스에서도 수익화할 수 있습니다 — 동일한 퍼블리셔 계정, 동일한 정산, 추가 가입 불필요.',
+                    'page.home.cross_dismiss_tip': '지금은 숨기기',
+                    'ob.welcome_pre': '환영합니다,',
+                    'ob.welcome_post': '님! 첫 광고를 출시해 보세요',
+                    'ob.of_4_complete': '/ 4 완료',
+                    'ob.eta_10min': '· 총 약 10분',
+                    'verify.tm_status': '상태',
+                    'verify.tm_latency': '지연시간',
+                    'verify.tm_bid': '입찰',
+                    'verify.tm_payout': '내 수익',
+                    'page.placements.tab_mcp': 'Lumi MCP',
+                    'page.placements.tab_web': 'Lumi 웹',
+                    'page.placements.tab_ext': 'Lumi 확장',
+                    'page.placements.tab_bot': 'Lumi 봇',
                     'cashout.title': 'PayPal 계정으로 출금',
                     'cashout.amount_label': '출금 금액',
                     'cashout.amount_min': '최소 $1.00 USD.',
@@ -8409,6 +8494,23 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.graduate_link': 'Mở dashboard advertiser',
                     'page.promote.cashout_btn': 'Rút tiền',
                     'page.promote.history_h': 'Lịch sử rút tiền',
+                    // ─── APAC i18n sweep additions ───
+                    'page.home.cross_kicker': 'Mở rộng phạm vi tiếp cận',
+                    'page.home.cross_h': 'Thêm một door tích hợp khác',
+                    'page.home.cross_intro': 'Bạn đã thiết lập một door. Thêm door khác để kiếm tiền trên một bề mặt khác — cùng tài khoản publisher, cùng đợt thanh toán, không cần đăng ký mới.',
+                    'page.home.cross_dismiss_tip': 'Ẩn tạm thời',
+                    'ob.welcome_pre': 'Chào,',
+                    'ob.welcome_post': '! Cùng ra mắt quảng cáo đầu tiên nào',
+                    'ob.of_4_complete': '/ 4 hoàn tất',
+                    'ob.eta_10min': '· Tổng ~10 phút',
+                    'verify.tm_status': 'trạng thái',
+                    'verify.tm_latency': 'độ trễ',
+                    'verify.tm_bid': 'bid',
+                    'verify.tm_payout': 'phần của bạn',
+                    'page.placements.tab_mcp': 'Lumi MCP',
+                    'page.placements.tab_web': 'Lumi Web',
+                    'page.placements.tab_ext': 'Lumi Extension',
+                    'page.placements.tab_bot': 'Lumi Bot',
                     'cashout.title': 'Rút tiền về tài khoản PayPal',
                     'cashout.amount_label': 'Số tiền rút',
                     'cashout.amount_min': 'Tối thiểu $1.00 USD.',

@@ -3153,20 +3153,20 @@
 
               <!-- Top action row: search + New Product button -->
               <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
-                <input type="search" id="productsSearch" placeholder="Search products…" style="flex:1;min-width:240px;max-width:380px;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;">
+                <input type="search" id="productsSearch" placeholder="Search products…" style="flex:1;min-width:240px;max-width:380px;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;" data-t-placeholder="page.products.ph_search">
                 <div style="display:flex;gap:8px;">
                   <select id="productsStatusFilter" style="padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;">
-                    <option value="">All products</option>
-                    <option value="active">Active only</option>
-                    <option value="archived">Archived</option>
+                    <option value="" data-t="page.products.filter_all">All products</option>
+                    <option value="active" data-t="page.products.filter_active">Active only</option>
+                    <option value="archived" data-t="page.products.filter_archived">Archived</option>
                   </select>
-                  <button id="newProductBtn" class="new-campaign-btn" type="button">+ New Product</button>
+                  <button id="newProductBtn" class="new-campaign-btn" type="button" data-t="page.products.btn_new">+ New Product</button>
                 </div>
               </div>
 
               <!-- Products list — table on wide viewports, cards on narrow -->
               <div id="productsList" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;">
-                <div style="padding:48px 24px;text-align:center;color:#9CA3AF;font-size:13px;" id="productsLoading">Loading products…</div>
+                <div style="padding:48px 24px;text-align:center;color:#9CA3AF;font-size:13px;" id="productsLoading" data-t="page.products.loading">Loading products…</div>
               </div>
             </div><!-- /[data-shell-route="products"] -->
 
@@ -3311,30 +3311,30 @@
             <div data-shell-route="payouts">
               <div class="shell-page-head">
                 <div>
-                  <h1 class="shell-page-title">Payouts</h1>
-                  <div class="shell-page-sub">Money Boost Boss owes you from MoR captures. Sellers settle biweekly Friday via PayPal.</div>
+                  <h1 class="shell-page-title" data-t="page.payouts.title">Payouts</h1>
+                  <div class="shell-page-sub" data-t="page.payouts.sub">Money Boost Boss owes you from MoR captures. Sellers settle biweekly Friday via PayPal.</div>
                 </div>
               </div>
 
               <!-- Top stat cards: available + lifetime + next payout date -->
               <div id="payoutsStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px;">
                 <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
-                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Available for next payout</div>
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" data-t="page.payouts.stat_available">Available for next payout</div>
                   <div style="font-size:26px;font-weight:700;color:#059669;line-height:1.1;margin-bottom:4px;" id="poAvailable">—</div>
                   <div style="font-size:11.5px;color:#6B7280;" id="poUnsettledCount">—</div>
                 </div>
                 <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
-                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Next payout</div>
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" data-t="page.payouts.stat_next">Next payout</div>
                   <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.2;margin-bottom:4px;" id="poNextDate">—</div>
                   <div style="font-size:11.5px;color:#6B7280;" id="poNextStatus">—</div>
                 </div>
                 <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
-                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Lifetime paid</div>
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" data-t="page.payouts.stat_lifetime_paid">Lifetime paid</div>
                   <div style="font-size:22px;font-weight:700;color:#0EA5E9;line-height:1.1;margin-bottom:4px;" id="poLifetimePaid">—</div>
-                  <div style="font-size:11.5px;color:#6B7280;">Already settled to your PayPal</div>
+                  <div style="font-size:11.5px;color:#6B7280;" data-t="page.payouts.stat_lifetime_paid_hint">Already settled to your PayPal</div>
                 </div>
                 <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
-                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Lifetime captured</div>
+                  <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" data-t="page.payouts.stat_lifetime_captured">Lifetime captured</div>
                   <div style="font-size:22px;font-weight:700;color:#FF2D78;line-height:1.1;margin-bottom:4px;" id="poLifetimeCaptured">—</div>
                   <div style="font-size:11.5px;color:#6B7280;" id="poRefunded">—</div>
                 </div>
@@ -3342,52 +3342,52 @@
 
               <!-- Hold banner — shown when no payout method configured -->
               <div id="poHoldBanner" style="display:none;background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:14px 18px;margin-bottom:18px;color:#92400E;">
-                <strong>⚠ Add your PayPal email below to receive payouts.</strong> Until you do, captured sales stay held in Boost Boss's account. Your funds aren't lost — they release the next payout cycle after you save your details.
+                <strong data-t="page.payouts.hold_banner_strong">⚠ Add your PayPal email below to receive payouts.</strong> <span data-t="page.payouts.hold_banner_body">Until you do, captured sales stay held in Boost Boss's account. Your funds aren't lost — they release the next payout cycle after you save your details.</span>
               </div>
 
               <!-- Payout method form -->
               <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
-                <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;">Payout method</div>
-                <div style="font-size:12.5px;color:#6B7280;margin-bottom:16px;">Boost Boss sends your settled funds to this PayPal address every biweekly Friday. Make sure the email matches a verified PayPal account, otherwise payments will be held.</div>
+                <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;" data-t="page.payouts.method_h">Payout method</div>
+                <div style="font-size:12.5px;color:#6B7280;margin-bottom:16px;" data-t="page.payouts.method_desc">Boost Boss sends your settled funds to this PayPal address every biweekly Friday. Make sure the email matches a verified PayPal account, otherwise payments will be held.</div>
                 <form id="poMethodForm" style="display:grid;grid-template-columns:2fr 1fr 120px auto;gap:12px;align-items:end;">
                   <div>
-                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">PayPal email <span style="color:#DC2626;">*</span></label>
-                    <input type="email" name="paypal_email" required class="form-input" placeholder="you@example.com">
+                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;"><span data-t="page.payouts.label_email">PayPal email</span> <span style="color:#DC2626;">*</span></label>
+                    <input type="email" name="paypal_email" required class="form-input" placeholder="you@example.com" data-t-placeholder="page.payouts.ph_email">
                   </div>
                   <div>
-                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Display name <span style="color:#9CA3AF;">(on statement)</span></label>
-                    <input type="text" name="display_name" maxlength="240" class="form-input" placeholder="Your name or business">
+                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;"><span data-t="page.payouts.label_display">Display name</span> <span style="color:#9CA3AF;" data-t="page.payouts.label_display_hint">(on statement)</span></label>
+                    <input type="text" name="display_name" maxlength="240" class="form-input" placeholder="Your name or business" data-t-placeholder="page.payouts.ph_display">
                   </div>
                   <div>
-                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Country</label>
-                    <input type="text" name="country_code" maxlength="2" class="form-input" placeholder="US" style="text-transform:uppercase;">
+                    <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;" data-t="page.payouts.label_country">Country</label>
+                    <input type="text" name="country_code" maxlength="2" class="form-input" placeholder="US" style="text-transform:uppercase;" data-t-placeholder="page.payouts.ph_country">
                   </div>
-                  <button type="submit" class="new-campaign-btn" id="poMethodSubmit">Save</button>
+                  <button type="submit" class="new-campaign-btn" id="poMethodSubmit" data-t="page.payouts.btn_save">Save</button>
                 </form>
                 <div id="poMethodErr" style="display:none;margin-top:10px;padding:9px 12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:8px;font-size:12.5px;"></div>
-                <div id="poMethodOk" style="display:none;margin-top:10px;padding:9px 12px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;border-radius:8px;font-size:12.5px;">✓ Payout method saved</div>
+                <div id="poMethodOk" style="display:none;margin-top:10px;padding:9px 12px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;border-radius:8px;font-size:12.5px;" data-t="page.payouts.method_ok">✓ Payout method saved</div>
               </div>
 
               <!-- Upcoming line items — what's in the next payout -->
               <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
                   <div>
-                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Upcoming payout — line items</div>
-                    <div style="font-size:12px;color:#6B7280;">Captures waiting to settle to your PayPal on the next biweekly Friday.</div>
+                    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;" data-t="page.payouts.upcoming_h">Upcoming payout — line items</div>
+                    <div style="font-size:12px;color:#6B7280;" data-t="page.payouts.upcoming_desc">Captures waiting to settle to your PayPal on the next biweekly Friday.</div>
                   </div>
-                  <button type="button" id="poRefreshUpcoming" style="padding:7px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">↻ Refresh</button>
+                  <button type="button" id="poRefreshUpcoming" style="padding:7px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;" data-t="page.payouts.btn_refresh">↻ Refresh</button>
                 </div>
                 <div id="poUpcoming" style="overflow-x:auto;">
-                  <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>
+                  <div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;" data-t="page.payouts.loading">Loading…</div>
                 </div>
               </div>
 
               <!-- Payout history -->
               <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;">
-                <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">Payout history</div>
-                <div style="font-size:12px;color:#6B7280;margin-bottom:14px;">Every batch BB has dispatched to your PayPal.</div>
+                <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;" data-t="page.payouts.history_h">Payout history</div>
+                <div style="font-size:12px;color:#6B7280;margin-bottom:14px;" data-t="page.payouts.history_desc">Every batch BB has dispatched to your PayPal.</div>
                 <div id="poHistory" style="overflow-x:auto;">
-                  <div style="padding:24px 0;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>
+                  <div style="padding:24px 0;text-align:center;color:#9CA3AF;font-size:13px;" data-t="page.payouts.loading">Loading…</div>
                 </div>
               </div>
             </div><!-- /[data-shell-route="payouts"] -->
@@ -3399,8 +3399,8 @@
             <div data-shell-route="promote">
               <div class="shell-page-head">
                 <div>
-                  <h1 class="shell-page-title">Promote</h1>
-                  <div class="shell-page-sub">Reuse your MoR earnings to acquire customers on the Boost Boss network. Spend in the system → no PayPal round-trip.</div>
+                  <h1 class="shell-page-title" data-t="page.promote.title">Promote</h1>
+                  <div class="shell-page-sub" data-t="page.promote.sub">Reuse your MoR earnings to acquire customers on the Boost Boss network. Spend in the system → no PayPal round-trip.</div>
                 </div>
               </div>
 
@@ -3409,19 +3409,19 @@
 
                 <!-- MoR earnings (cashable / convertible) -->
                 <div style="background:linear-gradient(135deg,#FFF5F8 0%,#F5FBFF 100%);border:1.5px solid #E5E7EB;border-radius:14px;padding:22px 24px;">
-                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7280;font-weight:700;">MoR earnings (unsettled)</div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7280;font-weight:700;" data-t="page.promote.mor_label">MoR earnings (unsettled)</div>
                   <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#111827;margin-top:4px;">
                     $<span id="promoteBalance">0.00</span>
                   </div>
-                  <div style="font-size:12.5px;color:#374151;margin-top:6px;line-height:1.5;">
+                  <div style="font-size:12.5px;color:#374151;margin-top:6px;line-height:1.5;" data-t="page.promote.mor_desc">
                     From settled MoR captures. Cash out via PayPal, or convert to ad credit to spend in BB.
                   </div>
                   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
                     <button id="promoteCashoutBtn" style="background:#1A1A2E;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
-                      Cash out via PayPal
+                      <span data-t="page.promote.btn_cashout">Cash out via PayPal</span>
                     </button>
-                    <button id="promoteConvertBtn" style="background:#fff;color:#4338CA;border:1px solid #C7D2FE;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+                    <button id="promoteConvertBtn" style="background:#fff;color:#4338CA;border:1px solid #C7D2FE;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;" data-t="page.promote.btn_convert">
                       ↻ Convert to ad credit
                     </button>
                   </div>
@@ -3429,17 +3429,17 @@
 
                 <!-- Ad credit (spend pool) -->
                 <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);border:1.5px solid #C7D2FE;border-radius:14px;padding:22px 24px;">
-                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;">Ad credit (available to spend)</div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;" data-t="page.promote.credit_label">Ad credit (available to spend)</div>
                   <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#3730A3;margin-top:4px;">
                     $<span id="promoteAdCredit">0.00</span>
                   </div>
                   <div style="font-size:12.5px;color:#4338CA;margin-top:6px;line-height:1.5;">
-                    Pre-funded ad budget — already inside BB. <span id="promoteAdCreditCount" style="color:#6366F1;">No conversions yet.</span>
+                    <span data-t="page.promote.credit_desc">Pre-funded ad budget — already inside BB.</span> <span id="promoteAdCreditCount" style="color:#6366F1;">No conversions yet.</span>
                   </div>
                   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
                     <button id="promoteCreateCampaignBtn" style="background:#FF2D78;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(255,45,120,0.32);">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                      Create campaign
+                      <span data-t="page.promote.btn_create">Create campaign</span>
                     </button>
                   </div>
                 </div>
@@ -3447,12 +3447,12 @@
 
               <!-- Active campaigns -->
               <div style="margin-bottom:24px;">
-                <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:#111827;">Active campaigns</h3>
+                <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:#111827;" data-t="page.promote.active_h">Active campaigns</h3>
                 <div id="promoteCampaignsList">
                   <div id="promoteEmptyState" style="border:1.5px dashed #E5E7EB;border-radius:14px;padding:48px 24px;text-align:center;color:#6B7280;">
                     <div style="font-size:42px;margin-bottom:12px;">📣</div>
-                    <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:#111827;margin-bottom:6px;">No campaigns yet</div>
-                    <div style="font-size:14px;line-height:1.55;max-width:480px;margin:0 auto;">
+                    <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:#111827;margin-bottom:6px;" data-t="page.promote.empty_h">No campaigns yet</div>
+                    <div style="font-size:14px;line-height:1.55;max-width:480px;margin:0 auto;" data-t="page.promote.empty_p">
                       When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your MoR earnings can fund it directly — no PayPal deposit needed.
                     </div>
                   </div>
@@ -3461,11 +3461,11 @@
 
               <!-- Bottom hint: full advertiser features -->
               <div style="border-top:1px solid #E5E7EB;padding-top:18px;margin-top:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                <div style="font-size:13px;color:#6B7280;">
+                <div style="font-size:13px;color:#6B7280;" data-t="page.promote.graduate_hint">
                   Want multiple creatives, advanced targeting, deep analytics? The full Campaigns surface has it all.
                 </div>
                 <a href="#/campaigns" style="font-size:14px;font-weight:600;color:#FF2D78;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                  Open Campaigns
+                  <span data-t="page.promote.graduate_link">Open Campaigns</span>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
               </div>
@@ -3476,8 +3476,8 @@
                   <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);padding:22px 26px;border-bottom:1px solid #E5E7EB;">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
                       <div>
-                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;margin-bottom:4px;">Convert to ad credit</div>
-                        <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.3;">How much to convert?</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;margin-bottom:4px;" data-t="page.promote.convert_kicker">Convert to ad credit</div>
+                        <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.3;" data-t="page.promote.convert_h">How much to convert?</div>
                       </div>
                       <button type="button" id="convertModalClose" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 4px;">×</button>
                     </div>
@@ -3487,22 +3487,22 @@
                   <div style="padding:24px 26px;">
                     <!-- Available chip -->
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:18px;">
-                      <span style="font-size:12.5px;color:#6B7280;font-weight:600;">Available MoR balance</span>
+                      <span style="font-size:12.5px;color:#6B7280;font-weight:600;" data-t="page.promote.convert_available">Available MoR balance</span>
                       <span style="font-size:16px;font-weight:700;color:#111827;">$<span id="convertModalAvailable">0.00</span></span>
                     </div>
 
                     <!-- Amount input -->
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:8px;">Amount to convert (USD)</label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:8px;" data-t="page.promote.convert_label_amount">Amount to convert (USD)</label>
                     <div style="position:relative;margin-bottom:8px;">
                       <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:#6B7280;">$</span>
                       <input type="number" id="convertModalAmount" min="0.01" step="0.01" style="width:100%;padding:14px 16px 14px 32px;border:2px solid #C7D2FE;border-radius:10px;font-size:22px;font-weight:700;font-family:inherit;color:#111827;background:#fff;">
-                      <button type="button" id="convertModalMaxBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">MAX</button>
+                      <button type="button" id="convertModalMaxBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" data-t="page.promote.convert_max">MAX</button>
                     </div>
-                    <div style="font-size:11px;color:#9CA3AF;margin-bottom:18px;line-height:1.5;">Rounds up to the nearest covered sale (MoR captures are atomic — can't be split mid-row).</div>
+                    <div style="font-size:11px;color:#9CA3AF;margin-bottom:18px;line-height:1.5;" data-t="page.promote.convert_round_hint">Rounds up to the nearest covered sale (MoR captures are atomic — can't be split mid-row).</div>
 
                     <!-- Trade-off explainer -->
                     <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#92400E;line-height:1.55;margin-bottom:8px;">
-                      <strong>⚠ One-way conversion.</strong> Once converted, the funds stay inside BB as ad credit — they can no longer be paid out to your PayPal. (Support can reverse it in exceptional cases.)
+                      <strong data-t="page.promote.convert_warn_strong">⚠ One-way conversion.</strong> <span data-t="page.promote.convert_warn_body">Once converted, the funds stay inside BB as ad credit — they can no longer be paid out to your PayPal. (Support can reverse it in exceptional cases.)</span>
                     </div>
 
                     <!-- Error display -->
@@ -3511,8 +3511,8 @@
 
                   <!-- Footer with actions -->
                   <div style="display:flex;justify-content:flex-end;gap:8px;padding:18px 26px;border-top:1px solid #F3F4F6;background:#FAFAFA;">
-                    <button type="button" id="convertModalCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Cancel</button>
-                    <button type="button" id="convertModalConfirm" style="padding:10px 22px;border:none;border-radius:10px;background:linear-gradient(135deg,#FF2D78 0%,#4338CA 100%);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(255,45,120,0.32);">↻ Convert</button>
+                    <button type="button" id="convertModalCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;" data-t="common.cancel">Cancel</button>
+                    <button type="button" id="convertModalConfirm" style="padding:10px 22px;border:none;border-radius:10px;background:linear-gradient(135deg,#FF2D78 0%,#4338CA 100%);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(255,45,120,0.32);" data-t="page.promote.convert_btn">↻ Convert</button>
                   </div>
                 </div>
               </div>
@@ -3544,7 +3544,7 @@
                             <span class="setup-card-pill" id="pixelStatus" data-t="setup.conv_not_detected">Not detected yet</span>
                         </div>
                         <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
-                            Track conversions on your site to unlock Benna's CPA and ROAS optimization. Add this snippet before the closing <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> tag on your conversion page.
+                            <span data-t="setup.conv_desc_a">Track conversions on your site to unlock Benna's CPA and ROAS optimization. Add this snippet before the closing</span> <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> <span data-t="setup.conv_desc_b">tag on your conversion page.</span>
                         </p>
                         <div style="
                             background: #0A0A14; border-radius: 10px; padding: 14px; position: relative;
@@ -3565,7 +3565,7 @@
 &lt;/script&gt;</pre>
                         </div>
                         <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
-                            Test end-to-end: <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
+                            <span data-t="setup.test_end_to_end">Test end-to-end:</span> <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
                         </div>
                     </div>
 
@@ -3579,7 +3579,7 @@
                                 cursor: pointer; font-family: inherit;
                             " data-t="setup.add_rule">+ Add rule</button>
                         </div>
-                        <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
+                        <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;" data-t="setup.rules_desc">
                             Trigger actions automatically when performance crosses thresholds — pause campaigns, shift budget, raise bids on winning audiences.
                         </p>
                         <div id="rulesContainer">
@@ -8572,10 +8572,11 @@
 
         function renderBillingTable() {
             const tbody = document.getElementById('billingTableBody');
+            const _T = (k, fb) => (window.dashT ? (window.dashT(k) || fb) : fb);
             tbody.innerHTML = '';
 
             if (_billingHistory.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No transactions yet</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">${_T('page.billing.empty','No transactions yet')}</td></tr>`;
                 return;
             }
 
@@ -8583,18 +8584,20 @@
                 const row = document.createElement('tr');
                 const isDeposit = tx.amount > 0;
                 const statusColor = tx.status === 'completed' || tx.status === 'settled' ? '#059669' : '#D97706';
+                const typeLabel   = _T('page.billing.type_' + tx.type,   tx.type);
+                const statusLabel = _T('page.billing.status_' + tx.status, tx.status);
                 row.innerHTML = `
                     <td style="white-space: nowrap;">${new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td>${escapeHtml(tx.description)}</td>
                     <td><span style="
                         font-size: 11px; padding: 3px 8px; border-radius: 100px; font-weight: 600;
                         background: ${isDeposit ? '#ECFDF5' : '#FEF3F2'}; color: ${isDeposit ? '#059669' : '#DC2626'};
-                    ">${tx.type}</span></td>
+                    ">${escapeHtml(typeLabel)}</span></td>
                     <td style="font-weight: 600; color: ${isDeposit ? '#059669' : '#111'};">
                         ${isDeposit ? '+' : ''}$${Math.abs(tx.amount).toFixed(2)}
                     </td>
                     <td style="color: #6B7280;">$${(tx.balance || 0).toFixed(2)}</td>
-                    <td><span style="font-size: 11px; color: ${statusColor}; font-weight: 500;">${tx.status}</span></td>
+                    <td><span style="font-size: 11px; color: ${statusColor}; font-weight: 500;">${escapeHtml(statusLabel)}</span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -9361,6 +9364,93 @@
                     'shell.nav.promote':   'Promote',
                     'page.products.title': 'Products',
                     'page.products.sub':   'Register the things you sell. Campaigns attach to a product. Affiliates browse and save by product.',
+                    // ─── Products route (APAC i18n sweep) ───
+                    'page.products.ph_search': 'Search products…',
+                    'page.products.filter_all': 'All products',
+                    'page.products.filter_active': 'Active only',
+                    'page.products.filter_archived': 'Archived',
+                    'page.products.btn_new': '+ New Product',
+                    'page.products.loading': 'Loading products…',
+                    'page.products.empty_h': 'No products yet',
+                    'page.products.empty_p': 'Register the things you sell. Each product can have many campaigns over time — the affiliate marketplace lists products, not campaigns, so your share links stay durable across promo cycles.',
+                    'page.products.btn_add_first': '+ Add your first product',
+                    'page.products.col_product': 'Product',
+                    'page.products.col_commission': 'Commission',
+                    'page.products.col_created': 'Created',
+                    'page.products.col_status': 'Status',
+                    'page.products.status_archived': 'Archived',
+                    'page.products.status_live': 'Live',
+                    'page.products.status_pending': 'Pending audit',
+                    'page.products.status_rejected': 'Rejected',
+                    'page.products.status_changes': 'Changes requested',
+                    'page.products.btn_edit': 'Edit',
+                    'page.products.btn_restore': 'Restore',
+                    'page.products.btn_orders': 'Orders →',
+                    // ─── Payouts route (MoR settlements, APAC i18n sweep) ───
+                    'page.payouts.title': 'Payouts',
+                    'page.payouts.sub': 'Money Boost Boss owes you from MoR captures. Sellers settle biweekly Friday via PayPal.',
+                    'page.payouts.stat_available': 'Available for next payout',
+                    'page.payouts.stat_next': 'Next payout',
+                    'page.payouts.stat_lifetime_paid': 'Lifetime paid',
+                    'page.payouts.stat_lifetime_paid_hint': 'Already settled to your PayPal',
+                    'page.payouts.stat_lifetime_captured': 'Lifetime captured',
+                    'page.payouts.hold_banner_strong': '⚠ Add your PayPal email below to receive payouts.',
+                    'page.payouts.hold_banner_body': "Until you do, captured sales stay held in Boost Boss's account. Your funds aren't lost — they release the next payout cycle after you save your details.",
+                    'page.payouts.method_h': 'Payout method',
+                    'page.payouts.method_desc': 'Boost Boss sends your settled funds to this PayPal address every biweekly Friday. Make sure the email matches a verified PayPal account, otherwise payments will be held.',
+                    'page.payouts.label_email': 'PayPal email',
+                    'page.payouts.label_display': 'Display name',
+                    'page.payouts.label_display_hint': '(on statement)',
+                    'page.payouts.label_country': 'Country',
+                    'page.payouts.ph_email': 'you@example.com',
+                    'page.payouts.ph_display': 'Your name or business',
+                    'page.payouts.ph_country': 'US',
+                    'page.payouts.btn_save': 'Save',
+                    'page.payouts.method_ok': '✓ Payout method saved',
+                    'page.payouts.upcoming_h': 'Upcoming payout — line items',
+                    'page.payouts.upcoming_desc': 'Captures waiting to settle to your PayPal on the next biweekly Friday.',
+                    'page.payouts.btn_refresh': '↻ Refresh',
+                    'page.payouts.loading': 'Loading…',
+                    'page.payouts.history_h': 'Payout history',
+                    'page.payouts.history_desc': 'Every batch BB has dispatched to your PayPal.',
+                    // ─── Promote route (MoR earnings → ad credit, APAC i18n sweep) ───
+                    'page.promote.title': 'Promote',
+                    'page.promote.sub': 'Reuse your MoR earnings to acquire customers on the Boost Boss network. Spend in the system → no PayPal round-trip.',
+                    'page.promote.mor_label': 'MoR earnings (unsettled)',
+                    'page.promote.mor_desc': 'From settled MoR captures. Cash out via PayPal, or convert to ad credit to spend in BB.',
+                    'page.promote.btn_cashout': 'Cash out via PayPal',
+                    'page.promote.btn_convert': '↻ Convert to ad credit',
+                    'page.promote.credit_label': 'Ad credit (available to spend)',
+                    'page.promote.credit_desc': 'Pre-funded ad budget — already inside BB.',
+                    'page.promote.btn_create': 'Create campaign',
+                    'page.promote.active_h': 'Active campaigns',
+                    'page.promote.empty_h': 'No campaigns yet',
+                    'page.promote.empty_p': "When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your MoR earnings can fund it directly — no PayPal deposit needed.",
+                    'page.promote.graduate_hint': 'Want multiple creatives, advanced targeting, deep analytics? The full Campaigns surface has it all.',
+                    'page.promote.graduate_link': 'Open Campaigns',
+                    'page.promote.convert_kicker': 'Convert to ad credit',
+                    'page.promote.convert_h': 'How much to convert?',
+                    'page.promote.convert_available': 'Available MoR balance',
+                    'page.promote.convert_label_amount': 'Amount to convert (USD)',
+                    'page.promote.convert_max': 'MAX',
+                    'page.promote.convert_round_hint': "Rounds up to the nearest covered sale (MoR captures are atomic — can't be split mid-row).",
+                    'page.promote.convert_warn_strong': '⚠ One-way conversion.',
+                    'page.promote.convert_warn_body': 'Once converted, the funds stay inside BB as ad credit — they can no longer be paid out to your PayPal. (Support can reverse it in exceptional cases.)',
+                    'page.promote.convert_btn': '↻ Convert',
+                    // ─── Billing route dynamic strings (APAC i18n sweep) ───
+                    'page.billing.empty': 'No transactions yet',
+                    'page.billing.type_deposit': 'deposit',
+                    'page.billing.type_spend': 'spend',
+                    'page.billing.status_completed': 'completed',
+                    'page.billing.status_settled': 'settled',
+                    'page.billing.status_pending': 'pending',
+                    'page.billing.status_refunded': 'refunded',
+                    'page.billing.status_cancelled': 'cancelled',
+                    'page.billing.status_captured': 'captured',
+                    // ─── Setup route body copy (APAC i18n sweep) ───
+                    'setup.conv_desc_a': "Track conversions on your site to unlock Benna's CPA and ROAS optimization. Add this snippet before the closing",
+                    'setup.conv_desc_b': 'tag on your conversion page.',
+                    'setup.rules_desc': 'Trigger actions automatically when performance crosses thresholds — pause campaigns, shift budget, raise bids on winning audiences.',
                     'shell.nav.billing': 'Billing',
                     'shell.nav.setup': 'Setup',
                     'shell.nav.settings': 'Settings',
@@ -9722,6 +9812,93 @@
                     'shell.nav.promote':   '推广',
                     'page.products.title': '产品',
                     'page.products.sub':   '注册您要销售的商品。广告会附加到商品上。联盟会员按商品浏览和收藏。',
+                    // ─── Products route (APAC i18n sweep) ───
+                    'page.products.ph_search': '搜索商品…',
+                    'page.products.filter_all': '全部商品',
+                    'page.products.filter_active': '仅在售',
+                    'page.products.filter_archived': '已归档',
+                    'page.products.btn_new': '+ 新建商品',
+                    'page.products.loading': '正在加载商品…',
+                    'page.products.empty_h': '尚无商品',
+                    'page.products.empty_p': '注册您要销售的商品。每件商品可对应多个广告 — 联盟市场展示的是商品而非广告,因此您的分享链接在多轮促销中始终有效。',
+                    'page.products.btn_add_first': '+ 添加首个商品',
+                    'page.products.col_product': '商品',
+                    'page.products.col_commission': '佣金',
+                    'page.products.col_created': '创建时间',
+                    'page.products.col_status': '状态',
+                    'page.products.status_archived': '已归档',
+                    'page.products.status_live': '上架中',
+                    'page.products.status_pending': '审核中',
+                    'page.products.status_rejected': '已拒绝',
+                    'page.products.status_changes': '需要修改',
+                    'page.products.btn_edit': '编辑',
+                    'page.products.btn_restore': '恢复',
+                    'page.products.btn_orders': '订单 →',
+                    // ─── Payouts route (MoR settlements, APAC i18n sweep) ───
+                    'page.payouts.title': '打款',
+                    'page.payouts.sub': 'Boost Boss 因 MoR 代收销售而欠付您的金额。卖家每两周一次在周五通过 PayPal 结算。',
+                    'page.payouts.stat_available': '下次打款可用金额',
+                    'page.payouts.stat_next': '下次打款',
+                    'page.payouts.stat_lifetime_paid': '累计已付',
+                    'page.payouts.stat_lifetime_paid_hint': '已结算至您的 PayPal',
+                    'page.payouts.stat_lifetime_captured': '累计代收',
+                    'page.payouts.hold_banner_strong': '⚠ 请在下方填写您的 PayPal 邮箱以接收打款。',
+                    'page.payouts.hold_banner_body': '在此之前,已代收的销售会暂存在 Boost Boss 账户中。您的资金不会丢失 — 保存信息后,下一个打款周期即可释放。',
+                    'page.payouts.method_h': '打款方式',
+                    'page.payouts.method_desc': 'Boost Boss 每两周一次在周五将已结算资金发送至此 PayPal 邮箱。请确保邮箱已绑定经过验证的 PayPal 账户,否则款项将被暂扣。',
+                    'page.payouts.label_email': 'PayPal 邮箱',
+                    'page.payouts.label_display': '显示名称',
+                    'page.payouts.label_display_hint': '(显示在对账单)',
+                    'page.payouts.label_country': '国家/地区',
+                    'page.payouts.ph_email': 'you@example.com',
+                    'page.payouts.ph_display': '您的姓名或公司名称',
+                    'page.payouts.ph_country': 'US',
+                    'page.payouts.btn_save': '保存',
+                    'page.payouts.method_ok': '✓ 已保存打款方式',
+                    'page.payouts.upcoming_h': '即将打款 — 明细项',
+                    'page.payouts.upcoming_desc': '等待在下个双周周五结算至您 PayPal 的代收款项。',
+                    'page.payouts.btn_refresh': '↻ 刷新',
+                    'page.payouts.loading': '加载中…',
+                    'page.payouts.history_h': '打款历史',
+                    'page.payouts.history_desc': 'BB 已发送至您 PayPal 的每一批打款。',
+                    // ─── Promote route (MoR earnings → ad credit, APAC i18n sweep) ───
+                    'page.promote.title': '推广',
+                    'page.promote.sub': '将您的 MoR 收益用于在 Boost Boss 网络上获取客户。在系统内消费 → 无需 PayPal 往返。',
+                    'page.promote.mor_label': 'MoR 收益(待结算)',
+                    'page.promote.mor_desc': '来自已结算的 MoR 代收。可通过 PayPal 提现,也可转为广告余额在 BB 内消费。',
+                    'page.promote.btn_cashout': '通过 PayPal 提现',
+                    'page.promote.btn_convert': '↻ 转为广告余额',
+                    'page.promote.credit_label': '广告余额(可投放)',
+                    'page.promote.credit_desc': '预存广告预算 — 已在 BB 内。',
+                    'page.promote.btn_create': '创建广告',
+                    'page.promote.active_h': '运行中的广告',
+                    'page.promote.empty_h': '尚无广告',
+                    'page.promote.empty_p': '当您创建首个广告后,会在这里显示实时展示、点击和花费。您的 MoR 收益可直接作为预算 — 无需 PayPal 充值。',
+                    'page.promote.graduate_hint': '需要更多创意、高级定向、深度分析吗?完整的广告页面应有尽有。',
+                    'page.promote.graduate_link': '打开广告页面',
+                    'page.promote.convert_kicker': '转为广告余额',
+                    'page.promote.convert_h': '要转换多少?',
+                    'page.promote.convert_available': '可用 MoR 余额',
+                    'page.promote.convert_label_amount': '转换金额(美元)',
+                    'page.promote.convert_max': '全部',
+                    'page.promote.convert_round_hint': '会向上取整至最近的一笔覆盖销售(MoR 代收是原子的,无法拆分)。',
+                    'page.promote.convert_warn_strong': '⚠ 单向转换。',
+                    'page.promote.convert_warn_body': '一旦转换,资金将作为广告余额留在 BB 内 — 不能再提现至您的 PayPal。(特殊情况下客服可协助撤销。)',
+                    'page.promote.convert_btn': '↻ 转换',
+                    // ─── Billing route dynamic strings (APAC i18n sweep) ───
+                    'page.billing.empty': '暂无交易',
+                    'page.billing.type_deposit': '充值',
+                    'page.billing.type_spend': '消费',
+                    'page.billing.status_completed': '已完成',
+                    'page.billing.status_settled': '已结算',
+                    'page.billing.status_pending': '处理中',
+                    'page.billing.status_refunded': '已退款',
+                    'page.billing.status_cancelled': '已取消',
+                    'page.billing.status_captured': '已代收',
+                    // ─── Setup route body copy (APAC i18n sweep) ───
+                    'setup.conv_desc_a': '在您的网站上追踪转化,以解锁 Benna 的 CPA 与 ROAS 优化。请将下方代码片段添加到转化页的',
+                    'setup.conv_desc_b': '闭合标签之前。',
+                    'setup.rules_desc': '当效果超过阈值时自动触发操作 — 暂停广告、调整预算、对优质受众加价。',
                     'shell.nav.billing': '账单',
                     'shell.nav.setup': '设置向导',
                     'shell.nav.settings': '设置',
@@ -10083,6 +10260,93 @@
                     'shell.nav.promote':   '推廣',
                     'page.products.title': '產品',
                     'page.products.sub':   '註冊您要販售的商品。廣告會附加到商品上。聯盟夥伴依商品瀏覽和收藏。',
+                    // ─── Products route (APAC i18n sweep) ───
+                    'page.products.ph_search': '搜尋商品…',
+                    'page.products.filter_all': '全部商品',
+                    'page.products.filter_active': '僅顯示上架中',
+                    'page.products.filter_archived': '已封存',
+                    'page.products.btn_new': '+ 新增商品',
+                    'page.products.loading': '正在載入商品…',
+                    'page.products.empty_h': '尚無商品',
+                    'page.products.empty_p': '註冊您要販售的商品。每件商品可對應多個廣告 — 聯盟市集顯示的是商品而非廣告,因此您的分享連結在多輪促銷中始終有效。',
+                    'page.products.btn_add_first': '+ 新增首個商品',
+                    'page.products.col_product': '商品',
+                    'page.products.col_commission': '佣金',
+                    'page.products.col_created': '建立時間',
+                    'page.products.col_status': '狀態',
+                    'page.products.status_archived': '已封存',
+                    'page.products.status_live': '上架中',
+                    'page.products.status_pending': '審核中',
+                    'page.products.status_rejected': '已拒絕',
+                    'page.products.status_changes': '需要修改',
+                    'page.products.btn_edit': '編輯',
+                    'page.products.btn_restore': '還原',
+                    'page.products.btn_orders': '訂單 →',
+                    // ─── Payouts route (MoR settlements, APAC i18n sweep) ───
+                    'page.payouts.title': '撥款',
+                    'page.payouts.sub': 'Boost Boss 因 MoR 代收銷售而欠付您的金額。賣家每兩週一次於週五透過 PayPal 結算。',
+                    'page.payouts.stat_available': '下次撥款可用金額',
+                    'page.payouts.stat_next': '下次撥款',
+                    'page.payouts.stat_lifetime_paid': '累計已付',
+                    'page.payouts.stat_lifetime_paid_hint': '已結算至您的 PayPal',
+                    'page.payouts.stat_lifetime_captured': '累計代收',
+                    'page.payouts.hold_banner_strong': '⚠ 請於下方填寫您的 PayPal 信箱以收取撥款。',
+                    'page.payouts.hold_banner_body': '在此之前,已代收的銷售會暫存於 Boost Boss 帳戶中。您的資金不會遺失 — 儲存資訊後,下一個撥款週期即會釋出。',
+                    'page.payouts.method_h': '撥款方式',
+                    'page.payouts.method_desc': 'Boost Boss 每兩週一次於週五將已結算款項發送至此 PayPal 信箱。請確認信箱已綁定通過驗證的 PayPal 帳戶,否則款項將被暫扣。',
+                    'page.payouts.label_email': 'PayPal 信箱',
+                    'page.payouts.label_display': '顯示名稱',
+                    'page.payouts.label_display_hint': '(顯示於對帳單)',
+                    'page.payouts.label_country': '國家/地區',
+                    'page.payouts.ph_email': 'you@example.com',
+                    'page.payouts.ph_display': '您的姓名或公司名稱',
+                    'page.payouts.ph_country': 'TW',
+                    'page.payouts.btn_save': '儲存',
+                    'page.payouts.method_ok': '✓ 已儲存撥款方式',
+                    'page.payouts.upcoming_h': '即將撥款 — 明細項目',
+                    'page.payouts.upcoming_desc': '等待於下個雙週週五結算至您 PayPal 的代收款項。',
+                    'page.payouts.btn_refresh': '↻ 重新整理',
+                    'page.payouts.loading': '載入中…',
+                    'page.payouts.history_h': '撥款紀錄',
+                    'page.payouts.history_desc': 'BB 已派發至您 PayPal 的每一批撥款。',
+                    // ─── Promote route (MoR earnings → ad credit, APAC i18n sweep) ───
+                    'page.promote.title': '推廣',
+                    'page.promote.sub': '將您的 MoR 收益用於在 Boost Boss 網路上獲取客戶。在系統內消費 → 無需 PayPal 往返。',
+                    'page.promote.mor_label': 'MoR 收益(待結算)',
+                    'page.promote.mor_desc': '來自已結算的 MoR 代收。可透過 PayPal 提領,也可轉為廣告餘額在 BB 內消費。',
+                    'page.promote.btn_cashout': '透過 PayPal 提領',
+                    'page.promote.btn_convert': '↻ 轉為廣告餘額',
+                    'page.promote.credit_label': '廣告餘額(可投放)',
+                    'page.promote.credit_desc': '預存廣告預算 — 已在 BB 內。',
+                    'page.promote.btn_create': '建立廣告',
+                    'page.promote.active_h': '運行中的廣告',
+                    'page.promote.empty_h': '尚無廣告',
+                    'page.promote.empty_p': '當您建立首個廣告後,會在這裡顯示即時展示、點擊與花費。您的 MoR 收益可直接作為預算 — 無需 PayPal 加值。',
+                    'page.promote.graduate_hint': '需要更多創意、進階定向、深度分析嗎?完整的廣告頁面應有盡有。',
+                    'page.promote.graduate_link': '開啟廣告頁面',
+                    'page.promote.convert_kicker': '轉為廣告餘額',
+                    'page.promote.convert_h': '要轉換多少?',
+                    'page.promote.convert_available': '可用 MoR 餘額',
+                    'page.promote.convert_label_amount': '轉換金額(美元)',
+                    'page.promote.convert_max': '全部',
+                    'page.promote.convert_round_hint': '會向上取整至最近的一筆覆蓋銷售(MoR 代收是原子的,無法拆分)。',
+                    'page.promote.convert_warn_strong': '⚠ 單向轉換。',
+                    'page.promote.convert_warn_body': '一旦轉換,款項將作為廣告餘額留在 BB 內 — 無法再提領至您的 PayPal。(特殊情況下客服可協助撤銷。)',
+                    'page.promote.convert_btn': '↻ 轉換',
+                    // ─── Billing route dynamic strings (APAC i18n sweep) ───
+                    'page.billing.empty': '尚無交易',
+                    'page.billing.type_deposit': '加值',
+                    'page.billing.type_spend': '消費',
+                    'page.billing.status_completed': '已完成',
+                    'page.billing.status_settled': '已結算',
+                    'page.billing.status_pending': '處理中',
+                    'page.billing.status_refunded': '已退款',
+                    'page.billing.status_cancelled': '已取消',
+                    'page.billing.status_captured': '已代收',
+                    // ─── Setup route body copy (APAC i18n sweep) ───
+                    'setup.conv_desc_a': '在您的網站上追蹤轉換,以解鎖 Benna 的 CPA 與 ROAS 最佳化。請將下方程式碼片段加入轉換頁的',
+                    'setup.conv_desc_b': '閉合標籤之前。',
+                    'setup.rules_desc': '當成效超過閾值時自動觸發動作 — 暫停廣告、調整預算、對優質受眾加價。',
                     'shell.nav.billing': '帳單',
                     'shell.nav.setup': '設定精靈',
                     'shell.nav.settings': '設定',
@@ -10444,6 +10708,93 @@
                     'shell.nav.promote':   'プロモート',
                     'page.products.title': '製品',
                     'page.products.sub':   '販売する商品を登録します。キャンペーンは商品に紐付きます。アフィリエイトは商品ごとに閲覧して保存します。',
+                    // ─── Products route (APAC i18n sweep) ───
+                    'page.products.ph_search': '商品を検索…',
+                    'page.products.filter_all': 'すべての商品',
+                    'page.products.filter_active': '公開中のみ',
+                    'page.products.filter_archived': 'アーカイブ済み',
+                    'page.products.btn_new': '+ 新規商品',
+                    'page.products.loading': '商品を読み込み中…',
+                    'page.products.empty_h': '商品はまだありません',
+                    'page.products.empty_p': '販売する商品を登録しましょう。各商品には複数のキャンペーンを紐付けできます — アフィリエイトマーケットプレイスは商品単位で表示されるので、プロモーションサイクルをまたいでもシェアリンクは有効です。',
+                    'page.products.btn_add_first': '+ 最初の商品を追加',
+                    'page.products.col_product': '商品',
+                    'page.products.col_commission': '報酬',
+                    'page.products.col_created': '作成日',
+                    'page.products.col_status': 'ステータス',
+                    'page.products.status_archived': 'アーカイブ済み',
+                    'page.products.status_live': '公開中',
+                    'page.products.status_pending': '審査中',
+                    'page.products.status_rejected': '却下',
+                    'page.products.status_changes': '修正依頼',
+                    'page.products.btn_edit': '編集',
+                    'page.products.btn_restore': '復元',
+                    'page.products.btn_orders': '注文 →',
+                    // ─── Payouts route (MoR settlements, APAC i18n sweep) ───
+                    'page.payouts.title': '支払い',
+                    'page.payouts.sub': 'MoR キャプチャから Boost Boss が支払う金額です。セラーへは隔週金曜に PayPal で精算されます。',
+                    'page.payouts.stat_available': '次回支払い可能額',
+                    'page.payouts.stat_next': '次回支払い',
+                    'page.payouts.stat_lifetime_paid': '累計支払い',
+                    'page.payouts.stat_lifetime_paid_hint': '既に PayPal に精算済み',
+                    'page.payouts.stat_lifetime_captured': '累計キャプチャ',
+                    'page.payouts.hold_banner_strong': '⚠ 支払いを受け取るには、下の欄に PayPal メールアドレスを登録してください。',
+                    'page.payouts.hold_banner_body': '登録するまで、キャプチャ済みの売上は Boost Boss のアカウントで保留されます。資金は失われません — 情報を保存すれば、次の支払いサイクルでリリースされます。',
+                    'page.payouts.method_h': '支払い方法',
+                    'page.payouts.method_desc': 'Boost Boss は隔週金曜に、精算済みの資金をこの PayPal アドレスへ送金します。検証済みの PayPal アカウントと一致するメールを指定してください。一致しないと支払いは保留されます。',
+                    'page.payouts.label_email': 'PayPal メール',
+                    'page.payouts.label_display': '表示名',
+                    'page.payouts.label_display_hint': '(明細に表示)',
+                    'page.payouts.label_country': '国',
+                    'page.payouts.ph_email': 'you@example.com',
+                    'page.payouts.ph_display': '氏名または事業者名',
+                    'page.payouts.ph_country': 'JP',
+                    'page.payouts.btn_save': '保存',
+                    'page.payouts.method_ok': '✓ 支払い方法を保存しました',
+                    'page.payouts.upcoming_h': '次回支払い — 明細',
+                    'page.payouts.upcoming_desc': '次の隔週金曜に PayPal へ精算予定のキャプチャです。',
+                    'page.payouts.btn_refresh': '↻ 更新',
+                    'page.payouts.loading': '読み込み中…',
+                    'page.payouts.history_h': '支払い履歴',
+                    'page.payouts.history_desc': 'BB が PayPal へ送信したすべての支払いバッチです。',
+                    // ─── Promote route (MoR earnings → ad credit, APAC i18n sweep) ───
+                    'page.promote.title': 'プロモート',
+                    'page.promote.sub': 'MoR 収益を再利用して Boost Boss ネットワーク上の顧客を獲得。システム内で消費 → PayPal を経由する必要はありません。',
+                    'page.promote.mor_label': 'MoR 収益(未精算)',
+                    'page.promote.mor_desc': '精算済み MoR キャプチャから。PayPal で出金、または広告クレジットに変換して BB 内で消費できます。',
+                    'page.promote.btn_cashout': 'PayPal で出金',
+                    'page.promote.btn_convert': '↻ 広告クレジットに変換',
+                    'page.promote.credit_label': '広告クレジット(消費可能)',
+                    'page.promote.credit_desc': 'プリペイド広告予算 — すでに BB 内にあります。',
+                    'page.promote.btn_create': 'キャンペーン作成',
+                    'page.promote.active_h': '実行中のキャンペーン',
+                    'page.promote.empty_h': 'キャンペーンはまだありません',
+                    'page.promote.empty_p': '最初のキャンペーンを作成すると、ライブのインプレッション・クリック・消費がここに表示されます。MoR 収益をそのまま予算として使えるので、PayPal 入金は不要です。',
+                    'page.promote.graduate_hint': '複数クリエイティブ、高度ターゲティング、詳細分析が必要ですか?キャンペーン画面にすべて揃っています。',
+                    'page.promote.graduate_link': 'キャンペーンを開く',
+                    'page.promote.convert_kicker': '広告クレジットに変換',
+                    'page.promote.convert_h': 'いくら変換しますか?',
+                    'page.promote.convert_available': '利用可能な MoR 残高',
+                    'page.promote.convert_label_amount': '変換額(USD)',
+                    'page.promote.convert_max': '全額',
+                    'page.promote.convert_round_hint': '最も近いカバー対象の売上単位に切り上げられます(MoR キャプチャは原子的で、途中で分割できません)。',
+                    'page.promote.convert_warn_strong': '⚠ 一方向の変換です。',
+                    'page.promote.convert_warn_body': '一度変換すると、資金は広告クレジットとして BB 内に留まり、PayPal への出金はできなくなります。(例外的な場合のみサポートで取り消し可能です。)',
+                    'page.promote.convert_btn': '↻ 変換',
+                    // ─── Billing route dynamic strings (APAC i18n sweep) ───
+                    'page.billing.empty': '取引はまだありません',
+                    'page.billing.type_deposit': '入金',
+                    'page.billing.type_spend': '消費',
+                    'page.billing.status_completed': '完了',
+                    'page.billing.status_settled': '精算済み',
+                    'page.billing.status_pending': '処理中',
+                    'page.billing.status_refunded': '返金済み',
+                    'page.billing.status_cancelled': 'キャンセル',
+                    'page.billing.status_captured': 'キャプチャ済み',
+                    // ─── Setup route body copy (APAC i18n sweep) ───
+                    'setup.conv_desc_a': 'コンバージョンをサイトで追跡して、Benna の CPA と ROAS 最適化を有効にしましょう。次のスニペットをコンバージョンページの',
+                    'setup.conv_desc_b': '閉じタグの直前に追加してください。',
+                    'setup.rules_desc': 'パフォーマンスがしきい値を超えたら、自動で動作させましょう — キャンペーン停止、予算シフト、勝ちオーディエンスへの入札強化など。',
                     'shell.nav.billing': '請求',
                     'shell.nav.setup': 'セットアップ',
                     'shell.nav.settings': '設定',
@@ -10805,6 +11156,93 @@
                     'shell.nav.promote':   '프로모트',
                     'page.products.title': '제품',
                     'page.products.sub':   '판매할 상품을 등록하세요. 캠페인은 상품에 연결됩니다. 어필리에이트는 상품별로 탐색하고 저장합니다.',
+                    // ─── Products route (APAC i18n sweep) ───
+                    'page.products.ph_search': '상품 검색…',
+                    'page.products.filter_all': '모든 상품',
+                    'page.products.filter_active': '활성만 보기',
+                    'page.products.filter_archived': '보관됨',
+                    'page.products.btn_new': '+ 새 상품',
+                    'page.products.loading': '상품을 불러오는 중…',
+                    'page.products.empty_h': '아직 상품이 없습니다',
+                    'page.products.empty_p': '판매할 상품을 등록하세요. 상품 하나에 여러 캠페인을 연결할 수 있습니다 — 어필리에이트 마켓플레이스는 캠페인이 아닌 상품 단위로 노출되므로, 공유 링크는 프로모션 사이클 전반에 걸쳐 안정적으로 유지됩니다.',
+                    'page.products.btn_add_first': '+ 첫 상품 추가',
+                    'page.products.col_product': '상품',
+                    'page.products.col_commission': '커미션',
+                    'page.products.col_created': '생성일',
+                    'page.products.col_status': '상태',
+                    'page.products.status_archived': '보관됨',
+                    'page.products.status_live': '판매 중',
+                    'page.products.status_pending': '심사 중',
+                    'page.products.status_rejected': '거부됨',
+                    'page.products.status_changes': '수정 요청',
+                    'page.products.btn_edit': '편집',
+                    'page.products.btn_restore': '복원',
+                    'page.products.btn_orders': '주문 →',
+                    // ─── Payouts route (MoR settlements, APAC i18n sweep) ───
+                    'page.payouts.title': '정산',
+                    'page.payouts.sub': 'MoR 캡처를 통해 Boost Boss가 회원에게 지급해야 할 금액입니다. 셀러는 격주 금요일에 PayPal로 정산됩니다.',
+                    'page.payouts.stat_available': '다음 정산 가능 금액',
+                    'page.payouts.stat_next': '다음 정산',
+                    'page.payouts.stat_lifetime_paid': '누적 지급',
+                    'page.payouts.stat_lifetime_paid_hint': '이미 PayPal로 정산됨',
+                    'page.payouts.stat_lifetime_captured': '누적 캡처',
+                    'page.payouts.hold_banner_strong': '⚠ 정산을 받으려면 아래에 PayPal 이메일을 입력하세요.',
+                    'page.payouts.hold_banner_body': '입력 전까지는 캡처된 매출이 Boost Boss 계정에 보류됩니다. 자금이 사라지진 않습니다 — 정보를 저장하면 다음 정산 주기에 풀립니다.',
+                    'page.payouts.method_h': '정산 방법',
+                    'page.payouts.method_desc': 'Boost Boss는 격주 금요일마다 정산된 금액을 이 PayPal 주소로 송금합니다. 인증된 PayPal 계정과 일치하는 이메일을 입력해 주세요. 그렇지 않으면 지급이 보류됩니다.',
+                    'page.payouts.label_email': 'PayPal 이메일',
+                    'page.payouts.label_display': '표시 이름',
+                    'page.payouts.label_display_hint': '(명세서에 표시)',
+                    'page.payouts.label_country': '국가',
+                    'page.payouts.ph_email': 'you@example.com',
+                    'page.payouts.ph_display': '이름 또는 사업자명',
+                    'page.payouts.ph_country': 'KR',
+                    'page.payouts.btn_save': '저장',
+                    'page.payouts.method_ok': '✓ 정산 방법이 저장되었습니다',
+                    'page.payouts.upcoming_h': '다음 정산 — 항목',
+                    'page.payouts.upcoming_desc': '다음 격주 금요일에 PayPal로 정산될 캡처 내역입니다.',
+                    'page.payouts.btn_refresh': '↻ 새로고침',
+                    'page.payouts.loading': '불러오는 중…',
+                    'page.payouts.history_h': '정산 내역',
+                    'page.payouts.history_desc': 'BB가 회원의 PayPal로 발송한 모든 정산 배치입니다.',
+                    // ─── Promote route (MoR earnings → ad credit, APAC i18n sweep) ───
+                    'page.promote.title': '프로모트',
+                    'page.promote.sub': 'MoR 수익을 재사용해 Boost Boss 네트워크에서 고객을 확보하세요. 시스템 내에서 지출 → PayPal을 거칠 필요 없음.',
+                    'page.promote.mor_label': 'MoR 수익(미정산)',
+                    'page.promote.mor_desc': '정산된 MoR 캡처에서 발생합니다. PayPal로 출금하거나, 광고 크레딧으로 전환해 BB에서 집행할 수 있습니다.',
+                    'page.promote.btn_cashout': 'PayPal로 출금',
+                    'page.promote.btn_convert': '↻ 광고 크레딧으로 전환',
+                    'page.promote.credit_label': '광고 크레딧(집행 가능)',
+                    'page.promote.credit_desc': '선충전 광고 예산 — 이미 BB 안에 있습니다.',
+                    'page.promote.btn_create': '캠페인 만들기',
+                    'page.promote.active_h': '진행 중인 캠페인',
+                    'page.promote.empty_h': '아직 캠페인이 없습니다',
+                    'page.promote.empty_p': '첫 캠페인을 만들면 실시간 노출, 클릭, 지출이 여기에 표시됩니다. MoR 수익으로 바로 예산을 사용할 수 있어 PayPal 충전이 필요 없습니다.',
+                    'page.promote.graduate_hint': '여러 크리에이티브, 고급 타겟팅, 심층 분석이 필요하신가요? 전체 캠페인 화면에 모두 갖춰져 있습니다.',
+                    'page.promote.graduate_link': '캠페인 열기',
+                    'page.promote.convert_kicker': '광고 크레딧으로 전환',
+                    'page.promote.convert_h': '얼마나 전환할까요?',
+                    'page.promote.convert_available': '사용 가능한 MoR 잔액',
+                    'page.promote.convert_label_amount': '전환 금액(USD)',
+                    'page.promote.convert_max': '최대',
+                    'page.promote.convert_round_hint': '가장 가까운 커버 매출 단위로 올림됩니다(MoR 캡처는 원자적이라 중간 분할 불가).',
+                    'page.promote.convert_warn_strong': '⚠ 단방향 전환입니다.',
+                    'page.promote.convert_warn_body': '전환된 자금은 BB 내 광고 크레딧으로 유지되며 더 이상 PayPal로 출금할 수 없습니다. (예외적인 경우 지원팀이 되돌릴 수 있습니다.)',
+                    'page.promote.convert_btn': '↻ 전환',
+                    // ─── Billing route dynamic strings (APAC i18n sweep) ───
+                    'page.billing.empty': '아직 거래가 없습니다',
+                    'page.billing.type_deposit': '충전',
+                    'page.billing.type_spend': '지출',
+                    'page.billing.status_completed': '완료',
+                    'page.billing.status_settled': '정산됨',
+                    'page.billing.status_pending': '처리 중',
+                    'page.billing.status_refunded': '환불됨',
+                    'page.billing.status_cancelled': '취소됨',
+                    'page.billing.status_captured': '캡처됨',
+                    // ─── Setup route body copy (APAC i18n sweep) ───
+                    'setup.conv_desc_a': '사이트에서 전환을 추적해 Benna의 CPA 및 ROAS 최적화를 활성화하세요. 아래 스니펫을 전환 페이지의',
+                    'setup.conv_desc_b': '닫는 태그 앞에 추가하세요.',
+                    'setup.rules_desc': '퍼포먼스가 임계값을 넘으면 자동으로 동작합니다 — 캠페인 일시중지, 예산 이동, 우수 오디언스 입찰가 상향 등.',
                     'shell.nav.billing': '결제',
                     'shell.nav.setup': '설정',
                     'shell.nav.settings': '환경설정',
@@ -11166,6 +11604,93 @@
                     'shell.nav.promote':   'Quảng bá',
                     'page.products.title': 'Sản phẩm',
                     'page.products.sub':   'Đăng ký các sản phẩm bạn bán. Chiến dịch gắn vào sản phẩm. Affiliate duyệt và lưu theo sản phẩm.',
+                    // ─── Products route (APAC i18n sweep) ───
+                    'page.products.ph_search': 'Tìm sản phẩm…',
+                    'page.products.filter_all': 'Tất cả sản phẩm',
+                    'page.products.filter_active': 'Chỉ đang bán',
+                    'page.products.filter_archived': 'Đã lưu trữ',
+                    'page.products.btn_new': '+ Sản phẩm mới',
+                    'page.products.loading': 'Đang tải sản phẩm…',
+                    'page.products.empty_h': 'Chưa có sản phẩm',
+                    'page.products.empty_p': 'Đăng ký các sản phẩm bạn bán. Mỗi sản phẩm có thể gắn nhiều chiến dịch — marketplace affiliate liệt kê theo sản phẩm chứ không phải chiến dịch, nên link chia sẻ của bạn vẫn ổn định qua các đợt khuyến mãi.',
+                    'page.products.btn_add_first': '+ Thêm sản phẩm đầu tiên',
+                    'page.products.col_product': 'Sản phẩm',
+                    'page.products.col_commission': 'Hoa hồng',
+                    'page.products.col_created': 'Ngày tạo',
+                    'page.products.col_status': 'Trạng thái',
+                    'page.products.status_archived': 'Đã lưu trữ',
+                    'page.products.status_live': 'Đang bán',
+                    'page.products.status_pending': 'Chờ duyệt',
+                    'page.products.status_rejected': 'Bị từ chối',
+                    'page.products.status_changes': 'Cần chỉnh sửa',
+                    'page.products.btn_edit': 'Sửa',
+                    'page.products.btn_restore': 'Khôi phục',
+                    'page.products.btn_orders': 'Đơn hàng →',
+                    // ─── Payouts route (MoR settlements, APAC i18n sweep) ───
+                    'page.payouts.title': 'Thanh toán',
+                    'page.payouts.sub': 'Khoản Boost Boss đang nợ bạn từ các giao dịch MoR. Seller được thanh toán qua PayPal vào thứ Sáu mỗi hai tuần.',
+                    'page.payouts.stat_available': 'Khả dụng cho kỳ kế tiếp',
+                    'page.payouts.stat_next': 'Kỳ thanh toán tới',
+                    'page.payouts.stat_lifetime_paid': 'Tổng đã thanh toán',
+                    'page.payouts.stat_lifetime_paid_hint': 'Đã chuyển vào PayPal của bạn',
+                    'page.payouts.stat_lifetime_captured': 'Tổng đã thu',
+                    'page.payouts.hold_banner_strong': '⚠ Thêm email PayPal bên dưới để nhận thanh toán.',
+                    'page.payouts.hold_banner_body': 'Trước khi thêm, doanh thu đã thu vẫn được giữ trong tài khoản Boost Boss. Tiền của bạn không bị mất — sẽ được giải phóng trong kỳ thanh toán kế tiếp sau khi lưu thông tin.',
+                    'page.payouts.method_h': 'Phương thức thanh toán',
+                    'page.payouts.method_desc': 'Boost Boss sẽ chuyển số tiền đã quyết toán vào địa chỉ PayPal này vào thứ Sáu mỗi hai tuần. Hãy đảm bảo email khớp với tài khoản PayPal đã xác minh, nếu không khoản thanh toán sẽ bị giữ.',
+                    'page.payouts.label_email': 'Email PayPal',
+                    'page.payouts.label_display': 'Tên hiển thị',
+                    'page.payouts.label_display_hint': '(trên sao kê)',
+                    'page.payouts.label_country': 'Quốc gia',
+                    'page.payouts.ph_email': 'you@example.com',
+                    'page.payouts.ph_display': 'Tên cá nhân hoặc doanh nghiệp',
+                    'page.payouts.ph_country': 'VN',
+                    'page.payouts.btn_save': 'Lưu',
+                    'page.payouts.method_ok': '✓ Đã lưu phương thức thanh toán',
+                    'page.payouts.upcoming_h': 'Kỳ thanh toán tới — chi tiết',
+                    'page.payouts.upcoming_desc': 'Các giao dịch đang chờ chuyển vào PayPal của bạn vào thứ Sáu cách tuần tiếp theo.',
+                    'page.payouts.btn_refresh': '↻ Làm mới',
+                    'page.payouts.loading': 'Đang tải…',
+                    'page.payouts.history_h': 'Lịch sử thanh toán',
+                    'page.payouts.history_desc': 'Mọi đợt BB đã gửi vào PayPal của bạn.',
+                    // ─── Promote route (MoR earnings → ad credit, APAC i18n sweep) ───
+                    'page.promote.title': 'Quảng bá',
+                    'page.promote.sub': 'Tái sử dụng thu nhập MoR để thu hút khách hàng trên mạng lưới Boost Boss. Chi tiêu trong hệ thống → không cần PayPal qua lại.',
+                    'page.promote.mor_label': 'Thu nhập MoR (chưa quyết toán)',
+                    'page.promote.mor_desc': 'Từ các giao dịch MoR đã quyết toán. Rút qua PayPal hoặc chuyển thành tín dụng quảng cáo để chi tiêu trong BB.',
+                    'page.promote.btn_cashout': 'Rút qua PayPal',
+                    'page.promote.btn_convert': '↻ Chuyển sang tín dụng quảng cáo',
+                    'page.promote.credit_label': 'Tín dụng quảng cáo (sẵn để chi)',
+                    'page.promote.credit_desc': 'Ngân sách quảng cáo đã nạp sẵn — nằm trong BB.',
+                    'page.promote.btn_create': 'Tạo chiến dịch',
+                    'page.promote.active_h': 'Chiến dịch đang chạy',
+                    'page.promote.empty_h': 'Chưa có chiến dịch',
+                    'page.promote.empty_p': 'Khi bạn tạo chiến dịch đầu tiên, hiển thị, lượt click và chi tiêu trực tiếp sẽ xuất hiện ở đây. Thu nhập MoR của bạn có thể tài trợ trực tiếp — không cần nạp PayPal.',
+                    'page.promote.graduate_hint': 'Muốn nhiều creative, targeting nâng cao, phân tích sâu? Trang Chiến dịch đầy đủ có hết.',
+                    'page.promote.graduate_link': 'Mở Chiến dịch',
+                    'page.promote.convert_kicker': 'Chuyển sang tín dụng quảng cáo',
+                    'page.promote.convert_h': 'Chuyển bao nhiêu?',
+                    'page.promote.convert_available': 'Số dư MoR khả dụng',
+                    'page.promote.convert_label_amount': 'Số tiền chuyển (USD)',
+                    'page.promote.convert_max': 'TỐI ĐA',
+                    'page.promote.convert_round_hint': 'Sẽ làm tròn lên tới giao dịch được bao phủ gần nhất (MoR captures là nguyên tử — không thể tách giữa chừng).',
+                    'page.promote.convert_warn_strong': '⚠ Chuyển một chiều.',
+                    'page.promote.convert_warn_body': 'Một khi đã chuyển, số tiền giữ trong BB dưới dạng tín dụng quảng cáo — không thể rút về PayPal nữa. (Bộ phận hỗ trợ có thể đảo ngược trong các trường hợp ngoại lệ.)',
+                    'page.promote.convert_btn': '↻ Chuyển',
+                    // ─── Billing route dynamic strings (APAC i18n sweep) ───
+                    'page.billing.empty': 'Chưa có giao dịch',
+                    'page.billing.type_deposit': 'nạp tiền',
+                    'page.billing.type_spend': 'chi tiêu',
+                    'page.billing.status_completed': 'hoàn tất',
+                    'page.billing.status_settled': 'đã quyết toán',
+                    'page.billing.status_pending': 'đang xử lý',
+                    'page.billing.status_refunded': 'đã hoàn',
+                    'page.billing.status_cancelled': 'đã hủy',
+                    'page.billing.status_captured': 'đã thu',
+                    // ─── Setup route body copy (APAC i18n sweep) ───
+                    'setup.conv_desc_a': "Theo dõi chuyển đổi trên site của bạn để mở khóa tối ưu CPA và ROAS của Benna. Thêm snippet này trước thẻ",
+                    'setup.conv_desc_b': 'đóng trên trang chuyển đổi.',
+                    'setup.rules_desc': 'Tự động kích hoạt hành động khi hiệu suất vượt ngưỡng — tạm dừng chiến dịch, dịch chuyển ngân sách, tăng bid cho audience hiệu quả.',
                     'shell.nav.billing': 'Hóa đơn',
                     'shell.nav.setup': 'Thiết lập',
                     'shell.nav.settings': 'Cài đặt',
@@ -11596,6 +12121,12 @@
                     // (CTA label + processed-by note) in the new locale.
                     if (typeof window.refreshDepositCtaLabel    === 'function') window.refreshDepositCtaLabel();
                     if (typeof window.refreshDepositProviderNote === 'function') window.refreshDepositProviderNote();
+                    // APAC i18n sweep — rerender the Products list + Billing
+                    // table since their cells are built via innerHTML using
+                    // dashT() at render time. Without this they keep showing
+                    // the pre-switch language until the user navigates away.
+                    if (typeof window.refreshProductsList    === 'function') window.refreshProductsList();
+                    if (typeof renderBillingTable            === 'function') renderBillingTable();
                 });
                 body.querySelectorAll('.aSetCopy').forEach((btn) => {
                     btn.addEventListener('click', () => {
@@ -12781,6 +13312,7 @@ function pfParseScreenshots(text) {
             }
 
             function renderList() {
+                const _T = (k, fb) => (window.dashT ? (window.dashT(k) || fb) : fb);
                 const q = (search && search.value || '').trim().toLowerCase();
                 const filtered = productsCache.filter((p) =>
                     !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q)
@@ -12789,11 +13321,11 @@ function pfParseScreenshots(text) {
                     list.innerHTML = `
                         <div style="padding:64px 24px;text-align:center;">
                             <div style="font-size:32px;margin-bottom:12px;">📦</div>
-                            <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:6px;">No products yet</div>
+                            <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:6px;">${_T('page.products.empty_h','No products yet')}</div>
                             <div style="font-size:13px;color:#6B7280;max-width:420px;margin:0 auto 18px;line-height:1.55;">
-                                Register the things you sell. Each product can have many campaigns over time — the affiliate marketplace lists products, not campaigns, so your share links stay durable across promo cycles.
+                                ${_T('page.products.empty_p','Register the things you sell. Each product can have many campaigns over time — the affiliate marketplace lists products, not campaigns, so your share links stay durable across promo cycles.')}
                             </div>
-                            <button class="new-campaign-btn" type="button" onclick="document.getElementById('newProductBtn').click()">+ Add your first product</button>
+                            <button class="new-campaign-btn" type="button" onclick="document.getElementById('newProductBtn').click()">${_T('page.products.btn_add_first','+ Add your first product')}</button>
                         </div>`;
                     return;
                 }
@@ -12826,24 +13358,24 @@ function pfParseScreenshots(text) {
                             <td style="padding:14px 18px;font-size:12px;color:#6B7280;">${escHtml(created)}</td>
                             <td style="padding:14px 18px;font-size:12px;">
                                 ${archived
-                                    ? '<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">Archived</span></div>'
+                                    ? `<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">${_T('page.products.status_archived','Archived')}</span></div>`
                                     : (() => {
                                         const s = p.audit_status || 'pending';
                                         const styles = {
-                                            approved:          { bg: '#ECFDF5', color: '#059669', label: 'Live' },
-                                            pending:           { bg: '#FEF3C7', color: '#92400E', label: 'Pending audit' },
-                                            rejected:          { bg: '#FEF2F2', color: '#DC2626', label: 'Rejected' },
-                                            changes_requested: { bg: '#FFF7ED', color: '#C2410C', label: 'Changes requested' },
+                                            approved:          { bg: '#ECFDF5', color: '#059669', label: _T('page.products.status_live','Live') },
+                                            pending:           { bg: '#FEF3C7', color: '#92400E', label: _T('page.products.status_pending','Pending audit') },
+                                            rejected:          { bg: '#FEF2F2', color: '#DC2626', label: _T('page.products.status_rejected','Rejected') },
+                                            changes_requested: { bg: '#FFF7ED', color: '#C2410C', label: _T('page.products.status_changes','Changes requested') },
                                         }[s] || { bg: '#F3F4F6', color: '#6B7280', label: s };
                                         return `<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:${styles.bg};color:${styles.color};font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">${styles.label}</span></div>`;
                                     })()
                                 }
                             </td>
                             <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
-                                <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">Edit</button>
+                                <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">${_T('page.products.btn_edit','Edit')}</button>
                                 ${archived
-                                    ? '<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;">Restore</button>'
-                                    : '<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">Orders →</button>'}
+                                    ? `<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;">${_T('page.products.btn_restore','Restore')}</button>`
+                                    : `<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">${_T('page.products.btn_orders','Orders →')}</button>`}
                             </td>
                         </tr>`;
                 }).join('');
@@ -12853,10 +13385,10 @@ function pfParseScreenshots(text) {
                         <thead>
                             <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
                                 <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:80px;"></th>
-                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Product</th>
-                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:120px;">Commission</th>
-                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:120px;">Created</th>
-                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:90px;">Status</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">${_T('page.products.col_product','Product')}</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:120px;">${_T('page.products.col_commission','Commission')}</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:120px;">${_T('page.products.col_created','Created')}</th>
+                                <th style="padding:12px 18px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:90px;">${_T('page.products.col_status','Status')}</th>
                                 <th style="padding:12px 18px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;width:180px;"></th>
                             </tr>
                         </thead>
@@ -12919,6 +13451,12 @@ function pfParseScreenshots(text) {
             // Filters + search
             if (search)    search.addEventListener('input', () => renderList());
             if (filterSel) filterSel.addEventListener('change', () => loadProducts());
+            // Expose a stable refresh hook so the language picker can re-render
+            // the Products list when the user switches locale (table cells are
+            // built via innerHTML using dashT() at render time).
+            window.refreshProductsList = function () {
+                try { renderList(); } catch (_) {}
+            };
 
             // New Product button
             if (newBtn) newBtn.addEventListener('click', () => openModal('create', null));
