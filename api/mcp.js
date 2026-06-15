@@ -119,6 +119,51 @@ const TIER_FAMILY = {
   "interruptive": ["video", "fullscreen"],
 };
 
+// ── Server-side intent_tokens fallback ─────────────────────────────────
+// When the publisher's door (JS Snippet via lumi.js, REST via
+// /v1/ad-request) doesn't populate intent_tokens but DOES provide a
+// context_summary, derive a token array from the summary so the cosine
+// path can fire. Without this, intentMatchScore() collapses to neutral
+// 1.0 for every campaign on those doors and the auction reduces to
+// bid × geo × format with no semantic relevance — see the pre-launch
+// audit (docs/benna-v1.md and intent_capture_reality memory).
+//
+// Light tokenisation: lowercase, split on non-alphanumeric, drop
+// short tokens + English stopwords, dedupe, cap at 16 to bound the
+// cache lookup cost. Per-language stopword lists are not used; the
+// cache lookup itself is what filters useful tokens (a non-English
+// stopword that misses the cache just doesn't contribute to the
+// averaged vector).
+const INTENT_STOPWORDS = new Set([
+  "a","an","the","and","or","but","if","then","of","to","in","on",
+  "for","with","is","are","was","were","be","been","being","have",
+  "has","had","do","does","did","this","that","these","those","i",
+  "you","he","she","it","we","they","my","your","our","their","at",
+  "by","from","as","not","no","so","up","out","over","under","into",
+  "than","just","like","get","gets","got","getting","make","makes",
+  "made","making","need","needs","needed","want","wants","wanted",
+  "can","could","will","would","should","about","what","which","who",
+  "when","where","why","how",
+]);
+function deriveIntentTokensFromContext(text) {
+  if (!text || typeof text !== "string") return [];
+  const raw = text
+    .toLowerCase()
+    .replace(/[^a-z0-9_\s]/g, " ")
+    .split(/\s+/);
+  const seen = new Set();
+  const out = [];
+  for (const t of raw) {
+    if (t.length < 3) continue;
+    if (INTENT_STOPWORDS.has(t)) continue;
+    if (seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+    if (out.length >= 16) break;
+  }
+  return out;
+}
+
 // ── Context derivation (MCP args → Benna bid context) ──────────────────
 function deriveBennaContext(args) {
   const ctxText = (args.context_summary || "").toLowerCase();
@@ -539,6 +584,17 @@ async function handleGetSponsoredContent(body, args, res) {
   };
   const reqIntentTokens = Array.isArray(args.intent_tokens) ? args.intent_tokens : [];
 
+  // Door-fallback intent derivation: if the request didn't carry an
+  // explicit intent_tokens array (JS Snippet via lumi.js, REST via
+  // /v1/ad-request both omit it) but DID carry a context_summary,
+  // tokenise the summary so the cosine path has something to look
+  // up. This is the door-unifying fix from the 2026-06-15 audit —
+  // without it, three of the four doors collapse to neutral 1.0
+  // intent_match_score and the auction loses all semantic relevance.
+  const derivedIntentTokens = reqIntentTokens.length === 0
+    ? deriveIntentTokensFromContext(args.context_summary)
+    : [];
+
   // Look up cached per-token embeddings via a single indexed Postgres
   // query, average the hit vectors, and use that as the request-side
   // context vector. NO OpenAI calls in the hot path — any tokens that
@@ -547,10 +603,22 @@ async function handleGetSponsoredContent(body, args, res) {
   // every token misses → Benna falls back to Jaccard.
   const requestEmbedding = await lookupCachedEmbedding([
     ...reqIntentTokens,
+    ...derivedIntentTokens,
     ...(mcpCtx.active_tools || []).map((t) => t.replace(/-mcp$/, "")),
     ...(mcpCtx.host_app ? [mcpCtx.host_app] : []),
     ...(effectiveSurface ? [effectiveSurface] : []),
   ]);
+
+  // Make derived tokens available to downstream Jaccard fallback too —
+  // when the cosine path can't fire (cache cold, embeddings null),
+  // Benna's intentMatchScore() Jaccards over token ARRAYS. If we only
+  // populated the cache lookup but didn't surface the derived tokens
+  // to scorePrice(), the Jaccard branch would still see an empty
+  // request-side array and collapse to neutral 1.0. Concatenating
+  // derivedIntentTokens into reqIntentTokens fixes both code paths.
+  const effectiveIntentTokens = reqIntentTokens.length > 0
+    ? reqIntentTokens
+    : derivedIntentTokens;
 
   // Publisher-side brand-safety: refuse advertiser categories the publisher excluded.
   // Brand-safety exclusions = per-placement exclusions ∪ the publisher's
@@ -649,7 +717,13 @@ async function handleGetSponsoredContent(body, args, res) {
       const priced = benna.scorePrice({
         placement: scorePlacement,
         context: {
-          intent_tokens: reqIntentTokens,
+          // effectiveIntentTokens = reqIntentTokens when the publisher
+          // provided them, else the server-derived tokens from
+          // context_summary. Feeding this to the Jaccard fallback (not
+          // just to the cosine cache lookup) means JS Snippet / REST
+          // doors get real semantic ranking even when the cache is
+          // cold or campaign embeddings haven't been computed yet.
+          intent_tokens: effectiveIntentTokens,
           country: countryCode,
           host_app: mcpCtx.host_app,
         },
@@ -854,7 +928,11 @@ async function handleGetSponsoredContent(body, args, res) {
         surface:       effectiveSurface,
         host_app:      mcpCtx.host_app,
         active_tools:  mcpCtx.active_tools,
-        intent_tokens: reqIntentTokens,
+        intent_tokens: effectiveIntentTokens,
+        // Flag whether tokens were publisher-supplied or server-derived
+        // from context_summary. Lets the dashboard show "Intent: derived
+        // from page context" vs "Intent: publisher-supplied" honestly.
+        intent_tokens_derived: reqIntentTokens.length === 0 && derivedIntentTokens.length > 0,
       },
       self_promote: !!winner.selfPromote,
     },

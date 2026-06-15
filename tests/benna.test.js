@@ -196,6 +196,114 @@ const baseCmp = {
       "Expected benna-rc5 model version, got " + benna.MODEL_VERSION);
   });
 
+  // ── Cosine intent scoring (Benna v1 — semantic embedding path) ─────
+  // Before this test existed, a regression in intentMatchScore() or
+  // cosineSimilarity() could ship to prod undetected — the v0 Jaccard
+  // tests don't exercise the embedding code path at all. Toy 4-dim
+  // vectors are fine for the math; production uses voyage-3-lite at
+  // 512 dims but the scoring logic is dimensionality-agnostic.
+
+  await test("_cosineSimilarity returns 1.0 for identical vectors", () => {
+    const v = [1, 0, 0, 0];
+    assert.strictEqual(benna._cosineSimilarity(v, v), 1);
+  });
+
+  await test("_cosineSimilarity returns 0 for orthogonal vectors", () => {
+    assert.strictEqual(benna._cosineSimilarity([1, 0, 0, 0], [0, 1, 0, 0]), 0);
+  });
+
+  await test("_intentMatchScore: identical embeddings → ceiling 1.5", () => {
+    const score = benna._intentMatchScore(["x"], ["x"], {
+      requestEmbedding:  [1, 0, 0, 0],
+      campaignEmbedding: [1, 0, 0, 0],
+    });
+    assert.strictEqual(score, 1.5);
+  });
+
+  await test("_intentMatchScore: orthogonal embeddings → floor 0.4", () => {
+    const score = benna._intentMatchScore(["x"], ["y"], {
+      requestEmbedding:  [1, 0, 0, 0],
+      campaignEmbedding: [0, 1, 0, 0],
+    });
+    assert.strictEqual(score, 0.4);
+  });
+
+  await test("_intentMatchScore: one-side null embedding → Jaccard fallback", () => {
+    // Both token arrays match → Jaccard = 1.0 → score 0.4 + 1.4 = 1.5
+    const score = benna._intentMatchScore(["debug"], ["debug"], {
+      requestEmbedding:  [1, 0, 0, 0],
+      campaignEmbedding: null,
+    });
+    assert.strictEqual(score, 1.5);
+  });
+
+  // The load-bearing assertion: at identical bids, the campaign whose
+  // intent_embedding is closer to the request's embedding wins the
+  // price comparison. If this assertion ever flips, the cosine path
+  // is broken and Benna has silently degraded to a bid-only auction —
+  // which is exactly the scenario the 2026-06-15 audit flagged.
+  await test("scorePrice: high-cosine campaign outprices low-cosine at equal bid", () => {
+    const placement = { surface: "chat", format: "native", floor_cpm: 0 };
+    const ctx       = { intent_tokens: ["billing"], country: "US" };
+    const reqVec    = [1, 0, 0, 0];
+
+    // Two campaigns with identical everything EXCEPT embedding similarity.
+    const highMatch = benna.scorePrice({
+      placement,
+      context: ctx,
+      campaign: {
+        bid_amount: 5,
+        format: "native",
+        target_intent_tokens: ["billing"],
+        intent_embedding: [1, 0, 0, 0],   // cosine 1.0 → intent score 1.5
+      },
+      request_intent_embedding: reqVec,
+    });
+
+    const lowMatch = benna.scorePrice({
+      placement,
+      context: ctx,
+      campaign: {
+        bid_amount: 5,
+        format: "native",
+        target_intent_tokens: ["billing"],
+        intent_embedding: [0, 1, 0, 0],   // cosine 0.0 → intent score 0.4
+      },
+      request_intent_embedding: reqVec,
+    });
+
+    assert.strictEqual(highMatch.factors.intent_match_score, 1.5);
+    assert.strictEqual(lowMatch.factors.intent_match_score, 0.4);
+
+    // The intent gap should propagate through to price_cpm at identical bids
+    assert(highMatch.price_cpm > lowMatch.price_cpm,
+      `high-cosine price_cpm (${highMatch.price_cpm}) should exceed ` +
+      `low-cosine price_cpm (${lowMatch.price_cpm}) at equal bid`);
+
+    // Ratio sanity — intent factor alone is 1.5 / 0.4 = 3.75x, and
+    // every other factor in scorePrice is identical between the two
+    // calls, so the price ratio should sit right around 3.75x.
+    const ratio = highMatch.price_cpm / lowMatch.price_cpm;
+    assert(ratio > 3.5 && ratio < 4.0,
+      `expected intent multiplier ratio ~3.75, got ${ratio.toFixed(3)}`);
+  });
+
+  await test("scorePrice: missing request_intent_embedding falls back gracefully", () => {
+    const r = benna.scorePrice({
+      placement: { surface: "chat", format: "native", floor_cpm: 0 },
+      context: { intent_tokens: ["billing"], country: "US" },
+      campaign: {
+        bid_amount: 5,
+        format: "native",
+        target_intent_tokens: ["billing"],
+        intent_embedding: [1, 0, 0, 0],   // present, but request side missing
+      },
+      // request_intent_embedding intentionally omitted
+    });
+    // Should fall through to Jaccard (both arrays = ["billing"]) → 1.5
+    assert.strictEqual(r.factors.intent_match_score, 1.5);
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

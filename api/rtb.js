@@ -19,6 +19,7 @@ const benna = require("./benna.js");
 const ledger = require("./_lib/ledger.js");
 const seats = require("./_lib/seats.js");
 const { mcpTargetingMatch } = require("./_lib/mcp_targeting.js");
+const { lookupCachedEmbedding } = require("./_lib/embeddings.js");
 const auctionLog = require("./_lib/auction_log.js");
 
 // Verbose auction logging — on by default in non-production, opt-in via
@@ -538,6 +539,19 @@ module.exports = async function handler(req, res) {
       impLogCtx.request.host_app      = mcpCtx.host_app      || null;
       impLogCtx.request.surface       = mcpCtx.surface       || null;
 
+      // Hot-path embedding lookup — mirrors api/mcp.js:548 so the RTB
+      // door benefits from the same cosine path. Without this, every
+      // RTB bid silently scored on Jaccard regardless of cache state,
+      // which made cosine structurally dead on the RTB door — see the
+      // 2026-06-15 audit. Single indexed Postgres query, no external
+      // API call on the bid path.
+      const rtbRequestEmbedding = await lookupCachedEmbedding([
+        ...(mcpCtx.intent_tokens || []),
+        ...((mcpCtx.active_tools || []).map((t) => t.replace(/-mcp$/, ""))),
+        ...(mcpCtx.host_app ? [mcpCtx.host_app] : []),
+        ...(mcpCtx.surface ? [mcpCtx.surface] : []),
+      ]);
+
       // Layer MCP-native targeting on top of OpenRTB-level eligibility.
       // Mirrors the JSON-RPC path in api/mcp.js so both auction surfaces
       // accept identical campaign targeting (target_active_tools, etc.).
@@ -598,6 +612,11 @@ module.exports = async function handler(req, res) {
             iab_cat: c.iab_cat || [],
             adomain: c.adomain || [],
           },
+          // Same cosine-then-Jaccard fallback as the MCP door —
+          // when both this and campaign.intent_embedding are non-null,
+          // intentMatchScore() uses cosine similarity instead of
+          // keyword overlap.
+          request_intent_embedding: rtbRequestEmbedding,
         });
         impCandidates.push({
           campaign_id: String(c.id),
