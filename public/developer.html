@@ -3239,13 +3239,16 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             </div>
 
             </div><!-- /[data-shell-route="integrations"] (Quick Start) -->
-        </div>
 
-        <!-- Footer -->
+        <!-- Footer — MUST live inside .container so the
+             `.container > footer` rule applies (flex anchor + centered
+             text). Previously sat outside .container which made it
+             left-aligned and skipped the bottom-anchor (2026-06-15). -->
         <footer>
             Lumi SDK © 2026 · <a href="/publish" style="color: #04BEFE; text-decoration: none;">← Back to boostboss.ai/publish</a>
         </footer>
 
+        </div><!-- /.container -->
           </div><!-- /.shell-main__inner -->
         </main><!-- /.shell-main -->
       </div><!-- /.shell-wrap -->
