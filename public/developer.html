@@ -1753,10 +1753,15 @@
             font-size: 19px;
             font-weight: 700;
             letter-spacing: -0.01em;
-            /* Static gradient — same colors as the marketing wordmark
-               but without the shimmer animation so the logo reads
-               calm at rest. The sparkle ✦ next to it still blinks. */
-            background-image: linear-gradient(90deg, #FF2D78 0%, #D946EF 50%, #FF2D78 100%);
+            /* Static rainbow — distinct color stops so each letter of
+               "Lumi SDK" sits in a different hue rather than reading as
+               mostly one color. Pink → yellow → cyan → violet covers the
+               BB brand spectrum without shimmer animation. */
+            background-image: linear-gradient(90deg,
+                #FF2D78 0%,
+                #FFE600 33%,
+                #04BEFE 66%,
+                #D946EF 100%);
             -webkit-background-clip: text;
                     background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1769,11 +1774,8 @@
             font-size: 18px;
             line-height: 1;
             text-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
-            animation: lumiBlink 1.8s ease-in-out infinite;
-        }
-        @keyframes lumiBlink { 0%, 100% { opacity: 0.55; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.1); } }
-        @media (prefers-reduced-motion: reduce) {
-            [data-shell-product="publisher"] .shell-sidebar__product .lumi-sparkle { animation: none; }
+            /* No blink animation — sparkle holds still at full strength
+               so the whole brand mark reads calm at rest. */
         }
 
         /* Responsive */
