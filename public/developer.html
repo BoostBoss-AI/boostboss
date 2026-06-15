@@ -3096,6 +3096,22 @@ await message.reply({
                     </div>
                 </div>
 
+                <!-- ── Compounding incentive callout ────────────────────
+                     Frames advertising spend not as cost but as compounding
+                     reinvestment. The publisher's ad reaches users, those
+                     users hit the publisher's tool, the tool serves more
+                     Boost Boss ads back to those same users — every dollar
+                     spent here loops back as bigger publisher earnings
+                     next cycle. -->
+                <div style="margin-bottom:24px;padding:16px 20px;background:linear-gradient(135deg, rgba(255,45,120,0.06), rgba(4,190,254,0.06));border-left:3px solid #FF2D78;border-radius:10px;">
+                    <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#FF2D78;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;" data-t="page.promote.compound_kicker">
+                        📈 Did you know?
+                    </div>
+                    <div style="font-size:14px;color:var(--ink-soft);line-height:1.6;" data-t="page.promote.compound_body" data-t-html>
+                        Every dollar you spend on Boost Boss ads brings more users to your tool — and your tool then serves more Boost Boss ads back to those users. <strong style="color:var(--ink);">Your earnings compound.</strong> Bigger campaigns roll the snowball faster — revenue you would have cashed out becomes the budget that grows next month's revenue.
+                    </div>
+                </div>
+
                 <!-- Active campaigns list (empty state for now) -->
                 <div style="margin-bottom:24px;">
                     <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:var(--ink);" data-t="page.promote.active_h">Active campaigns</h3>
@@ -6351,6 +6367,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.active_h': 'Active campaigns',
                     'page.promote.empty_title': 'No campaigns yet',
                     'page.promote.empty_p': "When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your existing earnings can fund it directly — no PayPal deposit needed.",
+                    'page.promote.compound_kicker': '📈 Did you know?',
+                    'page.promote.compound_body': 'Every dollar you spend on Boost Boss ads brings more users to your tool — and your tool then serves more Boost Boss ads back to those users. <strong>Your earnings compound.</strong> Bigger campaigns roll the snowball faster — revenue you would have cashed out becomes the budget that grows next month\'s revenue.',
                     'page.promote.graduate_hint': 'Want full advertiser features — multiple creatives, advanced targeting, deep analytics?',
                     'page.promote.graduate_link': 'Open advertiser dashboard',
                     'page.promote.cashout_btn': 'Cash out',
@@ -6744,6 +6762,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.active_h': '运行中的广告',
                     'page.promote.empty_title': '尚无广告',
                     'page.promote.empty_p': '当您创建首个广告后,会在这里显示实时展示、点击和花费。您现有的收益可直接作为预算 — 无需 PayPal 充值。',
+                    'page.promote.compound_kicker': '📈 你知道吗?',
+                    'page.promote.compound_body': '您在 Boost Boss 广告上花的每一块钱,都会为您的工具带来更多用户 — 而这些用户在使用您的工具时,又会看到更多 Boost Boss 广告。<strong>您的收益会自动复利。</strong>广告越大,雪球滚得越快 — 您原本要提领的收入,就变成了下个月增长收入的预算。',
                     'page.promote.graduate_hint': '需要完整的广告主功能 — 多个创意、高级定向、深度分析?',
                     'page.promote.graduate_link': '打开广告主面板',
                     'page.promote.cashout_btn': '提现',
@@ -7137,6 +7157,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.active_h': '運行中的廣告',
                     'page.promote.empty_title': '尚無廣告',
                     'page.promote.empty_p': '當您建立首個廣告後,會在這裡顯示即時展示、點擊與花費。您現有的收益可直接作為預算 — 無需 PayPal 加值。',
+                    'page.promote.compound_kicker': '📈 你知道嗎?',
+                    'page.promote.compound_body': '您在 Boost Boss 廣告上花的每一塊錢,都會為您的工具帶來更多用戶 — 而這些用戶在使用您的工具時,又會看到更多 Boost Boss 廣告。<strong>您的收益會自動複利。</strong>廣告越大,雪球滾得越快 — 您原本要提領的收入,就變成了下個月增長收入的預算。',
                     'page.promote.graduate_hint': '需要完整的廣告主功能 — 多個創意、進階定向、深度分析?',
                     'page.promote.graduate_link': '開啟廣告主面板',
                     'page.promote.cashout_btn': '提領',
@@ -7530,6 +7552,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.active_h': '実行中のキャンペーン',
                     'page.promote.empty_title': 'キャンペーンはまだありません',
                     'page.promote.empty_p': '最初のキャンペーンを作成すると、ライブのインプレッション、クリック、消費がここに表示されます。既存の収益をそのまま予算として使えます — PayPal 入金は不要です。',
+                    'page.promote.compound_kicker': '📈 ご存じですか？',
+                    'page.promote.compound_body': 'Boost Boss 広告に使う 1 ドルごとに、あなたのツールへ多くのユーザーが流入します — そしてそのユーザーは、あなたのツール内でさらに多くの Boost Boss 広告を目にします。<strong>収益は自動的に複利で増えます。</strong>キャンペーンが大きいほど雪だるまは速く転がり、現金化していたはずの収益が、来月の収益を伸ばす予算へと変わります。',
                     'page.promote.graduate_hint': 'すべての広告主機能 — 複数クリエイティブ、高度ターゲティング、詳細分析が必要ですか?',
                     'page.promote.graduate_link': '広告主ダッシュボードを開く',
                     'page.promote.cashout_btn': '出金',
@@ -7923,6 +7947,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.active_h': '활성 캠페인',
                     'page.promote.empty_title': '아직 캠페인이 없습니다',
                     'page.promote.empty_p': '첫 캠페인을 생성하면 실시간 노출, 클릭, 지출이 여기에 표시됩니다. 기존 수익을 그대로 예산으로 사용할 수 있습니다 — PayPal 입금 불필요.',
+                    'page.promote.compound_kicker': '📈 알고 계셨나요?',
+                    'page.promote.compound_body': 'Boost Boss 광고에 쓴 1달러는 당신의 도구로 더 많은 사용자를 데려옵니다 — 그리고 그 사용자들은 당신의 도구에서 더 많은 Boost Boss 광고를 보게 됩니다. <strong>수익은 자동으로 복리로 불어납니다.</strong> 캠페인이 클수록 눈덩이는 더 빨리 굴러갑니다 — 현금화할 수익이 다음 달 수익을 키우는 예산이 됩니다.',
                     'page.promote.graduate_hint': '전체 광고주 기능 — 다중 크리에이티브, 고급 타겟팅, 심층 분석이 필요하신가요?',
                     'page.promote.graduate_link': '광고주 대시보드 열기',
                     'page.promote.cashout_btn': '출금',
@@ -8316,6 +8342,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.promote.active_h': 'Chiến dịch đang chạy',
                     'page.promote.empty_title': 'Chưa có chiến dịch nào',
                     'page.promote.empty_p': 'Khi bạn tạo chiến dịch đầu tiên, nó sẽ hiển thị ở đây với impression, click và chi tiêu trực tiếp. Doanh thu hiện có của bạn có thể dùng trực tiếp làm ngân sách — không cần nạp PayPal.',
+                    'page.promote.compound_kicker': '📈 Bạn có biết?',
+                    'page.promote.compound_body': 'Mỗi đô-la bạn chi cho quảng cáo Boost Boss đều mang thêm người dùng đến công cụ của bạn — và những người dùng đó lại thấy thêm quảng cáo Boost Boss bên trong công cụ của bạn. <strong>Doanh thu của bạn tự động sinh lãi kép.</strong> Chiến dịch càng lớn, quả cầu tuyết lăn càng nhanh — khoản tiền bạn định rút ra trở thành ngân sách giúp tăng doanh thu tháng sau.',
                     'page.promote.graduate_hint': 'Cần đầy đủ tính năng advertiser — nhiều creative, nhắm mục tiêu nâng cao, phân tích sâu?',
                     'page.promote.graduate_link': 'Mở dashboard advertiser',
                     'page.promote.cashout_btn': 'Rút tiền',
