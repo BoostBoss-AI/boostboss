@@ -4717,8 +4717,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             else                        wrap.classList.add(isCost ? 'positive' : 'negative');
             const shown = Math.min(Math.abs(deltaPct), 999);
             const label = shown < 10 ? shown.toFixed(1) : Math.round(shown).toString();
-            const txt = (window.DASH_T && window.DASH_T['stats.vs_prior']) || '% vs prior';
-            span.textContent = label + txt;
+            // 'vs prior' is the translatable tail; the '%' character and the
+            // delta number stay literal. Pulled through window.dashT() so
+            // language switches re-render the stat-card delta string.
+            const vsPrior = (window.dashT && window.dashT('page.home.vs_prior')) || 'vs prior';
+            span.textContent = label + '% ' + vsPrior;
         }
 
         // Build a complete contiguous day-by-day series ending today,
@@ -4950,9 +4953,9 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // Category metadata for the placement panel's family headers.
         // Placements are grouped under these three categories for readability.
         const PLACEMENT_CATS = [
-            { key: 'ai-native',    label: 'AI-native placements', badge: 'standard', desc: 'Sponsored lines, sources and suggestions woven into the AI response. Gentle — reads as part of the product.' },
-            { key: 'display',      label: 'Display placements',   badge: 'standard', desc: 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.' },
-            { key: 'interruptive', label: 'Interruptive & gated', badge: 'optin',    desc: 'Units that interrupt the user — richer eCPM, but spend UX goodwill carefully.' },
+            { key: 'ai-native',    label: 'AI-native placements', labelKey: 'page.placements.cat_ai_h',          badge: 'standard', desc: 'Sponsored lines, sources and suggestions woven into the AI response. Gentle — reads as part of the product.', descKey: 'page.placements.cat_ai_body' },
+            { key: 'display',      label: 'Display placements',   labelKey: 'page.placements.cat_display_h',     badge: 'standard', desc: 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.',                descKey: 'page.placements.cat_display_body' },
+            { key: 'interruptive', label: 'Interruptive & gated', labelKey: 'page.placements.cat_interruptive_h',badge: 'optin',    desc: 'Units that interrupt the user — richer eCPM, but spend UX goodwill carefully.',                              descKey: 'page.placements.cat_interruptive_body' },
         ];
 
         // Per-format visual mockup. Returns HTML rendering a sample ad in
@@ -5007,28 +5010,28 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         // (70% by default; see api/billing.js for the source of truth).
         const DOOR_PLACEMENTS = {
             'mcp': [
-                { key: 'card',     cat: 'display',   name: 'Inline sponsored card', rpm: 6.00, mock: 'image',  desc: 'A sponsored card block appended to the tool response.' },
-                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',    rpm: 4.50, mock: 'native', desc: 'A sponsored source / citation inside the AI answer.' },
-                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',      rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
+                { key: 'card',     cat: 'display',   name: 'Inline sponsored card', nameKey: 'page.placements.card_inline_card_name',       rpm: 6.00, mock: 'image',  desc: 'A sponsored card block appended to the tool response.',  descKey: 'page.placements.card_mcp_card_body' },
+                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',    nameKey: 'page.placements.card_sponsored_citation_name',rpm: 4.50, mock: 'native', desc: 'A sponsored source / citation inside the AI answer.',    descKey: 'page.placements.card_mcp_citation_body' },
+                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',      nameKey: 'page.placements.card_tool_rec_name',          rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.', descKey: 'page.placements.card_tool_rec_body' },
             ],
             'js-snippet': [
-                { key: 'corner',   cat: 'display',     name: 'Corner unit',           rpm: 8.50, mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.' },
-                { key: 'card',     cat: 'display',     name: 'Inline sponsored card', rpm: 6.00, mock: 'image',  desc: 'Sponsored card rendered inline in your page flow.' },
-                { key: 'loading',  cat: 'interruptive',name: 'Loading-state ad',      rpm: 7.00, mock: 'native', desc: 'Shown while your AI is generating its response.' },
-                { key: 'citation', cat: 'ai-native',   name: 'Sponsored citation',    rpm: 4.50, mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
-                { key: 'chip',     cat: 'ai-native',   name: 'Suggested-action chip', rpm: 4.50, mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+                { key: 'corner',   cat: 'display',     name: 'Corner unit',           nameKey: 'page.placements.card_corner_unit_name',            rpm: 8.50, mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.',   descKey: 'page.placements.card_corner_unit_body' },
+                { key: 'card',     cat: 'display',     name: 'Inline sponsored card', nameKey: 'page.placements.card_inline_card_name',            rpm: 6.00, mock: 'image',  desc: 'Sponsored card rendered inline in your page flow.',       descKey: 'page.placements.card_js_card_body' },
+                { key: 'loading',  cat: 'interruptive',name: 'Loading-state ad',      nameKey: 'page.placements.card_loading_name',                rpm: 7.00, mock: 'native', desc: 'Shown while your AI is generating its response.',         descKey: 'page.placements.card_js_loading_body' },
+                { key: 'citation', cat: 'ai-native',   name: 'Sponsored citation',    nameKey: 'page.placements.card_sponsored_citation_name',     rpm: 4.50, mock: 'native', desc: 'Compact sponsored source inside a generated answer.',    descKey: 'page.placements.card_compact_citation_body' },
+                { key: 'chip',     cat: 'ai-native',   name: 'Suggested-action chip', nameKey: 'page.placements.card_suggested_action_chip_name',  rpm: 4.50, mock: 'native', desc: 'A tappable sponsored quick-reply pill.',                   descKey: 'page.placements.card_js_chip_body' },
             ],
             'npm-sdk': [
-                { key: 'corner',   cat: 'display',   name: 'Corner unit',         rpm: 8.50, mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.' },
-                { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',    rpm: 9.00, mock: 'image',  desc: 'A hero unit on the extension new-tab / home screen.' },
-                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',  rpm: 4.50, mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
-                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',    rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
+                { key: 'corner',   cat: 'display',   name: 'Corner unit',         nameKey: 'page.placements.card_corner_unit_name',          rpm: 8.50, mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.',   descKey: 'page.placements.card_corner_unit_body' },
+                { key: 'newtab',   cat: 'display',   name: 'New-tab takeover',    nameKey: 'page.placements.card_newtab_name',               rpm: 9.00, mock: 'image',  desc: 'A hero unit on the extension new-tab / home screen.',    descKey: 'page.placements.card_ext_newtab_body' },
+                { key: 'citation', cat: 'ai-native', name: 'Sponsored citation',  nameKey: 'page.placements.card_sponsored_citation_name',   rpm: 4.50, mock: 'native', desc: 'Compact sponsored source inside a generated answer.',    descKey: 'page.placements.card_compact_citation_body' },
+                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',    nameKey: 'page.placements.card_tool_rec_name',             rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.', descKey: 'page.placements.card_tool_rec_body' },
             ],
             'rest-api': [
-                { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    rpm: 6.00, mock: 'image',  desc: 'Sponsored embed / card in the bot reply.' },
-                { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        rpm: 4.00, mock: 'native', desc: 'A sponsored line in the bot welcome / onboarding message.' },
-                { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', rpm: 4.50, mock: 'native', desc: 'Sponsored quick-reply buttons under the bot reply.' },
-                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.' },
+                { key: 'card',     cat: 'display',   name: 'Inline sponsored card',    nameKey: 'page.placements.card_inline_card_name',              rpm: 6.00, mock: 'image',  desc: 'Sponsored embed / card in the bot reply.',                                descKey: 'page.placements.card_bot_card_body' },
+                { key: 'welcome',  cat: 'ai-native', name: 'Sponsored welcome',        nameKey: 'page.placements.card_sponsored_welcome_name',        rpm: 4.00, mock: 'native', desc: 'A sponsored line in the bot welcome / onboarding message.',              descKey: 'page.placements.card_bot_welcome_body' },
+                { key: 'buttons',  cat: 'ai-native', name: 'Suggested-action buttons', nameKey: 'page.placements.card_suggested_action_buttons_name', rpm: 4.50, mock: 'native', desc: 'Sponsored quick-reply buttons under the bot reply.',                      descKey: 'page.placements.card_bot_buttons_body' },
+                { key: 'toolrec',  cat: 'ai-native', name: 'Tool / skill rec',         nameKey: 'page.placements.card_tool_rec_name',                 rpm: 5.00, mock: 'native', desc: 'A "you might also try" sponsored tool recommendation.',                  descKey: 'page.placements.card_tool_rec_body' },
             ],
         };
 
@@ -5042,6 +5045,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             container.className = '';
             container.innerHTML = '';
 
+            // Locale resolver — falls back to literal English string when the
+            // active language is missing the key. Keeps the panel rendering
+            // even mid-translation rollout.
+            const _t = (k, en) => (window.dashT && window.dashT(k)) || en;
+
             const _sel = document.querySelector('.ic-card.ic-selected');
             const _door = (_sel && _sel.dataset.door) || 'mcp';
             const prefix = DOOR_SURFACE_PREFIX[_door] || 'web';
@@ -5050,8 +5058,17 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
             const _ctx = document.createElement('div');
             _ctx.style.cssText = 'font-size:12px;color:#6B7280;margin-bottom:14px;line-height:1.5;';
-            _ctx.innerHTML = `Showing placements for <strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong> — ${placements.length} this door renders. Use the door tabs above to switch.`;
+            const _introTpl = _t('page.placements.intro_tpl', 'Showing placements for {door} — {n} this door renders. Use the door tabs above to switch.');
+            _ctx.innerHTML = _introTpl
+                .replace('{door}', `<strong style="color:#1A1A2E;">${DOOR_LABELS[_door] || _door}</strong>`)
+                .replace('{n}', String(placements.length));
             container.appendChild(_ctx);
+
+            const _onLabel  = _t('page.placements.toggle_on',  'On');
+            const _offLabel = _t('page.placements.toggle_off', 'Off');
+            const _accept   = _t('page.placements.card_accept', 'Accept this placement');
+            const _badgeOptin    = _t('page.placements.tier_optin',    'Opt-in');
+            const _badgeStandard = _t('page.placements.tier_standard', 'Standard');
 
             PLACEMENT_CATS.forEach(cat => {
                 const cards = placements.filter(p => p.cat === cat.key);
@@ -5062,22 +5079,25 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 section.style.cssText = 'border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:14px;';
 
                 const badge = cat.badge === 'optin'
-                    ? '<span style="font-size:9px;font-weight:700;color:#854F0B;background:#FAEEDA;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">Opt-in</span>'
-                    : '<span style="font-size:9px;font-weight:700;color:#1D9E75;background:#E1F5EE;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">Standard</span>';
+                    ? `<span style="font-size:9px;font-weight:700;color:#854F0B;background:#FAEEDA;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">${_badgeOptin}</span>`
+                    : `<span style="font-size:9px;font-weight:700;color:#1D9E75;background:#E1F5EE;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;">${_badgeStandard}</span>`;
+
+                const catLabel = cat.labelKey ? _t(cat.labelKey, cat.label) : cat.label;
+                const catDesc  = cat.descKey  ? _t(cat.descKey,  cat.desc)  : cat.desc;
 
                 const header = document.createElement('div');
                 header.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px;';
                 header.innerHTML = `
                     <div style="flex:1;">
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <span style="font-size:14px;font-weight:700;color:#1A1A2E;">${cat.label}</span>
+                            <span style="font-size:14px;font-weight:700;color:#1A1A2E;">${catLabel}</span>
                             ${badge}
                         </div>
-                        <div style="font-size:12px;color:#6B7280;margin-top:5px;line-height:1.5;">${cat.desc}</div>
+                        <div style="font-size:12px;color:#6B7280;margin-top:5px;line-height:1.5;">${catDesc}</div>
                     </div>
                     <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
                         <input type="checkbox" ${allOn ? 'checked' : ''} onchange="togglePlacementCategory('${cat.key}', this.checked)">
-                        <span style="font-size:12px;font-weight:600;color:${allOn ? '#1A1A2E' : '#9CA3AF'};">${allOn ? 'On' : 'Off'}</span>
+                        <span style="font-size:12px;font-weight:600;color:${allOn ? '#1A1A2E' : '#9CA3AF'};">${allOn ? _onLabel : _offLabel}</span>
                     </label>
                 `;
                 section.appendChild(header);
@@ -5087,19 +5107,21 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 cards.forEach(p => {
                     const surfaceKey = prefix + '-' + p.key;
                     const on = disabled.indexOf(surfaceKey) === -1;
+                    const pName = p.nameKey ? _t(p.nameKey, p.name) : p.name;
+                    const pDesc = p.descKey ? _t(p.descKey, p.desc) : p.desc;
                     const card = document.createElement('div');
                     card.className = 'format-card ' + (on ? 'fmt-enabled' : 'fmt-disabled');
                     card.setAttribute('data-placement', surfaceKey);
                     card.innerHTML = `
                         <div class="format-card-head">
-                            <span class="format-card-name">${p.name}</span>
+                            <span class="format-card-name">${pName}</span>
                             <span class="format-card-rpm">~$${p.rpm.toFixed(2)} RPM</span>
                         </div>
                         <div class="format-card-preview">${formatMockup(p.mock)}</div>
-                        <div class="format-card-desc">${p.desc}</div>
+                        <div class="format-card-desc">${pDesc}</div>
                         <label class="format-card-toggle">
                             <input type="checkbox" ${on ? 'checked' : ''} onchange="togglePlacement('${surfaceKey}', this.checked)">
-                            <span>Accept this placement</span>
+                            <span>${_accept}</span>
                         </label>
                     `;
                     grid.appendChild(card);
@@ -5217,13 +5239,28 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 return;
             }
 
+            // Status pill labels go through the dashboard translation
+            // dict so 'Paid' / 'Pending' translate alongside the rest of
+            // the payouts page. Helper falls back to literal English when
+            // the active locale is missing the key.
+            const _T = (k, en) => (window.dashT && window.dashT(k)) || en;
+            const STATUS_LABELS = {
+                paid:       _T('page.payouts.history_status_paid',       'Paid'),
+                pending:    _T('page.payouts.history_status_pending',    'Pending'),
+                dispatched: _T('page.payouts.history_status_dispatched', 'Dispatched'),
+                failed:     _T('page.payouts.history_status_failed',     'Failed'),
+                on_hold:    _T('page.payouts.history_status_on_hold',    'On hold'),
+                completed:  _T('page.payouts.history_status_completed',  'Completed'),
+            };
+
             dailyStats.slice().reverse().forEach(day => {
                 const row = document.createElement('tr');
                 const dateObj = new Date(day.date);
                 const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-                const status = dateObj < new Date() - (7 * 24 * 60 * 60 * 1000) ? 'Paid' : 'Pending';
-                const statusClass = status === 'Paid' ? 'status-paid' : 'status-pending';
+                const statusKey   = dateObj < new Date() - (7 * 24 * 60 * 60 * 1000) ? 'paid' : 'pending';
+                const statusLabel = STATUS_LABELS[statusKey] || statusKey;
+                const statusClass = statusKey === 'paid' ? 'status-paid' : 'status-pending';
 
                 const impressions = day.impressions || 0;
                 const earnings = day.earnings || 0;
@@ -5236,7 +5273,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     <td>$${earnings.toFixed(2)}</td>
                     <td>${clicks}</td>
                     <td>$${rpm.toFixed(2)}</td>
-                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -6431,6 +6468,46 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.tab_web': 'Lumi Web',
                     'page.placements.tab_ext': 'Lumi Extension',
                     'page.placements.tab_bot': 'Lumi Bot',
+                    'page.placements.intro_tpl': 'Showing placements for {door} — {n} this door renders. Use the door tabs above to switch.',
+                    'page.placements.cat_ai_h': 'AI-native placements',
+                    'page.placements.cat_ai_body': 'Sponsored lines, sources and suggestions woven into the AI response. Gentle — reads as part of the product.',
+                    'page.placements.cat_display_h': 'Display placements',
+                    'page.placements.cat_display_body': 'Image cards and corner units shown alongside your content. Standard, unobtrusive inventory.',
+                    'page.placements.cat_interruptive_h': 'Interruptive & gated',
+                    'page.placements.cat_interruptive_body': 'Units that interrupt the user — richer eCPM, but spend UX goodwill carefully.',
+                    'page.placements.tier_standard': 'Standard',
+                    'page.placements.tier_optin': 'Opt-in',
+                    'page.placements.toggle_on': 'On',
+                    'page.placements.toggle_off': 'Off',
+                    'page.placements.card_accept': 'Accept this placement',
+                    'page.placements.card_inline_card_name': 'Inline sponsored card',
+                    'page.placements.card_sponsored_citation_name': 'Sponsored citation',
+                    'page.placements.card_tool_rec_name': 'Tool / skill rec',
+                    'page.placements.card_corner_unit_name': 'Corner unit',
+                    'page.placements.card_loading_name': 'Loading-state ad',
+                    'page.placements.card_suggested_action_chip_name': 'Suggested-action chip',
+                    'page.placements.card_newtab_name': 'New-tab takeover',
+                    'page.placements.card_sponsored_welcome_name': 'Sponsored welcome',
+                    'page.placements.card_suggested_action_buttons_name': 'Suggested-action buttons',
+                    'page.placements.card_mcp_card_body': 'A sponsored card block appended to the tool response.',
+                    'page.placements.card_mcp_citation_body': 'A sponsored source / citation inside the AI answer.',
+                    'page.placements.card_tool_rec_body': 'A "you might also try" sponsored tool recommendation.',
+                    'page.placements.card_corner_unit_body': 'Sticky dismissable card anchored to a screen corner.',
+                    'page.placements.card_js_card_body': 'Sponsored card rendered inline in your page flow.',
+                    'page.placements.card_js_loading_body': 'Shown while your AI is generating its response.',
+                    'page.placements.card_compact_citation_body': 'Compact sponsored source inside a generated answer.',
+                    'page.placements.card_js_chip_body': 'A tappable sponsored quick-reply pill.',
+                    'page.placements.card_ext_newtab_body': 'A hero unit on the extension new-tab / home screen.',
+                    'page.placements.card_bot_card_body': 'Sponsored embed / card in the bot reply.',
+                    'page.placements.card_bot_welcome_body': 'A sponsored line in the bot welcome / onboarding message.',
+                    'page.placements.card_bot_buttons_body': 'Sponsored quick-reply buttons under the bot reply.',
+                    'page.payouts.history_status_paid': 'Paid',
+                    'page.payouts.history_status_pending': 'Pending',
+                    'page.payouts.history_status_dispatched': 'Dispatched',
+                    'page.payouts.history_status_failed': 'Failed',
+                    'page.payouts.history_status_on_hold': 'On hold',
+                    'page.payouts.history_status_completed': 'Completed',
+                    'page.home.vs_prior': 'vs prior',
                     'cashout.title': 'Cash out to your PayPal',
                     'cashout.amount_label': 'Amount to cash out',
                     'cashout.amount_min': 'Minimum $1.00 USD.',
@@ -6847,6 +6924,46 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.tab_web': 'Lumi 网页',
                     'page.placements.tab_ext': 'Lumi 扩展',
                     'page.placements.tab_bot': 'Lumi Bot',
+                    'page.placements.intro_tpl': '显示 {door} 的版位 — 此入口共 {n} 个。点击上方入口标签可切换。',
+                    'page.placements.cat_ai_h': 'AI 原生版位',
+                    'page.placements.cat_ai_body': '将赞助文字、来源和建议自然融入 AI 回复中。温和呈现 — 读起来像产品的一部分。',
+                    'page.placements.cat_display_h': '展示版位',
+                    'page.placements.cat_display_body': '与您的内容并列展示的图片卡片和角落单元。标准、不打扰的库存。',
+                    'page.placements.cat_interruptive_h': '插入式与限定式',
+                    'page.placements.cat_interruptive_body': '打断用户的广告单元 — eCPM 更高，但请谨慎使用用户体验的好感度。',
+                    'page.placements.tier_standard': '标准',
+                    'page.placements.tier_optin': '需申请',
+                    'page.placements.toggle_on': '开启',
+                    'page.placements.toggle_off': '关闭',
+                    'page.placements.card_accept': '接受此版位',
+                    'page.placements.card_inline_card_name': '内嵌赞助卡片',
+                    'page.placements.card_sponsored_citation_name': '赞助引用',
+                    'page.placements.card_tool_rec_name': '工具 / 技能推荐',
+                    'page.placements.card_corner_unit_name': '角落单元',
+                    'page.placements.card_loading_name': '加载状态广告',
+                    'page.placements.card_suggested_action_chip_name': '推荐操作按钮',
+                    'page.placements.card_newtab_name': '新标签页接管',
+                    'page.placements.card_sponsored_welcome_name': '赞助欢迎语',
+                    'page.placements.card_suggested_action_buttons_name': '推荐操作按钮组',
+                    'page.placements.card_mcp_card_body': '附加在工具响应后的赞助卡片块。',
+                    'page.placements.card_mcp_citation_body': 'AI 回答中的赞助来源 / 引用。',
+                    'page.placements.card_tool_rec_body': '"您可能还会喜欢" 的赞助工具推荐。',
+                    'page.placements.card_corner_unit_body': '锚定在屏幕角落、可关闭的固定卡片。',
+                    'page.placements.card_js_card_body': '内嵌在页面流中的赞助卡片。',
+                    'page.placements.card_js_loading_body': 'AI 生成响应时显示。',
+                    'page.placements.card_compact_citation_body': '生成回答中的紧凑赞助来源。',
+                    'page.placements.card_js_chip_body': '可点击的赞助快捷回复按钮。',
+                    'page.placements.card_ext_newtab_body': '扩展程序新标签页 / 主屏上的主推单元。',
+                    'page.placements.card_bot_card_body': '机器人回复中的赞助嵌入 / 卡片。',
+                    'page.placements.card_bot_welcome_body': '机器人欢迎 / 引导消息中的赞助行。',
+                    'page.placements.card_bot_buttons_body': '机器人回复下方的赞助快捷回复按钮。',
+                    'page.payouts.history_status_paid': '已打款',
+                    'page.payouts.history_status_pending': '待处理',
+                    'page.payouts.history_status_dispatched': '已发出',
+                    'page.payouts.history_status_failed': '失败',
+                    'page.payouts.history_status_on_hold': '暂缓',
+                    'page.payouts.history_status_completed': '已完成',
+                    'page.home.vs_prior': '对比上一周期',
                     'cashout.title': '提现到您的 PayPal 账户',
                     'cashout.amount_label': '提现金额',
                     'cashout.amount_min': '最低 $1.00 美元。',
@@ -7263,6 +7380,46 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.tab_web': 'Lumi 網頁',
                     'page.placements.tab_ext': 'Lumi 擴充功能',
                     'page.placements.tab_bot': 'Lumi Bot',
+                    'page.placements.intro_tpl': '顯示 {door} 的版位 — 此入口共 {n} 個。點擊上方入口標籤可切換。',
+                    'page.placements.cat_ai_h': 'AI 原生版位',
+                    'page.placements.cat_ai_body': '將贊助文字、來源與建議自然融入 AI 回應中。柔和呈現 — 讀起來像產品的一部分。',
+                    'page.placements.cat_display_h': '展示版位',
+                    'page.placements.cat_display_body': '與您的內容並列顯示的圖片卡片和角落單元。標準、不打擾的庫存。',
+                    'page.placements.cat_interruptive_h': '插入式與限定式',
+                    'page.placements.cat_interruptive_body': '會打斷使用者的廣告單元 — eCPM 更高，但請謹慎使用使用者好感度。',
+                    'page.placements.tier_standard': '標準',
+                    'page.placements.tier_optin': '需申請',
+                    'page.placements.toggle_on': '開啟',
+                    'page.placements.toggle_off': '關閉',
+                    'page.placements.card_accept': '接受此版位',
+                    'page.placements.card_inline_card_name': '內嵌贊助卡片',
+                    'page.placements.card_sponsored_citation_name': '贊助引用',
+                    'page.placements.card_tool_rec_name': '工具 / 技能推薦',
+                    'page.placements.card_corner_unit_name': '角落單元',
+                    'page.placements.card_loading_name': '載入狀態廣告',
+                    'page.placements.card_suggested_action_chip_name': '建議動作按鈕',
+                    'page.placements.card_newtab_name': '新分頁接管',
+                    'page.placements.card_sponsored_welcome_name': '贊助歡迎語',
+                    'page.placements.card_suggested_action_buttons_name': '建議動作按鈕組',
+                    'page.placements.card_mcp_card_body': '附加在工具回應後的贊助卡片區塊。',
+                    'page.placements.card_mcp_citation_body': 'AI 回答中的贊助來源 / 引用。',
+                    'page.placements.card_tool_rec_body': '「您可能也想試試」的贊助工具推薦。',
+                    'page.placements.card_corner_unit_body': '錨定在螢幕角落、可關閉的固定卡片。',
+                    'page.placements.card_js_card_body': '內嵌於頁面流的贊助卡片。',
+                    'page.placements.card_js_loading_body': 'AI 產生回應時顯示。',
+                    'page.placements.card_compact_citation_body': '生成回答中的精簡贊助來源。',
+                    'page.placements.card_js_chip_body': '可點選的贊助快速回覆按鈕。',
+                    'page.placements.card_ext_newtab_body': '擴充功能新分頁 / 主畫面上的主打單元。',
+                    'page.placements.card_bot_card_body': '機器人回覆中的贊助嵌入 / 卡片。',
+                    'page.placements.card_bot_welcome_body': '機器人歡迎 / 引導訊息中的贊助行。',
+                    'page.placements.card_bot_buttons_body': '機器人回覆下方的贊助快速回覆按鈕。',
+                    'page.payouts.history_status_paid': '已撥款',
+                    'page.payouts.history_status_pending': '待處理',
+                    'page.payouts.history_status_dispatched': '已送出',
+                    'page.payouts.history_status_failed': '失敗',
+                    'page.payouts.history_status_on_hold': '暫緩',
+                    'page.payouts.history_status_completed': '已完成',
+                    'page.home.vs_prior': '對比上一週期',
                     'cashout.title': '提領至您的 PayPal 帳戶',
                     'cashout.amount_label': '提領金額',
                     'cashout.amount_min': '最低 $1.00 美元。',
@@ -7679,6 +7836,46 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.tab_web': 'Lumi Web',
                     'page.placements.tab_ext': 'Lumi 拡張機能',
                     'page.placements.tab_bot': 'Lumi Bot',
+                    'page.placements.intro_tpl': '{door} の配置を表示中 — このドアでレンダリングされる {n} 個。上のドアタブで切り替えできます。',
+                    'page.placements.cat_ai_h': 'AI ネイティブ配置',
+                    'page.placements.cat_ai_body': 'スポンサーテキスト、ソース、提案を AI の応答に自然に組み込みます。控えめで — 製品の一部のように読めます。',
+                    'page.placements.cat_display_h': 'ディスプレイ配置',
+                    'page.placements.cat_display_body': 'コンテンツの横に表示される画像カードとコーナーユニット。標準的で控えめな在庫です。',
+                    'page.placements.cat_interruptive_h': 'インタラプティブ & ゲート付き',
+                    'page.placements.cat_interruptive_body': 'ユーザーを中断する広告ユニット — eCPM が高くなりますが、UX の好感度を慎重に使ってください。',
+                    'page.placements.tier_standard': 'スタンダード',
+                    'page.placements.tier_optin': 'オプトイン',
+                    'page.placements.toggle_on': 'オン',
+                    'page.placements.toggle_off': 'オフ',
+                    'page.placements.card_accept': 'この配置を承認する',
+                    'page.placements.card_inline_card_name': 'インラインスポンサーカード',
+                    'page.placements.card_sponsored_citation_name': 'スポンサー引用',
+                    'page.placements.card_tool_rec_name': 'ツール / スキル推薦',
+                    'page.placements.card_corner_unit_name': 'コーナーユニット',
+                    'page.placements.card_loading_name': 'ローディング状態広告',
+                    'page.placements.card_suggested_action_chip_name': 'おすすめアクションチップ',
+                    'page.placements.card_newtab_name': '新規タブ占有',
+                    'page.placements.card_sponsored_welcome_name': 'スポンサーウェルカム',
+                    'page.placements.card_suggested_action_buttons_name': 'おすすめアクションボタン',
+                    'page.placements.card_mcp_card_body': 'ツール応答に追加されるスポンサーカードブロック。',
+                    'page.placements.card_mcp_citation_body': 'AI の回答内のスポンサーソース / 引用。',
+                    'page.placements.card_tool_rec_body': '「こちらもおすすめ」のスポンサーツール推薦。',
+                    'page.placements.card_corner_unit_body': '画面の角に固定された、閉じられる粘着カード。',
+                    'page.placements.card_js_card_body': 'ページフローにインラインで表示されるスポンサーカード。',
+                    'page.placements.card_js_loading_body': 'AI が応答を生成している間に表示されます。',
+                    'page.placements.card_compact_citation_body': '生成された回答内のコンパクトなスポンサーソース。',
+                    'page.placements.card_js_chip_body': 'タップ可能なスポンサークイック返信ピル。',
+                    'page.placements.card_ext_newtab_body': '拡張機能の新規タブ / ホーム画面のヒーローユニット。',
+                    'page.placements.card_bot_card_body': 'ボットの返信内のスポンサー埋め込み / カード。',
+                    'page.placements.card_bot_welcome_body': 'ボットのウェルカム / オンボーディングメッセージ内のスポンサー行。',
+                    'page.placements.card_bot_buttons_body': 'ボット返信の下のスポンサークイック返信ボタン。',
+                    'page.payouts.history_status_paid': '支払済み',
+                    'page.payouts.history_status_pending': '保留中',
+                    'page.payouts.history_status_dispatched': '送信済み',
+                    'page.payouts.history_status_failed': '失敗',
+                    'page.payouts.history_status_on_hold': '一時停止',
+                    'page.payouts.history_status_completed': '完了',
+                    'page.home.vs_prior': '前期比',
                     'cashout.title': 'PayPal アカウントへ出金',
                     'cashout.amount_label': '出金額',
                     'cashout.amount_min': '最低 $1.00 USD。',
@@ -8095,6 +8292,46 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.tab_web': 'Lumi 웹',
                     'page.placements.tab_ext': 'Lumi 확장',
                     'page.placements.tab_bot': 'Lumi 봇',
+                    'page.placements.intro_tpl': '{door}의 게재 위치 표시 중 — 이 도어가 렌더링하는 {n}개. 위쪽 도어 탭으로 전환할 수 있습니다.',
+                    'page.placements.cat_ai_h': 'AI 네이티브 게재 위치',
+                    'page.placements.cat_ai_body': '스폰서 라인, 출처, 제안을 AI 응답에 자연스럽게 통합합니다. 부드럽게 — 제품의 일부처럼 읽힙니다.',
+                    'page.placements.cat_display_h': '디스플레이 게재 위치',
+                    'page.placements.cat_display_body': '콘텐츠 옆에 표시되는 이미지 카드와 코너 유닛. 표준적이고 방해되지 않는 인벤토리입니다.',
+                    'page.placements.cat_interruptive_h': '인터럽티브 및 제한',
+                    'page.placements.cat_interruptive_body': '사용자를 중단시키는 광고 유닛 — eCPM이 높지만 UX 호감도를 신중하게 사용하세요.',
+                    'page.placements.tier_standard': '표준',
+                    'page.placements.tier_optin': '옵트인',
+                    'page.placements.toggle_on': '켜짐',
+                    'page.placements.toggle_off': '꺼짐',
+                    'page.placements.card_accept': '이 게재 위치 수락',
+                    'page.placements.card_inline_card_name': '인라인 스폰서 카드',
+                    'page.placements.card_sponsored_citation_name': '스폰서 인용',
+                    'page.placements.card_tool_rec_name': '도구 / 스킬 추천',
+                    'page.placements.card_corner_unit_name': '코너 유닛',
+                    'page.placements.card_loading_name': '로딩 상태 광고',
+                    'page.placements.card_suggested_action_chip_name': '추천 액션 칩',
+                    'page.placements.card_newtab_name': '새 탭 인수',
+                    'page.placements.card_sponsored_welcome_name': '스폰서 환영',
+                    'page.placements.card_suggested_action_buttons_name': '추천 액션 버튼',
+                    'page.placements.card_mcp_card_body': '도구 응답에 추가되는 스폰서 카드 블록.',
+                    'page.placements.card_mcp_citation_body': 'AI 답변 내의 스폰서 출처 / 인용.',
+                    'page.placements.card_tool_rec_body': '"이것도 시도해 보세요" 스폰서 도구 추천.',
+                    'page.placements.card_corner_unit_body': '화면 모서리에 고정되어 닫을 수 있는 스티키 카드.',
+                    'page.placements.card_js_card_body': '페이지 흐름에 인라인으로 렌더링된 스폰서 카드.',
+                    'page.placements.card_js_loading_body': 'AI가 응답을 생성하는 동안 표시됩니다.',
+                    'page.placements.card_compact_citation_body': '생성된 답변 내의 콤팩트한 스폰서 출처.',
+                    'page.placements.card_js_chip_body': '탭 가능한 스폰서 빠른 답장 알약.',
+                    'page.placements.card_ext_newtab_body': '확장 프로그램의 새 탭 / 홈 화면의 히어로 유닛.',
+                    'page.placements.card_bot_card_body': '봇 답장의 스폰서 임베드 / 카드.',
+                    'page.placements.card_bot_welcome_body': '봇 환영 / 온보딩 메시지의 스폰서 라인.',
+                    'page.placements.card_bot_buttons_body': '봇 답장 아래의 스폰서 빠른 답장 버튼.',
+                    'page.payouts.history_status_paid': '지급됨',
+                    'page.payouts.history_status_pending': '대기 중',
+                    'page.payouts.history_status_dispatched': '발송됨',
+                    'page.payouts.history_status_failed': '실패',
+                    'page.payouts.history_status_on_hold': '보류',
+                    'page.payouts.history_status_completed': '완료됨',
+                    'page.home.vs_prior': '이전 대비',
                     'cashout.title': 'PayPal 계정으로 출금',
                     'cashout.amount_label': '출금 금액',
                     'cashout.amount_min': '최소 $1.00 USD.',
@@ -8511,6 +8748,46 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     'page.placements.tab_web': 'Lumi Web',
                     'page.placements.tab_ext': 'Lumi Extension',
                     'page.placements.tab_bot': 'Lumi Bot',
+                    'page.placements.intro_tpl': 'Đang hiển thị vị trí cho {door} — cửa này hiển thị {n} vị trí. Dùng tab cửa phía trên để chuyển đổi.',
+                    'page.placements.cat_ai_h': 'Vị trí AI-native',
+                    'page.placements.cat_ai_body': 'Dòng tài trợ, nguồn và gợi ý được lồng vào phản hồi AI. Nhẹ nhàng — đọc như một phần của sản phẩm.',
+                    'page.placements.cat_display_h': 'Vị trí hiển thị',
+                    'page.placements.cat_display_body': 'Thẻ hình ảnh và đơn vị góc hiển thị bên cạnh nội dung của bạn. Kho hàng tiêu chuẩn, không gây phiền.',
+                    'page.placements.cat_interruptive_h': 'Gián đoạn & có cổng',
+                    'page.placements.cat_interruptive_body': 'Các đơn vị làm gián đoạn người dùng — eCPM cao hơn, nhưng hãy thận trọng với thiện cảm UX.',
+                    'page.placements.tier_standard': 'Tiêu chuẩn',
+                    'page.placements.tier_optin': 'Đăng ký',
+                    'page.placements.toggle_on': 'Bật',
+                    'page.placements.toggle_off': 'Tắt',
+                    'page.placements.card_accept': 'Chấp nhận vị trí này',
+                    'page.placements.card_inline_card_name': 'Thẻ tài trợ nội tuyến',
+                    'page.placements.card_sponsored_citation_name': 'Trích dẫn tài trợ',
+                    'page.placements.card_tool_rec_name': 'Gợi ý công cụ / kỹ năng',
+                    'page.placements.card_corner_unit_name': 'Đơn vị góc',
+                    'page.placements.card_loading_name': 'Quảng cáo trạng thái tải',
+                    'page.placements.card_suggested_action_chip_name': 'Chip hành động gợi ý',
+                    'page.placements.card_newtab_name': 'Tab mới chiếm chỗ',
+                    'page.placements.card_sponsored_welcome_name': 'Lời chào tài trợ',
+                    'page.placements.card_suggested_action_buttons_name': 'Nút hành động gợi ý',
+                    'page.placements.card_mcp_card_body': 'Một khối thẻ tài trợ được nối vào phản hồi của công cụ.',
+                    'page.placements.card_mcp_citation_body': 'Một nguồn / trích dẫn tài trợ bên trong câu trả lời AI.',
+                    'page.placements.card_tool_rec_body': 'Gợi ý công cụ tài trợ kiểu "bạn cũng có thể thử".',
+                    'page.placements.card_corner_unit_body': 'Thẻ dính có thể đóng được, neo ở góc màn hình.',
+                    'page.placements.card_js_card_body': 'Thẻ tài trợ hiển thị nội tuyến trong luồng trang của bạn.',
+                    'page.placements.card_js_loading_body': 'Hiển thị khi AI của bạn đang tạo phản hồi.',
+                    'page.placements.card_compact_citation_body': 'Nguồn tài trợ gọn nhẹ bên trong câu trả lời được tạo.',
+                    'page.placements.card_js_chip_body': 'Một viên trả lời nhanh tài trợ có thể nhấn.',
+                    'page.placements.card_ext_newtab_body': 'Một đơn vị hero trên tab mới / màn hình chính của tiện ích mở rộng.',
+                    'page.placements.card_bot_card_body': 'Nhúng / thẻ tài trợ trong câu trả lời của bot.',
+                    'page.placements.card_bot_welcome_body': 'Một dòng tài trợ trong thông điệp chào mừng / khởi tạo của bot.',
+                    'page.placements.card_bot_buttons_body': 'Nút trả lời nhanh tài trợ bên dưới câu trả lời của bot.',
+                    'page.payouts.history_status_paid': 'Đã thanh toán',
+                    'page.payouts.history_status_pending': 'Đang chờ',
+                    'page.payouts.history_status_dispatched': 'Đã gửi',
+                    'page.payouts.history_status_failed': 'Thất bại',
+                    'page.payouts.history_status_on_hold': 'Tạm hoãn',
+                    'page.payouts.history_status_completed': 'Đã hoàn thành',
+                    'page.home.vs_prior': 'so với kỳ trước',
                     'cashout.title': 'Rút tiền về tài khoản PayPal',
                     'cashout.amount_label': 'Số tiền rút',
                     'cashout.amount_min': 'Tối thiểu $1.00 USD.',
