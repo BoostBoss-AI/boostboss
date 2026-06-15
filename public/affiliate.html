@@ -453,16 +453,19 @@
   /* ── Date-range header on Dashboard home ───────────────────────────── */
   .date-bar {
     display: flex; align-items: center; gap: 14px; padding: 16px 20px;
-    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    background: linear-gradient(135deg, #FFF5F8 0%, #F5F3FF 100%);
+    border: 1px solid #FBCFE8; border-radius: 12px;
     margin-bottom: 20px; flex-wrap: wrap;
   }
-  .date-bar .lbl { font-size: 14px; color: var(--ink-soft); font-weight: 500; }
+  .date-bar .lbl { font-size: 14px; color: var(--ink); font-weight: 600; }
   .date-bar .picker {
     background: #fff; border: 1px solid var(--line); border-radius: 8px;
     padding: 8px 14px; font-size: 14px; cursor: pointer; min-width: 180px;
     font-family: inherit; color: var(--ink);
+    transition: border-color 0.15s;
   }
-  .date-bar .updated { margin-left: auto; font-size: 13px; color: var(--muted); }
+  .date-bar .picker:hover { border-color: var(--pink); }
+  .date-bar .updated { margin-left: auto; font-size: 13px; color: var(--ink-soft); }
 
   /* ── Dashboard metric card variant (6-up grid for Shopee parity) ─────
      The legacy .stats grid auto-fits at 160px which makes 4 cards across.
@@ -474,9 +477,26 @@
   }
   .metric-card {
     background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 20px 22px; position: relative;
+    padding: 20px 22px 22px; position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   }
-  .metric-card.is-primary { border-color: var(--pink); }
+  .metric-card:hover {
+    transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,15,26,0.06);
+  }
+  /* Each KPI tile gets a soft tinted strip across the top + a colored
+     value to give the dashboard some warmth without going gaudy. */
+  .metric-card::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+    background: var(--accent, var(--pink)); border-radius: 12px 12px 0 0;
+  }
+  .metric-card.is-clicks       { --accent: #FF2D78; background: linear-gradient(180deg, #FFF5F8 0%, var(--bg-card) 60px); }
+  .metric-card.is-signups      { --accent: #06B6D4; background: linear-gradient(180deg, #ECFEFF 0%, var(--bg-card) 60px); }
+  .metric-card.is-commission   { --accent: #F59E0B; background: linear-gradient(180deg, #FFFBEB 0%, var(--bg-card) 60px); }
+  .metric-card.is-activations  { --accent: #10B981; background: linear-gradient(180deg, #ECFDF5 0%, var(--bg-card) 60px); }
+  .metric-card.is-revenue      { --accent: #8B5CF6; background: linear-gradient(180deg, #F5F3FF 0%, var(--bg-card) 60px); }
+  .metric-card.is-newusers     { --accent: #F43F5E; background: linear-gradient(180deg, #FFF1F2 0%, var(--bg-card) 60px); }
+
   .metric-card .lbl {
     font-size: 12.5px; font-weight: 600; color: var(--muted);
     text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
@@ -489,7 +509,7 @@
   }
   .metric-card .val {
     font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700;
-    color: var(--ink); line-height: 1.1;
+    color: var(--accent, var(--ink)); line-height: 1.1;
   }
   .metric-card .delta {
     font-size: 12.5px; color: var(--muted); margin-top: 6px;
@@ -670,7 +690,15 @@
      normal desktop sizes. Higher horizontal padding (40px) keeps the
      content from touching the sidebar / right edge. */
   .main { padding: 32px 44px 64px; max-width: 1480px; margin: 0 auto; width: 100%; }
-  .main h2 { font-size: 30px; margin-bottom: 8px; letter-spacing: -0.4px; font-weight: 700; }
+  .main h2 {
+    font-size: 30px; margin-bottom: 12px; letter-spacing: -0.4px; font-weight: 700;
+    position: relative; padding-bottom: 12px;
+  }
+  .main h2::after {
+    content: ''; position: absolute; left: 0; bottom: 0;
+    width: 42px; height: 3px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--pink) 0%, #FF6B9D 100%);
+  }
   .main .pre { font-size: 15.5px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
   .stat {
@@ -1460,32 +1488,32 @@
              Order Amount → Revenue (advertiser top-line driven by your traffic)
              New Buyers → New Users -->
         <div class="metrics">
-          <div class="metric-card is-primary">
+          <div class="metric-card is-clicks">
             <div class="lbl"><span data-t="home.kpi_clicks">Clicks</span> <span class="help-i" title="Total clicks on your share links" data-t-title="home.kpi_clicks_tip">i</span></div>
             <div class="val" id="h-clicks">0</div>
             <div class="delta" id="h-clicks-delta" data-t="home.vs_previous">vs previous period</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card is-signups">
             <div class="lbl"><span data-t="home.kpi_signups">Signups</span> <span class="help-i" title="Account signups attributed to your links via advertiser postback" data-t-title="home.kpi_signups_tip">i</span></div>
             <div class="val" id="h-signups">0</div>
             <div class="delta" id="h-signups-delta" data-t="home.vs_previous">vs previous period</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card is-commission">
             <div class="lbl"><span data-t="home.kpi_commission">Est. Commission ($)</span> <span class="help-i" title="Estimated USD across pending + confirmed" data-t-title="home.kpi_commission_tip">i</span></div>
             <div class="val" id="h-earn">$0.00</div>
             <div class="delta" data-t="home.commission_sub">Pending until refund window passes</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card is-activations">
             <div class="lbl"><span data-t="home.kpi_activations">Activations</span> <span class="help-i" title="Paid conversions — first credit purchase, paid plan upgrade, etc." data-t-title="home.kpi_activations_tip">i</span></div>
             <div class="val" id="h-activations">0</div>
             <div class="delta" id="h-activations-delta" data-t="home.vs_previous">vs previous period</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card is-revenue">
             <div class="lbl"><span data-t="home.kpi_revenue">Revenue ($)</span> <span class="help-i" title="Top-line revenue the advertiser earned from your audience" data-t-title="home.kpi_revenue_tip">i</span></div>
             <div class="val" id="h-revenue">$0.00</div>
             <div class="delta" data-t="home.revenue_sub">Advertiser top-line</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card is-newusers">
             <div class="lbl"><span data-t="home.kpi_newusers">New Users</span> <span class="help-i" title="First-time users from your audience" data-t-title="home.kpi_newusers_tip">i</span></div>
             <div class="val" id="h-newusers">0</div>
             <div class="delta" data-t="home.newusers_sub">First-time conversions</div>
