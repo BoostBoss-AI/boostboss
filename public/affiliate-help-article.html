@@ -60,33 +60,64 @@
   }
   nav.help-nav .back:hover { border-color: var(--ink); background: var(--bg-soft); }
 
-  /* ── Two-column layout: left index sidebar + main content. ───────── */
+  /* Pink hero — mirrors the landing page so the brand stays consistent. */
+  .hero {
+    background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);
+    color: #fff; padding: 56px 24px 64px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 32px; font-weight: 700; margin-bottom: 28px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .hero .search-wrap {
+    max-width: 720px; margin: 0 auto;
+    background: #fff; border-radius: 14px; overflow: hidden;
+    display: flex; box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  }
+  .hero .search-wrap input {
+    flex: 1; padding: 16px 20px; font-size: 15px;
+    border: none; outline: none; color: var(--ink);
+    font-family: inherit;
+  }
+  .hero .search-wrap input::placeholder { color: var(--muted); }
+  .hero .search-wrap button {
+    background: var(--pink); border: none; color: #fff;
+    padding: 0 28px; cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+  }
+  .hero .search-wrap button:hover { background: var(--pink-dark); }
+  .hero .search-wrap button svg { width: 22px; height: 22px; }
+
+  /* ── Two-column layout: borderless left index + main content. ───── */
   .help-layout {
-    max-width: 1200px; margin: 0 auto; padding: 32px 24px 16px;
-    display: grid; grid-template-columns: 260px 1fr; gap: 40px;
+    max-width: 1200px; margin: 0 auto; padding: 40px 24px 16px;
+    display: grid; grid-template-columns: 240px 1fr; gap: 56px;
     align-items: start;
   }
   @media (max-width: 880px) {
-    .help-layout { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
+    .help-layout { grid-template-columns: 1fr; gap: 24px; padding-top: 28px; }
   }
+  /* Sidebar — no card, no border, no background. Just text + dividers.
+     Matches Shopee's affiliate help portal sidebar pattern. */
   aside.help-side {
-    position: sticky; top: 84px;
-    background: #fff; border: 1px solid var(--line); border-radius: 12px;
-    padding: 14px 8px 18px;
-    max-height: calc(100vh - 100px); overflow-y: auto;
+    position: sticky; top: 24px;
+    max-height: calc(100vh - 40px); overflow-y: auto;
+    padding: 4px 0;
   }
   @media (max-width: 880px) { aside.help-side { position: static; max-height: none; } }
   .hs-group { padding: 4px 0; }
-  .hs-group + .hs-group { border-top: 1px solid var(--line-soft); }
+  .hs-group + .hs-group { border-top: 1px solid var(--line-soft); margin-top: 4px; padding-top: 8px; }
   .hs-group-head {
     display: flex; align-items: center; justify-content: space-between;
     width: 100%; background: none; border: none; cursor: pointer;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 14.5px; font-weight: 700; color: var(--ink);
-    padding: 10px 12px; border-radius: 7px;
-    text-align: left; transition: background 0.15s;
+    font-size: 15px; font-weight: 700; color: var(--ink);
+    padding: 10px 0; border-radius: 0;
+    text-align: left;
   }
-  .hs-group-head:hover { background: var(--bg-soft); }
+  .hs-group-head:hover { color: var(--pink); }
   .hs-group-head .chev {
     width: 14px; height: 14px; color: var(--muted);
     transition: transform 0.18s ease;
@@ -95,16 +126,14 @@
   .hs-list { list-style: none; padding: 2px 0 8px 0; margin: 0; }
   .hs-group.collapsed .hs-list { display: none; }
   .hs-list a {
-    display: block; padding: 8px 12px 8px 24px;
-    font-size: 13.5px; line-height: 1.4; color: var(--ink-soft);
+    display: block; padding: 7px 0 7px 12px;
+    font-size: 14px; line-height: 1.45; color: var(--ink-soft);
     text-decoration: none;
-    border-left: 2px solid transparent; border-radius: 0 6px 6px 0;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: color 0.15s;
   }
-  .hs-list a:hover { color: var(--ink); background: var(--bg-soft); text-decoration: none; }
+  .hs-list a:hover { color: var(--ink); text-decoration: none; }
   .hs-list a.active {
     color: var(--pink); font-weight: 600;
-    border-left-color: var(--pink); background: rgba(255,45,120,0.05);
   }
 
   main.help-main { min-width: 0; }
@@ -224,6 +253,16 @@
     <a class="back" href="/affiliate">← Back to dashboard</a>
   </div>
 </nav>
+
+<section class="hero">
+  <h1>Hi, how can we help?</h1>
+  <form class="search-wrap" role="search" onsubmit="event.preventDefault(); var v=document.getElementById('help-search').value.trim(); if(v) location.href='/help?q='+encodeURIComponent(v);">
+    <input type="search" id="help-search" placeholder="Search the help center — try 'share link', 'commission', 'payout'…">
+    <button type="submit" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </form>
+</section>
 
 <div class="help-layout">
   <aside class="help-side" id="help-side"></aside>
