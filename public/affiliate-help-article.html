@@ -60,6 +60,41 @@
   }
   nav.help-nav .back:hover { border-color: var(--ink); background: var(--bg-soft); }
 
+  /* Language toggle. */
+  .lang-wrap { position: relative; }
+  .lang-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    padding: 7px 12px; border-radius: 7px;
+    border: 1px solid var(--line); background: #fff; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .lang-btn:hover { border-color: var(--ink); background: var(--bg-soft); }
+  .lang-btn .globe { width: 14px; height: 14px; flex-shrink: 0; }
+  .lang-btn .caret { width: 10px; height: 10px; color: var(--muted); }
+  .lang-menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    min-width: 180px;
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 10px; box-shadow: 0 10px 26px rgba(15,15,26,0.10);
+    padding: 6px; z-index: 60;
+    display: none;
+  }
+  .lang-menu.open { display: block; }
+  .lang-menu button {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; color: var(--ink);
+    background: none; border: none; cursor: pointer;
+    padding: 8px 12px; border-radius: 7px;
+  }
+  .lang-menu button:hover { background: var(--bg-soft); }
+  .lang-menu button.active { color: var(--pink); font-weight: 600; }
+  .lang-menu button .check { width: 14px; height: 14px; color: var(--pink); opacity: 0; }
+  .lang-menu button.active .check { opacity: 1; }
+
   /* Pink hero — mirrors the landing page so the brand stays consistent. */
   .hero {
     background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);
@@ -90,7 +125,7 @@
   .hero .search-wrap button:hover { background: var(--pink-dark); }
   .hero .search-wrap button svg { width: 18px; height: 18px; }
 
-  /* ── Two-column layout: borderless left index + main content. ───── */
+  /* Two-column layout: borderless left index + main content. */
   .help-layout {
     max-width: 1080px; margin: 0 auto; padding: 32px 24px 16px;
     display: grid; grid-template-columns: 220px 1fr; gap: 48px;
@@ -99,8 +134,6 @@
   @media (max-width: 880px) {
     .help-layout { grid-template-columns: 1fr; gap: 24px; padding-top: 28px; }
   }
-  /* Sidebar — no card, no border, no background. Just text + dividers.
-     Matches Shopee's affiliate help portal sidebar pattern. */
   aside.help-side {
     position: sticky; top: 24px;
     max-height: calc(100vh - 40px); overflow-y: auto;
@@ -145,9 +178,7 @@
   .crumbs a:hover { color: var(--ink); text-decoration: underline; }
   .crumbs .sep { margin: 0 8px; color: var(--muted); }
 
-  article {
-    padding: 0 0 64px;
-  }
+  article { padding: 0 0 64px; }
   article h1 {
     font-size: 34px; font-weight: 700; line-height: 1.2;
     margin-bottom: 12px;
@@ -185,10 +216,7 @@
   }
   article pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 
-  /* Related articles tile-list at the bottom of each article. */
-  .related {
-    margin: 0 0 40px; padding: 0;
-  }
+  .related { margin: 0 0 40px; padding: 0; }
   .related h3 {
     font-size: 16px; font-weight: 700; color: var(--ink);
     text-transform: uppercase; letter-spacing: 0.08em;
@@ -211,7 +239,6 @@
   }
   .related-list a .arrow { color: var(--muted); flex-shrink: 0; margin-left: auto; font-size: 13px; }
 
-  /* Contact-us strip — minor variant of the landing version. */
   .contact-band {
     background: var(--bg-soft); border-top: 1px solid var(--line);
     padding: 40px 24px 52px; text-align: center;
@@ -227,7 +254,6 @@
   }
   .contact-band a:hover { border-color: var(--ink); }
 
-  /* Article-not-found state */
   .notfound {
     max-width: 600px; margin: 80px auto; padding: 0 24px; text-align: center;
   }
@@ -250,12 +276,20 @@
       <span class="tag">AFFILIATE</span>
     </a>
     <div class="spacer"></div>
-    <a class="back" href="/affiliate">← Back to dashboard</a>
+    <div class="lang-wrap">
+      <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false">
+        <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span class="code" id="lang-code">EN</span>
+        <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lang-menu" id="lang-menu" role="menu"></div>
+    </div>
+    <a class="back" id="back-link" href="/affiliate">← Back to dashboard</a>
   </div>
 </nav>
 
 <section class="hero">
-  <h1>Hi, how can we help?</h1>
+  <h1 id="hero-title">Hi, how can we help?</h1>
   <form class="search-wrap" role="search" onsubmit="event.preventDefault(); var v=document.getElementById('help-search').value.trim(); if(v) location.href='/help?q='+encodeURIComponent(v);">
     <input type="search" id="help-search" placeholder="Search the help center — try 'share link', 'commission', 'payout'…">
     <button type="submit" aria-label="Search">
@@ -270,416 +304,2037 @@
 </div>
 
 <section class="contact-band">
-  <h3>Still need help?</h3>
+  <h3 id="still-help">Still need help?</h3>
   <a href="mailto:affiliate@boostboss.ai?subject=Affiliate%20help">📧 affiliate@boostboss.ai</a>
 </section>
 
 <script>
   // ════════════════════════════════════════════════════════════════════
-  //  Article store — each entry is one help-center article.
-  //  Body is plain HTML. Keep things tight: lede + 2-5 H2 sections
-  //  + a few practical bullets each. Sidebar 'related' surfaces 4
-  //  cross-links per article.
+  //  Help Center article reader.
+  //  HELP_I18N holds UI strings + a full ARTICLES dict per language.
+  //  6 languages × 12 articles each.
   // ════════════════════════════════════════════════════════════════════
-  var ARTICLES = {
 
-    'getting-started': {
-      title: 'Getting started as a Boost Boss affiliate',
-      lede: 'Boost Boss is an MCP-native ad network. As an affiliate you save ads you discover inside AI tools, share them with your audience, and earn when they buy. Here\'s the 60-second tour.',
-      related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
-      body: '\
-<h2>What Boost Boss is, in one paragraph</h2>\
-<p>Boost Boss serves sponsored content inside AI surfaces — Claude Desktop, Cursor, ChatGPT plugins, Discord and Slack bots, browser extensions. Advertisers run campaigns and pay per impression / click / purchase. Affiliates promote products from the catalog and earn a commission when buyers convert through their share link.</p>\
-\
-<h2>Three things to do in your first 10 minutes</h2>\
-<ol>\
-  <li><strong>Browse the catalog.</strong> Open <a href="/affiliate#catalog">Product Catalog</a> in the sidebar and look at what advertisers have registered. Sort by commission to find high-converting offers.</li>\
-  <li><strong>Mint your first share link.</strong> Click "Get Link" on any product you want to promote. The link routes through <code>/s/&lt;token&gt;</code> which redirects with a <code>bb_click=&lt;UUID&gt;</code> attribution parameter.</li>\
-  <li><strong>Set up your payout method.</strong> Go to <a href="/affiliate#payouts">Payout Record</a> and add the PayPal email where you want to be paid. Without this, earnings accrue but don\'t settle.</li>\
-</ol>\
-\
-<h2>How earnings work</h2>\
-<p>When someone clicks your share link and buys, you earn a share of what Boost Boss calls the <strong>Affiliate Pool</strong> — a percentage of the order that the seller specifically funds for affiliate marketing. The split is <strong>70% to you / 30% to Boost Boss</strong>. See <a href="/help/article?id=commission-model">Commission Model v2 explained</a>.</p>\
-\
-<div class="callout info"><strong>Plain version:</strong> if a product has a 20% affiliate pool and someone buys $100 worth, Boost Boss takes the $20 pool, gives you $14 (70% of the pool), and keeps $6 (30%). The seller gets the remaining $80 minus PayPal\'s processor fees.</div>\
-\
-<h2>What to do next</h2>\
-<ul>\
-  <li>Read <a href="/help/article?id=share-links">how attribution works</a> so you understand the data behind your link clicks.</li>\
-  <li>Skim <a href="/help/article?id=ftc-disclosure">FTC disclosure rules</a> — every public promotion needs a sponsorship disclosure.</li>\
-  <li>Choose where you\'ll promote: <a href="/help/article?id=promote-social">social media</a>, <a href="/help/article?id=promote-newsletter">newsletter</a>, or both.</li>\
-</ul>'
+  var LANG_LIST = [
+    { code: 'en',    label: 'English',      short: 'EN' },
+    { code: 'zh',    label: '简体中文',     short: '中' },
+    { code: 'zh-TW', label: '繁體中文',     short: '繁' },
+    { code: 'ja',    label: '日本語',       short: '日' },
+    { code: 'ko',    label: '한국어',       short: '한' },
+    { code: 'vi',    label: 'Tiếng Việt',   short: 'VI' },
+  ];
+
+  // English first. Other languages spliced in via HELP_I18N[lang] = {...}
+  // assignments below.
+  var HELP_I18N = {};
+
+  HELP_I18N.en = {
+    doc_title_suffix: ' — Boost Boss Affiliate Help',
+    doc_title_fallback: 'Help Center — Boost Boss Affiliate',
+    ui: {
+      hero_title: 'Hi, how can we help?',
+      hero_placeholder: "Search the help center — try 'share link', 'commission', 'payout'…",
+      back_to_dashboard: '← Back to dashboard',
+      breadcrumb_help_center: 'Help Center',
+      related_articles: 'Related articles',
+      still_need_help: 'Still need help?',
+      article_not_found_title: 'Article not found',
+      article_not_found_body: "The article you're looking for doesn't exist or has been renamed.",
+      article_not_found_link: '← Back to Help Center',
+      group_start: 'Getting started',
+      group_links: 'Share links & attribution',
+      group_commission: 'Commissions & payouts',
+      group_promote: 'Promotion',
+      group_account: 'Compliance & account',
+      sb_getting_started:    'Getting started as a Boost Boss affiliate',
+      sb_saving_ads:         'Saving ads & browsing the catalog',
+      sb_share_links:        'Share links & bb_click attribution',
+      sb_clawback:           'Conversions, clicks & the 30-day clawback',
+      sb_commission_model:   'Commission Model v2 — 70/30 split',
+      sb_payout_setup:       'Setting up your PayPal payout',
+      sb_payout_schedule:    'Payout schedule — biweekly Friday',
+      sb_promote_social:     'Promoting on social — X, IG, TikTok, FB',
+      sb_promote_newsletter: 'Promoting in newsletters & email',
+      sb_exclusive_offers:   'Exclusive Offers & Premium Partners',
+      sb_ftc_disclosure:     'FTC disclosure & affiliate standards',
+      sb_two_factor:         'Two-factor authentication & account',
     },
-
-    'saving-ads': {
-      title: 'Saving ads & browsing the catalog',
-      lede: 'Two ways to find products to promote: save an ad you spot inside an AI tool, or browse the full advertiser catalog from your dashboard.',
-      related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
-      body: '\
-<h2>Saving from inside an AI tool</h2>\
-<p>When you see a Boost Boss-served ad in a tool like Cursor, Claude Desktop, or a Discord bot, tap the bookmark icon. The product lands in your <a href="/affiliate#saves">My Saves</a> view with one click — no manual entry, no copy-paste.</p>\
-<p>What gets saved: the product (parent), not the individual creative. So if the advertiser runs multiple campaigns or seasonal variants for the same product, your saved entry still points at the right destination. New campaigns automatically use the best-active match at click-time.</p>\
-\
-<h2>Browsing the catalog</h2>\
-<p><a href="/affiliate#catalog">Product Catalog</a> shows every advertiser product that\'s passed audit. Two filters matter most:</p>\
-<ul>\
-  <li><strong>Commission</strong> — sorts products by their affiliate pool percentage. Higher is more upside per sale.</li>\
-  <li><strong>Category</strong> — narrows to a vertical (SaaS, infra, content tools, etc.) so you can match products to your audience.</li>\
-</ul>\
-\
-<h2>What "audit-approved" means</h2>\
-<p>Every product visible in the catalog has passed Boost Boss\'s audit — accurate description, working fulfilment URL, honest "original price" comparison (if displayed), valid refund path. Audit-rejected products don\'t appear in the catalog and can\'t be promoted.</p>\
-<div class="callout"><strong>Why this matters to you:</strong> products in the catalog are vetted, so the conversion risk on your end is lower. You\'re not stuck promoting something that breaks at checkout or never delivers.</div>'
-    },
-
-    'share-links': {
-      title: 'Share links & bb_click attribution',
-      lede: 'How Boost Boss knows a sale came from your link, why the system survives cookie loss and Safari ITP, and what to put in your share links so analytics work for both you and the advertiser.',
-      related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
-      body: '\
-<h2>The basic flow</h2>\
-<ol>\
-  <li>You mint a share link in the dashboard. It looks like <code>https://boostboss.ai/s/&lt;token&gt;</code>.</li>\
-  <li>Someone clicks it. Our redirect server appends <code>?bb_click=&lt;UUID&gt;</code> to the destination URL and 302-redirects them to the advertiser\'s product page.</li>\
-  <li>The UUID is logged with your affiliate ID, click timestamp, referring URL, and a coarse region. We also drop a first-party cookie as fallback.</li>\
-  <li>If a sale follows within the 30-day clawback window, the <code>bb_click</code> UUID on the buyer\'s purchase URL is what attributes the sale back to you.</li>\
-</ol>\
-\
-<h2>Why URL-based attribution is load-bearing</h2>\
-<p>Most affiliate networks rely on third-party cookies — which are blocked or capped by Safari ITP, Firefox ETP, and increasingly Chrome. Boost Boss treats the cookie as a fallback. The <strong>bb_click UUID in the URL is the load-bearing identifier</strong>. As long as the URL parameter survives to the conversion event, attribution works regardless of what the browser does.</p>\
-\
-<h2>What gets stripped</h2>\
-<p>Some platforms strip URL parameters when users share links:</p>\
-<ul>\
-  <li><strong>Twitter/X</strong> generally preserves them.</li>\
-  <li><strong>iMessage / SMS</strong> preserves them.</li>\
-  <li><strong>Some Facebook posts</strong> add their own fbclid but preserve yours.</li>\
-  <li><strong>Some email clients</strong> shorten URLs through a redirect — usually still preserves params.</li>\
-</ul>\
-<p>If your audience converts at a much lower rate than your clicks, check whether the URL is being mangled at the channel.</p>\
-\
-<h2>Sub IDs for channel tracking</h2>\
-<p>When minting a link, you can add up to 5 Sub IDs (a-z, A-Z, 0-9). These don\'t affect attribution — they\'re tags you assign so you can later tell which channel brought the click. Example: <code>sub1=twitter</code>, <code>sub1=newsletter-may</code>. Visible in your <a href="/affiliate#conv-soon">Sales Report</a>.</p>'
-    },
-
-    'commission-model': {
-      title: 'Commission Model v2 — 70/30 split explained',
-      lede: 'How Boost Boss splits a sale between the seller, you, and the platform. The new model replaced a flat 15% top-line take with a per-product affiliate pool — clearer incentives and only earning when an affiliate drives the sale.',
-      related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
-      body: '\
-<h2>The shape of a sale</h2>\
-<p>Every product on the catalog has an <strong>Affiliate Pool Percentage</strong> set by the seller. That\'s the share of the order that funds affiliate marketing. Boost Boss splits the pool 70 / 30 between the affiliate and the platform:</p>\
-<ul>\
-  <li><strong>70%</strong> → you (the affiliate who drove the sale)</li>\
-  <li><strong>30%</strong> → Boost Boss</li>\
-  <li><strong>Remainder</strong> → seller (the order value minus the affiliate pool minus PayPal processor fees)</li>\
-</ul>\
-\
-<h2>A worked example</h2>\
-<p>Product priced at <strong>$100</strong>, affiliate pool set by seller at <strong>20%</strong>.</p>\
-<pre><code>Order value         $100.00\
-Affiliate pool       $20.00  (20% of order)\
-  → Affiliate         $14.00  (70% of pool)\
-  → Boost Boss         $6.00  (30% of pool)\
-Seller settles       $80.00  minus PayPal fees</code></pre>\
-\
-<h2>Direct vs affiliate sales</h2>\
-<p>If a buyer purchases without an affiliate link (direct sale), Boost Boss takes no commission on the order value beyond standard payment processor pass-through. The seller keeps the entire order net of fees, taxes, and refunds. We only earn when an affiliate actually drove the sale.</p>\
-<div class="callout info"><strong>Why this matters:</strong> the v2 model aligns our incentives with yours — Boost Boss only makes money when affiliates do. Under the old 15% flat top-line take, we earned on direct sales you had no part in.</div>\
-\
-<h2>CPS by default, CPC and CPA on opt-in</h2>\
-<p>The default is <strong>cost-per-sale (CPS)</strong>: you earn only when a sale actually captures. Some advertisers opt their products into <strong>CPC</strong> (cost-per-click) or <strong>CPA</strong> (cost-per-action — e.g. signup) instead. When that\'s the case, you see the model on the catalog row and you earn on qualifying clicks or actions whether or not they convert to revenue.</p>'
-    },
-
-    'payout-setup': {
-      title: 'Setting up your PayPal payout',
-      lede: 'Boost Boss settles all affiliate payouts through PayPal. Add your PayPal email once in the dashboard and every biweekly Friday payout goes there automatically.',
-      related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
-      body: '\
-<h2>Where to add your PayPal email</h2>\
-<p>Go to <a href="/affiliate#payouts">Payout Record</a> in the sidebar. There\'s a Payout method form with one required field: <strong>PayPal email</strong>. Use the email tied to a verified PayPal account.</p>\
-\
-<h2>Why PayPal only, for now</h2>\
-<p>Boost Boss operates on a single payment provider for both inbound payments (advertiser deposits, buyer storefront captures) and outbound payments (publisher, seller, and affiliate payouts). PayPal is the current provider because Taiwan\'s corporate law requires pay-in and payout through the same provider, and PayPal serves the largest cross-section of the global market. Additional methods are on the roadmap once we open up multi-provider options.</p>\
-\
-<h2>Account requirements</h2>\
-<ul>\
-  <li><strong>Verified PayPal account</strong> on the receiving end. Unverified accounts may hold funds.</li>\
-  <li><strong>Country supported by PayPal Payouts API</strong> — 200+ countries supported; only a few aren\'t.</li>\
-  <li><strong>Sanctions screening</strong> — Boost Boss can\'t pay accounts in jurisdictions under US or international sanctions (Iran, North Korea, Cuba, Crimea, Syria, etc.).</li>\
-</ul>\
-\
-<h2>Changing your PayPal email later</h2>\
-<p>You can change it anytime from the same screen, but the change requires <strong>two-factor authentication</strong>. We do this on purpose — anyone who can quietly rewrite your destination address can intercept your earnings. See <a href="/help/article?id=two-factor">Two-factor authentication</a>.</p>\
-\
-<div class="callout warn"><strong>Triple-check the spelling.</strong> If you mistype your PayPal email, the funds bounce back and you need to re-request the payout. Most "where\'s my payout?" tickets we get are typos.</div>'
-    },
-
-    'payout-schedule': {
-      title: 'Payout schedule — biweekly Friday, Tuesday cutoff',
-      lede: 'Boost Boss pays affiliates on a fixed biweekly cycle. Earn by Tuesday → get paid that Friday. Earn after Tuesday → wait two weeks. Minimum payout is $1 USD.',
-      related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
-      body: '\
-<h2>The cycle in one paragraph</h2>\
-<p>Payouts run <strong>every other Friday</strong>. The cutoff is the immediately preceding <strong>Tuesday at 23:59 UTC</strong>. Earnings booked by the cutoff are included in that Friday\'s batch; earnings booked after the cutoff roll to the next Friday two weeks later.</p>\
-\
-<h2>What ends up in a batch</h2>\
-<ul>\
-  <li>Commissions on sales that captured by Tuesday cutoff</li>\
-  <li>Minus the 30-day clawback hold on any sale still within its refund window — those release into the next eligible batch</li>\
-  <li>Minus refunds and chargebacks that landed in the period</li>\
-</ul>\
-\
-<h2>How fast funds arrive</h2>\
-<p>When the PayPal Payouts API dispatches at Friday 12:00 UTC, most recipients see funds in their PayPal balance within minutes. The recipient already needs a PayPal account to receive — if they don\'t, PayPal holds the transfer until they sign up. "Up to 30 minutes" is the planning window we tell affiliates, but most arrive in 1-2 minutes.</p>\
-\
-<h2>Minimum and rollover</h2>\
-<p><strong>Minimum payout: $1 USD.</strong> Anything below stays in your balance and accrues across cycles until it crosses the threshold. There\'s no expiration — your balance is yours indefinitely.</p>\
-\
-<h2>2FA on cashout</h2>\
-<p>Every cashout request must be confirmed with a one-time code from your registered authenticator app. We don\'t rely on SMS — too easy to SIM-swap. Set up your authenticator in <a href="/affiliate#settings">Settings</a> before you expect your first payout. See <a href="/help/article?id=two-factor">Two-factor authentication</a>.</p>\
-\
-<div class="callout info"><strong>Holiday weeks:</strong> if a US bank holiday lands on the Friday, PayPal\'s Payouts API still runs on schedule. You won\'t see a delay.</div>'
-    },
-
-    'ftc-disclosure': {
-      title: 'FTC disclosure & affiliate standards',
-      lede: 'Every public promotion of a Boost Boss affiliate link must clearly disclose the affiliate relationship. This is a US FTC requirement and we expect it in every jurisdiction.',
-      related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
-      body: '\
-<h2>The rule, plain English</h2>\
-<p>When you share an affiliate link on social media, in a newsletter, on a website, in a video, or anywhere a third party might see it, you must clearly say you\'re an affiliate. The disclosure has to be <strong>before</strong> the link, <strong>noticeable</strong>, and <strong>understandable</strong>.</p>\
-\
-<h2>What counts as a good disclosure</h2>\
-<ul>\
-  <li><strong>In tweets / posts:</strong> <code>#ad</code>, <code>#sponsored</code>, or <code>#affiliate</code> at the start or end. All three are FTC-acceptable.</li>\
-  <li><strong>In videos:</strong> say it out loud near the start AND show it on screen. Just an end-card isn\'t enough.</li>\
-  <li><strong>In newsletters:</strong> "This post contains affiliate links — I earn a small commission if you buy through them." at the top of the post.</li>\
-  <li><strong>In blog posts:</strong> same as newsletters. Footer disclosure alone usually isn\'t enough.</li>\
-</ul>\
-\
-<h2>What doesn\'t count</h2>\
-<ul>\
-  <li><strong>Just <code>#partner</code></strong> — too vague, FTC has flagged this. Use <code>#ad</code> or <code>#sponsored</code>.</li>\
-  <li><strong>Buried-in-bio disclosures</strong> — your bio mentioning affiliate links doesn\'t cover individual posts.</li>\
-  <li><strong>Smallprint footer</strong> — easy to miss, not FTC-compliant by itself.</li>\
-</ul>\
-\
-<h2>The Boost Boss-specific rules</h2>\
-<p>On top of FTC compliance, Boost Boss\'s <a href="/aup">Acceptable Use Policy</a> prohibits:</p>\
-<ul>\
-  <li><strong>Misleading promotion</strong> — fake testimonials, fabricated screenshots, guaranteed-results claims.</li>\
-  <li><strong>Self-dealing</strong> — buying through your own link to capture the commission, or coordinating with friends/family.</li>\
-  <li><strong>Spam</strong> — unsolicited email or SMS, deceptive SEO (cloaking, doorway pages), incentivized-click traffic.</li>\
-  <li><strong>Trademark abuse</strong> — bidding on the seller\'s brand keywords in paid search, registering lookalike domains.</li>\
-</ul>\
-\
-<div class="callout warn"><strong>Self-dealing detection.</strong> We monitor click-to-conversion patterns. Sustained suspicious patterns trigger a clawback of accrued commissions and may result in account suspension.</div>'
-    },
-
-    'clawback': {
-      title: 'Conversions, clicks & the 30-day clawback',
-      lede: 'How long do you have to convert a click into a sale, and what happens to your commission if a buyer refunds? Two windows to know.',
-      related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
-      body: '\
-<h2>The attribution window</h2>\
-<p>When someone clicks your share link, the <code>bb_click</code> UUID stays attached for <strong>30 days</strong>. Any sale that happens within that window using the same URL parameter (or the fallback cookie) attributes back to you — regardless of how many other devices, sites, or sessions the buyer visited in between.</p>\
-\
-<h2>The clawback window</h2>\
-<p>Commissions are paid out per the <a href="/help/article?id=payout-schedule">biweekly Friday schedule</a>, but each individual commission is held for a <strong>30-day clawback window</strong> after the sale captures. If the buyer refunds or successfully charges back within that window, the corresponding commission is reversed.</p>\
-\
-<h2>In practice</h2>\
-<ul>\
-  <li>Sale captures on day 0 → commission is "pending"</li>\
-  <li>Day 1-30 → commission stays pending while refund/chargeback risk exists</li>\
-  <li>Day 30+ → commission is "released" and eligible for the next biweekly batch</li>\
-  <li>Refund or chargeback during the 30 days → commission cancelled, balance adjusted</li>\
-</ul>\
-\
-<h2>Sales report semantics</h2>\
-<p>Your <a href="/affiliate#conv-soon">Sales Report</a> shows three statuses:</p>\
-<ul>\
-  <li><strong>Pending</strong> — sale captured but still within the 30-day window</li>\
-  <li><strong>Released</strong> — past the window, eligible for the next payout batch</li>\
-  <li><strong>Reversed</strong> — buyer refunded or successfully chargeback\'d; commission cancelled</li>\
-</ul>\
-\
-<div class="callout"><strong>Why 30 days?</strong> Most products have 14-30 day refund windows. After 30 days the refund risk is low, so we can release commission with confidence and dispatch it on the next biweekly Friday.</div>'
-    },
-
-    'promote-social': {
-      title: 'Promoting on social — X, IG, TikTok, FB',
-      lede: 'Practical conversion tips for each major social platform. None of this is magic; it\'s about matching the product to the audience and disclosing properly.',
-      related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
-      body: '\
-<h2>X (formerly Twitter)</h2>\
-<ul>\
-  <li><strong>Disclosure:</strong> <code>#ad</code> at the start of the tweet.</li>\
-  <li><strong>What works:</strong> a single-tweet review with one screenshot/video and the link in the same tweet (don\'t reply-link it). Threads convert better than single tweets for higher-priced products.</li>\
-  <li><strong>What doesn\'t:</strong> bot-style "RT to win!" giveaways with your affiliate link. Twitter mutes engagement-bait.</li>\
-</ul>\
-\
-<h2>Instagram</h2>\
-<ul>\
-  <li><strong>Disclosure:</strong> Use IG\'s built-in "Paid partnership" tag if available, OR <code>#ad</code> at the start of the caption.</li>\
-  <li><strong>What works:</strong> story → swipe-up to your share link (legacy), or link-in-bio + a recent post pointing at it. Reels with the link in the description perform better than posts for software products.</li>\
-  <li><strong>What doesn\'t:</strong> long affiliate URLs in captions — they get cut. Use a clean share link, not a redirect.</li>\
-</ul>\
-\
-<h2>TikTok</h2>\
-<ul>\
-  <li><strong>Disclosure:</strong> "This is sponsored" verbally in the first 3 seconds AND <code>#ad</code> on screen.</li>\
-  <li><strong>What works:</strong> demos. Show the product in action for 15-30 seconds. Link in bio + comment with "Link in bio ↑" pinned.</li>\
-  <li><strong>What doesn\'t:</strong> using the link directly in the video description — it doesn\'t auto-link, viewers won\'t copy-paste.</li>\
-</ul>\
-\
-<h2>Facebook</h2>\
-<ul>\
-  <li><strong>Disclosure:</strong> <code>#ad</code> at the start of the post.</li>\
-  <li><strong>What works:</strong> long-form text posts with a clear use-case story. Facebook\'s algorithm rewards conversations, so ask a question in the post and reply to comments.</li>\
-  <li><strong>What doesn\'t:</strong> raw affiliate links in comments — FB throttles these. Put them in the post body.</li>\
-</ul>\
-\
-<h2>Universal advice</h2>\
-<p>Match the product to the audience. A productivity SaaS converts on r/productivity, not on r/aww. A coding tool converts in dev Twitter, not in art communities. Look at your followers\' interests and pick from the catalog accordingly.</p>'
-    },
-
-    'promote-newsletter': {
-      title: 'Promoting in newsletters & email',
-      lede: 'Newsletters convert better than social for B2B and prosumer products. A few patterns that work for Boost Boss affiliates.',
-      related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
-      body: '\
-<h2>Why newsletters are good</h2>\
-<p>Email gets opened with intent. Your audience already trusts you enough to give you their inbox. Conversion rates on newsletter affiliate links typically run 5-10x higher than social for software products.</p>\
-\
-<h2>The disclosure pattern that works</h2>\
-<p>Most successful affiliate newsletters use a one-paragraph disclosure block at the top of any post that contains affiliate links:</p>\
-<div class="callout"><em>"A few of the tools below are affiliate links — I earn a small commission if you sign up through them. It doesn\'t change the price. I only recommend things I use or have vetted thoroughly."</em></div>\
-<p>Place it before the first link, not in the footer.</p>\
-\
-<h2>Tactical patterns</h2>\
-<ul>\
-  <li><strong>Tool roundups.</strong> "5 tools that made me 10x faster at X" — pick 5, link affiliates where they exist, link non-affiliate where they don\'t. Honesty builds trust.</li>\
-  <li><strong>Tutorial → tool.</strong> Walk through doing something cool, mention the tool you used, link affiliate. Conversion is naturally higher because the use case is obvious.</li>\
-  <li><strong>Deal alerts.</strong> When BB has an Exclusive Offer or limited-time discount, send a short focused email — these convert because of urgency.</li>\
-  <li><strong>Weekly digest with one promoted slot.</strong> Reserve one consistent slot in your normal newsletter for an affiliate product. Subscribers learn to expect it and you don\'t spam them.</li>\
-</ul>\
-\
-<h2>What kills conversion in newsletters</h2>\
-<ul>\
-  <li>Too many links per email. Pick one or two — links compete with each other for attention.</li>\
-  <li>Hidden disclosure. If readers feel ambushed by a "wait, was that an ad?" moment, they unsubscribe.</li>\
-  <li>Stale offers. If the affiliate product\'s status changed (price went up, deal expired), update or remove the link before it costs you credibility.</li>\
-</ul>\
-\
-<div class="callout info"><strong>Use Sub IDs.</strong> Mint your newsletter share links with a Sub ID like <code>nl-2026-06</code> so you can see in <a href="/affiliate#conv-soon">Sales Report</a> which newsletter issue drove which sales. Helps you double down on what works.</div>'
-    },
-
-    'exclusive-offers': {
-      title: 'Exclusive Offers & Premium Partners',
-      lede: 'Two upgrades to the standard affiliate experience: time-limited discounts negotiated by Boost Boss, and direct relationships with advertisers who reach out at scale.',
-      related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
-      body: '\
-<h2>Exclusive Offers</h2>\
-<p>Advertisers occasionally negotiate Boost Boss-only discount codes or bonus commission rates. These appear on your <a href="/affiliate#exclusive">Exclusive Offers</a> screen. They\'re time-limited and only available to active affiliates.</p>\
-<p>Why advertisers do it: limited-time exclusives drive urgency, which converts better. Why we do it: better commercial terms for you = more reason to promote.</p>\
-\
-<h2>Premium Partners</h2>\
-<p>Once you accumulate sustained traffic — typically <strong>10k+ clicks across the network</strong> — advertisers in your niche may reach out directly with bespoke rates. We surface these opportunities in <a href="/affiliate#partners">Premium Partners</a>. Boost Boss facilitates the introduction; the commercial terms are between you and the advertiser.</p>\
-<p>You don\'t have to apply — it\'s pull-not-push. Keep promoting, hit volume, partners come to you.</p>\
-\
-<h2>How exclusives appear in attribution</h2>\
-<p>Exclusive Offer codes work as <strong>coupon attribution</strong>: when a buyer enters the code at checkout, the sale is attributed to you regardless of whether they clicked your <code>bb_click</code> URL first. This makes exclusives unusually good for "broadcast" promotions (newsletters, podcasts, video descriptions) where URL clicks are noisy but code entry is high-intent.</p>\
-\
-<div class="callout"><strong>If you have an audience, ask.</strong> Have a podcast, popular newsletter, or strong following in a niche? Email <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> with your audience profile. We may have an Exclusive Offer that fits or can broker an introduction directly.</div>'
-    },
-
-    'two-factor': {
-      title: 'Account settings & two-factor authentication',
-      lede: 'Two-factor authentication (2FA) is required for the most sensitive actions on your affiliate account — cashing out and changing your PayPal email. Set it up before your first payout.',
-      related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
-      body: '\
-<h2>Why we require 2FA</h2>\
-<p>Anyone who gets access to your Boost Boss account can quietly change your PayPal email and intercept your earnings. SMS-based 2FA is easy to SIM-swap, so we use TOTP (time-based one-time password) authenticator apps instead.</p>\
-\
-<h2>Setting it up</h2>\
-<ol>\
-  <li>Go to <a href="/affiliate#settings">Settings → Security</a>.</li>\
-  <li>Click "Enable two-factor authentication".</li>\
-  <li>Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password, anything TOTP-compatible).</li>\
-  <li>Enter the 6-digit code from the app to confirm.</li>\
-</ol>\
-\
-<h2>What 2FA gates</h2>\
-<ul>\
-  <li><strong>Every cashout request</strong> — you\'ll be asked for the current 6-digit code.</li>\
-  <li><strong>Changing your PayPal payout email</strong> — same.</li>\
-  <li><strong>Disabling 2FA itself</strong> — you need a fresh code to turn it off.</li>\
-</ul>\
-<p>Normal sign-in doesn\'t require a code — that\'s your password\'s job. 2FA only kicks in on actions that touch money.</p>\
-\
-<h2>If you lose your authenticator device</h2>\
-<p>Without recovery codes, you can\'t cash out or change your payout method. Email <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> with your affiliate ID. We\'ll guide you through an identity-verification process to reset 2FA — typically takes one business day.</p>\
-\
-<div class="callout warn"><strong>Save your authenticator backup.</strong> Most authenticator apps support cloud backup (Authy, 1Password). Turn it on. Losing your phone without a backup is the #1 reason for account recovery tickets.</div>\
-\
-<h2>Other settings worth knowing</h2>\
-<ul>\
-  <li><strong>Tax form (W-9 / W-8BEN).</strong> US affiliates earning above $600/year need a W-9 on file. Non-US affiliates need a W-8BEN. We surface the form in Settings → Tax when you cross the threshold.</li>\
-  <li><strong>Display name on payouts.</strong> The name PayPal will see in the transaction. Defaults to your account name; change in Settings → Payout method.</li>\
-  <li><strong>Notification preferences.</strong> Control which events trigger an email (new commission, payout sent, dispute notice, etc.) from Settings → Notifications.</li>\
-</ul>'
+    articles: {
+      'getting-started': {
+        title: 'Getting started as a Boost Boss affiliate',
+        lede: "Boost Boss is an MCP-native ad network. As an affiliate you save ads you discover inside AI tools, share them with your audience, and earn when they buy. Here's the 60-second tour.",
+        related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+        body:
+          '<h2>What Boost Boss is, in one paragraph</h2>' +
+          '<p>Boost Boss serves sponsored content inside AI surfaces — Claude Desktop, Cursor, ChatGPT plugins, Discord and Slack bots, browser extensions. Advertisers run campaigns and pay per impression / click / purchase. Affiliates promote products from the catalog and earn a commission when buyers convert through their share link.</p>' +
+          '<h2>Three things to do in your first 10 minutes</h2>' +
+          '<ol>' +
+            '<li><strong>Browse the catalog.</strong> Open <a href="/affiliate#catalog">Product Catalog</a> in the sidebar and look at what advertisers have registered. Sort by commission to find high-converting offers.</li>' +
+            '<li><strong>Mint your first share link.</strong> Click "Get Link" on any product you want to promote. The link routes through <code>/s/&lt;token&gt;</code> which redirects with a <code>bb_click=&lt;UUID&gt;</code> attribution parameter.</li>' +
+            "<li><strong>Set up your payout method.</strong> Go to <a href=\"/affiliate#payouts\">Payout Record</a> and add the PayPal email where you want to be paid. Without this, earnings accrue but don't settle.</li>" +
+          '</ol>' +
+          '<h2>How earnings work</h2>' +
+          '<p>When someone clicks your share link and buys, you earn a share of what Boost Boss calls the <strong>Affiliate Pool</strong> — a percentage of the order that the seller specifically funds for affiliate marketing. The split is <strong>70% to you / 30% to Boost Boss</strong>. See <a href="/help/article?id=commission-model">Commission Model v2 explained</a>.</p>' +
+          "<div class=\"callout info\"><strong>Plain version:</strong> if a product has a 20% affiliate pool and someone buys $100 worth, Boost Boss takes the $20 pool, gives you $14 (70% of the pool), and keeps $6 (30%). The seller gets the remaining $80 minus PayPal's processor fees.</div>" +
+          '<h2>What to do next</h2>' +
+          '<ul>' +
+            '<li>Read <a href="/help/article?id=share-links">how attribution works</a> so you understand the data behind your link clicks.</li>' +
+            '<li>Skim <a href="/help/article?id=ftc-disclosure">FTC disclosure rules</a> — every public promotion needs a sponsorship disclosure.</li>' +
+            "<li>Choose where you'll promote: <a href=\"/help/article?id=promote-social\">social media</a>, <a href=\"/help/article?id=promote-newsletter\">newsletter</a>, or both.</li>" +
+          '</ul>'
+      },
+      'saving-ads': {
+        title: 'Saving ads & browsing the catalog',
+        lede: 'Two ways to find products to promote: save an ad you spot inside an AI tool, or browse the full advertiser catalog from your dashboard.',
+        related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+        body:
+          '<h2>Saving from inside an AI tool</h2>' +
+          '<p>When you see a Boost Boss-served ad in a tool like Cursor, Claude Desktop, or a Discord bot, tap the bookmark icon. The product lands in your <a href="/affiliate#saves">My Saves</a> view with one click — no manual entry, no copy-paste.</p>' +
+          '<p>What gets saved: the product (parent), not the individual creative. So if the advertiser runs multiple campaigns or seasonal variants for the same product, your saved entry still points at the right destination. New campaigns automatically use the best-active match at click-time.</p>' +
+          '<h2>Browsing the catalog</h2>' +
+          "<p><a href=\"/affiliate#catalog\">Product Catalog</a> shows every advertiser product that's passed audit. Two filters matter most:</p>" +
+          '<ul>' +
+            '<li><strong>Commission</strong> — sorts products by their affiliate pool percentage. Higher is more upside per sale.</li>' +
+            '<li><strong>Category</strong> — narrows to a vertical (SaaS, infra, content tools, etc.) so you can match products to your audience.</li>' +
+          '</ul>' +
+          '<h2>What "audit-approved" means</h2>' +
+          "<p>Every product visible in the catalog has passed Boost Boss's audit — accurate description, working fulfilment URL, honest \"original price\" comparison (if displayed), valid refund path. Audit-rejected products don't appear in the catalog and can't be promoted.</p>" +
+          "<div class=\"callout\"><strong>Why this matters to you:</strong> products in the catalog are vetted, so the conversion risk on your end is lower. You're not stuck promoting something that breaks at checkout or never delivers.</div>"
+      },
+      'share-links': {
+        title: 'Share links & bb_click attribution',
+        lede: 'How Boost Boss knows a sale came from your link, why the system survives cookie loss and Safari ITP, and what to put in your share links so analytics work for both you and the advertiser.',
+        related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+        body:
+          '<h2>The basic flow</h2>' +
+          '<ol>' +
+            '<li>You mint a share link in the dashboard. It looks like <code>https://boostboss.ai/s/&lt;token&gt;</code>.</li>' +
+            "<li>Someone clicks it. Our redirect server appends <code>?bb_click=&lt;UUID&gt;</code> to the destination URL and 302-redirects them to the advertiser's product page.</li>" +
+            '<li>The UUID is logged with your affiliate ID, click timestamp, referring URL, and a coarse region. We also drop a first-party cookie as fallback.</li>' +
+            "<li>If a sale follows within the 30-day clawback window, the <code>bb_click</code> UUID on the buyer's purchase URL is what attributes the sale back to you.</li>" +
+          '</ol>' +
+          '<h2>Why URL-based attribution is load-bearing</h2>' +
+          '<p>Most affiliate networks rely on third-party cookies — which are blocked or capped by Safari ITP, Firefox ETP, and increasingly Chrome. Boost Boss treats the cookie as a fallback. The <strong>bb_click UUID in the URL is the load-bearing identifier</strong>. As long as the URL parameter survives to the conversion event, attribution works regardless of what the browser does.</p>' +
+          '<h2>What gets stripped</h2>' +
+          '<p>Some platforms strip URL parameters when users share links:</p>' +
+          '<ul>' +
+            '<li><strong>Twitter/X</strong> generally preserves them.</li>' +
+            '<li><strong>iMessage / SMS</strong> preserves them.</li>' +
+            '<li><strong>Some Facebook posts</strong> add their own fbclid but preserve yours.</li>' +
+            '<li><strong>Some email clients</strong> shorten URLs through a redirect — usually still preserves params.</li>' +
+          '</ul>' +
+          '<p>If your audience converts at a much lower rate than your clicks, check whether the URL is being mangled at the channel.</p>' +
+          '<h2>Sub IDs for channel tracking</h2>' +
+          "<p>When minting a link, you can add up to 5 Sub IDs (a-z, A-Z, 0-9). These don't affect attribution — they're tags you assign so you can later tell which channel brought the click. Example: <code>sub1=twitter</code>, <code>sub1=newsletter-may</code>. Visible in your <a href=\"/affiliate#conv-soon\">Sales Report</a>.</p>"
+      },
+      'commission-model': {
+        title: 'Commission Model v2 — 70/30 split explained',
+        lede: 'How Boost Boss splits a sale between the seller, you, and the platform. The new model replaced a flat 15% top-line take with a per-product affiliate pool — clearer incentives and only earning when an affiliate drives the sale.',
+        related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+        body:
+          '<h2>The shape of a sale</h2>' +
+          "<p>Every product on the catalog has an <strong>Affiliate Pool Percentage</strong> set by the seller. That's the share of the order that funds affiliate marketing. Boost Boss splits the pool 70 / 30 between the affiliate and the platform:</p>" +
+          '<ul>' +
+            '<li><strong>70%</strong> → you (the affiliate who drove the sale)</li>' +
+            '<li><strong>30%</strong> → Boost Boss</li>' +
+            '<li><strong>Remainder</strong> → seller (the order value minus the affiliate pool minus PayPal processor fees)</li>' +
+          '</ul>' +
+          '<h2>A worked example</h2>' +
+          '<p>Product priced at <strong>$100</strong>, affiliate pool set by seller at <strong>20%</strong>.</p>' +
+          '<pre><code>Order value         $100.00\nAffiliate pool       $20.00  (20% of order)\n  → Affiliate         $14.00  (70% of pool)\n  → Boost Boss         $6.00  (30% of pool)\nSeller settles       $80.00  minus PayPal fees</code></pre>' +
+          '<h2>Direct vs affiliate sales</h2>' +
+          '<p>If a buyer purchases without an affiliate link (direct sale), Boost Boss takes no commission on the order value beyond standard payment processor pass-through. The seller keeps the entire order net of fees, taxes, and refunds. We only earn when an affiliate actually drove the sale.</p>' +
+          '<div class="callout info"><strong>Why this matters:</strong> the v2 model aligns our incentives with yours — Boost Boss only makes money when affiliates do. Under the old 15% flat top-line take, we earned on direct sales you had no part in.</div>' +
+          '<h2>CPS by default, CPC and CPA on opt-in</h2>' +
+          "<p>The default is <strong>cost-per-sale (CPS)</strong>: you earn only when a sale actually captures. Some advertisers opt their products into <strong>CPC</strong> (cost-per-click) or <strong>CPA</strong> (cost-per-action — e.g. signup) instead. When that's the case, you see the model on the catalog row and you earn on qualifying clicks or actions whether or not they convert to revenue.</p>"
+      },
+      'payout-setup': {
+        title: 'Setting up your PayPal payout',
+        lede: 'Boost Boss settles all affiliate payouts through PayPal. Add your PayPal email once in the dashboard and every biweekly Friday payout goes there automatically.',
+        related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+        body:
+          '<h2>Where to add your PayPal email</h2>' +
+          "<p>Go to <a href=\"/affiliate#payouts\">Payout Record</a> in the sidebar. There's a Payout method form with one required field: <strong>PayPal email</strong>. Use the email tied to a verified PayPal account.</p>" +
+          '<h2>Why PayPal only, for now</h2>' +
+          "<p>Boost Boss operates on a single payment provider for both inbound payments (advertiser deposits, buyer storefront captures) and outbound payments (publisher, seller, and affiliate payouts). PayPal is the current provider because Taiwan's corporate law requires pay-in and payout through the same provider, and PayPal serves the largest cross-section of the global market. Additional methods are on the roadmap once we open up multi-provider options.</p>" +
+          '<h2>Account requirements</h2>' +
+          '<ul>' +
+            '<li><strong>Verified PayPal account</strong> on the receiving end. Unverified accounts may hold funds.</li>' +
+            "<li><strong>Country supported by PayPal Payouts API</strong> — 200+ countries supported; only a few aren't.</li>" +
+            "<li><strong>Sanctions screening</strong> — Boost Boss can't pay accounts in jurisdictions under US or international sanctions (Iran, North Korea, Cuba, Crimea, Syria, etc.).</li>" +
+          '</ul>' +
+          '<h2>Changing your PayPal email later</h2>' +
+          '<p>You can change it anytime from the same screen, but the change requires <strong>two-factor authentication</strong>. We do this on purpose — anyone who can quietly rewrite your destination address can intercept your earnings. See <a href="/help/article?id=two-factor">Two-factor authentication</a>.</p>' +
+          "<div class=\"callout warn\"><strong>Triple-check the spelling.</strong> If you mistype your PayPal email, the funds bounce back and you need to re-request the payout. Most \"where's my payout?\" tickets we get are typos.</div>"
+      },
+      'payout-schedule': {
+        title: 'Payout schedule — biweekly Friday, Tuesday cutoff',
+        lede: 'Boost Boss pays affiliates on a fixed biweekly cycle. Earn by Tuesday → get paid that Friday. Earn after Tuesday → wait two weeks. Minimum payout is $1 USD.',
+        related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+        body:
+          '<h2>The cycle in one paragraph</h2>' +
+          "<p>Payouts run <strong>every other Friday</strong>. The cutoff is the immediately preceding <strong>Tuesday at 23:59 UTC</strong>. Earnings booked by the cutoff are included in that Friday's batch; earnings booked after the cutoff roll to the next Friday two weeks later.</p>" +
+          '<h2>What ends up in a batch</h2>' +
+          '<ul>' +
+            '<li>Commissions on sales that captured by Tuesday cutoff</li>' +
+            '<li>Minus the 30-day clawback hold on any sale still within its refund window — those release into the next eligible batch</li>' +
+            '<li>Minus refunds and chargebacks that landed in the period</li>' +
+          '</ul>' +
+          '<h2>How fast funds arrive</h2>' +
+          "<p>When the PayPal Payouts API dispatches at Friday 12:00 UTC, most recipients see funds in their PayPal balance within minutes. The recipient already needs a PayPal account to receive — if they don't, PayPal holds the transfer until they sign up. \"Up to 30 minutes\" is the planning window we tell affiliates, but most arrive in 1-2 minutes.</p>" +
+          '<h2>Minimum and rollover</h2>' +
+          "<p><strong>Minimum payout: $1 USD.</strong> Anything below stays in your balance and accrues across cycles until it crosses the threshold. There's no expiration — your balance is yours indefinitely.</p>" +
+          '<h2>2FA on cashout</h2>' +
+          "<p>Every cashout request must be confirmed with a one-time code from your registered authenticator app. We don't rely on SMS — too easy to SIM-swap. Set up your authenticator in <a href=\"/affiliate#settings\">Settings</a> before you expect your first payout. See <a href=\"/help/article?id=two-factor\">Two-factor authentication</a>.</p>" +
+          "<div class=\"callout info\"><strong>Holiday weeks:</strong> if a US bank holiday lands on the Friday, PayPal's Payouts API still runs on schedule. You won't see a delay.</div>"
+      },
+      'ftc-disclosure': {
+        title: 'FTC disclosure & affiliate standards',
+        lede: 'Every public promotion of a Boost Boss affiliate link must clearly disclose the affiliate relationship. This is a US FTC requirement and we expect it in every jurisdiction.',
+        related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+        body:
+          '<h2>The rule, plain English</h2>' +
+          "<p>When you share an affiliate link on social media, in a newsletter, on a website, in a video, or anywhere a third party might see it, you must clearly say you're an affiliate. The disclosure has to be <strong>before</strong> the link, <strong>noticeable</strong>, and <strong>understandable</strong>.</p>" +
+          '<h2>What counts as a good disclosure</h2>' +
+          '<ul>' +
+            '<li><strong>In tweets / posts:</strong> <code>#ad</code>, <code>#sponsored</code>, or <code>#affiliate</code> at the start or end. All three are FTC-acceptable.</li>' +
+            "<li><strong>In videos:</strong> say it out loud near the start AND show it on screen. Just an end-card isn't enough.</li>" +
+            '<li><strong>In newsletters:</strong> "This post contains affiliate links — I earn a small commission if you buy through them." at the top of the post.</li>' +
+            '<li><strong>In blog posts:</strong> same as newsletters. Footer disclosure alone usually isn\'t enough.</li>' +
+          '</ul>' +
+          "<h2>What doesn't count</h2>" +
+          '<ul>' +
+            '<li><strong>Just <code>#partner</code></strong> — too vague, FTC has flagged this. Use <code>#ad</code> or <code>#sponsored</code>.</li>' +
+            "<li><strong>Buried-in-bio disclosures</strong> — your bio mentioning affiliate links doesn't cover individual posts.</li>" +
+            '<li><strong>Smallprint footer</strong> — easy to miss, not FTC-compliant by itself.</li>' +
+          '</ul>' +
+          '<h2>The Boost Boss-specific rules</h2>' +
+          "<p>On top of FTC compliance, Boost Boss's <a href=\"/aup\">Acceptable Use Policy</a> prohibits:</p>" +
+          '<ul>' +
+            '<li><strong>Misleading promotion</strong> — fake testimonials, fabricated screenshots, guaranteed-results claims.</li>' +
+            '<li><strong>Self-dealing</strong> — buying through your own link to capture the commission, or coordinating with friends/family.</li>' +
+            '<li><strong>Spam</strong> — unsolicited email or SMS, deceptive SEO (cloaking, doorway pages), incentivized-click traffic.</li>' +
+            "<li><strong>Trademark abuse</strong> — bidding on the seller's brand keywords in paid search, registering lookalike domains.</li>" +
+          '</ul>' +
+          '<div class="callout warn"><strong>Self-dealing detection.</strong> We monitor click-to-conversion patterns. Sustained suspicious patterns trigger a clawback of accrued commissions and may result in account suspension.</div>'
+      },
+      'clawback': {
+        title: 'Conversions, clicks & the 30-day clawback',
+        lede: 'How long do you have to convert a click into a sale, and what happens to your commission if a buyer refunds? Two windows to know.',
+        related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+        body:
+          '<h2>The attribution window</h2>' +
+          '<p>When someone clicks your share link, the <code>bb_click</code> UUID stays attached for <strong>30 days</strong>. Any sale that happens within that window using the same URL parameter (or the fallback cookie) attributes back to you — regardless of how many other devices, sites, or sessions the buyer visited in between.</p>' +
+          '<h2>The clawback window</h2>' +
+          '<p>Commissions are paid out per the <a href="/help/article?id=payout-schedule">biweekly Friday schedule</a>, but each individual commission is held for a <strong>30-day clawback window</strong> after the sale captures. If the buyer refunds or successfully charges back within that window, the corresponding commission is reversed.</p>' +
+          '<h2>In practice</h2>' +
+          '<ul>' +
+            '<li>Sale captures on day 0 → commission is "pending"</li>' +
+            '<li>Day 1-30 → commission stays pending while refund/chargeback risk exists</li>' +
+            '<li>Day 30+ → commission is "released" and eligible for the next biweekly batch</li>' +
+            '<li>Refund or chargeback during the 30 days → commission cancelled, balance adjusted</li>' +
+          '</ul>' +
+          '<h2>Sales report semantics</h2>' +
+          '<p>Your <a href="/affiliate#conv-soon">Sales Report</a> shows three statuses:</p>' +
+          '<ul>' +
+            '<li><strong>Pending</strong> — sale captured but still within the 30-day window</li>' +
+            '<li><strong>Released</strong> — past the window, eligible for the next payout batch</li>' +
+            "<li><strong>Reversed</strong> — buyer refunded or successfully chargeback'd; commission cancelled</li>" +
+          '</ul>' +
+          '<div class="callout"><strong>Why 30 days?</strong> Most products have 14-30 day refund windows. After 30 days the refund risk is low, so we can release commission with confidence and dispatch it on the next biweekly Friday.</div>'
+      },
+      'promote-social': {
+        title: 'Promoting on social — X, IG, TikTok, FB',
+        lede: "Practical conversion tips for each major social platform. None of this is magic; it's about matching the product to the audience and disclosing properly.",
+        related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+        body:
+          '<h2>X (formerly Twitter)</h2>' +
+          '<ul>' +
+            '<li><strong>Disclosure:</strong> <code>#ad</code> at the start of the tweet.</li>' +
+            "<li><strong>What works:</strong> a single-tweet review with one screenshot/video and the link in the same tweet (don't reply-link it). Threads convert better than single tweets for higher-priced products.</li>" +
+            "<li><strong>What doesn't:</strong> bot-style \"RT to win!\" giveaways with your affiliate link. Twitter mutes engagement-bait.</li>" +
+          '</ul>' +
+          '<h2>Instagram</h2>' +
+          '<ul>' +
+            "<li><strong>Disclosure:</strong> Use IG's built-in \"Paid partnership\" tag if available, OR <code>#ad</code> at the start of the caption.</li>" +
+            '<li><strong>What works:</strong> story → swipe-up to your share link (legacy), or link-in-bio + a recent post pointing at it. Reels with the link in the description perform better than posts for software products.</li>' +
+            "<li><strong>What doesn't:</strong> long affiliate URLs in captions — they get cut. Use a clean share link, not a redirect.</li>" +
+          '</ul>' +
+          '<h2>TikTok</h2>' +
+          '<ul>' +
+            '<li><strong>Disclosure:</strong> "This is sponsored" verbally in the first 3 seconds AND <code>#ad</code> on screen.</li>' +
+            '<li><strong>What works:</strong> demos. Show the product in action for 15-30 seconds. Link in bio + comment with "Link in bio ↑" pinned.</li>' +
+            "<li><strong>What doesn't:</strong> using the link directly in the video description — it doesn't auto-link, viewers won't copy-paste.</li>" +
+          '</ul>' +
+          '<h2>Facebook</h2>' +
+          '<ul>' +
+            '<li><strong>Disclosure:</strong> <code>#ad</code> at the start of the post.</li>' +
+            "<li><strong>What works:</strong> long-form text posts with a clear use-case story. Facebook's algorithm rewards conversations, so ask a question in the post and reply to comments.</li>" +
+            "<li><strong>What doesn't:</strong> raw affiliate links in comments — FB throttles these. Put them in the post body.</li>" +
+          '</ul>' +
+          '<h2>Universal advice</h2>' +
+          "<p>Match the product to the audience. A productivity SaaS converts on r/productivity, not on r/aww. A coding tool converts in dev Twitter, not in art communities. Look at your followers' interests and pick from the catalog accordingly.</p>"
+      },
+      'promote-newsletter': {
+        title: 'Promoting in newsletters & email',
+        lede: 'Newsletters convert better than social for B2B and prosumer products. A few patterns that work for Boost Boss affiliates.',
+        related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+        body:
+          '<h2>Why newsletters are good</h2>' +
+          '<p>Email gets opened with intent. Your audience already trusts you enough to give you their inbox. Conversion rates on newsletter affiliate links typically run 5-10x higher than social for software products.</p>' +
+          '<h2>The disclosure pattern that works</h2>' +
+          '<p>Most successful affiliate newsletters use a one-paragraph disclosure block at the top of any post that contains affiliate links:</p>' +
+          '<div class="callout"><em>"A few of the tools below are affiliate links — I earn a small commission if you sign up through them. It doesn\'t change the price. I only recommend things I use or have vetted thoroughly."</em></div>' +
+          '<p>Place it before the first link, not in the footer.</p>' +
+          '<h2>Tactical patterns</h2>' +
+          '<ul>' +
+            '<li><strong>Tool roundups.</strong> "5 tools that made me 10x faster at X" — pick 5, link affiliates where they exist, link non-affiliate where they don\'t. Honesty builds trust.</li>' +
+            '<li><strong>Tutorial → tool.</strong> Walk through doing something cool, mention the tool you used, link affiliate. Conversion is naturally higher because the use case is obvious.</li>' +
+            '<li><strong>Deal alerts.</strong> When BB has an Exclusive Offer or limited-time discount, send a short focused email — these convert because of urgency.</li>' +
+            "<li><strong>Weekly digest with one promoted slot.</strong> Reserve one consistent slot in your normal newsletter for an affiliate product. Subscribers learn to expect it and you don't spam them.</li>" +
+          '</ul>' +
+          '<h2>What kills conversion in newsletters</h2>' +
+          '<ul>' +
+            '<li>Too many links per email. Pick one or two — links compete with each other for attention.</li>' +
+            '<li>Hidden disclosure. If readers feel ambushed by a "wait, was that an ad?" moment, they unsubscribe.</li>' +
+            "<li>Stale offers. If the affiliate product's status changed (price went up, deal expired), update or remove the link before it costs you credibility.</li>" +
+          '</ul>' +
+          '<div class="callout info"><strong>Use Sub IDs.</strong> Mint your newsletter share links with a Sub ID like <code>nl-2026-06</code> so you can see in <a href="/affiliate#conv-soon">Sales Report</a> which newsletter issue drove which sales. Helps you double down on what works.</div>'
+      },
+      'exclusive-offers': {
+        title: 'Exclusive Offers & Premium Partners',
+        lede: 'Two upgrades to the standard affiliate experience: time-limited discounts negotiated by Boost Boss, and direct relationships with advertisers who reach out at scale.',
+        related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+        body:
+          '<h2>Exclusive Offers</h2>' +
+          "<p>Advertisers occasionally negotiate Boost Boss-only discount codes or bonus commission rates. These appear on your <a href=\"/affiliate#exclusive\">Exclusive Offers</a> screen. They're time-limited and only available to active affiliates.</p>" +
+          '<p>Why advertisers do it: limited-time exclusives drive urgency, which converts better. Why we do it: better commercial terms for you = more reason to promote.</p>' +
+          '<h2>Premium Partners</h2>' +
+          '<p>Once you accumulate sustained traffic — typically <strong>10k+ clicks across the network</strong> — advertisers in your niche may reach out directly with bespoke rates. We surface these opportunities in <a href="/affiliate#partners">Premium Partners</a>. Boost Boss facilitates the introduction; the commercial terms are between you and the advertiser.</p>' +
+          "<p>You don't have to apply — it's pull-not-push. Keep promoting, hit volume, partners come to you.</p>" +
+          '<h2>How exclusives appear in attribution</h2>' +
+          '<p>Exclusive Offer codes work as <strong>coupon attribution</strong>: when a buyer enters the code at checkout, the sale is attributed to you regardless of whether they clicked your <code>bb_click</code> URL first. This makes exclusives unusually good for "broadcast" promotions (newsletters, podcasts, video descriptions) where URL clicks are noisy but code entry is high-intent.</p>' +
+          '<div class="callout"><strong>If you have an audience, ask.</strong> Have a podcast, popular newsletter, or strong following in a niche? Email <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> with your audience profile. We may have an Exclusive Offer that fits or can broker an introduction directly.</div>'
+      },
+      'two-factor': {
+        title: 'Account settings & two-factor authentication',
+        lede: 'Two-factor authentication (2FA) is required for the most sensitive actions on your affiliate account — cashing out and changing your PayPal email. Set it up before your first payout.',
+        related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+        body:
+          '<h2>Why we require 2FA</h2>' +
+          '<p>Anyone who gets access to your Boost Boss account can quietly change your PayPal email and intercept your earnings. SMS-based 2FA is easy to SIM-swap, so we use TOTP (time-based one-time password) authenticator apps instead.</p>' +
+          '<h2>Setting it up</h2>' +
+          '<ol>' +
+            '<li>Go to <a href="/affiliate#settings">Settings → Security</a>.</li>' +
+            '<li>Click "Enable two-factor authentication".</li>' +
+            '<li>Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password, anything TOTP-compatible).</li>' +
+            '<li>Enter the 6-digit code from the app to confirm.</li>' +
+          '</ol>' +
+          '<h2>What 2FA gates</h2>' +
+          '<ul>' +
+            "<li><strong>Every cashout request</strong> — you'll be asked for the current 6-digit code.</li>" +
+            '<li><strong>Changing your PayPal payout email</strong> — same.</li>' +
+            '<li><strong>Disabling 2FA itself</strong> — you need a fresh code to turn it off.</li>' +
+          '</ul>' +
+          "<p>Normal sign-in doesn't require a code — that's your password's job. 2FA only kicks in on actions that touch money.</p>" +
+          '<h2>If you lose your authenticator device</h2>' +
+          "<p>Without recovery codes, you can't cash out or change your payout method. Email <a href=\"mailto:affiliate@boostboss.ai\">affiliate@boostboss.ai</a> with your affiliate ID. We'll guide you through an identity-verification process to reset 2FA — typically takes one business day.</p>" +
+          '<div class="callout warn"><strong>Save your authenticator backup.</strong> Most authenticator apps support cloud backup (Authy, 1Password). Turn it on. Losing your phone without a backup is the #1 reason for account recovery tickets.</div>' +
+          '<h2>Other settings worth knowing</h2>' +
+          '<ul>' +
+            '<li><strong>Tax form (W-9 / W-8BEN).</strong> US affiliates earning above $600/year need a W-9 on file. Non-US affiliates need a W-8BEN. We surface the form in Settings → Tax when you cross the threshold.</li>' +
+            '<li><strong>Display name on payouts.</strong> The name PayPal will see in the transaction. Defaults to your account name; change in Settings → Payout method.</li>' +
+            '<li><strong>Notification preferences.</strong> Control which events trigger an email (new commission, payout sent, dispute notice, etc.) from Settings → Notifications.</li>' +
+          '</ul>'
+      }
     }
   };
 
-  // ── Cross-link metadata (small subset for related cards) ───────────
-  // Title comes from ARTICLES; this map is just so the related cards
-  // can render without re-finding the article.
+  // ─── HELP_INDEX: sidebar layout, language-independent IDs ─────────
+  var HELP_INDEX = [
+    { id: 'start',      groupKey: 'group_start',      items: [
+      ['getting-started',   'sb_getting_started'],
+      ['saving-ads',        'sb_saving_ads'],
+    ]},
+    { id: 'links',      groupKey: 'group_links',      items: [
+      ['share-links',       'sb_share_links'],
+      ['clawback',          'sb_clawback'],
+    ]},
+    { id: 'commission', groupKey: 'group_commission', items: [
+      ['commission-model',  'sb_commission_model'],
+      ['payout-setup',      'sb_payout_setup'],
+      ['payout-schedule',   'sb_payout_schedule'],
+    ]},
+    { id: 'promote',    groupKey: 'group_promote',    items: [
+      ['promote-social',    'sb_promote_social'],
+      ['promote-newsletter','sb_promote_newsletter'],
+      ['exclusive-offers',  'sb_exclusive_offers'],
+    ]},
+    { id: 'account',    groupKey: 'group_account',    items: [
+      ['ftc-disclosure',    'sb_ftc_disclosure'],
+      ['two-factor',        'sb_two_factor'],
+    ]},
+  ];
 
-  function getArticleTitle(id) {
-    var a = ARTICLES[id];
-    return a ? a.title : id.replace(/-/g, ' ');
+  // ════════════════════════════════════════════════════════════════════
+  //  简体中文 (Simplified Chinese)
+  // ════════════════════════════════════════════════════════════════════
+  HELP_I18N.zh = {
+    doc_title_suffix: ' — Boost Boss 联盟帮助',
+    doc_title_fallback: '帮助中心 — Boost Boss 联盟',
+    ui: {
+      hero_title: '您好，需要什么帮助？',
+      hero_placeholder: '搜索帮助中心 — 试试"分享链接"、"佣金"、"提现"…',
+      back_to_dashboard: '← 返回仪表板',
+      breadcrumb_help_center: '帮助中心',
+      related_articles: '相关文章',
+      still_need_help: '还需要帮助吗？',
+      article_not_found_title: '未找到文章',
+      article_not_found_body: '您查找的文章不存在或已重命名。',
+      article_not_found_link: '← 返回帮助中心',
+      group_start: '新手入门',
+      group_links: '分享链接与归因',
+      group_commission: '佣金与提现',
+      group_promote: '推广技巧',
+      group_account: '合规与账户',
+      sb_getting_started:    'Boost Boss 联盟入门指南',
+      sb_saving_ads:         '收藏广告与浏览商品目录',
+      sb_share_links:        '分享链接与 bb_click 归因',
+      sb_clawback:           '转化、点击与 30 天追回期',
+      sb_commission_model:   '佣金模式 v2 — 70/30 分成',
+      sb_payout_setup:       '设置 PayPal 提现账户',
+      sb_payout_schedule:    '提现时间表 — 每两周周五',
+      sb_promote_social:     '社交媒体推广 — X、IG、TikTok、FB',
+      sb_promote_newsletter: '通过邮件通讯推广',
+      sb_exclusive_offers:   '独家优惠与高级合作伙伴',
+      sb_ftc_disclosure:     'FTC 披露与联盟规范',
+      sb_two_factor:         '双因素认证与账户设置',
+    },
+    articles: {
+      'getting-started': {
+        title: 'Boost Boss 联盟入门指南',
+        lede: 'Boost Boss 是一个原生 MCP 广告网络。作为联盟伙伴，您可以收藏在 AI 工具中发现的广告，分享给您的受众，当他们购买时您就能获得收益。一分钟带您快速了解。',
+        related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+        body:
+          '<h2>一句话介绍 Boost Boss</h2>' +
+          '<p>Boost Boss 在 AI 场景中投放赞助内容 — 包括 Claude Desktop、Cursor、ChatGPT 插件、Discord 和 Slack 机器人、浏览器扩展。广告主投放广告，按曝光 / 点击 / 购买付费。联盟伙伴推广商品目录中的产品，当买家通过您的分享链接转化时，您就能赚取佣金。</p>' +
+          '<h2>前 10 分钟要做的三件事</h2>' +
+          '<ol>' +
+            '<li><strong>浏览商品目录。</strong>在侧边栏打开 <a href="/affiliate#catalog">商品目录</a>，看看广告主已上架了哪些产品。按佣金排序，找到高转化的机会。</li>' +
+            '<li><strong>生成您的第一个分享链接。</strong>在任何想推广的商品上点击"获取链接"。链接会通过 <code>/s/&lt;token&gt;</code> 跳转，并附带 <code>bb_click=&lt;UUID&gt;</code> 归因参数。</li>' +
+            '<li><strong>设置您的提现方式。</strong>前往 <a href="/affiliate#payouts">提现记录</a>，添加您要收款的 PayPal 邮箱。没有这一步，收益会累积但无法结算。</li>' +
+          '</ol>' +
+          '<h2>收益是怎么算的</h2>' +
+          '<p>当有人点击您的分享链接并购买后，您将分得 Boost Boss 所谓的 <strong>联盟分成池</strong> — 卖家专门为联盟营销划拨的订单百分比。分成比例是 <strong>您 70% / Boost Boss 30%</strong>。详见<a href="/help/article?id=commission-model">佣金模式 v2 详解</a>。</p>' +
+          '<div class="callout info"><strong>通俗版本：</strong>如果某商品的联盟分成池为 20%，有人购买了 $100 的商品，Boost Boss 拿走 $20 的分成池，给您 $14（占池子的 70%），自己留 $6（占池子的 30%）。卖家拿到剩余的 $80 减去 PayPal 手续费。</div>' +
+          '<h2>接下来做什么</h2>' +
+          '<ul>' +
+            '<li>阅读<a href="/help/article?id=share-links">归因是如何工作的</a>，了解点击数据背后的逻辑。</li>' +
+            '<li>浏览 <a href="/help/article?id=ftc-disclosure">FTC 披露规则</a> — 每次公开推广都需要说明赞助关系。</li>' +
+            '<li>选择推广渠道：<a href="/help/article?id=promote-social">社交媒体</a>、<a href="/help/article?id=promote-newsletter">邮件通讯</a>，或两者兼有。</li>' +
+          '</ul>'
+      },
+      'saving-ads': {
+        title: '收藏广告与浏览商品目录',
+        lede: '有两种方式找到可推广的产品：收藏您在 AI 工具中看到的广告，或从仪表板浏览完整的广告主商品目录。',
+        related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+        body:
+          '<h2>在 AI 工具中直接收藏</h2>' +
+          '<p>当您在 Cursor、Claude Desktop 或 Discord 机器人等工具中看到 Boost Boss 投放的广告时，点击书签图标即可。商品会一键加入您的<a href="/affiliate#saves">我的收藏</a>视图 — 无需手动录入，无需复制粘贴。</p>' +
+          '<p>收藏的对象是商品本身（父级），不是某个具体的创意素材。所以即便广告主针对同一商品投放多个广告或推出季节性变体，您收藏的入口仍会指向正确的目的地。新广告会在点击时自动匹配当前最佳的活跃版本。</p>' +
+          '<h2>浏览商品目录</h2>' +
+          '<p><a href="/affiliate#catalog">商品目录</a>展示了所有通过审核的广告主产品。两个最重要的筛选器：</p>' +
+          '<ul>' +
+            '<li><strong>佣金</strong> — 按联盟分成池百分比排序。比例越高，单笔成交的收益越多。</li>' +
+            '<li><strong>类别</strong> — 按垂直领域筛选（SaaS、基础设施、内容工具等），方便您把产品匹配给目标受众。</li>' +
+          '</ul>' +
+          '<h2>"已通过审核"意味着什么</h2>' +
+          '<p>目录中可见的每一款产品都通过了 Boost Boss 的审核 — 描述准确、履约链接可用、"原价"对比真实（如有显示）、退款流程合规。被驳回的产品不会出现在目录中，也无法被推广。</p>' +
+          '<div class="callout"><strong>这对您的意义：</strong>目录中的产品经过把关，您这边承担的转化风险更低。您不必担心推广的产品在结账时崩掉或永远不发货。</div>'
+      },
+      'share-links': {
+        title: '分享链接与 bb_click 归因',
+        lede: 'Boost Boss 如何识别一笔订单来自您的链接，为什么这套机制能扛住 Cookie 失效和 Safari ITP，以及在分享链接中应该带什么参数，让您和广告主双方的数据分析都能跑通。',
+        related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+        body:
+          '<h2>基本流程</h2>' +
+          '<ol>' +
+            '<li>您在仪表板生成一个分享链接，形如 <code>https://boostboss.ai/s/&lt;token&gt;</code>。</li>' +
+            '<li>有人点击它。我们的重定向服务器会在目标 URL 后追加 <code>?bb_click=&lt;UUID&gt;</code>，然后用 302 跳转到广告主的商品页。</li>' +
+            '<li>UUID 会连同您的联盟 ID、点击时间戳、引荐 URL 和粗略地区一起记录下来。我们还会写入一个第一方 Cookie 作为兜底。</li>' +
+            '<li>如果 30 天追回期内发生成交，买家购买 URL 上的 <code>bb_click</code> UUID 就是把这笔订单归因给您的依据。</li>' +
+          '</ol>' +
+          '<h2>为什么 URL 归因是核心</h2>' +
+          '<p>大多数联盟网络依赖第三方 Cookie — 而它正被 Safari ITP、Firefox ETP 以及越来越严格的 Chrome 拦截或限制。Boost Boss 把 Cookie 当作兜底方案，<strong>URL 中的 bb_click UUID 才是核心标识符</strong>。只要这个 URL 参数能传递到转化事件，归因就能跑通，与浏览器策略无关。</p>' +
+          '<h2>哪些渠道会去掉参数</h2>' +
+          '<p>有些平台在用户转发链接时会剥离 URL 参数：</p>' +
+          '<ul>' +
+            '<li><strong>Twitter/X</strong> 一般会保留参数。</li>' +
+            '<li><strong>iMessage / 短信</strong> 会保留参数。</li>' +
+            '<li><strong>部分 Facebook 帖子</strong> 会自动加上 fbclid，但会保留您原本的参数。</li>' +
+            '<li><strong>部分邮件客户端</strong> 会通过跳转链接对 URL 进行短链处理 — 通常仍会保留参数。</li>' +
+          '</ul>' +
+          '<p>如果您的受众转化率远低于点击数，请检查 URL 是否在某个渠道被改动过。</p>' +
+          '<h2>用 Sub ID 区分渠道</h2>' +
+          '<p>生成链接时，您可以添加最多 5 个 Sub ID（a-z、A-Z、0-9）。它们不影响归因 — 只是您自己打的标签，方便事后辨别点击来自哪个渠道。例如：<code>sub1=twitter</code>、<code>sub1=newsletter-may</code>。可在<a href="/affiliate#conv-soon">销售报表</a>中查看。</p>'
+      },
+      'commission-model': {
+        title: '佣金模式 v2 — 70/30 分成详解',
+        lede: 'Boost Boss 如何在卖家、您和平台之间分配一笔订单。新模式取代了原先 15% 的总营收抽成，改为每个商品独立设置的联盟分成池 — 激励更清晰，仅在联盟推广带来成交时才收费。',
+        related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+        body:
+          '<h2>一笔订单的结构</h2>' +
+          '<p>商品目录中每一款产品都有一个由卖家设置的 <strong>联盟分成池百分比</strong>。这就是订单中用于联盟营销的份额。Boost Boss 将分成池按 70/30 在联盟和平台之间切分：</p>' +
+          '<ul>' +
+            '<li><strong>70%</strong> → 您（带来这笔成交的联盟）</li>' +
+            '<li><strong>30%</strong> → Boost Boss</li>' +
+            '<li><strong>剩余部分</strong> → 卖家（订单金额减去联盟分成池，再减去 PayPal 手续费）</li>' +
+          '</ul>' +
+          '<h2>一个实际的例子</h2>' +
+          '<p>商品售价 <strong>$100</strong>，卖家设置的联盟分成池为 <strong>20%</strong>。</p>' +
+          '<pre><code>订单金额            $100.00\n联盟分成池           $20.00  (订单的 20%)\n  → 联盟              $14.00  (分成池的 70%)\n  → Boost Boss         $6.00  (分成池的 30%)\n卖家结算             $80.00  减去 PayPal 手续费</code></pre>' +
+          '<h2>直接成交 vs 联盟成交</h2>' +
+          '<p>如果买家未经联盟链接购买（直接成交），Boost Boss 在订单金额上不收任何佣金，除了标准支付通道费用。卖家拿走整笔订单，扣除费用、税金和退款后的余额。我们只在联盟实际带来成交时才赚钱。</p>' +
+          '<div class="callout info"><strong>为什么这很重要：</strong>v2 模式让我们的利益和您一致 — Boost Boss 只在联盟赚钱时才赚钱。在旧的 15% 总营收抽成下，我们对您毫无贡献的直接成交也会收费。</div>' +
+          '<h2>默认 CPS，可选 CPC 和 CPA</h2>' +
+          '<p>默认模式是 <strong>CPS（按成交付费）</strong>：只有真正成交，您才有收益。部分广告主会把他们的商品设为 <strong>CPC</strong>（按点击付费）或 <strong>CPA</strong>（按行动付费 — 比如注册）。遇到这种情况时，您会在商品目录行看到对应的模式，不论最终是否转化为成交，符合条件的点击或行动都会带来收益。</p>'
+      },
+      'payout-setup': {
+        title: '设置 PayPal 提现账户',
+        lede: 'Boost Boss 所有联盟提现都通过 PayPal 结算。只需在仪表板填一次 PayPal 邮箱，之后每两周的周五会自动打款到该账户。',
+        related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+        body:
+          '<h2>在哪里填 PayPal 邮箱</h2>' +
+          '<p>前往侧边栏的<a href="/affiliate#payouts">提现记录</a>。提现方式表单里只有一个必填项：<strong>PayPal 邮箱</strong>。请填写绑定了已验证 PayPal 账户的邮箱。</p>' +
+          '<h2>为什么暂时只支持 PayPal</h2>' +
+          '<p>Boost Boss 的入账（广告主充值、买家店面收款）和出账（发行方、卖家、联盟提现）都使用同一个支付服务商。当前选择 PayPal 是因为台湾公司法规定入账和出账必须经由同一个服务商，而 PayPal 覆盖的国际市场最广。等我们开放多服务商之后，更多提现方式会陆续上线。</p>' +
+          '<h2>账户要求</h2>' +
+          '<ul>' +
+            '<li><strong>收款方需为已验证的 PayPal 账户。</strong>未验证的账户可能被冻结资金。</li>' +
+            '<li><strong>所在国家受 PayPal Payouts API 支持。</strong>200+ 国家可用，仅极少数地区不支持。</li>' +
+            '<li><strong>制裁筛查。</strong>Boost Boss 无法向受美国或国际制裁的地区付款（伊朗、朝鲜、古巴、克里米亚、叙利亚等）。</li>' +
+          '</ul>' +
+          '<h2>之后想修改 PayPal 邮箱</h2>' +
+          '<p>可以随时在同一界面修改，但修改需要 <strong>双因素认证</strong>。我们故意这么做 — 任何能悄悄修改收款地址的人，都能截走您的收益。详见<a href="/help/article?id=two-factor">双因素认证</a>。</p>' +
+          '<div class="callout warn"><strong>务必三次核对拼写。</strong>如果 PayPal 邮箱填错，资金会被退回，您需要重新申请提现。我们收到的"我的钱去哪了？"工单大多都是拼写错误。</div>'
+      },
+      'payout-schedule': {
+        title: '提现时间表 — 每两周周五打款，周二截止',
+        lede: 'Boost Boss 按固定的两周周期支付联盟收益。周二前赚到的钱 → 当周周五到账。周二后赚的 → 等两周。最低提现额度 $1 USD。',
+        related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+        body:
+          '<h2>一句话讲清周期</h2>' +
+          '<p>提现每<strong>隔一周的周五</strong>执行一次。截止时间是紧接着的<strong>周二 UTC 23:59</strong>。截止前入账的收益会进入当周五的批次；截止后入账的会顺延到两周后的下一个周五。</p>' +
+          '<h2>一个批次会包含什么</h2>' +
+          '<ul>' +
+            '<li>周二截止前已成交的订单佣金</li>' +
+            '<li>扣除仍处于退款窗口期的 30 天追回保留金 — 它们会进入下一个符合条件的批次</li>' +
+            '<li>扣除该周期内发生的退款和拒付</li>' +
+          '</ul>' +
+          '<h2>到账速度</h2>' +
+          '<p>PayPal Payouts API 在周五 UTC 12:00 发起转账，绝大多数收款人几分钟内就能在 PayPal 余额中看到资金。收款人必须已有 PayPal 账户 — 否则 PayPal 会暂存这笔转账直到对方注册。我们告诉联盟伙伴的预期窗口是"最多 30 分钟"，但大部分会在 1-2 分钟内到账。</p>' +
+          '<h2>最低额度与累计</h2>' +
+          '<p><strong>最低提现 $1 USD。</strong>低于这个数会留在您的余额中，跨周期累计直到达标。没有过期时间 — 您的余额永远是您的。</p>' +
+          '<h2>提现的 2FA 验证</h2>' +
+          '<p>每次提现申请都必须通过注册的认证器 APP 验证一次性验证码。我们不依赖短信 — 太容易被换 SIM 卡攻击。请在<a href="/affiliate#settings">设置</a>中预先配置认证器，再等待首笔提现。详见<a href="/help/article?id=two-factor">双因素认证</a>。</p>' +
+          '<div class="callout info"><strong>遇上节假日：</strong>如果当周五是美国银行假日，PayPal Payouts API 仍按计划执行。您不会感到延迟。</div>'
+      },
+      'ftc-disclosure': {
+        title: 'FTC 披露与联盟规范',
+        lede: '每一次对 Boost Boss 联盟链接的公开推广，都必须清楚说明联盟关系。这是美国 FTC 的要求，我们对所有地区一视同仁。',
+        related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+        body:
+          '<h2>用大白话讲规则</h2>' +
+          '<p>当您在社交媒体、邮件通讯、网站、视频或任何第三方可能看到的地方分享联盟链接时，必须清楚说明您是联盟伙伴。披露必须出现在链接<strong>之前</strong>，要<strong>显眼</strong>且<strong>容易理解</strong>。</p>' +
+          '<h2>什么算合格的披露</h2>' +
+          '<ul>' +
+            '<li><strong>推文 / 帖子：</strong>在开头或结尾加上 <code>#ad</code>、<code>#sponsored</code> 或 <code>#affiliate</code>。三者都符合 FTC 要求。</li>' +
+            '<li><strong>视频：</strong>开头几秒内口播声明，同时在画面上显示。只在片尾打字幕不够。</li>' +
+            '<li><strong>邮件通讯：</strong>在帖子开头写"本文包含联盟链接 — 通过它们购买，我会获得少量佣金"。</li>' +
+            '<li><strong>博客文章：</strong>同邮件通讯。仅靠页脚披露通常不够。</li>' +
+          '</ul>' +
+          '<h2>什么不算</h2>' +
+          '<ul>' +
+            '<li><strong>只写 <code>#partner</code></strong> — 太模糊，FTC 已标注此问题。请用 <code>#ad</code> 或 <code>#sponsored</code>。</li>' +
+            '<li><strong>埋在个人简介中的披露</strong> — 简介里提一句联盟链接，并不覆盖每一篇具体的帖子。</li>' +
+            '<li><strong>页脚小字</strong> — 容易被忽略，单独使用不符合 FTC 要求。</li>' +
+          '</ul>' +
+          '<h2>Boost Boss 的额外规则</h2>' +
+          '<p>除了 FTC 合规，Boost Boss 的<a href="/aup">使用规范</a>还禁止：</p>' +
+          '<ul>' +
+            '<li><strong>误导性推广</strong> — 虚假证言、伪造截图、保证效果的承诺。</li>' +
+            '<li><strong>自我交易</strong> — 通过自己的链接下单赚佣金，或与亲友串通。</li>' +
+            '<li><strong>垃圾信息</strong> — 未经许可的邮件或短信、欺骗性 SEO（伪装页、桥页）、激励点击流量。</li>' +
+            '<li><strong>商标滥用</strong> — 在付费搜索中竞价卖家品牌词、注册仿冒域名。</li>' +
+          '</ul>' +
+          '<div class="callout warn"><strong>自我交易检测。</strong>我们会监控点击到转化的模式。长期可疑的模式会触发已结算佣金的追回，并可能导致账户停用。</div>'
+      },
+      'clawback': {
+        title: '转化、点击与 30 天追回期',
+        lede: '点击转化为成交的窗口有多长？买家退款时您的佣金会怎样？两个关键窗口必须了解。',
+        related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+        body:
+          '<h2>归因窗口</h2>' +
+          '<p>当有人点击您的分享链接后，<code>bb_click</code> UUID 会保留 <strong>30 天</strong>。在这个窗口内，任何使用同一 URL 参数（或兜底 Cookie）发生的成交都会归因给您 — 不论买家中途访问了多少其他设备、网站或会话。</p>' +
+          '<h2>追回窗口</h2>' +
+          '<p>佣金按<a href="/help/article?id=payout-schedule">每两周周五</a>计划发放，但每笔佣金都会在成交后保留 <strong>30 天追回窗口</strong>。如果买家在窗口内退款或成功发起拒付，对应的佣金会被冲回。</p>' +
+          '<h2>实际操作</h2>' +
+          '<ul>' +
+            '<li>第 0 天成交 → 佣金状态为"待定"</li>' +
+            '<li>第 1-30 天 → 在退款/拒付风险存在时，佣金保持待定</li>' +
+            '<li>第 30 天后 → 佣金"释放"，进入下一个两周批次</li>' +
+            '<li>30 天内退款或拒付 → 佣金取消，余额相应调整</li>' +
+          '</ul>' +
+          '<h2>销售报表的语义</h2>' +
+          '<p>您的<a href="/affiliate#conv-soon">销售报表</a>显示三种状态：</p>' +
+          '<ul>' +
+            '<li><strong>待定</strong> — 已成交但仍在 30 天窗口内</li>' +
+            '<li><strong>已释放</strong> — 已过窗口，进入下一个提现批次</li>' +
+            '<li><strong>已冲回</strong> — 买家已退款或成功拒付；佣金取消</li>' +
+          '</ul>' +
+          '<div class="callout"><strong>为什么是 30 天？</strong>大多数商品的退款窗口为 14-30 天。30 天后退款风险较低，我们可以放心释放佣金，并在下一个两周周五打款。</div>'
+      },
+      'promote-social': {
+        title: '社交媒体推广 — X、IG、TikTok、FB',
+        lede: '主要社交平台的实用转化技巧。没有什么魔法 — 关键在于把产品匹配到受众，并做好披露。',
+        related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+        body:
+          '<h2>X（原 Twitter）</h2>' +
+          '<ul>' +
+            '<li><strong>披露：</strong>在推文开头加上 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>单条推文配一张截图/视频 + 同一条推文里附链接（不要把链接放回复里）。高客单价产品中，长推文串比单推文转化更好。</li>' +
+            '<li><strong>无效做法：</strong>"转发抽奖"式的机器人引流加上联盟链接。Twitter 会压制吸赞营销。</li>' +
+          '</ul>' +
+          '<h2>Instagram</h2>' +
+          '<ul>' +
+            '<li><strong>披露：</strong>使用 IG 自带的"付费合作"标签（如可用），或在文案开头加 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>故事 → 上滑跳转到分享链接（老版本），或简介链接 + 一条引导到该链接的近期帖子。软件类产品中，Reels 配描述里的链接比普通帖子转化更好。</li>' +
+            '<li><strong>无效做法：</strong>文案里贴长长的联盟 URL — 会被截断。请用简洁的分享链接，不要用跳转链。</li>' +
+          '</ul>' +
+          '<h2>TikTok</h2>' +
+          '<ul>' +
+            '<li><strong>披露：</strong>开头 3 秒内口播"这是赞助内容"，同时画面上打 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>演示。15-30 秒展示产品实际运行。简介里放链接，并把"链接在简介里 ↑"的评论置顶。</li>' +
+            '<li><strong>无效做法：</strong>直接把链接贴在视频描述里 — 不会自动变成可点链接，观众也不会复制粘贴。</li>' +
+          '</ul>' +
+          '<h2>Facebook</h2>' +
+          '<ul>' +
+            '<li><strong>披露：</strong>在帖子开头加 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>长文配清晰的使用场景故事。FB 算法奖励对话，所以在帖子里抛个问题并回复评论。</li>' +
+            '<li><strong>无效做法：</strong>在评论里贴裸联盟链接 — FB 会限流。请放在帖子正文中。</li>' +
+          '</ul>' +
+          '<h2>通用建议</h2>' +
+          '<p>把产品匹配到受众。生产力 SaaS 在 r/productivity 转化，不在 r/aww。编程工具在开发者 Twitter 转化，不在艺术圈。看看您粉丝的兴趣，再从商品目录里挑产品。</p>'
+      },
+      'promote-newsletter': {
+        title: '通过邮件通讯推广',
+        lede: '对 B2B 和专业型产品，邮件通讯的转化率高于社交媒体。下面是一些对 Boost Boss 联盟有效的套路。',
+        related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+        body:
+          '<h2>为什么邮件通讯有效</h2>' +
+          '<p>读者打开邮件时带着意愿。您的受众已经信任您到愿意把收件箱交给您。软件类产品中，邮件通讯里联盟链接的转化率通常是社交媒体的 5-10 倍。</p>' +
+          '<h2>有效的披露模板</h2>' +
+          '<p>最成功的联盟邮件通讯都会在含联盟链接的帖子顶部放一段披露：</p>' +
+          '<div class="callout"><em>"下面提到的部分工具是联盟链接 — 如果您通过它们注册，我会获得少量佣金。价格不会因此变化。我只推荐自己用过或仔细评估过的东西。"</em></div>' +
+          '<p>请放在第一个链接之前，而不是页脚。</p>' +
+          '<h2>战术模板</h2>' +
+          '<ul>' +
+            '<li><strong>工具盘点。</strong>"让我做 X 快 10 倍的 5 款工具" — 选 5 款，有联盟的就放联盟链接，没有的就放普通链接。诚实带来信任。</li>' +
+            '<li><strong>教程 → 工具。</strong>带读者走完一个酷炫操作，提到您用的工具，附上联盟链接。因为使用场景明确，转化率自然更高。</li>' +
+            '<li><strong>优惠提醒。</strong>当 BB 有独家优惠或限时折扣时，发一封简短聚焦的邮件 — 紧迫感会带来转化。</li>' +
+            '<li><strong>每周摘要中固定一个推广位。</strong>在常规通讯里固定保留一个联盟产品位置。订阅者会期待它，您也不会显得在打扰他们。</li>' +
+          '</ul>' +
+          '<h2>什么会扼杀邮件转化</h2>' +
+          '<ul>' +
+            '<li>一封邮件里链接太多。挑一两个就行 — 链接会互相争夺注意力。</li>' +
+            '<li>隐瞒披露。读者一旦感觉"等等，这是广告？"被偷袭，就会退订。</li>' +
+            '<li>过期优惠。如果联盟产品的状态变了（涨价、活动结束），请在它伤害您的可信度之前更新或移除链接。</li>' +
+          '</ul>' +
+          '<div class="callout info"><strong>善用 Sub ID。</strong>给邮件通讯的分享链接打上类似 <code>nl-2026-06</code> 的 Sub ID，便于在<a href="/affiliate#conv-soon">销售报表</a>中看清是哪一期带来的成交。这帮助您加码做有效的内容。</div>'
+      },
+      'exclusive-offers': {
+        title: '独家优惠与高级合作伙伴',
+        lede: '标准联盟体验之上的两项升级：由 Boost Boss 谈下来的限时折扣，以及与广告主之间在量级达标后建立的直接关系。',
+        related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+        body:
+          '<h2>独家优惠</h2>' +
+          '<p>广告主偶尔会与 Boost Boss 谈定专属折扣码或加码佣金。这些会出现在您的<a href="/affiliate#exclusive">独家优惠</a>页面。它们都是限时的，仅对活跃联盟开放。</p>' +
+          '<p>广告主为什么愿意：限时独家能制造紧迫感，转化更好。我们为什么这么做：您的商业条件更好 = 更有动力推广。</p>' +
+          '<h2>高级合作伙伴</h2>' +
+          '<p>当您积累了持续的流量 — 通常是<strong>全网 1 万次以上点击</strong> — 您所在垂直的广告主可能会直接联系您，提供定制化合作条件。我们会在<a href="/affiliate#partners">高级合作伙伴</a>中呈现这类机会。Boost Boss 负责牵线，具体商务条款由您和广告主谈定。</p>' +
+          '<p>不需要您主动申请 — 是拉式而非推式。持续推广，达成量级，伙伴自然会来找您。</p>' +
+          '<h2>独家优惠如何归因</h2>' +
+          '<p>独家优惠码采用 <strong>优惠券归因</strong>：买家在结账时输入该优惠码，订单就会归因给您，不管他们是否先点击了您的 <code>bb_click</code> URL。这让独家优惠特别适合"广播式"推广（邮件通讯、播客、视频描述），那些场景下 URL 点击噪音大，但优惠码使用意图明确。</p>' +
+          '<div class="callout"><strong>有受众就主动开口。</strong>有播客、有人气邮件通讯、或在某个垂直有强影响力？给 <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> 发邮件介绍您的受众画像。我们也许有匹配的独家优惠，或能直接撮合合作。</div>'
+      },
+      'two-factor': {
+        title: '账户设置与双因素认证',
+        lede: '双因素认证（2FA）是联盟账户中最敏感操作的硬性要求 — 包括提现和修改 PayPal 邮箱。请在首次提现前就启用它。',
+        related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+        body:
+          '<h2>为什么要求 2FA</h2>' +
+          '<p>任何拿到您 Boost Boss 账户的人，都能悄悄改掉您的 PayPal 邮箱并截走收益。基于短信的 2FA 容易被换 SIM 卡攻破，所以我们采用 TOTP（基于时间的一次性密码）认证器 APP。</p>' +
+          '<h2>启用步骤</h2>' +
+          '<ol>' +
+            '<li>前往<a href="/affiliate#settings">设置 → 安全</a>。</li>' +
+            '<li>点击"启用双因素认证"。</li>' +
+            '<li>用认证器 APP（Google Authenticator、Authy、1Password 或任何 TOTP 兼容的应用）扫码。</li>' +
+            '<li>输入 APP 显示的 6 位验证码确认。</li>' +
+          '</ol>' +
+          '<h2>2FA 守护哪些操作</h2>' +
+          '<ul>' +
+            '<li><strong>每一次提现申请</strong> — 系统会要求您输入当前的 6 位验证码。</li>' +
+            '<li><strong>修改 PayPal 提现邮箱</strong> — 同上。</li>' +
+            '<li><strong>禁用 2FA 本身</strong> — 关闭也需要一次新的验证码。</li>' +
+          '</ul>' +
+          '<p>正常登录不需要验证码 — 那是密码的职责。2FA 只在涉及资金的操作上生效。</p>' +
+          '<h2>认证设备丢失怎么办</h2>' +
+          '<p>没有恢复码，您将无法提现或修改提现方式。请用您的联盟 ID 邮件联系 <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a>。我们会指引您完成身份核实流程并重置 2FA — 通常需要一个工作日。</p>' +
+          '<div class="callout warn"><strong>请保存认证器备份。</strong>大多数认证器 APP 支持云备份（Authy、1Password）。请开启。手机丢失且无备份是账户恢复工单的头号原因。</div>' +
+          '<h2>其他值得了解的设置</h2>' +
+          '<ul>' +
+            '<li><strong>税务表（W-9 / W-8BEN）。</strong>年收入超 $600 的美国联盟需提交 W-9；非美国联盟需提交 W-8BEN。达到阈值时，我们会在设置 → 税务中弹出表单。</li>' +
+            '<li><strong>提现显示姓名。</strong>PayPal 在交易中看到的姓名。默认使用您的账户名；可在设置 → 提现方式中修改。</li>' +
+            '<li><strong>通知偏好。</strong>在设置 → 通知中控制哪些事件触发邮件（新佣金、提现已发、争议提醒等）。</li>' +
+          '</ul>'
+      }
+    }
+  };
+
+  // ════════════════════════════════════════════════════════════════════
+  //  繁體中文 (Traditional Chinese)
+  // ════════════════════════════════════════════════════════════════════
+  HELP_I18N['zh-TW'] = {
+    doc_title_suffix: ' — Boost Boss 聯盟說明',
+    doc_title_fallback: '說明中心 — Boost Boss 聯盟',
+    ui: {
+      hero_title: '您好！需要協助嗎？',
+      hero_placeholder: '搜尋說明中心 — 試試「分享連結」、「佣金」、「撥款」…',
+      back_to_dashboard: '← 返回儀表板',
+      breadcrumb_help_center: '說明中心',
+      related_articles: '相關文章',
+      still_need_help: '還需要協助嗎？',
+      article_not_found_title: '找不到文章',
+      article_not_found_body: '您要找的文章不存在或已更名。',
+      article_not_found_link: '← 返回說明中心',
+      group_start: '新手入門',
+      group_links: '分享連結與歸因',
+      group_commission: '佣金與撥款',
+      group_promote: '推廣技巧',
+      group_account: '合規與帳戶',
+      sb_getting_started:    'Boost Boss 聯盟入門指南',
+      sb_saving_ads:         '收藏廣告與瀏覽商品目錄',
+      sb_share_links:        '分享連結與 bb_click 歸因',
+      sb_clawback:           '轉換、點擊與 30 天追回期',
+      sb_commission_model:   '佣金模式 v2 — 70/30 分潤',
+      sb_payout_setup:       '設定 PayPal 撥款帳戶',
+      sb_payout_schedule:    '撥款時程 — 每兩週週五',
+      sb_promote_social:     '社群媒體推廣 — X、IG、TikTok、FB',
+      sb_promote_newsletter: '透過電子報推廣',
+      sb_exclusive_offers:   '獨家優惠與高級合作夥伴',
+      sb_ftc_disclosure:     'FTC 揭露與聯盟規範',
+      sb_two_factor:         '雙重驗證與帳戶設定',
+    },
+    articles: {
+      'getting-started': {
+        title: 'Boost Boss 聯盟入門指南',
+        lede: 'Boost Boss 是原生 MCP 的廣告聯播網。作為聯盟夥伴，您可以收藏在 AI 工具中發現的廣告、分享給您的受眾，當他們購買時就能賺取收益。一分鐘快速上手。',
+        related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+        body:
+          '<h2>一段話介紹 Boost Boss</h2>' +
+          '<p>Boost Boss 在 AI 場景中投放贊助內容 — 包括 Claude Desktop、Cursor、ChatGPT 外掛、Discord 與 Slack 機器人、瀏覽器擴充。廣告主投放活動，按曝光 / 點擊 / 購買付費。聯盟夥伴推廣商品目錄中的產品，當買家透過您的分享連結轉換時，您就能賺取佣金。</p>' +
+          '<h2>前 10 分鐘要做的三件事</h2>' +
+          '<ol>' +
+            '<li><strong>瀏覽商品目錄。</strong>在側邊欄打開 <a href="/affiliate#catalog">商品目錄</a>，看看廣告主上架了哪些產品。按佣金排序，找出高轉換的機會。</li>' +
+            '<li><strong>產生第一個分享連結。</strong>在任一想推廣的商品上點擊「取得連結」。連結會經由 <code>/s/&lt;token&gt;</code> 跳轉，並帶上 <code>bb_click=&lt;UUID&gt;</code> 歸因參數。</li>' +
+            '<li><strong>設定撥款方式。</strong>前往<a href="/affiliate#payouts">撥款紀錄</a>，新增您要收款的 PayPal 信箱。沒有這一步，收益會累積但無法結算。</li>' +
+          '</ol>' +
+          '<h2>收益如何計算</h2>' +
+          '<p>當有人點擊您的分享連結並購買後，您將分得 Boost Boss 所稱的<strong>聯盟分潤池</strong> — 賣家專為聯盟行銷撥出的訂單百分比。分潤比例為<strong>您 70% / Boost Boss 30%</strong>。詳見<a href="/help/article?id=commission-model">佣金模式 v2 詳解</a>。</p>' +
+          '<div class="callout info"><strong>白話版本：</strong>若某商品聯盟分潤池為 20%，有人買了 $100 的商品，Boost Boss 拿走 $20 的分潤池，給您 $14（池子的 70%），自己留 $6（池子的 30%）。賣家拿到剩下的 $80 減去 PayPal 手續費。</div>' +
+          '<h2>接下來做什麼</h2>' +
+          '<ul>' +
+            '<li>閱讀<a href="/help/article?id=share-links">歸因是怎麼運作的</a>，理解連結點擊背後的資料邏輯。</li>' +
+            '<li>瀏覽 <a href="/help/article?id=ftc-disclosure">FTC 揭露規則</a> — 每次公開推廣都要附上贊助揭露。</li>' +
+            '<li>選擇推廣管道：<a href="/help/article?id=promote-social">社群媒體</a>、<a href="/help/article?id=promote-newsletter">電子報</a>，或兩者並行。</li>' +
+          '</ul>'
+      },
+      'saving-ads': {
+        title: '收藏廣告與瀏覽商品目錄',
+        lede: '有兩種方式找到可推廣的產品：收藏在 AI 工具中看到的廣告，或從儀表板瀏覽完整的廣告主商品目錄。',
+        related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+        body:
+          '<h2>在 AI 工具中直接收藏</h2>' +
+          '<p>當您在 Cursor、Claude Desktop 或 Discord 機器人等工具中看到 Boost Boss 投放的廣告時，點擊書籤圖示即可。商品會一鍵進入您的<a href="/affiliate#saves">我的收藏</a>視圖 — 無需手動輸入、無需複製貼上。</p>' +
+          '<p>被收藏的是商品本身（母項），而非個別創意素材。所以即使廣告主對同一商品投放多個活動或推出季節變體，您收藏的入口仍會指到正確的目的地。新活動會在點擊時自動採用當下最佳的啟用版本。</p>' +
+          '<h2>瀏覽商品目錄</h2>' +
+          '<p><a href="/affiliate#catalog">商品目錄</a>列出所有通過審核的廣告主產品。最重要的兩個篩選器：</p>' +
+          '<ul>' +
+            '<li><strong>佣金</strong> — 按聯盟分潤池百分比排序。比例越高，單筆成交收益越多。</li>' +
+            '<li><strong>類別</strong> — 按垂直領域篩選（SaaS、基礎建設、內容工具等），方便您把產品配對給目標受眾。</li>' +
+          '</ul>' +
+          '<h2>「審核通過」是什麼意思</h2>' +
+          '<p>目錄中可見的每一款產品都通過了 Boost Boss 的審核 — 描述準確、出貨連結可用、「原價」對比真實（如有顯示）、退款流程合規。被駁回的產品不會出現在目錄中，也無法被推廣。</p>' +
+          '<div class="callout"><strong>這對您的意義：</strong>目錄中的產品都經過把關，您這邊承擔的轉換風險更低。您不必擔心推廣的產品在結帳時掛掉或永遠不送達。</div>'
+      },
+      'share-links': {
+        title: '分享連結與 bb_click 歸因',
+        lede: 'Boost Boss 怎麼知道某筆訂單來自您的連結？為什麼這套機制能扛得住 Cookie 流失與 Safari ITP？分享連結中該帶什麼參數，讓您與廣告主雙方的分析都能順利運作？',
+        related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+        body:
+          '<h2>基本流程</h2>' +
+          '<ol>' +
+            '<li>您在儀表板產生一個分享連結，形如 <code>https://boostboss.ai/s/&lt;token&gt;</code>。</li>' +
+            '<li>有人點擊它。我們的跳轉伺服器會在目標 URL 後附加 <code>?bb_click=&lt;UUID&gt;</code>，並以 302 跳轉到廣告主的商品頁。</li>' +
+            '<li>UUID 連同您的聯盟 ID、點擊時間、來源 URL 與粗略地區一起被記錄下來。我們同時寫入一個第一方 Cookie 作為備援。</li>' +
+            '<li>若 30 天追回期內發生成交，買家購買 URL 上的 <code>bb_click</code> UUID 就是把該筆訂單歸給您的依據。</li>' +
+          '</ol>' +
+          '<h2>為什麼 URL 歸因是關鍵</h2>' +
+          '<p>多數聯盟網路仰賴第三方 Cookie — 但它正被 Safari ITP、Firefox ETP 與越來越嚴格的 Chrome 封鎖或限制。Boost Boss 把 Cookie 視為備援，<strong>URL 中的 bb_click UUID 才是核心識別碼</strong>。只要這個參數能傳遞到轉換事件，歸因就能運作，與瀏覽器策略無關。</p>' +
+          '<h2>哪些管道會剝離參數</h2>' +
+          '<p>有些平台在使用者轉發連結時會剝離 URL 參數：</p>' +
+          '<ul>' +
+            '<li><strong>Twitter/X</strong> 大多會保留。</li>' +
+            '<li><strong>iMessage / 簡訊</strong> 會保留。</li>' +
+            '<li><strong>部分 Facebook 貼文</strong> 會自行加上 fbclid，但保留您原本的參數。</li>' +
+            '<li><strong>部分電子郵件服務</strong> 會把 URL 包裝成跳轉短網址 — 通常仍會保留參數。</li>' +
+          '</ul>' +
+          '<p>如果您的受眾轉換率遠低於點擊數，請檢查 URL 是否在某個管道被改動過。</p>' +
+          '<h2>用 Sub ID 區分管道</h2>' +
+          '<p>產生連結時，您最多可加入 5 個 Sub ID（a-z、A-Z、0-9）。它們不影響歸因 — 只是您自己貼的標籤，方便日後辨別點擊來自哪個管道。例如：<code>sub1=twitter</code>、<code>sub1=newsletter-may</code>。可在<a href="/affiliate#conv-soon">銷售報表</a>中查看。</p>'
+      },
+      'commission-model': {
+        title: '佣金模式 v2 — 70/30 分潤詳解',
+        lede: 'Boost Boss 如何在賣家、您與平台之間切分一筆訂單。新模式以每商品獨立設定的聯盟分潤池，取代了原本 15% 的營收總抽成 — 誘因更清楚，僅在聯盟推廣帶來成交時才收費。',
+        related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+        body:
+          '<h2>一筆訂單的組成</h2>' +
+          '<p>商品目錄中每一款產品都有由賣家設定的<strong>聯盟分潤池百分比</strong>。這就是訂單中用於聯盟行銷的份額。Boost Boss 將分潤池以 70/30 在聯盟和平台之間切分：</p>' +
+          '<ul>' +
+            '<li><strong>70%</strong> → 您（帶來這筆成交的聯盟）</li>' +
+            '<li><strong>30%</strong> → Boost Boss</li>' +
+            '<li><strong>其餘部分</strong> → 賣家（訂單金額減去聯盟分潤池，再減 PayPal 手續費）</li>' +
+          '</ul>' +
+          '<h2>一個具體例子</h2>' +
+          '<p>商品售價 <strong>$100</strong>，賣家設定的聯盟分潤池為 <strong>20%</strong>。</p>' +
+          '<pre><code>訂單金額            $100.00\n聯盟分潤池           $20.00  (訂單的 20%)\n  → 聯盟              $14.00  (分潤池的 70%)\n  → Boost Boss         $6.00  (分潤池的 30%)\n賣家結算             $80.00  扣除 PayPal 手續費</code></pre>' +
+          '<h2>直接成交 vs 聯盟成交</h2>' +
+          '<p>若買家未透過聯盟連結購買（直接成交），Boost Boss 不會從訂單金額中抽取任何佣金，除了標準金流通道費用之外。賣家拿走整筆訂單，扣除費用、稅金與退款後的餘額。我們只在聯盟確實帶來成交時才賺錢。</p>' +
+          '<div class="callout info"><strong>為什麼這很重要：</strong>v2 模式讓我們的利益與您一致 — Boost Boss 只在聯盟賺錢時才賺錢。在舊的 15% 營收總抽成下，與您無關的直接成交我們也會收費。</div>' +
+          '<h2>預設 CPS，可選 CPC 與 CPA</h2>' +
+          '<p>預設模式為 <strong>CPS（按成交付費）</strong>：只有真正成交您才有收益。部分廣告主會把他們的商品設為 <strong>CPC</strong>（按點擊付費）或 <strong>CPA</strong>（按行動付費 — 例如註冊）。當遇到這類設定時，您會在商品目錄列中看到對應模式，不論最後是否轉為實際成交，符合條件的點擊或行動都會帶來收益。</p>'
+      },
+      'payout-setup': {
+        title: '設定 PayPal 撥款帳戶',
+        lede: 'Boost Boss 所有聯盟撥款都透過 PayPal 結算。在儀表板填一次 PayPal 信箱，之後每兩週週五的撥款都會自動匯到該帳戶。',
+        related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+        body:
+          '<h2>在哪裡填 PayPal 信箱</h2>' +
+          '<p>前往側邊欄的<a href="/affiliate#payouts">撥款紀錄</a>。撥款方式表單只有一個必填欄位：<strong>PayPal 信箱</strong>。請填寫綁定已驗證 PayPal 帳戶的信箱。</p>' +
+          '<h2>為什麼目前只支援 PayPal</h2>' +
+          '<p>Boost Boss 對入帳（廣告主儲值、買家商店收款）與出帳（發行方、賣家、聯盟撥款）使用同一個金流服務商。目前選擇 PayPal 是因為台灣公司法規定入帳與出帳必須經由同一個服務商，而 PayPal 涵蓋的國際市場最廣。等我們開放多服務商之後，會陸續新增更多撥款方式。</p>' +
+          '<h2>帳戶要求</h2>' +
+          '<ul>' +
+            '<li><strong>收款方需為已驗證的 PayPal 帳戶。</strong>未驗證的帳戶可能被凍結資金。</li>' +
+            '<li><strong>所在國家需受 PayPal Payouts API 支援。</strong>200+ 國家可用，僅極少數地區不支援。</li>' +
+            '<li><strong>制裁篩查。</strong>Boost Boss 無法向受美國或國際制裁的地區付款（伊朗、北韓、古巴、克里米亞、敘利亞等）。</li>' +
+          '</ul>' +
+          '<h2>之後想修改 PayPal 信箱</h2>' +
+          '<p>可以隨時在同一畫面修改，但修改需經<strong>雙重驗證</strong>。我們特意這麼做 — 任何能偷偷改寫收款信箱的人，都能攔截您的收益。詳見<a href="/help/article?id=two-factor">雙重驗證</a>。</p>' +
+          '<div class="callout warn"><strong>請務必反覆確認拼寫。</strong>PayPal 信箱填錯，款項會被退回，您得重新申請撥款。我們收到「我的款項到哪去了？」的工單，大多都是拼字錯誤。</div>'
+      },
+      'payout-schedule': {
+        title: '撥款時程 — 每兩週週五撥款，週二截止',
+        lede: 'Boost Boss 採固定兩週週期支付聯盟收益。週二前賺到的 → 當週週五入帳。週二後賺的 → 等兩週。最低撥款金額為 $1 USD。',
+        related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+        body:
+          '<h2>一段話講清楚週期</h2>' +
+          '<p>撥款每<strong>隔一週的週五</strong>執行一次。截止時間是緊接的<strong>週二 UTC 23:59</strong>。截止前入帳的收益會進入當週五的批次；截止後入帳的會順延到兩週後的下一個週五。</p>' +
+          '<h2>一個批次會包含什麼</h2>' +
+          '<ul>' +
+            '<li>週二截止前已成交的訂單佣金</li>' +
+            '<li>扣除仍處於退款窗口期的 30 天追回保留款 — 它們會進入下一個符合條件的批次</li>' +
+            '<li>扣除該期間內發生的退款與拒付</li>' +
+          '</ul>' +
+          '<h2>入帳速度</h2>' +
+          '<p>PayPal Payouts API 於週五 UTC 12:00 發起撥款，大多數收款人幾分鐘內就能在 PayPal 餘額中看到資金。收款人必須已有 PayPal 帳戶 — 否則 PayPal 會暫存到對方註冊為止。我們告知聯盟夥伴的預期窗口為「最多 30 分鐘」，但多數會在 1-2 分鐘內入帳。</p>' +
+          '<h2>最低額度與累積</h2>' +
+          '<p><strong>最低撥款 $1 USD。</strong>低於這個數會留在您的餘額中，跨週期累積直到達標。沒有過期時間 — 您的餘額永遠是您的。</p>' +
+          '<h2>提領的 2FA 驗證</h2>' +
+          '<p>每次提領申請都必須以您註冊的驗證器 APP 確認一次性驗證碼。我們不依賴簡訊 — 太容易被 SIM 卡盜換攻擊。請在<a href="/affiliate#settings">設定</a>中預先建立驗證器，再等待第一次撥款。詳見<a href="/help/article?id=two-factor">雙重驗證</a>。</p>' +
+          '<div class="callout info"><strong>遇上假日：</strong>若當週五為美國銀行假日，PayPal Payouts API 仍會按時執行。您不會感覺到延遲。</div>'
+      },
+      'ftc-disclosure': {
+        title: 'FTC 揭露與聯盟規範',
+        lede: '每一次對 Boost Boss 聯盟連結的公開推廣，都必須清楚揭露聯盟關係。這是美國 FTC 的要求，我們對所有地區一視同仁。',
+        related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+        body:
+          '<h2>白話版規則</h2>' +
+          '<p>當您在社群媒體、電子報、網站、影片或任何第三方可能看到的地方分享聯盟連結時，必須清楚表明您是聯盟夥伴。揭露要出現在連結<strong>之前</strong>，要<strong>顯眼</strong>且<strong>易於理解</strong>。</p>' +
+          '<h2>什麼算合格的揭露</h2>' +
+          '<ul>' +
+            '<li><strong>推文 / 貼文：</strong>在開頭或結尾加上 <code>#ad</code>、<code>#sponsored</code> 或 <code>#affiliate</code>。三者都符合 FTC。</li>' +
+            '<li><strong>影片：</strong>開頭幾秒口頭聲明，同時在畫面上顯示。只放片尾卡片不夠。</li>' +
+            '<li><strong>電子報：</strong>在文章開頭寫「本文含聯盟連結 — 透過它們購買，我會獲得少量佣金」。</li>' +
+            '<li><strong>部落格文章：</strong>同電子報。只放頁尾通常不夠。</li>' +
+          '</ul>' +
+          '<h2>什麼不算</h2>' +
+          '<ul>' +
+            '<li><strong>只寫 <code>#partner</code></strong> — 太模糊，FTC 已標註過。請改用 <code>#ad</code> 或 <code>#sponsored</code>。</li>' +
+            '<li><strong>埋在個人簡介裡的揭露</strong> — 簡介裡提一句聯盟連結，並不能涵蓋每一篇貼文。</li>' +
+            '<li><strong>頁尾小字</strong> — 容易被忽略，單獨使用不符合 FTC。</li>' +
+          '</ul>' +
+          '<h2>Boost Boss 的額外規範</h2>' +
+          '<p>除了 FTC 合規之外，Boost Boss 的<a href="/aup">使用規範</a>還禁止：</p>' +
+          '<ul>' +
+            '<li><strong>誤導性推廣</strong> — 假見證、偽造截圖、保證成果的宣稱。</li>' +
+            '<li><strong>自我交易</strong> — 透過自己的連結下單賺佣金，或與親友串通。</li>' +
+            '<li><strong>垃圾訊息</strong> — 未經許可的電子郵件或簡訊、欺騙性 SEO（偽裝頁、橋頁）、誘導點擊流量。</li>' +
+            '<li><strong>商標濫用</strong> — 在付費搜尋上競標賣家品牌關鍵字、註冊仿冒網域。</li>' +
+          '</ul>' +
+          '<div class="callout warn"><strong>自我交易偵測。</strong>我們會監控點擊到轉換的型態。長期可疑的型態會觸發已結算佣金的追回，並可能導致帳戶停權。</div>'
+      },
+      'clawback': {
+        title: '轉換、點擊與 30 天追回期',
+        lede: '點擊轉成成交的窗口多長？買家退款時您的佣金會怎樣？兩個關鍵窗口必須掌握。',
+        related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+        body:
+          '<h2>歸因窗口</h2>' +
+          '<p>當有人點擊您的分享連結後，<code>bb_click</code> UUID 會保留 <strong>30 天</strong>。在這個窗口內，任何使用同一 URL 參數（或備援 Cookie）發生的成交都會歸因給您 — 不論買家中途造訪了多少其他裝置、網站或工作階段。</p>' +
+          '<h2>追回窗口</h2>' +
+          '<p>佣金依<a href="/help/article?id=payout-schedule">兩週週五</a>排程支付，但每筆佣金都會在成交後保留 <strong>30 天追回窗口</strong>。若買家在窗口內退款或成功提起拒付，對應的佣金會被沖回。</p>' +
+          '<h2>實際運作</h2>' +
+          '<ul>' +
+            '<li>第 0 天成交 → 佣金狀態為「待定」</li>' +
+            '<li>第 1-30 天 → 退款/拒付風險存在期間，佣金維持待定</li>' +
+            '<li>第 30 天後 → 佣金「釋放」，進入下一個兩週批次</li>' +
+            '<li>30 天內退款或拒付 → 佣金取消，餘額相應調整</li>' +
+          '</ul>' +
+          '<h2>銷售報表的語意</h2>' +
+          '<p>您的<a href="/affiliate#conv-soon">銷售報表</a>顯示三種狀態：</p>' +
+          '<ul>' +
+            '<li><strong>待定</strong> — 已成交但仍在 30 天窗口內</li>' +
+            '<li><strong>已釋放</strong> — 已過窗口，進入下一個撥款批次</li>' +
+            '<li><strong>已沖回</strong> — 買家已退款或成功拒付；佣金取消</li>' +
+          '</ul>' +
+          '<div class="callout"><strong>為什麼是 30 天？</strong>多數產品的退款窗口為 14-30 天。30 天後退款風險較低，我們可以放心釋放佣金，並在下一個兩週週五撥款。</div>'
+      },
+      'promote-social': {
+        title: '社群媒體推廣 — X、IG、TikTok、FB',
+        lede: '主要社群平台的實用轉換技巧。沒有什麼魔法 — 關鍵在於把產品配對到受眾並做好揭露。',
+        related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+        body:
+          '<h2>X（原 Twitter）</h2>' +
+          '<ul>' +
+            '<li><strong>揭露：</strong>推文開頭加上 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>單一推文配一張截圖/影片，連結放在同一則推文（別放回覆）。高單價產品中，討論串比單推轉換更好。</li>' +
+            '<li><strong>無效做法：</strong>「轉推抽獎」式機器人引流加上聯盟連結。Twitter 會壓低互動誘餌。</li>' +
+          '</ul>' +
+          '<h2>Instagram</h2>' +
+          '<ul>' +
+            '<li><strong>揭露：</strong>使用 IG 內建的「付費合作」標籤（如可用），或在文案開頭加 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>限時動態 → 上滑跳轉到分享連結（舊版本），或簡介連結 + 一則引導到該連結的最新貼文。軟體類產品中，Reels 配說明欄連結比一般貼文轉換更好。</li>' +
+            '<li><strong>無效做法：</strong>文案放長串聯盟 URL — 會被截斷。請用乾淨的分享連結，不要再加跳轉。</li>' +
+          '</ul>' +
+          '<h2>TikTok</h2>' +
+          '<ul>' +
+            '<li><strong>揭露：</strong>開頭 3 秒口頭講「這是贊助內容」，並在畫面上打 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>展示。15-30 秒呈現產品實際運作。簡介放連結，並把「連結在簡介 ↑」的留言置頂。</li>' +
+            '<li><strong>無效做法：</strong>把連結直接放在影片說明 — 不會自動變可點，觀眾也不會複製貼上。</li>' +
+          '</ul>' +
+          '<h2>Facebook</h2>' +
+          '<ul>' +
+            '<li><strong>揭露：</strong>貼文開頭加 <code>#ad</code>。</li>' +
+            '<li><strong>有效做法：</strong>長文配清楚的使用情境故事。FB 演算法獎勵對話，所以在貼文中拋個問題並回覆留言。</li>' +
+            '<li><strong>無效做法：</strong>在留言裡貼裸聯盟連結 — FB 會限流。請放在貼文內文。</li>' +
+          '</ul>' +
+          '<h2>通用建議</h2>' +
+          '<p>把產品配對到受眾。生產力 SaaS 在 r/productivity 轉換，不在 r/aww。程式工具在開發者 Twitter 轉換，不在藝術圈。看看您追蹤者的興趣，再從商品目錄中挑選。</p>'
+      },
+      'promote-newsletter': {
+        title: '透過電子報推廣',
+        lede: '對 B2B 與專業型產品，電子報的轉換率高於社群。下面是一些對 Boost Boss 聯盟有效的套路。',
+        related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+        body:
+          '<h2>為什麼電子報有效</h2>' +
+          '<p>讀者開信時帶著意願。您的受眾已經信任您到願意把信箱交給您。軟體類產品中，電子報聯盟連結的轉換率通常是社群的 5-10 倍。</p>' +
+          '<h2>有效的揭露樣式</h2>' +
+          '<p>最成功的聯盟電子報，會在含聯盟連結的文章頂部放一段揭露：</p>' +
+          '<div class="callout"><em>「下方提到的部分工具是聯盟連結 — 如果您透過它們註冊，我會獲得少量佣金。價格不會因此變動。我只推薦自己用過或仔細評估過的東西。」</em></div>' +
+          '<p>請放在第一個連結之前，而不是頁尾。</p>' +
+          '<h2>戰術範本</h2>' +
+          '<ul>' +
+            '<li><strong>工具盤點。</strong>「讓我做 X 快 10 倍的 5 款工具」 — 挑 5 款，有聯盟的就放聯盟連結，沒有的就放一般連結。誠實會帶來信任。</li>' +
+            '<li><strong>教學 → 工具。</strong>帶讀者走完一個酷炫操作，提到您用的工具，附上聯盟連結。因為使用情境清晰，轉換率自然較高。</li>' +
+            '<li><strong>優惠通知。</strong>當 BB 有獨家優惠或限時折扣時，寄一封簡短聚焦的信 — 緊迫感會帶來轉換。</li>' +
+            '<li><strong>週報固定一個推廣位。</strong>在正常電子報中固定保留一個聯盟產品位置。訂閱者會期待它，您也不會像在打擾他們。</li>' +
+          '</ul>' +
+          '<h2>什麼會扼殺電子報轉換</h2>' +
+          '<ul>' +
+            '<li>一封信裡連結太多。挑一兩個就好 — 連結之間會互相搶注意力。</li>' +
+            '<li>隱藏揭露。讀者一旦感覺「等等，這是廣告？」被偷襲，就會退訂。</li>' +
+            '<li>過期優惠。如果聯盟產品的狀態變了（漲價、活動結束），請在它傷害您的可信度之前更新或移除連結。</li>' +
+          '</ul>' +
+          '<div class="callout info"><strong>善用 Sub ID。</strong>給電子報的分享連結貼上像 <code>nl-2026-06</code> 這樣的 Sub ID，方便在<a href="/affiliate#conv-soon">銷售報表</a>看出哪一期帶來哪些成交。幫您加碼有效的內容。</div>'
+      },
+      'exclusive-offers': {
+        title: '獨家優惠與高級合作夥伴',
+        lede: '標準聯盟體驗之外的兩項升級：由 Boost Boss 談下的限時折扣，以及量級達標後與廣告主建立的直接關係。',
+        related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+        body:
+          '<h2>獨家優惠</h2>' +
+          '<p>廣告主偶爾會與 Boost Boss 談定專屬折扣碼或加碼佣金。這些會出現在您的<a href="/affiliate#exclusive">獨家優惠</a>頁面。它們都是限時的，僅對活躍聯盟開放。</p>' +
+          '<p>廣告主為什麼願意：限時獨家能製造緊迫感，轉換較好。我們為什麼這麼做：對您更好的商務條件 = 更有動力推廣。</p>' +
+          '<h2>高級合作夥伴</h2>' +
+          '<p>當您累積了穩定流量 — 通常是<strong>全網 1 萬次以上點擊</strong> — 您所在垂直的廣告主可能會直接聯絡您，提供量身打造的條件。我們會在<a href="/affiliate#partners">高級合作夥伴</a>中呈現這類機會。Boost Boss 負責牽線，商務條款由您與廣告主談定。</p>' +
+          '<p>不需要您主動申請 — 是拉式而非推式。持續推廣、達成量級，夥伴自然會來找您。</p>' +
+          '<h2>獨家優惠在歸因中怎麼算</h2>' +
+          '<p>獨家優惠碼採用<strong>優惠券歸因</strong>：買家在結帳時輸入該優惠碼，訂單就會歸給您，不論他們是否先點擊過您的 <code>bb_click</code> URL。這讓獨家優惠特別適合「廣播式」推廣（電子報、Podcast、影片說明欄），那些場景下 URL 點擊噪音大，但優惠碼輸入意圖明確。</p>' +
+          '<div class="callout"><strong>有受眾就主動開口。</strong>有 Podcast、人氣電子報、或在某個垂直有強影響力？寫信到 <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> 介紹您的受眾輪廓。我們或許有適合的獨家優惠，或能直接撮合合作。</div>'
+      },
+      'two-factor': {
+        title: '帳戶設定與雙重驗證',
+        lede: '雙重驗證（2FA）是聯盟帳戶中最敏感操作的硬性要求 — 包括提領與修改 PayPal 信箱。請在首次撥款前就啟用。',
+        related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+        body:
+          '<h2>為什麼要求 2FA</h2>' +
+          '<p>任何拿到您 Boost Boss 帳戶的人，都能悄悄改掉您的 PayPal 信箱並攔截收益。簡訊型 2FA 容易被 SIM 卡盜換攻擊，所以我們採用 TOTP（時間型一次性密碼）驗證器 APP。</p>' +
+          '<h2>啟用步驟</h2>' +
+          '<ol>' +
+            '<li>前往<a href="/affiliate#settings">設定 → 安全</a>。</li>' +
+            '<li>點擊「啟用雙重驗證」。</li>' +
+            '<li>用驗證器 APP（Google Authenticator、Authy、1Password 或任何 TOTP 相容 APP）掃描 QR Code。</li>' +
+            '<li>輸入 APP 顯示的 6 位數驗證碼確認。</li>' +
+          '</ol>' +
+          '<h2>2FA 守護哪些操作</h2>' +
+          '<ul>' +
+            '<li><strong>每一次提領申請</strong> — 系統會請您輸入當下的 6 位數驗證碼。</li>' +
+            '<li><strong>修改 PayPal 撥款信箱</strong> — 同上。</li>' +
+            '<li><strong>停用 2FA 本身</strong> — 關閉它也需要一次新的驗證碼。</li>' +
+          '</ul>' +
+          '<p>一般登入不需要驗證碼 — 那是密碼的工作。2FA 只在涉及金錢的操作上啟動。</p>' +
+          '<h2>驗證裝置遺失怎麼辦</h2>' +
+          '<p>沒有備援碼的話，您將無法提領或修改撥款方式。請以您的聯盟 ID 寫信到 <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a>。我們會引導您完成身分核實流程並重設 2FA — 通常一個工作天內完成。</p>' +
+          '<div class="callout warn"><strong>請開啟驗證器備份。</strong>多數驗證器 APP 都支援雲端備份（Authy、1Password）。請開啟。手機遺失且沒備份是帳戶救援工單的頭號原因。</div>' +
+          '<h2>其他值得知道的設定</h2>' +
+          '<ul>' +
+            '<li><strong>稅務表（W-9 / W-8BEN）。</strong>年收入超 $600 的美國聯盟需提交 W-9；非美國聯盟需提交 W-8BEN。達門檻時，我們會在設定 → 稅務中顯示表單。</li>' +
+            '<li><strong>撥款顯示姓名。</strong>PayPal 在交易中看到的姓名。預設為您的帳戶名；可在設定 → 撥款方式中修改。</li>' +
+            '<li><strong>通知偏好。</strong>在設定 → 通知中控制哪些事件觸發 Email（新佣金、撥款已發、爭議通知等）。</li>' +
+          '</ul>'
+      }
+    }
+  };
+
+  // ════════════════════════════════════════════════════════════════════
+  //  日本語 (Japanese)
+  // ════════════════════════════════════════════════════════════════════
+  HELP_I18N.ja = {
+    doc_title_suffix: ' — Boost Boss アフィリエイト ヘルプ',
+    doc_title_fallback: 'ヘルプセンター — Boost Boss アフィリエイト',
+    ui: {
+      hero_title: 'こんにちは。何かお困りですか？',
+      hero_placeholder: 'ヘルプを検索 — 「シェアリンク」「報酬」「支払い」など…',
+      back_to_dashboard: '← ダッシュボードへ戻る',
+      breadcrumb_help_center: 'ヘルプセンター',
+      related_articles: '関連記事',
+      still_need_help: 'まだお困りですか？',
+      article_not_found_title: '記事が見つかりません',
+      article_not_found_body: 'お探しの記事は存在しないか、名前が変更されました。',
+      article_not_found_link: '← ヘルプセンターへ戻る',
+      group_start: 'はじめに',
+      group_links: 'シェアリンクとアトリビューション',
+      group_commission: '報酬と支払い',
+      group_promote: 'プロモーション',
+      group_account: 'コンプライアンスとアカウント',
+      sb_getting_started:    'Boost Boss アフィリエイトをはじめよう',
+      sb_saving_ads:         '広告の保存とカタログの閲覧',
+      sb_share_links:        'シェアリンクと bb_click アトリビューション',
+      sb_clawback:           'コンバージョン、クリック、30 日間のクローバック',
+      sb_commission_model:   '報酬モデル v2 — 70/30 分配',
+      sb_payout_setup:       'PayPal 支払いの設定',
+      sb_payout_schedule:    '支払いスケジュール — 隔週金曜',
+      sb_promote_social:     'SNS でのプロモーション — X、IG、TikTok、FB',
+      sb_promote_newsletter: 'ニュースレターとメールでのプロモーション',
+      sb_exclusive_offers:   '独占オファーとプレミアムパートナー',
+      sb_ftc_disclosure:     'FTC 開示とアフィリエイト基準',
+      sb_two_factor:         '二要素認証とアカウント設定',
+    },
+    articles: {
+      'getting-started': {
+        title: 'Boost Boss アフィリエイトをはじめよう',
+        lede: 'Boost Boss は MCP ネイティブの広告ネットワークです。アフィリエイトとして、AI ツールで見つけた広告を保存し、オーディエンスにシェアし、購入されると報酬を獲得できます。60 秒で全体像をつかみましょう。',
+        related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+        body:
+          '<h2>Boost Boss とは（一段落で）</h2>' +
+          '<p>Boost Boss は AI 面 — Claude Desktop、Cursor、ChatGPT プラグイン、Discord や Slack のボット、ブラウザ拡張機能 — に広告を配信します。広告主はキャンペーンを実施し、インプレッション / クリック / 購入に応じて支払います。アフィリエイトはカタログから商品を紹介し、シェアリンク経由で購入されると報酬を獲得します。</p>' +
+          '<h2>最初の 10 分でやるべき 3 つのこと</h2>' +
+          '<ol>' +
+            '<li><strong>カタログを見る。</strong>サイドバーから<a href="/affiliate#catalog">商品カタログ</a>を開き、登録されている商品を確認します。報酬順に並べ替えれば、高コンバージョンの案件が見つかります。</li>' +
+            '<li><strong>最初のシェアリンクを発行する。</strong>紹介したい商品の「リンクを取得」をクリック。リンクは <code>/s/&lt;token&gt;</code> を経由してリダイレクトされ、<code>bb_click=&lt;UUID&gt;</code> のアトリビューション パラメータが付与されます。</li>' +
+            '<li><strong>支払い方法を設定する。</strong><a href="/affiliate#payouts">支払い記録</a>を開き、受け取り用の PayPal メールアドレスを追加します。これがないと、報酬は計上されても精算されません。</li>' +
+          '</ol>' +
+          '<h2>報酬の仕組み</h2>' +
+          '<p>シェアリンク経由で購入が発生すると、Boost Boss でいう <strong>アフィリエイトプール</strong>（販売者がアフィリエイト用に拠出する注文額の一定割合）の一部を受け取れます。配分は <strong>あなた 70% / Boost Boss 30%</strong>。詳しくは<a href="/help/article?id=commission-model">報酬モデル v2 の解説</a>をどうぞ。</p>' +
+          '<div class="callout info"><strong>具体例：</strong>アフィリエイトプールが 20% の商品で $100 の購入があった場合、Boost Boss は $20 のプールを受け取り、あなたに $14（プールの 70%）を渡し、$6（30%）を取ります。販売者は残りの $80 から PayPal の決済手数料を引いた額を受け取ります。</div>' +
+          '<h2>次にやること</h2>' +
+          '<ul>' +
+            '<li><a href="/help/article?id=share-links">アトリビューションの仕組み</a>を読み、クリック データの意味を理解しましょう。</li>' +
+            '<li><a href="/help/article?id=ftc-disclosure">FTC 開示ルール</a>に目を通しましょう — すべての公開プロモーションにスポンサー開示が必要です。</li>' +
+            '<li>プロモーション先を選びましょう：<a href="/help/article?id=promote-social">SNS</a>、<a href="/help/article?id=promote-newsletter">ニュースレター</a>、もしくは両方。</li>' +
+          '</ul>'
+      },
+      'saving-ads': {
+        title: '広告の保存とカタログの閲覧',
+        lede: '紹介する商品の見つけ方は 2 つ：AI ツールで見かけた広告を保存する、またはダッシュボードから広告主カタログを閲覧する。',
+        related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+        body:
+          '<h2>AI ツール内で直接保存する</h2>' +
+          '<p>Cursor、Claude Desktop、Discord のボットなどで Boost Boss 配信の広告を見たら、ブックマーク アイコンをタップしてください。ワンクリックで<a href="/affiliate#saves">マイ保存</a>ビューに追加されます — 手入力もコピペも不要です。</p>' +
+          '<p>保存されるのは個別のクリエイティブではなく商品（親）です。広告主が同じ商品で複数のキャンペーンや季節バリエーションを走らせていても、保存したエントリは常に正しい遷移先を指します。新しいキャンペーンはクリック時に最も適切なアクティブ版へ自動マッチします。</p>' +
+          '<h2>カタログを閲覧する</h2>' +
+          '<p><a href="/affiliate#catalog">商品カタログ</a>には、審査を通った広告主商品がすべて並びます。重要なフィルタは 2 つ：</p>' +
+          '<ul>' +
+            '<li><strong>報酬</strong> — アフィリエイトプールの割合で並べ替え。高いほど 1 件あたりの収益が大きくなります。</li>' +
+            '<li><strong>カテゴリ</strong> — 縦軸（SaaS、インフラ、コンテンツツールなど）で絞り込み、オーディエンスに合わせて選びやすくします。</li>' +
+          '</ul>' +
+          '<h2>「審査通過」の意味</h2>' +
+          '<p>カタログに表示される商品はすべて Boost Boss の審査を通過しています — 説明が正確、配送 URL が機能、（表示されている場合）「定価」比較が誠実、返金経路が有効。審査で却下された商品はカタログに出ず、紹介できません。</p>' +
+          '<div class="callout"><strong>なぜ重要か：</strong>カタログ内の商品は精査されているので、あなた側のコンバージョン リスクは低くなります。決済で止まる、届かないといった商品を紹介してしまう心配がありません。</div>'
+      },
+      'share-links': {
+        title: 'シェアリンクと bb_click アトリビューション',
+        lede: 'Boost Boss がどのように「この売上はあなたのリンク経由」と判断するか、なぜ Cookie 喪失や Safari ITP に強いのか、そしてあなたと広告主の双方の分析が機能するためにシェアリンクに何を含めるべきか。',
+        related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+        body:
+          '<h2>基本フロー</h2>' +
+          '<ol>' +
+            '<li>ダッシュボードでシェアリンクを発行します。形式は <code>https://boostboss.ai/s/&lt;token&gt;</code>。</li>' +
+            '<li>誰かがクリックします。リダイレクト サーバーが宛先 URL に <code>?bb_click=&lt;UUID&gt;</code> を付加し、302 で広告主の商品ページへ転送します。</li>' +
+            '<li>UUID は、あなたのアフィリエイト ID、クリック時刻、リファラ URL、概略の地域とともに記録されます。フォールバックとしてファーストパーティ Cookie も付与します。</li>' +
+            '<li>30 日間のクローバック期間内に購入が発生すると、購入 URL 上の <code>bb_click</code> UUID が売上をあなたへ帰属させます。</li>' +
+          '</ol>' +
+          '<h2>URL アトリビューションが要である理由</h2>' +
+          '<p>多くのアフィリエイト ネットワークはサードパーティ Cookie に依存しています — それは Safari ITP、Firefox ETP、そして Chrome でもブロックされたり制限されたりしています。Boost Boss は Cookie をフォールバック扱いとし、<strong>URL 内の bb_click UUID を主たる識別子</strong>とします。コンバージョン イベントまで URL パラメータが残れば、ブラウザの挙動に関係なくアトリビューションは機能します。</p>' +
+          '<h2>パラメータが落ちる経路</h2>' +
+          '<p>ユーザーがリンクをシェアする際、一部のプラットフォームは URL パラメータを取り除きます：</p>' +
+          '<ul>' +
+            '<li><strong>Twitter/X</strong> は通常そのまま残します。</li>' +
+            '<li><strong>iMessage / SMS</strong> はそのまま残します。</li>' +
+            '<li><strong>一部の Facebook 投稿</strong>は独自の fbclid を付け足しますが、あなたのパラメータは保持します。</li>' +
+            '<li><strong>一部のメールクライアント</strong>はリダイレクトで URL を短縮しますが、通常はパラメータを保持します。</li>' +
+          '</ul>' +
+          '<p>クリック数に対してコンバージョン率が極端に低い場合は、URL がチャネルで改変されていないか確認してください。</p>' +
+          '<h2>チャネル別のサブ ID</h2>' +
+          '<p>リンク発行時にサブ ID を最大 5 個追加できます（a-z、A-Z、0-9）。アトリビューションには影響しません — あとからどのチャネル経由のクリックかを判別するためのタグです。例：<code>sub1=twitter</code>、<code>sub1=newsletter-may</code>。<a href="/affiliate#conv-soon">セールス レポート</a>で確認できます。</p>'
+      },
+      'commission-model': {
+        title: '報酬モデル v2 — 70/30 分配の解説',
+        lede: 'Boost Boss が売上を販売者・あなた・プラットフォームでどう分けるか。新モデルはトップライン 15% 固定の取り分を廃止し、商品ごとのアフィリエイトプールに置き換えました — インセンティブが明確になり、アフィリエイト経由の売上が発生したときだけ手数料を取ります。',
+        related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+        body:
+          '<h2>1 件の売上の構造</h2>' +
+          '<p>カタログの各商品には販売者が設定した <strong>アフィリエイトプール割合</strong>があります。これがアフィリエイト マーケティングに充てられる注文額の割合です。Boost Boss はそのプールを 70 / 30 でアフィリエイトとプラットフォームに分けます：</p>' +
+          '<ul>' +
+            '<li><strong>70%</strong> → あなた（売上をもたらしたアフィリエイト）</li>' +
+            '<li><strong>30%</strong> → Boost Boss</li>' +
+            '<li><strong>残り</strong> → 販売者（注文額からアフィリエイトプール、PayPal 決済手数料を差し引いた額）</li>' +
+          '</ul>' +
+          '<h2>具体例</h2>' +
+          '<p>商品価格 <strong>$100</strong>、販売者設定のアフィリエイトプール <strong>20%</strong>。</p>' +
+          '<pre><code>注文額              $100.00\nアフィリエイトプール  $20.00  (注文の 20%)\n  → アフィリエイト    $14.00  (プールの 70%)\n  → Boost Boss         $6.00  (プールの 30%)\n販売者の精算         $80.00  PayPal 手数料を差し引き</code></pre>' +
+          '<h2>直接購入 vs アフィリエイト経由</h2>' +
+          '<p>アフィリエイト リンクを介さずに買われた場合（直接購入）、Boost Boss は標準の決済通過費用を超える手数料を一切取りません。販売者は手数料・税金・返金を差し引いた額をすべて受け取ります。私たちはアフィリエイトが実際に売上をもたらしたときだけ収益化します。</p>' +
+          '<div class="callout info"><strong>なぜ重要か：</strong>v2 モデルは私たちの利害をあなたと一致させます — Boost Boss はアフィリエイトが稼ぐときだけ稼ぐ。旧来の 15% トップライン固定では、あなたが関与していない直接売上にも手数料が発生していました。</div>' +
+          '<h2>既定は CPS、CPC と CPA はオプトイン</h2>' +
+          '<p>既定は <strong>CPS（成果報酬）</strong>：実際に売上が立ったときのみ報酬が発生します。一部の広告主は商品を <strong>CPC</strong>（クリック課金）や <strong>CPA</strong>（アクション課金 — 例：サインアップ）に設定します。その場合、カタログ行にモデル表示があり、収益化につながらなくても、条件を満たすクリックやアクションで報酬が発生します。</p>'
+      },
+      'payout-setup': {
+        title: 'PayPal 支払いの設定',
+        lede: 'Boost Boss はすべてのアフィリエイト支払いを PayPal で精算します。ダッシュボードに PayPal メールを 1 度登録すれば、隔週金曜の支払いは自動でその先に送られます。',
+        related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+        body:
+          '<h2>PayPal メールはどこに登録する？</h2>' +
+          '<p>サイドバーから<a href="/affiliate#payouts">支払い記録</a>へ。支払い方法フォームに必須項目が 1 つあります：<strong>PayPal メール</strong>。本人確認済みの PayPal アカウントに紐づくメールを使ってください。</p>' +
+          '<h2>当面 PayPal のみである理由</h2>' +
+          '<p>Boost Boss は入金（広告主のデポジット、ストアフロントの売上）と出金（パブリッシャー・販売者・アフィリエイトの支払い）を 1 つの決済プロバイダで運用しています。台湾の会社法が入出金を同一プロバイダで行うことを要求し、PayPal は世界で最も広い市場をカバーするため、現状は PayPal を採用しています。マルチプロバイダ対応後、他の手段も追加予定です。</p>' +
+          '<h2>アカウント要件</h2>' +
+          '<ul>' +
+            '<li><strong>受取側は本人確認済みの PayPal アカウント</strong>。未確認アカウントでは資金が保留される場合があります。</li>' +
+            '<li><strong>PayPal Payouts API のサポート国であること</strong> — 200 か国以上対応、未対応はごく少数です。</li>' +
+            '<li><strong>制裁スクリーニング</strong> — Boost Boss は米国または国際制裁下の地域（イラン、北朝鮮、キューバ、クリミア、シリアなど）には支払えません。</li>' +
+          '</ul>' +
+          '<h2>後で PayPal メールを変更する</h2>' +
+          '<p>同じ画面でいつでも変更できますが、変更には <strong>二要素認証</strong> が必要です。あえてそうしています — 受取先を黙って書き換えられる相手は、収益を横取りできてしまうからです。<a href="/help/article?id=two-factor">二要素認証</a>を参照。</p>' +
+          '<div class="callout warn"><strong>スペルは 3 度確認を。</strong>PayPal メールを打ち間違えると資金が戻り、支払いを再申請する必要があります。「支払いはどこ？」のお問い合わせの大半はタイプミスです。</div>'
+      },
+      'payout-schedule': {
+        title: '支払いスケジュール — 隔週金曜、火曜締め',
+        lede: 'Boost Boss は固定の隔週サイクルでアフィリエイトに支払います。火曜までに発生 → その金曜に着金。火曜を過ぎたら → 2 週間後。最低支払額は $1 USD。',
+        related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+        body:
+          '<h2>サイクル（一段落）</h2>' +
+          '<p>支払いは<strong>隔週金曜</strong>に実行されます。締めは直前の<strong>火曜 UTC 23:59</strong>。締めまでに計上された報酬はその金曜のバッチに含まれ、締め以降のものは 2 週間後の次の金曜に繰り越されます。</p>' +
+          '<h2>バッチに入るもの</h2>' +
+          '<ul>' +
+            '<li>火曜の締めまでに購入確定した売上の報酬</li>' +
+            '<li>返金期間内のため 30 日クローバック保留中の分は差し引き — それらは次回のバッチに回されます</li>' +
+            '<li>該当期間に発生した返金・チャージバックも差し引き</li>' +
+          '</ul>' +
+          '<h2>着金スピード</h2>' +
+          '<p>PayPal Payouts API が金曜 UTC 12:00 に発射すると、ほとんどの受取人は数分以内に PayPal 残高に資金が入ります。受取側に既存の PayPal アカウントが必要 — なければ PayPal が登録まで送金を保留します。アフィリエイト向けには「最大 30 分」と案内していますが、多くは 1〜2 分で着金します。</p>' +
+          '<h2>最低額と繰越</h2>' +
+          '<p><strong>最低支払い：$1 USD。</strong>下回る場合は残高に積み上がり、しきい値を超えるまでサイクル間で繰り越されます。有効期限はありません — 残高はずっとあなたのものです。</p>' +
+          '<h2>出金時の 2FA</h2>' +
+          '<p>出金リクエストはすべて、登録済みの認証アプリのワンタイム コードで確認します。SMS は使いません — SIM スワップが簡単すぎるからです。初回支払いの前に、<a href="/affiliate#settings">設定</a>で認証アプリを構成してください。<a href="/help/article?id=two-factor">二要素認証</a>を参照。</p>' +
+          '<div class="callout info"><strong>祝日週：</strong>米国の銀行祝日が金曜に重なっても、PayPal Payouts API は予定どおり動きます。遅延はありません。</div>'
+      },
+      'ftc-disclosure': {
+        title: 'FTC 開示とアフィリエイト基準',
+        lede: 'Boost Boss のアフィリエイト リンクを公の場で紹介する際は、必ずアフィリエイト関係を明示する必要があります。これは米国 FTC の要件であり、どの地域でも同様にお願いしています。',
+        related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+        body:
+          '<h2>ルール（平易な言葉で）</h2>' +
+          '<p>SNS、ニュースレター、Web サイト、動画、そのほか第三者の目に触れる場所でアフィリエイト リンクをシェアするときは、あなたがアフィリエイトであることを明確に伝える必要があります。開示はリンクの<strong>前</strong>に、<strong>目立つ形</strong>で、<strong>理解しやすく</strong>。</p>' +
+          '<h2>よい開示の例</h2>' +
+          '<ul>' +
+            '<li><strong>ツイート / 投稿：</strong>冒頭または末尾に <code>#ad</code>、<code>#sponsored</code>、<code>#affiliate</code>。3 つとも FTC 的に許容。</li>' +
+            '<li><strong>動画：</strong>序盤で口頭で言い、画面上にも表示する。エンドカードだけでは不十分。</li>' +
+            '<li><strong>ニュースレター：</strong>投稿冒頭に「この記事にはアフィリエイト リンクが含まれます。経由で購入されると私が少額の報酬を得ます」と明記。</li>' +
+            '<li><strong>ブログ記事：</strong>ニュースレターと同様。フッターだけの開示では通常不十分。</li>' +
+          '</ul>' +
+          '<h2>該当しないもの</h2>' +
+          '<ul>' +
+            '<li><strong><code>#partner</code> だけ</strong> — 曖昧すぎて FTC が指摘済み。<code>#ad</code> か <code>#sponsored</code> を。</li>' +
+            '<li><strong>プロフィールに埋め込んだ開示</strong> — 個別の投稿をカバーしません。</li>' +
+            '<li><strong>フッターの小さな文字</strong> — 見落とされやすく、それだけでは FTC 基準を満たしません。</li>' +
+          '</ul>' +
+          '<h2>Boost Boss 独自の規範</h2>' +
+          '<p>FTC コンプライアンスに加え、Boost Boss の<a href="/aup">利用規範</a>では次を禁止しています：</p>' +
+          '<ul>' +
+            '<li><strong>誤解を招くプロモーション</strong> — 偽の証言、偽造スクリーンショット、効果保証の主張。</li>' +
+            '<li><strong>自己取引</strong> — 自分のリンクから購入して報酬を取る、家族や友人と共謀する。</li>' +
+            '<li><strong>スパム</strong> — 同意のないメールや SMS、ブラックハット SEO（クローキング、ドアウェイ）、報酬付きクリック トラフィック。</li>' +
+            '<li><strong>商標悪用</strong> — 販売者のブランド キーワードへの有料検索入札、類似ドメインの登録。</li>' +
+          '</ul>' +
+          '<div class="callout warn"><strong>自己取引の検知。</strong>クリックからコンバージョンへのパターンを監視しています。継続的に怪しいパターンが見られると、計上済み報酬のクローバックや、場合によってはアカウント停止に至ります。</div>'
+      },
+      'clawback': {
+        title: 'コンバージョン、クリック、30 日間のクローバック',
+        lede: 'クリックから売上までの期間はどれだけ猶予がある？ 買い手が返金したら報酬はどうなる？ 押さえるべき 2 つの期間。',
+        related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+        body:
+          '<h2>アトリビューション期間</h2>' +
+          '<p>シェアリンクがクリックされると、<code>bb_click</code> UUID は <strong>30 日間</strong>有効です。その期間内に同じ URL パラメータ（またはフォールバック Cookie）で発生した売上はすべてあなたに帰属します — 買い手が途中で他の端末・サイト・セッションを経由しても問題ありません。</p>' +
+          '<h2>クローバック期間</h2>' +
+          '<p>報酬は<a href="/help/article?id=payout-schedule">隔週金曜の支払い</a>で支払われますが、各報酬は売上確定後 <strong>30 日のクローバック期間</strong>を保留されます。その期間内に買い手が返金またはチャージバックを成立させた場合、該当する報酬は取り消されます。</p>' +
+          '<h2>実際の流れ</h2>' +
+          '<ul>' +
+            '<li>0 日目に売上確定 → 報酬は「保留中」</li>' +
+            '<li>1〜30 日目 → 返金 / チャージバックのリスクがある間、保留中のまま</li>' +
+            '<li>30 日目以降 → 報酬は「解放」され、次の隔週バッチの対象に</li>' +
+            '<li>30 日以内に返金やチャージバックがあれば → 報酬キャンセル、残高調整</li>' +
+          '</ul>' +
+          '<h2>セールス レポートのステータス</h2>' +
+          '<p><a href="/affiliate#conv-soon">セールス レポート</a>では 3 つのステータスを表示します：</p>' +
+          '<ul>' +
+            '<li><strong>保留中</strong> — 売上は確定済みだが、まだ 30 日窓内</li>' +
+            '<li><strong>解放済み</strong> — 窓を過ぎ、次の支払いバッチの対象</li>' +
+            '<li><strong>取消</strong> — 買い手が返金もしくはチャージバック成立。報酬はキャンセル</li>' +
+          '</ul>' +
+          '<div class="callout"><strong>なぜ 30 日？</strong>多くの商品の返金窓は 14〜30 日です。30 日を超えると返金リスクが低くなるので、安心して報酬を解放し、次の隔週金曜に送金できます。</div>'
+      },
+      'promote-social': {
+        title: 'SNS でのプロモーション — X、IG、TikTok、FB',
+        lede: '主要 SNS ごとの実用的なコンバージョン Tips。魔法はありません — 商品をオーディエンスに合わせ、適切に開示することが肝心です。',
+        related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+        body:
+          '<h2>X（旧 Twitter）</h2>' +
+          '<ul>' +
+            '<li><strong>開示：</strong>ツイート冒頭に <code>#ad</code>。</li>' +
+            '<li><strong>効くもの：</strong>1 ツイート完結のレビュー + スクショ/動画 + 同ツイート内のリンク（返信に貼らない）。高単価商品はスレッドのほうが単発より転換が良い。</li>' +
+            '<li><strong>効かないもの：</strong>「RT で当たる！」式のボット ぽい懸賞 + アフィリエイト リンク。Twitter はエンゲージ ベイトを抑え込みます。</li>' +
+          '</ul>' +
+          '<h2>Instagram</h2>' +
+          '<ul>' +
+            '<li><strong>開示：</strong>IG の「タイアップ投稿」タグ（使えるなら）か、キャプション冒頭に <code>#ad</code>。</li>' +
+            '<li><strong>効くもの：</strong>ストーリーズ → スワイプアップで共有リンク（旧仕様）、もしくはプロフィール リンク + 直近投稿で誘導。ソフトウェア系は説明欄リンク付き Reels の方が普通の投稿より転換が高い。</li>' +
+            '<li><strong>効かないもの：</strong>長いアフィリエイト URL をキャプションに貼ること — 途中で切られます。リダイレクトではなく短く清潔なシェアリンクを。</li>' +
+          '</ul>' +
+          '<h2>TikTok</h2>' +
+          '<ul>' +
+            '<li><strong>開示：</strong>開始 3 秒以内に「これはスポンサーです」と口頭で言い、画面に <code>#ad</code>。</li>' +
+            '<li><strong>効くもの：</strong>デモ。15〜30 秒で商品の動きを見せる。プロフィールにリンクを置き、「リンクはプロフィールへ↑」のコメントをピン留め。</li>' +
+            '<li><strong>効かないもの：</strong>動画の説明欄にリンクを直接書くこと — 自動リンクにならず、視聴者はコピペしません。</li>' +
+          '</ul>' +
+          '<h2>Facebook</h2>' +
+          '<ul>' +
+            '<li><strong>開示：</strong>投稿冒頭に <code>#ad</code>。</li>' +
+            '<li><strong>効くもの：</strong>明確な利用シーンを描いた長文。FB のアルゴリズムは会話を評価するので、投稿で問いを投げ、コメントに返信する。</li>' +
+            '<li><strong>効かないもの：</strong>コメント欄に裸のアフィリエイト リンク — FB が露出を絞ります。本文に入れる。</li>' +
+          '</ul>' +
+          '<h2>普遍的アドバイス</h2>' +
+          '<p>商品をオーディエンスに合わせる。生産性 SaaS は r/productivity で転換し、r/aww では転換しません。コーディング ツールは開発者 Twitter で転換し、アート コミュニティでは違います。フォロワーの関心を見て、カタログから選びましょう。</p>'
+      },
+      'promote-newsletter': {
+        title: 'ニュースレターとメールでのプロモーション',
+        lede: 'B2B やプロシューマー向けでは、ニュースレターは SNS より転換が良い。Boost Boss アフィリエイトに効く定番パターンを紹介します。',
+        related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+        body:
+          '<h2>ニュースレターが効く理由</h2>' +
+          '<p>メールは意思を持って開かれます。読者はあなたを信頼して受信箱を渡している。ソフトウェア系では、ニュースレターのアフィリエイト リンクの転換率は SNS の 5〜10 倍に達することがよくあります。</p>' +
+          '<h2>効く開示パターン</h2>' +
+          '<p>成功しているアフィリエイト ニュースレターは、アフィリエイト リンクを含む投稿の冒頭に短い開示ブロックを置きます：</p>' +
+          '<div class="callout"><em>「下記のいくつかはアフィリエイト リンクです — 登録されると私が少額の報酬を得ます。価格は変わりません。自分が使った、あるいは入念に評価したものだけを紹介しています。」</em></div>' +
+          '<p>最初のリンクの前に置き、フッターには置かないでください。</p>' +
+          '<h2>戦術パターン</h2>' +
+          '<ul>' +
+            '<li><strong>ツールまとめ。</strong>「X を 10 倍速くしたツール 5 選」 — 5 つ選び、アフィリエイトがあるものはアフィ リンク、ないものは通常リンク。誠実さが信頼に変わる。</li>' +
+            '<li><strong>チュートリアル → ツール。</strong>カッコイイ操作を順に見せ、使ったツールに触れてアフィ リンクを置く。文脈が明確なので転換は自然と上がる。</li>' +
+            '<li><strong>セール通知。</strong>BB の独占オファーや期間限定割引が出たら、短く絞ったメールを送る — 緊迫感で転換します。</li>' +
+            '<li><strong>週次ダイジェストの 1 つの推し枠。</strong>普通のニュースレター内に、アフィリエイト商品の固定枠を 1 つ確保。読者が期待するようになり、スパム感を出さずに済みます。</li>' +
+          '</ul>' +
+          '<h2>ニュースレターで転換を殺すもの</h2>' +
+          '<ul>' +
+            '<li>1 通あたりリンクが多すぎる。1〜2 個に絞る — リンク同士が注意を奪い合います。</li>' +
+            '<li>隠れた開示。「あれ、これ広告だった？」と感じられた瞬間、購読解除されます。</li>' +
+            '<li>古いオファー。商品の状況が変わったら（値上げ、終了）、信頼を損なう前に更新か削除を。</li>' +
+          '</ul>' +
+          '<div class="callout info"><strong>サブ ID を活用。</strong>ニュースレター用のシェアリンクには <code>nl-2026-06</code> のようにサブ ID を付け、<a href="/affiliate#conv-soon">セールス レポート</a>でどの号がどの売上を生んだかを確認できるようにしましょう。効くものを伸ばす助けになります。</div>'
+      },
+      'exclusive-offers': {
+        title: '独占オファーとプレミアムパートナー',
+        lede: '通常のアフィリエイト体験を超える 2 つのアップグレード：Boost Boss が交渉する期間限定の割引と、規模に応じて広告主から直接届く取引機会。',
+        related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+        body:
+          '<h2>独占オファー</h2>' +
+          '<p>広告主は折々に Boost Boss 限定の割引コードや上乗せ報酬を交渉します。これらは<a href="/affiliate#exclusive">独占オファー</a>画面に表示され、期間限定でアクティブなアフィリエイトのみ利用できます。</p>' +
+          '<p>広告主の動機：限定オファーは緊迫感を生み、転換が良い。私たちの動機：あなたへの条件が良い = 推す理由が増える。</p>' +
+          '<h2>プレミアムパートナー</h2>' +
+          '<p>持続的な流量 — 通常は<strong>ネットワーク全体で 1 万クリック以上</strong> — を積み上げると、あなたの領域の広告主が個別レートで直接アプローチしてきます。これらの機会は<a href="/affiliate#partners">プレミアムパートナー</a>に表示されます。Boost Boss が橋渡しをし、商務条件はあなたと広告主との間で取り決めます。</p>' +
+          '<p>応募は不要 — プル型です。プロモーションを続け、量を達成すれば、パートナーが向こうから来ます。</p>' +
+          '<h2>独占オファーのアトリビューション</h2>' +
+          '<p>独占オファー コードは<strong>クーポン アトリビューション</strong>として機能します：買い手が会計時にコードを入力すると、たとえあなたの <code>bb_click</code> URL を踏んでいなくても、売上はあなたに帰属します。これにより、URL クリックがノイジーでもコード入力は意図が高い「ブロードキャスト型」プロモーション（ニュースレター、ポッドキャスト、動画説明）にきわめて適します。</p>' +
+          '<div class="callout"><strong>オーディエンスがあるなら声を上げて。</strong>ポッドキャスト、人気ニュースレター、特定ジャンルでの強い影響力をお持ちなら、<a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> にオーディエンス プロフィールをお送りください。マッチする独占オファーがある、あるいは直接マッチングを仲介できる場合があります。</div>'
+      },
+      'two-factor': {
+        title: 'アカウント設定と二要素認証',
+        lede: '二要素認証（2FA）は、アフィリエイト アカウントで最も慎重を要する操作 — 出金と PayPal メールの変更 — に必須です。最初の支払い前に必ず設定してください。',
+        related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+        body:
+          '<h2>2FA を必須にする理由</h2>' +
+          '<p>Boost Boss アカウントにアクセスできる人は、こっそり PayPal メールを書き換えて収益を横取りできます。SMS 型 2FA は SIM スワップに弱いため、TOTP（時間ベースのワンタイム パスワード）認証アプリを使います。</p>' +
+          '<h2>設定の手順</h2>' +
+          '<ol>' +
+            '<li><a href="/affiliate#settings">設定 → セキュリティ</a>へ。</li>' +
+            '<li>「二要素認証を有効化」をクリック。</li>' +
+            '<li>認証アプリ（Google Authenticator、Authy、1Password など TOTP 対応のもの）で QR コードをスキャン。</li>' +
+            '<li>アプリの 6 桁コードを入力して確定。</li>' +
+          '</ol>' +
+          '<h2>2FA が守る操作</h2>' +
+          '<ul>' +
+            '<li><strong>すべての出金リクエスト</strong> — 直近の 6 桁コードを尋ねられます。</li>' +
+            '<li><strong>PayPal 支払いメールの変更</strong> — 同上。</li>' +
+            '<li><strong>2FA 自体の無効化</strong> — オフにするにも新しいコードが必要。</li>' +
+          '</ul>' +
+          '<p>通常のサインインにはコードは不要 — それはパスワードの仕事です。2FA はお金に触れる操作のときだけ発動します。</p>' +
+          '<h2>認証デバイスを紛失したら</h2>' +
+          '<p>リカバリ コードがないと、出金も支払い方法の変更もできません。アフィリエイト ID を添えて <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> へご連絡ください。本人確認プロセスで 2FA をリセットします — 通常は 1 営業日で対応できます。</p>' +
+          '<div class="callout warn"><strong>認証アプリのバックアップを。</strong>多くの認証アプリはクラウド バックアップ（Authy、1Password）をサポートしています。オンにしてください。バックアップなしで携帯を失くすことが、アカウント復旧依頼の第 1 位の原因です。</div>' +
+          '<h2>その他知っておくべき設定</h2>' +
+          '<ul>' +
+            '<li><strong>税務書類（W-9 / W-8BEN）。</strong>年 $600 を超える米国アフィリエイトは W-9 を、米国外は W-8BEN を提出します。しきい値を越えると、設定 → 税務にフォームが出ます。</li>' +
+            '<li><strong>支払い時の表示名。</strong>PayPal の取引で見える名前。既定はアカウント名で、設定 → 支払い方法から変更できます。</li>' +
+            '<li><strong>通知設定。</strong>どのイベントでメールを送るか（新規報酬、支払い送付、紛争通知など）を、設定 → 通知でコントロール。</li>' +
+          '</ul>'
+      }
+    }
+  };
+
+  // ════════════════════════════════════════════════════════════════════
+  //  한국어 (Korean)
+  // ════════════════════════════════════════════════════════════════════
+  HELP_I18N.ko = {
+    doc_title_suffix: ' — Boost Boss 어필리에이트 도움말',
+    doc_title_fallback: '도움말 센터 — Boost Boss 어필리에이트',
+    ui: {
+      hero_title: '안녕하세요, 무엇을 도와드릴까요?',
+      hero_placeholder: '도움말 검색 — \'공유 링크\', \'커미션\', \'정산\' 등…',
+      back_to_dashboard: '← 대시보드로 돌아가기',
+      breadcrumb_help_center: '도움말 센터',
+      related_articles: '관련 문서',
+      still_need_help: '아직 도움이 필요하신가요?',
+      article_not_found_title: '문서를 찾을 수 없어요',
+      article_not_found_body: '찾으시는 문서가 없거나 이름이 변경되었어요.',
+      article_not_found_link: '← 도움말 센터로 돌아가기',
+      group_start: '시작하기',
+      group_links: '공유 링크와 어트리뷰션',
+      group_commission: '커미션과 정산',
+      group_promote: '프로모션',
+      group_account: '컴플라이언스 및 계정',
+      sb_getting_started:    'Boost Boss 어필리에이트 시작하기',
+      sb_saving_ads:         '광고 저장하기와 카탈로그 둘러보기',
+      sb_share_links:        '공유 링크와 bb_click 어트리뷰션',
+      sb_clawback:           '전환, 클릭 그리고 30일 클로백',
+      sb_commission_model:   '커미션 모델 v2 — 70/30 분배',
+      sb_payout_setup:       'PayPal 정산 설정',
+      sb_payout_schedule:    '정산 일정 — 격주 금요일',
+      sb_promote_social:     'SNS 프로모션 — X, IG, TikTok, FB',
+      sb_promote_newsletter: '뉴스레터와 이메일 프로모션',
+      sb_exclusive_offers:   '독점 오퍼와 프리미엄 파트너',
+      sb_ftc_disclosure:     'FTC 고지와 어필리에이트 기준',
+      sb_two_factor:         '2단계 인증과 계정 설정',
+    },
+    articles: {
+      'getting-started': {
+        title: 'Boost Boss 어필리에이트 시작하기',
+        lede: 'Boost Boss는 MCP 네이티브 광고 네트워크예요. 어필리에이트로 활동하면 AI 도구에서 발견한 광고를 저장하고, 오디언스에게 공유하고, 구매가 발생하면 수익을 얻을 수 있어요. 60초 안에 전체 흐름을 살펴볼게요.',
+        related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+        body:
+          '<h2>Boost Boss를 한 문단으로</h2>' +
+          '<p>Boost Boss는 AI 표면 — Claude Desktop, Cursor, ChatGPT 플러그인, Discord와 Slack 봇, 브라우저 확장 — 에 스폰서드 콘텐츠를 노출해요. 광고주는 캠페인을 운영하고 노출 / 클릭 / 구매에 따라 비용을 지불합니다. 어필리에이트는 카탈로그의 상품을 홍보하고, 구매자가 공유 링크로 전환하면 커미션을 받게 돼요.</p>' +
+          '<h2>처음 10분 안에 할 세 가지</h2>' +
+          '<ol>' +
+            '<li><strong>카탈로그 둘러보기.</strong> 사이드바에서 <a href="/affiliate#catalog">상품 카탈로그</a>를 열어 등록된 상품을 확인해보세요. 커미션 순으로 정렬하면 전환 잘 되는 오퍼를 찾을 수 있어요.</li>' +
+            '<li><strong>첫 공유 링크 만들기.</strong> 홍보하고 싶은 상품에서 "링크 받기"를 클릭하세요. 링크는 <code>/s/&lt;token&gt;</code>을 거쳐 리디렉션되며, <code>bb_click=&lt;UUID&gt;</code> 어트리뷰션 파라미터가 붙어요.</li>' +
+            '<li><strong>정산 방법 설정.</strong> <a href="/affiliate#payouts">정산 기록</a>으로 가서 받을 PayPal 이메일을 등록하세요. 이게 없으면 수익은 쌓이지만 정산되지 않아요.</li>' +
+          '</ol>' +
+          '<h2>수익 구조</h2>' +
+          '<p>누군가 공유 링크를 클릭해서 구매하면, Boost Boss가 말하는 <strong>어필리에이트 풀</strong>의 일부를 받아요. 어필리에이트 풀은 판매자가 어필리에이트 마케팅을 위해 따로 떼어 둔 주문 금액의 일정 비율이에요. 분배는 <strong>여러분 70% / Boost Boss 30%</strong>. 자세히는 <a href="/help/article?id=commission-model">커미션 모델 v2 해설</a>을 보세요.</p>' +
+          '<div class="callout info"><strong>쉽게 말하면:</strong> 어필리에이트 풀이 20%인 상품을 $100어치 구매했다면, Boost Boss는 $20의 풀을 가져와 여러분에게 $14(풀의 70%)를 주고 $6(30%)을 가져가요. 판매자는 나머지 $80에서 PayPal 결제 수수료를 뺀 금액을 받아요.</div>' +
+          '<h2>그다음 할 일</h2>' +
+          '<ul>' +
+            '<li><a href="/help/article?id=share-links">어트리뷰션이 어떻게 작동하는지</a> 읽어보고, 클릭 데이터 뒤의 로직을 이해해보세요.</li>' +
+            '<li><a href="/help/article?id=ftc-disclosure">FTC 고지 규칙</a>을 훑어보세요 — 모든 공개 프로모션엔 스폰서십 고지가 필요해요.</li>' +
+            '<li>프로모션 채널을 정하세요: <a href="/help/article?id=promote-social">SNS</a>, <a href="/help/article?id=promote-newsletter">뉴스레터</a>, 또는 둘 다.</li>' +
+          '</ul>'
+      },
+      'saving-ads': {
+        title: '광고 저장하기와 카탈로그 둘러보기',
+        lede: '홍보할 상품을 찾는 방법은 두 가지: AI 도구에서 본 광고를 저장하거나, 대시보드에서 광고주 카탈로그를 둘러보는 거예요.',
+        related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+        body:
+          '<h2>AI 도구 안에서 저장하기</h2>' +
+          '<p>Cursor, Claude Desktop, Discord 봇 등에서 Boost Boss가 서빙한 광고를 보면, 북마크 아이콘을 탭하세요. 상품이 한 번에 <a href="/affiliate#saves">내 저장</a> 뷰에 추가돼요 — 수기 입력도, 복붙도 필요 없어요.</p>' +
+          '<p>저장되는 건 개별 크리에이티브가 아니라 상품(부모)이에요. 그래서 광고주가 같은 상품에 여러 캠페인이나 시즌 변형을 운영해도, 저장한 항목은 항상 올바른 도착지를 가리켜요. 새 캠페인은 클릭 시 가장 활성화된 매칭을 자동으로 사용해요.</p>' +
+          '<h2>카탈로그 둘러보기</h2>' +
+          '<p><a href="/affiliate#catalog">상품 카탈로그</a>에는 심사를 통과한 광고주 상품이 모두 노출돼요. 가장 중요한 필터 두 가지:</p>' +
+          '<ul>' +
+            '<li><strong>커미션</strong> — 어필리에이트 풀 비율로 정렬. 높을수록 건당 수익이 커요.</li>' +
+            '<li><strong>카테고리</strong> — 버티컬(SaaS, 인프라, 콘텐츠 도구 등)로 좁혀, 오디언스에 맞는 상품을 고를 수 있어요.</li>' +
+          '</ul>' +
+          '<h2>"심사 통과"란 무슨 뜻인가요</h2>' +
+          '<p>카탈로그에 보이는 모든 상품은 Boost Boss 심사를 거쳤어요 — 설명이 정확하고, 이행 URL이 작동하고, "원가" 비교(표시되는 경우)가 정직하며, 환불 경로가 유효해요. 심사에서 떨어진 상품은 카탈로그에 노출되지 않고 홍보할 수 없어요.</p>' +
+          '<div class="callout"><strong>여러분에게 중요한 이유:</strong> 카탈로그 상품은 검증되어 있어서 전환 리스크가 낮아요. 결제에서 망가지거나 배송이 안 되는 상품을 떠안을 일이 적어요.</div>'
+      },
+      'share-links': {
+        title: '공유 링크와 bb_click 어트리뷰션',
+        lede: 'Boost Boss가 어떻게 매출이 여러분 링크에서 나왔는지 알아내는지, 이 시스템이 쿠키 손실과 Safari ITP를 어떻게 버티는지, 그리고 여러분과 광고주 양쪽의 분석이 모두 잘 굴러가도록 공유 링크에 뭘 담아야 하는지.',
+        related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+        body:
+          '<h2>기본 흐름</h2>' +
+          '<ol>' +
+            '<li>대시보드에서 공유 링크를 만들어요. 형태는 <code>https://boostboss.ai/s/&lt;token&gt;</code>.</li>' +
+            '<li>누군가 클릭하면, 리디렉트 서버가 도착 URL에 <code>?bb_click=&lt;UUID&gt;</code>를 붙이고 광고주 상품 페이지로 302 리디렉션해요.</li>' +
+            '<li>UUID는 여러분의 어필리에이트 ID, 클릭 시각, 레퍼러 URL, 대략적인 지역과 함께 기록돼요. 폴백으로 퍼스트파티 쿠키도 심어 둬요.</li>' +
+            '<li>30일 클로백 윈도우 안에 매출이 발생하면, 구매 URL의 <code>bb_click</code> UUID가 매출을 여러분에게 귀속시켜요.</li>' +
+          '</ol>' +
+          '<h2>URL 어트리뷰션이 핵심인 이유</h2>' +
+          '<p>대부분의 어필리에이트 네트워크는 서드파티 쿠키에 의존하는데, Safari ITP, Firefox ETP, 그리고 점점 더 엄격해지는 Chrome이 이를 차단하거나 제한하고 있어요. Boost Boss는 쿠키를 폴백으로 두고, <strong>URL 안의 bb_click UUID가 핵심 식별자</strong>예요. 전환 이벤트까지 URL 파라미터가 살아만 있다면, 브라우저 정책과 상관없이 어트리뷰션이 작동해요.</p>' +
+          '<h2>파라미터가 잘리는 경우</h2>' +
+          '<p>사용자가 링크를 공유할 때 URL 파라미터를 제거하는 플랫폼도 있어요:</p>' +
+          '<ul>' +
+            '<li><strong>Twitter/X</strong>는 보통 유지해요.</li>' +
+            '<li><strong>iMessage / SMS</strong>는 유지해요.</li>' +
+            '<li><strong>일부 Facebook 게시물</strong>은 자체 fbclid를 붙이지만 여러분 파라미터는 보존해요.</li>' +
+            '<li><strong>일부 메일 클라이언트</strong>는 리디렉트로 URL을 줄이지만 보통 파라미터는 보존돼요.</li>' +
+          '</ul>' +
+          '<p>오디언스 전환율이 클릭 수에 비해 너무 낮다면, 어느 채널에서 URL이 변형되는지 확인해보세요.</p>' +
+          '<h2>채널 추적용 Sub ID</h2>' +
+          '<p>링크를 만들 때 Sub ID를 최대 5개(a-z, A-Z, 0-9)까지 더할 수 있어요. 어트리뷰션엔 영향을 주지 않고 — 나중에 어느 채널에서 클릭이 왔는지 구분하려고 직접 붙이는 태그예요. 예: <code>sub1=twitter</code>, <code>sub1=newsletter-may</code>. <a href="/affiliate#conv-soon">매출 리포트</a>에서 볼 수 있어요.</p>'
+      },
+      'commission-model': {
+        title: '커미션 모델 v2 — 70/30 분배 해설',
+        lede: 'Boost Boss가 매출을 판매자, 여러분, 그리고 플랫폼 사이에 어떻게 나누는지. 새 모델은 일률 15% 톱라인 수수료를 상품별 어필리에이트 풀로 바꿨어요 — 인센티브가 더 명확하고, 어필리에이트가 매출을 만든 경우에만 수수료를 받아요.',
+        related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+        body:
+          '<h2>한 건의 매출 구조</h2>' +
+          '<p>카탈로그의 모든 상품엔 판매자가 설정한 <strong>어필리에이트 풀 비율</strong>이 있어요. 어필리에이트 마케팅에 쓰이는 주문 금액의 몫이에요. Boost Boss는 그 풀을 70 / 30으로 어필리에이트와 플랫폼에 나눠요:</p>' +
+          '<ul>' +
+            '<li><strong>70%</strong> → 여러분(매출을 만든 어필리에이트)</li>' +
+            '<li><strong>30%</strong> → Boost Boss</li>' +
+            '<li><strong>나머지</strong> → 판매자(주문액에서 어필리에이트 풀과 PayPal 결제 수수료를 뺀 금액)</li>' +
+          '</ul>' +
+          '<h2>구체적인 예시</h2>' +
+          '<p>상품 가격 <strong>$100</strong>, 판매자가 설정한 어필리에이트 풀 <strong>20%</strong>.</p>' +
+          '<pre><code>주문 금액            $100.00\n어필리에이트 풀       $20.00  (주문의 20%)\n  → 어필리에이트      $14.00  (풀의 70%)\n  → Boost Boss         $6.00  (풀의 30%)\n판매자 정산          $80.00  PayPal 수수료 차감</code></pre>' +
+          '<h2>직접 매출 vs 어필리에이트 매출</h2>' +
+          '<p>구매자가 어필리에이트 링크 없이 구매하면(직접 매출), Boost Boss는 표준 결제 수수료 외엔 어떤 커미션도 가져가지 않아요. 판매자는 수수료, 세금, 환불을 뺀 주문 전액을 가져가요. 우리는 어필리에이트가 실제로 매출을 일으킨 경우에만 수익을 내요.</p>' +
+          '<div class="callout info"><strong>왜 중요한가:</strong> v2 모델은 우리 이익을 여러분과 일치시켜요 — Boost Boss는 어필리에이트가 벌 때만 벌어요. 옛 15% 톱라인 방식에선 여러분이 관여하지 않은 직접 매출에서도 수수료를 받았어요.</div>' +
+          '<h2>기본은 CPS, CPC와 CPA는 옵트인</h2>' +
+          '<p>기본은 <strong>CPS(매출당 비용)</strong>: 실제 매출이 잡혀야 수익이 나요. 일부 광고주는 상품을 <strong>CPC</strong>(클릭당 비용)나 <strong>CPA</strong>(가입 등 액션당 비용)로 설정해요. 그럴 땐 카탈로그 행에 모델 표시가 보이고, 매출로 이어지지 않아도 조건을 만족하는 클릭이나 액션에서 수익이 발생해요.</p>'
+      },
+      'payout-setup': {
+        title: 'PayPal 정산 설정',
+        lede: 'Boost Boss는 모든 어필리에이트 정산을 PayPal로 처리해요. 대시보드에 PayPal 이메일을 한 번만 등록하면, 격주 금요일 정산이 자동으로 그쪽으로 가요.',
+        related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+        body:
+          '<h2>PayPal 이메일은 어디에 등록하나요</h2>' +
+          '<p>사이드바의 <a href="/affiliate#payouts">정산 기록</a>으로 가세요. 정산 수단 폼에 필수 항목이 하나 있어요: <strong>PayPal 이메일</strong>. 본인 확인이 끝난 PayPal 계정에 연결된 이메일을 사용하세요.</p>' +
+          '<h2>지금은 왜 PayPal만 지원하나요</h2>' +
+          '<p>Boost Boss는 입금(광고주 입금, 구매자 스토어프런트 결제)과 출금(퍼블리셔, 판매자, 어필리에이트 정산)을 한 개의 결제 프로바이더로 운영해요. 대만 회사법이 입출금을 같은 프로바이더로 처리하도록 요구하고, PayPal이 세계에서 가장 넓은 시장을 커버하기 때문에 현재는 PayPal을 쓰고 있어요. 멀티 프로바이더가 열리면 추가 수단이 로드맵에 올라갈 거예요.</p>' +
+          '<h2>계정 요건</h2>' +
+          '<ul>' +
+            '<li><strong>수령 측은 본인 확인된 PayPal 계정.</strong> 미확인 계정은 자금이 보류될 수 있어요.</li>' +
+            '<li><strong>PayPal Payouts API 지원 국가</strong> — 200개 이상 국가 지원, 미지원은 극히 일부.</li>' +
+            '<li><strong>제재 스크리닝</strong> — Boost Boss는 미국 또는 국제 제재 지역(이란, 북한, 쿠바, 크림반도, 시리아 등)에는 정산할 수 없어요.</li>' +
+          '</ul>' +
+          '<h2>나중에 PayPal 이메일 바꾸기</h2>' +
+          '<p>같은 화면에서 언제든 바꿀 수 있지만, 변경엔 <strong>2단계 인증</strong>이 필요해요. 일부러 그렇게 해놨어요 — 수령지를 조용히 바꿀 수 있는 사람은 여러분 수익을 가로챌 수도 있으니까요. <a href="/help/article?id=two-factor">2단계 인증</a>을 보세요.</p>' +
+          '<div class="callout warn"><strong>철자를 세 번 확인하세요.</strong> PayPal 이메일을 잘못 입력하면 자금이 반송되고 정산을 다시 요청해야 해요. "내 정산은 어디 갔나요?" 문의의 대부분은 오타예요.</div>'
+      },
+      'payout-schedule': {
+        title: '정산 일정 — 격주 금요일, 화요일 마감',
+        lede: 'Boost Boss는 고정된 격주 사이클로 어필리에이트에 정산해요. 화요일까지 발생 → 그 주 금요일에 입금. 화요일 이후 → 2주 더 기다림. 최소 정산 금액은 $1 USD.',
+        related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+        body:
+          '<h2>한 문단으로 보는 사이클</h2>' +
+          '<p>정산은 <strong>격주 금요일</strong>마다 실행돼요. 마감은 직전 <strong>화요일 UTC 23:59</strong>. 마감 전 기록된 수익은 그 주 금요일 배치에 포함되고, 마감 후 기록된 건은 2주 뒤 다음 금요일로 넘어가요.</p>' +
+          '<h2>한 배치에 들어가는 것</h2>' +
+          '<ul>' +
+            '<li>화요일 마감까지 캡처된 매출의 커미션</li>' +
+            '<li>환불 윈도우가 남아 30일 클로백 보류 중인 분은 차감 — 이는 다음 적격 배치로 넘어가요</li>' +
+            '<li>해당 기간에 발생한 환불과 차지백도 차감</li>' +
+          '</ul>' +
+          '<h2>입금 속도</h2>' +
+          '<p>PayPal Payouts API가 금요일 UTC 12:00에 발사하면, 대다수 수령인은 몇 분 안에 PayPal 잔액에서 자금을 볼 수 있어요. 수령 측에 이미 PayPal 계정이 필요해요 — 없으면 PayPal이 가입 시까지 송금을 보류해요. 어필리에이트분들께는 "최대 30분" 윈도우로 안내하지만, 보통은 1~2분 안에 들어와요.</p>' +
+          '<h2>최소 금액과 이월</h2>' +
+          '<p><strong>최소 정산: $1 USD.</strong> 그 아래는 잔액에 남아 사이클 간 누적돼 임계치를 넘으면 정산돼요. 만료는 없어요 — 잔액은 영원히 여러분 거예요.</p>' +
+          '<h2>출금 시 2FA</h2>' +
+          '<p>모든 출금 요청은 등록된 인증 앱의 일회용 코드로 확인해야 해요. SMS는 쓰지 않아요 — SIM 스왑이 너무 쉬워요. 첫 정산을 기다리기 전에 <a href="/affiliate#settings">설정</a>에서 인증 앱을 미리 구성하세요. <a href="/help/article?id=two-factor">2단계 인증</a>을 보세요.</p>' +
+          '<div class="callout info"><strong>휴일 주간:</strong> 미국 은행 휴일이 금요일에 걸려도, PayPal Payouts API는 일정대로 돌아가요. 지연은 없어요.</div>'
+      },
+      'ftc-disclosure': {
+        title: 'FTC 고지와 어필리에이트 기준',
+        lede: 'Boost Boss 어필리에이트 링크를 공개적으로 홍보할 때는, 어필리에이트 관계를 분명히 밝혀야 해요. 이는 미국 FTC의 요구사항이고, 우리는 모든 지역에 동일하게 적용해요.',
+        related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+        body:
+          '<h2>쉬운 말로 본 규칙</h2>' +
+          '<p>SNS, 뉴스레터, 웹사이트, 영상, 그 외 제3자가 볼 만한 곳에서 어필리에이트 링크를 공유할 땐, 여러분이 어필리에이트라는 사실을 명확히 알려야 해요. 고지는 링크 <strong>앞</strong>에, <strong>눈에 잘 띄게</strong>, <strong>이해하기 쉽게</strong> 두세요.</p>' +
+          '<h2>좋은 고지 예시</h2>' +
+          '<ul>' +
+            '<li><strong>트윗 / 게시물:</strong> 글머리나 끝에 <code>#ad</code>, <code>#sponsored</code>, <code>#affiliate</code>. 세 가지 모두 FTC가 인정해요.</li>' +
+            '<li><strong>영상:</strong> 도입부에 말로 고지하고, 화면에도 표시하세요. 엔드카드만으론 부족해요.</li>' +
+            '<li><strong>뉴스레터:</strong> 글머리에 "이 글은 어필리에이트 링크를 포함합니다 — 링크를 통해 구매하시면 제가 약간의 커미션을 받아요."</li>' +
+            '<li><strong>블로그 글:</strong> 뉴스레터와 동일. 푸터 고지만으로는 보통 부족해요.</li>' +
+          '</ul>' +
+          '<h2>인정되지 않는 것</h2>' +
+          '<ul>' +
+            '<li><strong><code>#partner</code>만</strong> — 너무 모호해서 FTC가 지적했어요. <code>#ad</code>나 <code>#sponsored</code>를 쓰세요.</li>' +
+            '<li><strong>프로필에 묻힌 고지</strong> — 프로필에 어필리에이트 링크를 언급해도 개별 게시물엔 적용되지 않아요.</li>' +
+            '<li><strong>작은 푸터 글씨</strong> — 놓치기 쉽고, 그것만으론 FTC 기준을 충족하지 않아요.</li>' +
+          '</ul>' +
+          '<h2>Boost Boss 고유 규칙</h2>' +
+          '<p>FTC 준수에 더해, Boost Boss의 <a href="/aup">이용 정책</a>은 다음을 금지해요:</p>' +
+          '<ul>' +
+            '<li><strong>오인 유발 프로모션</strong> — 가짜 후기, 조작 스크린샷, 결과 보장 주장.</li>' +
+            '<li><strong>자기 거래</strong> — 본인 링크로 구매해 커미션을 챙기거나, 친구/가족과 짜는 행위.</li>' +
+            '<li><strong>스팸</strong> — 동의 없는 이메일/SMS, 기만적인 SEO(클로킹, 도어웨이), 보상형 클릭 트래픽.</li>' +
+            '<li><strong>상표 남용</strong> — 판매자의 브랜드 키워드 유료 입찰, 유사 도메인 등록.</li>' +
+          '</ul>' +
+          '<div class="callout warn"><strong>자기 거래 탐지.</strong> 클릭에서 전환으로 이어지는 패턴을 모니터링해요. 의심 패턴이 지속되면 누적 커미션 클로백, 경우에 따라 계정 정지로 이어질 수 있어요.</div>'
+      },
+      'clawback': {
+        title: '전환, 클릭 그리고 30일 클로백',
+        lede: '클릭을 매출로 바꿀 시간은 얼마나 있나? 구매자가 환불하면 커미션은 어떻게 되나? 알아둘 두 개의 윈도우.',
+        related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+        body:
+          '<h2>어트리뷰션 윈도우</h2>' +
+          '<p>공유 링크가 클릭되면 <code>bb_click</code> UUID는 <strong>30일</strong> 동안 유효해요. 그 윈도우 안에 같은 URL 파라미터(혹은 폴백 쿠키)로 발생한 매출은 모두 여러분에게 귀속돼요 — 구매자가 중간에 다른 기기, 사이트, 세션을 거쳐도 상관없어요.</p>' +
+          '<h2>클로백 윈도우</h2>' +
+          '<p>커미션은 <a href="/help/article?id=payout-schedule">격주 금요일 일정</a>에 따라 지급되지만, 각 커미션은 매출 캡처 후 <strong>30일 클로백 윈도우</strong> 동안 보류돼요. 그 윈도우 안에 구매자가 환불하거나 차지백에 성공하면 해당 커미션은 회수돼요.</p>' +
+          '<h2>실제 흐름</h2>' +
+          '<ul>' +
+            '<li>0일째 매출 캡처 → 커미션은 "보류"</li>' +
+            '<li>1~30일 → 환불/차지백 리스크가 있는 동안 보류 상태</li>' +
+            '<li>30일 이후 → 커미션 "릴리즈", 다음 격주 배치 대상</li>' +
+            '<li>30일 내 환불 또는 차지백 → 커미션 취소, 잔액 조정</li>' +
+          '</ul>' +
+          '<h2>매출 리포트 의미</h2>' +
+          '<p><a href="/affiliate#conv-soon">매출 리포트</a>엔 세 가지 상태가 표시돼요:</p>' +
+          '<ul>' +
+            '<li><strong>보류</strong> — 매출은 잡혔지만 아직 30일 윈도우 안</li>' +
+            '<li><strong>릴리즈</strong> — 윈도우를 지났고, 다음 정산 배치 대상</li>' +
+            '<li><strong>회수</strong> — 환불 또는 차지백 성공; 커미션 취소</li>' +
+          '</ul>' +
+          '<div class="callout"><strong>왜 30일이냐고요?</strong> 대부분 상품의 환불 윈도우가 14~30일이에요. 30일이 지나면 환불 리스크가 낮아서, 자신 있게 커미션을 릴리즈하고 다음 격주 금요일에 송금할 수 있어요.</div>'
+      },
+      'promote-social': {
+        title: 'SNS 프로모션 — X, IG, TikTok, FB',
+        lede: '주요 SNS별 실전 전환 팁. 마법은 없어요 — 핵심은 상품을 오디언스에 맞추고, 제대로 고지하는 거예요.',
+        related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+        body:
+          '<h2>X (구 Twitter)</h2>' +
+          '<ul>' +
+            '<li><strong>고지:</strong> 트윗 머리에 <code>#ad</code>.</li>' +
+            '<li><strong>잘 되는 것:</strong> 한 트윗에 스크린샷/영상 한 컷과 링크를 같이 넣기(답글에 링크 달지 말기). 고가 상품은 스레드가 단일 트윗보다 전환이 잘 돼요.</li>' +
+            '<li><strong>안 되는 것:</strong> 봇 느낌의 "RT 이벤트" + 어필리에이트 링크. Twitter가 어그로형 글을 눌러요.</li>' +
+          '</ul>' +
+          '<h2>Instagram</h2>' +
+          '<ul>' +
+            '<li><strong>고지:</strong> IG 내장 "유료 광고" 태그(가능하면) 또는 캡션 머리에 <code>#ad</code>.</li>' +
+            '<li><strong>잘 되는 것:</strong> 스토리 → 스와이프업으로 공유 링크(구버전), 또는 프로필 링크 + 그쪽을 가리키는 최근 게시물. 소프트웨어 상품은 설명에 링크 단 Reels가 일반 포스트보다 전환이 좋아요.</li>' +
+            '<li><strong>안 되는 것:</strong> 캡션에 긴 어필리에이트 URL — 잘려요. 리디렉트 말고 깔끔한 공유 링크를 쓰세요.</li>' +
+          '</ul>' +
+          '<h2>TikTok</h2>' +
+          '<ul>' +
+            '<li><strong>고지:</strong> 첫 3초 안에 "이건 스폰서예요"라고 말로 하고, 화면엔 <code>#ad</code>.</li>' +
+            '<li><strong>잘 되는 것:</strong> 데모. 15~30초 동안 제품이 동작하는 모습 보여주기. 프로필에 링크 + "링크는 프로필에 ↑" 댓글 고정.</li>' +
+            '<li><strong>안 되는 것:</strong> 영상 설명에 링크를 그대로 두기 — 자동 링크가 안 되고, 시청자도 복붙 안 해요.</li>' +
+          '</ul>' +
+          '<h2>Facebook</h2>' +
+          '<ul>' +
+            '<li><strong>고지:</strong> 게시물 머리에 <code>#ad</code>.</li>' +
+            '<li><strong>잘 되는 것:</strong> 사용 사례 스토리가 명확한 장문 게시물. Facebook 알고리즘은 대화를 보상하니, 게시물에서 질문을 던지고 댓글에 답하세요.</li>' +
+            '<li><strong>안 되는 것:</strong> 댓글에 어필리에이트 링크 날것 — FB가 노출을 깎아요. 본문에 넣으세요.</li>' +
+          '</ul>' +
+          '<h2>공통 팁</h2>' +
+          '<p>상품을 오디언스에 맞추세요. 생산성 SaaS는 r/productivity에서 전환되고, r/aww에서는 안 돼요. 코딩 도구는 개발자 Twitter에서 되고, 아트 커뮤니티에선 잘 안 돼요. 팔로워의 관심사를 보고, 카탈로그에서 거기에 맞춰 골라보세요.</p>'
+      },
+      'promote-newsletter': {
+        title: '뉴스레터와 이메일 프로모션',
+        lede: 'B2B와 프로슈머 상품에선 뉴스레터가 SNS보다 전환이 좋아요. Boost Boss 어필리에이트에게 잘 먹히는 몇 가지 패턴을 정리했어요.',
+        related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+        body:
+          '<h2>뉴스레터가 좋은 이유</h2>' +
+          '<p>이메일은 의도를 가지고 열려요. 오디언스는 이미 여러분을 충분히 신뢰해서 받은편지함을 내준 거예요. 소프트웨어 상품에선 뉴스레터 어필리에이트 링크의 전환율이 SNS의 5~10배에 이르는 일이 흔해요.</p>' +
+          '<h2>잘 통하는 고지 패턴</h2>' +
+          '<p>성공한 어필리에이트 뉴스레터는 어필리에이트 링크가 들어간 글의 상단에 한 단락짜리 고지를 두는 경우가 많아요:</p>' +
+          '<div class="callout"><em>"아래에 언급된 도구 중 일부는 어필리에이트 링크예요 — 링크로 가입해 주시면 제가 약간의 커미션을 받아요. 가격은 그대로예요. 직접 써봤거나 꼼꼼히 검증한 것만 추천해요."</em></div>' +
+          '<p>푸터가 아니라 첫 링크 앞에 배치하세요.</p>' +
+          '<h2>전술 패턴</h2>' +
+          '<ul>' +
+            '<li><strong>도구 모음.</strong> "X를 10배 빠르게 만든 도구 5선" — 5개 고르고, 어필리에이트가 있는 건 어필리에이트 링크로, 없는 건 일반 링크로. 정직함이 신뢰를 만들어요.</li>' +
+            '<li><strong>튜토리얼 → 도구.</strong> 멋진 작업을 한 단계씩 보여주며 쓴 도구를 언급하고 어필리에이트 링크를 달기. 맥락이 분명해 자연스럽게 전환이 올라가요.</li>' +
+            '<li><strong>딜 알림.</strong> BB에 독점 오퍼나 한정 할인이 뜨면 짧고 집중된 메일을 보내세요 — 긴급함이 전환을 만들어요.</li>' +
+            '<li><strong>주간 다이제스트의 한 추천 슬롯.</strong> 평소 뉴스레터에 어필리에이트 상품용 고정 슬롯을 한 자리만 유지하세요. 구독자가 기대하게 되고, 스팸처럼 보이지도 않아요.</li>' +
+          '</ul>' +
+          '<h2>뉴스레터 전환을 죽이는 것</h2>' +
+          '<ul>' +
+            '<li>메일 한 통에 링크가 너무 많음. 하나나 둘만 — 링크끼리 관심을 빼앗아요.</li>' +
+            '<li>감춰진 고지. "어, 이거 광고였어?" 하고 당했다고 느끼면 구독을 해지해요.</li>' +
+            '<li>오래된 오퍼. 어필리에이트 상품 상태가 바뀌었다면(가격 상승, 딜 종료) 신뢰를 갉아먹기 전에 링크를 업데이트하거나 빼세요.</li>' +
+          '</ul>' +
+          '<div class="callout info"><strong>Sub ID를 활용하세요.</strong> 뉴스레터용 공유 링크에 <code>nl-2026-06</code> 같은 Sub ID를 붙이면, <a href="/affiliate#conv-soon">매출 리포트</a>에서 어느 호가 어떤 매출을 만들었는지 볼 수 있어요. 효과 있는 걸 두 배로 키우는 데 도움이 돼요.</div>'
+      },
+      'exclusive-offers': {
+        title: '독점 오퍼와 프리미엄 파트너',
+        lede: '표준 어필리에이트 경험 위의 두 가지 업그레이드: Boost Boss가 협상한 한정 할인, 그리고 규모가 커지면 광고주가 직접 다가오는 관계.',
+        related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+        body:
+          '<h2>독점 오퍼</h2>' +
+          '<p>광고주들이 가끔 Boost Boss 전용 할인 코드나 보너스 커미션을 협상해 와요. <a href="/affiliate#exclusive">독점 오퍼</a> 화면에 보이고, 기간 한정이며 활성 어필리에이트만 이용할 수 있어요.</p>' +
+          '<p>광고주가 하는 이유: 한정 독점은 긴급함을 만들어 전환이 좋아요. 우리가 하는 이유: 여러분에게 더 좋은 조건 = 홍보할 이유가 더 늘어남.</p>' +
+          '<h2>프리미엄 파트너</h2>' +
+          '<p>지속적인 트래픽 — 보통 <strong>네트워크 전체 1만 클릭 이상</strong> — 을 쌓으면, 여러분 분야의 광고주가 맞춤형 단가로 직접 다가올 수 있어요. 이런 기회는 <a href="/affiliate#partners">프리미엄 파트너</a>에 노출돼요. Boost Boss가 소개를 주선하고, 상업 조건은 여러분과 광고주가 직접 정해요.</p>' +
+          '<p>지원할 필요는 없어요 — 푸시가 아닌 풀 방식이에요. 계속 홍보하고 볼륨을 채우면, 파트너가 알아서 찾아와요.</p>' +
+          '<h2>독점 오퍼의 어트리뷰션</h2>' +
+          '<p>독점 오퍼 코드는 <strong>쿠폰 어트리뷰션</strong>으로 작동해요: 결제 시 코드를 입력하면, 구매자가 사전에 여러분의 <code>bb_click</code> URL을 클릭했는지와 상관없이 매출이 여러분에게 귀속돼요. 그래서 독점 오퍼는 URL 클릭은 잡음 많고 코드 입력은 의도가 높은 "브로드캐스트" 프로모션(뉴스레터, 팟캐스트, 영상 설명)에 특히 유용해요.</p>' +
+          '<div class="callout"><strong>오디언스가 있다면 먼저 말 거세요.</strong> 팟캐스트, 인기 뉴스레터, 특정 분야에서 강한 팔로잉이 있나요? <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a>로 오디언스 프로필을 보내주세요. 맞는 독점 오퍼가 있거나 직접 소개를 주선해드릴 수 있어요.</div>'
+      },
+      'two-factor': {
+        title: '계정 설정과 2단계 인증',
+        lede: '2단계 인증(2FA)은 어필리에이트 계정에서 가장 민감한 동작 — 출금과 PayPal 이메일 변경 — 에 필수예요. 첫 정산 전에 꼭 설정하세요.',
+        related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+        body:
+          '<h2>왜 2FA를 요구하나요</h2>' +
+          '<p>Boost Boss 계정에 접근할 수 있는 사람은 누구든 조용히 PayPal 이메일을 바꿔 수익을 가로챌 수 있어요. SMS 기반 2FA는 SIM 스왑에 취약해서, 우리는 TOTP(시간 기반 일회용 비밀번호) 인증 앱을 사용해요.</p>' +
+          '<h2>설정 방법</h2>' +
+          '<ol>' +
+            '<li><a href="/affiliate#settings">설정 → 보안</a>으로 가세요.</li>' +
+            '<li>"2단계 인증 활성화"를 클릭하세요.</li>' +
+            '<li>인증 앱(Google Authenticator, Authy, 1Password 등 TOTP 호환 앱)으로 QR 코드를 스캔하세요.</li>' +
+            '<li>앱의 6자리 코드를 입력해 확인하세요.</li>' +
+          '</ol>' +
+          '<h2>2FA가 막는 동작</h2>' +
+          '<ul>' +
+            '<li><strong>모든 출금 요청</strong> — 현재의 6자리 코드를 물어봐요.</li>' +
+            '<li><strong>PayPal 정산 이메일 변경</strong> — 동일.</li>' +
+            '<li><strong>2FA 자체를 끄기</strong> — 끄려고 해도 새 코드가 필요해요.</li>' +
+          '</ul>' +
+          '<p>일반 로그인엔 코드가 필요 없어요 — 그건 비밀번호의 몫이에요. 2FA는 돈에 닿는 동작에서만 켜져요.</p>' +
+          '<h2>인증 기기를 잃어버렸다면</h2>' +
+          '<p>복구 코드가 없으면 출금도, 정산 방법 변경도 못 해요. 어필리에이트 ID와 함께 <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a>로 메일을 보내주세요. 본인 확인 절차로 2FA를 재설정해 드려요 — 보통 1영업일이 걸려요.</p>' +
+          '<div class="callout warn"><strong>인증 앱 백업을 켜두세요.</strong> 대부분의 인증 앱은 클라우드 백업(Authy, 1Password)을 지원해요. 켜두세요. 백업 없이 폰을 잃는 게 계정 복구 요청 1위 원인이에요.</div>' +
+          '<h2>알아두면 좋은 기타 설정</h2>' +
+          '<ul>' +
+            '<li><strong>세금 양식(W-9 / W-8BEN).</strong> 연 $600 이상 버는 미국 어필리에이트는 W-9, 미국 외는 W-8BEN을 제출해요. 임계치를 넘으면 설정 → 세금에서 양식이 노출돼요.</li>' +
+            '<li><strong>정산 표시 이름.</strong> PayPal 거래에서 보이는 이름이에요. 기본값은 계정명이며, 설정 → 정산 방법에서 변경하세요.</li>' +
+            '<li><strong>알림 설정.</strong> 어떤 이벤트에 이메일을 보낼지(새 커미션, 정산 발송, 분쟁 알림 등)를 설정 → 알림에서 조절해요.</li>' +
+          '</ul>'
+      }
+    }
+  };
+
+  // ════════════════════════════════════════════════════════════════════
+  //  Tiếng Việt (Vietnamese)
+  // ════════════════════════════════════════════════════════════════════
+  HELP_I18N.vi = {
+    doc_title_suffix: ' — Trợ giúp Boost Boss Affiliate',
+    doc_title_fallback: 'Trung tâm trợ giúp — Boost Boss Affiliate',
+    ui: {
+      hero_title: 'Chào bạn, chúng tôi giúp gì được nào?',
+      hero_placeholder: "Tìm kiếm trợ giúp — thử 'link chia sẻ', 'hoa hồng', 'thanh toán'…",
+      back_to_dashboard: '← Quay lại bảng điều khiển',
+      breadcrumb_help_center: 'Trung tâm trợ giúp',
+      related_articles: 'Bài liên quan',
+      still_need_help: 'Vẫn cần trợ giúp?',
+      article_not_found_title: 'Không tìm thấy bài viết',
+      article_not_found_body: 'Bài viết bạn tìm không tồn tại hoặc đã được đổi tên.',
+      article_not_found_link: '← Quay lại Trung tâm trợ giúp',
+      group_start: 'Bắt đầu',
+      group_links: 'Link chia sẻ & ghi nhận',
+      group_commission: 'Hoa hồng & thanh toán',
+      group_promote: 'Quảng bá',
+      group_account: 'Tuân thủ & tài khoản',
+      sb_getting_started:    'Bắt đầu với Boost Boss Affiliate',
+      sb_saving_ads:         'Lưu quảng cáo & duyệt catalog',
+      sb_share_links:        'Link chia sẻ & ghi nhận bb_click',
+      sb_clawback:           'Chuyển đổi, click và cửa sổ thu hồi 30 ngày',
+      sb_commission_model:   'Mô hình hoa hồng v2 — chia 70/30',
+      sb_payout_setup:       'Cài đặt thanh toán PayPal',
+      sb_payout_schedule:    'Lịch thanh toán — thứ Sáu hai tuần một lần',
+      sb_promote_social:     'Quảng bá trên mạng xã hội — X, IG, TikTok, FB',
+      sb_promote_newsletter: 'Quảng bá qua newsletter & email',
+      sb_exclusive_offers:   'Ưu đãi độc quyền & Đối tác cao cấp',
+      sb_ftc_disclosure:     'Công bố FTC & chuẩn mực affiliate',
+      sb_two_factor:         'Xác thực hai bước & cài đặt tài khoản',
+    },
+    articles: {
+      'getting-started': {
+        title: 'Bắt đầu với Boost Boss Affiliate',
+        lede: 'Boost Boss là mạng quảng cáo gốc MCP. Là affiliate, bạn lưu các quảng cáo phát hiện bên trong các công cụ AI, chia sẻ cho khán giả của mình và kiếm tiền khi họ mua. Đây là tour 60 giây.',
+        related: ['saving-ads', 'share-links', 'commission-model', 'payout-setup'],
+        body:
+          '<h2>Boost Boss là gì, trong một đoạn</h2>' +
+          '<p>Boost Boss phục vụ nội dung tài trợ bên trong các bề mặt AI — Claude Desktop, Cursor, các plugin ChatGPT, bot Discord và Slack, tiện ích trình duyệt. Nhà quảng cáo chạy chiến dịch và trả tiền theo lượt hiển thị / click / lượt mua. Affiliate quảng bá sản phẩm từ catalog và nhận hoa hồng khi người mua chuyển đổi qua link chia sẻ.</p>' +
+          '<h2>Ba việc nên làm trong 10 phút đầu</h2>' +
+          '<ol>' +
+            '<li><strong>Duyệt catalog.</strong> Mở <a href="/affiliate#catalog">Catalog sản phẩm</a> ở sidebar và xem nhà quảng cáo đã đăng ký gì. Sắp xếp theo hoa hồng để tìm các ưu đãi chuyển đổi cao.</li>' +
+            '<li><strong>Tạo link chia sẻ đầu tiên.</strong> Bấm "Lấy link" trên bất kỳ sản phẩm nào bạn muốn quảng bá. Link đi qua <code>/s/&lt;token&gt;</code>, sau đó redirect kèm tham số ghi nhận <code>bb_click=&lt;UUID&gt;</code>.</li>' +
+            '<li><strong>Thiết lập phương thức nhận tiền.</strong> Vào <a href="/affiliate#payouts">Lịch sử thanh toán</a> và thêm email PayPal bạn muốn nhận tiền. Không có bước này, thu nhập vẫn được tính nhưng chưa thể giải ngân.</li>' +
+          '</ol>' +
+          '<h2>Cách tính thu nhập</h2>' +
+          '<p>Khi ai đó bấm link chia sẻ của bạn và mua hàng, bạn nhận một phần của cái Boost Boss gọi là <strong>Quỹ Affiliate</strong> — một phần trăm của đơn hàng mà người bán dành riêng cho tiếp thị affiliate. Tỷ lệ chia là <strong>70% cho bạn / 30% cho Boost Boss</strong>. Xem <a href="/help/article?id=commission-model">Giải thích mô hình hoa hồng v2</a>.</p>' +
+          '<div class="callout info"><strong>Nói cho dễ:</strong> nếu một sản phẩm có quỹ affiliate 20% và ai đó mua $100, Boost Boss lấy quỹ $20, đưa bạn $14 (70% quỹ) và giữ $6 (30%). Người bán nhận $80 còn lại, sau khi trừ phí PayPal.</div>' +
+          '<h2>Tiếp theo nên làm gì</h2>' +
+          '<ul>' +
+            '<li>Đọc <a href="/help/article?id=share-links">cách ghi nhận hoạt động</a> để hiểu dữ liệu phía sau các lượt click.</li>' +
+            '<li>Lướt qua <a href="/help/article?id=ftc-disclosure">các quy định công bố FTC</a> — mọi quảng bá công khai đều cần lời công bố tài trợ.</li>' +
+            '<li>Chọn nơi quảng bá: <a href="/help/article?id=promote-social">mạng xã hội</a>, <a href="/help/article?id=promote-newsletter">newsletter</a>, hoặc cả hai.</li>' +
+          '</ul>'
+      },
+      'saving-ads': {
+        title: 'Lưu quảng cáo & duyệt catalog',
+        lede: 'Hai cách tìm sản phẩm để quảng bá: lưu quảng cáo bạn thấy trong công cụ AI, hoặc duyệt toàn bộ catalog nhà quảng cáo từ bảng điều khiển.',
+        related: ['getting-started', 'share-links', 'commission-model', 'exclusive-offers'],
+        body:
+          '<h2>Lưu ngay trong công cụ AI</h2>' +
+          '<p>Khi bạn thấy một quảng cáo do Boost Boss phục vụ trong các công cụ như Cursor, Claude Desktop hay bot Discord, hãy chạm vào biểu tượng dấu trang. Sản phẩm sẽ vào ngay <a href="/affiliate#saves">Mục đã lưu</a> chỉ bằng một cú chạm — không phải nhập tay, không phải copy-paste.</p>' +
+          '<p>Cái được lưu là sản phẩm (mục cha), không phải mẫu quảng cáo cụ thể. Vì vậy dù nhà quảng cáo chạy nhiều chiến dịch hay biến thể theo mùa cho cùng sản phẩm, mục bạn lưu vẫn trỏ đúng đích. Chiến dịch mới sẽ tự khớp với phiên bản hoạt động tốt nhất tại thời điểm click.</p>' +
+          '<h2>Duyệt catalog</h2>' +
+          '<p><a href="/affiliate#catalog">Catalog sản phẩm</a> hiển thị mọi sản phẩm nhà quảng cáo đã qua kiểm duyệt. Hai bộ lọc quan trọng nhất:</p>' +
+          '<ul>' +
+            '<li><strong>Hoa hồng</strong> — sắp xếp sản phẩm theo phần trăm quỹ affiliate. Cao hơn = lợi nhuận trên mỗi đơn lớn hơn.</li>' +
+            '<li><strong>Danh mục</strong> — thu hẹp theo lĩnh vực (SaaS, hạ tầng, công cụ nội dung…) để khớp sản phẩm với khán giả.</li>' +
+          '</ul>' +
+          '<h2>"Đã qua kiểm duyệt" nghĩa là gì</h2>' +
+          '<p>Mọi sản phẩm hiển thị trong catalog đều đã qua kiểm duyệt của Boost Boss — mô tả chính xác, URL giao hàng hoạt động, so sánh "giá gốc" trung thực (nếu hiển thị), quy trình hoàn tiền hợp lệ. Sản phẩm bị từ chối không xuất hiện trong catalog và không thể quảng bá.</p>' +
+          '<div class="callout"><strong>Vì sao điều này quan trọng với bạn:</strong> sản phẩm trong catalog đã được kiểm tra, nên rủi ro chuyển đổi phía bạn thấp hơn. Bạn không bị mắc kẹt với một sản phẩm gãy ở thanh toán hay không bao giờ giao hàng.</div>'
+      },
+      'share-links': {
+        title: 'Link chia sẻ & ghi nhận bb_click',
+        lede: 'Cách Boost Boss biết một đơn hàng đến từ link của bạn, vì sao hệ thống vẫn sống khi cookie mất hoặc Safari ITP chặn, và nên bỏ gì vào link chia sẻ để phân tích chạy tốt cho cả bạn lẫn nhà quảng cáo.',
+        related: ['commission-model', 'clawback', 'promote-social', 'promote-newsletter'],
+        body:
+          '<h2>Luồng cơ bản</h2>' +
+          '<ol>' +
+            '<li>Bạn tạo link chia sẻ trong bảng điều khiển, dạng <code>https://boostboss.ai/s/&lt;token&gt;</code>.</li>' +
+            '<li>Ai đó bấm vào. Máy chủ redirect của chúng tôi gắn <code>?bb_click=&lt;UUID&gt;</code> vào URL đích và redirect 302 sang trang sản phẩm của nhà quảng cáo.</li>' +
+            '<li>UUID được ghi lại cùng affiliate ID, dấu thời gian click, URL giới thiệu và khu vực sơ bộ. Chúng tôi cũng đặt một cookie bên thứ nhất để dự phòng.</li>' +
+            '<li>Nếu có đơn hàng trong cửa sổ thu hồi 30 ngày, UUID <code>bb_click</code> trên URL mua hàng của khách là thứ ghi đơn đó về cho bạn.</li>' +
+          '</ol>' +
+          '<h2>Vì sao ghi nhận bằng URL là cốt lõi</h2>' +
+          '<p>Hầu hết mạng affiliate dựa vào cookie bên thứ ba — và chúng đang bị Safari ITP, Firefox ETP, và ngày càng nhiều Chrome chặn hoặc giới hạn. Boost Boss xem cookie như phương án dự phòng. <strong>UUID bb_click trong URL mới là định danh chính</strong>. Miễn là tham số URL sống đến lúc chuyển đổi, ghi nhận vẫn chạy bất kể trình duyệt làm gì.</p>' +
+          '<h2>Kênh nào bị mất tham số</h2>' +
+          '<p>Một số nền tảng cắt bớt tham số URL khi người dùng chia sẻ link:</p>' +
+          '<ul>' +
+            '<li><strong>Twitter/X</strong> nhìn chung giữ nguyên.</li>' +
+            '<li><strong>iMessage / SMS</strong> giữ nguyên.</li>' +
+            '<li><strong>Một số bài Facebook</strong> tự thêm fbclid nhưng vẫn giữ tham số của bạn.</li>' +
+            '<li><strong>Một số ứng dụng email</strong> rút gọn URL qua redirect — thường vẫn giữ tham số.</li>' +
+          '</ul>' +
+          '<p>Nếu khán giả của bạn chuyển đổi thấp hơn nhiều so với số click, hãy kiểm tra xem URL có bị biến dạng tại kênh nào không.</p>' +
+          '<h2>Sub ID để theo dõi kênh</h2>' +
+          '<p>Khi tạo link, bạn có thể thêm tối đa 5 Sub ID (a-z, A-Z, 0-9). Chúng không ảnh hưởng đến việc ghi nhận — chỉ là nhãn bạn gán để sau này biết click đến từ kênh nào. Ví dụ: <code>sub1=twitter</code>, <code>sub1=newsletter-may</code>. Xem trong <a href="/affiliate#conv-soon">Báo cáo bán hàng</a>.</p>'
+      },
+      'commission-model': {
+        title: 'Mô hình hoa hồng v2 — Giải thích chia 70/30',
+        lede: 'Cách Boost Boss chia một đơn hàng giữa người bán, bạn và nền tảng. Mô hình mới thay thế mức 15% trên tổng doanh thu bằng quỹ affiliate riêng cho từng sản phẩm — động lực rõ ràng hơn và chỉ thu khi affiliate thực sự mang về đơn.',
+        related: ['payout-setup', 'payout-schedule', 'clawback', 'getting-started'],
+        body:
+          '<h2>Cấu trúc một đơn hàng</h2>' +
+          '<p>Mọi sản phẩm trong catalog đều có <strong>Tỷ lệ Quỹ Affiliate</strong> do người bán đặt. Đó là phần đơn hàng dành cho tiếp thị affiliate. Boost Boss chia quỹ này 70 / 30 giữa affiliate và nền tảng:</p>' +
+          '<ul>' +
+            '<li><strong>70%</strong> → bạn (affiliate đã mang về đơn)</li>' +
+            '<li><strong>30%</strong> → Boost Boss</li>' +
+            '<li><strong>Phần còn lại</strong> → người bán (giá trị đơn trừ quỹ affiliate trừ phí PayPal)</li>' +
+          '</ul>' +
+          '<h2>Ví dụ cụ thể</h2>' +
+          '<p>Sản phẩm giá <strong>$100</strong>, quỹ affiliate do người bán đặt <strong>20%</strong>.</p>' +
+          '<pre><code>Giá trị đơn         $100.00\nQuỹ affiliate        $20.00  (20% đơn hàng)\n  → Affiliate         $14.00  (70% quỹ)\n  → Boost Boss         $6.00  (30% quỹ)\nNgười bán nhận       $80.00  trừ phí PayPal</code></pre>' +
+          '<h2>Bán trực tiếp vs qua affiliate</h2>' +
+          '<p>Nếu người mua mua hàng không qua link affiliate (bán trực tiếp), Boost Boss không thu hoa hồng nào ngoài phí cổng thanh toán tiêu chuẩn. Người bán giữ toàn bộ đơn sau khi trừ phí, thuế và hoàn tiền. Chúng tôi chỉ thu phí khi affiliate thực sự mang đơn về.</p>' +
+          '<div class="callout info"><strong>Vì sao quan trọng:</strong> mô hình v2 đồng nhất lợi ích của chúng tôi với bạn — Boost Boss chỉ kiếm tiền khi affiliate kiếm tiền. Theo mô hình 15% trên tổng doanh thu cũ, chúng tôi vẫn thu cả những đơn trực tiếp mà bạn không liên quan.</div>' +
+          '<h2>Mặc định CPS, có thể chọn CPC và CPA</h2>' +
+          '<p>Mặc định là <strong>CPS (trả theo đơn)</strong>: bạn chỉ kiếm khi đơn thực sự được ghi nhận. Một số nhà quảng cáo chọn đặt sản phẩm theo <strong>CPC</strong> (trả theo click) hoặc <strong>CPA</strong> (trả theo hành động — ví dụ đăng ký). Khi đó, bạn sẽ thấy mô hình trên dòng catalog và kiếm tiền cho click/hành động đủ điều kiện, dù có dẫn đến doanh thu hay không.</p>'
+      },
+      'payout-setup': {
+        title: 'Cài đặt thanh toán PayPal',
+        lede: 'Boost Boss thanh toán mọi khoản hoa hồng affiliate qua PayPal. Chỉ cần thêm email PayPal một lần trong bảng điều khiển và mỗi kỳ thanh toán thứ Sáu cách tuần sẽ tự động về đó.',
+        related: ['payout-schedule', 'commission-model', 'two-factor', 'clawback'],
+        body:
+          '<h2>Thêm email PayPal ở đâu</h2>' +
+          '<p>Vào <a href="/affiliate#payouts">Lịch sử thanh toán</a> trong sidebar. Form Phương thức thanh toán có đúng một trường bắt buộc: <strong>email PayPal</strong>. Dùng email gắn với tài khoản PayPal đã xác minh.</p>' +
+          '<h2>Vì sao hiện tại chỉ có PayPal</h2>' +
+          '<p>Boost Boss vận hành với một nhà cung cấp thanh toán cho cả thu (nạp tiền của nhà quảng cáo, thanh toán cửa hàng của khách mua) lẫn chi (thanh toán cho publisher, người bán và affiliate). Hiện tại là PayPal vì luật doanh nghiệp Đài Loan yêu cầu thu và chi phải qua cùng một nhà cung cấp, mà PayPal là nhà cung cấp phủ rộng nhất trên thị trường toàn cầu. Khi mở đa nhà cung cấp, các phương thức bổ sung sẽ được thêm.</p>' +
+          '<h2>Yêu cầu tài khoản</h2>' +
+          '<ul>' +
+            '<li><strong>Tài khoản PayPal đã xác minh</strong> ở đầu nhận. Tài khoản chưa xác minh có thể bị giữ tiền.</li>' +
+            '<li><strong>Quốc gia được PayPal Payouts API hỗ trợ</strong> — hơn 200 quốc gia; chỉ một vài nước không được hỗ trợ.</li>' +
+            '<li><strong>Sàng lọc cấm vận</strong> — Boost Boss không thể trả cho tài khoản ở các khu vực bị Mỹ hoặc quốc tế cấm vận (Iran, Triều Tiên, Cuba, Crimea, Syria…).</li>' +
+          '</ul>' +
+          '<h2>Sau này muốn đổi email PayPal</h2>' +
+          '<p>Bạn có thể đổi bất cứ lúc nào ở cùng màn hình, nhưng việc đổi cần <strong>xác thực hai bước</strong>. Chúng tôi cố ý làm vậy — ai có thể âm thầm sửa địa chỉ nhận tiền thì cũng có thể chặn lấy thu nhập của bạn. Xem <a href="/help/article?id=two-factor">Xác thực hai bước</a>.</p>' +
+          '<div class="callout warn"><strong>Kiểm tra chính tả ba lần.</strong> Nếu nhập sai email PayPal, tiền sẽ bị trả ngược và bạn phải yêu cầu thanh toán lại. Phần lớn các ticket "tiền của tôi đâu?" mà chúng tôi nhận đều là lỗi đánh máy.</div>'
+      },
+      'payout-schedule': {
+        title: 'Lịch thanh toán — thứ Sáu hai tuần một lần, chốt thứ Ba',
+        lede: 'Boost Boss thanh toán cho affiliate theo chu kỳ hai tuần cố định. Kiếm được trước thứ Ba → nhận vào thứ Sáu đó. Kiếm sau thứ Ba → đợi hai tuần. Mức thanh toán tối thiểu là $1 USD.',
+        related: ['payout-setup', 'commission-model', 'clawback', 'two-factor'],
+        body:
+          '<h2>Chu kỳ trong một đoạn</h2>' +
+          '<p>Thanh toán chạy <strong>thứ Sáu mỗi hai tuần</strong>. Hạn chốt là <strong>thứ Ba liền trước, 23:59 UTC</strong>. Thu nhập ghi nhận trước hạn chốt sẽ nằm trong batch của thứ Sáu đó; thu nhập ghi sau hạn chốt sẽ chuyển sang thứ Sáu tiếp theo cách hai tuần.</p>' +
+          '<h2>Trong một batch có những gì</h2>' +
+          '<ul>' +
+            '<li>Hoa hồng cho các đơn đã ghi nhận trước hạn chốt thứ Ba</li>' +
+            '<li>Trừ phần đang giữ trong cửa sổ thu hồi 30 ngày — số đó sẽ được trả vào batch đủ điều kiện kế tiếp</li>' +
+            '<li>Trừ các khoản hoàn tiền và chargeback rơi vào kỳ này</li>' +
+          '</ul>' +
+          '<h2>Tiền về nhanh đến đâu</h2>' +
+          '<p>Khi PayPal Payouts API kích hoạt vào thứ Sáu 12:00 UTC, phần lớn người nhận thấy tiền trong số dư PayPal trong vòng vài phút. Người nhận cần có sẵn tài khoản PayPal — nếu chưa có, PayPal sẽ giữ giao dịch đến khi họ đăng ký. Chúng tôi dùng mốc "tối đa 30 phút" làm cửa sổ kế hoạch nói với affiliate, nhưng phần lớn về trong 1-2 phút.</p>' +
+          '<h2>Mức tối thiểu và cộng dồn</h2>' +
+          '<p><strong>Thanh toán tối thiểu: $1 USD.</strong> Dưới mức đó sẽ ở lại số dư và cộng dồn qua các chu kỳ cho đến khi vượt ngưỡng. Không hết hạn — số dư là của bạn vô thời hạn.</p>' +
+          '<h2>2FA khi rút tiền</h2>' +
+          '<p>Mọi yêu cầu rút đều phải xác nhận bằng mã một lần từ ứng dụng xác thực đã đăng ký. Chúng tôi không dùng SMS — quá dễ bị SIM-swap. Hãy cài đặt ứng dụng xác thực trong <a href="/affiliate#settings">Cài đặt</a> trước khi mong nhận đợt thanh toán đầu tiên. Xem <a href="/help/article?id=two-factor">Xác thực hai bước</a>.</p>' +
+          '<div class="callout info"><strong>Tuần có ngày lễ:</strong> nếu ngày lễ ngân hàng Mỹ rơi vào thứ Sáu, PayPal Payouts API vẫn chạy đúng lịch. Bạn sẽ không thấy trễ.</div>'
+      },
+      'ftc-disclosure': {
+        title: 'Công bố FTC & chuẩn mực affiliate',
+        lede: 'Mọi lần quảng bá công khai link affiliate Boost Boss đều phải nêu rõ mối quan hệ affiliate. Đây là yêu cầu của FTC Mỹ và chúng tôi áp dụng ở mọi khu vực.',
+        related: ['promote-social', 'promote-newsletter', 'share-links', 'commission-model'],
+        body:
+          '<h2>Quy tắc nói cho dễ hiểu</h2>' +
+          '<p>Khi bạn chia sẻ link affiliate trên mạng xã hội, trong newsletter, trên website, trong video, hoặc bất cứ nơi nào bên thứ ba có thể nhìn thấy, bạn phải nói rõ mình là affiliate. Lời công bố phải <strong>nằm trước</strong> link, <strong>dễ nhận thấy</strong>, và <strong>dễ hiểu</strong>.</p>' +
+          '<h2>Công bố thế nào là ổn</h2>' +
+          '<ul>' +
+            '<li><strong>Trong tweet / bài đăng:</strong> <code>#ad</code>, <code>#sponsored</code> hoặc <code>#affiliate</code> ở đầu hoặc cuối. Cả ba đều được FTC chấp nhận.</li>' +
+            '<li><strong>Trong video:</strong> nói ra miệng ở đoạn đầu VÀ hiển thị trên màn hình. Chỉ end-card là chưa đủ.</li>' +
+            '<li><strong>Trong newsletter:</strong> "Bài này có link affiliate — tôi nhận một khoản hoa hồng nhỏ nếu bạn mua qua link." ở đầu bài.</li>' +
+            '<li><strong>Trong bài blog:</strong> tương tự newsletter. Chỉ công bố ở footer thường chưa đủ.</li>' +
+          '</ul>' +
+          '<h2>Cái không tính</h2>' +
+          '<ul>' +
+            '<li><strong>Chỉ <code>#partner</code></strong> — quá mơ hồ, FTC đã cảnh báo. Dùng <code>#ad</code> hoặc <code>#sponsored</code>.</li>' +
+            '<li><strong>Công bố giấu trong tiểu sử</strong> — tiểu sử nói có link affiliate không thay được công bố ở từng bài.</li>' +
+            '<li><strong>Chữ nhỏ ở footer</strong> — dễ bỏ sót, một mình không đạt chuẩn FTC.</li>' +
+          '</ul>' +
+          '<h2>Các quy định riêng của Boost Boss</h2>' +
+          '<p>Ngoài tuân thủ FTC, <a href="/aup">Chính sách sử dụng</a> của Boost Boss cấm:</p>' +
+          '<ul>' +
+            '<li><strong>Quảng bá gây hiểu lầm</strong> — đánh giá giả, ảnh chụp màn hình bịa, lời hứa đảm bảo kết quả.</li>' +
+            '<li><strong>Tự giao dịch</strong> — mua qua link của chính bạn để ăn hoa hồng, hoặc cấu kết với bạn bè/người nhà.</li>' +
+            '<li><strong>Spam</strong> — email hoặc SMS không xin phép, SEO lừa đảo (cloaking, doorway), traffic click được thưởng.</li>' +
+            '<li><strong>Lạm dụng thương hiệu</strong> — đặt giá thầu cho từ khóa thương hiệu của người bán trong quảng cáo tìm kiếm, đăng ký tên miền nhái.</li>' +
+          '</ul>' +
+          '<div class="callout warn"><strong>Phát hiện tự giao dịch.</strong> Chúng tôi giám sát các mẫu hình click-đến-chuyển-đổi. Mẫu đáng ngờ kéo dài sẽ kích hoạt thu hồi hoa hồng đã tích, và có thể dẫn đến đình chỉ tài khoản.</div>'
+      },
+      'clawback': {
+        title: 'Chuyển đổi, click và cửa sổ thu hồi 30 ngày',
+        lede: 'Bạn có bao nhiêu thời gian để biến một click thành đơn hàng, và hoa hồng của bạn sẽ ra sao nếu khách hoàn tiền? Hai cửa sổ cần nhớ.',
+        related: ['commission-model', 'share-links', 'payout-schedule', 'getting-started'],
+        body:
+          '<h2>Cửa sổ ghi nhận</h2>' +
+          '<p>Khi ai đó bấm link chia sẻ, UUID <code>bb_click</code> còn hiệu lực trong <strong>30 ngày</strong>. Bất kỳ đơn hàng nào trong cửa sổ đó dùng cùng tham số URL (hoặc cookie dự phòng) đều được ghi về bạn — bất kể người mua đã ghé qua bao nhiêu thiết bị, trang hay phiên khác ở giữa.</p>' +
+          '<h2>Cửa sổ thu hồi</h2>' +
+          '<p>Hoa hồng được trả theo <a href="/help/article?id=payout-schedule">lịch thứ Sáu hai tuần một lần</a>, nhưng mỗi khoản hoa hồng được giữ <strong>30 ngày cửa sổ thu hồi</strong> sau khi đơn ghi nhận. Nếu người mua hoàn tiền hoặc chargeback thành công trong cửa sổ này, hoa hồng tương ứng sẽ bị đảo.</p>' +
+          '<h2>Trong thực tế</h2>' +
+          '<ul>' +
+            '<li>Đơn ghi nhận ngày 0 → hoa hồng "đang chờ"</li>' +
+            '<li>Ngày 1-30 → hoa hồng vẫn chờ trong khi còn rủi ro hoàn/chargeback</li>' +
+            '<li>Sau ngày 30 → hoa hồng được "giải phóng", đủ điều kiện vào batch hai tuần kế tiếp</li>' +
+            '<li>Hoàn tiền hoặc chargeback trong 30 ngày → hoa hồng bị hủy, điều chỉnh số dư</li>' +
+          '</ul>' +
+          '<h2>Ý nghĩa các trạng thái trong báo cáo bán hàng</h2>' +
+          '<p><a href="/affiliate#conv-soon">Báo cáo bán hàng</a> hiển thị ba trạng thái:</p>' +
+          '<ul>' +
+            '<li><strong>Đang chờ</strong> — đơn đã ghi nhận nhưng vẫn trong cửa sổ 30 ngày</li>' +
+            '<li><strong>Đã giải phóng</strong> — đã qua cửa sổ, đủ điều kiện cho batch thanh toán kế tiếp</li>' +
+            '<li><strong>Đã đảo</strong> — khách đã hoàn tiền hoặc chargeback thành công; hoa hồng bị hủy</li>' +
+          '</ul>' +
+          '<div class="callout"><strong>Vì sao 30 ngày?</strong> Đa số sản phẩm có cửa sổ hoàn tiền 14-30 ngày. Sau 30 ngày rủi ro hoàn tiền thấp, nên chúng tôi có thể tự tin giải phóng hoa hồng và gửi vào thứ Sáu hai tuần kế tiếp.</div>'
+      },
+      'promote-social': {
+        title: 'Quảng bá trên mạng xã hội — X, IG, TikTok, FB',
+        lede: 'Mẹo thực chiến để tăng chuyển đổi trên từng nền tảng lớn. Không có ma thuật gì — vấn đề là khớp sản phẩm với khán giả và công bố cho đúng.',
+        related: ['ftc-disclosure', 'share-links', 'promote-newsletter', 'commission-model'],
+        body:
+          '<h2>X (trước là Twitter)</h2>' +
+          '<ul>' +
+            '<li><strong>Công bố:</strong> <code>#ad</code> ở đầu tweet.</li>' +
+            '<li><strong>Cái hiệu quả:</strong> review trong một tweet duy nhất kèm một ảnh/video và link nằm cùng tweet (đừng để link vào reply). Với sản phẩm giá cao, thread chuyển đổi tốt hơn tweet đơn.</li>' +
+            '<li><strong>Cái không hiệu quả:</strong> kiểu "RT để trúng thưởng!" gắn link affiliate. Twitter sẽ bóp engagement-bait.</li>' +
+          '</ul>' +
+          '<h2>Instagram</h2>' +
+          '<ul>' +
+            '<li><strong>Công bố:</strong> dùng nhãn "Hợp tác có trả phí" có sẵn của IG (nếu có), HOẶC <code>#ad</code> ở đầu caption.</li>' +
+            '<li><strong>Cái hiệu quả:</strong> story → swipe-up dẫn về link chia sẻ (bản cũ), hoặc link-in-bio + một bài gần đây trỏ tới đó. Với sản phẩm phần mềm, Reels có link trong mô tả chuyển đổi tốt hơn post thường.</li>' +
+            '<li><strong>Cái không hiệu quả:</strong> URL affiliate dài trong caption — sẽ bị cắt. Dùng link chia sẻ sạch, không phải link redirect.</li>' +
+          '</ul>' +
+          '<h2>TikTok</h2>' +
+          '<ul>' +
+            '<li><strong>Công bố:</strong> nói "Đây là nội dung tài trợ" bằng miệng trong 3 giây đầu VÀ hiện <code>#ad</code> trên màn hình.</li>' +
+            '<li><strong>Cái hiệu quả:</strong> demo. Cho thấy sản phẩm chạy trong 15-30 giây. Để link trong bio + ghim bình luận "Link trong bio ↑".</li>' +
+            '<li><strong>Cái không hiệu quả:</strong> dán link trực tiếp vào phần mô tả video — không tự thành link, khán giả không copy-paste.</li>' +
+          '</ul>' +
+          '<h2>Facebook</h2>' +
+          '<ul>' +
+            '<li><strong>Công bố:</strong> <code>#ad</code> ở đầu bài.</li>' +
+            '<li><strong>Cái hiệu quả:</strong> bài text dài với câu chuyện sử dụng rõ ràng. Thuật toán FB thưởng cho hội thoại, nên hãy đặt câu hỏi trong bài và trả lời bình luận.</li>' +
+            '<li><strong>Cái không hiệu quả:</strong> link affiliate dạng thô trong bình luận — FB sẽ bóp. Đưa vào trong nội dung bài đăng.</li>' +
+          '</ul>' +
+          '<h2>Lời khuyên chung</h2>' +
+          '<p>Khớp sản phẩm với khán giả. SaaS năng suất chuyển đổi trên r/productivity, không phải r/aww. Công cụ coding chuyển đổi trên Twitter dev, không phải cộng đồng nghệ thuật. Nhìn vào sở thích của người theo dõi rồi chọn từ catalog cho phù hợp.</p>'
+      },
+      'promote-newsletter': {
+        title: 'Quảng bá qua newsletter & email',
+        lede: 'Với sản phẩm B2B và prosumer, newsletter chuyển đổi tốt hơn mạng xã hội. Vài khuôn mẫu hiệu quả cho affiliate Boost Boss.',
+        related: ['promote-social', 'ftc-disclosure', 'share-links', 'commission-model'],
+        body:
+          '<h2>Vì sao newsletter hiệu quả</h2>' +
+          '<p>Email được mở với chủ đích. Khán giả đã tin bạn đủ để giao hộp thư cho bạn. Với sản phẩm phần mềm, tỷ lệ chuyển đổi của link affiliate trong newsletter thường cao hơn mạng xã hội 5-10 lần.</p>' +
+          '<h2>Khuôn mẫu công bố hiệu quả</h2>' +
+          '<p>Hầu hết newsletter affiliate thành công đều dùng một đoạn công bố ngắn ở đầu bài có chứa link affiliate:</p>' +
+          '<div class="callout"><em>"Một vài công cụ bên dưới là link affiliate — tôi nhận một khoản hoa hồng nhỏ nếu bạn đăng ký qua link. Giá không thay đổi. Tôi chỉ giới thiệu thứ đã dùng hoặc đã đánh giá kỹ."</em></div>' +
+          '<p>Đặt trước link đầu tiên, không phải ở footer.</p>' +
+          '<h2>Các khuôn mẫu chiến thuật</h2>' +
+          '<ul>' +
+            '<li><strong>Tổng hợp công cụ.</strong> "5 công cụ giúp tôi làm X nhanh gấp 10" — chọn 5, gắn link affiliate khi có, link thường khi không. Sự trung thực xây niềm tin.</li>' +
+            '<li><strong>Tutorial → công cụ.</strong> Dẫn người đọc qua một thao tác hay, nhắc đến công cụ đã dùng, gắn link affiliate. Chuyển đổi cao hơn tự nhiên vì ngữ cảnh rõ.</li>' +
+            '<li><strong>Cảnh báo ưu đãi.</strong> Khi BB có Ưu đãi độc quyền hoặc giảm giá có hạn, gửi một email ngắn và tập trung — sự cấp bách tạo chuyển đổi.</li>' +
+            '<li><strong>Bản tin tuần với một mục được tài trợ.</strong> Giữ một mục cố định trong newsletter cho sản phẩm affiliate. Người đăng ký sẽ chờ mục đó và bạn không bị mang tiếng spam.</li>' +
+          '</ul>' +
+          '<h2>Cái giết chuyển đổi trong newsletter</h2>' +
+          '<ul>' +
+            '<li>Quá nhiều link trong một email. Chọn một hoặc hai — link cạnh tranh sự chú ý lẫn nhau.</li>' +
+            '<li>Giấu công bố. Nếu người đọc cảm thấy bị phục kích kiểu "à, hóa ra là quảng cáo?", họ sẽ hủy đăng ký.</li>' +
+            '<li>Ưu đãi cũ. Nếu trạng thái sản phẩm affiliate đã đổi (tăng giá, hết hạn), cập nhật hoặc bỏ link trước khi mất uy tín.</li>' +
+          '</ul>' +
+          '<div class="callout info"><strong>Dùng Sub ID.</strong> Tạo link chia sẻ cho newsletter với Sub ID như <code>nl-2026-06</code> để xem trong <a href="/affiliate#conv-soon">Báo cáo bán hàng</a> số phát hành nào đã tạo ra đơn nào. Giúp bạn đẩy mạnh cái đang hiệu quả.</div>'
+      },
+      'exclusive-offers': {
+        title: 'Ưu đãi độc quyền & Đối tác cao cấp',
+        lede: 'Hai nâng cấp so với trải nghiệm affiliate tiêu chuẩn: ưu đãi có thời hạn do Boost Boss đàm phán, và quan hệ trực tiếp với nhà quảng cáo khi bạn đạt quy mô.',
+        related: ['commission-model', 'getting-started', 'saving-ads', 'promote-newsletter'],
+        body:
+          '<h2>Ưu đãi độc quyền</h2>' +
+          '<p>Nhà quảng cáo thỉnh thoảng đàm phán mã giảm giá hoặc mức hoa hồng cộng thêm dành riêng cho Boost Boss. Chúng xuất hiện trong màn hình <a href="/affiliate#exclusive">Ưu đãi độc quyền</a>. Có thời hạn và chỉ dành cho affiliate đang hoạt động.</p>' +
+          '<p>Vì sao nhà quảng cáo làm vậy: ưu đãi giới hạn tạo cảm giác cấp bách, chuyển đổi tốt hơn. Vì sao chúng tôi làm vậy: điều khoản tốt hơn cho bạn = bạn có thêm lý do để quảng bá.</p>' +
+          '<h2>Đối tác cao cấp</h2>' +
+          '<p>Khi bạn tích lũy lưu lượng bền vững — thường là <strong>hơn 10k click trên toàn mạng</strong> — các nhà quảng cáo trong ngách của bạn có thể trực tiếp liên hệ với mức riêng. Chúng tôi đưa các cơ hội này lên <a href="/affiliate#partners">Đối tác cao cấp</a>. Boost Boss kết nối; điều khoản kinh doanh là giữa bạn và nhà quảng cáo.</p>' +
+          '<p>Không cần xin đăng ký — đây là kéo, không phải đẩy. Cứ tiếp tục quảng bá, đạt khối lượng, đối tác sẽ tìm tới bạn.</p>' +
+          '<h2>Ưu đãi độc quyền ghi nhận thế nào</h2>' +
+          '<p>Mã ưu đãi độc quyền hoạt động theo <strong>ghi nhận qua coupon</strong>: khi người mua nhập mã ở thanh toán, đơn được ghi cho bạn bất kể họ có bấm URL <code>bb_click</code> của bạn trước đó hay không. Điều này khiến ưu đãi độc quyền cực kỳ phù hợp cho quảng bá kiểu "phát sóng" (newsletter, podcast, mô tả video), nơi click URL ồn ào nhưng việc nhập mã thì có chủ đích cao.</p>' +
+          '<div class="callout"><strong>Có khán giả thì cứ hỏi.</strong> Có podcast, newsletter đông người, hoặc lượng theo dõi mạnh trong một ngách? Gửi email tới <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> kèm chân dung khán giả. Chúng tôi có thể có Ưu đãi độc quyền phù hợp hoặc kết nối trực tiếp.</div>'
+      },
+      'two-factor': {
+        title: 'Cài đặt tài khoản & xác thực hai bước',
+        lede: 'Xác thực hai bước (2FA) là bắt buộc cho các thao tác nhạy cảm nhất trên tài khoản affiliate — rút tiền và đổi email PayPal. Hãy cài trước đợt thanh toán đầu tiên.',
+        related: ['payout-setup', 'payout-schedule', 'commission-model', 'ftc-disclosure'],
+        body:
+          '<h2>Vì sao chúng tôi yêu cầu 2FA</h2>' +
+          '<p>Bất cứ ai vào được tài khoản Boost Boss của bạn cũng có thể âm thầm đổi email PayPal và chặn lấy thu nhập. 2FA qua SMS dễ bị SIM-swap, nên chúng tôi dùng ứng dụng xác thực TOTP (mật khẩu một lần theo thời gian).</p>' +
+          '<h2>Cách thiết lập</h2>' +
+          '<ol>' +
+            '<li>Vào <a href="/affiliate#settings">Cài đặt → Bảo mật</a>.</li>' +
+            '<li>Bấm "Bật xác thực hai bước".</li>' +
+            '<li>Quét mã QR bằng ứng dụng xác thực (Google Authenticator, Authy, 1Password, hoặc bất kỳ ứng dụng tương thích TOTP nào).</li>' +
+            '<li>Nhập mã 6 chữ số từ ứng dụng để xác nhận.</li>' +
+          '</ol>' +
+          '<h2>2FA chặn các thao tác nào</h2>' +
+          '<ul>' +
+            '<li><strong>Mỗi yêu cầu rút tiền</strong> — bạn sẽ được hỏi mã 6 chữ số hiện tại.</li>' +
+            '<li><strong>Đổi email nhận thanh toán PayPal</strong> — tương tự.</li>' +
+            '<li><strong>Tắt chính 2FA</strong> — muốn tắt cũng cần một mã mới.</li>' +
+          '</ul>' +
+          '<p>Đăng nhập bình thường không cần mã — đó là việc của mật khẩu. 2FA chỉ kích hoạt với thao tác liên quan đến tiền.</p>' +
+          '<h2>Nếu mất thiết bị xác thực</h2>' +
+          '<p>Không có mã khôi phục, bạn sẽ không thể rút tiền hay đổi phương thức nhận. Hãy email <a href="mailto:affiliate@boostboss.ai">affiliate@boostboss.ai</a> kèm affiliate ID. Chúng tôi sẽ hướng dẫn quy trình xác minh danh tính để reset 2FA — thường mất một ngày làm việc.</p>' +
+          '<div class="callout warn"><strong>Lưu bản sao lưu của ứng dụng xác thực.</strong> Phần lớn ứng dụng xác thực hỗ trợ sao lưu đám mây (Authy, 1Password). Hãy bật. Mất điện thoại mà không có bản sao lưu là nguyên nhân số 1 của các ticket khôi phục tài khoản.</div>' +
+          '<h2>Các cài đặt khác đáng biết</h2>' +
+          '<ul>' +
+            '<li><strong>Mẫu thuế (W-9 / W-8BEN).</strong> Affiliate Mỹ kiếm trên $600/năm cần nộp W-9. Affiliate ngoài Mỹ cần W-8BEN. Chúng tôi hiển thị form trong Cài đặt → Thuế khi bạn vượt ngưỡng.</li>' +
+            '<li><strong>Tên hiển thị khi nhận tiền.</strong> Tên PayPal sẽ thấy trong giao dịch. Mặc định là tên tài khoản; đổi trong Cài đặt → Phương thức thanh toán.</li>' +
+            '<li><strong>Tùy chọn thông báo.</strong> Quản lý sự kiện nào kích hoạt email (hoa hồng mới, đã gửi thanh toán, thông báo tranh chấp…) trong Cài đặt → Thông báo.</li>' +
+          '</ul>'
+      }
+    }
+  };
+</script>
+
+<script>
+  // ─── Language resolution + persistence ──────────────────────────────
+  function resolveInitialLang() {
+    try {
+      var saved = localStorage.getItem('bb_help_lang');
+      if (saved && HELP_I18N[saved]) return saved;
+    } catch (_) {}
+    var nav = (navigator.language || 'en').toLowerCase();
+    if (nav.indexOf('zh-tw') === 0 || nav.indexOf('zh-hk') === 0 || nav.indexOf('zh-hant') === 0) return 'zh-TW';
+    if (nav.indexOf('zh') === 0) return 'zh';
+    if (nav.indexOf('ja') === 0) return 'ja';
+    if (nav.indexOf('ko') === 0) return 'ko';
+    if (nav.indexOf('vi') === 0) return 'vi';
+    return 'en';
+  }
+  var currentLang = resolveInitialLang();
+
+  function dict() { return HELP_I18N[currentLang] || HELP_I18N.en; }
+  function articlesFor(lang) {
+    return (HELP_I18N[lang] && HELP_I18N[lang].articles) || HELP_I18N.en.articles;
   }
 
-  // ── Renderer ─────────────────────────────────────────────────────────
   function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"\']/g, function (c) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
 
-  // ─── Help Center index (mirrored from affiliate-help.html) ───
-  // Keep both files in sync if articles are added or renamed.
-  var HELP_INDEX = [
-    { id: 'start', title: 'Getting started', articles: [
-      ['getting-started',   'Getting started as a Boost Boss affiliate'],
-      ['saving-ads',        'Saving ads & browsing the catalog'],
-    ]},
-    { id: 'links', title: 'Share links & attribution', articles: [
-      ['share-links',       'Share links & bb_click attribution'],
-      ['clawback',          'Conversions, clicks & the 30-day clawback'],
-    ]},
-    { id: 'commission', title: 'Commissions & payouts', articles: [
-      ['commission-model',  'Commission Model v2 — 70/30 split'],
-      ['payout-setup',      'Setting up your PayPal payout'],
-      ['payout-schedule',   'Payout schedule — biweekly Friday'],
-    ]},
-    { id: 'promote', title: 'Promotion', articles: [
-      ['promote-social',    'Promoting on social — X, IG, TikTok, FB'],
-      ['promote-newsletter','Promoting in newsletters & email'],
-      ['exclusive-offers',  'Exclusive Offers & Premium Partners'],
-    ]},
-    { id: 'account', title: 'Compliance & account', articles: [
-      ['ftc-disclosure',    'FTC disclosure & affiliate standards'],
-      ['two-factor',        'Two-factor authentication & account'],
-    ]},
-  ];
-
   function findGroupFor(articleId) {
     for (var i = 0; i < HELP_INDEX.length; i++) {
       var g = HELP_INDEX[i];
-      for (var j = 0; j < g.articles.length; j++) {
-        if (g.articles[j][0] === articleId) return g.id;
+      for (var j = 0; j < g.items.length; j++) {
+        if (g.items[j][0] === articleId) return g.id;
       }
     }
     return null;
@@ -688,24 +2343,23 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
   function renderHelpSidebar(activeArticleId) {
     var side = document.getElementById('help-side');
     if (!side) return;
+    var ui = dict().ui;
     var activeGroup = activeArticleId ? findGroupFor(activeArticleId) : null;
     var html = HELP_INDEX.map(function (g) {
-      var listHtml = g.articles.map(function (a) {
-        var aid = a[0], atitle = a[1];
+      var listHtml = g.items.map(function (a) {
+        var aid = a[0], labelKey = a[1];
+        var label = ui[labelKey] || aid;
         var cls = (activeArticleId && activeArticleId === aid) ? ' class="active"' : '';
-        return '<li><a' + cls + ' href="/help/article?id=' + encodeURIComponent(aid) + '">' + atitle + '</a></li>';
+        return '<li><a' + cls + ' href="/help/article?id=' + encodeURIComponent(aid) + '">' + escapeHtml(label) + '</a></li>';
       }).join('');
-      // Only the group containing the current article stays expanded on
-      // article pages; the rest start collapsed for a tidier index.
       var groupCls = (activeGroup && activeGroup !== g.id) ? ' collapsed' : '';
-      return '\
-        <div class="hs-group' + groupCls + '" data-group="' + g.id + '">\
-          <button class="hs-group-head" type="button">\
-            <span>' + g.title + '</span>\
-            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>\
-          </button>\
-          <ul class="hs-list">' + listHtml + '</ul>\
-        </div>';
+      return '<div class="hs-group' + groupCls + '" data-group="' + g.id + '">' +
+               '<button class="hs-group-head" type="button">' +
+                 '<span>' + escapeHtml(ui[g.groupKey] || g.id) + '</span>' +
+                 '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+               '</button>' +
+               '<ul class="hs-list">' + listHtml + '</ul>' +
+             '</div>';
     }).join('');
     side.innerHTML = html;
     Array.prototype.forEach.call(side.querySelectorAll('.hs-group-head'), function (btn) {
@@ -715,56 +2369,125 @@ Seller settles       $80.00  minus PayPal fees</code></pre>\
     });
   }
 
+  function getArticleTitle(id) {
+    var a = articlesFor(currentLang)[id];
+    if (a) return a.title;
+    var en = articlesFor('en')[id];
+    return en ? en.title : id.replace(/-/g, ' ');
+  }
+
   function render() {
     var id = (new URLSearchParams(location.search).get('id') || '').toLowerCase();
     var mount = document.getElementById('article-mount');
-    var article = ARTICLES[id];
+    var ui = dict().ui;
+    var article = articlesFor(currentLang)[id] || articlesFor('en')[id];
 
     renderHelpSidebar(id || null);
 
     if (!article) {
-      mount.innerHTML = '\
-        <div class="notfound">\
-          <h1>Article not found</h1>\
-          <p>The article you\'re looking for doesn\'t exist or has been renamed.</p>\
-          <a href="/help">← Back to Help Center</a>\
-        </div>';
-      document.title = 'Help Center — Boost Boss Affiliate';
+      mount.innerHTML =
+        '<div class="notfound">' +
+          '<h1>' + escapeHtml(ui.article_not_found_title) + '</h1>' +
+          '<p>' + escapeHtml(ui.article_not_found_body) + '</p>' +
+          '<a href="/help">' + escapeHtml(ui.article_not_found_link) + '</a>' +
+        '</div>';
+      document.title = dict().doc_title_fallback;
       return;
     }
 
-    document.title = article.title + ' — Boost Boss Affiliate Help';
+    document.title = article.title + dict().doc_title_suffix;
 
     var relatedHtml = '';
     if (article.related && article.related.length) {
-      relatedHtml = '\
-        <div class="related">\
-          <h3>Related articles</h3>\
-          <div class="related-list">' +
+      relatedHtml =
+        '<div class="related">' +
+          '<h3>' + escapeHtml(ui.related_articles) + '</h3>' +
+          '<div class="related-list">' +
             article.related.map(function (rid) {
               return '<a href="/help/article?id=' + encodeURIComponent(rid) + '">' +
                        '<span>' + escapeHtml(getArticleTitle(rid)) + '</span>' +
                        '<span class="arrow">→</span>' +
                      '</a>';
             }).join('') +
-          '</div>\
-        </div>';
+          '</div>' +
+        '</div>';
     }
 
-    mount.innerHTML = '\
-      <div class="crumbs">\
-        <a href="/help">Help Center</a>\
-        <span class="sep">/</span>\
-        <span>' + escapeHtml(article.title) + '</span>\
-      </div>\
-      <article>\
-        <h1>' + escapeHtml(article.title) + '</h1>\
-        <p class="lede">' + escapeHtml(article.lede) + '</p>\
-        ' + article.body + '\
-      </article>\
-      ' + relatedHtml;
+    mount.innerHTML =
+      '<div class="crumbs">' +
+        '<a href="/help">' + escapeHtml(ui.breadcrumb_help_center) + '</a>' +
+        '<span class="sep">/</span>' +
+        '<span>' + escapeHtml(article.title) + '</span>' +
+      '</div>' +
+      '<article>' +
+        '<h1>' + escapeHtml(article.title) + '</h1>' +
+        '<p class="lede">' + escapeHtml(article.lede) + '</p>' +
+        article.body +
+      '</article>' +
+      relatedHtml;
   }
 
+  // ─── Top-of-page UI binding ─────────────────────────────────────────
+  function applyChromeTranslations() {
+    var ui = dict().ui;
+    document.documentElement.lang = currentLang;
+    document.getElementById('hero-title').textContent = ui.hero_title;
+    document.getElementById('help-search').setAttribute('placeholder', ui.hero_placeholder);
+    document.getElementById('back-link').textContent = ui.back_to_dashboard;
+    document.getElementById('still-help').textContent = ui.still_need_help;
+    var matchShort = 'EN';
+    for (var i = 0; i < LANG_LIST.length; i++) {
+      if (LANG_LIST[i].code === currentLang) { matchShort = LANG_LIST[i].short; break; }
+    }
+    document.getElementById('lang-code').textContent = matchShort;
+    renderLangMenu(currentLang);
+  }
+
+  function renderLangMenu(activeLang) {
+    var menu = document.getElementById('lang-menu');
+    menu.innerHTML = LANG_LIST.map(function (l) {
+      var active = (l.code === activeLang) ? ' active' : '';
+      return '<button type="button" class="' + active.trim() + '" data-lang="' + l.code + '" role="menuitem">' +
+               '<span>' + l.label + '</span>' +
+               '<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+             '</button>';
+    }).join('');
+    Array.prototype.forEach.call(menu.querySelectorAll('button'), function (b) {
+      b.addEventListener('click', function () {
+        var code = b.getAttribute('data-lang');
+        if (!code || code === currentLang) { closeLangMenu(); return; }
+        currentLang = code;
+        try { localStorage.setItem('bb_help_lang', code); } catch (_) {}
+        applyChromeTranslations();
+        render();
+        closeLangMenu();
+      });
+    });
+  }
+
+  function openLangMenu() {
+    document.getElementById('lang-menu').classList.add('open');
+    document.getElementById('lang-btn').setAttribute('aria-expanded', 'true');
+  }
+  function closeLangMenu() {
+    document.getElementById('lang-menu').classList.remove('open');
+    document.getElementById('lang-btn').setAttribute('aria-expanded', 'false');
+  }
+
+  document.getElementById('lang-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var menu = document.getElementById('lang-menu');
+    if (menu.classList.contains('open')) closeLangMenu(); else openLangMenu();
+  });
+  document.addEventListener('click', function (e) {
+    var wrap = document.querySelector('.lang-wrap');
+    if (wrap && !wrap.contains(e.target)) closeLangMenu();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLangMenu();
+  });
+
+  applyChromeTranslations();
   render();
   window.addEventListener('popstate', render);
 </script>

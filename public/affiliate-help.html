@@ -59,6 +59,42 @@
   }
   nav.help-nav .back:hover { border-color: var(--ink); background: var(--bg-soft); }
 
+  /* Language toggle in the help-nav. */
+  .lang-wrap { position: relative; }
+  .lang-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; font-weight: 600; color: var(--ink);
+    padding: 8px 12px; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .lang-btn:hover { border-color: var(--ink); background: var(--bg-soft); }
+  .lang-btn .globe { width: 14px; height: 14px; flex-shrink: 0; }
+  .lang-btn .code { letter-spacing: 0.02em; }
+  .lang-btn .caret { width: 10px; height: 10px; color: var(--muted); }
+  .lang-menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    min-width: 180px;
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 10px; box-shadow: 0 10px 26px rgba(15,15,26,0.10);
+    padding: 6px; z-index: 60;
+    display: none;
+  }
+  .lang-menu.open { display: block; }
+  .lang-menu button {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; color: var(--ink);
+    background: none; border: none; cursor: pointer;
+    padding: 8px 12px; border-radius: 7px;
+  }
+  .lang-menu button:hover { background: var(--bg-soft); }
+  .lang-menu button.active { color: var(--pink); font-weight: 600; }
+  .lang-menu button .check { width: 14px; height: 14px; color: var(--pink); opacity: 0; }
+  .lang-menu button.active .check { opacity: 1; }
+
   /* Hero — big search prompt over a pink panel. */
   .hero {
     background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);
@@ -163,12 +199,20 @@
       <span class="tag">AFFILIATE</span>
     </a>
     <div class="spacer"></div>
-    <a class="back" href="/affiliate">← Back to dashboard</a>
+    <div class="lang-wrap">
+      <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false">
+        <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span class="code" id="lang-code">EN</span>
+        <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lang-menu" id="lang-menu" role="menu"></div>
+    </div>
+    <a class="back" id="back-link" href="/affiliate">← Back to dashboard</a>
   </div>
 </nav>
 
 <section class="hero">
-  <h1>Hi, how can we help?</h1>
+  <h1 id="hero-title">Hi, how can we help?</h1>
   <div class="search-wrap" role="search">
     <input type="search" id="help-search" placeholder="Search the help center — try 'share link', 'commission', 'payout'…" autofocus>
     <button type="button" aria-label="Search" onclick="document.getElementById('help-search').focus();">
@@ -178,49 +222,267 @@
 </section>
 
 <main>
-  <h2>All categories</h2>
+  <h2 id="all-cats">All categories</h2>
   <div class="cat-grid">
 
     <a class="cat-card" href="/help/article?id=getting-started">
       <div class="ico">🚀</div>
-      <div class="label">Getting started</div>
+      <div class="label" data-cat="start">Getting started</div>
     </a>
 
     <a class="cat-card" href="/help/article?id=share-links">
       <div class="ico violet">🔗</div>
-      <div class="label">Share links & attribution</div>
+      <div class="label" data-cat="links">Share links & attribution</div>
     </a>
 
     <a class="cat-card" href="/help/article?id=commission-model">
       <div class="ico amber">💰</div>
-      <div class="label">Commissions & payouts</div>
+      <div class="label" data-cat="commissions">Commissions & payouts</div>
     </a>
 
     <a class="cat-card" href="/help/article?id=promote-social">
       <div class="ico cyan">📣</div>
-      <div class="label">Promotion</div>
+      <div class="label" data-cat="promotion">Promotion</div>
     </a>
 
     <a class="cat-card" href="/help/article?id=ftc-disclosure">
       <div class="ico violet">🛡️</div>
-      <div class="label">Compliance & account</div>
+      <div class="label" data-cat="compliance">Compliance & account</div>
     </a>
 
   </div>
 </main>
 
 <section class="contact-band">
-  <h3>Still have a question?</h3>
+  <h3 id="still-q">Still have a question?</h3>
   <a class="contact-card" href="mailto:affiliate@boostboss.ai?subject=Affiliate%20help%20question">
     <div class="ico">📧</div>
     <div class="text">
-      <div class="label">Contact us</div>
-      <div class="sub">affiliate@boostboss.ai · we reply within one business day</div>
+      <div class="label" id="contact-us">Contact us</div>
+      <div class="sub" id="contact-sub">affiliate@boostboss.ai · we reply within one business day</div>
     </div>
   </a>
 </section>
 
 <script>
+  // ════════════════════════════════════════════════════════════════════
+  //  i18n dictionary for the Help Center landing page.
+  // ════════════════════════════════════════════════════════════════════
+  var HELP_I18N = {
+    en: {
+      doc_title: 'Help Center — Boost Boss Affiliate',
+      ui: {
+        hero_title: 'Hi, how can we help?',
+        hero_placeholder: "Search the help center — try 'share link', 'commission', 'payout'…",
+        all_categories: 'All categories',
+        cat_start: 'Getting started',
+        cat_links: 'Share links & attribution',
+        cat_commissions: 'Commissions & payouts',
+        cat_promotion: 'Promotion',
+        cat_compliance: 'Compliance & account',
+        still_question: 'Still have a question?',
+        contact_us: 'Contact us',
+        contact_subline: 'affiliate@boostboss.ai · we reply within one business day',
+        back_to_dashboard: '← Back to dashboard',
+        lang_label: 'Language',
+      },
+    },
+    zh: {
+      doc_title: '帮助中心 — Boost Boss 联盟',
+      ui: {
+        hero_title: '您好，需要什么帮助？',
+        hero_placeholder: '搜索帮助中心 — 试试"分享链接"、"佣金"、"提现"…',
+        all_categories: '全部分类',
+        cat_start: '新手入门',
+        cat_links: '分享链接与归因',
+        cat_commissions: '佣金与提现',
+        cat_promotion: '推广技巧',
+        cat_compliance: '合规与账户',
+        still_question: '还有疑问吗？',
+        contact_us: '联系我们',
+        contact_subline: 'affiliate@boostboss.ai · 一个工作日内回复',
+        back_to_dashboard: '← 返回仪表板',
+        lang_label: '语言',
+      },
+    },
+    'zh-TW': {
+      doc_title: '說明中心 — Boost Boss 聯盟',
+      ui: {
+        hero_title: '您好！需要協助嗎？',
+        hero_placeholder: '搜尋說明中心 — 試試「分享連結」、「佣金」、「撥款」…',
+        all_categories: '全部分類',
+        cat_start: '新手入門',
+        cat_links: '分享連結與歸因',
+        cat_commissions: '佣金與撥款',
+        cat_promotion: '推廣技巧',
+        cat_compliance: '合規與帳戶',
+        still_question: '還有問題嗎？',
+        contact_us: '聯絡我們',
+        contact_subline: 'affiliate@boostboss.ai · 一個工作天內回覆',
+        back_to_dashboard: '← 返回儀表板',
+        lang_label: '語言',
+      },
+    },
+    ja: {
+      doc_title: 'ヘルプセンター — Boost Boss アフィリエイト',
+      ui: {
+        hero_title: 'こんにちは。何かお困りですか？',
+        hero_placeholder: 'ヘルプを検索 — 「シェアリンク」「報酬」「支払い」など…',
+        all_categories: 'すべてのカテゴリ',
+        cat_start: 'はじめに',
+        cat_links: 'シェアリンクとアトリビューション',
+        cat_commissions: '報酬と支払い',
+        cat_promotion: 'プロモーション',
+        cat_compliance: 'コンプライアンスとアカウント',
+        still_question: 'まだ質問がありますか？',
+        contact_us: 'お問い合わせ',
+        contact_subline: 'affiliate@boostboss.ai · 営業日1日以内に返信します',
+        back_to_dashboard: '← ダッシュボードへ戻る',
+        lang_label: '言語',
+      },
+    },
+    ko: {
+      doc_title: '도움말 센터 — Boost Boss 어필리에이트',
+      ui: {
+        hero_title: '안녕하세요, 무엇을 도와드릴까요?',
+        hero_placeholder: '도움말 검색 — \'공유 링크\', \'커미션\', \'정산\' 등…',
+        all_categories: '전체 카테고리',
+        cat_start: '시작하기',
+        cat_links: '공유 링크와 어트리뷰션',
+        cat_commissions: '커미션과 정산',
+        cat_promotion: '프로모션',
+        cat_compliance: '컴플라이언스 및 계정',
+        still_question: '아직 궁금한 점이 있나요?',
+        contact_us: '문의하기',
+        contact_subline: 'affiliate@boostboss.ai · 영업일 기준 1일 내 회신',
+        back_to_dashboard: '← 대시보드로 돌아가기',
+        lang_label: '언어',
+      },
+    },
+    vi: {
+      doc_title: 'Trung tâm trợ giúp — Boost Boss Affiliate',
+      ui: {
+        hero_title: 'Chào bạn, chúng tôi giúp gì được nào?',
+        hero_placeholder: "Tìm kiếm trợ giúp — thử 'link chia sẻ', 'hoa hồng', 'thanh toán'…",
+        all_categories: 'Tất cả danh mục',
+        cat_start: 'Bắt đầu',
+        cat_links: 'Link chia sẻ & ghi nhận',
+        cat_commissions: 'Hoa hồng & thanh toán',
+        cat_promotion: 'Quảng bá',
+        cat_compliance: 'Tuân thủ & tài khoản',
+        still_question: 'Vẫn còn thắc mắc?',
+        contact_us: 'Liên hệ chúng tôi',
+        contact_subline: 'affiliate@boostboss.ai · phản hồi trong vòng 1 ngày làm việc',
+        back_to_dashboard: '← Quay lại bảng điều khiển',
+        lang_label: 'Ngôn ngữ',
+      },
+    },
+  };
+
+  var LANG_LIST = [
+    { code: 'en',    label: 'English',      short: 'EN' },
+    { code: 'zh',    label: '简体中文',     short: '中' },
+    { code: 'zh-TW', label: '繁體中文',     short: '繁' },
+    { code: 'ja',    label: '日本語',       short: '日' },
+    { code: 'ko',    label: '한국어',       short: '한' },
+    { code: 'vi',    label: 'Tiếng Việt',   short: 'VI' },
+  ];
+
+  function resolveInitialLang() {
+    try {
+      var saved = localStorage.getItem('bb_help_lang');
+      if (saved && HELP_I18N[saved]) return saved;
+    } catch (_) {}
+    var nav = (navigator.language || 'en').toLowerCase();
+    if (nav.indexOf('zh-tw') === 0 || nav.indexOf('zh-hk') === 0 || nav.indexOf('zh-hant') === 0) return 'zh-TW';
+    if (nav.indexOf('zh') === 0) return 'zh';
+    if (nav.indexOf('ja') === 0) return 'ja';
+    if (nav.indexOf('ko') === 0) return 'ko';
+    if (nav.indexOf('vi') === 0) return 'vi';
+    return 'en';
+  }
+
+  var currentLang = resolveInitialLang();
+
+  function applyTranslations(lang) {
+    var dict = HELP_I18N[lang] || HELP_I18N.en;
+    var ui = dict.ui;
+    document.documentElement.lang = lang;
+    document.title = dict.doc_title;
+
+    document.getElementById('hero-title').textContent = ui.hero_title;
+    document.getElementById('help-search').setAttribute('placeholder', ui.hero_placeholder);
+    document.getElementById('all-cats').textContent = ui.all_categories;
+    document.getElementById('still-q').textContent = ui.still_question;
+    document.getElementById('contact-us').textContent = ui.contact_us;
+    document.getElementById('contact-sub').textContent = ui.contact_subline;
+    document.getElementById('back-link').textContent = ui.back_to_dashboard;
+
+    var catMap = {
+      start: ui.cat_start, links: ui.cat_links,
+      commissions: ui.cat_commissions, promotion: ui.cat_promotion,
+      compliance: ui.cat_compliance,
+    };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cat]'), function (el) {
+      var key = el.getAttribute('data-cat');
+      if (catMap[key]) el.textContent = catMap[key];
+    });
+
+    // Update toggle code label.
+    var matchShort = 'EN';
+    for (var i = 0; i < LANG_LIST.length; i++) {
+      if (LANG_LIST[i].code === lang) { matchShort = LANG_LIST[i].short; break; }
+    }
+    document.getElementById('lang-code').textContent = matchShort;
+
+    renderLangMenu(lang);
+  }
+
+  function renderLangMenu(activeLang) {
+    var menu = document.getElementById('lang-menu');
+    menu.innerHTML = LANG_LIST.map(function (l) {
+      var active = (l.code === activeLang) ? ' active' : '';
+      return '<button type="button" class="' + active.trim() + '" data-lang="' + l.code + '" role="menuitem">' +
+               '<span>' + l.label + '</span>' +
+               '<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+             '</button>';
+    }).join('');
+    Array.prototype.forEach.call(menu.querySelectorAll('button'), function (b) {
+      b.addEventListener('click', function () {
+        var code = b.getAttribute('data-lang');
+        if (!code || code === currentLang) { closeLangMenu(); return; }
+        currentLang = code;
+        try { localStorage.setItem('bb_help_lang', code); } catch (_) {}
+        applyTranslations(code);
+        closeLangMenu();
+      });
+    });
+  }
+
+  function openLangMenu() {
+    document.getElementById('lang-menu').classList.add('open');
+    document.getElementById('lang-btn').setAttribute('aria-expanded', 'true');
+  }
+  function closeLangMenu() {
+    document.getElementById('lang-menu').classList.remove('open');
+    document.getElementById('lang-btn').setAttribute('aria-expanded', 'false');
+  }
+
+  document.getElementById('lang-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var menu = document.getElementById('lang-menu');
+    if (menu.classList.contains('open')) closeLangMenu(); else openLangMenu();
+  });
+  document.addEventListener('click', function (e) {
+    var wrap = document.querySelector('.lang-wrap');
+    if (wrap && !wrap.contains(e.target)) closeLangMenu();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLangMenu();
+  });
+
+  applyTranslations(currentLang);
+
   // Pre-fill the search box from ?q= when arriving from another page.
   (function () {
     try {
