@@ -2410,19 +2410,18 @@
             color: var(--text-secondary);
         }
 
-        /* Footer — anchored to the bottom of the viewport across every
-           dashboard route (2026-06-15). The previous treatment let the
-           footer float wherever route content happened to end, which
-           meant /home put it mid-screen while /products + /payouts on a
-           tall screen pushed it way down — visually inconsistent and
-           the © line caught the eye on quiet routes.
-           Fix:
-             • .container is a flex column with min-height filling the
-               viewport (minus the top nav). margin-top:auto on the
-               footer makes it always land at the bottom edge.
-             • Lower visual weight: smaller font, muted color, lower
-               opacity so it stops snagging the eye. Hover restores
-               full opacity so the link still reads as interactive. */
+        /* Footer — anchored to the same vertical position across every
+           dashboard route (2026-06-15). Two minimal changes vs the prior
+           treatment, otherwise unchanged:
+             1. .container is a flex column with min-height filling the
+                viewport (minus the top nav band). margin-top:auto on
+                the footer pushes it to the bottom edge so every route
+                lands the © line at the same Y position regardless of
+                how short the current route's content is.
+             2. Top padding bumped from 1.25rem to 2rem so the footer
+                sits a touch lower, with a bit more breathing room
+                above it.
+           Color, font-size, and link styling are unchanged. */
         .container {
             display: flex;
             flex-direction: column;
@@ -2431,17 +2430,9 @@
         .container > footer {
             margin-top: auto;
             text-align: center;
-            padding: 3.5rem 0 1.5rem;
-            color: #9CA3AF;
-            font-size: 0.72rem;
-            letter-spacing: 0.02em;
-            opacity: 0.6;
-            transition: opacity 0.2s ease;
-        }
-        .container > footer:hover { opacity: 0.95; }
-        .container > footer a {
-            font-weight: 500;
-            opacity: 0.85;
+            padding: 2rem 0 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
         }
         /* Toast notifications */
         .toast-container {
