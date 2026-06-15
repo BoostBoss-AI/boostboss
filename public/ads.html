@@ -965,11 +965,22 @@
       <div class="reach-card" data-reveal style="--reveal-delay:180ms">
         <div class="rc-mockup">
           <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored attachment in a Telegram bot reply">
+            <defs>
+              <!-- Mask matching the rounded inner screen so straight-
+                   cornered content like the header strip, chat backdrop,
+                   and composer get clipped to the phone's rounded edge
+                   (otherwise their bottom corners pokes past the
+                   rounded phone bottom). -->
+              <clipPath id="d4-screen-clip">
+                <rect x="101" y="17" width="78" height="166" rx="11"/>
+              </clipPath>
+            </defs>
             <rect x="6" y="6" width="268" height="188" rx="8" fill="#E7EBF0" stroke="#1F1F2E" stroke-width="1.5"/>
             <!-- Phone frame centered -->
             <rect x="98" y="14" width="84" height="172" rx="14" fill="#1F1F2E"/>
             <rect x="101" y="17" width="78" height="166" rx="11" fill="#FFFFFF"/>
             <rect x="128" y="20" width="24" height="6" rx="3" fill="#1F1F2E"/>
+            <g clip-path="url(#d4-screen-clip)">
             <!-- Telegram header -->
             <rect x="101" y="29" width="78" height="14" fill="#5288C1"/>
             <circle cx="113" cy="36" r="4" fill="#FFFFFF"/>
@@ -977,35 +988,32 @@
             <text x="121" y="35" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#FFFFFF">DocBot</text>
             <text x="121" y="41" font-family="Inter, sans-serif" font-size="4.5" fill="#D6E5F2">@docbot · online</text>
             <!-- Chat backdrop -->
-            <rect x="101" y="43" width="78" height="114" fill="#E7EBF0"/>
+            <rect x="101" y="43" width="78" height="128" fill="#E7EBF0"/>
             <!-- User msg right -->
-            <rect x="124" y="46" width="50" height="14" rx="4" fill="#EFFDDE"/>
-            <text x="128" y="54" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Deploy options?</text>
-            <text x="170" y="60" text-anchor="end" font-family="Inter, sans-serif" font-size="3.5" fill="#9CA3AF">10:24 ✓✓</text>
+            <rect x="124" y="48" width="50" height="14" rx="4" fill="#EFFDDE"/>
+            <text x="128" y="56" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Deploy options?</text>
+            <text x="170" y="62" text-anchor="end" font-family="Inter, sans-serif" font-size="3.5" fill="#9CA3AF">10:24 ✓✓</text>
             <!-- Bot reply -->
-            <rect x="106" y="62" width="62" height="14" rx="4" fill="#FFFFFF"/>
-            <text x="110" y="70" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Railway and Fly.io.</text>
+            <rect x="106" y="66" width="62" height="14" rx="4" fill="#FFFFFF"/>
+            <text x="110" y="74" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Railway and Fly.io.</text>
             <!-- Sponsored card -->
-            <rect x="106" y="78" width="68" height="60" rx="4" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.2"/>
-            <rect x="106" y="78" width="68" height="14" rx="4" fill="#0F0F1A"/>
-            <rect x="106" y="86" width="68" height="6" fill="#0F0F1A"/>
-            <text x="140" y="88" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="7" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
-            <text x="110" y="100" font-family="Inter, sans-serif" font-size="4" font-weight="700" fill="#E01E65" letter-spacing="0.3">SPONSORED · Vercel</text>
-            <text x="110" y="109" font-family="Inter, sans-serif" font-size="5.5" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
-            <text x="110" y="117" font-family="Inter, sans-serif" font-size="4.5" fill="#4B4B5E">Free hobby · git push</text>
-            <rect x="110" y="123" width="34" height="10" rx="2" fill="#5288C1"/>
-            <text x="127" y="130" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" font-weight="600" fill="#FFFFFF">Try Free</text>
-            <text x="148" y="130" font-family="Inter, sans-serif" font-size="4" fill="#9CA3AF">vercel.com</text>
+            <rect x="106" y="84" width="68" height="76" rx="4" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.2"/>
+            <rect x="106" y="84" width="68" height="22" rx="4" fill="#0F0F1A"/>
+            <rect x="106" y="100" width="68" height="6" fill="#0F0F1A"/>
+            <text x="140" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
+            <text x="110" y="116" font-family="Inter, sans-serif" font-size="4.5" font-weight="700" fill="#E01E65" letter-spacing="0.3">SPONSORED · Vercel</text>
+            <text x="110" y="126" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
+            <text x="110" y="135" font-family="Inter, sans-serif" font-size="5" fill="#4B4B5E">Free hobby · git push</text>
+            <rect x="110" y="142" width="38" height="11" rx="2" fill="#5288C1"/>
+            <text x="129" y="149" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="600" fill="#FFFFFF">Try Free</text>
+            <text x="152" y="149" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">vercel.com</text>
             <!-- Composer -->
-            <rect x="101" y="157" width="78" height="12" fill="#F4F3EE"/>
-            <rect x="105" y="160" width="60" height="6" rx="3" fill="#FFFFFF"/>
-            <text x="108" y="165" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">Message…</text>
-            <circle cx="172" cy="163" r="4" fill="#5288C1"/>
-            <text x="172" y="166" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="700" fill="#FFFFFF">→</text>
-            <!-- Phone home-indicator chin so the rounded bottom of the
-                 device is visible (was clipped previously) -->
-            <rect x="101" y="169" width="78" height="14" fill="#FFFFFF"/>
-            <rect x="128" y="178" width="24" height="2" rx="1" fill="#1F1F2E"/>
+            <rect x="101" y="171" width="78" height="12" fill="#F4F3EE"/>
+            <rect x="105" y="174" width="60" height="6" rx="3" fill="#FFFFFF"/>
+            <text x="108" y="179" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">Message…</text>
+            <circle cx="172" cy="177" r="4" fill="#5288C1"/>
+            <text x="172" y="180" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="700" fill="#FFFFFF">→</text>
+            </g><!-- /d4-screen-clip -->
           </svg>
         </div>
         <div class="rc-body">
