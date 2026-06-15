@@ -11,8 +11,12 @@
 #                               every active campaign that has target tokens
 #    4. embed_stats (again)   — confirm cache_size went up
 #
-#  Required env:
-#    BBX_ADMIN_KEY            — admin secret matching prod Vercel env
+#  Required env (any ONE of these — script picks the first that's set):
+#    BBX_ADMIN_KEY            — admin secret (newer name, used in benna-v1.md)
+#    ADMIN_TOKEN              — admin secret (older name, used in
+#                               launch-kit/phase-e-live-key-flip-runbook.md)
+#    CRON_SECRET              — Vercel cron secret (requireAdminOrCron also
+#                               accepts this as Bearer auth)
 #  Optional env:
 #    BBX_BASE_URL             — defaults to https://boostboss.ai
 #    BBX_VERBOSE              — set to 1 to echo full JSON responses
@@ -38,24 +42,32 @@ fail()  { echo "${RED}✗${RESET} $1" >&2; exit 1; }
 info()  { echo "${DIM}  $1${RESET}"; }
 title() { echo; echo "${YELLOW}▸ $1${RESET}"; }
 
-# ── Pre-flight ─────────────────────────────────────────────────────
-[[ -n "${BBX_ADMIN_KEY:-}" ]] || fail "BBX_ADMIN_KEY env var not set"
+# ── Pre-flight: pick whichever auth env var is set ─────────────────
+AUTH_KEY=""
+AUTH_NAME=""
+if   [[ -n "${BBX_ADMIN_KEY:-}" ]]; then AUTH_KEY="$BBX_ADMIN_KEY"; AUTH_NAME="BBX_ADMIN_KEY"
+elif [[ -n "${ADMIN_TOKEN:-}"   ]]; then AUTH_KEY="$ADMIN_TOKEN";   AUTH_NAME="ADMIN_TOKEN"
+elif [[ -n "${CRON_SECRET:-}"   ]]; then AUTH_KEY="$CRON_SECRET";   AUTH_NAME="CRON_SECRET"
+else
+  fail "no auth env var set — try one of: BBX_ADMIN_KEY, ADMIN_TOKEN, CRON_SECRET"
+fi
 [[ -f "$SEED_FILE" ]] || fail "seed file not found at $SEED_FILE"
 command -v jq >/dev/null 2>&1 || fail "jq required but not on PATH"
 command -v curl >/dev/null 2>&1 || fail "curl required but not on PATH"
 
 echo "Benna v1 activation → ${BASE_URL}"
+echo "Auth source:         ${AUTH_NAME}"
 echo "Seed file:           ${SEED_FILE}"
 
 curl_get() {
   curl -sS -w '\n%{http_code}\n' \
-    -H "Authorization: Bearer ${BBX_ADMIN_KEY}" \
+    -H "Authorization: Bearer ${AUTH_KEY}" \
     "${BASE_URL}$1"
 }
 
 curl_post_json() {
   curl -sS -w '\n%{http_code}\n' -X POST \
-    -H "Authorization: Bearer ${BBX_ADMIN_KEY}" \
+    -H "Authorization: Bearer ${AUTH_KEY}" \
     -H "Content-Type: application/json" \
     --data-binary "$2" \
     "${BASE_URL}$1"
