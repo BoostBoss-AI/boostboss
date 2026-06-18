@@ -523,16 +523,32 @@ async function handleCapturePaypalOrder(req, res) {
   }
   const amountUsd = capture.amount_usd || expectedAmount || 0;
 
-  const credited = await creditAdvertiserForPayinEvent({
-    provider:           "paypal",
-    advertiserId,
-    amountUsd,
-    externalEventId:    capture.capture_id || capture.order_id,
-    paypalOrderId:      capture.order_id,
-    paypalCaptureId:    capture.capture_id,
-    payerEmail:         capture.payer_email,
-    description:        "PayPal deposit",
-  });
+  // Webhook-authoritative bookkeeping (Task #147, fixed 2026-06-18).
+  //
+  // We deliberately do NOT credit the advertiser balance here in
+  // production. PayPal's PAYMENT.CAPTURE.COMPLETED webhook is the single
+  // source of truth: durable (PayPal retries on delivery failure),
+  // idempotent (event.id de-dup at line 2400-2407), and matches how the
+  // Stripe path works. The return-URL hop you're handling here is
+  // fragile (browser refresh, network blip, tab close); duplicating the
+  // credit logic between this path and the webhook caused a double-credit
+  // bug where every advertiser deposit was credited twice.
+  //
+  // Demo mode (in-memory ledger, no Supabase) still credits here so the
+  // local development flow stays usable without webhook delivery.
+  let credited = false;
+  if (!HAS_SUPABASE) {
+    credited = await creditAdvertiserForPayinEvent({
+      provider:           "paypal",
+      advertiserId,
+      amountUsd,
+      externalEventId:    capture.capture_id || capture.order_id,
+      paypalOrderId:      capture.order_id,
+      paypalCaptureId:    capture.capture_id,
+      payerEmail:         capture.payer_email,
+      description:        "PayPal deposit",
+    });
+  }
 
   return res.json({
     mode:        capture.mode,
@@ -542,6 +558,11 @@ async function handleCapturePaypalOrder(req, res) {
     amount_usd:  amountUsd,
     advertiser_id: advertiserId,
     credited,
+    // In production (HAS_SUPABASE), credited=false means "PayPal captured
+    // the funds, webhook is about to credit the balance." The frontend
+    // should briefly poll /api/billing?action=balance after a successful
+    // capture; the webhook normally lands within 1-2s.
+    webhook_authoritative: HAS_SUPABASE,
   });
 }
 
@@ -650,7 +671,36 @@ async function creditAdvertiserForPayinEvent({
       if (paypalOrderId)   row.paypal_order_id   = paypalOrderId;
       if (paypalCaptureId) row.paypal_capture_id = paypalCaptureId;
       if (payerEmail)      row.payer_email       = payerEmail;
-      await sb.from("transactions").upsert(row, { onConflict: "paypal_capture_id" });
+
+      // Try to update the pending row that createPaypalOrder stamped at
+      // order-create time. The pending row has paypal_order_id set but
+      // paypal_capture_id=NULL — so an onConflict upsert on
+      // paypal_capture_id never matches it, which would leave an orphan
+      // "pending" row behind and (combined with the pre-fix capture-
+      // handler credit) cause the original double-credit bug.
+      let updated = false;
+      if (paypalOrderId) {
+        try {
+          const { data: updatedRows } = await sb.from("transactions")
+            .update({
+              status:            "completed",
+              description:       row.description,
+              paypal_capture_id: paypalCaptureId || null,
+              ...(payerEmail ? { payer_email: payerEmail } : {}),
+            })
+            .eq("paypal_order_id", paypalOrderId)
+            .eq("status",          "pending")
+            .select("id");
+          updated = !!(updatedRows && updatedRows.length > 0);
+        } catch (_) { /* column may not exist on older schemas */ }
+      }
+
+      if (!updated) {
+        // No pending row to update (e.g. webhook arrived before the
+        // pending stamp landed, or the row was stamped without
+        // paypal_order_id). Fall back to upsert.
+        await sb.from("transactions").upsert(row, { onConflict: "paypal_capture_id" });
+      }
     } catch (_) { /* if schema lacks columns the row is best-effort */ }
 
     // Phase 4: send the branded "Deposit successful" email. Best-effort,

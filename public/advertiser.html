@@ -5356,8 +5356,19 @@
                 const j = await r.json();
                 if (!r.ok) throw new Error(j.error || `Server returned ${r.status}`);
                 if (j.status === 'COMPLETED') {
-                    showToast(`Deposit of $${j.amount_usd || pending.expected} received!`, 'success');
+                    // Webhook-authoritative bookkeeping (Task #147 fix): the
+                    // capture endpoint no longer credits the balance directly
+                    // in production. PayPal's webhook does. The webhook
+                    // normally lands within 1-2s, so we poll the balance a
+                    // couple of times to reflect it as soon as it arrives.
+                    showToast(`Deposit of $${j.amount_usd || pending.expected} confirmed — balance updating…`, 'success');
                     await loadBalance();
+                    if (j.webhook_authoritative) {
+                        const pollAt = [2500, 6000, 12000];
+                        pollAt.forEach((delay) => {
+                            setTimeout(() => { loadBalance().catch(() => {}); }, delay);
+                        });
+                    }
                 } else {
                     showToast('Deposit pending review — the webhook will reconcile shortly.', 'info');
                     await loadBalance();
