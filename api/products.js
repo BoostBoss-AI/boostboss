@@ -914,6 +914,60 @@ module.exports = async function handler(req, res) {
       return res.json({ product: data });
     }
 
+    // ── DELETE (hard delete, Task #156) ────────────────────────────────
+    // For dupes / drafts / test products the seller wants removed entirely.
+    // Refuses if the product has any storefront_transactions rows so we
+    // don't break referential integrity of historical orders. Sellers
+    // with real sales must use archive instead.
+    if ((req.method === "DELETE" || (req.method === "POST" && action === "delete"))) {
+      const auth = await requireAdvertiser(req);
+      if (auth.error) return res.status(auth.status).json({ error: auth.error });
+
+      const id = body.id || req.query.id;
+      if (!id) return res.status(400).json({ error: "id is required" });
+
+      // Ownership check + protect against deleting products with real sales
+      const { data: product, error: prodErr } = await sb
+        .from("products")
+        .select("id, name")
+        .eq("id", id)
+        .eq("advertiser_id", auth.advertiserId)
+        .maybeSingle();
+      if (prodErr) return res.status(500).json({ error: prodErr.message });
+      if (!product) return res.status(404).json({ error: "Product not found or not yours" });
+
+      try {
+        const { count: orderCount } = await sb
+          .from("storefront_transactions")
+          .select("id", { count: "exact", head: true })
+          .eq("product_id", id);
+        if ((orderCount || 0) > 0) {
+          return res.status(409).json({
+            error: "This product has " + orderCount + " order(s) on record and cannot be hard-deleted. Use archive instead so the order history stays intact.",
+            order_count: orderCount,
+          });
+        }
+      } catch (_) { /* storefront_transactions table may not exist in older deploys */ }
+
+      // Delete dependents first. pricing_plans typically has ON DELETE CASCADE
+      // on product_id, but we call it explicitly to handle older schemas where
+      // the cascade may not be set up yet. Errors here are non-fatal — the
+      // products.delete will still run and the orphaned plans (if any) can
+      // be swept later.
+      try {
+        await sb.from("pricing_plans").delete().eq("product_id", id);
+      } catch (_) {}
+
+      const { error: delErr } = await sb
+        .from("products")
+        .delete()
+        .eq("id", id)
+        .eq("advertiser_id", auth.advertiserId);
+      if (delErr) return res.status(500).json({ error: delErr.message });
+
+      return res.json({ success: true, deleted: { id, name: product.name } });
+    }
+
     // ── RESTORE (un-archive) ───────────────────────────────────────────
     if (req.method === "POST" && action === "restore") {
       const auth = await requireAdvertiser(req);

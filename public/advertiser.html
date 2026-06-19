@@ -13444,8 +13444,9 @@ function pfParseScreenshots(text) {
                             <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
                                 <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">${_T('page.products.btn_edit','Edit')}</button>
                                 ${archived
-                                    ? `<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;">${_T('page.products.btn_restore','Restore')}</button>`
-                                    : `<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;">${_T('page.products.btn_orders','Orders →')}</button>`}
+                                    ? `<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;margin-right:6px;">${_T('page.products.btn_restore','Restore')}</button>`
+                                    : `<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;margin-right:6px;">${_T('page.products.btn_orders','Orders →')}</button>`}
+                                <button type="button" data-action="delete" title="${_T('page.products.btn_delete_tip','Delete this product permanently. Only works if there are no recorded orders.')}" style="padding:6px 10px;border:1px solid #FECACA;border-radius:6px;background:#FEF2F2;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#B91C1C;">${_T('page.products.btn_delete','Delete')}</button>
                             </td>
                         </tr>`;
                 }).join('');
@@ -13493,6 +13494,41 @@ function pfParseScreenshots(text) {
                     alert(e.message);
                 }
             }
+            async function deleteProduct(id, productName) {
+                // Hard-delete via /api/products?action=delete (Task #156).
+                // The endpoint refuses if storefront_transactions rows
+                // reference this product so we never break order history;
+                // sellers with real sales should use archive instead. The
+                // confirm() text matches the destructive style of other
+                // BB confirmations so the seller knows it's permanent.
+                const prompt = _T(
+                    'page.products.delete_confirm',
+                    'Delete "${name}" permanently? This cannot be undone. Use Archive instead if you want to hide it without losing the row.'
+                ).replace('${name}', productName || 'this product');
+                if (!confirm(prompt)) return;
+                try {
+                    const r = await fetch('/api/products?action=delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                        body: JSON.stringify({ id }),
+                    });
+                    const j = await r.json().catch(() => ({}));
+                    if (!r.ok) {
+                        // 409 = product has orders. Tell the seller to archive instead.
+                        if (r.status === 409 && j.order_count) {
+                            alert(_T(
+                                'page.products.delete_blocked',
+                                'Cannot delete — this product has ${count} order(s). Use Archive instead so the order history stays intact.'
+                            ).replace('${count}', String(j.order_count)));
+                            return;
+                        }
+                        throw new Error(j.error || 'Delete failed');
+                    }
+                    await loadProducts();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
 
             // Delegated click handler for the rendered table rows.
             // Buttons drive edit/orders/restore actions; <a data-action="view">
@@ -13516,6 +13552,7 @@ function pfParseScreenshots(text) {
                 }
                 if (action === 'archive') return archiveProduct(id);
                 if (action === 'restore') return restoreProduct(id);
+                if (action === 'delete')  return deleteProduct(id, product && product.name);
             });
 
             // Filters + search
