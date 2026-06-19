@@ -837,8 +837,19 @@
             background-color: rgba(0, 0, 0, 0.7);
             z-index: 2000;
             justify-content: center;
-            align-items: center;
+            /* Anchor to top with a small breathing gap (Task #157). Previously
+               align-items: center left a fat dark band above the modal when
+               the form's natural height was shorter than the viewport. With
+               flex-start the modal pins near the top and the only dark band
+               below is the bit between modal bottom and viewport bottom. */
+            align-items: flex-start;
+            padding-top: 3vh;
             backdrop-filter: blur(4px);
+            /* When the user is on a small screen + a tall form, allow the
+               whole modal column to scroll if needed. The inner
+               .modal-content already has its own overflow:auto for the
+               normal case. */
+            overflow-y: auto;
         }
 
         .modal.active {
