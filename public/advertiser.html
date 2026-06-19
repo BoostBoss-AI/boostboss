@@ -4464,7 +4464,7 @@
 
               <!-- Lock tip — shown when audit_status='approved' -->
               <div id="productLockedTip" style="display:none;margin-top:14px;padding:12px 16px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:10px;font-size:12.5px;color:#475569;line-height:1.6;">
-                🔒 <strong>This product is approved and locked.</strong> To keep the marketplace honest, approved products are immutable — sellers can't edit pricing or marketing after approval. Use <strong>Duplicate as new</strong> to create a fresh version pre-filled with these values, then update + resubmit for audit.
+                🔒 <strong>This product is approved and locked.</strong> To keep the marketplace honest, approved products are immutable — sellers can't edit pricing or marketing after approval. Use <strong>Duplicate as new</strong> to create a fresh version pre-filled with these values, then update + resubmit for audit. <a href="/docs/product-lifecycle" target="_blank" rel="noopener" style="color:#FF2D78;font-weight:600;text-decoration:underline;">Learn more →</a>
               </div>
 
               <div id="productFormErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;margin-top:14px;"></div>
@@ -13449,7 +13449,13 @@ function pfParseScreenshots(text) {
                                             rejected:          { bg: '#FEF2F2', color: '#DC2626', label: _T('page.products.status_rejected','Rejected') },
                                             changes_requested: { bg: '#FFF7ED', color: '#C2410C', label: _T('page.products.status_changes','Changes requested') },
                                         }[s] || { bg: '#F3F4F6', color: '#6B7280', label: s };
-                                        return `<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:${styles.bg};color:${styles.color};font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">${styles.label}</span></div>`;
+                                        // Show a small 🔒 next to the Live badge so the user knows
+                                        // the product is locked even before they click Edit.
+                                        // Hover shows a longer explanation + links to the lifecycle docs.
+                                        const lockBadge = (s === 'approved')
+                                            ? `<a href="/docs/product-lifecycle" target="_blank" rel="noopener" title="Approved products are locked from editing — click for full explanation" style="margin-left:6px;text-decoration:none;color:#059669;font-size:11px;">🔒</a>`
+                                            : '';
+                                        return `<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:${styles.bg};color:${styles.color};font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">${styles.label}</span>${lockBadge}</div>`;
                                     })()
                                 }
                             </td>
@@ -13457,7 +13463,7 @@ function pfParseScreenshots(text) {
                                 ${(!archived && (p.audit_status === 'draft' || p.audit_status === 'changes_requested'))
                                     ? `<button type="button" data-action="submit_for_audit" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FF2D78;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff;margin-right:6px;">${_T('page.products.btn_submit_audit','Submit for audit →')}</button>`
                                     : ''}
-                                <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">${_T('page.products.btn_edit','Edit')}</button>
+                                <button type="button" data-action="edit" title="${(p.audit_status === 'approved') ? 'This product is approved + locked. Opens in read-only mode with Duplicate as new / Archive options.' : 'Edit product details'}" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">${(p.audit_status === 'approved') ? '🔒 ' : ''}${_T('page.products.btn_edit','Edit')}</button>
                                 ${archived
                                     ? `<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;margin-right:6px;">${_T('page.products.btn_restore','Restore')}</button>`
                                     : `<button type="button" data-action="orders" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FFF1F6;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#FF2D78;margin-right:6px;">${_T('page.products.btn_orders','Orders →')}</button>`}

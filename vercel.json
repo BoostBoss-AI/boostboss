@@ -82,6 +82,7 @@
     { "source": "/docs", "destination": "/docs.html" },
     { "source": "/docs/quickstart", "destination": "/docs-quickstart.html" },
     { "source": "/docs/activation-link", "destination": "/docs-activation-link.html" },
+    { "source": "/docs/product-lifecycle", "destination": "/docs-product-lifecycle.html" },
     { "source": "/docs/api-reference", "destination": "/docs-api-reference.html" },
     { "source": "/docs/mcp", "destination": "/docs-mcp.html" },
     { "source": "/docs/js-snippet", "destination": "/docs-js-snippet.html" },
