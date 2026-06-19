@@ -7357,8 +7357,30 @@
         // campaign-level copy, so an empty map is the correct payload.
         window.__buildPerDoorCreatives = function () { return {}; };
 
+        // In-flight guard (Tasks #145, #146, #153) — prevents the form
+        // submission from creating duplicate campaigns when the user
+        // double-clicks Launch, or when a slow upload lets a second submit
+        // sneak in. Module-scoped so both the create handler AND the edit
+        // wrapper (line ~7930) share the same flag.
+        let _campaignFormInFlight = false;
+
         async function handleCreateCampaign(e) {
             e.preventDefault();
+            if (_campaignFormInFlight) return;
+            _campaignFormInFlight = true;
+            const launchBtn = document.getElementById('launchCampaignBtn');
+            const launchBtnText = launchBtn ? launchBtn.textContent : '';
+            if (launchBtn) {
+                launchBtn.disabled = true;
+                launchBtn.textContent = 'Launching…';
+            }
+            const reset = () => {
+                _campaignFormInFlight = false;
+                if (launchBtn) {
+                    launchBtn.disabled = false;
+                    launchBtn.textContent = launchBtnText || 'Launch Campaign';
+                }
+            };
 
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const formData = new FormData(campaignForm);
@@ -7495,6 +7517,8 @@
                 loadStats();
             } catch (error) {
                 showToast(error.message, 'error');
+            } finally {
+                reset();
             }
         }
 
@@ -7931,7 +7955,26 @@
             e.preventDefault();
 
             if (editingCampaignId) {
-                // UPDATE mode
+                // UPDATE mode — share the same in-flight guard the create
+                // path uses (Tasks #145, #153). Edit double-clicks were
+                // creating duplicate updates AND duplicate campaigns
+                // depending on timing.
+                if (_campaignFormInFlight) return;
+                _campaignFormInFlight = true;
+                const launchBtn = document.getElementById('launchCampaignBtn');
+                const origText = launchBtn ? launchBtn.textContent : '';
+                if (launchBtn) {
+                    launchBtn.disabled = true;
+                    launchBtn.textContent = 'Saving…';
+                }
+                const releaseGuard = () => {
+                    _campaignFormInFlight = false;
+                    if (launchBtn) {
+                        launchBtn.disabled = false;
+                        launchBtn.textContent = origText || 'Save Changes';
+                    }
+                };
+
                 const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
                 const formData = new FormData(campaignForm);
                 const updateData = {
@@ -7977,9 +8020,13 @@
                     loadStats();
                 } catch (err) {
                     showToast(err.message, 'error');
+                } finally {
+                    releaseGuard();
                 }
             } else {
-                // CREATE mode — call original handler
+                // CREATE mode — call original handler. handleCreateCampaign
+                // sets _campaignFormInFlight itself and releases in its own
+                // finally, so don't double-guard here.
                 _origSubmit.call(this, e);
             }
         });
