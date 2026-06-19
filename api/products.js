@@ -805,9 +805,15 @@ module.exports = async function handler(req, res) {
       const norm = normalizeProduct(body);
       if (norm.error) return res.status(400).json({ error: norm.error });
 
+      // Task #156: new products land in 'draft' status — they don't enter
+      // the admin audit queue until the seller clicks "Submit for audit".
+      // Keeps the audit queue clean of half-finished products and gives the
+      // seller room to iterate without re-triggering review. Requires the
+      // MIGRATION-product-draft-status.sql constraint update.
       const insertRow = Object.assign({}, norm.row, {
         advertiser_id: auth.advertiserId,
         status: "active",
+        audit_status: "draft",
       });
       const { data, error } = await sb
         .from("products")
@@ -829,6 +835,10 @@ module.exports = async function handler(req, res) {
             price:          data.price,
             currency:       data.currency || "USD",
             billing_period: pickDefaultBillingPeriod(data.sku_type),
+            // Task #156: default plan starts in 'pending' (plan-level audit
+            // is independent and gets resolved when admin approves the
+            // product). Product-level draft gate is what matters for
+            // keeping things out of the queue.
             audit_status:   "pending",
             is_active:      true,
             is_recommended: true,

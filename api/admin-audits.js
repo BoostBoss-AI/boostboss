@@ -75,9 +75,13 @@ async function handleList(req, res) {
 
   if (filter === "queue") {
     prodQuery = prodQuery.in("audit_status", ["pending", "changes_requested"]);
-  } else if (["pending", "approved", "rejected", "changes_requested"].includes(filter)) {
+  } else if (["pending", "approved", "rejected", "changes_requested", "draft"].includes(filter)) {
     prodQuery = prodQuery.eq("audit_status", filter);
-  } // 'all' returns everything
+  } else {
+    // 'all' — exclude drafts because they are not yet submitted for review
+    // (Task #156). Admin can still see them by passing ?status=draft.
+    prodQuery = prodQuery.neq("audit_status", "draft");
+  }
 
   const { data: products, error } = await prodQuery;
   if (error) return res.status(500).json({ error: error.message });

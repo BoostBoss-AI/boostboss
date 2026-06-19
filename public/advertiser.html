@@ -13430,8 +13430,9 @@ function pfParseScreenshots(text) {
                                 ${archived
                                     ? `<div><span style="display:inline-block;padding:2px 9px;border-radius:10px;background:#F3F4F6;color:#6B7280;font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">${_T('page.products.status_archived','Archived')}</span></div>`
                                     : (() => {
-                                        const s = p.audit_status || 'pending';
+                                        const s = p.audit_status || 'draft';
                                         const styles = {
+                                            draft:             { bg: '#F1F5F9', color: '#475569', label: _T('page.products.status_draft','Draft') },
                                             approved:          { bg: '#ECFDF5', color: '#059669', label: _T('page.products.status_live','Live') },
                                             pending:           { bg: '#FEF3C7', color: '#92400E', label: _T('page.products.status_pending','Pending audit') },
                                             rejected:          { bg: '#FEF2F2', color: '#DC2626', label: _T('page.products.status_rejected','Rejected') },
@@ -13442,6 +13443,9 @@ function pfParseScreenshots(text) {
                                 }
                             </td>
                             <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
+                                ${(!archived && (p.audit_status === 'draft' || p.audit_status === 'changes_requested'))
+                                    ? `<button type="button" data-action="submit_for_audit" style="padding:6px 12px;border:1px solid #FF2D78;border-radius:6px;background:#FF2D78;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff;margin-right:6px;">${_T('page.products.btn_submit_audit','Submit for audit →')}</button>`
+                                    : ''}
                                 <button type="button" data-action="edit" style="padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;margin-right:6px;">${_T('page.products.btn_edit','Edit')}</button>
                                 ${archived
                                     ? `<button type="button" data-action="restore" style="padding:6px 12px;border:1px solid #BBF7D0;border-radius:6px;background:#F0FDF4;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#059669;margin-right:6px;">${_T('page.products.btn_restore','Restore')}</button>`
@@ -13489,6 +13493,29 @@ function pfParseScreenshots(text) {
                         body: JSON.stringify({ id }),
                     });
                     if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Restore failed'); }
+                    await loadProducts();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+            async function submitForAudit(id, productName) {
+                // Task #156 — flips audit_status from 'draft' (or
+                // 'changes_requested') to 'pending'. Backend endpoint
+                // exists since audit-model-fix; this just wires the UI
+                // button to it.
+                const prompt = _T(
+                    'page.products.submit_confirm',
+                    'Submit "${name}" for BB audit? You won\'t be able to edit it while it\'s in review.'
+                ).replace('${name}', productName || 'this product');
+                if (!confirm(prompt)) return;
+                try {
+                    const r = await fetch('/api/products?action=submit_for_audit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+                        body: JSON.stringify({ id }),
+                    });
+                    const j = await r.json().catch(() => ({}));
+                    if (!r.ok) throw new Error(j.error || 'Submit failed');
                     await loadProducts();
                 } catch (e) {
                     alert(e.message);
@@ -13553,6 +13580,7 @@ function pfParseScreenshots(text) {
                 if (action === 'archive') return archiveProduct(id);
                 if (action === 'restore') return restoreProduct(id);
                 if (action === 'delete')  return deleteProduct(id, product && product.name);
+                if (action === 'submit_for_audit') return submitForAudit(id, product && product.name);
             });
 
             // Filters + search
