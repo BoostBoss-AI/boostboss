@@ -1376,6 +1376,41 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
       body: JSON.stringify(payload),
     });
     const j = await r.json();
+
+    // Already-registered case (Task #151, fixed 2026-06-19): backend now
+    // detects existing emails (including Supabase's empty-identities trick)
+    // and returns { already_registered: true }. Surface a clear message + a
+    // one-click switch to the signin form so the user doesn't have to
+    // re-find the page.
+    if (!r.ok && j.already_registered) {
+      // showError uses textContent, so render the inline "Sign in" link
+      // via innerHTML directly. The error string from the server is plain
+      // text (no user input echoed back), so this is XSS-safe.
+      const errEl = document.getElementById("error");
+      const msg = j.error || "This email is already registered.";
+      const signinSelector = '[data-mode="signin"], #show-login, [data-tab="signin"]';
+      const hasInlineSigninBtn = !!document.querySelector(signinSelector);
+      const linkTarget = hasInlineSigninBtn
+        ? '#switch-to-signin" data-switch="1'
+        : (selectedRole === "developer" ? "/publish/signin" : "/ads/signin");
+      errEl.innerHTML = msg +
+        ' <a href="' + linkTarget + '" id="switch-to-signin" ' +
+        'style="color:var(--pink);text-decoration:underline;font-weight:600;">Sign in instead →</a>';
+      errEl.style.display = "block";
+      showToast('Email already registered — sign in instead', 'info');
+      // Wire the inline switch if we have a signin button on the same page.
+      if (hasInlineSigninBtn) {
+        const inlineSwitch = document.getElementById("switch-to-signin");
+        inlineSwitch && inlineSwitch.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          document.querySelector(signinSelector).click();
+          const loginEmail = document.getElementById("login-email");
+          if (loginEmail) loginEmail.value = (payload.email || "").trim();
+        });
+      }
+      return;
+    }
+
     if (!r.ok || j.error) throw new Error(j.error || "Signup failed");
 
     // Phase 3A: if the backend says email confirmation is required

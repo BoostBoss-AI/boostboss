@@ -2150,7 +2150,55 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
       });
     }
   } else {
-    userId = signUpData.user?.id;
+    // Supabase signUp() does NOT throw when the email already exists — it
+    // returns a "fake user" with identities=[] to prevent email enumeration
+    // attacks. We have to detect this case ourselves, otherwise an existing
+    // user re-submitting the signup form silently falls through this branch
+    // and the page just spins with no feedback (Task #151, fixed 2026-06-19).
+    //
+    // Per Supabase docs:
+    //   https://supabase.com/docs/reference/javascript/auth-signup
+    // An empty identities array is the signal that the email is already
+    // registered. We reroute into the same "already registered" check the
+    // signUpErr branch uses.
+    const identities = (signUpData && signUpData.user && signUpData.user.identities) || [];
+    if (signUpData && signUpData.user && identities.length === 0) {
+      // Existing-but-unconfirmed user OR existing-and-confirmed user.
+      // Try signInWithPassword to see if this is the "right password but
+      // already registered" case (where they probably meant to sign in).
+      const { data: siData } = await supabaseAnon.auth.signInWithPassword({ email, password });
+      if (siData && siData.user) {
+        userId = siData.user.id;
+        existingMeta = siData.user.user_metadata || {};
+        isExistingUser = true;
+
+        // Refuse if this role's profile already exists — they should sign in.
+        const table = role === "advertiser" ? "advertisers" : "developers";
+        const { data: existingProfile } = await supabaseAdmin
+          .from(table).select("id").eq("id", userId).maybeSingle();
+        if (existingProfile) {
+          const product = role === "advertiser" ? "SuperBoost Ads" : "Lumi SDK";
+          return res.status(400).json({
+            error:        "This email is already registered for " + product + ". Please sign in instead.",
+            already_registered: true,
+          });
+        }
+        // Existing user but no profile for this role — fall through to the
+        // cross-role attachment path (intended behavior, same as signUpErr
+        // branch).
+      } else {
+        // Existing user but wrong password (or unconfirmed). We can't safely
+        // create a new account on top of theirs, but we also don't want to
+        // confirm the email exists by saying "wrong password." Tell the user
+        // generically and route them to sign in, where they can recover.
+        return res.status(400).json({
+          error:        "This email may already be registered. Please sign in or use the password reset link.",
+          already_registered: true,
+        });
+      }
+    } else {
+      userId = signUpData.user?.id;
+    }
   }
 
   if (!userId) {
