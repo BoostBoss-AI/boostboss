@@ -265,7 +265,49 @@ async function applyDecision(req, res, newStatus, { requireNotes }) {
     .maybeSingle();
   if (upErr) return res.status(500).json({ error: upErr.message });
 
-  return res.json({ success: true, product: updated, prior_status: product.audit_status });
+  // Cascade decision to pricing plans (Task #150, fixed 2026-06-18).
+  //
+  // Before this, pricing_plans had full audit columns but no mechanism
+  // ever updated them — every plan stayed pending forever. The semantics:
+  //   - approved: only plans WITH an original_price_proof_url get
+  //     approved. Plans missing proof URLs stay pending so the
+  //     pricing_plans_audit_policy invariant (every live plan has a
+  //     proof URL) is protected even if a product is approved early.
+  //   - rejected / changes_requested: cascade to ALL plans. A rejected
+  //     product cannot have an approved plan hanging off it.
+  const planUpdates = {
+    audit_status:        newStatus,
+    audit_reviewed_at:   new Date().toISOString(),
+    audit_review_notes:  notes || null,
+  };
+  if (process.env.ADMIN_DEFAULT_REVIEWER_ID) {
+    planUpdates.audit_reviewer_id = process.env.ADMIN_DEFAULT_REVIEWER_ID;
+  }
+
+  let planQuery = client.from("pricing_plans")
+    .update(planUpdates)
+    .eq("product_id", productId);
+  if (newStatus === "approved") {
+    planQuery = planQuery
+      .not("original_price_proof_url", "is", null)
+      .neq("original_price_proof_url", "");
+  }
+  const { data: updatedPlans, error: planErr } = await planQuery
+    .select("id, plan_name, audit_status, original_price_proof_url");
+
+  // Plan-cascade failure is non-fatal — the product still got the
+  // requested status. Surface the count for the admin UI to display.
+  if (planErr) {
+    console.error("[admin-audits] plan cascade failed:", planErr.message);
+  }
+
+  return res.json({
+    success:       true,
+    product:       updated,
+    prior_status:  product.audit_status,
+    plans_updated: Array.isArray(updatedPlans) ? updatedPlans.length : 0,
+    plans:         updatedPlans || [],
+  });
 }
 
 // ──────────────────────────────────────────────────────────────────────

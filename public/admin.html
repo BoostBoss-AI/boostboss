@@ -2560,7 +2560,13 @@ function renderAuditList(items) {
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
-      toast(`Product ${action.replace(/_/g, " ")}d`, "success");
+      // Surface plan-cascade count from the response so it's obvious
+      // whether plans came along (post Task #150 fix).
+      const planCount = (typeof j.plans_updated === "number") ? j.plans_updated : 0;
+      const planSuffix = planCount > 0
+        ? ` (+${planCount} ${planCount === 1 ? "plan" : "plans"})`
+        : "";
+      toast(`Product ${action.replace(/_/g, " ")}d${planSuffix}`, "success");
       await loadAuditsPanel();
     } catch (err) {
       toast("Failed: " + err.message, "error");
