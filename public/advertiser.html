@@ -849,7 +849,10 @@
             background-color: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 2rem 2.25rem;
+            /* Top padding 0 — modal-header is now sticky and provides its own
+               padding. This prevents the blank-at-top issue when scrolling
+               (Task #157). */
+            padding: 0 2.25rem 2rem;
             max-width: 980px;
             width: 92%;
             max-height: 92vh;
@@ -861,9 +864,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            /* Sticky so the title + close button stay visible while the user
+               scrolls long forms. Negative horizontal margin extends the
+               header background out into the modal-content padding so the
+               sticky band doesn't show the form content underneath as it
+               scrolls past. */
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-surface);
+            margin: 0 -2.25rem 1.5rem;
+            padding: 1.5rem 2.25rem 1rem;
             border-bottom: 1px solid var(--border);
+            z-index: 2;
         }
 
         .modal-title {
