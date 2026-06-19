@@ -13503,10 +13503,8 @@ function pfParseScreenshots(text) {
                 // 'changes_requested') to 'pending'. Backend endpoint
                 // exists since audit-model-fix; this just wires the UI
                 // button to it.
-                const prompt = _T(
-                    'page.products.submit_confirm',
-                    'Submit "${name}" for BB audit? You won\'t be able to edit it while it\'s in review.'
-                ).replace('${name}', productName || 'this product');
+                const prompt = 'Submit "' + (productName || 'this product') +
+                    '" for BB audit? You won\'t be able to edit it while it\'s in review.';
                 if (!confirm(prompt)) return;
                 try {
                     const r = await fetch('/api/products?action=submit_for_audit', {
@@ -13525,13 +13523,9 @@ function pfParseScreenshots(text) {
                 // Hard-delete via /api/products?action=delete (Task #156).
                 // The endpoint refuses if storefront_transactions rows
                 // reference this product so we never break order history;
-                // sellers with real sales should use archive instead. The
-                // confirm() text matches the destructive style of other
-                // BB confirmations so the seller knows it's permanent.
-                const prompt = _T(
-                    'page.products.delete_confirm',
-                    'Delete "${name}" permanently? This cannot be undone. Use Archive instead if you want to hide it without losing the row.'
-                ).replace('${name}', productName || 'this product');
+                // sellers with real sales should use archive instead.
+                const prompt = 'Delete "' + (productName || 'this product') +
+                    '" permanently? This cannot be undone. Use Archive instead if you want to hide it without losing the row.';
                 if (!confirm(prompt)) return;
                 try {
                     const r = await fetch('/api/products?action=delete', {
@@ -13543,10 +13537,8 @@ function pfParseScreenshots(text) {
                     if (!r.ok) {
                         // 409 = product has orders. Tell the seller to archive instead.
                         if (r.status === 409 && j.order_count) {
-                            alert(_T(
-                                'page.products.delete_blocked',
-                                'Cannot delete — this product has ${count} order(s). Use Archive instead so the order history stays intact.'
-                            ).replace('${count}', String(j.order_count)));
+                            alert('Cannot delete — this product has ' + j.order_count +
+                                ' order(s). Use Archive instead so the order history stays intact.');
                             return;
                         }
                         throw new Error(j.error || 'Delete failed');
