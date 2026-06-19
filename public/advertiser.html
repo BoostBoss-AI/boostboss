@@ -13483,7 +13483,13 @@ function pfParseScreenshots(text) {
             }
 
             async function archiveProduct(id) {
-                if (!confirm('Archive this product? Existing share links keep working but it disappears from the marketplace.')) return;
+                const ok = await bbConfirm({
+                    title: 'Archive this product?',
+                    body:  'Existing share links keep working, but the product disappears from the marketplace. You can restore it later from the archived view.',
+                    confirmText: 'Archive',
+                    cancelText:  'Cancel',
+                });
+                if (!ok) return;
                 try {
                     const r = await fetch('/api/products?action=archive', {
                         method: 'POST',
@@ -13509,14 +13515,56 @@ function pfParseScreenshots(text) {
                     alert(e.message);
                 }
             }
+            // Branded confirmation modal (Task #156 polish). Replaces the
+            // stock window.confirm() popup with a BB-styled overlay that
+            // matches the rest of the dashboard. Returns Promise<boolean>.
+            // Variant: 'default' = pink CTA; 'danger' = red CTA for delete.
+            function bbConfirm({ title, body, confirmText, cancelText, variant }) {
+                return new Promise((resolve) => {
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit;';
+                    const ctaColor = variant === 'danger' ? '#DC2626' : '#FF2D78';
+                    const ctaBorder = variant === 'danger' ? '#B91C1C' : '#FF2D78';
+                    overlay.innerHTML =
+                        '<div role="dialog" aria-modal="true" style="background:#fff;border-radius:14px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.35);padding:24px 24px 18px;border:1px solid #E5E7EB;">' +
+                            '<div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;">' + (title || 'Are you sure?') + '</div>' +
+                            (body ? '<div style="font-size:13.5px;line-height:1.55;color:#4B5563;margin-bottom:18px;">' + body + '</div>' : '') +
+                            '<div style="display:flex;justify-content:flex-end;gap:8px;">' +
+                                '<button type="button" data-bb-confirm-cancel style="padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;">' + (cancelText || 'Cancel') + '</button>' +
+                                '<button type="button" data-bb-confirm-ok style="padding:8px 16px;border:1px solid ' + ctaBorder + ';border-radius:8px;background:' + ctaColor + ';color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">' + (confirmText || 'Confirm') + '</button>' +
+                            '</div>' +
+                        '</div>';
+                    document.body.appendChild(overlay);
+                    const cleanup = (result) => {
+                        try { document.body.removeChild(overlay); } catch (_) {}
+                        document.removeEventListener('keydown', onKey);
+                        resolve(result);
+                    };
+                    const onKey = (e) => {
+                        if (e.key === 'Escape') cleanup(false);
+                        if (e.key === 'Enter')  cleanup(true);
+                    };
+                    overlay.querySelector('[data-bb-confirm-cancel]').addEventListener('click', () => cleanup(false));
+                    overlay.querySelector('[data-bb-confirm-ok]').addEventListener('click', () => cleanup(true));
+                    overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+                    document.addEventListener('keydown', onKey);
+                    // Focus the OK button for keyboard users.
+                    setTimeout(() => { try { overlay.querySelector('[data-bb-confirm-ok]').focus(); } catch (_) {} }, 50);
+                });
+            }
+
             async function submitForAudit(id, productName) {
                 // Task #156 — flips audit_status from 'draft' (or
                 // 'changes_requested') to 'pending'. Backend endpoint
                 // exists since audit-model-fix; this just wires the UI
                 // button to it.
-                const prompt = 'Submit "' + (productName || 'this product') +
-                    '" for BB audit? You won\'t be able to edit it while it\'s in review.';
-                if (!confirm(prompt)) return;
+                const ok = await bbConfirm({
+                    title: 'Submit for BB audit?',
+                    body:  '<b>' + (productName || 'This product') + '</b> will go into the BB review queue. While it\'s in review you won\'t be able to edit it. Reviews usually finish within 24 hours.',
+                    confirmText: 'Submit for audit',
+                    cancelText:  'Keep editing',
+                });
+                if (!ok) return;
                 try {
                     const r = await fetch('/api/products?action=submit_for_audit', {
                         method: 'POST',
@@ -13535,9 +13583,15 @@ function pfParseScreenshots(text) {
                 // The endpoint refuses if storefront_transactions rows
                 // reference this product so we never break order history;
                 // sellers with real sales should use archive instead.
-                const prompt = 'Delete "' + (productName || 'this product') +
-                    '" permanently? This cannot be undone. Use Archive instead if you want to hide it without losing the row.';
-                if (!confirm(prompt)) return;
+                const ok = await bbConfirm({
+                    title: 'Delete this product permanently?',
+                    body:  '<b>' + (productName || 'This product') + '</b> will be removed for good — including its pricing plans. ' +
+                           'This cannot be undone. If you want to hide it without losing the row, use Archive instead.',
+                    confirmText: 'Delete permanently',
+                    cancelText:  'Keep it',
+                    variant:     'danger',
+                });
+                if (!ok) return;
                 try {
                     const r = await fetch('/api/products?action=delete', {
                         method: 'POST',
