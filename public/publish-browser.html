@@ -3,17 +3,17 @@
 <head>
 <!-- BB_I18N_PRELOAD: zero-flash language preference. Mirrors i18n.js. Do not edit by hand — run scripts/i18n_inject_preload.py. -->
 <style>html.bb-i18n-loading{visibility:hidden}</style>
-<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/mcp':1,'/publish/ai-apps':1,'/publish/extensions':1,'/publish/bots':1,'/publish/no-code':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
+<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/computer':1,'/publish/browser':1,'/publish/browser-extension':1,'/publish/mobile':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
 <!-- /BB_I18N_PRELOAD -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For MCP Server Developers — Boost Boss</title>
-<meta name="description" content="Earn revenue every time your MCP tool is called. The first ad network built natively into the Model Context Protocol. Three lines of code. Claude Desktop, Cursor, Cline render the rest.">
-<meta property="og:title" content="For MCP Server Developers — Boost Boss">
-<meta property="og:description" content="Monetize per MCP tool call. Three lines of code. Industry-leading payouts.">
-<meta property="og:url" content="https://boostboss.ai/publish/mcp">
-<link rel="canonical" href="https://boostboss.ai/publish/mcp">
+<title>Lumi for Browser App — Boost Boss</title>
+<meta name="description" content="Add ad revenue to your AI web app in 5 minutes. Lumi for Browser App is one async script tag — ad slots that fire on user intent, not page chrome. 8 placements. Weekly payouts.">
+<meta property="og:title" content="Lumi for Browser App — Boost Boss">
+<meta property="og:description" content="Monetize your AI web app in 5 minutes. One async script tag. 8 placements.">
+<meta property="og:url" content="https://boostboss.ai/publish/browser">
+<link rel="canonical" href="https://boostboss.ai/publish/browser">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,23 +26,11 @@
     --bg: #FFFFFF; --bg-soft: #FAFAF7; --code-bg: #0F0F1A;
   }
   html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: var(--ink); line-height: 1.55;
-    -webkit-font-smoothing: antialiased; font-size: 16px;
-    background:
-      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%),
-      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%),
-      #FAFAF7;
-    background-attachment: fixed; min-height: 100vh;
-  }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%), radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%), #FAFAF7; background-attachment: fixed; min-height: 100vh; }
   a { color: inherit; text-decoration: none; }
   .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-  .wrap-narrow { max-width: 880px; margin: 0 auto; padding: 0 24px; }
   h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 
-  /* NAV */
   nav.site-nav { position: sticky; top: 0; z-index: 100; background: transparent; transition: background 0.3s, border 0.3s, backdrop-filter 0.3s; border-bottom: 1px solid transparent; }
   nav.site-nav.scrolled { background: rgba(250,250,247,0.86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(15,15,26,0.06); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
@@ -101,45 +89,39 @@
   .btn-primary { background: var(--pink); color: #fff; border-color: var(--pink); }
   .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
   .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 10px; }
-  .btn-block { width: 100%; }
 
-  /* HERO */
   .hero { padding: 80px 0 60px; }
   .eyebrow { display: inline-block; padding: 6px 13px; background: rgba(255, 45, 120, 0.10); color: var(--pink-dark); font-size: 12.5px; font-weight: 700; border-radius: 999px; margin-bottom: 18px; letter-spacing: 0.06em; text-transform: uppercase; }
   .hero h1 { font-size: clamp(40px, 5.4vw, 64px); font-weight: 700; line-height: 1.05; margin-bottom: 22px; max-width: 880px; }
   .hero h1 .grad { background: linear-gradient(90deg, var(--pink), var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   .hero .sub { font-size: 19px; color: var(--ink-soft); max-width: 720px; margin-bottom: 32px; line-height: 1.5; }
 
-  /* SECTION HEADER */
   section { padding: 70px 0; }
   .section-eyebrow { display: block; font-size: 12.5px; font-weight: 700; color: var(--pink-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
   h2.section-h { font-size: clamp(28px, 3.4vw, 38px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
   .section-sub { font-size: 17px; color: var(--ink-soft); max-width: 640px; margin-bottom: 40px; }
 
-  /* HOW IT WORKS */
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
   .how-step { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 28px 26px; }
   .how-step .num { width: 36px; height: 36px; border-radius: 10px; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; font-family: 'Space Grotesk', sans-serif; margin-bottom: 18px; }
   .how-step h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
   .how-step p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
 
-  /* CODE BLOCK */
   .code-block { background: var(--code-bg); color: #E5E7EB; border-radius: 14px; padding: 28px 28px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; max-width: 880px; }
   .code-block .kw { color: #C792EA; }
   .code-block .str { color: #C3E88D; }
-  .code-block .fn { color: #82AAFF; }
+  .code-block .tag { color: #F07178; }
+  .code-block .attr { color: #FFCB6B; }
   .code-block .cm { color: #6B7280; font-style: italic; }
   .code-caption { font-size: 14px; color: var(--ink-soft); margin-top: 14px; max-width: 880px; }
   .code-caption a { color: var(--pink); font-weight: 600; }
   .code-caption a:hover { text-decoration: underline; }
 
-  /* WHO THIS IS FOR */
   .who { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .who ul { list-style: none; padding: 0; margin: 0; max-width: 760px; }
   .who li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; font-size: 16px; color: var(--ink); }
   .who li .check { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: rgba(4, 190, 254, 0.14); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; margin-top: 3px; }
 
-  /* REVENUE EXAMPLE */
   .revenue-card { background: linear-gradient(140deg, rgba(255, 45, 120, 0.06), rgba(4, 190, 254, 0.06)); border: 1.5px solid var(--line); border-radius: 18px; padding: 36px 38px; max-width: 720px; }
   .revenue-card .label { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 18px; }
   .revenue-card .rev-row { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px dashed rgba(15,15,26,0.10); font-size: 15.5px; }
@@ -148,23 +130,34 @@
   .revenue-card .rev-row:last-child .v { color: var(--pink-dark); font-family: 'Space Grotesk', sans-serif; }
   .revenue-card .disclaimer { font-size: 12.5px; color: var(--muted); margin-top: 18px; line-height: 1.5; }
 
-  /* FAQ */
   .faq-list { max-width: 880px; }
   .faq-item { border-bottom: 1px solid var(--line); padding: 20px 0; }
   .faq-item:first-child { padding-top: 0; }
   .faq-item h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
   .faq-item p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.55; }
 
+  .cta-footer { padding: 90px 0 110px; text-align: center; }
+  .cta-footer h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 14px; }
+  .cta-footer p { font-size: 16.5px; color: var(--ink-soft); margin-bottom: 28px; }
+
+  footer.site-footer { padding: 40px 0 60px; border-top: 1px solid var(--line); background: #fff; }
+  .footer-inner { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; align-items: center; }
+  .footer-brand { display: flex; align-items: center; gap: 10px; }
+  .footer-brand .brand-name { font-size: 16px; }
+  .footer-brand .brand-mark { width: 26px; height: 26px; }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 22px; }
+  .footer-links a { font-size: 14px; color: var(--ink-soft); }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-legal-links { gap: 18px; margin-top: 4px; }
+  .footer-legal-links a { font-size: 12px; color: var(--muted); }
+  .footer-copy { font-size: 13px; color: var(--muted); }
+
   /* PRODUCT SHOT */
   .product-shot { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 28px; max-width: 880px; margin: 28px auto 0; box-shadow: 0 2px 24px -8px rgba(15,15,26,0.10); }
   .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
   .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
 
-  /* Phase G — real screenshot graceful fallback.
-     By default the inline SVG renders. If a real screenshot exists at
-     the img's src, onload fires and sets .has-real-img on the wrapper,
-     which hides the SVG and shows the img. If the screenshot 404s,
-     onerror removes the img and the SVG stays visible. */
+  /* Phase G — real screenshot graceful fallback */
   .hero-mockup-wrap .hero-mockup-real { display: none; width: 100%; height: auto; border-radius: 10px; }
   .hero-mockup-wrap.has-real-img .hero-mockup-real { display: block; }
   .hero-mockup-wrap.has-real-img svg { display: none; }
@@ -178,25 +171,6 @@
   .see-it .section-eyebrow { display: block; text-align: center; }
   .see-it .section-sub { text-align: center; max-width: 660px; margin-left: auto; margin-right: auto; }
 
-  /* CTA FOOTER */
-  .cta-footer { padding: 90px 0 110px; text-align: center; }
-  .cta-footer h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 14px; }
-  .cta-footer p { font-size: 16.5px; color: var(--ink-soft); margin-bottom: 28px; }
-  .cta-footer .perk { display: inline-block; padding: 6px 14px; background: rgba(255, 230, 0, 0.16); color: #8a6d00; font-size: 13.5px; font-weight: 600; border-radius: 999px; margin-top: 16px; }
-
-  /* SITE FOOTER */
-  footer.site-footer { padding: 40px 0 60px; border-top: 1px solid var(--line); background: #fff; }
-  .footer-inner { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; align-items: center; }
-  .footer-brand { display: flex; align-items: center; gap: 10px; }
-  .footer-brand .brand-name { font-size: 16px; }
-  .footer-brand .brand-mark { width: 26px; height: 26px; }
-  .footer-links { display: flex; flex-wrap: wrap; gap: 22px; }
-  .footer-links a { font-size: 14px; color: var(--ink-soft); }
-  .footer-links a:hover { color: var(--ink); }
-  .footer-legal-links { gap: 18px; margin-top: 4px; }
-  .footer-legal-links a { font-size: 12px; color: var(--muted); }
-  .footer-copy { font-size: 13px; color: var(--muted); }
-
   @media (max-width: 760px) {
     .nav-links { display: none; }
     .how-grid { grid-template-columns: 1fr; }
@@ -208,7 +182,6 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="site-nav">
   <div class="nav-inner">
     <a class="brand" href="/publish">
@@ -217,11 +190,10 @@
       <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
     </a>
     <div class="nav-links">
-      <a href="/publish/mcp" class="active" data-i18n="subnav.mcp">MCP Servers</a>
-      <a href="/publish/ai-apps" data-i18n="subnav.ai_apps">AI Apps</a>
-      <a href="/publish/extensions" data-i18n="subnav.extensions">Extensions</a>
-      <a href="/publish/bots" data-i18n="subnav.bots">Bots</a>
-      <a href="/publish/no-code" data-i18n="subnav.no_code">Custom GPTs</a>
+      <a href="/publish/computer" data-i18n="subnav.computer">Computer App</a>
+      <a href="/publish/browser" class="active" data-i18n="subnav.browser">Browser App</a>
+      <a href="/publish/browser-extension" data-i18n="subnav.browser_extension">Browser Extension App</a>
+      <a href="/publish/mobile" data-i18n="subnav.mobile">Mobile App</a>
     </div>
     <div class="nav-ctas">
       <div class="nav-lang-wrap" id="navLangWrap">
@@ -248,26 +220,25 @@
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow" data-i18n="publish.mcp.hero_eyebrow">For MCP Server Developers</span>
-    <h1 data-i18n="publish.mcp.hero_h1_html" data-i18n-html>Earn revenue every time your <span class="grad">MCP tool</span> is called.</h1>
-    <p class="sub" data-i18n="publish.mcp.hero_sub">Boost Boss is the only ad network built natively into the Model Context Protocol. Your server adds three lines. Claude Desktop, Cursor, Cline, and every MCP host renders the rest.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.mcp.hero_cta">Start as a publisher →</a>
+    <span class="eyebrow" data-i18n="publish.browser.hero_eyebrow">Lumi for Browser App</span>
+    <h1 data-i18n="publish.browser.hero_h1_html" data-i18n-html>Monetize your AI web app in <span class="grad">5 minutes</span>.</h1>
+    <p class="sub" data-i18n="publish.browser.hero_sub_html" data-i18n-html>ChatGPT-style chats, AI image generators, no-code builders, AI dashboards — anything you ship at your own domain. One async <code>&lt;script&gt;</code> tag. 8 placements including corner unit ($8.50 RPM), page interstitial, and loading-state ad.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.browser.hero_cta">Start as a publisher →</a>
   </div>
 </section>
 
 <!-- SEE IT APPEAR -->
 <section class="see-it">
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.mcp.see_eyebrow">See it appear</span>
-    <h2 class="section-h" data-i18n="publish.mcp.see_h2_html" data-i18n-html>When your tool runs, your output renders first.<br>The sponsored block slides in after.</h2>
-    <p class="section-sub" data-i18n="publish.mcp.see_sub">No interruption. No latency. The user always gets your tool result before they see the ad.</p>
-    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored block slides into a Claude Desktop tool response">
-      <!-- Phase G: real screenshot if /assets/publish/mcp-hero.png exists; SVG fallback otherwise. -->
-      <img class="hero-mockup-real" src="/assets/publish/mcp-hero.png"
-           alt="Claude Desktop showing a sponsored block in a tool response"
+    <span class="section-eyebrow" data-i18n="publish.browser.see_eyebrow">See it appear</span>
+    <h2 class="section-h" data-i18n="publish.browser.see_h2_html" data-i18n-html>Drop a slot. Watch the ad render in.<br>Style stays yours.</h2>
+    <p class="section-sub" data-i18n="publish.browser.see_sub_html" data-i18n-html>A <code>&lt;div data-lumi-slot&gt;</code> placed wherever you want it. Lumi only renders the inner card — your typography, spacing, and chrome carry through.</p>
+    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored card slides into a web AI chat conversation">
+      <!-- Phase G: real screenshot if /assets/publish/browser-hero.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/browser-hero.png"
+           alt="A web AI app showing a sponsored card inline with the conversation"
            onload="this.parentElement.classList.add('has-real-img')"
            onerror="this.remove()" />
       <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
@@ -278,266 +249,286 @@
             44%, 92%  { opacity: 1; transform: translate(0, 0); }
             100%      { opacity: 0; transform: translate(0, 26px); }
           }
-          .dot { animation: bb-pulse 1.4s ease-in-out infinite; opacity: 0.35; }
-          .dot:nth-of-type(2) { animation-delay: 0.18s; }
-          .dot:nth-of-type(3) { animation-delay: 0.36s; }
-          @keyframes bb-pulse { 0%, 60%, 100% { opacity: 0.35; } 30% { opacity: 1; } }
+          .typing { animation: bb-typing 5.2s ease-in-out infinite; }
+          @keyframes bb-typing {
+            0%, 22% { opacity: 1; }
+            32%, 100% { opacity: 0; }
+          }
+          .answer { animation: bb-answer 5.2s ease-in-out infinite; transform-box: fill-box; }
+          @keyframes bb-answer {
+            0%, 18% { opacity: 0; }
+            32%, 100% { opacity: 1; }
+          }
           @media (prefers-reduced-motion: reduce) {
-            .ad-block { animation: none; opacity: 1; transform: translate(0, 0); }
-            .dot { animation: none; opacity: 0.6; }
+            .ad-block, .answer { animation: none; opacity: 1; transform: translate(0, 0); }
+            .typing { animation: none; opacity: 0; }
           }
         </style>
 
         <!-- Laptop bezel + base -->
         <rect x="32" y="22" width="696" height="382" rx="14" fill="#1F1F2E"/>
-        <rect x="44" y="34" width="672" height="358" rx="6" fill="#FAFAF7"/>
+        <rect x="44" y="34" width="672" height="358" rx="6" fill="#FFFFFF"/>
         <rect x="14" y="404" width="732" height="14" rx="3" fill="#15151F"/>
         <rect x="14" y="404" width="732" height="6" fill="#2A2A3A"/>
         <circle cx="380" cy="29" r="2.3" fill="#0A0A14"/>
 
-        <!-- Window chrome -->
-        <rect x="44" y="34" width="672" height="30" fill="#EFEEE9"/>
-        <circle cx="60" cy="49" r="5" fill="#FF5F57"/>
-        <circle cx="76" cy="49" r="5" fill="#FEBC2E"/>
-        <circle cx="92" cy="49" r="5" fill="#28C840"/>
-        <text x="380" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">Claude Desktop · MCP host</text>
+        <!-- Browser chrome -->
+        <rect x="44" y="34" width="672" height="32" fill="#F1F1ED"/>
+        <circle cx="60" cy="50" r="5" fill="#FF5F57"/>
+        <circle cx="76" cy="50" r="5" fill="#FEBC2E"/>
+        <circle cx="92" cy="50" r="5" fill="#28C840"/>
+        <rect x="142" y="42" width="448" height="18" rx="9" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="154" y="55" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">🔒 chat.myaiapp.com/c/abc123</text>
 
-        <!-- Sidebar -->
-        <rect x="44" y="64" width="120" height="328" fill="#F4F3EE"/>
-        <rect x="58" y="80" width="92" height="22" rx="6" fill="#E5E4DD"/>
-        <rect x="58" y="112" width="76" height="9" rx="3" fill="#D8D7CF"/>
-        <rect x="58" y="128" width="92" height="9" rx="3" fill="#D8D7CF"/>
-        <rect x="58" y="144" width="60" height="9" rx="3" fill="#D8D7CF"/>
-        <text x="58" y="180" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#9CA3AF" letter-spacing="0.6">RECENT</text>
-        <rect x="58" y="190" width="92" height="8" rx="3" fill="#E5E4DD"/>
-        <rect x="58" y="204" width="68" height="8" rx="3" fill="#E5E4DD"/>
-        <rect x="58" y="218" width="80" height="8" rx="3" fill="#E5E4DD"/>
+        <!-- App sidebar -->
+        <rect x="44" y="66" width="156" height="326" fill="#0F0F1A"/>
+        <text x="60" y="90" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">MyAI</text>
+        <rect x="58" y="104" width="128" height="26" rx="7" fill="#FF2D78"/>
+        <text x="66" y="121" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">+ New chat</text>
+        <text x="60" y="152" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">TODAY</text>
+        <rect x="58" y="162" width="128" height="22" rx="6" fill="#1F1F2E"/>
+        <text x="66" y="177" font-family="Inter, sans-serif" font-size="10.5" fill="#E5E7EB">Python deploy options</text>
+        <text x="66" y="200" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Refactor my router</text>
+        <text x="66" y="220" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Bug in checkout</text>
 
-        <!-- Chat: user msg -->
-        <rect x="320" y="86" width="380" height="38" rx="13" fill="#0F0F1A"/>
-        <text x="334" y="110" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF">How do I deploy my FastAPI app?</text>
+        <!-- User msg -->
+        <rect x="436" y="86" width="272" height="36" rx="12" fill="#0F0F1A"/>
+        <text x="450" y="109" font-family="Inter, sans-serif" font-size="12" fill="#FFFFFF">What's the fastest way to deploy?</text>
 
-        <!-- Assistant intro -->
-        <circle cx="192" cy="148" r="10" fill="#D97757"/>
-        <text x="192" y="152" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">C</text>
-        <text x="210" y="152" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Looking up deployment options…</text>
-
-        <!-- Tool call indicator -->
-        <rect x="192" y="170" width="244" height="22" rx="6" fill="#EEF6FF" stroke="#BAD7F2" stroke-width="1"/>
-        <text x="200" y="185" font-family="JetBrains Mono, monospace" font-size="11" fill="#1B5FB6">⚙ deploy_helper.lookup_options</text>
-
-        <!-- Tool result block (always visible) -->
-        <rect x="192" y="204" width="500" height="86" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="204" y="224" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.4">TOOL RESULT</text>
-        <text x="204" y="244" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Best options for FastAPI deployment:</text>
-        <text x="204" y="262" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Railway — git push deploys, $5/mo hobby tier</text>
-        <text x="204" y="278" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Fly.io — global edge, Docker-based, free tier</text>
-
-        <!-- Sponsored block (the animated one) -->
-        <g class="ad-block">
-          <rect x="192" y="304" width="500" height="76" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
-          <rect x="192" y="304" width="500" height="20" rx="12" fill="#FFE6F0"/>
-          <rect x="192" y="314" width="500" height="10" fill="#FFE6F0"/>
-          <text x="204" y="318" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
-          <text x="680" y="318" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
-
-          <rect x="204" y="334" width="40" height="40" rx="9" fill="#0F0F1A"/>
-          <text x="224" y="361" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">▲</text>
-
-          <text x="256" y="349" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
-          <text x="256" y="365" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
-          <rect x="608" y="340" width="76" height="26" rx="7" fill="#0F0F1A"/>
-          <text x="646" y="357" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+        <!-- Typing indicator (visible 0-22% of loop) -->
+        <g class="typing">
+          <text x="220" y="156" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
+          <circle cx="220" cy="180" r="3.5" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="232" cy="180" r="3.5" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="244" cy="180" r="3.5" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.4s" repeatCount="indefinite"/>
+          </circle>
         </g>
+
+        <!-- Answer (fades in at 18-32%) -->
+        <g class="answer">
+          <text x="220" y="156" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
+          <text x="220" y="178" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">For Python apps, RailRunner and EdgePort are both</text>
+          <text x="220" y="195" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">solid choices. RailRunner has zero-config git push;</text>
+          <text x="220" y="212" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">EdgePort gives you global edge regions.</text>
+        </g>
+
+        <!-- Sponsored slot rendered by Lumi (animated reveal) -->
+        <g class="ad-block">
+          <rect x="220" y="232" width="488" height="118" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+          <text x="232" y="251" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by DeployJet</text>
+          <text x="696" y="251" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+          <rect x="232" y="264" width="64" height="74" rx="10" fill="#0F0F1A"/>
+          <text x="264" y="308" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="30" font-weight="700" fill="#FFFFFF">▲</text>
+          <text x="308" y="280" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">DeployJet — Deploy in seconds. Scale forever.</text>
+          <text x="308" y="298" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
+          <rect x="308" y="310" width="92" height="26" rx="7" fill="#0F0F1A"/>
+          <text x="354" y="328" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+          <text x="414" y="328" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">deployjet.com</text>
+        </g>
+
+        <!-- Composer at bottom -->
+        <rect x="220" y="366" width="488" height="26" rx="13" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="232" y="383" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Send a message…</text>
       </svg>
-      <div class="stage-caption" data-i18n="publish.mcp.see_caption">The sponsored block is a structured payload Boost Boss returns alongside your tool result. The host (Claude Desktop, Cursor, Cline) renders it natively — same chrome as the rest of the response, with a clear sponsorship label.</div>
+      <div class="stage-caption" data-i18n="publish.browser.see_caption">The card renders inline with your chat layout. You control the slot position, the surrounding spacing, and what comes after — Lumi just fills in the bordered card with the sponsored content.</div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
+<!-- PLACEMENTS -->
 <section>
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.mcp.how_eyebrow">How it works</span>
-    <h2 class="section-h" data-i18n="publish.mcp.how_h2_html" data-i18n-html>From <code>npm install</code> to first impression in under 10 minutes.</h2>
+    <span class="section-eyebrow" data-i18n="publish.browser.placements_eyebrow">Placements you can serve</span>
+    <h2 class="section-h" data-i18n="publish.browser.placements_h2">8 placements built for AI web apps.</h2>
+    <div class="revenue-card" style="max-width: 880px;">
+      <div class="rev-row"><span>Sponsored citation</span><span class="v">$6.00 RPM</span></div>
+      <div class="rev-row"><span>Suggested chip</span><span class="v">$4.50 RPM</span></div>
+      <div class="rev-row"><span>Inline card</span><span class="v">$7.00 RPM</span></div>
+      <div class="rev-row"><span>Loading-state ad</span><span class="v">$4.00 RPM</span></div>
+      <div class="rev-row"><span>Corner unit</span><span class="v">$8.50 RPM</span></div>
+      <div class="rev-row"><span>Page interstitial</span><span class="v">$10.00 RPM</span></div>
+      <div class="rev-row"><span>Empty-state hero</span><span class="v">$5.00 RPM</span></div>
+      <div class="rev-row"><span>Settings page slot</span><span class="v">$3.50 RPM</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="section-eyebrow" data-i18n="publish.browser.how_eyebrow">How it works</span>
+    <h2 class="section-h" data-i18n="publish.browser.how_h2">Sign up. Paste. Earn.</h2>
     <div class="how-grid">
       <div class="how-step">
         <div class="num">1</div>
-        <h4 data-i18n="publish.mcp.how1_h4">Connect your MCP server</h4>
-        <p data-i18n="publish.mcp.how1_p_html" data-i18n-html>Add three lines: install <code>@boostbossai/lumi-mcp</code>, init with your publisher ID, attach to a tool handler.</p>
+        <h4 data-i18n="publish.browser.how1_h4">Sign up</h4>
+        <p data-i18n="publish.browser.how1_p">Copy your snippet from the dashboard. One publisher ID, ready to paste.</p>
       </div>
       <div class="how-step">
         <div class="num">2</div>
-        <h4 data-i18n="publish.mcp.how2_h4">Tools keep working</h4>
-        <p data-i18n="publish.mcp.how2_p">Your existing tool output is unchanged. Boost Boss appends a sponsored block — never replaces, never delays.</p>
+        <h4 data-i18n="publish.browser.how2_h4_html" data-i18n-html>Paste into your <code>&lt;head&gt;</code></h4>
+        <p data-i18n="publish.browser.how2_p">Async, lazy-loaded, zero impact on first paint. Works in Next.js, Nuxt, Remix, Vite, plain HTML.</p>
       </div>
       <div class="how-step">
         <div class="num">3</div>
-        <h4 data-i18n="publish.mcp.how3_h4">Earn per call</h4>
-        <p data-i18n="publish.mcp.how3_p">Boost Boss attaches relevant ads to tool responses. You earn on every impression and every click.</p>
+        <h4 data-i18n="publish.browser.how3_h4">Place ad slots</h4>
+        <p data-i18n="publish.browser.how3_p_html" data-i18n-html>Drop a <code>&lt;div data-lumi-slot&gt;</code> wherever you want ads. Boost Boss renders the rest.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- INTEGRATION SNIPPET -->
 <section>
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.mcp.snippet_eyebrow">Integration snippet</span>
-    <h2 class="section-h" data-i18n="publish.mcp.snippet_h2">Three lines, one tool handler.</h2>
-<pre class="code-block"><span class="kw">import</span> { LumiMCP } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-mcp'</span>;
-<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">LumiMCP</span>({ publisherId: <span class="str">'pub_xxx'</span> });
+    <span class="section-eyebrow" data-i18n="publish.browser.snippet_eyebrow">Integration snippet</span>
+    <h2 class="section-h" data-i18n="publish.browser.snippet_h2">One snippet. Any AI stack.</h2>
+<pre class="code-block"><span class="tag">&lt;script</span> <span class="attr">async</span>
+  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
+  <span class="attr">data-publisher</span>=<span class="str">"pub_abc"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/script&gt;</span>
 
-<span class="cm">// Inside any existing tool handler:</span>
-<span class="kw">const</span> ad = <span class="kw">await</span> lumi.<span class="fn">fetchAd</span>({ context: request.params.name });
-<span class="kw">return</span> { content: [...result, ad.<span class="fn">toMCPBlock</span>()] };</pre>
-    <p class="code-caption" data-i18n="publish.mcp.snippet_caption_html" data-i18n-html>That's it. The MCP host renders the ad payload natively. <a href="/docs/mcp">Full docs →</a></p>
+<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"corner-unit"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+    <p class="code-caption" data-i18n="publish.browser.snippet_caption_html" data-i18n-html>That's the entire integration. Same snippet for any LLM backend and any agent framework — Lumi works at the rendering surface, not the agent logic. <a href="/docs/js-snippet">Full docs →</a></p>
 
-    <!-- PRODUCT SHOT: Claude Desktop with sponsored block in tool response -->
-    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered inside a Claude Desktop tool response">
-      <!-- Phase G: real screenshot if /assets/publish/mcp-product.png exists; SVG fallback otherwise. -->
-      <img class="hero-mockup-real" src="/assets/publish/mcp-product.png"
-           alt="Claude Desktop with a sponsored block rendered inside a tool response"
+    <!-- PRODUCT SHOT: AI app with sidebar + inline sponsored card -->
+    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored card rendered inline in a web AI chat app">
+      <!-- Phase G: real screenshot if /assets/publish/browser-product.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/browser-product.png"
+           alt="Sponsored card rendered inline in a web AI app"
            onload="this.parentElement.classList.add('has-real-img')"
            onerror="this.remove()" />
       <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
-        <!-- Window chrome -->
-        <rect x="0" y="0" width="720" height="440" fill="#FAFAF7"/>
-        <rect x="0" y="0" width="720" height="36" fill="#EFEEE9"/>
-        <circle cx="18" cy="18" r="6" fill="#FF5F57"/>
-        <circle cx="38" cy="18" r="6" fill="#FEBC2E"/>
-        <circle cx="58" cy="18" r="6" fill="#28C840"/>
-        <text x="360" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">Claude Desktop · MCP host</text>
+        <!-- Browser chrome -->
+        <rect x="0" y="0" width="720" height="440" fill="#FFFFFF"/>
+        <rect x="0" y="0" width="720" height="40" fill="#F1F1ED"/>
+        <circle cx="18" cy="20" r="6" fill="#FF5F57"/>
+        <circle cx="38" cy="20" r="6" fill="#FEBC2E"/>
+        <circle cx="58" cy="20" r="6" fill="#28C840"/>
+        <rect x="86" y="11" width="22" height="18" rx="4" fill="#E5E4DD"/>
+        <rect x="114" y="11" width="22" height="18" rx="4" fill="#E5E4DD"/>
+        <rect x="148" y="9" width="468" height="22" rx="11" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="160" y="24" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">🔒 chat.myaiapp.com/c/abc123</text>
 
-        <!-- Sidebar -->
-        <rect x="0" y="36" width="120" height="404" fill="#F4F3EE"/>
-        <rect x="14" y="54" width="92" height="22" rx="6" fill="#E5E4DD"/>
-        <rect x="14" y="86" width="76" height="10" rx="3" fill="#D8D7CF"/>
-        <rect x="14" y="106" width="92" height="10" rx="3" fill="#D8D7CF"/>
-        <rect x="14" y="126" width="60" height="10" rx="3" fill="#D8D7CF"/>
-        <rect x="14" y="146" width="84" height="10" rx="3" fill="#D8D7CF"/>
-        <text x="14" y="186" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#9CA3AF" letter-spacing="0.6">RECENT</text>
-        <rect x="14" y="194" width="92" height="9" rx="3" fill="#E5E4DD"/>
-        <rect x="14" y="208" width="68" height="9" rx="3" fill="#E5E4DD"/>
-        <rect x="14" y="222" width="80" height="9" rx="3" fill="#E5E4DD"/>
+        <!-- Left sidebar (AI app's own UI) -->
+        <rect x="0" y="40" width="160" height="400" fill="#0F0F1A"/>
+        <text x="16" y="64" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">MyAI</text>
+        <rect x="14" y="78" width="132" height="28" rx="7" fill="#FF2D78"/>
+        <text x="22" y="96" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">+ New chat</text>
+        <text x="16" y="128" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">TODAY</text>
+        <rect x="14" y="138" width="132" height="22" rx="6" fill="#1F1F2E"/>
+        <text x="22" y="153" font-family="Inter, sans-serif" font-size="10.5" fill="#E5E7EB">Python deploy options</text>
+        <text x="22" y="178" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Refactor my router</text>
+        <text x="22" y="198" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Bug in checkout</text>
+        <text x="16" y="226" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">YESTERDAY</text>
+        <text x="22" y="244" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Postgres index plan</text>
+        <text x="22" y="264" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">PayPal webhook flow</text>
 
-        <!-- Chat area -->
+        <!-- Main chat area -->
         <!-- User message -->
-        <rect x="280" y="58" width="320" height="40" rx="14" fill="#0F0F1A"/>
-        <text x="296" y="83" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF">How do I deploy my FastAPI app?</text>
+        <rect x="436" y="60" width="248" height="36" rx="12" fill="#0F0F1A"/>
+        <text x="450" y="83" font-family="Inter, sans-serif" font-size="12" fill="#FFFFFF">What's the fastest way to deploy?</text>
 
-        <!-- Claude response intro -->
-        <circle cx="148" cy="124" r="10" fill="#D97757"/>
-        <text x="148" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">C</text>
-        <text x="166" y="128" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">I'll check deployment options for FastAPI…</text>
+        <!-- Assistant response -->
+        <text x="184" y="128" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
+        <text x="184" y="148" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">For Python apps, RailRunner and EdgePort are both</text>
+        <text x="184" y="166" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">solid choices. RailRunner has zero-config git push;</text>
+        <text x="184" y="184" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">EdgePort gives you global edge regions.</text>
 
-        <!-- Tool call indicator -->
-        <rect x="148" y="146" width="240" height="22" rx="6" fill="#EEF6FF" stroke="#BAD7F2" stroke-width="1"/>
-        <text x="156" y="161" font-family="JetBrains Mono, monospace" font-size="11" fill="#1B5FB6">⚙ deploy_helper.lookup_options</text>
+        <!-- Sponsored slot rendered by Lumi (the star) -->
+        <rect x="184" y="204" width="500" height="120" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+        <text x="196" y="223" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by DeployJet</text>
+        <text x="672" y="223" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
 
-        <!-- Tool result block -->
-        <rect x="148" y="180" width="544" height="84" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="160" y="200" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.4">TOOL RESULT</text>
-        <text x="160" y="220" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Best options for FastAPI deployment:</text>
-        <text x="160" y="238" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Railway — git push deploys, auto-scaling, $5/mo hobby tier</text>
-        <text x="160" y="254" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Fly.io — global edge, Docker-based, generous free tier</text>
+        <rect x="196" y="236" width="68" height="76" rx="10" fill="#0F0F1A"/>
+        <text x="230" y="282" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#FFFFFF">▲</text>
 
-        <!-- Sponsored block (the star) -->
-        <rect x="148" y="278" width="544" height="118" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
-        <rect x="148" y="278" width="544" height="22" rx="12" fill="#FFE6F0"/>
-        <rect x="148" y="290" width="544" height="10" fill="#FFE6F0"/>
-        <text x="160" y="293" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
-        <text x="612" y="293" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+        <text x="276" y="252" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">DeployJet — Deploy in seconds. Scale forever.</text>
+        <text x="276" y="270" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
+        <rect x="276" y="282" width="92" height="26" rx="7" fill="#0F0F1A"/>
+        <text x="322" y="300" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+        <text x="382" y="300" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">deployjet.com</text>
 
-        <!-- Sponsored content -->
-        <rect x="160" y="312" width="48" height="48" rx="10" fill="#0F0F1A"/>
-        <text x="184" y="343" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF">▲</text>
-
-        <text x="220" y="328" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
-        <text x="220" y="346" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · Auto-deploy from GitHub · Built-in observability</text>
-
-        <rect x="220" y="362" width="100" height="26" rx="7" fill="#0F0F1A"/>
-        <text x="270" y="380" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#FFFFFF">Try Vercel Free</text>
-
-        <text x="220" y="384" font-family="Inter, sans-serif" font-size="0" fill="#FFFFFF"></text>
-        <text x="334" y="380" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">vercel.com</text>
+        <!-- Continued reply -->
+        <text x="184" y="346" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Want me to walk through RailRunner's deploy flow?</text>
 
         <!-- Composer -->
-        <rect x="148" y="408" width="544" height="22" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="160" y="423" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Reply to Claude…</text>
+        <rect x="184" y="384" width="500" height="36" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="196" y="406" font-family="Inter, sans-serif" font-size="12" fill="#9CA3AF">Send a message…</text>
+        <circle cx="668" cy="402" r="11" fill="#FF2D78"/>
+        <text x="668" y="406" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">↑</text>
       </svg>
-      <div class="shot-caption" data-i18n="publish.mcp.snippet_shot_caption">Real render. The sponsored block ships as a structured payload — the host (Claude Desktop, Cursor, Cline) draws the chrome.</div>
+      <div class="shot-caption" data-i18n="publish.browser.snippet_shot_caption_html" data-i18n-html>A <code>&lt;div data-lumi-slot&gt;</code> placed below an answer. Style it to match your app — Lumi only renders the inner card.</div>
     </div>
   </div>
 </section>
 
-<!-- WHO THIS IS FOR -->
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.mcp.who_eyebrow">Who this is for</span>
-    <h2 class="section-h" data-i18n="publish.mcp.who_h2">If any of these sound like you, MCP is your path.</h2>
+    <span class="section-eyebrow" data-i18n="publish.browser.who_eyebrow">Who this is for</span>
+    <h2 class="section-h" data-i18n="publish.browser.who_h2">If you ship AI in a browser at your own domain, this is your path.</h2>
     <ul>
-      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li1_html" data-i18n-html>You ship an MCP server listed on <strong>mcp.so</strong>, <strong>Smithery</strong>, <strong>Glama</strong>, or <strong>PulseMCP</strong>.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li2">Your server is called by users of Claude Desktop, Cursor, Cline, Continue, Zed AI, or Windsurf.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li3">You'd like a real revenue stream beyond GitHub Sponsors.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.mcp.who_li4">You build for developer audiences and want premium CPMs that match the audience value.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.browser.who_li1">You shipped an AI chat app, AI assistant, image generator, or no-code builder with a web UI.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.browser.who_li2">You use any LLM provider — OpenAI, Anthropic, Gemini, open-source. We don't care which.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.browser.who_li3">You built with LangChain, the AI SDK, CrewAI, LlamaIndex, AutoGen, Mastra, or rolled your own.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.browser.who_li4">You're tired of subscription churn as your only monetization.</span></li>
     </ul>
   </div>
 </section>
 
-<!-- REVENUE EXAMPLE -->
 <section>
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.mcp.rev_eyebrow">Revenue example</span>
-    <h2 class="section-h" data-i18n="publish.mcp.rev_h2">What "earning per call" actually looks like.</h2>
+    <span class="section-eyebrow" data-i18n="publish.browser.rev_eyebrow">Revenue example</span>
+    <h2 class="section-h" data-i18n="publish.browser.rev_h2">What 10,000 daily users can earn.</h2>
     <div class="revenue-card">
-      <span class="label" data-i18n="publish.mcp.rev_label">Illustrative — not a guarantee</span>
-      <div class="rev-row"><span data-i18n="publish.mcp.rev_row1">Daily tool calls</span><span class="v">5,000</span></div>
-      <div class="rev-row"><span data-i18n="publish.mcp.rev_row2">Ad impressions per day (1 in 3 calls)</span><span class="v">~1,500</span></div>
-      <div class="rev-row"><span data-i18n="publish.mcp.rev_row3">Average CPM (developer audience premium)</span><span class="v">$12</span></div>
-      <div class="rev-row"><span data-i18n="publish.mcp.rev_row4">Monthly publisher revenue</span><span class="v">~$540</span></div>
-      <p class="disclaimer" data-i18n="publish.mcp.rev_disclaimer">Numbers are illustrative for a moderately active MCP server. Actual revenue depends on tool-call volume, fill rate, advertiser demand, and your audience composition. CPMs vary; developer-tooling traffic typically sits at the high end.</p>
+      <span class="label" data-i18n="publish.browser.rev_label">Illustrative — not a guarantee</span>
+      <div class="rev-row"><span data-i18n="publish.browser.rev_row1">Daily active users</span><span class="v">10,000</span></div>
+      <div class="rev-row"><span data-i18n="publish.browser.rev_row2">Ad impressions per user per day</span><span class="v">~3</span></div>
+      <div class="rev-row"><span data-i18n="publish.browser.rev_row3">Daily impressions</span><span class="v">30,000</span></div>
+      <div class="rev-row"><span data-i18n="publish.browser.rev_row4">Blended eCPM (8 placements active)</span><span class="v">$2</span></div>
+      <div class="rev-row"><span data-i18n="publish.browser.rev_row5">Monthly publisher revenue</span><span class="v">~$1,800</span></div>
+      <p class="disclaimer" data-i18n="publish.browser.rev_disclaimer">Numbers are illustrative for an AI web app with conversational UX. Actual revenue depends on session length, placement mix, fill rate, and audience. Verticals with stronger commercial intent (developer tooling, finance, B2B SaaS) typically run higher CPMs.</p>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.mcp.faq_eyebrow">Frequently asked</span>
-    <h2 class="section-h" data-i18n="publish.mcp.faq_h2">The questions every MCP dev asks first.</h2>
+    <span class="section-eyebrow" data-i18n="publish.browser.faq_eyebrow">Frequently asked</span>
+    <h2 class="section-h" data-i18n="publish.browser.faq_h2">The questions every browser-app builder asks.</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <h4 data-i18n="publish.mcp.faq1_q">Will ads break my MCP integration?</h4>
-        <p data-i18n="publish.mcp.faq1_a">No. Ads are appended, not substituted. Your tool's primary output is unchanged — the host renders your tool result first, the sponsored block second.</p>
+        <h4 data-i18n="publish.browser.faq1_q">Does this work with my agent framework?</h4>
+        <p data-i18n="publish.browser.faq1_a">Yes. Lumi is framework-agnostic. We integrate at the rendering surface, not the agent logic — so LangChain, the AI SDK, CrewAI, LlamaIndex, AutoGen, Mastra, or your own custom orchestration all work the same way.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.mcp.faq2_q">What does an MCP ad look like to the user?</h4>
-        <p data-i18n="publish.mcp.faq2_a">A clearly labeled sponsored block in the tool response, rendered by the host (Claude Desktop, Cursor, etc.). The user always sees both the answer and the disclosure — there's no hidden injection.</p>
+        <h4 data-i18n="publish.browser.faq2_q">Will ads slow down my app?</h4>
+        <p data-i18n="publish.browser.faq2_a">No. The script is async and lazy-loaded — zero impact on first paint, no blocking on your bundle. Ad slots render after your AI surface is interactive.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.mcp.faq3_q">Can I block specific advertisers?</h4>
-        <p data-i18n="publish.mcp.faq3_a">Yes. Category-level blocks (e.g., no recruiting ads) and domain-level blocks (e.g., never these specific competitors) — all controlled from your publisher dashboard.</p>
+        <h4 data-i18n="publish.browser.faq3_q">What if I'm using Server-Sent Events for streaming?</h4>
+        <p data-i18n="publish.browser.faq3_a">Lumi works alongside SSE. Ads render in your UI separately from your model's stream — you don't need to interleave anything. The ad slot is a sibling element, not a stream consumer.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.mcp.faq4_q">Does this work with stdio AND HTTP transports?</h4>
-        <p data-i18n="publish.mcp.faq4_a_html" data-i18n-html>Yes — both transports are supported. <code>@boostbossai/lumi-mcp</code> auto-detects which one your server uses; the SDK works identically across both.</p>
+        <h4 data-i18n="publish.browser.faq4_q">Can I theme the ads to match my UI?</h4>
+        <p data-i18n="publish.browser.faq4_a_html" data-i18n-html>Yes. Lumi reads your CSS variables for color and typography (<code>--lumi-primary</code>, <code>--lumi-text</code>, <code>--lumi-radius</code>, etc.). The default look is neutral; the themed look matches your brand.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.mcp.faq5_q">Is this approved by Anthropic?</h4>
-        <p data-i18n="publish.mcp.faq5_a">Boost Boss operates within MCP's public protocol — we don't require Anthropic's approval. We follow MCP disclosure norms strictly: every sponsored block is labeled, never disguised as tool output.</p>
+        <h4 data-i18n="publish.browser.faq5_q">Can I run my own ads alongside Boost Boss?</h4>
+        <p data-i18n="publish.browser.faq5_a_html" data-i18n-html>Yes. We don't lock down inventory. Boost Boss renders only in slots you explicitly tag with <code>data-lumi-slot</code> — everything else is yours.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA FOOTER -->
 <section class="cta-footer">
   <div class="wrap">
-    <h2 data-i18n="publish.mcp.cta_h2">Ready to monetize your MCP server?</h2>
-    <p data-i18n="publish.mcp.cta_p">Three lines. Ten minutes. Weekly payouts.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.mcp.cta_btn">Apply as a Founding Publisher →</a>
-    <div><span class="perk" data-i18n="publish.mcp.cta_perk">⚡ First 20 MCP publishers get an elevated founding-publisher payout for 6 months</span></div>
+    <h2 data-i18n="publish.browser.cta_h2">Ready to monetize your AI web app?</h2>
+    <p data-i18n="publish.browser.cta_p">One snippet. Five minutes. 8 placements. Weekly payouts.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.browser.cta_btn">Apply as a Founding Publisher →</a>
   </div>
 </section>
 
@@ -598,7 +589,6 @@
   </div>
 </footer>
 <script>
-  // Top nav: transparent at top, frosted-glass on scroll. Matches /publish.
   (function(){
     var nav = document.querySelector('nav.site-nav');
     if (!nav) return;

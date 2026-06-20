@@ -3,28 +3,24 @@
 <head>
 <!-- BB_I18N_PRELOAD: zero-flash language preference. Mirrors i18n.js. Do not edit by hand — run scripts/i18n_inject_preload.py. -->
 <style>html.bb-i18n-loading{visibility:hidden}</style>
-<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/mcp':1,'/publish/ai-apps':1,'/publish/extensions':1,'/publish/bots':1,'/publish/no-code':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
+<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/computer':1,'/publish/browser':1,'/publish/browser-extension':1,'/publish/mobile':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
 <!-- /BB_I18N_PRELOAD -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For AI App Builders — Boost Boss</title>
-<meta name="description" content="Add ad revenue to your AI app in under 5 minutes. One script tag. Works with OpenAI, Anthropic, Gemini, open-source models, and any agent framework.">
-<meta property="og:title" content="For AI App Builders — Boost Boss">
-<meta property="og:description" content="Monetize any AI app or agent. One script tag. Works with any LLM backend.">
-<meta property="og:url" content="https://boostboss.ai/publish/ai-apps">
-<link rel="canonical" href="https://boostboss.ai/publish/ai-apps">
+<title>Lumi for Browser Extension App — Boost Boss</title>
+<meta name="description" content="Real revenue for Chrome/Safari/Firefox extensions. Lumi for Browser Extension App is Manifest V3 native. Popup, side panel, new-tab takeover — sovereign surfaces with no host-site dependency. 8 placements.">
+<meta property="og:title" content="Lumi for Browser Extension App — Boost Boss">
+<meta property="og:description" content="Monetize Chrome/Safari/Firefox extensions. Manifest V3 native. 8 sovereign-surface placements.">
+<meta property="og:url" content="https://boostboss.ai/publish/browser-extension">
+<link rel="canonical" href="https://boostboss.ai/publish/browser-extension">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --pink: #FF2D78; --pink-dark: #E01E65; --cyan: #04BEFE; --yellow: #FFE600;
-    --ink: #0F0F1A; --ink-soft: #4B4B5E; --muted: #6B7280; --line: #E5E7EB;
-    --bg: #FFFFFF; --bg-soft: #FAFAF7; --code-bg: #0F0F1A;
-  }
+  :root { --pink: #FF2D78; --pink-dark: #E01E65; --cyan: #04BEFE; --yellow: #FFE600; --ink: #0F0F1A; --ink-soft: #4B4B5E; --muted: #6B7280; --line: #E5E7EB; --bg: #FFFFFF; --bg-soft: #FAFAF7; --code-bg: #0F0F1A; }
   html { scroll-behavior: smooth; }
   body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%), radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%), #FAFAF7; background-attachment: fixed; min-height: 100vh; }
   a { color: inherit; text-decoration: none; }
@@ -99,7 +95,6 @@
   section { padding: 70px 0; }
   .section-eyebrow { display: block; font-size: 12.5px; font-weight: 700; color: var(--pink-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
   h2.section-h { font-size: clamp(28px, 3.4vw, 38px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
-  .section-sub { font-size: 17px; color: var(--ink-soft); max-width: 640px; margin-bottom: 40px; }
 
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
   .how-step { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 28px 26px; }
@@ -110,8 +105,7 @@
   .code-block { background: var(--code-bg); color: #E5E7EB; border-radius: 14px; padding: 28px 28px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; max-width: 880px; }
   .code-block .kw { color: #C792EA; }
   .code-block .str { color: #C3E88D; }
-  .code-block .tag { color: #F07178; }
-  .code-block .attr { color: #FFCB6B; }
+  .code-block .fn { color: #82AAFF; }
   .code-block .cm { color: #6B7280; font-style: italic; }
   .code-caption { font-size: 14px; color: var(--ink-soft); margin-top: 14px; max-width: 880px; }
   .code-caption a { color: var(--pink); font-weight: 600; }
@@ -190,11 +184,10 @@
       <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
     </a>
     <div class="nav-links">
-      <a href="/publish/mcp" data-i18n="subnav.mcp">MCP Servers</a>
-      <a href="/publish/ai-apps" class="active" data-i18n="subnav.ai_apps">AI Apps</a>
-      <a href="/publish/extensions" data-i18n="subnav.extensions">Extensions</a>
-      <a href="/publish/bots" data-i18n="subnav.bots">Bots</a>
-      <a href="/publish/no-code" data-i18n="subnav.no_code">Custom GPTs</a>
+      <a href="/publish/computer" data-i18n="subnav.computer">Computer App</a>
+      <a href="/publish/browser" data-i18n="subnav.browser">Browser App</a>
+      <a href="/publish/browser-extension" class="active" data-i18n="subnav.browser_extension">Browser Extension App</a>
+      <a href="/publish/mobile" data-i18n="subnav.mobile">Mobile App</a>
     </div>
     <div class="nav-ctas">
       <div class="nav-lang-wrap" id="navLangWrap">
@@ -223,46 +216,35 @@
 
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow" data-i18n="publish.aiapps.hero_eyebrow">For AI App Builders</span>
-    <h1 data-i18n="publish.aiapps.hero_h1_html" data-i18n-html>Add ad revenue to your AI app in <span class="grad">under 5 minutes</span>.</h1>
-    <p class="sub" data-i18n="publish.aiapps.hero_sub_html" data-i18n-html>Lumi SDK script tag — one async <code>&lt;script&gt;</code> in your <code>&lt;head&gt;</code>. Works with OpenAI, Anthropic, Gemini, open-source models, and any agent framework (LangChain, Vercel AI SDK, CrewAI, custom orchestration). No backend changes required.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.aiapps.hero_cta">Start as a publisher →</a>
+    <span class="eyebrow" data-i18n="publish.bext.hero_eyebrow">Lumi for Browser Extension App</span>
+    <h1 data-i18n="publish.bext.hero_h1_html" data-i18n-html>Real revenue for browser extensions. <span class="grad">No surveillance, no malware.</span></h1>
+    <p class="sub" data-i18n="publish.bext.hero_sub_html" data-i18n-html>Chrome, Safari, Firefox. Manifest V3 native. The 4 sovereign surfaces — popup, side panel, new-tab takeover, install onboarding — are where you serve ads. <strong>Premium new-tab takeover at $9 RPM</strong> is the headline placement.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.bext.hero_cta">Start as a publisher →</a>
   </div>
 </section>
 
 <!-- SEE IT APPEAR -->
 <section class="see-it">
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.aiapps.see_eyebrow">See it appear</span>
-    <h2 class="section-h" data-i18n="publish.aiapps.see_h2_html" data-i18n-html>Drop a slot. Watch the ad render in.<br>Style stays yours.</h2>
-    <p class="section-sub" data-i18n="publish.aiapps.see_sub_html" data-i18n-html>A <code>&lt;div data-lumi-slot&gt;</code> placed wherever you want it. Lumi only renders the inner card — your typography, spacing, and chrome carry through.</p>
-    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored card slides into a web AI chat conversation">
-      <!-- Phase G: real screenshot if /assets/publish/ai-apps-hero.png exists. -->
-      <img class="hero-mockup-real" src="/assets/publish/ai-apps-hero.png"
-           alt="A web AI app showing a sponsored card inline with the conversation"
+    <span class="section-eyebrow" data-i18n="publish.bext.see_eyebrow">See it appear</span>
+    <h2 class="section-h" data-i18n="publish.bext.see_h2_html" data-i18n-html>Lives in your side panel.<br>Renders contextually with the page.</h2>
+    <p class="section-sub" data-i18n="publish.bext.see_sub">Manifest V3 native. Service-worker safe. Targets from on-page context — never user surveillance.</p>
+    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored block fades into the bottom of an extension side panel">
+      <!-- Phase G: real screenshot if /assets/publish/browser-extension-hero.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/browser-extension-hero.png"
+           alt="Chrome extension side panel with a sponsored block at the bottom"
            onload="this.parentElement.classList.add('has-real-img')"
            onerror="this.remove()" />
       <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
         <style>
           .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
           @keyframes bb-rise {
-            0%, 28%   { opacity: 0; transform: translate(0, 26px); }
-            44%, 92%  { opacity: 1; transform: translate(0, 0); }
-            100%      { opacity: 0; transform: translate(0, 26px); }
-          }
-          .typing { animation: bb-typing 5.2s ease-in-out infinite; }
-          @keyframes bb-typing {
-            0%, 22% { opacity: 1; }
-            32%, 100% { opacity: 0; }
-          }
-          .answer { animation: bb-answer 5.2s ease-in-out infinite; transform-box: fill-box; }
-          @keyframes bb-answer {
-            0%, 18% { opacity: 0; }
-            32%, 100% { opacity: 1; }
+            0%, 30%   { opacity: 0; transform: translate(0, 22px); }
+            46%, 92%  { opacity: 1; transform: translate(0, 0); }
+            100%      { opacity: 0; transform: translate(0, 22px); }
           }
           @media (prefers-reduced-motion: reduce) {
-            .ad-block, .answer { animation: none; opacity: 1; transform: translate(0, 0); }
-            .typing { animation: none; opacity: 0; }
+            .ad-block { animation: none; opacity: 1; transform: translate(0, 0); }
           }
         </style>
 
@@ -278,88 +260,109 @@
         <circle cx="60" cy="50" r="5" fill="#FF5F57"/>
         <circle cx="76" cy="50" r="5" fill="#FEBC2E"/>
         <circle cx="92" cy="50" r="5" fill="#28C840"/>
-        <rect x="142" y="42" width="448" height="18" rx="9" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
-        <text x="154" y="55" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">🔒 chat.myaiapp.com/c/abc123</text>
+        <rect x="120" y="42" width="318" height="18" rx="9" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="132" y="55" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">🔒 dailywire.example/2026/04/29/article</text>
+        <rect x="450" y="42" width="20" height="20" rx="4" fill="#FF2D78"/>
+        <rect x="455" y="48" width="4" height="8" fill="#FFFFFF"/>
+        <rect x="461" y="48" width="4" height="8" fill="#FFFFFF"/>
 
-        <!-- App sidebar -->
-        <rect x="44" y="66" width="156" height="326" fill="#0F0F1A"/>
-        <text x="60" y="90" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">MyAI</text>
-        <rect x="58" y="104" width="128" height="26" rx="7" fill="#FF2D78"/>
-        <text x="66" y="121" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">+ New chat</text>
-        <text x="60" y="152" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">TODAY</text>
-        <rect x="58" y="162" width="128" height="22" rx="6" fill="#1F1F2E"/>
-        <text x="66" y="177" font-family="Inter, sans-serif" font-size="10.5" fill="#E5E7EB">Python deploy options</text>
-        <text x="66" y="200" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Refactor my router</text>
-        <text x="66" y="220" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Bug in checkout</text>
+        <!-- Page content (left of side panel) -->
+        <rect x="44" y="66" width="424" height="326" fill="#FAFAF7"/>
+        <text x="64" y="100" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">The shifting landscape of AI</text>
+        <text x="64" y="118" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">infrastructure spend</text>
+        <text x="64" y="136" font-family="Inter, sans-serif" font-size="10" fill="#6B7280">Staff writers · April 29, 2026</text>
+        <rect x="64" y="148" width="384" height="92" rx="6" fill="#E5E4DD"/>
+        <text x="256" y="200" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="#9CA3AF">[ article hero image ]</text>
+        <text x="64" y="262" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">Demand for hosted AI services has tripled in</text>
+        <text x="64" y="278" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">the past year, but the bottleneck has shifted</text>
+        <text x="64" y="294" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">from raw compute to deployment surface area.</text>
+        <text x="64" y="310" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">Companies that once raced to buy GPUs are now</text>
+        <text x="64" y="326" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">racing to ship the right interface to use them.</text>
+        <text x="64" y="354" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">"It's no longer about model size," said one VP</text>
+        <text x="64" y="370" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">at a major cloud provider.</text>
 
-        <!-- User msg -->
-        <rect x="436" y="86" width="272" height="36" rx="12" fill="#0F0F1A"/>
-        <text x="450" y="109" font-family="Inter, sans-serif" font-size="12" fill="#FFFFFF">What's the fastest way to deploy?</text>
+        <!-- Side panel (right) -->
+        <rect x="468" y="66" width="248" height="326" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <rect x="468" y="66" width="248" height="34" fill="#0F0F1A"/>
+        <circle cx="486" cy="83" r="9" fill="#FF2D78"/>
+        <text x="486" y="87" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">A</text>
+        <text x="503" y="87" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF">Article AI · Summarizer</text>
+        <text x="704" y="87" font-family="Inter, sans-serif" font-size="14" fill="#9CA3AF" text-anchor="end">×</text>
 
-        <!-- Typing indicator (visible 0-22% of loop) -->
-        <g class="typing">
-          <text x="220" y="156" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
-          <circle cx="220" cy="180" r="3.5" fill="#9CA3AF">
-            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
-          </circle>
-          <circle cx="232" cy="180" r="3.5" fill="#9CA3AF">
-            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.2s" repeatCount="indefinite"/>
-          </circle>
-          <circle cx="244" cy="180" r="3.5" fill="#9CA3AF">
-            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.4s" repeatCount="indefinite"/>
-          </circle>
-        </g>
+        <!-- Tab bar -->
+        <rect x="468" y="100" width="248" height="28" fill="#F4F3EE"/>
+        <rect x="476" y="105" width="64" height="18" rx="5" fill="#FFFFFF"/>
+        <text x="508" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#0F0F1A">Summary</text>
+        <text x="560" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Q&amp;A</text>
+        <text x="608" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Sources</text>
+        <text x="676" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Notes</text>
 
-        <!-- Answer (fades in at 18-32%) -->
-        <g class="answer">
-          <text x="220" y="156" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
-          <text x="220" y="178" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">For Python apps, Railway and Fly.io are both</text>
-          <text x="220" y="195" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">solid choices. Railway has zero-config git push;</text>
-          <text x="220" y="212" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Fly.io gives you global edge regions.</text>
-        </g>
+        <!-- AI summary content -->
+        <text x="484" y="152" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">KEY POINTS</text>
+        <text x="484" y="172" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">▸ AI infra demand tripled YoY</text>
+        <text x="484" y="190" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">▸ Bottleneck shifted from</text>
+        <text x="494" y="206" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">compute to deployment</text>
+        <text x="484" y="224" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">▸ Integration is the new lever</text>
 
-        <!-- Sponsored slot rendered by Lumi (animated reveal) -->
+        <text x="484" y="252" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">RELATED</text>
+        <text x="484" y="270" font-family="Inter, sans-serif" font-size="10.5" fill="#04BEFE">→ Why DeployJet won deploys</text>
+        <text x="484" y="286" font-family="Inter, sans-serif" font-size="10.5" fill="#04BEFE">→ BuildSpark's pivot to agents</text>
+
+        <!-- Sponsored block at bottom of side panel (animated) -->
         <g class="ad-block">
-          <rect x="220" y="232" width="488" height="118" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
-          <text x="232" y="251" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
-          <text x="696" y="251" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
-          <rect x="232" y="264" width="64" height="74" rx="10" fill="#0F0F1A"/>
-          <text x="264" y="308" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="30" font-weight="700" fill="#FFFFFF">▲</text>
-          <text x="308" y="280" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
-          <text x="308" y="298" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
-          <rect x="308" y="310" width="92" height="26" rx="7" fill="#0F0F1A"/>
-          <text x="354" y="328" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
-          <text x="414" y="328" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">vercel.com</text>
+          <rect x="476" y="304" width="232" height="80" rx="10" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+          <text x="488" y="322" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by DeployJet</text>
+          <rect x="488" y="332" width="36" height="36" rx="8" fill="#0F0F1A"/>
+          <text x="506" y="356" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">▲</text>
+          <text x="532" y="346" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#0F0F1A">DeployJet — Deploy in seconds.</text>
+          <text x="532" y="360" font-family="Inter, sans-serif" font-size="10" fill="#4B4B5E">Free hobby · global edge</text>
+          <rect x="488" y="372" width="64" height="20" rx="5" fill="#0F0F1A"/>
+          <text x="520" y="386" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Try Free →</text>
+          <text x="556" y="386" font-family="Inter, sans-serif" font-size="9.5" fill="#9CA3AF">deployjet.com</text>
         </g>
-
-        <!-- Composer at bottom -->
-        <rect x="220" y="366" width="488" height="26" rx="13" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="232" y="383" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Send a message…</text>
       </svg>
-      <div class="stage-caption" data-i18n="publish.aiapps.see_caption">The card renders inline with your chat layout. You control the slot position, the surrounding spacing, and what comes after — Lumi just fills in the bordered card with the sponsored content.</div>
+      <div class="stage-caption" data-i18n="publish.bext.see_caption">The sponsored block sits at the bottom of your panel, contextual to whatever the user is reading. Targeting comes from page DOM context — clean, surveillance-free.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PLACEMENTS -->
+<section>
+  <div class="wrap">
+    <span class="section-eyebrow" data-i18n="publish.bext.placements_eyebrow">Placements you can serve</span>
+    <h2 class="section-h" data-i18n="publish.bext.placements_h2">8 sovereign-surface placements.</h2>
+    <div class="revenue-card" style="max-width: 880px;">
+      <div class="rev-row"><span>Sponsored citation</span><span class="v">$6.50 RPM</span></div>
+      <div class="rev-row"><span>Suggested chip</span><span class="v">$4.50 RPM</span></div>
+      <div class="rev-row"><span>Inline card</span><span class="v">$7.00 RPM</span></div>
+      <div class="rev-row"><span>Loading-state ad</span><span class="v">$4.00 RPM</span></div>
+      <div class="rev-row"><span>Popup card</span><span class="v">$7.50 RPM</span></div>
+      <div class="rev-row"><span>Side panel slot</span><span class="v">$6.00 RPM</span></div>
+      <div class="rev-row"><span>New-tab takeover</span><span class="v">$9.00 RPM</span></div>
+      <div class="rev-row"><span>Install onboarding</span><span class="v">$8.00 RPM</span></div>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.aiapps.how_eyebrow">How it works</span>
-    <h2 class="section-h" data-i18n="publish.aiapps.how_h2">Sign up. Paste. Earn.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bext.how_eyebrow">How it works</span>
+    <h2 class="section-h" data-i18n="publish.bext.how_h2">Install. Render. Earn.</h2>
     <div class="how-grid">
       <div class="how-step">
         <div class="num">1</div>
-        <h4 data-i18n="publish.aiapps.how1_h4">Sign up</h4>
-        <p data-i18n="publish.aiapps.how1_p">Copy your snippet from the dashboard. One publisher ID, ready to paste.</p>
+        <h4 data-i18n="publish.bext.how1_h4">Install via npm</h4>
+        <p data-i18n="publish.bext.how1_p_html" data-i18n-html>Add <code>@boostbossai/lumi-extension</code> to your extension. Manifest V3 native, service-worker safe.</p>
       </div>
       <div class="how-step">
         <div class="num">2</div>
-        <h4 data-i18n="publish.aiapps.how2_h4_html" data-i18n-html>Paste into your <code>&lt;head&gt;</code></h4>
-        <p data-i18n="publish.aiapps.how2_p">Async, lazy-loaded, zero impact on first paint. Works in Next.js, Nuxt, Remix, Vite, plain HTML.</p>
+        <h4 data-i18n="publish.bext.how2_h4">Render on sovereign surfaces</h4>
+        <p data-i18n="publish.bext.how2_p">Mount Lumi in your popup, side panel, new-tab override, or install onboarding. Surfaces YOU control.</p>
       </div>
       <div class="how-step">
         <div class="num">3</div>
-        <h4 data-i18n="publish.aiapps.how3_h4">Place ad slots</h4>
-        <p data-i18n="publish.aiapps.how3_p_html" data-i18n-html>Drop a <code>&lt;div data-lumi-slot&gt;</code> wherever you want ads. Boost Boss renders the rest.</p>
+        <h4 data-i18n="publish.bext.how3_h4">Earn per impression and click</h4>
+        <p data-i18n="publish.bext.how3_p">Contextual targeting from on-page DOM — never surveillance. Weekly PayPal payouts.</p>
       </div>
     </div>
   </div>
@@ -367,21 +370,22 @@
 
 <section>
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.aiapps.snippet_eyebrow">Integration snippet</span>
-    <h2 class="section-h" data-i18n="publish.aiapps.snippet_h2">One snippet. Any AI stack.</h2>
-<pre class="code-block"><span class="tag">&lt;script</span> <span class="attr">async</span>
-  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
-  <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span><span class="tag">&gt;</span>
-<span class="tag">&lt;/script&gt;</span>
+    <span class="section-eyebrow" data-i18n="publish.bext.snippet_eyebrow">Integration snippet</span>
+    <h2 class="section-h" data-i18n="publish.bext.snippet_h2">A few lines, your extension surface.</h2>
+<pre class="code-block"><span class="cm">// In your service worker or side panel script:</span>
+<span class="kw">import</span> { Lumi } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-extension'</span>;
+<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">Lumi</span>({
+  publisherId: <span class="str">'pub_abc'</span>,
+  format: <span class="str">'side-panel'</span>
+});
+lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
+    <p class="code-caption" data-i18n="publish.bext.snippet_caption_html" data-i18n-html>Manifest V3 compatible. Works in service workers, side panels, popups, new-tab overrides, and install onboarding pages. <a href="/docs/extension-sdk">Full docs →</a></p>
 
-<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
-    <p class="code-caption" data-i18n="publish.aiapps.snippet_caption_html" data-i18n-html>That's the entire integration. Same snippet for OpenAI, Anthropic, Gemini, LangChain, Vercel AI SDK, CrewAI — Lumi works at the rendering surface, not the agent logic. <a href="/docs/js-snippet">Full docs →</a></p>
-
-    <!-- PRODUCT SHOT: AI app with sidebar + inline sponsored card -->
-    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored card rendered inline in a web AI chat app">
-      <!-- Phase G: real screenshot if /assets/publish/ai-apps-product.png exists. -->
-      <img class="hero-mockup-real" src="/assets/publish/ai-apps-product.png"
-           alt="Sponsored card rendered inline in a web AI app"
+    <!-- PRODUCT SHOT: Chrome side panel with AI extension and sponsored block -->
+    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered inside a Chrome extension side panel">
+      <!-- Phase G: real screenshot if /assets/publish/browser-extension-product.png exists. -->
+      <img class="hero-mockup-real" src="/assets/publish/browser-extension-product.png"
+           alt="Sponsored block in a Chrome extension side panel"
            onload="this.parentElement.classList.add('has-real-img')"
            onerror="this.remove()" />
       <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
@@ -391,117 +395,130 @@
         <circle cx="18" cy="20" r="6" fill="#FF5F57"/>
         <circle cx="38" cy="20" r="6" fill="#FEBC2E"/>
         <circle cx="58" cy="20" r="6" fill="#28C840"/>
-        <rect x="86" y="11" width="22" height="18" rx="4" fill="#E5E4DD"/>
-        <rect x="114" y="11" width="22" height="18" rx="4" fill="#E5E4DD"/>
-        <rect x="148" y="9" width="468" height="22" rx="11" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
-        <text x="160" y="24" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">🔒 chat.myaiapp.com/c/abc123</text>
+        <rect x="86" y="9" width="350" height="22" rx="11" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="98" y="24" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">🔒 dailywire.example/2026/04/29/article</text>
+        <!-- Side panel toggle icon -->
+        <rect x="448" y="9" width="22" height="22" rx="4" fill="#FF2D78"/>
+        <rect x="453" y="14" width="6" height="12" fill="#FFFFFF"/>
+        <rect x="461" y="14" width="6" height="12" fill="#FFFFFF"/>
 
-        <!-- Left sidebar (AI app's own UI) -->
-        <rect x="0" y="40" width="160" height="400" fill="#0F0F1A"/>
-        <text x="16" y="64" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">MyAI</text>
-        <rect x="14" y="78" width="132" height="28" rx="7" fill="#FF2D78"/>
-        <text x="22" y="96" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">+ New chat</text>
-        <text x="16" y="128" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">TODAY</text>
-        <rect x="14" y="138" width="132" height="22" rx="6" fill="#1F1F2E"/>
-        <text x="22" y="153" font-family="Inter, sans-serif" font-size="10.5" fill="#E5E7EB">Python deploy options</text>
-        <text x="22" y="178" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Refactor my router</text>
-        <text x="22" y="198" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Bug in checkout</text>
-        <text x="16" y="226" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">YESTERDAY</text>
-        <text x="22" y="244" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Postgres index plan</text>
-        <text x="22" y="264" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">PayPal webhook flow</text>
+        <!-- Page content (left) -->
+        <rect x="0" y="40" width="430" height="400" fill="#FAFAF7"/>
+        <text x="24" y="78" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700" fill="#0F0F1A">The shifting landscape of AI</text>
+        <text x="24" y="98" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700" fill="#0F0F1A">infrastructure spend</text>
+        <text x="24" y="118" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">By staff writers · April 29, 2026 · 8 min read</text>
 
-        <!-- Main chat area -->
-        <!-- User message -->
-        <rect x="436" y="60" width="248" height="36" rx="12" fill="#0F0F1A"/>
-        <text x="450" y="83" font-family="Inter, sans-serif" font-size="12" fill="#FFFFFF">What's the fastest way to deploy?</text>
+        <rect x="24" y="138" width="382" height="120" rx="6" fill="#E5E4DD"/>
+        <text x="215" y="202" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="#9CA3AF">[ article hero image ]</text>
 
-        <!-- Assistant response -->
-        <text x="184" y="128" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
-        <text x="184" y="148" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">For Python apps, Railway and Fly.io are both</text>
-        <text x="184" y="166" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">solid choices. Railway has zero-config git push;</text>
-        <text x="184" y="184" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Fly.io gives you global edge regions.</text>
+        <text x="24" y="284" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Demand for hosted AI services has tripled in</text>
+        <text x="24" y="302" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">the past year, but the bottleneck has shifted</text>
+        <text x="24" y="320" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">from raw compute to deployment surface area.</text>
+        <text x="24" y="338" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Companies that once raced to buy GPUs are now</text>
+        <text x="24" y="356" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">racing to ship the right interface to use them.</text>
+        <text x="24" y="384" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">"It's no longer about model size," said one</text>
+        <text x="24" y="402" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">VP at a major cloud provider. "The lever now</text>
+        <text x="24" y="420" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">is integration, not raw inference."</text>
 
-        <!-- Sponsored slot rendered by Lumi (the star) -->
-        <rect x="184" y="204" width="500" height="120" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
-        <text x="196" y="223" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
-        <text x="672" y="223" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+        <!-- Side panel (right) — the extension -->
+        <rect x="440" y="40" width="280" height="400" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <rect x="440" y="40" width="280" height="36" fill="#0F0F1A"/>
+        <circle cx="458" cy="58" r="9" fill="#FF2D78"/>
+        <text x="458" y="62" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">A</text>
+        <text x="476" y="62" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Article AI · Summarizer</text>
+        <text x="704" y="62" font-family="Inter, sans-serif" font-size="14" fill="#9CA3AF" text-anchor="end">×</text>
 
-        <rect x="196" y="236" width="68" height="76" rx="10" fill="#0F0F1A"/>
-        <text x="230" y="282" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#FFFFFF">▲</text>
+        <!-- Tab bar -->
+        <rect x="440" y="76" width="280" height="32" fill="#F4F3EE"/>
+        <rect x="448" y="82" width="68" height="20" rx="5" fill="#FFFFFF"/>
+        <text x="482" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#0F0F1A">Summary</text>
+        <text x="540" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Q&amp;A</text>
+        <text x="592" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Sources</text>
+        <text x="668" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Notes</text>
 
-        <text x="276" y="252" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
-        <text x="276" y="270" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
-        <rect x="276" y="282" width="92" height="26" rx="7" fill="#0F0F1A"/>
-        <text x="322" y="300" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
-        <text x="382" y="300" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">vercel.com</text>
+        <!-- AI summary content -->
+        <text x="456" y="132" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">KEY POINTS</text>
+        <text x="456" y="154" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">▸ AI infra demand tripled YoY</text>
+        <text x="456" y="174" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">▸ Bottleneck shifted from</text>
+        <text x="466" y="190" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">compute to deployment surface</text>
+        <text x="456" y="210" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">▸ Integration is the new lever</text>
 
-        <!-- Continued reply -->
-        <text x="184" y="346" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Want me to walk through Railway's deploy flow?</text>
+        <text x="456" y="240" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">RELATED</text>
+        <text x="456" y="260" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE">→ Why DeployJet won deploys</text>
+        <text x="456" y="278" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE">→ BuildSpark's pivot to agents</text>
 
-        <!-- Composer -->
-        <rect x="184" y="384" width="500" height="36" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="196" y="406" font-family="Inter, sans-serif" font-size="12" fill="#9CA3AF">Send a message…</text>
-        <circle cx="668" cy="402" r="11" fill="#FF2D78"/>
-        <text x="668" y="406" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">↑</text>
+        <!-- Sponsored block at bottom of side panel (the star) -->
+        <rect x="448" y="298" width="264" height="120" rx="10" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+        <text x="460" y="316" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by DeployJet</text>
+
+        <rect x="460" y="328" width="44" height="44" rx="9" fill="#0F0F1A"/>
+        <text x="482" y="358" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">▲</text>
+
+        <text x="514" y="342" font-family="Space Grotesk, sans-serif" font-size="12" font-weight="700" fill="#0F0F1A">DeployJet — Deploy in seconds.</text>
+        <text x="514" y="358" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">Free hobby · global edge</text>
+
+        <rect x="460" y="386" width="84" height="22" rx="6" fill="#0F0F1A"/>
+        <text x="502" y="402" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">Try Free →</text>
+        <text x="556" y="402" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF">deployjet.com</text>
       </svg>
-      <div class="shot-caption" data-i18n="publish.aiapps.snippet_shot_caption_html" data-i18n-html>A <code>&lt;div data-lumi-slot&gt;</code> placed below an answer. Style it to match your app — Lumi only renders the inner card.</div>
+      <div class="shot-caption" data-i18n="publish.bext.snippet_shot_caption">Side panel format. The extension owns the chrome — Lumi only renders the bordered card.</div>
     </div>
   </div>
 </section>
 
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.aiapps.who_eyebrow">Who this is for</span>
-    <h2 class="section-h" data-i18n="publish.aiapps.who_h2">If you ship AI in a browser, this is your path.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bext.who_eyebrow">Who this is for</span>
+    <h2 class="section-h" data-i18n="publish.bext.who_h2">If your extension renders AI output, this is your path.</h2>
     <ul>
-      <li><span class="check">✓</span><span data-i18n="publish.aiapps.who_li1">You shipped an AI chat app, AI assistant, or AI tool with a web UI.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.aiapps.who_li2">You use any LLM provider — we don't care which.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.aiapps.who_li3">You built with LangChain, Vercel AI SDK, CrewAI, LlamaIndex, AutoGen, Mastra, or rolled your own.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.aiapps.who_li4">You're tired of subscription churn as your only monetization.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bext.who_li1">You shipped a Chrome, Safari, or Firefox extension with AI features.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bext.who_li2">Examples: writing assistants, AI sidebars, summarizers, translators, research tools, AI-augmented browsing.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bext.who_li3">You're avoiding "monetization SDKs" with surveillance baggage that put your store listing at risk.</span></li>
+      <li><span class="check">✓</span><span data-i18n="publish.bext.who_li4">You want a revenue stream that won't get you flagged on the next Chrome Web Store review.</span></li>
     </ul>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.aiapps.rev_eyebrow">Revenue example</span>
-    <h2 class="section-h" data-i18n="publish.aiapps.rev_h2">What 5,000 daily users can earn.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bext.rev_eyebrow">Revenue example</span>
+    <h2 class="section-h" data-i18n="publish.bext.rev_h2">What 30,000 daily users can earn.</h2>
     <div class="revenue-card">
-      <span class="label" data-i18n="publish.aiapps.rev_label">Illustrative — not a guarantee</span>
-      <div class="rev-row"><span data-i18n="publish.aiapps.rev_row1">Daily active users</span><span class="v">5,000</span></div>
-      <div class="rev-row"><span data-i18n="publish.aiapps.rev_row2">Ad impressions per user per day</span><span class="v">~5</span></div>
-      <div class="rev-row"><span data-i18n="publish.aiapps.rev_row3">Daily impressions</span><span class="v">25,000</span></div>
-      <div class="rev-row"><span data-i18n="publish.aiapps.rev_row4">Blended CPM</span><span class="v">$4</span></div>
-      <div class="rev-row"><span data-i18n="publish.aiapps.rev_row5">Monthly publisher revenue</span><span class="v">~$3,000</span></div>
-      <p class="disclaimer" data-i18n="publish.aiapps.rev_disclaimer">Numbers are illustrative for an AI app with conversational UX. Actual revenue depends on session length, slot placement, fill rate, and audience. Verticals with stronger commercial intent (developer tooling, finance, B2B SaaS) typically run higher CPMs.</p>
+      <span class="label" data-i18n="publish.bext.rev_label">Illustrative — not a guarantee</span>
+      <div class="rev-row"><span data-i18n="publish.bext.rev_row1">Daily active users</span><span class="v">30,000</span></div>
+      <div class="rev-row"><span data-i18n="publish.bext.rev_row2">Ad impressions per user per day</span><span class="v">~3</span></div>
+      <div class="rev-row"><span data-i18n="publish.bext.rev_row3">Daily impressions</span><span class="v">90,000</span></div>
+      <div class="rev-row"><span data-i18n="publish.bext.rev_row4">Blended eCPM (new-tab takeover premium)</span><span class="v">$5</span></div>
+      <div class="rev-row"><span data-i18n="publish.bext.rev_row5">Monthly publisher revenue</span><span class="v">~$13,500</span></div>
+      <p class="disclaimer" data-i18n="publish.bext.rev_disclaimer">Numbers are illustrative for an established AI extension with daily-driver usage. Actual revenue depends on session length, placement mix, fill rate, and audience composition. Productivity-focused extensions that activate new-tab takeover sit at the top of the range.</p>
     </div>
   </div>
 </section>
 
 <section class="who">
   <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.aiapps.faq_eyebrow">Frequently asked</span>
-    <h2 class="section-h" data-i18n="publish.aiapps.faq_h2">The questions every AI app builder asks.</h2>
+    <span class="section-eyebrow" data-i18n="publish.bext.faq_eyebrow">Frequently asked</span>
+    <h2 class="section-h" data-i18n="publish.bext.faq_h2">The questions every extension dev asks.</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <h4 data-i18n="publish.aiapps.faq1_q">Does this work with my agent framework?</h4>
-        <p data-i18n="publish.aiapps.faq1_a">Yes. Lumi is framework-agnostic. We integrate at the rendering surface, not the agent logic — so LangChain, Vercel AI SDK, CrewAI, LlamaIndex, AutoGen, Mastra, or your own custom orchestration all work the same way.</p>
+        <h4 data-i18n="publish.bext.faq1_q">Will Chrome Web Store flag this?</h4>
+        <p data-i18n="publish.bext.faq1_a">No. Lumi's 4 sovereign-surface placements — popup, side panel, new-tab takeover, install onboarding — are explicitly accepted by Chrome Web Store policy. We deliberately do NOT support content-script injection on third-party sites because that's the Web Store gray zone where extensions get pulled. Same posture for Safari and Firefox stores.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.aiapps.faq2_q">Will ads slow down my app?</h4>
-        <p data-i18n="publish.aiapps.faq2_a">No. The script is async and lazy-loaded — zero impact on first paint, no blocking on your bundle. Ad slots render after your AI surface is interactive.</p>
+        <h4 data-i18n="publish.bext.faq2_q">Manifest V3 support?</h4>
+        <p data-i18n="publish.bext.faq2_a_html" data-i18n-html>Native. Lumi runs in service workers and uses declarative network rules — no remotely-hosted code, no <code>eval</code>, no patterns that V3 review rejects.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.aiapps.faq3_q">What if I'm using Server-Sent Events for streaming?</h4>
-        <p data-i18n="publish.aiapps.faq3_a">Lumi works alongside SSE. Ads render in your UI separately from your model's stream — you don't need to interleave anything. The ad slot is a sibling element, not a stream consumer.</p>
+        <h4 data-i18n="publish.bext.faq3_q">Will Lumi sell my user data?</h4>
+        <p data-i18n="publish.bext.faq3_a">No. Boost Boss does not sell user data and has no third-party tracking pixels. All targeting is contextual — derived from on-page or in-extension content at request time, never persisted into a user profile.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.aiapps.faq4_q">Can I theme the ads to match my UI?</h4>
-        <p data-i18n="publish.aiapps.faq4_a_html" data-i18n-html>Yes. Lumi reads your CSS variables for color and typography (<code>--lumi-primary</code>, <code>--lumi-text</code>, <code>--lumi-radius</code>, etc.). The default look is neutral; the themed look matches your brand.</p>
+        <h4 data-i18n="publish.bext.faq4_q">Can I run on top of an existing freemium model?</h4>
+        <p data-i18n="publish.bext.faq4_a">Yes — most of our extension publishers do exactly this. Show ads to free users, hide them for Pro subscribers, all controlled by your own paywall logic.</p>
       </div>
       <div class="faq-item">
-        <h4 data-i18n="publish.aiapps.faq5_q">Can I run my own ads alongside Boost Boss?</h4>
-        <p data-i18n="publish.aiapps.faq5_a_html" data-i18n-html>Yes. We don't lock down inventory. Boost Boss renders only in slots you explicitly tag with <code>data-lumi-slot</code> — everything else is yours.</p>
+        <h4 data-i18n="publish.bext.faq5_q">What about CSP restrictions in extension contexts?</h4>
+        <p data-i18n="publish.bext.faq5_a_html" data-i18n-html>Lumi works within strict CSP. Our SDK doesn't require <code>unsafe-eval</code> or <code>unsafe-inline</code>; ad creative renders inside an isolated mount point you control.</p>
       </div>
     </div>
   </div>
@@ -509,9 +526,9 @@
 
 <section class="cta-footer">
   <div class="wrap">
-    <h2 data-i18n="publish.aiapps.cta_h2">Ready to monetize your AI app?</h2>
-    <p data-i18n="publish.aiapps.cta_p">One snippet. Five minutes. Weekly payouts.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.aiapps.cta_btn">Apply as a Founding Publisher →</a>
+    <h2 data-i18n="publish.bext.cta_h2">Ready to monetize your browser extension?</h2>
+    <p data-i18n="publish.bext.cta_p">Manifest V3 native. 8 sovereign-surface placements. Weekly payouts.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.bext.cta_btn">Apply as a Founding Publisher →</a>
   </div>
 </section>
 
@@ -579,7 +596,6 @@
     document.addEventListener('scroll', on, { passive: true });
     on();
   })();
-  // Logged-in publisher: swap nav CTAs for a pill linking to /publish/dashboard.
   (function(){
     var token = localStorage.getItem('bb_pub_token');
     if (!token) return;

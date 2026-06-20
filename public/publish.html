@@ -3,20 +3,20 @@
 <head>
 <!-- BB_I18N_PRELOAD: zero-flash language preference. Mirrors i18n.js. Do not edit by hand — run scripts/i18n_inject_preload.py. -->
 <style>html.bb-i18n-loading{visibility:hidden}</style>
-<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/mcp':1,'/publish/ai-apps':1,'/publish/extensions':1,'/publish/bots':1,'/publish/no-code':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
+<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/computer':1,'/publish/browser':1,'/publish/browser-extension':1,'/publish/mobile':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
 <!-- /BB_I18N_PRELOAD -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Publishers — Boost Boss</title>
-<meta name="description" content="Monetize your AI product, your way. The ad network built for AI-native surfaces. One backend, four integration paths plus a no-code waitlist — wherever your AI lives, we serve.">
+<meta name="description" content="Monetize your AI app — wherever your users meet it. Lumi packs the same ad-serving SDK into four installable surfaces: Computer App, Browser App, Browser Extension App, and Mobile App. One publisher account. Real revenue per impression.">
 <meta property="og:title" content="For Publishers — Boost Boss">
-<meta property="og:description" content="The ad network built for AI-native surfaces. MCP, AI Apps, Extensions, Bots, plus a no-code waitlist for Custom GPTs and Poe.">
+<meta property="og:description" content="Install Lumi where your users are: Computer App, Browser App, Browser Extension App, or Mobile App. Industry-leading payouts. Weekly.">
 <meta property="og:url" content="https://boostboss.ai/publish">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="For Publishers — Boost Boss">
-<meta name="twitter:description" content="Monetize MCP servers, AI apps, browser extensions, AI bots, and Custom GPTs. Industry-leading payouts. Weekly.">
+<meta name="twitter:description" content="Monetize your AI app on the surface where your users meet it. Four Lumi packages. One publisher account. Weekly payouts.">
 <link rel="canonical" href="https://boostboss.ai/publish">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -297,11 +297,10 @@
       <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
     </a>
     <div class="nav-links">
-      <a href="/publish/mcp" data-i18n="subnav.mcp">MCP Servers</a>
-      <a href="/publish/ai-apps" data-i18n="subnav.ai_apps">AI Apps</a>
-      <a href="/publish/extensions" data-i18n="subnav.extensions">Extensions</a>
-      <a href="/publish/bots" data-i18n="subnav.bots">Bots</a>
-      <a href="/publish/no-code" data-i18n="subnav.no_code">Custom GPTs</a>
+      <a href="/publish/computer">Computer App</a>
+      <a href="/publish/browser">Browser App</a>
+      <a href="/publish/browser-extension">Browser Extension App</a>
+      <a href="/publish/mobile">Mobile App</a>
     </div>
     <div class="nav-ctas">
       <div class="nav-lang-wrap" id="navLangWrap">
@@ -331,58 +330,50 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <h1 data-i18n="publish.hub.hero_h1_html" data-i18n-html>Monetize your AI product,<br><span class="grad">your way.</span></h1>
-    <p class="sub" data-i18n="publish.hub.hero_sub">Boost Boss is the ad network built for AI-native surfaces. One backend, four integration paths plus a no-code waitlist — wherever your AI lives, we serve.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.hub.hero_cta">Start as a publisher →</a>
+    <h1>Wherever your users meet your AI,<br><span class="grad">Lumi monetizes it.</span></h1>
+    <p class="sub">One ad-serving SDK, packaged for the four surfaces publishers actually ship: Computer App, Browser App, Browser Extension App, and Mobile App. One publisher account. Real revenue per impression — no analytics theatre, no surveillance, no cookies.</p>
+    <a class="btn btn-primary btn-lg" href="/publish/signup">Start earning today →</a>
   </div>
 </section>
 
 <!-- ROUTER -->
 <section class="router">
   <div class="wrap">
-    <span class="router-eyebrow" data-i18n="publish.hub.router_eyebrow">Which one are you?</span>
-    <h2 class="router-h2" data-i18n="publish.hub.router_h2">Pick the path that matches what you've built.</h2>
-    <p class="router-sub" data-i18n="publish.hub.router_sub">Each integration is the simplest possible code in that ecosystem's idiom — three lines via Lumi SDK for MCP, one script tag via Lumi SDK script tag, an npm package via Lumi SDK for browser extensions, or a REST call via Lumi API for Bots.</p>
+    <span class="router-eyebrow">Pick your install</span>
+    <h2 class="router-h2">Four packages. One publisher account.</h2>
+    <p class="router-sub">Lumi ships as four installable packages — one per surface you can build. Pick the one that matches your app. Multi-surface publishers install more than one; the same publisher account aggregates earnings across all of them.</p>
     <div class="router-grid">
-      <a class="router-card" href="/publish/mcp">
+      <a class="router-card" href="/publish/computer">
         <div class="router-card-mark mark-mcp">
-          <div class="mark-name">Lumi SDK for MCP</div>
+          <div class="mark-name">Lumi for Computer App</div>
         </div>
-        <h3 data-i18n="publish.hub.card_mcp_h3">I built an MCP server</h3>
-        <p data-i18n="publish.hub.card_mcp_p">Stripe-MCP, Postgres-MCP, Filesystem-MCP, anything called from Claude Desktop, Cursor, Cline. Earn per tool call.</p>
-        <span class="arrow" data-i18n="publish.hub.card_mcp_arrow">For MCP Server Developers </span>
+        <h3>I built a downloaded app</h3>
+        <p>Electron, Tauri, native macOS / Windows / Linux. AI chat apps, IDE assistants, productivity tools — anything users install on their computer. Full window control, video + sound ads allowed.</p>
+        <span class="arrow">10 placements · top RPM video pre-roll →</span>
       </a>
-      <a class="router-card" href="/publish/ai-apps">
-        <div class="router-card-mark mark-snippet">
-          <div class="mark-name">Lumi SDK script tag</div>
-        </div>
-        <h3 data-i18n="publish.hub.card_ai_h3">I built an AI app or website</h3>
-        <p data-i18n="publish.hub.card_ai_p_html" data-i18n-html>LangChain, Vercel AI SDK, CrewAI, custom OpenAI wrappers, vertical AI tools, AI assistants, AI search. One async script tag in your <code>&lt;head&gt;</code>.</p>
-        <span class="arrow" data-i18n="publish.hub.card_ai_arrow">For AI App Builders </span>
-      </a>
-      <a class="router-card" href="/publish/extensions">
+      <a class="router-card" href="/publish/browser-extension">
         <div class="router-card-mark mark-ext">
-          <div class="mark-name">Lumi SDK for browser extensions</div>
+          <div class="mark-name">Lumi for Browser Extension App</div>
         </div>
-        <h3 data-i18n="publish.hub.card_ext_h3">I built a browser extension</h3>
-        <p data-i18n="publish.hub.card_ext_p">Writing assistants, AI sidebars, summarizers, translators, Gmail copilots — Chrome, Edge, Firefox. Manifest v3 native, React + Vue bindings.</p>
-        <span class="arrow" data-i18n="publish.hub.card_ext_arrow">For Browser Extension Developers </span>
+        <h3>I built a browser extension</h3>
+        <p>Chrome / Safari / Firefox extensions — writing assistants, AI sidebars, summarizers, deal finders. Manifest V3 native. Your popup, side panel, and new-tab page are sovereign surfaces.</p>
+        <span class="arrow">8 placements · new-tab takeover at $9 RPM →</span>
       </a>
-      <a class="router-card" href="/publish/bots">
+      <a class="router-card" href="/publish/browser">
+        <div class="router-card-mark mark-snippet">
+          <div class="mark-name">Lumi for Browser App</div>
+        </div>
+        <h3>I built a web app</h3>
+        <p>Anything that runs in a browser at your own domain — ChatGPT-style chats, AI image generators, no-code builders, AI dashboards. One async <code>&lt;script&gt;</code> tag, ad slots fire on intent.</p>
+        <span class="arrow">8 placements · corner unit + page interstitial →</span>
+      </a>
+      <a class="router-card" href="/publish/mobile">
         <div class="router-card-mark mark-bots">
-          <div class="mark-name">Lumi SDK for Discord · Telegram · Slack</div>
+          <div class="mark-name">Lumi for Mobile App</div>
         </div>
-        <h3 data-i18n="publish.hub.card_bots_h3">I built an AI bot</h3>
-        <p data-i18n="publish.hub.card_bots_p">Research bots, summarization bots, support bots, image-gen bots. One REST call from your handler, optional helper libraries per platform.</p>
-        <span class="arrow" data-i18n="publish.hub.card_bots_arrow">For AI Bot Developers </span>
-      </a>
-      <a class="router-card waitlist" href="/publish/no-code">
-        <div class="router-card-mark mark-nocode">
-          <div class="mark-name">Lumi SDK for no-code</div>
-        </div>
-        <h3 data-i18n="publish.hub.card_nocode_h3">I built a Custom GPT or no-code AI</h3>
-        <p data-i18n="publish.hub.card_nocode_p">OpenAI Custom GPTs, Poe bots, Perplexity Pages, Voiceflow / Botpress / Stack AI builds — anywhere you authored the AI but the platform owns the runtime. We're shipping no-code monetization next.</p>
-        <span class="arrow" data-i18n="publish.hub.card_nocode_arrow_html" data-i18n-html>For Custom GPT &amp; No-Code Authors </span>
+        <h3>I built a mobile app</h3>
+        <p>iOS, Android, or React Native AI apps. Native sound, full-screen interstitials, and the highest-CPM format in adtech: rewarded video. Opt-in by user click — perfectly compliant.</p>
+        <span class="arrow">10 placements · rewarded video unlocks brand budgets →</span>
       </a>
 
       <!-- Value-prop anchor tile — fills the 6th grid cell with an
@@ -402,15 +393,15 @@
           <line x1="230" y1="50"  x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
           <line x1="50"  y1="150" x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
           <line x1="230" y1="150" x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
-          <!-- Door dots: MCP / AI Apps / Extensions / Bots -->
+          <!-- Door dots: Computer App / Browser Ext App / Browser App / Mobile App -->
           <circle cx="50"  cy="50"  r="14" fill="#FFFFFF" stroke="#FF2D78" stroke-width="2"/>
-          <text x="50" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FF2D78" font-weight="700">⚙</text>
-          <circle cx="230" cy="50"  r="14" fill="#FFFFFF" stroke="#04BEFE" stroke-width="2"/>
-          <text x="230" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE" font-weight="700">💬</text>
-          <circle cx="50"  cy="150" r="14" fill="#FFFFFF" stroke="#FFE600" stroke-width="2"/>
-          <text x="50" y="154" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#8a6d00" font-weight="700">🧩</text>
+          <text x="50" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FF2D78" font-weight="700">🖥</text>
+          <circle cx="230" cy="50"  r="14" fill="#FFFFFF" stroke="#FFE600" stroke-width="2"/>
+          <text x="230" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#8a6d00" font-weight="700">🧩</text>
+          <circle cx="50"  cy="150" r="14" fill="#FFFFFF" stroke="#04BEFE" stroke-width="2"/>
+          <text x="50" y="154" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE" font-weight="700">🌐</text>
           <circle cx="230" cy="150" r="14" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2"/>
-          <text x="230" y="154" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#7C3AED" font-weight="700">🤖</text>
+          <text x="230" y="154" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#7C3AED" font-weight="700">📱</text>
           <!-- Central hub — Boost Boss -->
           <circle cx="140" cy="100" r="32" fill="url(#hubGrad)"/>
           <text x="140" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" letter-spacing="0.08em">ONE</text>
@@ -450,8 +441,8 @@
       <div class="why-item">
         <span class="check">✓</span>
         <div>
-          <h4 data-i18n="publish.hub.why3_h4">Three SDKs, one API, plus a no-code path on the way</h4>
-          <p data-i18n="publish.hub.why3_p_html" data-i18n-html>Lumi SDK for MCP, Lumi SDK script tag, Lumi SDK for browser extensions, Lumi API for Bots — and a no-code integration coming for Custom GPT &amp; Poe authors. Same backend, same publisher account, same payouts across all paths.</p>
+          <h4>Four surfaces, one publisher account</h4>
+          <p>Lumi for Computer App, Browser App, Browser Extension App, and Mobile App — one SDK family, four installable packages. If you ship on more than one surface, install more than one. Earnings aggregate to the same account, paid out the same Friday.</p>
         </div>
       </div>
       <div class="why-item">
@@ -480,9 +471,9 @@
       <h2 data-i18n="publish.hub.notfit_h2">Not a fit for</h2>
       <p class="intro" data-i18n="publish.hub.notfit_intro_html" data-i18n-html>A short list of who Boost Boss is <em>not</em> built for, so you don't waste your time. We'd rather lose the lead than waste your week.</p>
       <ul>
-        <li data-i18n="publish.hub.notfit_li1">Mobile native iOS / Android apps — we don't do mobile SDKs; AppLovin and Unity own that lane and we don't compete there.</li>
-        <li data-i18n="publish.hub.notfit_li2">Gambling, adult, or affiliate-spam verticals — both demand and supply side are filtered out at policy review.</li>
-        <li data-i18n="publish.hub.notfit_li3">Surveillance-based ad networks — we don't share publisher inventory with retargeting tags or behavioral cookie networks.</li>
+        <li>Gambling, adult, or affiliate-spam verticals — both demand and supply side are filtered out at policy review.</li>
+        <li>Surveillance-based ad networks — we don't share publisher inventory with retargeting tags or behavioral cookie networks.</li>
+        <li>Apps you don't own the surface of — Custom GPTs, Discord bots running inside Discord's app, Slack bots inside Slack. We need a surface you control end-to-end.</li>
       </ul>
     </div>
   </div>
