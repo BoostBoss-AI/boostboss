@@ -13749,6 +13749,28 @@ function pfParseScreenshots(text) {
                 return origOpenModal.apply(this, arguments);
             };
 
+            // Brief green-check overlay next to the Save button to confirm a
+            // successful save without closing the modal. Two-second fade.
+            // Inserted inline (no new dependencies, no portal) so it can't
+            // race a subsequent close-and-reopen cycle.
+            function flashSaveSuccess(anchorBtn, label) {
+                if (!anchorBtn || !anchorBtn.parentNode) return;
+                let chip = anchorBtn.parentNode.querySelector('.bb-save-flash');
+                if (!chip) {
+                    chip = document.createElement('span');
+                    chip.className = 'bb-save-flash';
+                    chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;background:#ECFDF5;border:1px solid #BBF7D0;color:#047857;font-size:12px;font-weight:700;margin-right:8px;opacity:0;transition:opacity 240ms ease;';
+                    anchorBtn.parentNode.insertBefore(chip, anchorBtn);
+                }
+                chip.innerHTML = '<span style="font-size:13px;line-height:1;">✓</span><span>' + (label || 'Saved') + '</span>';
+                requestAnimationFrame(() => { chip.style.opacity = '1'; });
+                clearTimeout(chip._t);
+                chip._t = setTimeout(() => {
+                    chip.style.opacity = '0';
+                    setTimeout(() => { try { chip.remove(); } catch (_) {} }, 260);
+                }, 2200);
+            }
+
             async function requestCloseProductModal() {
                 if (!productFormDirty) { closeModal(); return; }
                 const ok = await bbConfirm({
@@ -13903,13 +13925,30 @@ function pfParseScreenshots(text) {
                     });
                     const j = await r.json();
                     if (!r.ok) throw new Error(j.error || 'Save failed');
-                    closeModal();
+                    // Save-without-close (Andy 2026-06-20): keep the modal
+                    // open so the seller doesn't lose their place after
+                    // hitting Save. Reload the underlying list silently so
+                    // the row count + status stays in sync, and on a fresh
+                    // CREATE flip the modal into EDIT mode so subsequent
+                    // saves PATCH the same row.
+                    if (mode !== 'edit' && j && j.product && j.product.id) {
+                        modal.dataset.mode = 'edit';
+                        modal.dataset.productId = j.product.id;
+                        if (titleEl) titleEl.textContent = 'Edit product';
+                    }
                     await loadProducts();
+                    productFormDirty = false;
+                    // Flash a green check inline next to the Save button so
+                    // the seller knows it landed without an extra modal step.
+                    flashSaveSuccess(submitBtn, mode === 'edit' ? 'Saved' : 'Created');
+                    if (typeof showToast === 'function') {
+                        showToast(mode === 'edit' ? '✓ Saved' : '✓ Product created', 'success');
+                    }
                 } catch (e) {
                     showFormErr(e.message || 'Could not save product');
                 } finally {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = mode === 'edit' ? 'Save changes' : 'Save product';
+                    submitBtn.textContent = (modal.dataset.mode === 'edit') ? 'Save changes' : 'Save product';
                 }
             });
 
