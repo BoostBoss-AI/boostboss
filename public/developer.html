@@ -4624,38 +4624,56 @@ export default function App() {
 
             // Chart — pass the raw daily; renderChart will rebuild its own
             // windowed slice (same buildPubDailyWindow) so the bars and
-            // summary numbers stay aligned with the cards above.
-            if (daily.length > 0) {
-                renderChart(daily, days);
-            } else {
-                document.getElementById('chartContainer').innerHTML =
-                    '<p style="text-align:center;color:#9CA3AF;padding:2rem;font-size:13px;">No data yet</p>';
-            }
+            // summary numbers stay aligned with the cards above. Renders
+            // the skeleton + overlay even when daily is empty so publishers
+            // see what the chart will look like instead of just plain text.
+            renderChart(daily, days);
         }
 
         // Render the daily-earnings chart with summary strip, y-axis grid,
         // value-shaded bars, and date-labelled x-axis. Mirrors the
         // advertiser home chart so the two dashboards share a visual
         // language.
+        //
+        // Empty-state contract (2026-06-20): when dailyStats is empty we
+        // synthesize a zero-value N-day window so the chart skeleton
+        // (axes, grid, dates, flat bars) still renders. A friendly
+        // overlay sits on top of the plot area so publishers see what
+        // the chart *will* look like instead of bare text.
         function renderChart(dailyStats, numDays) {
             const container = document.getElementById('chartContainer');
             container.innerHTML = '';
             const days = numDays || 14;
 
-            if (!dailyStats || dailyStats.length === 0) {
-                container.innerHTML = '<p style="text-align:center;color:#9CA3AF;padding:2rem;font-size:13px;">No data yet</p>';
-                return;
+            const hasData = !!(dailyStats && dailyStats.length > 0);
+            let slice;
+            if (hasData) {
+                // Build a true day-by-day window so the toggle shows N calendar
+                // days, not "last N records in the (sparse) array."
+                slice = buildPubDailyWindow(dailyStats, days);
+            } else {
+                // Synthesize an empty N-day window so the skeleton can render.
+                slice = [];
+                const today = new Date();
+                for (let i = days - 1; i >= 0; i--) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    slice.push({
+                        date: d.toISOString().slice(0, 10),
+                        earnings: 0, impressions: 0, clicks: 0,
+                    });
+                }
             }
 
-            // Build a true day-by-day window so the toggle shows N calendar
-            // days, not "last N records in the (sparse) array."
-            const slice = buildPubDailyWindow(dailyStats, days);
             const values = slice.map(d => Number(d.earnings || 0));
-            const max = Math.max(...values, 0.0001);
+            // When real data exists, max = peak value (clamped above zero so
+            // /0 can't happen). When empty, we still want sensible $0.25 /
+            // $0.50 / $0.75 / $1.00 y-axis labels so the chart looks alive.
+            const max = hasData ? Math.max(...values, 0.0001) : 1;
             const total = values.reduce((s, v) => s + v, 0);
             const avg = total / Math.max(values.length, 1);
             const peakIdx = values.indexOf(Math.max(...values));
-            const peakDay = slice[peakIdx] && slice[peakIdx].date
+            const peakDay = hasData && slice[peakIdx] && slice[peakIdx].date
                 ? new Date(slice[peakIdx].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
                 : '—';
 
@@ -4743,6 +4761,22 @@ export default function App() {
                 xLabels.appendChild(xLbl);
             });
             plot.appendChild(bars);
+
+            // Empty-state overlay — sits on top of the skeleton when there's
+            // no real data so publishers see what the chart *will* look like.
+            if (!hasData) {
+                plot.style.position = 'relative';
+                const overlay = document.createElement('div');
+                overlay.className = 'chart-empty-overlay';
+                overlay.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.85) 60%);pointer-events:none;padding:20px;';
+                overlay.innerHTML = `
+                    <div style="font-size:32px;margin-bottom:8px;opacity:0.6;">📈</div>
+                    <div style="font-weight:700;color:#4B5563;font-size:14px;margin-bottom:4px;">No revenue yet</div>
+                    <div style="font-size:12.5px;color:#6B7280;line-height:1.5;max-width:360px;">Your daily earnings will appear here as soon as your installs start serving impressions. Connect a door from the Integrations tab to begin.</div>
+                `;
+                plot.appendChild(overlay);
+            }
+
             container.appendChild(plot);
             container.appendChild(xLabels);
         }
