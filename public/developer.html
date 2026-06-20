@@ -2731,21 +2731,24 @@ export default function App() {
                 </div>
             </div>
 
-            <!-- BBX Placements Breakdown — per-slot economics from placement_daily_stats -->
+            <!-- Live per-door placement analytics — 4 doors in parallel
+                 because one publisher can install multiple Lumi packages and
+                 needs to see traffic from each surface side-by-side. -->
             <div class="section" data-panel="earnings">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 10px; flex-wrap: wrap;">
-                    <div class="section-title" style="margin-bottom: 0;" data-t="placements.title">Placements</div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="font-size: 12px; color: #6B7280;">
-                            <span data-t="placements.last_30">Last 30 days · grouped by</span> <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">placement_id</code>
-                        </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 10px; flex-wrap: wrap;">
+                    <div class="section-title" style="margin-bottom: 0;" data-t="placements.title">Live placement traffic</div>
+                    <div style="font-size: 12px; color: #6B7280;">
+                        <span data-t="placements.last_30_simple">Last 30 days · by door</span>
                     </div>
                 </div>
-                <div id="placementsContainer" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
-                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;" data-t="common.loading">Loading…</div>
+                <div style="font-size: 12.5px; color: #6B7280; margin-bottom: 14px; line-height: 1.5;" data-t="placements.subtitle">
+                    Each panel below is one of your installed Lumi doors. If you ship across multiple surfaces (e.g. Computer App + Mobile App), all of them stream traffic in parallel here. Doors you haven't installed yet show what placements they'd unlock.
                 </div>
-                <div style="font-size: 11px; color: #9CA3AF; margin-top: 10px; line-height: 1.5;">
-                    <span data-t="placements.hint_a">Each row is one slot inside your app. Pass the</span> <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">placement_id</code> <span data-t="placements.hint_b">to</span> <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">getSponsoredContent()</code> <span data-t="placements.hint_c">to enable per-slot floors, frequency caps, and reporting. Higher</span> <strong data-t="placements.intent">Intent</strong> <span data-t="placements.hint_d">means Benna is matching the right ads to that placement's context.</span>
+                <div id="placementsContainer" style="overflow:visible;">
+                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;" data-t="common.loading">Loading…</div>
+                </div>
+                <div style="font-size: 11px; color: #9CA3AF; margin-top: 12px; line-height: 1.5;">
+                    <strong data-t="placements.intent">Intent</strong> <span data-t="placements.hint_d">means Benna is matching the right ads to that placement's context. 1.5 = perfect overlap, 0.7 = decent, 0.4 = cold start. Higher Intent → higher eCPM.</span>
                 </div>
             </div>
 
@@ -4057,66 +4060,143 @@ init({ publisherId: <span style="color:#FFE600;">"pub_abc"</span> });
             renderPlacements(stats.placements || []);
         }
 
-        // ── BBX Placements panel ─────────────────────────────────────────
-        // Shows per-placement metrics from placement_daily_stats: impressions,
-        // CTR, eCPM, publisher earnings, average intent-match score. Empty
-        // state is "no traffic yet" — clicking the placement_id copies it for
-        // the publisher to paste into their SDK call.
+        // ── Live Placements panel — 4-door layout ────────────────────────
+        // Renders per-door analytics in parallel because a single publisher
+        // can install multiple Lumi packages (e.g., Computer App + Browser
+        // Extension App + Mobile App for one product line). Each door panel
+        // shows its placements + last-30-day stats; empty doors render an
+        // "install this door" CTA so the publisher sees the inventory their
+        // current install doesn't yet cover.
         function renderPlacements(placements) {
             const host = document.getElementById('placementsContainer');
             if (!host) return;
-            if (!placements || placements.length === 0) {
-                host.innerHTML = `
-                    <div style="padding:32px;text-align:center;color:#9CA3AF;background:#FAFAFA;border:1px dashed #E5E7EB;border-radius:12px;">
-                        <div style="font-size:32px;margin-bottom:6px;">📍</div>
-                        <div style="font-weight:600;color:#6B7280;font-size:14px;margin-bottom:4px;">No placement traffic yet</div>
-                        <div style="font-size:13px;color:#9CA3AF;">
-                            Pass <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px;">placement_id</code> to <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px;">getSponsoredContent()</code> to start measuring per-slot economics.
-                        </div>
-                    </div>`;
-                return;
-            }
+
+            // The 4 doors with display names + accent colors. Keys must match
+            // DOOR_PLACEMENTS so the bundle hints render the right placements.
+            const DOORS = [
+                { key: 'mcp',       label: 'Lumi for Computer App',           accent: '#9D7AFF', dotIcon: '🖥' },
+                { key: 'js-snippet',label: 'Lumi for Browser App',            accent: '#04BEFE', dotIcon: '🌐' },
+                { key: 'npm-sdk',   label: 'Lumi for Browser Extension App',  accent: '#FFB020', dotIcon: '🧩' },
+                { key: 'rest-api',  label: 'Lumi for Mobile App',             accent: '#FF2D78', dotIcon: '📱' },
+            ];
+
             const fmt$ = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const fmtPct = (n) => (Number(n || 0) * 100).toFixed(2) + '%';
+            const fmtPct = (n) => (Number(n || 0) * 100).toFixed(1) + '%';
             const intentBadge = (s) => {
-                if (s == null) return '<span style="color:#9CA3AF;font-size:12px;">—</span>';
+                if (s == null) return '<span style="color:#9CA3AF;font-size:11px;">—</span>';
                 const v = Number(s);
                 const colour = v >= 1.2 ? '#059669' : (v >= 0.7 ? '#D97706' : '#9CA3AF');
-                return `<span style="color:${colour};font-weight:600;font-size:13px;">${v.toFixed(2)}</span>`;
+                return `<span style="color:${colour};font-weight:600;font-size:12px;">${v.toFixed(2)}</span>`;
             };
-            const rows = placements.map(p => `
-                <tr style="border-top:1px solid #F3F4F6;">
-                    <td style="padding:12px 14px;">
-                        <div style="font-weight:600;font-size:13.5px;color:#111;">${escapeHtml(p.name || p.placement_id)}</div>
-                        <div style="font-size:11px;color:#9CA3AF;font-family:monospace;">${escapeHtml(p.placement_id)}</div>
-                    </td>
-                    <td style="padding:12px 14px;font-size:12px;color:#6B7280;">
-                        <span style="background:#EFF6FF;color:#1D4ED8;padding:2px 8px;border-radius:100px;font-weight:500;">${escapeHtml(p.surface || '—')}</span>
-                        <span style="margin-left:6px;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-weight:500;">${escapeHtml(p.format || '—')}</span>
-                    </td>
-                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${(p.impressions||0).toLocaleString()}</td>
-                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${(p.clicks||0).toLocaleString()}</td>
-                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${fmtPct(p.ctr)}</td>
-                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${fmt$(p.ecpm)}</td>
-                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#059669;">${fmt$(p.publisher_earnings)}</td>
-                    <td style="padding:12px 14px;text-align:right;">${intentBadge(p.avg_intent_match)}</td>
-                </tr>`).join('');
+
+            // Map an incoming placement to a door key. Looks at:
+            //   1. p.door (preferred — set by backend if available)
+            //   2. p.surface (e.g. 'mcp' / 'js-snippet' / 'npm-sdk' / 'rest-api' / 'web' / 'ext' / 'mobile')
+            //   3. p.placement_id prefix (e.g. 'mcp_citation' → 'mcp', 'mobile_rewarded' → 'rest-api')
+            // Anything we can't classify falls into the Computer App panel as a
+            // last-resort default so we never silently drop rows.
+            const surfaceToKey = {
+                'mcp': 'mcp', 'desktop': 'mcp', 'computer': 'mcp',
+                'web': 'js-snippet', 'browser': 'js-snippet', 'js-snippet': 'js-snippet', 'snippet': 'js-snippet',
+                'ext': 'npm-sdk', 'extension': 'npm-sdk', 'npm-sdk': 'npm-sdk',
+                'bot': 'rest-api', 'mobile': 'rest-api', 'rest-api': 'rest-api', 'rest': 'rest-api', 'ios': 'rest-api', 'android': 'rest-api',
+            };
+            const placementToDoor = (p) => {
+                if (p.door && surfaceToKey[p.door]) return surfaceToKey[p.door];
+                if (p.surface && surfaceToKey[p.surface]) return surfaceToKey[p.surface];
+                const id = String(p.placement_id || '').toLowerCase();
+                for (const prefix of Object.keys(surfaceToKey)) {
+                    if (id.startsWith(prefix + '_') || id.startsWith(prefix + '-')) return surfaceToKey[prefix];
+                }
+                return 'mcp';
+            };
+
+            // Bucket the incoming placements by door
+            const buckets = { 'mcp': [], 'js-snippet': [], 'npm-sdk': [], 'rest-api': [] };
+            (placements || []).forEach(p => {
+                const k = placementToDoor(p);
+                buckets[k].push(p);
+            });
+
+            const renderDoorPanel = (door) => {
+                const rows = buckets[door.key];
+                const bundleSize = (typeof DOOR_PLACEMENTS !== 'undefined' && DOOR_PLACEMENTS[door.key] && DOOR_PLACEMENTS[door.key].length) || 0;
+                const isLive = rows.length > 0;
+                const totalImps = rows.reduce((s, p) => s + (Number(p.impressions) || 0), 0);
+                const totalEarnings = rows.reduce((s, p) => s + (Number(p.publisher_earnings) || 0), 0);
+
+                const headerHtml = `
+                    <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #F3F4F6;background:linear-gradient(90deg, ${door.accent}15 0%, transparent 60%);">
+                        <span style="font-size:16px;line-height:1;">${door.dotIcon}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:700;font-size:13.5px;color:#0F0F1A;letter-spacing:-0.01em;">${escapeHtml(door.label)}</div>
+                            <div style="font-size:11px;color:#6B7280;margin-top:2px;">
+                                <span style="display:inline-flex;align-items:center;gap:5px;">
+                                    <span style="width:6px;height:6px;border-radius:50%;background:${isLive ? '#10B981' : '#D1D5DB'};${isLive ? 'box-shadow:0 0 0 3px ' + door.accent + '20;' : ''}"></span>
+                                    ${isLive ? `<strong style="color:#059669;font-weight:600;">Live</strong> · ${rows.length} of ${bundleSize} placements serving` : `<span style="color:#9CA3AF;">Not yet installed · ${bundleSize} placements available</span>`}
+                                </span>
+                            </div>
+                        </div>
+                        ${isLive ? `
+                            <div style="text-align:right;flex-shrink:0;">
+                                <div style="font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">30d Earnings</div>
+                                <div style="font-size:15px;color:${door.accent};font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px;">${fmt$(totalEarnings)}</div>
+                            </div>
+                        ` : ''}
+                    </div>`;
+
+                if (!isLive) {
+                    return `
+                        <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:220px;">
+                            ${headerHtml}
+                            <div style="flex:1;padding:24px 18px;text-align:center;color:#9CA3AF;font-size:12.5px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;">
+                                <div style="font-size:24px;opacity:0.5;">📭</div>
+                                <div style="font-weight:600;color:#6B7280;font-size:13px;">No traffic from this door yet</div>
+                                <div style="font-size:12px;line-height:1.5;max-width:320px;">
+                                    Install <strong>${escapeHtml(door.label)}</strong> from the <a href="#integrations" style="color:${door.accent};font-weight:600;text-decoration:none;">Integrations</a> tab to start earning from these ${bundleSize} placements.
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                const rowsHtml = rows.map(p => `
+                    <tr style="border-top:1px solid #F3F4F6;">
+                        <td style="padding:9px 12px;">
+                            <div style="font-weight:600;font-size:12.5px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${escapeHtml(p.name || p.placement_id)}">${escapeHtml(p.name || p.placement_id)}</div>
+                            <div style="font-size:10px;color:#9CA3AF;font-family:'JetBrains Mono', ui-monospace, monospace;">${escapeHtml(p.placement_id)}</div>
+                        </td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px;">${(p.impressions||0).toLocaleString()}</td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px;">${fmtPct(p.ctr)}</td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px;">${fmt$(p.ecpm)}</td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#059669;font-size:12.5px;">${fmt$(p.publisher_earnings)}</td>
+                        <td style="padding:9px 12px;text-align:right;">${intentBadge(p.avg_intent_match)}</td>
+                    </tr>`).join('');
+
+                return `
+                    <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+                        ${headerHtml}
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <thead>
+                                    <tr style="background:#FAFAFA;">
+                                        <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">Placement</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">Imps</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">CTR</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">eCPM</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">Earnings</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;" title="Average Benna intent-match score: cosine of intent_tokens × campaign targeting.">Intent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rowsHtml}</tbody>
+                            </table>
+                        </div>
+                    </div>`;
+            };
+
             host.innerHTML = `
-                <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                    <thead>
-                        <tr style="background:#FAFAFA;">
-                            <th style="padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Placement</th>
-                            <th style="padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Surface / Format</th>
-                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Imps</th>
-                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Clicks</th>
-                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">CTR</th>
-                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">eCPM</th>
-                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Earnings</th>
-                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;" title="Average Benna intent-match score (cosine of intent_tokens × campaign targeting). 1.5 = perfect, 0.4 = no overlap.">Intent</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>`;
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(420px, 1fr));gap:14px;padding:0;">
+                    ${DOORS.map(renderDoorPanel).join('')}
+                </div>`;
         }
 
         function escapeHtml(s) {
