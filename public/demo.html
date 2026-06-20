@@ -594,6 +594,329 @@
     font-size: 11px;
   }
 
+  /* ─────────────────────────────────────────
+     PLACEMENT VISUALS — new placements added for the 4-door rewrite.
+     Distinct visual identity per placement so the demo shows the format
+     the publisher actually gets, not just a generic card.
+  ───────────────────────────────────────── */
+
+  /* Pre-roll video card (Desktop + Mobile) — black player with play glyph. */
+  .bb-preroll {
+    background: #0F0F1A;
+    border-radius: 10px;
+    padding: 24px 18px;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 8px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .bb-preroll::before {
+    content: 'SPONSORED PRE-ROLL · 0:15';
+    position: absolute; top: 8px; left: 12px;
+    font-size: 9px; font-weight: 700; color: #FFE600;
+    letter-spacing: 0.08em;
+  }
+  .bb-preroll .pr-play {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #FF2D78;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #FFFFFF; flex-shrink: 0;
+    margin-top: 14px;
+  }
+  .bb-preroll .pr-meta { margin-top: 14px; }
+  .bb-preroll .pr-title { font-size: 13px; font-weight: 700; }
+  .bb-preroll .pr-skip {
+    margin-left: auto; margin-top: 14px;
+    font-size: 10px; color: #9CA3AF;
+    border: 1px solid #4B4B5E; padding: 4px 9px; border-radius: 4px;
+  }
+
+  /* Window banner (Desktop) — slim sponsored strip across the top of content. */
+  .bb-window-banner {
+    background: linear-gradient(90deg, #FFE6F0, #FFF9D6);
+    border: 1px solid #FF2D78;
+    border-left: 4px solid #FF2D78;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 10px;
+    margin: 6px 0;
+  }
+  .bb-window-banner .wb-spons {
+    font-size: 9px; font-weight: 700; color: #E01E65; letter-spacing: 0.08em;
+  }
+  .bb-window-banner .wb-text { color: #0F0F1A; font-weight: 600; }
+  .bb-window-banner .wb-cta {
+    margin-left: auto; color: #FF2D78; font-weight: 700; text-decoration: none; font-size: 11px;
+  }
+
+  /* Sidebar slot (Desktop) — narrow vertical card. */
+  .bb-sidebar-slot {
+    background: #FFFFFF;
+    border: 1.5px dashed #FF2D78;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 8px 0;
+    max-width: 220px;
+  }
+  .bb-sidebar-slot .ss-label {
+    font-size: 9px; font-weight: 700; color: #E01E65;
+    letter-spacing: 0.08em; margin-bottom: 6px;
+  }
+  .bb-sidebar-slot .ss-title { font-size: 12px; font-weight: 700; color: #0F0F1A; }
+  .bb-sidebar-slot .ss-cta {
+    display: inline-block; margin-top: 6px;
+    font-size: 10.5px; color: #FFFFFF; background: #0F0F1A;
+    padding: 4px 9px; border-radius: 5px; text-decoration: none;
+  }
+
+  /* Modal / page interstitial — full-coverage overlay inside the surface. */
+  .bb-modal-interstitial {
+    position: absolute; inset: 0;
+    background: rgba(15, 15, 26, 0.55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    padding: 20px;
+  }
+  .bb-modal-interstitial .mi-card {
+    background: #FFFFFF;
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  }
+  .bb-modal-interstitial .mi-label {
+    font-size: 9px; font-weight: 700; color: #E01E65; letter-spacing: 0.1em;
+  }
+  .bb-modal-interstitial .mi-title {
+    font-size: 17px; font-weight: 700; color: #0F0F1A; margin: 8px 0 6px;
+  }
+  .bb-modal-interstitial .mi-desc { font-size: 12px; color: #4B4B5E; }
+  .bb-modal-interstitial .mi-cta {
+    display: inline-block; margin-top: 14px;
+    background: #FF2D78; color: #FFFFFF;
+    padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    text-decoration: none;
+  }
+  .bb-modal-interstitial .mi-close {
+    position: absolute; top: 12px; right: 14px;
+    background: transparent; border: none; color: #FFFFFF;
+    font-size: 20px; cursor: pointer; opacity: 0.7;
+  }
+
+  /* Empty-state hero — large centered card shown on new chat / empty view. */
+  .bb-empty-hero {
+    background: linear-gradient(135deg, #FFF5F8 0%, #FFFCE8 100%);
+    border: 1px solid #FFE600;
+    border-radius: 14px;
+    padding: 28px 24px;
+    margin: 12px 0;
+    text-align: center;
+  }
+  .bb-empty-hero .eh-label {
+    font-size: 9px; font-weight: 700; color: #E01E65; letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+  .bb-empty-hero .eh-title {
+    font-size: 18px; font-weight: 700; color: #0F0F1A; margin-bottom: 6px;
+  }
+  .bb-empty-hero .eh-desc { font-size: 12px; color: #4B4B5E; margin-bottom: 14px; }
+  .bb-empty-hero .eh-cta {
+    display: inline-block; background: #FF2D78; color: #FFFFFF;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* System notification (Desktop) — toast in bottom-right. */
+  .bb-system-notif {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid #FF2D78;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    max-width: 340px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .bb-system-notif .sn-icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: #FF2D78; color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .bb-system-notif .sn-meta { flex: 1; }
+  .bb-system-notif .sn-label { font-size: 9px; font-weight: 700; color: #E01E65; letter-spacing: 0.08em; }
+  .bb-system-notif .sn-title { font-size: 12px; font-weight: 700; color: #0F0F1A; margin-top: 2px; }
+  .bb-system-notif .sn-desc { font-size: 11px; color: #4B4B5E; margin-top: 2px; }
+
+  /* Popup card (Browser) — extension toolbar popup style. */
+  .bb-popup-card {
+    background: #FFFFFF;
+    border: 2px solid #FF2D78;
+    border-radius: 10px;
+    padding: 14px;
+    margin: 8px 0;
+    max-width: 280px;
+  }
+  .bb-popup-card .pc-label {
+    font-size: 9px; font-weight: 700; color: #E01E65;
+    letter-spacing: 0.08em;
+  }
+  .bb-popup-card .pc-title {
+    font-size: 13px; font-weight: 700; color: #0F0F1A; margin-top: 4px;
+  }
+  .bb-popup-card .pc-desc { font-size: 11px; color: #4B4B5E; margin-top: 3px; }
+  .bb-popup-card .pc-cta {
+    display: block; margin-top: 10px;
+    background: #0F0F1A; color: #FFFFFF;
+    text-align: center;
+    padding: 7px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* Side panel slot (Browser) — vertical card pinned in the panel. */
+  .bb-sidepanel-slot {
+    background: #FAFAF7;
+    border: 1px solid #E5E7EB;
+    border-top: 3px solid #FF2D78;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 8px 0;
+  }
+  .bb-sidepanel-slot .sp-label { font-size: 9px; font-weight: 700; color: #E01E65; letter-spacing: 0.08em; }
+  .bb-sidepanel-slot .sp-title { font-size: 12px; font-weight: 700; color: #0F0F1A; margin-top: 4px; }
+  .bb-sidepanel-slot .sp-cta { font-size: 10.5px; color: #FF2D78; font-weight: 700; text-decoration: none; }
+
+  /* Install onboarding card (Browser) — welcome-style card. */
+  .bb-install-onboard {
+    background: #0F0F1A;
+    color: #FFFFFF;
+    border-radius: 12px;
+    padding: 18px;
+    margin: 8px 0;
+    text-align: center;
+  }
+  .bb-install-onboard .io-label {
+    font-size: 9px; color: #FFE600; letter-spacing: 0.1em; margin-bottom: 6px;
+  }
+  .bb-install-onboard .io-title { font-size: 15px; font-weight: 700; }
+  .bb-install-onboard .io-desc { font-size: 11.5px; color: #C7C7D8; margin-top: 4px; }
+  .bb-install-onboard .io-cta {
+    display: inline-block; margin-top: 12px;
+    background: #FF2D78; color: #FFFFFF;
+    padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* Settings page slot (Web) — settings/billing-page banner. */
+  .bb-settings-ad {
+    background: linear-gradient(90deg, #FF2D78, #FFB020);
+    color: #FFFFFF;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 8px 0;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .bb-settings-ad .sa-icon { font-size: 24px; }
+  .bb-settings-ad .sa-text { flex: 1; }
+  .bb-settings-ad .sa-title { font-size: 14px; font-weight: 700; }
+  .bb-settings-ad .sa-desc { font-size: 11px; opacity: 0.95; margin-top: 2px; }
+  .bb-settings-ad .sa-cta {
+    background: #FFFFFF; color: #FF2D78;
+    padding: 7px 14px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* Rewarded video (Mobile) — opt-in card. */
+  .bb-rewarded {
+    background: linear-gradient(135deg, #FF2D78 0%, #FFE600 100%);
+    color: #FFFFFF;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 8px 0;
+    text-align: center;
+  }
+  .bb-rewarded .rv-label { font-size: 9px; color: #FFFFFF; letter-spacing: 0.1em; opacity: 0.9; }
+  .bb-rewarded .rv-title { font-size: 14px; font-weight: 800; margin: 6px 0 4px; }
+  .bb-rewarded .rv-desc { font-size: 11px; opacity: 0.95; }
+  .bb-rewarded .rv-cta {
+    display: inline-block; margin-top: 10px;
+    background: #0F0F1A; color: #FFFFFF;
+    padding: 9px 16px; border-radius: 22px; font-size: 12px; font-weight: 700;
+    text-decoration: none;
+  }
+  .bb-rewarded .rv-cta::before { content: '▶ '; }
+
+  /* Bottom banner (Mobile) — fixed-bottom AdMob-style strip. */
+  .bb-bottom-banner {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-top: 3px solid #FF2D78;
+    padding: 8px 10px;
+    margin: 6px 0;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10.5px;
+  }
+  .bb-bottom-banner .bbb-spons { font-size: 8.5px; color: #E01E65; font-weight: 700; letter-spacing: 0.08em; }
+  .bb-bottom-banner .bbb-title { color: #0F0F1A; font-weight: 600; }
+  .bb-bottom-banner .bbb-cta { margin-left: auto; color: #FFFFFF; background: #FF2D78; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-size: 9.5px; font-weight: 700; }
+
+  /* Inline native banner (Mobile) — smaller in-feed banner. */
+  .bb-inline-native {
+    background: #F4F3EE;
+    border-left: 3px solid #FF2D78;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin: 6px 0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bb-inline-native .in-spons { font-size: 8px; font-weight: 700; color: #E01E65; letter-spacing: 0.08em; }
+  .bb-inline-native .in-title { font-size: 11px; font-weight: 600; color: #0F0F1A; }
+  .bb-inline-native .in-cta { margin-left: auto; color: #FF2D78; font-weight: 700; font-size: 10.5px; text-decoration: none; }
+
+  /* Full-screen interstitial (Mobile) — covers the phone screen. */
+  .bb-fullscreen-mobile {
+    position: absolute; inset: 0;
+    background: #0F0F1A;
+    z-index: 20;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 24px;
+    color: #FFFFFF;
+    text-align: center;
+  }
+  .bb-fullscreen-mobile .fm-skip {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255,255,255,0.15); color: #FFFFFF;
+    padding: 4px 9px; border-radius: 4px; font-size: 10px; border: none;
+  }
+  .bb-fullscreen-mobile .fm-label { font-size: 9px; color: #FFE600; letter-spacing: 0.1em; }
+  .bb-fullscreen-mobile .fm-title { font-size: 16px; font-weight: 800; margin: 8px 0 4px; }
+  .bb-fullscreen-mobile .fm-desc { font-size: 11.5px; opacity: 0.85; }
+  .bb-fullscreen-mobile .fm-cta {
+    display: inline-block; margin-top: 14px;
+    background: #FF2D78; color: #FFFFFF;
+    padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* Splash sponsor (Mobile) — full-screen launch sponsorship. */
+  .bb-splash {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    z-index: 15;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    color: #FFFFFF;
+  }
+  .bb-splash .sp-mark { font-size: 28px; font-weight: 800; }
+  .bb-splash .sp-tag { font-size: 11px; opacity: 0.9; margin-top: 4px; }
+  .bb-splash .sp-spons { font-size: 9px; opacity: 0.75; letter-spacing: 0.1em; margin-top: 16px; }
+
   /* Loading-state shimmer (Web door). */
   @keyframes bb-shimmer {
     0% { background-position: -180px 0; }
@@ -1074,6 +1397,12 @@
   /* AI-native placements (citation / tool-rec / chip) — yellow accent */
   .demo-btn.ai-native { border-color: #FFE600; color: #BA8B00; }
   .demo-btn.ai-native:hover { background: #FFFACD; color: #856700; }
+  /* Video placements — blue/dark accent so sound-capable formats are visible */
+  .demo-btn.video { border-color: #04BEFE; color: #0479BE; }
+  .demo-btn.video:hover { background: #E0F2FE; color: #035A8E; }
+  /* Premium placements (highest RPM per door — rewarded, interstitial, takeover) */
+  .demo-btn.premium { border-color: #FF2D78; background: #FFF5F8; color: #C81E62; font-weight: 700; }
+  .demo-btn.premium:hover { background: #FFE6F0; color: #A11551; }
 
   /* ───────────── BENNA INSPECTOR PANEL ───────────── */
   .demo-btn.benna {
@@ -1298,19 +1627,25 @@
     <span id="app-subtitle">Developer's AI App — Llama 4</span>
   </div>
 
-  <!-- Door tab strip: MCP / Web / Extension / Bot -->
+  <!-- Door tab strip: 4 doors organized by SURFACE the publisher ships
+       (where the ad renders), not by integration protocol.
+         data-door="mcp" → Lumi Desktop (downloaded apps like Claude, Cursor)
+         data-door="web" → Lumi Web      (browser-based web apps like ChatGPT.com)
+         data-door="ext" → Lumi Browser  (browser extensions like Grammarly)
+         data-door="bot" → Lumi Mobile   (iOS/Android/React Native apps)
+       Internal IDs kept stable so existing CSS classes still apply. -->
   <div class="door-tabs" role="tablist" aria-label="Boost Boss door selector">
     <button class="door-tab" role="tab" data-door="mcp" onclick="setActiveDoor('mcp')">
-      <span class="door-dot" style="--dot:#9D7AFF"></span>Lumi MCP
-    </button>
-    <button class="door-tab active" role="tab" data-door="web" aria-selected="true" onclick="setActiveDoor('web')">
-      <span class="door-dot" style="--dot:#04BEFE"></span>Web
+      <span class="door-dot" style="--dot:#9D7AFF"></span>Lumi Desktop
     </button>
     <button class="door-tab" role="tab" data-door="ext" onclick="setActiveDoor('ext')">
-      <span class="door-dot" style="--dot:#FFB020"></span>Extension
+      <span class="door-dot" style="--dot:#FFB020"></span>Lumi Browser
+    </button>
+    <button class="door-tab active" role="tab" data-door="web" aria-selected="true" onclick="setActiveDoor('web')">
+      <span class="door-dot" style="--dot:#04BEFE"></span>Lumi Web
     </button>
     <button class="door-tab" role="tab" data-door="bot" onclick="setActiveDoor('bot')">
-      <span class="door-dot" style="--dot:#5288C1"></span>Bot
+      <span class="door-dot" style="--dot:#5288C1"></span>Lumi Mobile
     </button>
     <!-- Benna Inspector removed — /demo now shows only the ad placements,
          not the internal auction decision panel. The JS still feeds the
@@ -1425,7 +1760,7 @@
     </div>
   </div>
 
-  <!-- ===== BOT DOOR — Telegram phone ===== -->
+  <!-- ===== MOBILE DOOR — generic AI mobile app (iOS/Android) ===== -->
   <div class="door-surface hidden" id="surface-bot">
     <div class="bot-window">
       <div class="bot-phone">
@@ -1433,10 +1768,10 @@
           <div class="bot-notch"></div>
           <div class="bot-header">
             <span class="back">←</span>
-            <span class="avatar">D</span>
+            <span class="avatar">F</span>
             <div class="meta">
-              <div class="name">DocBot</div>
-              <div class="status">@docbot · online</div>
+              <div class="name">FluentAI</div>
+              <div class="status">AI assistant · online</div>
             </div>
           </div>
           <div class="bot-chat" id="bot-chat">
@@ -2023,41 +2358,78 @@ window.BoostBoss = (() => {
 /* ───────────────────────────────────────────────────────────
    DOOR STATE — drives which surface is visible and which
    triggers render in the wedge. Web is the default.
+
+   Internal keys (mcp/web/ext/bot) are stable shorthand for the
+   4 surface mockups so existing CSS class names still apply.
+   User-facing labels use the new surface-based taxonomy:
+     mcp → Lumi Desktop     (Claude Desktop window mockup)
+     web → Lumi Web         (browser web app mockup)
+     ext → Lumi Browser     (browser + extension panel mockup)
+     bot → Lumi Mobile      (mobile phone mockup)
 ─────────────────────────────────────────────────────────── */
 let activeDoor = 'web';
 
 const DOOR_META = {
-  mcp: { label: 'Lumi MCP', surfaceId: 'surface-mcp', title: 'Claude Desktop',  subtitle: 'MCP host · sponsored tool result' },
-  web: { label: 'Web',      surfaceId: 'surface-web', title: 'SampleAI Chat',   subtitle: "Developer's AI App — Llama 4" },
-  ext: { label: 'Extension',surfaceId: 'surface-ext', title: 'Article AI',      subtitle: 'Chrome extension · side-panel summarizer' },
-  bot: { label: 'Bot',      surfaceId: 'surface-bot', title: 'DocBot',          subtitle: 'Telegram bot · @docbot' },
+  mcp: { label: 'Lumi Desktop', surfaceId: 'surface-mcp', title: 'Claude Desktop',  subtitle: 'Downloaded AI app · Mac/Windows/Linux' },
+  web: { label: 'Lumi Web',     surfaceId: 'surface-web', title: 'SampleAI Chat',   subtitle: 'Browser-based AI app — Llama 4' },
+  ext: { label: 'Lumi Browser', surfaceId: 'surface-ext', title: 'Article AI',      subtitle: 'Chrome extension · side-panel summarizer' },
+  bot: { label: 'Lumi Mobile',  surfaceId: 'surface-bot', title: 'FluentAI',        subtitle: 'iOS / Android AI app' },
 };
 
-// Per-door trigger config — buttons swap with the active door.
+// Per-door placement list — every placement that surface can serve.
+// 'cls' drives button styling: '' = display, 'ai-native' = AI-native,
+//   'video' = video format, 'premium' = highest-CPM premium.
 const DOOR_TRIGGERS = {
+  // ── Lumi Desktop (Claude Desktop / Cursor / Devin) — 10 placements ──
   mcp: [
-    { label: 'Inline card',        cls: 'primary',   fn: 'insertNativeAd' },
-    { label: 'Sponsored citation', cls: 'ai-native', fn: 'insertCitation' },
-    { label: 'Tool / skill rec',   cls: 'ai-native', fn: 'insertToolRec' },
+    { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
+    { label: 'Inline sponsored card', cls: '',        fn: 'insertNativeAd' },
+    { label: 'Loading-state ad',    cls: '',          fn: 'insertLoadingState' },
+    { label: 'Pre-roll video',      cls: 'video',     fn: 'insertPreRoll' },
+    { label: 'Window banner',       cls: '',          fn: 'insertWindowBanner' },
+    { label: 'Sidebar slot',        cls: '',          fn: 'insertSidebarSlot' },
+    { label: 'Modal interstitial',  cls: 'premium',   fn: 'insertModalInterstitial' },
+    { label: 'Empty-state hero',    cls: '',          fn: 'insertEmptyHero' },
+    { label: 'System notification', cls: '',          fn: 'insertSystemNotif' },
   ],
-  web: [
-    { label: 'Corner unit',        cls: 'primary',   fn: "BoostBoss.trigger('corner','image')" },
-    { label: 'Inline card',        cls: '',          fn: 'insertNativeAd' },
-    { label: 'Loading state',      cls: '',          fn: 'insertLoadingState' },
-    { label: 'Sponsored citation', cls: 'ai-native', fn: 'insertCitation' },
-    { label: 'Suggested chip',     cls: 'ai-native', fn: 'insertChip' },
-  ],
+
+  // ── Lumi Browser (Grammarly / Honey / Pocket) — 8 placements ──
   ext: [
-    { label: 'Corner unit',        cls: 'primary',   fn: "BoostBoss.trigger('corner','image')" },
-    { label: 'New-tab takeover',   cls: '',          fn: 'insertNewTab' },
-    { label: 'Sponsored citation', cls: 'ai-native', fn: 'insertCitation' },
-    { label: 'Tool / skill rec',   cls: 'ai-native', fn: 'insertToolRec' },
+    { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
+    { label: 'Inline sponsored card', cls: '',        fn: 'insertNativeAd' },
+    { label: 'Loading-state ad',    cls: '',          fn: 'insertLoadingState' },
+    { label: 'Popup card',          cls: '',          fn: 'insertPopupCard' },
+    { label: 'Side panel slot',     cls: '',          fn: 'insertSidePanelSlot' },
+    { label: 'New-tab takeover',    cls: 'premium',   fn: 'insertNewTab' },
+    { label: 'Install onboarding',  cls: '',          fn: 'insertInstallOnboard' },
   ],
+
+  // ── Lumi Web (ChatGPT.com / Lovable / v0 / Bolt) — 8 placements ──
+  web: [
+    { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
+    { label: 'Inline sponsored card', cls: '',        fn: 'insertNativeAd' },
+    { label: 'Loading-state ad',    cls: '',          fn: 'insertLoadingState' },
+    { label: 'Corner unit',         cls: '',          fn: "BoostBoss.trigger('corner','image')" },
+    { label: 'Page interstitial',   cls: 'premium',   fn: 'insertPageInterstitial' },
+    { label: 'Empty-state hero',    cls: '',          fn: 'insertEmptyHero' },
+    { label: 'Settings page slot',  cls: '',          fn: 'insertSettingsAd' },
+  ],
+
+  // ── Lumi Mobile (ChatGPT mobile / Claude mobile / Replika) — 10 placements ──
   bot: [
-    { label: 'Inline card',         cls: 'primary',   fn: 'insertNativeAd' },
-    { label: 'Sponsored welcome',   cls: '',          fn: 'insertBotWelcome' },
-    { label: 'Suggested actions',   cls: 'ai-native', fn: 'insertChip' },
-    { label: 'Tool / skill rec',    cls: 'ai-native', fn: 'insertToolRec' },
+    { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
+    { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
+    { label: 'Inline sponsored card', cls: '',        fn: 'insertNativeAd' },
+    { label: 'Loading-state ad',    cls: '',          fn: 'insertLoadingState' },
+    { label: 'Pre-roll video',      cls: 'video',     fn: 'insertPreRoll' },
+    { label: 'Rewarded video',      cls: 'premium',   fn: 'insertRewardedVideo' },
+    { label: 'Bottom banner',       cls: '',          fn: 'insertBottomBanner' },
+    { label: 'Inline native banner',cls: '',          fn: 'insertInlineNativeBanner' },
+    { label: 'Full-screen interstitial', cls: 'premium', fn: 'insertFullScreenInterstitial' },
+    { label: 'Splash sponsor',      cls: '',          fn: 'insertSplashSponsor' },
   ],
 };
 
@@ -2379,6 +2751,259 @@ function insertBotWelcome() {
     </div>`);
   scrollTargetToBottom();
   BoostBoss.trackEvent("welcome_impression", { id: "welcome_" + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+/* ───────────────────────────────────────────────────────────
+   NEW PLACEMENT RENDERERS — one per placement, distinct visual
+   so the demo shows what each format actually looks like, not
+   a generic card. Routed to the active surface via getRenderTarget.
+─────────────────────────────────────────────────────────── */
+
+const SAMPLE_ADS = [
+  { brand: 'Linear',   title: 'Linear — issue tracking, built for speed', desc: 'Keyboard-first, no clutter.',   cta: 'Try Linear free →',  url: 'https://linear.app' },
+  { brand: 'Vercel',   title: 'Vercel — deploy in seconds, scale forever', desc: 'Git push to deploy.',          cta: 'Start free →',       url: 'https://vercel.com' },
+  { brand: 'Supabase', title: 'Supabase — open-source Firebase alternative', desc: 'Postgres + auth + storage.', cta: 'Get started →',      url: 'https://supabase.com' },
+  { brand: 'Cursor',   title: 'Cursor — the AI-first code editor',       desc: 'Trusted by 1M+ developers.',    cta: 'Download Cursor →',  url: 'https://cursor.com' },
+];
+function pickAd() { return SAMPLE_ADS[Math.floor(Math.random() * SAMPLE_ADS.length)]; }
+
+function insertPreRoll() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-preroll">
+      <span class="pr-play">▶</span>
+      <div class="pr-meta">
+        <div class="pr-title">${ad.title}</div>
+        <div style="font-size:10px;opacity:0.7;margin-top:2px;">Sponsored video · ${ad.brand}</div>
+      </div>
+      <span class="pr-skip">Skip in 5s</span>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('preroll_impression', { id: 'preroll_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertWindowBanner() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-window-banner">
+      <span class="wb-spons">SPONSORED</span>
+      <span class="wb-text">${ad.title}</span>
+      <a class="wb-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('windowbanner_impression', { id: 'wb_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertSidebarSlot() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-sidebar-slot">
+      <div class="ss-label">SPONSORED · sidebar slot</div>
+      <div class="ss-title">${ad.title}</div>
+      <a class="ss-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('sidebar_impression', { id: 'sb_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertModalInterstitial() { insertOverlay('modal'); }
+function insertPageInterstitial() { insertOverlay('page'); }
+function insertOverlay(kind) {
+  const ad = pickAd();
+  // The overlay needs a positioned ancestor — attach inside the active surface div.
+  const surface = document.getElementById(DOOR_META[activeDoor].surfaceId);
+  if (!surface) return;
+  // Ensure the surface is positioned so position:absolute children pin to it.
+  if (getComputedStyle(surface).position === 'static') surface.style.position = 'relative';
+  // Remove any prior overlay on this surface.
+  const prior = surface.querySelector('.bb-modal-interstitial');
+  if (prior) prior.remove();
+  const el = document.createElement('div');
+  el.className = 'bb-modal-interstitial';
+  el.innerHTML = `
+    <button class="mi-close" aria-label="Close" onclick="this.closest('.bb-modal-interstitial').remove();">×</button>
+    <div class="mi-card">
+      <div class="mi-label">SPONSORED · ${kind === 'page' ? 'PAGE INTERSTITIAL' : 'MODAL INTERSTITIAL'}</div>
+      <div class="mi-title">${ad.title}</div>
+      <div class="mi-desc">${ad.desc}</div>
+      <a class="mi-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`;
+  surface.appendChild(el);
+  BoostBoss.trackEvent('interstitial_impression', { id: 'int_' + Date.now(), advertiser: ad.brand, door: activeDoor, kind });
+}
+
+function insertEmptyHero() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-empty-hero">
+      <div class="eh-label">SPONSORED · empty-state hero</div>
+      <div class="eh-title">${ad.title}</div>
+      <div class="eh-desc">${ad.desc}</div>
+      <a class="eh-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('hero_impression', { id: 'hero_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertSystemNotif() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-system-notif">
+      <span class="sn-icon">▲</span>
+      <div class="sn-meta">
+        <div class="sn-label">SPONSORED · ${ad.brand}</div>
+        <div class="sn-title">${ad.title}</div>
+        <div class="sn-desc">${ad.desc}</div>
+      </div>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('systemnotif_impression', { id: 'sn_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertPopupCard() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-popup-card">
+      <div class="pc-label">SPONSORED · popup card</div>
+      <div class="pc-title">${ad.title}</div>
+      <div class="pc-desc">${ad.desc}</div>
+      <a class="pc-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('popup_impression', { id: 'pop_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertSidePanelSlot() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-sidepanel-slot">
+      <div class="sp-label">SPONSORED · side panel</div>
+      <div class="sp-title">${ad.title}</div>
+      <a class="sp-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('sidepanel_impression', { id: 'spx_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertInstallOnboard() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-install-onboard">
+      <div class="io-label">SPONSORED · install onboarding</div>
+      <div class="io-title">Welcome — brought to you by ${ad.brand}</div>
+      <div class="io-desc">${ad.desc}</div>
+      <a class="io-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('onboard_impression', { id: 'on_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertSettingsAd() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-settings-ad">
+      <span class="sa-icon">⚙</span>
+      <div class="sa-text">
+        <div class="sa-title">Upgrade to ${ad.brand}</div>
+        <div class="sa-desc">${ad.desc}</div>
+      </div>
+      <a class="sa-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('settingsad_impression', { id: 'set_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertRewardedVideo() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-rewarded">
+      <div class="rv-label">REWARDED · OPT-IN</div>
+      <div class="rv-title">Watch a 15s ad to unlock 5 more prompts</div>
+      <div class="rv-desc">Sponsored by ${ad.brand}</div>
+      <a class="rv-cta" href="${ad.url}" target="_blank">Watch and earn</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('rewarded_impression', { id: 'rw_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertBottomBanner() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-bottom-banner">
+      <div>
+        <div class="bbb-spons">SPONSORED</div>
+        <div class="bbb-title">${ad.title}</div>
+      </div>
+      <a class="bbb-cta" href="${ad.url}" target="_blank">${ad.cta}</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('bottombanner_impression', { id: 'bb_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertInlineNativeBanner() {
+  const ad = pickAd();
+  const target = getRenderTarget();
+  target.insertAdjacentHTML('beforeend', `
+    <div class="bb-inline-native">
+      <div>
+        <div class="in-spons">AD · ${ad.brand}</div>
+        <div class="in-title">${ad.desc}</div>
+      </div>
+      <a class="in-cta" href="${ad.url}" target="_blank">Try →</a>
+    </div>`);
+  scrollTargetToBottom();
+  BoostBoss.trackEvent('inlinenative_impression', { id: 'in_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertFullScreenInterstitial() {
+  const ad = pickAd();
+  // Anchor to the phone-screen (bot-screen) for mobile full-screen feel.
+  const screen = document.querySelector('#surface-bot .bot-screen');
+  if (!screen) return;
+  if (getComputedStyle(screen).position === 'static') screen.style.position = 'relative';
+  const prior = screen.querySelector('.bb-fullscreen-mobile');
+  if (prior) prior.remove();
+  const el = document.createElement('div');
+  el.className = 'bb-fullscreen-mobile';
+  el.innerHTML = `
+    <button class="fm-skip" onclick="this.closest('.bb-fullscreen-mobile').remove();">Skip ×</button>
+    <div class="fm-label">SPONSORED · FULL-SCREEN</div>
+    <div class="fm-title">${ad.title}</div>
+    <div class="fm-desc">${ad.desc}</div>
+    <a class="fm-cta" href="${ad.url}" target="_blank">${ad.cta}</a>`;
+  screen.appendChild(el);
+  BoostBoss.trackEvent('fullscreen_impression', { id: 'fs_' + Date.now(), advertiser: ad.brand, door: activeDoor });
+}
+
+function insertSplashSponsor() {
+  const ad = pickAd();
+  const screen = document.querySelector('#surface-bot .bot-screen');
+  if (!screen) return;
+  if (getComputedStyle(screen).position === 'static') screen.style.position = 'relative';
+  const prior = screen.querySelector('.bb-splash');
+  if (prior) prior.remove();
+  const el = document.createElement('div');
+  el.className = 'bb-splash';
+  el.innerHTML = `
+    <div class="sp-mark">${ad.brand}</div>
+    <div class="sp-tag">${ad.desc}</div>
+    <div class="sp-spons">SPLASH SPONSOR · TAP TO SKIP</div>`;
+  el.onclick = () => el.remove();
+  screen.appendChild(el);
+  // Auto-dismiss after 3 seconds for the demo.
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
+  BoostBoss.trackEvent('splash_impression', { id: 'sp_' + Date.now(), advertiser: ad.brand, door: activeDoor });
 }
 
 function sendMsg() {
