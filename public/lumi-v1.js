@@ -278,7 +278,43 @@
       '.lumi-corner__cta{display:inline-block;background:#FF2D78;color:#fff;font-weight:700;font-size:12px;padding:7px 14px;border-radius:7px;text-decoration:none;cursor:pointer;border:none;font-family:inherit}',
       '.lumi-corner__cta:hover{background:#E01E65}',
       '@keyframes lumi-slide-in{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}',
-      '@media (prefers-reduced-motion: reduce){.lumi-corner{animation:none}}',
+      '@media (prefers-reduced-motion: reduce){.lumi-corner,.lumi-interstitial,.lumi-loading-shimmer{animation:none}}',
+      // Slot-mounted placements (settings, citation, chip, inline card, hero, loading)
+      '.lumi-slot{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;color:#0F0F1A;border-radius:10px;overflow:hidden;margin:12px 0;background:#fff;border:1px solid #E5E7EB}',
+      '.lumi-slot__disclosure{font-size:9.5px;font-weight:700;color:#E01E65;letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;padding:9px 12px 4px}',
+      '.lumi-slot__disclosure-mark{background:#FF2D78;color:#fff;font-weight:900;letter-spacing:-0.5px;font-size:8.5px;padding:1px 4px;border-radius:3px}',
+      '.lumi-slot__body{padding:0 12px 12px}',
+      '.lumi-slot__headline{font-weight:700;font-size:14px;line-height:1.35;margin-bottom:3px}',
+      '.lumi-slot__sub{font-size:12.5px;color:#4B5563;line-height:1.45;margin-bottom:9px}',
+      '.lumi-slot__cta{display:inline-block;background:#FF2D78;color:#fff;font-weight:700;font-size:12px;padding:7px 14px;border-radius:7px;text-decoration:none;cursor:pointer;border:none;font-family:inherit}',
+      '.lumi-slot__cta:hover{background:#E01E65}',
+      // Settings page slot — colorful banner accent
+      '.lumi-settings{border-left:3px solid #FF2D78}',
+      '.lumi-settings .lumi-slot__body{display:flex;align-items:center;gap:14px}',
+      '.lumi-settings .lumi-settings__icon{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#FF2D78,#FFB020);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}',
+      '.lumi-settings .lumi-settings__text{flex:1;min-width:0}',
+      // Page interstitial — full-page overlay
+      '.lumi-interstitial{position:fixed;inset:0;background:rgba(15,15,26,0.72);z-index:2147483600;display:flex;align-items:center;justify-content:center;padding:24px;animation:lumi-fade-in 0.25s ease-out both;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}',
+      '.lumi-interstitial__card{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:28px;text-align:center;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.4);animation:lumi-pop-in 0.35s cubic-bezier(0.16,1,0.3,1) both}',
+      '.lumi-interstitial__skip{position:absolute;top:12px;right:14px;background:#F3F4F6;border:none;width:30px;height:30px;border-radius:6px;color:#6B7280;font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center}',
+      '.lumi-interstitial__skip:hover{background:#E5E7EB;color:#0F0F1A}',
+      '.lumi-interstitial__disclosure{font-size:10px;font-weight:700;color:#E01E65;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}',
+      '.lumi-interstitial__image{width:100%;border-radius:10px;margin-bottom:14px;max-height:160px;object-fit:cover;display:block}',
+      '.lumi-interstitial__headline{font-size:19px;font-weight:700;color:#0F0F1A;margin-bottom:6px;line-height:1.3}',
+      '.lumi-interstitial__body{font-size:13px;color:#4B5563;margin-bottom:16px;line-height:1.55}',
+      '.lumi-interstitial__cta{display:inline-block;background:#FF2D78;color:#fff;font-weight:700;font-size:13px;padding:10px 22px;border-radius:8px;text-decoration:none;cursor:pointer;border:none;font-family:inherit}',
+      '@keyframes lumi-fade-in{from{opacity:0}to{opacity:1}}',
+      '@keyframes lumi-pop-in{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}',
+      // Loading-state shimmer
+      '.lumi-loading{background:#FFF5F8;border:1px solid #FFE600;border-left:3px solid #FF2D78;border-radius:10px;padding:13px 16px;margin:10px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}',
+      '.lumi-loading__label{font-size:10px;font-weight:700;color:#E01E65;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}',
+      '.lumi-loading__row{height:11px;border-radius:3px;background:linear-gradient(90deg,#FFE0EC 0%,#FFF5F9 50%,#FFE0EC 100%);background-size:360px 100%;animation:lumi-shimmer 1.2s linear infinite;margin-bottom:6px}',
+      '.lumi-loading__row:nth-child(2){width:80%}',
+      '.lumi-loading__row:nth-child(3){width:60%}',
+      '.lumi-loading__row:nth-child(4){width:40%;margin-bottom:10px}',
+      '.lumi-loading__headline{font-size:13.5px;font-weight:700;color:#0F0F1A;margin-bottom:4px}',
+      '.lumi-loading__sub{font-size:12px;color:#4B5563;margin-bottom:10px}',
+      '@keyframes lumi-shimmer{0%{background-position:-180px 0}100%{background-position:180px 0}}',
     ].join('\n');
     try {
       const style = document.createElement('style');
@@ -377,6 +413,319 @@
     });
   }
 
+  // ── 11. Shared slot renderer (citation / chip / inline card / hero / settings)
+  // ────────────────────────────────────────────────────────────────────
+  // Builds a card with disclosure + headline + sub + CTA. Used by the
+  // simpler placements that share the same visual structure.
+  function buildSlotCard(ad, opts) {
+    opts = opts || {};
+    const root = document.createElement('div');
+    root.className = 'lumi-slot ' + (opts.extraClass || '');
+    root.setAttribute('role', 'complementary');
+    root.setAttribute('aria-label', 'Sponsored content');
+
+    const disclosure = document.createElement('div');
+    disclosure.className = 'lumi-slot__disclosure';
+    const mark = document.createElement('span');
+    mark.className = 'lumi-slot__disclosure-mark';
+    mark.textContent = 'BB';
+    disclosure.appendChild(mark);
+    disclosure.appendChild(document.createTextNode(' ' + (ad.disclosure_label || 'Sponsored')));
+    root.appendChild(disclosure);
+
+    const body = document.createElement('div');
+    body.className = 'lumi-slot__body';
+
+    if (opts.layout === 'settings') {
+      const icon = document.createElement('div');
+      icon.className = 'lumi-settings__icon';
+      icon.textContent = '✦';
+      body.appendChild(icon);
+      const text = document.createElement('div');
+      text.className = 'lumi-settings__text';
+      if (ad.headline) {
+        const h = document.createElement('div');
+        h.className = 'lumi-slot__headline';
+        h.textContent = ad.headline;
+        text.appendChild(h);
+      }
+      if (ad.body) {
+        const s = document.createElement('div');
+        s.className = 'lumi-slot__sub';
+        s.style.marginBottom = '0';
+        s.textContent = ad.body;
+        text.appendChild(s);
+      }
+      body.appendChild(text);
+      const cta = document.createElement('button');
+      cta.className = 'lumi-slot__cta';
+      cta.type = 'button';
+      cta.textContent = (ad.cta_label || 'Learn more') + ' →';
+      cta.addEventListener('click', function (e) { e.preventDefault(); onClick(ad); });
+      body.appendChild(cta);
+    } else {
+      if (ad.headline) {
+        const h = document.createElement('div');
+        h.className = 'lumi-slot__headline';
+        h.textContent = ad.headline;
+        body.appendChild(h);
+      }
+      if (ad.body) {
+        const s = document.createElement('div');
+        s.className = 'lumi-slot__sub';
+        s.textContent = ad.body;
+        body.appendChild(s);
+      }
+      const cta = document.createElement('button');
+      cta.className = 'lumi-slot__cta';
+      cta.type = 'button';
+      cta.textContent = (ad.cta_label || 'Learn more') + ' →';
+      cta.addEventListener('click', function (e) { e.preventDefault(); onClick(ad); });
+      body.appendChild(cta);
+    }
+    root.appendChild(body);
+    root.addEventListener('click', function (e) {
+      if (e.target && e.target.closest('.lumi-slot__cta')) return;
+      onClick(ad);
+    });
+    return root;
+  }
+
+  // ── 12. Settings page slot ─────────────────────────────────────────
+  // Fires only when the publisher's app is on a settings/billing route.
+  // Mounts inline at the top of [data-lumi-slot="settings"] if the
+  // publisher placed an explicit marker, otherwise prepends to <main>
+  // or <body>.
+  const SETTINGS_PATHS = ['/settings', '/account', '/billing', '/profile', '/preferences', '/subscription'];
+  let __settingsShown = false;
+  function maybeRenderSettings() {
+    if (__settingsShown) return;
+    if (document.querySelector('[data-lumi-disable="settings"], [data-lumi-disable="all"]')) return;
+    const path = (location.pathname || '').toLowerCase();
+    const matches = SETTINGS_PATHS.some(function (p) { return path === p || path.indexOf(p + '/') === 0 || path.indexOf(p) >= 0; });
+    if (!matches) return;
+    fetchAd('settings', buildContext() + ' settings billing account').then(function (ad) {
+      if (!ad) return;
+      __settingsShown = true;
+      injectStyles();
+      const el = buildSlotCard(ad, { extraClass: 'lumi-settings', layout: 'settings' });
+      const slot = document.querySelector('[data-lumi-slot="settings"]');
+      const target = slot || document.querySelector('main') || document.body;
+      if (slot) slot.appendChild(el);
+      else target.insertBefore(el, target.firstChild);
+      observeImpression(el, ad);
+    });
+  }
+
+  // ── 13. Page interstitial ──────────────────────────────────────────
+  // Full-page sponsor between route navigations. Triggers on history
+  // API push/pop. Frequency-capped to one per session by default; the
+  // backend's frequency cap is the source of truth.
+  let __interstitialCount = 0;
+  const __INTERSTITIAL_MAX_PER_PAGE = 1;
+  function renderInterstitial() {
+    if (__interstitialCount >= __INTERSTITIAL_MAX_PER_PAGE) return;
+    if (document.querySelector('[data-lumi-disable="interstitial"], [data-lumi-disable="all"]')) return;
+    fetchAd('interstitial').then(function (ad) {
+      if (!ad) return;
+      __interstitialCount++;
+      injectStyles();
+      const root = document.createElement('div');
+      root.className = 'lumi-interstitial';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-label', 'Sponsored content');
+
+      const card = document.createElement('div');
+      card.className = 'lumi-interstitial__card';
+
+      const skip = document.createElement('button');
+      skip.className = 'lumi-interstitial__skip';
+      skip.setAttribute('aria-label', 'Close');
+      skip.textContent = '×';
+      skip.addEventListener('click', function () { try { root.parentNode && root.parentNode.removeChild(root); } catch (_) {} });
+      card.appendChild(skip);
+
+      const disc = document.createElement('div');
+      disc.className = 'lumi-interstitial__disclosure';
+      disc.textContent = ad.disclosure_label || 'Sponsored';
+      card.appendChild(disc);
+
+      if (ad.image_url) {
+        const img = document.createElement('img');
+        img.className = 'lumi-interstitial__image';
+        img.src = ad.image_url;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        card.appendChild(img);
+      }
+
+      if (ad.headline) {
+        const h = document.createElement('div');
+        h.className = 'lumi-interstitial__headline';
+        h.textContent = ad.headline;
+        card.appendChild(h);
+      }
+      if (ad.body) {
+        const b = document.createElement('div');
+        b.className = 'lumi-interstitial__body';
+        b.textContent = ad.body;
+        card.appendChild(b);
+      }
+      const cta = document.createElement('button');
+      cta.className = 'lumi-interstitial__cta';
+      cta.type = 'button';
+      cta.textContent = (ad.cta_label || 'Learn more') + ' →';
+      cta.addEventListener('click', function (e) {
+        e.preventDefault();
+        onClick(ad);
+        try { root.parentNode && root.parentNode.removeChild(root); } catch (_) {}
+      });
+      card.appendChild(cta);
+
+      // Click backdrop = dismiss (treat as skip, no click attribution)
+      root.addEventListener('click', function (e) {
+        if (e.target === root) { try { root.parentNode && root.parentNode.removeChild(root); } catch (_) {} }
+      });
+
+      root.appendChild(card);
+      document.body.appendChild(root);
+      observeImpression(card, ad);
+    });
+  }
+
+  // Hook into the History API so we get notified on SPA route changes.
+  function installRouteListener() {
+    try {
+      const origPush = history.pushState;
+      const origReplace = history.replaceState;
+      function notify() {
+        // Defer to next tick so the new route's DOM settles first
+        setTimeout(function () {
+          maybeRenderSettings();
+          // Avoid hammering on every nav — interstitial gets one shot per page
+          if (__interstitialCount < __INTERSTITIAL_MAX_PER_PAGE) {
+            // 60-second cooldown after handshake so first nav doesn't interrupt landing
+            if (Date.now() - __routeListenerInstalledAt > 60000) renderInterstitial();
+          }
+        }, 80);
+      }
+      history.pushState = function () { const r = origPush.apply(this, arguments); notify(); return r; };
+      history.replaceState = function () { const r = origReplace.apply(this, arguments); notify(); return r; };
+      window.addEventListener('popstate', notify);
+    } catch (_) { /* ignore — proxying history can fail in sandboxed iframes */ }
+  }
+  const __routeListenerInstalledAt = Date.now();
+
+  // ── 14. Loading-state ad ───────────────────────────────────────────
+  // Watches for spinners/skeletons appearing in publisher-marked slots
+  // (data-lumi-slot="loading") OR auto-detects [aria-busy="true"] /
+  // .spinner / .loading elements that stay visible for >2s (so brief
+  // micro-spinners don't fire impressions).
+  function renderLoadingAt(target) {
+    if (!target || target.__lumiLoadingFilled) return;
+    if (document.querySelector('[data-lumi-disable="loading"], [data-lumi-disable="all"]')) return;
+    target.__lumiLoadingFilled = true;
+    fetchAd('loading').then(function (ad) {
+      if (!ad) { target.__lumiLoadingFilled = false; return; }
+      injectStyles();
+      const root = document.createElement('div');
+      root.className = 'lumi-loading';
+      const label = document.createElement('div');
+      label.className = 'lumi-loading__label';
+      label.textContent = 'Sponsored · loading';
+      root.appendChild(label);
+
+      if (ad.headline) {
+        const h = document.createElement('div');
+        h.className = 'lumi-loading__headline';
+        h.textContent = ad.headline;
+        root.appendChild(h);
+      }
+      if (ad.body) {
+        const s = document.createElement('div');
+        s.className = 'lumi-loading__sub';
+        s.textContent = ad.body;
+        root.appendChild(s);
+      }
+      // Shimmer rows visually suggest more content loading
+      for (let i = 0; i < 3; i++) {
+        const r = document.createElement('div');
+        r.className = 'lumi-loading__row';
+        root.appendChild(r);
+      }
+      const cta = document.createElement('button');
+      cta.className = 'lumi-slot__cta';
+      cta.type = 'button';
+      cta.textContent = (ad.cta_label || 'Learn more') + ' →';
+      cta.addEventListener('click', function (e) { e.preventDefault(); onClick(ad); });
+      root.appendChild(cta);
+
+      // Mount as the slot's content (clearing the spinner) or alongside it
+      try {
+        if (target.dataset && target.dataset.lumiSlot === 'loading') {
+          target.appendChild(root);
+        } else {
+          // For auto-detected spinners, sit next to them rather than replacing
+          // so the publisher's own loading state stays intact.
+          target.parentNode && target.parentNode.insertBefore(root, target.nextSibling);
+        }
+        observeImpression(root, ad);
+      } catch (_) {}
+    });
+  }
+
+  function scanForLoadingTargets() {
+    // Explicit slot tag is the trusted path
+    const explicit = document.querySelectorAll('[data-lumi-slot="loading"]');
+    explicit.forEach(function (n) { renderLoadingAt(n); });
+    if (explicit.length > 0) return;
+    // Auto-detect, but only if the spinner has been visible >2s (filters
+    // out brief UI ticks that don't warrant ad interruption)
+    const candidates = document.querySelectorAll('[aria-busy="true"], .spinner, .loading');
+    candidates.forEach(function (n) {
+      if (n.__lumiSeenAt) {
+        if (Date.now() - n.__lumiSeenAt > 2000) renderLoadingAt(n);
+      } else {
+        n.__lumiSeenAt = Date.now();
+      }
+    });
+  }
+
+  // ── 15. Slot opt-in renderer (citation / chip / inline-card / hero) ─
+  // Publishers can place explicit markers in their DOM:
+  //   <div data-lumi-slot="citation"></div>
+  //   <div data-lumi-slot="chip"></div>
+  //   <div data-lumi-slot="card"></div>
+  //   <div data-lumi-slot="hero"></div>
+  // Auto-detection for these placements is high-risk because they need
+  // chat/feed surface knowledge. The opt-in path is the safe v1.3 path.
+  // Auto-detection ships in v1.4 after we collect heuristic data from
+  // real publishers' DOM patterns.
+  const SLOT_TO_PLACEMENT = {
+    citation: 'citation',
+    chip:     'chip',
+    card:     'card',
+    hero:     'hero',
+  };
+  function renderOptInSlots() {
+    if (document.querySelector('[data-lumi-disable="all"]')) return;
+    Object.keys(SLOT_TO_PLACEMENT).forEach(function (slotKey) {
+      const placement = SLOT_TO_PLACEMENT[slotKey];
+      document.querySelectorAll('[data-lumi-slot="' + slotKey + '"]').forEach(function (slot) {
+        if (slot.__lumiFilled) return;
+        slot.__lumiFilled = true;
+        fetchAd(placement).then(function (ad) {
+          if (!ad) { slot.__lumiFilled = false; return; }
+          injectStyles();
+          const el = buildSlotCard(ad);
+          slot.appendChild(el);
+          observeImpression(el, ad);
+        });
+      });
+    });
+  }
+
   // Ephemeral session id, reused across all ad-fetch calls on this page.
   const __sessionId = (function () {
     try {
@@ -385,7 +734,26 @@
     return 'lumi_' + Math.random().toString(36).slice(2, 12) + '_' + Date.now();
   })();
 
-  // ── 11. Fire when ready ────────────────────────────────────────────
+  // ── 16. Periodic re-scan for SPA-injected slot markers ──────────────
+  // Publishers with SPAs (React/Vue/Svelte) may inject [data-lumi-slot]
+  // markers AFTER initial DOMContentLoaded. A light scan every 2s
+  // catches them. Stops auto-scanning once 10 attempts have passed
+  // with no new slots — keeps idle CPU at zero.
+  let __scanAttemptsSinceLastFind = 0;
+  function periodicScan() {
+    const before = document.querySelectorAll('[data-lumi-slot]').length;
+    renderOptInSlots();
+    scanForLoadingTargets();
+    maybeRenderSettings();
+    const after = document.querySelectorAll('[data-lumi-slot]:not([__lumi-counted])').length;
+    if (after > before) __scanAttemptsSinceLastFind = 0;
+    else __scanAttemptsSinceLastFind++;
+    if (__scanAttemptsSinceLastFind < 10) {
+      setTimeout(periodicScan, 2000);
+    }
+  }
+
+  // ── 17. Fire when ready ────────────────────────────────────────────
   // We DON'T block first paint. Wait until the page is parsed enough that
   // sending the beacon won't compete with the publisher's hero render.
   function go() {
@@ -394,8 +762,15 @@
     // Render the corner unit after a short delay so the publisher's app
     // has time to lay out its own UI first. Feels less intrusive.
     setTimeout(renderCornerUnit, 1500);
+    // Scan once for explicit slot markers, then settings, then start the
+    // periodic re-scan to catch SPA-injected slots.
+    setTimeout(function () {
+      renderOptInSlots();
+      maybeRenderSettings();
+      installRouteListener();
+      periodicScan();
+    }, 800);
     // Expose a tiny diagnostic surface for the publisher's dev tools.
-    // No setters — read-only by design.
     try {
       Object.defineProperty(window, 'Lumi', {
         value: Object.freeze({
@@ -404,6 +779,8 @@
           door: DOOR,
           ping: function ping() { firePing(); },
           corner: function corner() { __cornerShown = false; renderCornerUnit(); },
+          interstitial: function interstitial() { __interstitialCount = 0; renderInterstitial(); },
+          settings: function settings() { __settingsShown = false; maybeRenderSettings(); },
           context: buildContext(),
         }),
         writable: false,

@@ -73,16 +73,42 @@
   <h2 id="what">What this gives you</h2>
   <p>All 8 Browser App placements come with the install. Boost Boss's auction picks which placement serves per ad request based on user intent + real-time fill. You can't toggle individual placements on or off — letting publishers turn placements off cuts impressions 20–40%.</p>
   <ul>
-    <li><strong>Corner unit</strong> ✅ <em>shipping in v1.1</em> — sticky dismissable card pinned to a screen corner</li>
-    <li><strong>Sponsored citation</strong> — woven into AI-generated answers</li>
-    <li><strong>Suggested chip</strong> — tappable quick-reply pill</li>
-    <li><strong>Inline sponsored card</strong> — full content card in chat/feed flow</li>
-    <li><strong>Loading-state ad</strong> — shown while your AI generates</li>
-    <li><strong>Page interstitial</strong> — full-page sponsor between route navigations</li>
-    <li><strong>Empty-state hero</strong> — hero sponsor when a view has no content yet</li>
-    <li><strong>Settings page slot</strong> — modest sponsor card on settings/account routes</li>
+    <li><strong>Corner unit</strong> ✅ <em>auto-mounted</em> — sticky dismissable card pinned bottom-right</li>
+    <li><strong>Settings page slot</strong> ✅ <em>auto-mounted</em> — sponsored card on routes matching <code>/settings</code> · <code>/billing</code> · <code>/account</code> · <code>/profile</code></li>
+    <li><strong>Page interstitial</strong> ✅ <em>auto-mounted</em> — full-page sponsor on SPA route changes (once per page, 60s grace after install)</li>
+    <li><strong>Loading-state ad</strong> ✅ <em>auto + opt-in</em> — auto-detects <code>aria-busy</code> / <code>.spinner</code> / <code>.loading</code> visible >2s, OR explicit <code>&lt;div data-lumi-slot="loading"&gt;</code></li>
+    <li><strong>Sponsored citation</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="citation"&gt;</code> inside your AI-response container</li>
+    <li><strong>Suggested chip</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="chip"&gt;</code> in your suggested-action area</li>
+    <li><strong>Inline sponsored card</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="card"&gt;</code> in your feed flow</li>
+    <li><strong>Empty-state hero</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="hero"&gt;</code> in your empty-view container</li>
   </ul>
-  <p style="font-size:13px;color:#9CA3AF;margin-top:14px;">v1.1 ships the corner unit live. The remaining 7 placements each require surface-specific auto-detection heuristics (chat containers, route changes, settings pages) and ship in dedicated weekly releases. Your existing install picks them up automatically — no script tag change needed.</p>
+  <p style="font-size:13px;color:#9CA3AF;margin-top:14px;">v1.3 ships 4 auto-mounted placements + 4 publisher-controlled slot tags. Auto-detection for the 4 opt-in placements ships in v1.4 (after we collect real-publisher DOM patterns to avoid false positives — false-positive ad injection on a chat container ranks among the worst publisher experiences in adtech).</p>
+
+  <h3 id="slots">Slot opt-in — for the 4 placements that need surface knowledge</h3>
+  <p>Some placements need to know <em>where</em> in your app the content makes sense. Rather than guess from DOM heuristics that could fire in the wrong place, place an explicit slot marker:</p>
+  <pre><code>&lt;!-- After your AI response — Lumi will mount a sponsored citation here --&gt;
+&lt;div data-lumi-slot="citation"&gt;&lt;/div&gt;
+
+&lt;!-- In your suggested-action row --&gt;
+&lt;div data-lumi-slot="chip"&gt;&lt;/div&gt;
+
+&lt;!-- Between content blocks in your feed --&gt;
+&lt;div data-lumi-slot="card"&gt;&lt;/div&gt;
+
+&lt;!-- Inside an empty view --&gt;
+&lt;div data-lumi-slot="hero"&gt;&lt;/div&gt;
+
+&lt;!-- During a loading state --&gt;
+&lt;div data-lumi-slot="loading"&gt;&lt;/div&gt;</code></pre>
+  <p>Lumi re-scans for new <code>data-lumi-slot</code> markers every 2 seconds for up to 20 seconds after install, so React/Vue components that mount asynchronously are caught automatically. Already-filled slots are remembered and not re-rendered.</p>
+
+  <h3 id="opt-out">Opt-out — exclude a specific placement</h3>
+  <p>Add a <code>data-lumi-disable</code> marker anywhere in the DOM to opt out of a placement type:</p>
+  <pre><code>&lt;meta data-lumi-disable="corner" /&gt;       &lt;!-- no corner unit --&gt;
+&lt;meta data-lumi-disable="interstitial" /&gt; &lt;!-- no page interstitial --&gt;
+&lt;meta data-lumi-disable="settings" /&gt;     &lt;!-- no settings slot --&gt;
+&lt;meta data-lumi-disable="loading" /&gt;      &lt;!-- no loading-state ad --&gt;
+&lt;meta data-lumi-disable="all" /&gt;          &lt;!-- nothing renders --&gt;</code></pre>
 
   <h2 id="csp">Strict Content-Security-Policy</h2>
   <p>If your site enforces a strict CSP header, add <code>boostboss.ai</code> to two directives:</p>
