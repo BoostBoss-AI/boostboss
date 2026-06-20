@@ -6451,10 +6451,16 @@
             chartContainer.innerHTML = '';
             const days = numDays || 14;
 
+            // Real data only — never fake. New advertisers see a flat chart
+            // with zero bars and an empty-state message until their first
+            // impression. Previously this block generated random 50k-150k
+            // impressions when there was no real data, which looked great
+            // in demos but lied to onboarding sellers about activity. The
+            // honest behavior is: 0 means 0.
             if (!dailyData || dailyData.length === 0) {
                 dailyData = Array(days).fill(0).map((_, i) => ({
                     date: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    impressions: Math.floor(Math.random() * 100000) + 50000
+                    impressions: 0,
                 }));
             }
             const slice = dailyData.slice(-days);
@@ -6510,6 +6516,19 @@
             // Bars + grid lines
             const bars = document.createElement('div');
             bars.className = 'chart-bars';
+            bars.style.position = 'relative';
+            // Empty state overlay — surfaces when this advertiser has no
+            // real impressions yet. Sits inside the chart frame so the
+            // surrounding chrome (axes, summary strip) still reads as a
+            // chart, just an honest empty one.
+            if (total === 0) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;pointer-events:none;z-index:2;';
+                empty.innerHTML =
+                    '<div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:6px;">No impressions yet</div>' +
+                    '<div style="font-size:12.5px;color:#9CA3AF;line-height:1.55;max-width:340px;">Your daily impressions will appear here as soon as your first campaign starts serving. Fund your wallet and launch a campaign to begin.</div>';
+                bars.appendChild(empty);
+            }
             // four horizontal grid lines at 25/50/75/100%
             for (let i = 0; i < 4; i++) {
                 const grid = document.createElement('div');
