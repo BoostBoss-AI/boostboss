@@ -1630,8 +1630,8 @@
   <!-- Door tab strip: 4 doors organized by SURFACE the publisher ships
        (where the ad renders), not by integration protocol.
          data-door="mcp" → Lumi for Computer App (downloaded apps like Claude, Cursor)
-         data-door="web" → Lumi for Web Browser      (browser-based web apps like ChatGPT.com)
-         data-door="ext" → Lumi for Browser Extension  (browser extensions like Grammarly)
+         data-door="web" → Lumi for Browser App      (browser-based web apps like ChatGPT.com)
+         data-door="ext" → Lumi for Browser Extension App  (browser extensions like Grammarly)
          data-door="bot" → Lumi for Mobile App   (iOS/Android/React Native apps)
        Internal IDs kept stable so existing CSS classes still apply. -->
   <div class="door-tabs" role="tablist" aria-label="Boost Boss door selector">
@@ -1639,10 +1639,10 @@
       <span class="door-dot" style="--dot:#9D7AFF"></span>Lumi for Computer App
     </button>
     <button class="door-tab" role="tab" data-door="ext" onclick="setActiveDoor('ext')">
-      <span class="door-dot" style="--dot:#FFB020"></span>Lumi for Browser Extension
+      <span class="door-dot" style="--dot:#FFB020"></span>Lumi for Browser Extension App
     </button>
     <button class="door-tab active" role="tab" data-door="web" aria-selected="true" onclick="setActiveDoor('web')">
-      <span class="door-dot" style="--dot:#04BEFE"></span>Lumi for Web Browser
+      <span class="door-dot" style="--dot:#04BEFE"></span>Lumi for Browser App
     </button>
     <button class="door-tab" role="tab" data-door="bot" onclick="setActiveDoor('bot')">
       <span class="door-dot" style="--dot:#5288C1"></span>Lumi for Mobile App
@@ -2363,16 +2363,16 @@ window.BoostBoss = (() => {
    4 surface mockups so existing CSS class names still apply.
    User-facing labels use the new surface-based taxonomy:
      mcp → Lumi for Computer App     (Claude Desktop window mockup)
-     web → Lumi for Web Browser         (browser web app mockup)
-     ext → Lumi for Browser Extension     (browser + extension panel mockup)
+     web → Lumi for Browser App         (browser web app mockup)
+     ext → Lumi for Browser Extension App     (browser + extension panel mockup)
      bot → Lumi for Mobile App      (mobile phone mockup)
 ─────────────────────────────────────────────────────────── */
 let activeDoor = 'web';
 
 const DOOR_META = {
   mcp: { label: 'Lumi for Computer App', surfaceId: 'surface-mcp', title: 'Claude Desktop',  subtitle: 'Downloaded AI app · Mac/Windows/Linux' },
-  web: { label: 'Lumi for Web Browser',     surfaceId: 'surface-web', title: 'SampleAI Chat',   subtitle: 'Browser-based AI app — Llama 4' },
-  ext: { label: 'Lumi for Browser Extension', surfaceId: 'surface-ext', title: 'Article AI',      subtitle: 'Chrome extension · side-panel summarizer' },
+  web: { label: 'Lumi for Browser App',     surfaceId: 'surface-web', title: 'SampleAI Chat',   subtitle: 'Browser-based AI app — Llama 4' },
+  ext: { label: 'Lumi for Browser Extension App', surfaceId: 'surface-ext', title: 'Article AI',      subtitle: 'Chrome extension · side-panel summarizer' },
   bot: { label: 'Lumi for Mobile App',  surfaceId: 'surface-bot', title: 'FluentAI',        subtitle: 'iOS / Android AI app' },
 };
 
@@ -2394,7 +2394,7 @@ const DOOR_TRIGGERS = {
     { label: 'System notification', cls: '',          fn: 'insertSystemNotif' },
   ],
 
-  // ── Lumi for Browser Extension (Grammarly / Honey / Pocket) — 8 placements ──
+  // ── Lumi for Browser Extension App (Grammarly / Honey / Pocket) — 8 placements ──
   ext: [
     { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
     { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
@@ -2406,7 +2406,7 @@ const DOOR_TRIGGERS = {
     { label: 'Install onboarding',  cls: '',          fn: 'insertInstallOnboard' },
   ],
 
-  // ── Lumi for Web Browser (ChatGPT.com / Lovable / v0 / Bolt) — 8 placements ──
+  // ── Lumi for Browser App (ChatGPT.com / Lovable / v0 / Bolt) — 8 placements ──
   web: [
     { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
     { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
