@@ -13514,8 +13514,16 @@ function pfParseScreenshots(text) {
                 return new Promise((resolve) => {
                     const overlay = document.createElement('div');
                     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit;';
-                    const ctaColor = variant === 'danger' ? '#DC2626' : (variant === 'warning' ? '#D97706' : '#FF2D78');
-                    const ctaBorder = variant === 'danger' ? '#B91C1C' : (variant === 'warning' ? '#B45309' : '#FF2D78');
+                    const ctaColor =
+                        variant === 'danger'  ? '#DC2626' :
+                        variant === 'warning' ? '#D97706' :
+                        variant === 'success' ? '#059669' :
+                        '#FF2D78';
+                    const ctaBorder =
+                        variant === 'danger'  ? '#B91C1C' :
+                        variant === 'warning' ? '#B45309' :
+                        variant === 'success' ? '#047857' :
+                        '#FF2D78';
                     overlay.innerHTML =
                         '<div role="dialog" aria-modal="true" style="background:#fff;border-radius:14px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.35);padding:24px 24px 18px;border:1px solid #E5E7EB;">' +
                             '<div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;">' + (title || 'Are you sure?') + '</div>' +
@@ -13580,6 +13588,19 @@ function pfParseScreenshots(text) {
                     const j = await r.json().catch(() => ({}));
                     if (!r.ok) throw new Error(j.error || 'Submit failed');
                     await loadProducts();
+                    // Quick toast for ambient feedback…
+                    if (typeof showToast === 'function') {
+                        showToast('✓ Submitted for audit', 'success');
+                    }
+                    // …plus a richer success modal so the seller knows what
+                    // happens next. Andy specifically asked for this on
+                    // 2026-06-20 — silent status flips feel buggy.
+                    await bbAlert({
+                        title:       '✅ Submitted for audit',
+                        body:        '<b>' + (productName || 'This product') + '</b> is now in the BB review queue. We usually review within 24 hours and email you when it\'s approved or if we need any changes. Meanwhile the product stays read-only.',
+                        confirmText: 'Got it',
+                        variant:     'success',
+                    });
                 } catch (e) {
                     bbAlert({
                         title: 'Can\'t submit for audit yet',
