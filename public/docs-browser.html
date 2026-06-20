@@ -71,17 +71,18 @@
   <p>That's the whole install. Yes, really.</p>
 
   <h2 id="what">What this gives you</h2>
-  <p>All 8 Browser App placements auto-enable on install. Boost Boss's auction picks which placement serves per ad request based on user intent + real-time fill. You can't toggle individual placements on or off (and you wouldn't want to — letting publishers turn placements off cuts impressions 20–40%).</p>
+  <p>All 8 Browser App placements come with the install. Boost Boss's auction picks which placement serves per ad request based on user intent + real-time fill. You can't toggle individual placements on or off — letting publishers turn placements off cuts impressions 20–40%.</p>
   <ul>
+    <li><strong>Corner unit</strong> ✅ <em>shipping in v1.1</em> — sticky dismissable card pinned to a screen corner</li>
     <li><strong>Sponsored citation</strong> — woven into AI-generated answers</li>
     <li><strong>Suggested chip</strong> — tappable quick-reply pill</li>
     <li><strong>Inline sponsored card</strong> — full content card in chat/feed flow</li>
     <li><strong>Loading-state ad</strong> — shown while your AI generates</li>
-    <li><strong>Corner unit</strong> — sticky dismissable card pinned to a screen corner</li>
     <li><strong>Page interstitial</strong> — full-page sponsor between route navigations</li>
     <li><strong>Empty-state hero</strong> — hero sponsor when a view has no content yet</li>
     <li><strong>Settings page slot</strong> — modest sponsor card on settings/account routes</li>
   </ul>
+  <p style="font-size:13px;color:#9CA3AF;margin-top:14px;">v1.1 ships the corner unit live. The remaining 7 placements each require surface-specific auto-detection heuristics (chat containers, route changes, settings pages) and ship in dedicated weekly releases. Your existing install picks them up automatically — no script tag change needed.</p>
 
   <h2 id="csp">Strict Content-Security-Policy</h2>
   <p>If your site enforces a strict CSP header, add <code>boostboss.ai</code> to two directives:</p>
