@@ -130,6 +130,14 @@ module.exports = async function handler(req, res) {
   const formatPref  = String(body.format || "native").trim().toLowerCase();
   const sessionId   = String(body.session_id || "lumi_" + Math.random().toString(36).slice(2, 10) + "_" + Date.now());
   const pageUrl     = String(body.page_url || "").trim();
+  // Door identifier — maps to the events.integration_method column the
+  // verify badge poller reads. Default 'js-snippet' = Browser App for
+  // backward compatibility with the v0 runtime that didn't send this.
+  // Allowlist mapped to internal door keys; anything else clamps to
+  // 'js-snippet' so a malformed client never poisons the analytics.
+  const DOOR_ALLOWLIST = { 'js-snippet': 1, 'mcp': 1, 'npm-sdk': 1, 'rest-api': 1 };
+  const doorRaw = String(body.door || "js-snippet").trim().toLowerCase();
+  const door = DOOR_ALLOWLIST[doorRaw] ? doorRaw : "js-snippet";
 
   if (!publisherId) {
     return res.status(400).json({ error: "missing_publisher_id", message: "publisher_id is required." });
@@ -155,9 +163,17 @@ module.exports = async function handler(req, res) {
   const origin = (req.headers && (req.headers.origin || req.headers.Origin)) || "";
 
   // ── Forward to the auction via the same MCP handler /api/ad-request uses ──
+  // Build a door-aware surface tag so the auction-side tracking layer
+  // can route impressions to the correct integration_method column.
+  // The MCP auction uses surface as a free-form string today; downstream
+  // we parse the prefix ('web-' / 'desktop-' / 'extension-' / 'mobile-')
+  // to determine which door's verify badge to flip.
+  const DOOR_SURFACE = { 'js-snippet': 'web', 'mcp': 'desktop', 'npm-sdk': 'extension', 'rest-api': 'mobile' };
+  const surfacePrefix = DOOR_SURFACE[door];
+
   const mockReq = {
     method: "POST",
-    headers: { "x-lumi-source": "lumi-browser-app", "content-type": "application/json" },
+    headers: { "x-lumi-source": "lumi-" + surfacePrefix + "-app", "content-type": "application/json" },
     query: {},
     body: {
       jsonrpc: "2.0",
@@ -166,15 +182,20 @@ module.exports = async function handler(req, res) {
       params: {
         name: "get_sponsored_content",
         arguments: {
-          context_summary:   context,
-          format_preference: formatPref,
-          developer_api_key: apiKey,
-          publisher_id:      apiKey,
-          session_id:        sessionId,
-          host_app:          "lumi_browser_app",
-          surface:           "web-" + placement,
-          page_url:          pageUrl || undefined,
-          origin:            origin || undefined,
+          context_summary:    context,
+          format_preference:  formatPref,
+          developer_api_key:  apiKey,
+          publisher_id:       apiKey,
+          session_id:         sessionId,
+          host_app:           "lumi_" + surfacePrefix + "_app",
+          surface:            surfacePrefix + "-" + placement,
+          // Pass the canonical door key so the auction-side tracking
+          // recorder knows which integration_method to write — matches
+          // the events.integration_method enum the verify badge poller
+          // queries on.
+          integration_method: door,
+          page_url:           pageUrl || undefined,
+          origin:             origin || undefined,
         },
       },
     },

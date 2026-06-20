@@ -15,13 +15,13 @@ import {
   API_ORIGIN,
   fetchAd,
   fireImpression,
+  fireHandshake,
   getSessionId,
   getActiveTabUrl,
 } from './shared.js';
 
 const PUB_KEY = 'lumi_publisher_id';
 const HANDSHAKE_DONE_KEY = 'lumi_handshake_done';
-const HANDSHAKE_URL = `${API_ORIGIN}/api/lumi-handshake`;
 
 export const LumiBackground = {
   /**
@@ -71,36 +71,22 @@ async function handleFetchAdMessage(publisherId, msg) {
 }
 
 async function sendHandshake(publisherId) {
+  // Idempotent — only fire once per install. Verify badge flips on the
+  // first impression event recorded for this developer_id with
+  // integration_method=npm-sdk; subsequent fires would just spam analytics.
   try {
     const got = await chrome.storage.local.get(HANDSHAKE_DONE_KEY);
     if (got && got[HANDSHAKE_DONE_KEY]) return;
-  } catch (_e) {
-    // ignore — best-effort
-  }
+  } catch (_e) { /* ignore — best-effort */ }
 
-  const sessionId = await getSessionId();
-  const payload = {
-    publisher_id: publisherId,
-    session_id: sessionId,
-    sdk: 'lumi-extension',
-    sdk_version: '0.1.0',
-    surface: 'browser-extension-app',
-    user_agent: (typeof navigator !== 'undefined' && navigator.userAgent) || null,
-  };
+  // Delegate to the shared helper which uses /api/track with the proper
+  // integration_method=npm-sdk so the Browser Extension verify badge in
+  // the dashboard flips from "Not started" to "Connected".
+  await fireHandshake(publisherId);
 
   try {
-    await fetch(HANDSHAKE_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    });
-    try {
-      await chrome.storage.local.set({ [HANDSHAKE_DONE_KEY]: true });
-    } catch (_e) {}
-  } catch (_e) {
-    // ignore
-  }
+    await chrome.storage.local.set({ [HANDSHAKE_DONE_KEY]: true });
+  } catch (_e) { /* ignore */ }
 }
 
 // Re-export for renderers that import from the package root.

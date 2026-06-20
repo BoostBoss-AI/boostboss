@@ -2,27 +2,33 @@
 //
 // Used by background.js, popup.js, sidepanel.js, and newtab.js. Zero deps,
 // vanilla browser-extension JS. ES module.
+//
+// Wire contract (must match api/lumi-fetch.js + api/track.js on the server):
+//   POST /api/lumi-fetch   { publisher_id, door, context, placement, session_id, page_url }
+//     → { ad: { ad_id, headline, body, image_url, cta_label, click_url, impression_url, ... } }
+//   The impression_url returned in the ad payload is a server-built URL the
+//   runtime hits to record an impression (GET pixel via sendBeacon).
 
 export const API_ORIGIN = 'https://boostboss.ai';
 export const LUMI_FETCH_URL = `${API_ORIGIN}/api/lumi-fetch`;
-export const LUMI_IMPRESSION_URL = `${API_ORIGIN}/api/lumi-impression`;
+export const TRACK_URL = `${API_ORIGIN}/api/track`;
+export const DOOR = 'npm-sdk';  // Internal door key for Lumi for Browser Extension App
+export const SDK_VERSION = '0.1.0';
 
 export const PLACEMENTS = {
-  POPUP: 'popup-card',
-  SIDEPANEL: 'sidepanel-slot',
-  NEWTAB: 'newtab-takeover',
+  POPUP: 'popup',
+  SIDEPANEL: 'sidepanel',
+  NEWTAB: 'newtab',
+  CARD: 'card',          // inline sponsored card (used in onboarding flow)
 };
 
 const SESSION_KEY = 'lumi_session_id';
 
 /**
  * Return a stable session UUID for this extension install. Uses
- * chrome.storage.session — survives across surfaces within a browser session
- * but resets when the browser restarts, which is what we want for session-scoped
- * frequency capping.
- *
- * Falls back to a per-call random if chrome.storage is unavailable (e.g.
- * tests or non-extension contexts).
+ * chrome.storage.session — survives across surfaces within a browser session,
+ * resets on browser restart. Fallback to in-memory random for non-extension
+ * contexts (tests).
  */
 export async function getSessionId() {
   if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.session) {
@@ -40,43 +46,83 @@ export async function getSessionId() {
 }
 
 /**
- * Read the active tab's URL (if available). Used as the "context" signal so
- * BB scoring can match intent against what the user is currently browsing.
+ * Read the active tab URL — used as page_url for /api/lumi-fetch so the
+ * auction can score intent against where the user is currently browsing.
  */
 export async function getActiveTabUrl() {
-  if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.query) {
-    return null;
-  }
+  if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.query) return null;
   try {
     const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    const tab = tabs && tabs[0];
-    return tab && tab.url ? tab.url : null;
+    return tabs && tabs[0] && tabs[0].url ? tabs[0].url : null;
+  } catch (_e) { return null; }
+}
+
+/**
+ * Build a short context summary for the active tab. Just the URL host +
+ * path is fine for v0 — v1 will derive richer context from page metadata.
+ */
+export function summarizeContext(activeUrl) {
+  if (!activeUrl) return 'browser extension';
+  try {
+    const u = new URL(activeUrl);
+    return [u.hostname, u.pathname].filter(Boolean).join(' ').slice(0, 280) || 'browser extension';
   } catch (_e) {
-    return null;
+    return 'browser extension';
   }
 }
 
 /**
- * Fetch a single ad placement from the BB ad server.
+ * Handshake — fires once per surface so the publisher's "Browser Extension"
+ * verify badge in the dashboard flips from "Not started" to "Connected".
+ * Mirrors the Browser App door's handshake to /api/track.
+ */
+export async function fireHandshake(publisherId) {
+  if (!publisherId) return;
+  const sessionId = await getSessionId();
+  const body = {
+    event: 'impression',
+    campaign_id: 'lumi_extension_v0_handshake',
+    session_id: sessionId,
+    developer_id: publisherId,
+    integration_method: DOOR,
+    surface: 'extension',
+    placement_id: 'lumi_handshake',
+    context: {
+      sdk_version: SDK_VERSION,
+      handshake: true,
+    },
+  };
+  try {
+    await fetch(TRACK_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      keepalive: true,
+    }).catch(() => {});
+  } catch (_e) { /* silent */ }
+}
+
+/**
+ * Fetch a single ad from /api/lumi-fetch.
  *
  * @param {object} opts
  * @param {string} opts.publisherId
  * @param {string} opts.placement   — e.g. PLACEMENTS.POPUP
- * @param {string} [opts.contextUrl]
+ * @param {string} [opts.contextUrl] — active tab URL
  * @param {string} [opts.sessionId]
- * @returns {Promise<object|null>}  — ad payload, or null on miss/error
+ * @returns {Promise<object|null>}  — ad object with impression_url + click_url
  */
 export async function fetchAd({ publisherId, placement, contextUrl, sessionId }) {
+  if (!publisherId) return null;
   const body = {
     publisher_id: publisherId,
+    door: DOOR,
+    context: summarizeContext(contextUrl),
     placement,
-    surface: 'browser-extension-app',
-    context: contextUrl ? { url: contextUrl } : null,
-    session_id: sessionId,
-    sdk: 'lumi-extension',
-    sdk_version: '0.1.0',
+    format: 'native',
+    session_id: sessionId || (await getSessionId()),
+    page_url: contextUrl || null,
   };
-
   try {
     const res = await fetch(LUMI_FETCH_URL, {
       method: 'POST',
@@ -85,50 +131,42 @@ export async function fetchAd({ publisherId, placement, contextUrl, sessionId })
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (!data || !data.ad) return null;
-    return data.ad;
-  } catch (_e) {
-    return null;
-  }
+    return (data && data.ad) || null;
+  } catch (_e) { return null; }
 }
 
 /**
- * Fire an impression beacon. Best-effort; failures are silent.
+ * Fire an impression beacon — uses the server-built impression_url returned
+ * with the ad. Best-effort; failures silent.
  */
-export function fireImpression(ad, { sessionId } = {}) {
-  if (!ad || !ad.impression_token) return;
-  const body = {
-    impression_token: ad.impression_token,
-    session_id: sessionId || null,
-    ts: Date.now(),
-  };
+export function fireImpression(ad) {
+  if (!ad || !ad.impression_url) return;
   try {
-    // Prefer keepalive so the beacon survives renderer teardown (popup close).
-    fetch(LUMI_IMPRESSION_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-      keepalive: true,
-    }).catch(() => {});
-  } catch (_e) {
-    // ignore
-  }
+    // Prefer sendBeacon so the request survives popup teardown
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon(ad.impression_url);
+      return;
+    }
+    fetch(ad.impression_url, { method: 'GET', mode: 'no-cors', credentials: 'omit', keepalive: true }).catch(() => {});
+  } catch (_e) { /* silent */ }
 }
 
 /**
- * Attach an IntersectionObserver to fire `fireImpression` on first visibility.
- * Falls back to immediate fire if IO isn't available.
+ * Watch an element via IntersectionObserver; fire impression once when ≥50%
+ * of it enters the viewport. Fall back to immediate fire if IO unavailable.
  */
-export function observeImpression(el, ad, { sessionId } = {}) {
-  if (!el) return;
+export function observeImpression(el, ad) {
+  if (!el || !ad) return;
   if (typeof IntersectionObserver === 'undefined') {
-    fireImpression(ad, { sessionId });
+    fireImpression(ad);
     return;
   }
+  let fired = false;
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
-      if (e.isIntersecting && e.intersectionRatio >= 0.5) {
-        fireImpression(ad, { sessionId });
+      if (e.isIntersecting && e.intersectionRatio >= 0.5 && !fired) {
+        fired = true;
+        fireImpression(ad);
         io.disconnect();
         break;
       }
@@ -138,31 +176,24 @@ export function observeImpression(el, ad, { sessionId } = {}) {
 }
 
 /**
- * Open the ad's click URL in a new tab. Uses chrome.tabs.create when
- * available so we don't disrupt the user's current navigation.
+ * Open the ad click URL in a new tab. Uses chrome.tabs.create when
+ * available so the current page state isn't disrupted.
  */
 export function openClick(ad) {
   if (!ad || !ad.click_url) return;
   if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
-    try {
-      chrome.tabs.create({ url: ad.click_url });
-      return;
-    } catch (_e) {
-      // fall through
-    }
+    try { chrome.tabs.create({ url: ad.click_url }); return; }
+    catch (_e) { /* fall through */ }
   }
-  try {
-    window.open(ad.click_url, '_blank', 'noopener,noreferrer');
-  } catch (_e) {
-    // ignore
-  }
+  try { window.open(ad.click_url, '_blank', 'noopener,noreferrer'); }
+  catch (_e) { /* silent */ }
 }
 
 function randomUuid() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
-  // RFC4122-ish fallback.
+  // RFC4122-ish fallback
   const hex = [...crypto.getRandomValues(new Uint8Array(16))]
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');

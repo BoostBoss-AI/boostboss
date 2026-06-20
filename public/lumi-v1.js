@@ -191,6 +191,7 @@
   function fetchAd(placement, contextOverride) {
     const body = {
       publisher_id: publisherId,
+      door:         DOOR,   // 'js-snippet' — flips Browser App verify badge
       context:      contextOverride || buildContext(),
       placement:    placement,
       format:       'native',

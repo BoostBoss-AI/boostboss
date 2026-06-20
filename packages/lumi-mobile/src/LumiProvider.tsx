@@ -9,6 +9,7 @@ import { View } from 'react-native';
 
 import type { LumiContextValue } from './types';
 import { BottomBanner } from './components/BottomBanner';
+import { fireHandshake } from './api';
 
 const LumiContext = React.createContext<LumiContextValue | null>(null);
 
@@ -31,6 +32,17 @@ export function LumiProvider({
   // Session UUID is generated once per app launch. v0 uses Math.random();
   // expo-crypto / react-native-get-random-values is the upgrade path.
   const sessionId = React.useMemo(() => randomUuid(), []);
+
+  // Handshake fires once per app launch so the publisher's Mobile App
+  // verify badge flips from "Not started" to "Connected" the moment the
+  // installed app boots up. Idempotent at the React level via useEffect
+  // empty dependency array.
+  React.useEffect(() => {
+    if (!publisherId) return;
+    fireHandshake(publisherId, sessionId).catch(() => {});
+    // Intentionally empty deps — handshake is once-per-mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value = React.useMemo<LumiContextValue>(
     () => ({
