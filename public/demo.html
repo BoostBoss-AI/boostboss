@@ -1629,7 +1629,7 @@
 
   <!-- Door tab strip: 4 doors organized by SURFACE the publisher ships
        (where the ad renders), not by integration protocol.
-         data-door="mcp" → Lumi for Computer App (downloaded apps like Claude, Cursor)
+         data-door="mcp" → Lumi for Computer App (downloaded AI apps for Mac/Windows/Linux)
          data-door="web" → Lumi for Browser App      (browser-based web apps like ChatGPT.com)
          data-door="ext" → Lumi for Browser Extension App  (browser extensions like Grammarly)
          data-door="bot" → Lumi for Mobile App   (iOS/Android/React Native apps)
@@ -1652,8 +1652,13 @@
          no-op renderers defensively in case it's ever re-enabled. -->
   </div>
 
-  <!-- ===== WEB DOOR — existing SampleAI Chat (default) ===== -->
+  <!-- ===== LUMI FOR BROWSER APP — SampleAI Chat in a browser ===== -->
   <div class="door-surface" id="surface-web">
+    <!-- Browser chrome strip so the surface visually reads as 'web browser app'. -->
+    <div class="ext-chrome">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <div class="urlbar">🔒 sampleai.app/chat</div>
+    </div>
     <div class="chat-area" id="chat">
       <div class="msg ai">
         <div class="msg-avatar">AI</div>
@@ -1679,8 +1684,8 @@
               Sponsored by Boost Boss
             </div>
             <div class="bb-na-title">Build beautiful sites in minutes — no code</div>
-            <div class="bb-na-desc">Framer lets you design, build, and ship stunning landing pages. Free for 30 days.</div>
-            <a class="bb-na-cta" href="https://framer.com" target="_blank">Try Framer Free →</a>
+            <div class="bb-na-desc">BuildSpark lets you design, build, and ship stunning landing pages. Free for 30 days.</div>
+            <a class="bb-na-cta" href="#" target="_blank">Try BuildSpark Free →</a>
           </div>
         </div>
       </div>
@@ -1697,7 +1702,7 @@
     <div class="mcp-window">
       <div class="mcp-titlebar">
         <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-        <span class="label">Claude Desktop · MCP host</span>
+        <span class="label">BriefBot Desktop · downloaded AI app</span>
       </div>
       <div class="mcp-body" id="mcp-body">
         <div class="mcp-user-msg">How do I deploy my FastAPI app?</div>
@@ -1749,8 +1754,8 @@
             <div class="ep-bullet">▸ Bottleneck shifted from compute to deployment surface</div>
             <div class="ep-bullet">▸ Integration is the new lever</div>
             <div class="ep-label" style="margin-top:6px;">Related</div>
-            <div class="ep-bullet" style="color:#04BEFE;">→ Why Vercel won deploys (TC)</div>
-            <div class="ep-bullet" style="color:#04BEFE;">→ Replit's pivot to agents</div>
+            <div class="ep-bullet" style="color:#04BEFE;">→ Why DeployJet won deploys (TC)</div>
+            <div class="ep-bullet" style="color:#04BEFE;">→ AgentForge's pivot to agents</div>
           </div>
         </div>
       </div>
@@ -1843,42 +1848,43 @@ window.BoostBoss = (() => {
   let impressionCount = 0;
   let clickCount = 0;
 
-  // ── Ad catalog (fetched from MCP server in production) ──
+  // ── Ad catalog (fetched from MCP server in production).
+  //    All brands here are FICTIONAL placeholder advertisers used for the demo. ──
   const ADS = {
     image: [
       {
         id: "bb_img_001",
         type: "image",
-        advertiser: "Framer",
+        advertiser: "BuildSpark",
         headline: "Build stunning sites — no code needed",
-        subtext: "Framer · Free for 30 days · Trusted by 2M+ creators",
-        media_url: "https://placehold.co/540x304/f97316/ffffff?text=🚀+Framer+Landing+Pages",
+        subtext: "BuildSpark · Free for 30 days · Trusted by 2M+ creators",
+        media_url: "https://placehold.co/540x304/f97316/ffffff?text=🚀+BuildSpark+Landing+Pages",
         cta_label: "Try Free →",
-        cta_url: "https://framer.com",
+        cta_url: "#",
         skippable_after_sec: 3,
         targeting: { keywords: ["landing page", "design", "website", "no-code"], regions: ["global"] },
       },
       {
         id: "bb_img_002",
         type: "image",
-        advertiser: "Vercel",
+        advertiser: "DeployJet",
         headline: "Deploy in seconds. Scale forever.",
-        subtext: "Vercel · Free hobby plan · Used by Netflix, Uber, GitHub",
-        media_url: "https://placehold.co/540x304/000000/ffffff?text=▲+Vercel+Deploy+Now",
+        subtext: "DeployJet · Free hobby plan · Used by thousands of teams",
+        media_url: "https://placehold.co/540x304/000000/ffffff?text=▲+DeployJet+Deploy+Now",
         cta_label: "Deploy Now →",
-        cta_url: "https://vercel.com",
+        cta_url: "#",
         skippable_after_sec: 3,
         targeting: { keywords: ["deploy", "hosting", "server", "scale"], regions: ["global"] },
       },
       {
         id: "bb_img_003",
         type: "image",
-        advertiser: "Cursor",
+        advertiser: "CodeCraft",
         headline: "Code faster with AI — built for developers",
-        subtext: "Cursor · AI-first IDE · 1M+ developers",
-        media_url: "https://placehold.co/540x304/6366f1/ffffff?text=⚡+Cursor+AI+IDE",
+        subtext: "CodeCraft · AI-first IDE · 1M+ developers",
+        media_url: "https://placehold.co/540x304/6366f1/ffffff?text=⚡+CodeCraft+AI+IDE",
         cta_label: "Download Free →",
-        cta_url: "https://cursor.com",
+        cta_url: "#",
         skippable_after_sec: 3,
         targeting: { keywords: ["code", "programming", "IDE", "developer"], regions: ["global"] },
       },
@@ -1887,26 +1893,26 @@ window.BoostBoss = (() => {
       {
         id: "bb_vid_001",
         type: "video",
-        advertiser: "Framer",
-        headline: "See Framer in action — 15 second demo",
+        advertiser: "BuildSpark",
+        headline: "See BuildSpark in action — 15 second demo",
         subtext: "Autoplay · muted · skippable after 5s",
         media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
         poster_url: "https://placehold.co/540x304/ef4444/ffffff?text=▶+Loading+Video+Ad...",
-        cta_label: "Try Framer →",
-        cta_url: "https://framer.com",
+        cta_label: "Try BuildSpark →",
+        cta_url: "#",
         skippable_after_sec: 5,
         targeting: { keywords: ["design", "build", "create"], regions: ["global"] },
       },
       {
         id: "bb_vid_002",
         type: "video",
-        advertiser: "Notion",
+        advertiser: "MindStack",
         headline: "All your work. One tool. Powered by AI.",
-        subtext: "Notion · Free for personal use · 30M+ teams",
+        subtext: "MindStack · Free for personal use · 30M+ teams",
         media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-        poster_url: "https://placehold.co/540x304/0ea5e9/ffffff?text=▶+Notion+AI+Demo",
-        cta_label: "Get Notion Free →",
-        cta_url: "https://notion.so",
+        poster_url: "https://placehold.co/540x304/0ea5e9/ffffff?text=▶+MindStack+AI+Demo",
+        cta_label: "Get MindStack Free →",
+        cta_url: "#",
         skippable_after_sec: 5,
         targeting: { keywords: ["notes", "organize", "project", "team"], regions: ["global"] },
       },
@@ -2362,7 +2368,7 @@ window.BoostBoss = (() => {
    Internal keys (mcp/web/ext/bot) are stable shorthand for the
    4 surface mockups so existing CSS class names still apply.
    User-facing labels use the new surface-based taxonomy:
-     mcp → Lumi for Computer App     (Claude Desktop window mockup)
+     mcp → Lumi for Computer App     (BriefBot Desktop window mockup)
      web → Lumi for Browser App         (browser web app mockup)
      ext → Lumi for Browser Extension App     (browser + extension panel mockup)
      bot → Lumi for Mobile App      (mobile phone mockup)
@@ -2370,7 +2376,7 @@ window.BoostBoss = (() => {
 let activeDoor = 'web';
 
 const DOOR_META = {
-  mcp: { label: 'Lumi for Computer App', surfaceId: 'surface-mcp', title: 'Claude Desktop',  subtitle: 'Downloaded AI app · Mac/Windows/Linux' },
+  mcp: { label: 'Lumi for Computer App', surfaceId: 'surface-mcp', title: 'BriefBot Desktop',  subtitle: 'Downloaded AI app · Mac/Windows/Linux' },
   web: { label: 'Lumi for Browser App',     surfaceId: 'surface-web', title: 'SampleAI Chat',   subtitle: 'Browser-based AI app — Llama 4' },
   ext: { label: 'Lumi for Browser Extension App', surfaceId: 'surface-ext', title: 'Article AI',      subtitle: 'Chrome extension · side-panel summarizer' },
   bot: { label: 'Lumi for Mobile App',  surfaceId: 'surface-bot', title: 'FluentAI',        subtitle: 'iOS / Android AI app' },
@@ -2380,7 +2386,7 @@ const DOOR_META = {
 // 'cls' drives button styling: '' = display, 'ai-native' = AI-native,
 //   'video' = video format, 'premium' = highest-CPM premium.
 const DOOR_TRIGGERS = {
-  // ── Lumi for Computer App (Claude Desktop / Cursor / Devin) — 10 placements ──
+  // ── Lumi for Computer App (downloaded AI apps for Mac/Win/Linux) — 10 placements ──
   mcp: [
     { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
     { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
@@ -2394,7 +2400,7 @@ const DOOR_TRIGGERS = {
     { label: 'System notification', cls: '',          fn: 'insertSystemNotif' },
   ],
 
-  // ── Lumi for Browser Extension App (Grammarly / Honey / Pocket) — 8 placements ──
+  // ── Lumi for Browser Extension App (extensions installed in Chrome/Safari) — 8 placements ──
   ext: [
     { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
     { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
@@ -2406,7 +2412,7 @@ const DOOR_TRIGGERS = {
     { label: 'Install onboarding',  cls: '',          fn: 'insertInstallOnboard' },
   ],
 
-  // ── Lumi for Browser App (ChatGPT.com / Lovable / v0 / Bolt) — 8 placements ──
+  // ── Lumi for Browser App (browser-based AI web apps) — 8 placements ──
   web: [
     { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
     { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
@@ -2418,7 +2424,7 @@ const DOOR_TRIGGERS = {
     { label: 'Settings page slot',  cls: '',          fn: 'insertSettingsAd' },
   ],
 
-  // ── Lumi for Mobile App (ChatGPT mobile / Claude mobile / Replika) — 10 placements ──
+  // ── Lumi for Mobile App (iOS / Android / React Native AI apps) — 10 placements ──
   bot: [
     { label: 'Sponsored citation',  cls: 'ai-native', fn: 'insertCitation' },
     { label: 'Suggested chip',      cls: 'ai-native', fn: 'insertChip' },
@@ -2500,9 +2506,9 @@ function scrollTargetToBottom() {
 ─────────────────────────────────────────────────────────── */
 function insertNativeAd() {
   const ads = [
-    { title: "Supercharge your workflow with Notion AI", desc: "Take notes, manage projects, and let AI do the heavy lifting. Free for personal use.", cta: "Try Notion Free →", url: "https://notion.so" },
-    { title: "Ship 10x faster with Cursor AI", desc: "The AI-first code editor trusted by 1M+ developers. Works with any language.", cta: "Download Cursor →", url: "https://cursor.com" },
-    { title: "Deploy your app in 30 seconds", desc: "Vercel — the platform for frontend developers. Git push, instant deploy.", cta: "Start Deploying →", url: "https://vercel.com" },
+    { title: "Supercharge your workflow with MindStack AI", desc: "Take notes, manage projects, and let AI do the heavy lifting. Free for personal use.", cta: "Try MindStack Free →", url: "#" },
+    { title: "Ship 10x faster with CodeCraft", desc: "The AI-first code editor trusted by 1M+ developers. Works with any language.", cta: "Download CodeCraft →", url: "#" },
+    { title: "Deploy your app in 30 seconds", desc: "DeployJet — the platform for frontend developers. Git push, instant deploy.", cta: "Start Deploying →", url: "#" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
   const target = getRenderTarget();
@@ -2569,9 +2575,9 @@ function insertNativeAd() {
 /* ── Sponsored citation — woven into the active surface ── */
 function insertCitation() {
   const ads = [
-    { title: "Notion AI — note-taking that thinks with you", cta: "Try Notion →", url: "https://notion.so" },
-    { title: "Vercel — deploy in seconds, scale forever", cta: "Try free →", url: "https://vercel.com" },
-    { title: "Cursor — the AI-first code editor", cta: "Download →", url: "https://cursor.com" },
+    { title: "MindStack — AI notes that think with you", cta: "Try MindStack →", url: "#" },
+    { title: "DeployJet — deploy in seconds, scale forever", cta: "Try free →", url: "#" },
+    { title: "CodeCraft — the AI-first code editor", cta: "Download →", url: "#" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
   const target = getRenderTarget();
@@ -2605,9 +2611,9 @@ function insertCitation() {
 /* ── Tool / skill rec — "you might also try" panel ── */
 function insertToolRec() {
   const ads = [
-    { title: "Stripe — payments without the headache", desc: "Drop-in checkout, subscriptions, global tax. Free until you scale.", cta: "Get started →", url: "https://stripe.com" },
-    { title: "Linear — the issue tracker built for speed", desc: "Keyboard-first, no clutter. Plans your team will actually use.", cta: "Try Linear →", url: "https://linear.app" },
-    { title: "Supabase — open-source Firebase alternative", desc: "Postgres, auth, storage, edge functions. Generous free tier.", cta: "Sign up →", url: "https://supabase.com" },
+    { title: "PayLane — payments without the headache", desc: "Drop-in checkout, subscriptions, global tax. Free until you scale.", cta: "Get started →", url: "#" },
+    { title: "TaskFlux — the issue tracker built for speed", desc: "Keyboard-first, no clutter. Plans your team will actually use.", cta: "Try TaskFlux →", url: "#" },
+    { title: "StackNimbus — open-source backend in a box", desc: "Postgres, auth, storage, edge functions. Generous free tier.", cta: "Sign up →", url: "#" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
   const target = getRenderTarget();
@@ -2641,9 +2647,9 @@ function insertToolRec() {
 /* ── Suggested-action chip / Bot inline-keyboard ── */
 function insertChip() {
   const ads = [
-    { label: "Try Framer free",           url: "https://framer.com", brand: "Framer" },
-    { label: "Open Cursor →",             url: "https://cursor.com", brand: "Cursor" },
-    { label: "Spin up a Vercel project",  url: "https://vercel.com", brand: "Vercel" },
+    { label: "Try BuildSpark free",         url: "#", brand: "BuildSpark" },
+    { label: "Open CodeCraft →",            url: "#", brand: "CodeCraft" },
+    { label: "Spin up a DeployJet project", url: "#", brand: "DeployJet" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
   const target = getRenderTarget();
@@ -2703,9 +2709,9 @@ function insertLoadingState() {
 /* ── Extension new-tab takeover (full-surface card inside ext-window) ── */
 function insertNewTab() {
   const ads = [
-    { title: "Vercel — Deploy in seconds. Scale forever.", desc: "Free hobby plan · Auto-deploy from GitHub · Global edge.", cta: "Try Vercel Free", url: "https://vercel.com", brand: "Vercel" },
-    { title: "Linear — built for product teams that move fast.", desc: "Keyboard-first issue tracking with zero clutter.",          cta: "Try Linear",        url: "https://linear.app", brand: "Linear" },
-    { title: "Notion — your wiki, docs, and projects in one.",   desc: "Free for personal use. AI-powered search built in.",       cta: "Get Notion Free",   url: "https://notion.so", brand: "Notion" },
+    { title: "DeployJet — Deploy in seconds. Scale forever.",   desc: "Free hobby plan · Auto-deploy from git · Global edge.", cta: "Try DeployJet Free", url: "#", brand: "DeployJet" },
+    { title: "TaskFlux — built for product teams that move fast.", desc: "Keyboard-first issue tracking with zero clutter.",   cta: "Try TaskFlux",       url: "#", brand: "TaskFlux" },
+    { title: "MindStack — your wiki, docs, and projects in one.", desc: "Free for personal use. AI-powered search built in.",  cta: "Get MindStack Free", url: "#", brand: "MindStack" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
   const host = document.getElementById('ext-newtab');
@@ -2732,9 +2738,9 @@ function closeNewTab() {
 /* ── Bot sponsored-welcome (first-touch bot greeting with ad) ── */
 function insertBotWelcome() {
   const ads = [
-    { brand: "Vercel",  title: "Deploy in seconds. Scale forever.", desc: "Free hobby plan, git-push to deploy, global edge.", cta: "Try Free",       url: "https://vercel.com" },
-    { brand: "Linear",  title: "Issue tracking built for speed.",   desc: "Keyboard-first, no clutter. Free for small teams.", cta: "Try Linear",     url: "https://linear.app" },
-    { brand: "Supabase",title: "Open-source Firebase alternative.", desc: "Postgres, auth, storage, edge functions.",          cta: "Sign up free",   url: "https://supabase.com" },
+    { brand: "DeployJet",   title: "Deploy in seconds. Scale forever.", desc: "Free hobby plan, git-push to deploy, global edge.", cta: "Try Free",       url: "#" },
+    { brand: "TaskFlux",    title: "Issue tracking built for speed.",   desc: "Keyboard-first, no clutter. Free for small teams.", cta: "Try TaskFlux",   url: "#" },
+    { brand: "StackNimbus", title: "Open-source backend in a box.",      desc: "Postgres, auth, storage, edge functions.",         cta: "Sign up free",   url: "#" },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
   const target = getRenderTarget();
@@ -2760,10 +2766,10 @@ function insertBotWelcome() {
 ─────────────────────────────────────────────────────────── */
 
 const SAMPLE_ADS = [
-  { brand: 'Linear',   title: 'Linear — issue tracking, built for speed', desc: 'Keyboard-first, no clutter.',   cta: 'Try Linear free →',  url: 'https://linear.app' },
-  { brand: 'Vercel',   title: 'Vercel — deploy in seconds, scale forever', desc: 'Git push to deploy.',          cta: 'Start free →',       url: 'https://vercel.com' },
-  { brand: 'Supabase', title: 'Supabase — open-source Firebase alternative', desc: 'Postgres + auth + storage.', cta: 'Get started →',      url: 'https://supabase.com' },
-  { brand: 'Cursor',   title: 'Cursor — the AI-first code editor',       desc: 'Trusted by 1M+ developers.',    cta: 'Download Cursor →',  url: 'https://cursor.com' },
+  { brand: 'TaskFlux',    title: 'TaskFlux — issue tracking, built for speed',  desc: 'Keyboard-first, no clutter.',     cta: 'Try TaskFlux free →',  url: '#' },
+  { brand: 'DeployJet',   title: 'DeployJet — deploy in seconds, scale forever', desc: 'Git push to deploy.',            cta: 'Start free →',         url: '#' },
+  { brand: 'StackNimbus', title: 'StackNimbus — open-source backend in a box',   desc: 'Postgres + auth + storage.',     cta: 'Get started →',        url: '#' },
+  { brand: 'CodeCraft',   title: 'CodeCraft — the AI-first code editor',         desc: 'Trusted by 1M+ developers.',     cta: 'Download CodeCraft →', url: '#' },
 ];
 function pickAd() { return SAMPLE_ADS[Math.floor(Math.random() * SAMPLE_ADS.length)]; }
 
