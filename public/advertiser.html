@@ -13490,7 +13490,7 @@ function pfParseScreenshots(text) {
                     if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'Archive failed'); }
                     await loadProducts();
                 } catch (e) {
-                    alert(e.message);
+                    bbAlert({ title: 'Archive failed', body: e.message });
                 }
             }
             async function restoreProduct(id) {
@@ -13510,18 +13510,20 @@ function pfParseScreenshots(text) {
             // stock window.confirm() popup with a BB-styled overlay that
             // matches the rest of the dashboard. Returns Promise<boolean>.
             // Variant: 'default' = pink CTA; 'danger' = red CTA for delete.
-            function bbConfirm({ title, body, confirmText, cancelText, variant }) {
+            function bbConfirm({ title, body, confirmText, cancelText, variant, hideCancel }) {
                 return new Promise((resolve) => {
                     const overlay = document.createElement('div');
                     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit;';
-                    const ctaColor = variant === 'danger' ? '#DC2626' : '#FF2D78';
-                    const ctaBorder = variant === 'danger' ? '#B91C1C' : '#FF2D78';
+                    const ctaColor = variant === 'danger' ? '#DC2626' : (variant === 'warning' ? '#D97706' : '#FF2D78');
+                    const ctaBorder = variant === 'danger' ? '#B91C1C' : (variant === 'warning' ? '#B45309' : '#FF2D78');
                     overlay.innerHTML =
                         '<div role="dialog" aria-modal="true" style="background:#fff;border-radius:14px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.35);padding:24px 24px 18px;border:1px solid #E5E7EB;">' +
                             '<div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;">' + (title || 'Are you sure?') + '</div>' +
                             (body ? '<div style="font-size:13.5px;line-height:1.55;color:#4B5563;margin-bottom:18px;">' + body + '</div>' : '') +
                             '<div style="display:flex;justify-content:flex-end;gap:8px;">' +
-                                '<button type="button" data-bb-confirm-cancel style="padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;">' + (cancelText || 'Cancel') + '</button>' +
+                                (hideCancel ? '' :
+                                    '<button type="button" data-bb-confirm-cancel style="padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;">' + (cancelText || 'Cancel') + '</button>'
+                                ) +
                                 '<button type="button" data-bb-confirm-ok style="padding:8px 16px;border:1px solid ' + ctaBorder + ';border-radius:8px;background:' + ctaColor + ';color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">' + (confirmText || 'Confirm') + '</button>' +
                             '</div>' +
                         '</div>';
@@ -13535,12 +13537,25 @@ function pfParseScreenshots(text) {
                         if (e.key === 'Escape') cleanup(false);
                         if (e.key === 'Enter')  cleanup(true);
                     };
-                    overlay.querySelector('[data-bb-confirm-cancel]').addEventListener('click', () => cleanup(false));
+                    const cancelBtn = overlay.querySelector('[data-bb-confirm-cancel]');
+                    if (cancelBtn) cancelBtn.addEventListener('click', () => cleanup(false));
                     overlay.querySelector('[data-bb-confirm-ok]').addEventListener('click', () => cleanup(true));
                     overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
                     document.addEventListener('keydown', onKey);
                     // Focus the OK button for keyboard users.
                     setTimeout(() => { try { overlay.querySelector('[data-bb-confirm-ok]').focus(); } catch (_) {} }, 50);
+                });
+            }
+            // bbAlert — single-button BB-styled notice. Used in place of
+            // window.alert() across submit / save / delete error paths so the
+            // dashboard never falls back to the OS-native popup.
+            function bbAlert({ title, body, confirmText, variant }) {
+                return bbConfirm({
+                    title:       title || 'Heads up',
+                    body:        body,
+                    confirmText: confirmText || 'OK',
+                    variant:     variant || 'warning',
+                    hideCancel:  true,
                 });
             }
 
@@ -13566,7 +13581,11 @@ function pfParseScreenshots(text) {
                     if (!r.ok) throw new Error(j.error || 'Submit failed');
                     await loadProducts();
                 } catch (e) {
-                    alert(e.message);
+                    bbAlert({
+                        title: 'Can\'t submit for audit yet',
+                        body:  e.message,
+                        confirmText: 'OK, I\'ll fix it',
+                    });
                 }
             }
             async function deleteProduct(id, productName) {
@@ -13593,15 +13612,18 @@ function pfParseScreenshots(text) {
                     if (!r.ok) {
                         // 409 = product has orders. Tell the seller to archive instead.
                         if (r.status === 409 && j.order_count) {
-                            alert('Cannot delete — this product has ' + j.order_count +
-                                ' order(s). Use Archive instead so the order history stays intact.');
+                            await bbAlert({
+                                title: 'Cannot delete this product',
+                                body:  'This product has <b>' + j.order_count + ' order(s)</b> on record. Use <b>Archive</b> instead so the order history stays intact.',
+                                confirmText: 'Got it',
+                            });
                             return;
                         }
                         throw new Error(j.error || 'Delete failed');
                     }
                     await loadProducts();
                 } catch (e) {
-                    alert(e.message);
+                    bbAlert({ title: 'Delete failed', body: e.message });
                 }
             }
 
