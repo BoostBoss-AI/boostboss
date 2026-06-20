@@ -1,0 +1,34 @@
+{
+  "name": "@boostbossai/install-extension",
+  "version": "0.1.0",
+  "description": "One-command installer for Lumi for Browser Extension App — Boost Boss's Chrome MV3 extension ad SDK.",
+  "bin": {
+    "install-extension": "./bin/install.js"
+  },
+  "main": "./bin/install.js",
+  "files": [
+    "bin",
+    "lib",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "boostboss",
+    "lumi",
+    "chrome",
+    "extension",
+    "manifest-v3",
+    "ads",
+    "monetization"
+  ],
+  "homepage": "https://boostboss.ai/publish/extensions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boostbossai/boostboss.git",
+    "directory": "packages/install-extension"
+  },
+  "license": "MIT",
+  "author": "Boost Boss"
+}

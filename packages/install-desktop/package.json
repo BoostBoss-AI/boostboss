@@ -1,0 +1,34 @@
+{
+  "name": "@boostbossai/install-desktop",
+  "version": "0.1.0",
+  "description": "One-command installer for Lumi for Computer App — Boost Boss's Electron/Tauri ad SDK.",
+  "bin": {
+    "install-desktop": "./bin/install.js"
+  },
+  "main": "./bin/install.js",
+  "files": [
+    "bin",
+    "lib",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "boostboss",
+    "lumi",
+    "electron",
+    "tauri",
+    "ads",
+    "monetization",
+    "desktop"
+  ],
+  "homepage": "https://boostboss.ai/publish/extensions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boostbossai/boostboss.git",
+    "directory": "packages/install-desktop"
+  },
+  "license": "MIT",
+  "author": "Boost Boss"
+}

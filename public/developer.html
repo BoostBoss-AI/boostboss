@@ -2393,33 +2393,27 @@
                 <!-- Door 1: Lumi for Computer App (Electron/Tauri/native desktop) -->
                 <div class="fw-panel" id="fw-mcp">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_install">1. Install</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Run this in your project directory — that's the whole install</h4>
                         <div class="code-block">
                             <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp-install')" data-t="common.copy">Copy</button>
-                            <pre id="code-mcp-install">npm install @boostbossai/lumi-desktop</pre>
+                            <pre id="code-mcp-install">npx @boostbossai/install-desktop <span id="mcp-pub-token-inline">pub_abc</span></pre>
                         </div>
-                        <div style="font-size:12px;color:#6B7280;margin-top:6px;">For Electron, Tauri, and native macOS / Windows / Linux apps.</div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One command. The CLI detects Electron or Tauri, patches your renderer HTML to add the Lumi script tag, and prints a banner showing all 10 placements that auto-enabled. Restart your app — the <strong>Computer App</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. To uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-desktop --uninstall</code>
+                        </div>
                     </div>
-                    <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_mcp_wire">2. Initialize once at app start</h4>
-                        <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp')" data-t="common.copy">Copy</button>
-                            <pre id="code-mcp">// Initialize Lumi once during your desktop app's startup.
-import { init } from '@boostbossai/lumi-desktop';
-
-init({
-  publisherId: process.env.BB_PUBLISHER_ID,
-});
-
-// All 10 placements (sponsored citation, suggested chip, inline
-// sponsored card, loading-state ad, pre-roll video, window banner,
-// sidebar slot, modal interstitial, empty-state hero, system
-// notification) auto-enable on install. Boost Boss tunes which
-// ones serve based on intent and real-time fill — no per-placement
-// wiring needed in your code.</pre>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🪟 Electron</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">CLI patches your renderer's <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">index.html</code>. No code edits needed.</div>
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            <span data-t="integ.cap_mcp">Try sandbox without signup: pass</span> <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">publisherId: "pub_test_demo"</code>. <a href="/docs/mcp" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🦀 Tauri</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Manual integration in v1.2. See <a href="/docs/computer#tauri" style="color:#04BEFE;text-decoration:underline;">/docs/computer#tauri</a>.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🎥 Sound + video</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Desktop apps escape browser autoplay rules. Pre-roll video with sound is fully supported.</div>
                         </div>
                     </div>
                 </div>
@@ -2458,33 +2452,27 @@ init({
                 <!-- Door 3: Lumi for Browser Extension App (Manifest v3) -->
                 <div class="fw-panel" id="fw-npm-sdk" style="display: none;">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_install">1. Install</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Run this in your extension directory — that's the whole install</h4>
                         <div class="code-block">
                             <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-install')" data-t="common.copy">Copy</button>
-                            <pre id="code-ext-install">npm install @boostbossai/lumi-extension</pre>
+                            <pre id="code-ext-install">npx @boostbossai/install-extension <span id="ext-pub-token-inline">pub_abc</span></pre>
                         </div>
-                        <div style="font-size:12px;color:#6B7280;margin-top:6px;">Manifest V3 native — zero <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">eval</code>, zero remote code.</div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One command. The CLI installs the runtime, patches your <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">manifest.json</code> (permissions + host), drops the SDK into your service worker, and wires popup + sidepanel + new-tab pages if they exist. Reload your extension in <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">chrome://extensions</code> — the <strong>Browser Extension</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. Uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-extension --uninstall</code>
+                        </div>
                     </div>
-                    <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_ext_render">2. Initialize in your service worker</h4>
-                        <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext')" data-t="common.copy">Copy</button>
-                            <pre id="code-ext">// background.js (Manifest V3 service worker)
-import { init } from '@boostbossai/lumi-extension';
-
-init({
-  publisherId: 'pub_abc',
-});
-
-// All 8 Browser Extension placements (sponsored citation,
-// suggested chip, inline sponsored card, loading-state ad,
-// popup card, side panel slot, new-tab takeover, install
-// onboarding) auto-enable on install. Boost Boss picks which
-// placement serves per request — you don't have to wire each
-// surface individually.</pre>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FFB020;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🧩 Manifest V3</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Chrome / Edge / Brave / Opera. Zero <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">eval</code>, zero remote code. Bundled into <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">node_modules</code> at install.</div>
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            Allow <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">https://boostboss.ai</code> in your extension's CSP. <a href="/docs/npm-sdk" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">⚡ Premium placement</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">New-tab takeover at $16 RPM — auto-enables when your manifest declares a new-tab override.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🔧 Firefox / Safari</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">v1.2 supports Chrome MV3 only. Firefox / Safari ports follow in v1.3. <a href="/docs/extension" style="color:#FF2D78;text-decoration:underline;">Track progress →</a></div>
                         </div>
                     </div>
                 </div>
@@ -2492,39 +2480,27 @@ init({
                 <!-- Door 4: Lumi for Mobile App (iOS / Android / React Native) -->
                 <div class="fw-panel" id="fw-rest-api" style="display: none;">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_rest_env">1. Install</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Run this in your React Native project — that's the whole install</h4>
                         <div class="code-block">
                             <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')" data-t="common.copy">Copy</button>
-                            <pre id="code-rest-env">npm install @boostbossai/lumi-mobile</pre>
+                            <pre id="code-rest-env">npx @boostbossai/install-mobile <span id="rest-pub-token-inline">pub_abc</span></pre>
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;">React Native, with native iOS and Android bindings included.</div>
-                    </div>
-                    <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_rest_call">2. Drop in the rewarded-video component</h4>
-                        <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest')" data-t="common.copy">Copy</button>
-                            <pre id="code-rest">// App.tsx (React Native)
-import { LumiProvider, RewardedVideo } from '@boostbossai/lumi-mobile';
-
-export default function App() {
-  return (
-    &lt;LumiProvider publisherId="pub_abc"&gt;
-      {/* your app screens */}
-
-      {/* Drop in the premium rewarded-video unit anywhere a user
-          would benefit from earning an in-app reward. */}
-      &lt;RewardedVideo
-        onReward={(reward) =&gt; grantUserBonus(reward)}
-      /&gt;
-    &lt;/LumiProvider&gt;
-  );
-}</pre>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One command. The CLI detects Expo vs bare React Native, installs the runtime, wraps your <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">App.tsx</code> root with <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">&lt;LumiProvider&gt;</code>, and runs <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">pod install</code> on Mac. Rebuild your app — the <strong>Mobile App</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. Uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-mobile --uninstall</code>
                         </div>
                     </div>
-                    <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_rest_helper">3. The other 9 placements auto-enable</h4>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            With <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">LumiProvider</code> wrapping your app, all 10 Mobile placements (sponsored citation, suggested chip, inline sponsored card, loading-state ad, pre-roll video, <strong>rewarded video</strong>, bottom banner, inline native banner, full-screen interstitial, splash sponsor) auto-enable. Rewarded video is the premium unit — $25–50 CPM, opt-in by the user. <a href="/docs/rest-api" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🏆 Rewarded video</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">The highest-CPM format in adtech ($25–50 CPM). User opts in, you grant them a reward. Drop in anywhere: <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">&lt;RewardedVideo onReward={fn} /&gt;</code></div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">📱 Expo + Bare RN</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">CLI auto-detects which you have and patches the right entry point. Expo SDK 50+ or React Native 0.74+.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🎵 Sound + video</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Native apps escape browser autoplay rules. Pre-roll, rewarded, full-screen — all sound-on, App Store / Play Store compliant.</div>
                         </div>
                     </div>
                 </div>
@@ -4175,17 +4151,18 @@ export default function App() {
             const appIdEl = document.getElementById('app-id');
             if (appIdEl) appIdEl.textContent = userProfile.app_id || '—';
 
-            // Browser App door — inject the publisher's real identifier
-            // into the Lumi script-tag snippet so Copy-paste works without
-            // any further substitution. The server-side verify badge query
-            // is keyed on developer_id, so the runtime needs to send the
-            // same string back. UUID is the most reliable identifier we
-            // have client-side (app_id is sometimes missing on fresh
-            // accounts; api_key is sensitive).
-            const jsTokenInline = document.getElementById('js-pub-token-inline');
-            if (jsTokenInline && userProfile.id) {
-                jsTokenInline.textContent = userProfile.id;
-            }
+            // All 4 doors — inject the publisher's real identifier into
+            // each install snippet so Copy-paste works without any further
+            // substitution. The server-side verify badge query is keyed on
+            // developer_id, so the runtime needs to send the same string
+            // back. UUID is the most reliable identifier we have
+            // client-side (app_id is sometimes missing on fresh accounts;
+            // api_key is sensitive).
+            ['js-pub-token-inline', 'mcp-pub-token-inline', 'ext-pub-token-inline', 'rest-pub-token-inline']
+                .forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el && userProfile.id) el.textContent = userProfile.id;
+                });
         }
 
         // Scroll to the detailed Integration Test panel and auto-fire it.

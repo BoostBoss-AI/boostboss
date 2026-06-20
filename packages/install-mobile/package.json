@@ -1,0 +1,36 @@
+{
+  "name": "@boostbossai/install-mobile",
+  "version": "0.1.0",
+  "description": "One-command installer for Lumi for Mobile App — Boost Boss's React Native (Expo + bare RN) ad SDK.",
+  "bin": {
+    "install-mobile": "./bin/install.js"
+  },
+  "main": "./bin/install.js",
+  "files": [
+    "bin",
+    "lib",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "boostboss",
+    "lumi",
+    "react-native",
+    "expo",
+    "mobile",
+    "ios",
+    "android",
+    "ads",
+    "monetization"
+  ],
+  "homepage": "https://boostboss.ai/publish/mobile",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boostbossai/boostboss.git",
+    "directory": "packages/install-mobile"
+  },
+  "license": "MIT",
+  "author": "Boost Boss"
+}

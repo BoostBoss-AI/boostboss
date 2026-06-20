@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi for Browser Extension App · Docs — Boost Boss</title>
+<meta name="description" content="One terminal command. 8 placements. Boost Boss's runtime for Chrome / Edge / Brave / Opera Manifest V3 extensions.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: #0F0F1A; line-height: 1.65; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 176, 32, 0.06), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(255, 230, 0, 0.06), transparent 60%), #FAFAF7; min-height: 100vh; }
+  a { color: #FF2D78; text-decoration: none; } a:hover { text-decoration: underline; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
+  h1 { font-size: 36px; margin-bottom: 12px; } h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; } h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
+  p { margin: 10px 0; color: #4B5563; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
+  pre { font-family: 'JetBrains Mono', monospace; background: #0F0F1A; color: #E5E7EB; padding: 18px 20px; border-radius: 10px; overflow-x: auto; margin: 14px 0; font-size: 14px; line-height: 1.6; }
+  pre code { background: transparent; padding: 0; color: inherit; }
+  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; } .nav a { color: #6B7280; }
+  .pill { display: inline-block; background: #FEF3C7; color: #B45309; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
+  ul { padding-left: 22px; color: #4B5563; } ul li { margin: 5px 0; }
+  .callout { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #FFB020; padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px; } .callout strong { color: #0F0F1A; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><a href="/docs">← Docs</a></div>
+  <span class="pill">Lumi for Browser Extension App</span>
+  <h1>One terminal command. 8 placements.</h1>
+  <p>For Chrome / Edge / Brave / Opera browser extensions (Manifest V3). The install CLI patches your <code>manifest.json</code>, drops the SDK into your service worker, and wires popup + side panel + new-tab pages where they exist.</p>
+
+  <h2 id="install">Install</h2>
+  <p>From your extension's project root:</p>
+  <pre><code>npx @boostbossai/install-extension YOUR_PUBLISHER_ID</code></pre>
+  <p>What the CLI does:</p>
+  <ul>
+    <li>Runs <code>npm install @boostbossai/lumi-extension</code></li>
+    <li>Adds <code>"storage"</code> to your <code>permissions</code></li>
+    <li>Adds <code>"https://boostboss.ai/*"</code> to your <code>host_permissions</code></li>
+    <li>Prepends a 3-line init block to your background service worker</li>
+    <li>Adds a <code>&lt;script&gt;</code> tag to your <code>popup.html</code> / <code>sidepanel.html</code> / <code>newtab.html</code> if those exist</li>
+    <li>Writes a <code>.lumi-install-log</code> recording every change for symmetric uninstall</li>
+  </ul>
+  <p>Reload your extension in <code>chrome://extensions</code>. The <strong>Browser Extension</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 60 seconds.</p>
+
+  <h2 id="what">8 placements auto-enable</h2>
+  <ul>
+    <li><strong>Sponsored citation</strong> · ~$4.50 RPM</li>
+    <li><strong>Suggested chip</strong> · ~$4.50 RPM</li>
+    <li><strong>Inline sponsored card</strong> · ~$6.50 RPM</li>
+    <li><strong>Loading-state ad</strong> · ~$7.00 RPM</li>
+    <li><strong>Popup card</strong> · ~$7.50 RPM — sponsored card inside your toolbar popup</li>
+    <li><strong>Side panel slot</strong> · ~$8.00 RPM — sponsored card in Chrome's side panel API</li>
+    <li><strong>New-tab takeover</strong> · ~$16.00 RPM — hero unit if you override <code>chrome://newtab</code></li>
+    <li><strong>Install onboarding</strong> · ~$9.00 RPM — sponsor card during post-install flow</li>
+  </ul>
+
+  <h2 id="manifest">Manifest V3 only</h2>
+  <p>The Chrome Web Store has been Manifest V3-only since 2024. If your extension is still on V2, migrate first (<a href="https://developer.chrome.com/docs/extensions/migrating/">Chrome's guide</a>) and re-run the installer. The CLI errors out on V2 with a link to the migration guide.</p>
+  <p>The runtime is bundled into your extension's <code>node_modules/@boostbossai/lumi-extension/dist/</code> at install time — no remote code loading, no <code>eval</code>, fully Manifest V3 compliant.</p>
+
+  <h2 id="firefox-safari">Firefox / Safari</h2>
+  <p>v1.2 supports Chrome / Edge / Brave / Opera (Chromium MV3). Firefox port lands in v1.3. Safari Web Extensions are a separate effort (App Store distribution required) — v1.4. Track progress at <a href="/publish/dashboard">your dashboard</a>.</p>
+
+  <h2 id="uninstall">Uninstall</h2>
+  <pre><code>npx @boostbossai/install-extension --uninstall</code></pre>
+  <p>The CLI reads <code>.lumi-install-log</code>, reverses every patch (manifest, service worker, HTML files), uninstalls the npm package, deletes the log. Your extension is back to its pre-install state.</p>
+
+  <h2 id="privacy">Privacy posture</h2>
+  <div class="callout">
+    <strong>Active-tab content only · session-storage scoped to your extension.</strong>
+    <p style="margin-top:6px;">The runtime reads the URL of the active tab plus your extension's own UI surfaces (popup / sidepanel / newtab). Nothing is read from other tabs unless you've granted the extension cross-tab permissions yourself. Session UUIDs are stored in <code>chrome.storage.session</code> (auto-cleared on browser restart). No <code>localStorage</code>, no cookies, no cross-site tracking.</p>
+  </div>
+
+  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi for Browser Extension App v0.1.0 · 2026-06-20</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Tests / scratch
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+scratch/
+fixtures/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Dev / CI
+.github/
+.eslintrc*
+.prettierrc*
+.editorconfig
+coverage/
+.nyc_output/
+
+# Local logs that should never ship
+*.log
+.lumi-install-log

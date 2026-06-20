@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi for Mobile App · Docs — Boost Boss</title>
+<meta name="description" content="One terminal command. 10 placements including the highest-CPM ad format in adtech: rewarded video. React Native, Expo, iOS, Android.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: #0F0F1A; line-height: 1.65; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.06), transparent 60%), #FAFAF7; min-height: 100vh; }
+  a { color: #FF2D78; text-decoration: none; } a:hover { text-decoration: underline; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
+  h1 { font-size: 36px; margin-bottom: 12px; } h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; } h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
+  p { margin: 10px 0; color: #4B5563; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
+  pre { font-family: 'JetBrains Mono', monospace; background: #0F0F1A; color: #E5E7EB; padding: 18px 20px; border-radius: 10px; overflow-x: auto; margin: 14px 0; font-size: 14px; line-height: 1.6; }
+  pre code { background: transparent; padding: 0; color: inherit; }
+  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; } .nav a { color: #6B7280; }
+  .pill { display: inline-block; background: #FFE6F0; color: #BE185D; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
+  ul { padding-left: 22px; color: #4B5563; } ul li { margin: 5px 0; }
+  .callout { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #FF2D78; padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px; } .callout strong { color: #0F0F1A; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><a href="/docs">← Docs</a></div>
+  <span class="pill">Lumi for Mobile App</span>
+  <h1>The highest-CPM ad format in adtech, one command away.</h1>
+  <p>For iOS / Android apps built with Expo or bare React Native. The install CLI auto-detects your setup, wraps your App.tsx root with <code>&lt;LumiProvider&gt;</code>, and runs <code>pod install</code> on Mac. Rebuild your app — all 10 placements auto-enable, including rewarded video ($25–50 CPM).</p>
+
+  <h2 id="install">Install</h2>
+  <pre><code>npx @boostbossai/install-mobile YOUR_PUBLISHER_ID</code></pre>
+  <p>What the CLI does:</p>
+  <ul>
+    <li>Detects Expo vs bare React Native from <code>package.json</code> + <code>app.json</code></li>
+    <li>Runs <code>npm install @boostbossai/lumi-mobile</code></li>
+    <li>For Expo: adds <code>@boostbossai/lumi-mobile</code> to your plugins array</li>
+    <li>Wraps your root component's outermost JSX element with <code>&lt;LumiProvider publisherId="..."&gt;</code></li>
+    <li>For bare RN on Mac: runs <code>cd ios &amp;&amp; pod install</code></li>
+    <li>Writes <code>.lumi-install-log</code></li>
+  </ul>
+  <p>Rebuild your app (<code>npx expo run:ios</code> / <code>npx react-native run-ios</code>). The <strong>Mobile App</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 60 seconds.</p>
+
+  <h2 id="rewarded">Rewarded video — the premium unit</h2>
+  <p>The <code>&lt;BottomBanner /&gt;</code> auto-mounts when <code>LumiProvider</code> sees your app. The premium <code>&lt;RewardedVideo /&gt;</code> is opt-in — drop it anywhere a user would benefit from earning an in-app reward:</p>
+  <pre><code>import { RewardedVideo } from '@boostbossai/lumi-mobile';
+
+&lt;RewardedVideo
+  buttonLabel="Watch ad for 10 credits"
+  onReward={(reward) =&gt; grantUserCredits(10)}
+/&gt;</code></pre>
+  <p>Rewarded video is the highest-CPM ad format in all of adtech ($25–50 CPM). Users opt in explicitly, watch a 15–30 second video, and you grant them their reward. Apple and Google App Store policies fully support this format — it's how AppLovin and Unity print money.</p>
+
+  <h2 id="what">10 placements auto-enable</h2>
+  <ul>
+    <li><strong>Sponsored citation</strong> · ~$4.50 RPM</li>
+    <li><strong>Suggested chip</strong> · ~$4.50 RPM</li>
+    <li><strong>Inline sponsored card</strong> · ~$6.50 RPM</li>
+    <li><strong>Loading-state ad</strong> · ~$7.00 RPM</li>
+    <li><strong>Pre-roll video</strong> · ~$11.00 RPM — sound-on (native apps escape browser autoplay)</li>
+    <li><strong>Rewarded video</strong> · <strong>~$35.00 RPM</strong> — opt-in for an in-app reward (highest CPM in adtech)</li>
+    <li><strong>Bottom banner</strong> · ~$6.50 RPM — persistent banner, auto-mounts at root</li>
+    <li><strong>Inline native banner</strong> · ~$7.50 RPM — feed-style placement</li>
+    <li><strong>Full-screen interstitial</strong> · ~$18.00 RPM — between major transitions</li>
+    <li><strong>Splash sponsor</strong> · ~$15.00 RPM — on app launch screen</li>
+  </ul>
+
+  <h2 id="compatibility">Compatibility</h2>
+  <ul>
+    <li>Expo SDK 50+ (managed workflow)</li>
+    <li>Bare React Native 0.74+</li>
+    <li>iOS 14+, Android API 23+ (Android 6.0)</li>
+    <li>Native Swift / Kotlin SDKs ship in v1.3 (for apps that don't use React Native)</li>
+  </ul>
+
+  <h2 id="uninstall">Uninstall</h2>
+  <pre><code>npx @boostbossai/install-mobile --uninstall</code></pre>
+  <p>The CLI reads <code>.lumi-install-log</code>, reverses every patch (unwraps the <code>LumiProvider</code>, removes from Expo plugins, uninstalls the npm package), deletes the log.</p>
+
+  <h2 id="privacy">Privacy posture</h2>
+  <div class="callout">
+    <strong>App-session scoped · no cross-app tracking · App Store / Play Store compliant.</strong>
+    <p style="margin-top:6px;">Session UUIDs are generated per app launch and discarded on close. No IDFA, no Google Advertising ID, no fingerprinting. Rewarded video is opt-in by user click (Apple guideline 4.5.4 explicit allowlist). No background data collection. Full <a href="/privacy">privacy policy</a>.</p>
+  </div>
+
+  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi for Mobile App v0.1.0 · 2026-06-20</p>
+</div>
+</body>
+</html>

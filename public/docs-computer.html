@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi for Computer App · Docs — Boost Boss</title>
+<meta name="description" content="One terminal command. 10 placements. Boost Boss's runtime for Electron and Tauri AI apps.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: #0F0F1A; line-height: 1.65; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(157, 122, 255, 0.06), transparent 60%), #FAFAF7; min-height: 100vh; }
+  a { color: #FF2D78; text-decoration: none; } a:hover { text-decoration: underline; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
+  h1 { font-size: 36px; margin-bottom: 12px; } h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; } h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
+  p { margin: 10px 0; color: #4B5563; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
+  pre { font-family: 'JetBrains Mono', monospace; background: #0F0F1A; color: #E5E7EB; padding: 18px 20px; border-radius: 10px; overflow-x: auto; margin: 14px 0; font-size: 14px; line-height: 1.6; }
+  pre code { background: transparent; padding: 0; color: inherit; }
+  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; } .nav a { color: #6B7280; }
+  .pill { display: inline-block; background: #F3E8FF; color: #7C3AED; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
+  ul { padding-left: 22px; color: #4B5563; } ul li { margin: 5px 0; }
+  .callout { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #9D7AFF; padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px; } .callout strong { color: #0F0F1A; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><a href="/docs">← Docs</a></div>
+  <span class="pill">Lumi for Computer App</span>
+  <h1>One terminal command. 10 placements.</h1>
+  <p>For downloaded AI apps built with Electron or Tauri. The install CLI patches your renderer HTML, links your publisher account, and prints a banner showing all 10 placements that auto-enabled.</p>
+
+  <h2 id="install">Install</h2>
+  <p>From your Electron app's project root:</p>
+  <pre><code>npx @boostbossai/install-desktop YOUR_PUBLISHER_ID</code></pre>
+  <p>Your publisher ID is shown on your <a href="/publish/dashboard">dashboard</a>. The CLI detects Electron in your <code>package.json</code>, finds your renderer HTML (typically <code>public/index.html</code> or <code>src/renderer/index.html</code>), and inserts a single <code>&lt;script&gt;</code> tag in <code>&lt;head&gt;</code>. No code changes required.</p>
+  <p>Restart your app. The <strong>Computer App</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 60 seconds.</p>
+
+  <h2 id="what">What this gives you</h2>
+  <p>All 10 Computer App placements auto-enable. Boost Boss's auction picks which one serves per ad request.</p>
+  <ul>
+    <li><strong>Sponsored citation</strong> · ~$4.50 RPM — woven into AI-generated answers</li>
+    <li><strong>Suggested chip</strong> · ~$4.50 RPM — tappable quick-reply pill</li>
+    <li><strong>Inline sponsored card</strong> · ~$6.50 RPM — content card in chat flow</li>
+    <li><strong>Loading-state ad</strong> · ~$7.00 RPM — shown during AI generation</li>
+    <li><strong>Pre-roll video</strong> · ~$10.00 RPM — sound-on (no browser autoplay restriction)</li>
+    <li><strong>Window banner</strong> · ~$7.50 RPM — top-of-window strip</li>
+    <li><strong>Sidebar slot</strong> · ~$7.00 RPM — anchored in app sidebar/inspector</li>
+    <li><strong>Modal interstitial</strong> · ~$18.00 RPM — full-modal sponsor between flows</li>
+    <li><strong>Empty-state hero</strong> · ~$8.50 RPM — hero unit on empty views</li>
+    <li><strong>System notification</strong> · ~$5.00 RPM — sparingly, OS notification</li>
+  </ul>
+
+  <h2 id="tauri">Tauri</h2>
+  <p>v1.2 ships Electron support. Tauri integration is coming in v1.3. For now, manually add this to your renderer HTML's <code>&lt;head&gt;</code>:</p>
+  <pre><code>&lt;script async src="https://boostboss.ai/lumi/v1.js#YOUR_PUBLISHER_ID"&gt;&lt;/script&gt;</code></pre>
+  <p>And add to your <code>tauri.conf.json</code> CSP: <code>script-src https://boostboss.ai; connect-src https://boostboss.ai;</code></p>
+
+  <h2 id="uninstall">Uninstall</h2>
+  <p>From the same project root:</p>
+  <pre><code>npx @boostbossai/install-desktop --uninstall</code></pre>
+  <p>The CLI reads <code>.lumi-install-log</code>, reverses every patch byte-for-byte, deletes the log, and prints confirmation. Restart your app — no more impressions serve from this install.</p>
+
+  <h2 id="privacy">Privacy posture</h2>
+  <div class="callout">
+    <strong>Active app window only · no persistence · no cross-session tracking.</strong>
+    <p style="margin-top:6px;">The runtime reads only what's visible in your app's renderer at the moment of an ad request. Nothing is persisted across app launches. Native sound + video are allowed because Electron renderers run in your app process, not a browser tab.</p>
+  </div>
+
+  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi for Computer App v0.1.0 · 2026-06-20</p>
+</div>
+</body>
+</html>

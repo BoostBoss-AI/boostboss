@@ -1,0 +1,47 @@
+{
+  "name": "@boostbossai/lumi-mobile",
+  "version": "0.1.0",
+  "description": "Lumi for Mobile App runtime SDK — Boost Boss's ad placements for React Native (Expo + bare).",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "react-native": "./src/index.tsx",
+  "source": "./src/index.tsx",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.tsx",
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    },
+    "./components/BottomBanner": "./src/components/BottomBanner.tsx",
+    "./components/RewardedVideo": "./src/components/RewardedVideo.tsx",
+    "./components/InlineNativeBanner": "./src/components/InlineNativeBanner.tsx",
+    "./components/FullScreenInterstitial": "./src/components/FullScreenInterstitial.tsx"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.74.0"
+  },
+  "keywords": [
+    "boostboss",
+    "lumi",
+    "react-native",
+    "expo",
+    "mobile",
+    "ios",
+    "android",
+    "ads",
+    "monetization"
+  ],
+  "homepage": "https://boostboss.ai/publish/mobile",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boostbossai/boostboss.git",
+    "directory": "packages/lumi-mobile"
+  },
+  "license": "MIT",
+  "author": "Boost Boss"
+}
