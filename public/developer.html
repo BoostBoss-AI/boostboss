@@ -2530,12 +2530,14 @@ export default function App() {
                     <div style="margin-bottom: 14px;">
                         <div style="font-weight: 700; font-size: 14px; color: #1A1A2E;" data-t="verify.title">Verify your integration</div>
                         <div style="font-size: 12px; color: #6B7280; margin-top: 2px;" data-t="verify.subtitle">
-                            Fire a synthetic ad request to confirm your setup is wired correctly. Per-door badges auto-update as soon as a real event for that door arrives.
+                            We watch every door automatically. The moment a real ad request arrives from any of your Lumi installs, that door switches from "Not started" to "Connected" — like a cable clicking into place. No manual test needed.
                         </div>
                     </div>
 
-                    <!-- Per-door verification badges. Updated by pollIntegrationVerify(). -->
-                    <div id="verifyBadgesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:16px;">
+                    <!-- Per-door verification badges. Updated by pollIntegrationVerify()
+                         every 30s — switches from "Not started" → "Connected" the first
+                         time a real ad request arrives from that door. -->
+                    <div id="verifyBadgesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:0;">
                         <div class="verify-badge" data-door="mcp">
                             <span class="verify-icon">○</span>
                             <span class="verify-name">Computer App</span>
@@ -2558,112 +2560,10 @@ export default function App() {
                         </div>
                     </div>
 
-                    <!-- Inline test form + Theme & Preview (unified 2026-05-20).
-                         Top row: synthetic test form.
-                         Middle row: Theme controls (left) + live ad preview (right).
-                         Bottom row: slim status line + collapsible raw MCP response.
-                         The preview pane updates live with theme changes AND
-                         shows the actual ad data from the last test run. -->
-                    <div style="background:#FAFAFA; border:1px solid #E5E7EB; border-radius:12px; padding:16px 20px;">
-                        <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;" data-t="verify.run_test_header">Run a synthetic test</div>
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;">
-                            <div style="flex:1;min-width:200px;">
-                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="verify.context_label">Context</label>
-                                <input type="text" id="testContext" value="user is debugging a python traceback" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;" data-t-placeholder="verify.context_placeholder">
-                            </div>
-                            <div style="min-width:120px;">
-                                <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="verify.format_label">Format</label>
-                                <select id="testFormat" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
-                                    <option value="any" data-t="verify.format_any">Any</option>
-                                    <option value="image" data-t="verify.format_image">Image</option>
-                                    <option value="native" data-t="verify.format_native">Native</option>
-                                </select>
-                            </div>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <label style="font-size:11px;color:#6B7280;display:flex;align-items:center;gap:4px;cursor:pointer;" title="Use pub_test_demo — guaranteed to return a fill so you can verify your integration end-to-end before going live." data-t-title="verify.sandbox_tip">
-                                    <input type="checkbox" id="testSandboxToggle" checked style="margin:0;">
-                                    <span data-t="verify.sandbox">Sandbox</span>
-                                </label>
-                                <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:9px 20px;background:#FF2D78;color:#fff;border:1.5px solid #1A1A2E;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:2px 2px 0 #1A1A2E;" data-t="verify.run_btn">▶ Run Test</button>
-                            </div>
-                        </div>
-
-                        <!-- Theme & Preview surface — the AdSense Ad Units analog.
-                             Publisher tweaks CSS variables on the left; rendered ad
-                             on the right updates in real time. After Run Test, the
-                             preview swaps from placeholder to the actual ad payload. -->
-                        <div style="display:grid;grid-template-columns:240px 1fr;gap:24px;margin-top:18px;padding-top:18px;border-top:1px dashed #E5E7EB;" class="theme-preview-grid">
-                            <!-- Theme controls -->
-                            <div>
-                                <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;" data-t="theme.header">Theme</div>
-                                <div style="margin-bottom:14px;">
-                                    <label for="themePrimary" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="theme.primary_color">Primary color</label>
-                                    <div style="display:flex;align-items:center;gap:8px;">
-                                        <input type="color" id="themePrimary" value="#FF2D78" style="width:36px;height:30px;border:1px solid #E5E7EB;border-radius:6px;padding:2px;cursor:pointer;background:#fff;">
-                                        <code id="themePrimaryLabel" style="font-size:11px;color:#1A1A2E;font-family:'SFMono-Regular',monospace;">#FF2D78</code>
-                                    </div>
-                                </div>
-                                <div style="margin-bottom:14px;">
-                                    <label for="themeRadius" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;"><span data-t="theme.border_radius">Border radius</span> <span id="themeRadiusLabel" style="font-family:'SFMono-Regular',monospace;color:#1A1A2E;">12px</span></label>
-                                    <input type="range" id="themeRadius" min="0" max="24" value="12" style="width:100%;">
-                                </div>
-                                <div style="margin-bottom:14px;">
-                                    <label for="themeFont" style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;" data-t="theme.font">Font</label>
-                                    <select id="themeFont" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:12px;background:#fff;">
-                                        <option value="Inter, sans-serif">Inter</option>
-                                        <option value="system-ui, -apple-system, sans-serif" data-t="theme.font_system">System UI</option>
-                                        <option value="'SFMono-Regular', Consolas, monospace" data-t="theme.font_mono">Monospace</option>
-                                        <option value="Georgia, serif">Georgia</option>
-                                    </select>
-                                </div>
-                                <button id="copyThemeBtn" onclick="copyThemeCss()" style="width:100%;padding:8px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;" data-t="theme.copy_css">Copy CSS snippet</button>
-                                <div style="font-size:10.5px;color:#9CA3AF;margin-top:6px;line-height:1.4;"><span data-t="theme.paste_into_a">Paste into your stylesheet's</span> <code>:root</code> <span data-t="theme.paste_into_b">block to apply this theme to all Lumi ads in your app.</span></div>
-                            </div>
-
-                            <!-- Live preview pane -->
-                            <div>
-                                <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-                                    <span data-t="theme.live_preview">Live preview</span>
-                                    <span id="adPreviewStatus" style="font-size:10px;color:#9CA3AF;font-weight:500;text-transform:none;letter-spacing:0;" data-t="theme.placeholder_status">placeholder · run a test to see a real ad</span>
-                                </div>
-                                <div id="adPreview" style="
-                                    background: #fff;
-                                    border: 1px solid #E5E7EB;
-                                    border-left: 3px solid var(--lumi-primary, #FF2D78);
-                                    border-radius: var(--lumi-radius, 12px);
-                                    padding: 14px 16px;
-                                    font-family: var(--lumi-font, 'Inter', sans-serif);
-                                    max-width: 460px;
-                                ">
-                                    <div style="font-size:10px;color:var(--lumi-primary,#FF2D78);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                                        <span style="background:var(--lumi-primary,#FF2D78);color:#fff;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:900;">BB</span>
-                                        <span data-t="theme.sponsored_via">Sponsored · via Boost Boss</span>
-                                    </div>
-                                    <img id="adPreviewImg" src="" alt="" style="width:100%;border-radius:6px;margin-bottom:10px;display:none;max-height:200px;object-fit:cover;">
-                                    <div id="adPreviewHeadline" style="font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:4px;" data-t="theme.headline_placeholder">Your headline appears here</div>
-                                    <div id="adPreviewSubtext" style="font-size:12px;color:#6B7280;margin-bottom:10px;line-height:1.5;" data-t="theme.subtext_placeholder">Run a synthetic test to see a real ad rendered with your theme settings.</div>
-                                    <a id="adPreviewCta" href="#" onclick="return false;" style="display:inline-block;background:var(--lumi-primary,#FF2D78);color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;" data-t="theme.cta_try">Try Free →</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Slim status row + collapsible raw response. The four
-                             standalone metric cards were replaced with this single
-                             horizontal strip since the preview pane is now the
-                             primary post-test visual. -->
-                        <div id="testResults" style="display:none;margin-top:16px;padding-top:14px;border-top:1px dashed #E5E7EB;">
-                            <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#6B7280;align-items:center;">
-                                <span><strong style="color:#1A1A2E;" id="tm-status">—</strong> <span style="font-size:11px;" data-t="verify.tm_status">status</span></span>
-                                <span><strong style="color:#04BEFE;" id="tm-latency">—</strong> <span style="font-size:11px;" data-t="verify.tm_latency">latency</span></span>
-                                <span><strong style="color:#9D7AFF;" id="tm-bid">—</strong> <span style="font-size:11px;" data-t="verify.tm_bid">bid</span></span>
-                                <span><strong style="color:#FF2D78;" id="tm-payout">—</strong> <span style="font-size:11px;" data-t="verify.tm_payout">your payout</span></span>
-                            </div>
-                            <details style="background:#0A0A14;border-radius:8px;overflow:hidden;margin-top:12px;">
-                                <summary style="padding:10px 14px;color:#9D7AFF;font-size:12px;font-weight:600;cursor:pointer;font-family:'SFMono-Regular',Consolas,monospace;" data-t="verify.raw_mcp">Raw MCP Response</summary>
-                                <pre id="testRawResponse" style="padding:12px 14px;margin:0;color:#B0B0C7;font-size:11px;line-height:1.6;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace;max-height:300px;overflow-y:auto;"></pre>
-                            </details>
-                        </div>
-                    </div>
+                    <!-- Run-a-synthetic-test form + Theme controls + Live Preview +
+                         test result strip were removed 2026-06-20. The verify-badges
+                         poller is the single source of integration health and updates
+                         automatically every 30s based on real impression events. -->
                 </div>
             </div>
 
@@ -3085,58 +2985,11 @@ export default function App() {
                  surface rather than two separate ones. -->
 
 
-            <!-- ═══════ ROUTE: integrations (Quick Start — 2nd wrapper) ═══════ -->
-            <div data-shell-route="integrations">
+            <!-- Quick Start section removed 2026-06-20 — install code now lives
+                 inline next to each door card in the primary Integrations panel
+                 above, so a separate full-width Quick Start block was redundant.
+                 The /docs route still hosts the long-form install guide. -->
 
-            <!-- SDK Quick Start -->
-            <div class="section">
-                <div class="section-title" data-t="qs.title">Quick Start</div>
-                <div style="
-                    background: #0A0A14; border-radius: 12px; padding: 20px; color: #B0B0C7;
-                    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
-                    line-height: 1.7; position: relative; overflow-x: auto;
-                ">
-                    <button onclick="copyQuickStart()" style="
-                        position: absolute; top: 10px; right: 10px;
-                        background: rgba(255,255,255,0.1); border: none;
-                        padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
-                        font-size: 11px; cursor: pointer; font-family: inherit;
-                    " id="copyQsBtn" data-t="common.copy">Copy</button>
-                    <pre id="quickStartCode" style="margin: 0; white-space: pre-wrap;"><span style="color:#6B7280;">// 1. Install the package that matches your app.</span>
-<span style="color:#6B7280;">//      Computer App           — @boostbossai/lumi-desktop</span>
-<span style="color:#6B7280;">//      Browser App            — &lt;script src="https://boostboss.ai/lumi.js"&gt;</span>
-<span style="color:#6B7280;">//      Browser Extension App  — @boostbossai/lumi-extension</span>
-<span style="color:#6B7280;">//      Mobile App             — @boostbossai/lumi-mobile</span>
-
-<span style="color:#9D7AFF;">import</span> { init } <span style="color:#9D7AFF;">from</span> <span style="color:#FFE600;">"@boostbossai/lumi-&lt;door&gt;"</span>;
-
-<span style="color:#6B7280;">// 2. Initialize once with your publisher ID. Done.</span>
-init({ publisherId: <span style="color:#FFE600;">"pub_abc"</span> });
-
-<span style="color:#6B7280;">// 3. All placements in your door's bundle auto-enable. Boost</span>
-<span style="color:#6B7280;">//    Boss picks which one serves per request based on intent +</span>
-<span style="color:#6B7280;">//    real-time fill. No per-placement wiring needed.</span></pre>
-                </div>
-                <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
-                    <a href="/docs" style="
-                        padding: 8px 16px; background: var(--pink); color: #fff;
-                        border-radius: 8px; font-size: 13px; font-weight: 600;
-                        text-decoration: none; display: inline-block;
-                    " data-t="qs.full_docs">Full Documentation</a>
-                    <a href="/docs/quickstart" style="
-                        padding: 8px 16px; border: 1px solid #E5E7EB;
-                        border-radius: 8px; font-size: 13px; font-weight: 600;
-                        text-decoration: none; color: #374151; display: inline-block;
-                    " data-t="qs.try_playground">Try sandbox</a>
-                    <a href="https://www.npmjs.com/org/boostbossai" target="_blank" style="
-                        padding: 8px 16px; border: 1px solid #E5E7EB;
-                        border-radius: 8px; font-size: 13px; font-weight: 600;
-                        text-decoration: none; color: #374151; display: inline-block;
-                    " data-t="qs.npm_pkg">npm Package</a>
-                </div>
-            </div>
-
-            </div><!-- /[data-shell-route="integrations"] (Quick Start) -->
 
         <!-- Footer removed 2026-06-15 -->
 
