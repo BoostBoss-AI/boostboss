@@ -1312,12 +1312,9 @@
     <button class="door-tab" role="tab" data-door="bot" onclick="setActiveDoor('bot')">
       <span class="door-dot" style="--dot:#5288C1"></span>Bot
     </button>
-    <!-- Benna Inspector — diagnostic tool, lives outside the door tabs.
-         Not a placement; toggles the live auction-decision side panel. -->
-    <div class="door-tabs-tool">
-      <span class="tool-label">Inspect</span>
-      <button class="benna-inspect-btn" id="bennaToggle" onclick="toggleBennaInspector()">▲ Benna</button>
-    </div>
+    <!-- Benna Inspector removed — /demo now shows only the ad placements,
+         not the internal auction decision panel. The JS still feeds the
+         no-op renderers defensively in case it's ever re-enabled. -->
   </div>
 
   <!-- ===== WEB DOOR — existing SampleAI Chat (default) ===== -->
@@ -1465,60 +1462,10 @@
   </div>
 </div>
 
-<!-- BENNA INSPECTOR (slide-in from right) -->
-<aside id="benna-inspector" aria-hidden="true">
-  <div class="bi-head">
-    <div class="mark">B</div>
-    <div class="title-wrap">
-      <div class="eyebrow">Benna · live decision</div>
-      <div class="title" id="bi-winner-title">Waiting for an auction…</div>
-    </div>
-    <button class="close" onclick="toggleBennaInspector(false)" aria-label="Close">×</button>
-  </div>
+<!-- Benna inspector removed from /demo (2026-06-20).
+     Users see only what the ad placements look like; the live auction-decision
+     side panel was internal-only signal that distracted from the placement preview. -->
 
-  <div class="bi-section">
-    <div class="bi-label">Bid context · derived from MCP</div>
-    <div class="bi-ctx" id="bi-ctx">
-      <span class="k">intent=</span><span class="v">—</span><br>
-      <span class="k">mcp_tool=</span><span class="v">—</span><br>
-      <span class="k">host=</span><span class="v">—</span><br>
-      <span class="k">session_len=</span><span class="v">—</span><br>
-      <span class="k">region=</span><span class="v">—</span>
-    </div>
-  </div>
-
-  <div class="bi-section">
-    <div class="bi-label">Winner</div>
-    <div class="bi-winner">
-      <div class="headline" id="bi-win-headline">—</div>
-      <div style="font-size: 11px; color: #A1A1B3;" id="bi-win-adv">—</div>
-      <div>
-        <span class="bid" id="bi-win-bid">$0.00</span>
-        <span class="bid-label">effective bid</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="bi-section">
-    <div class="bi-label">Inference</div>
-    <div class="bi-metric-grid">
-      <div class="bi-metric"><div class="v" id="bi-pclick">—</div><div class="l">p(click)</div></div>
-      <div class="bi-metric"><div class="v" id="bi-pconv">—</div><div class="l">p(convert)</div></div>
-      <div class="bi-metric"><div class="v" id="bi-latency">—</div><div class="l">latency</div></div>
-      <div class="bi-metric"><div class="v" id="bi-candidates">—</div><div class="l">candidates</div></div>
-    </div>
-  </div>
-
-  <div class="bi-section">
-    <div class="bi-label">Signal contributions</div>
-    <div id="bi-signals"><div style="color:#6B6B83;font-size:11px;">No signals yet — trigger an ad.</div></div>
-  </div>
-
-  <div class="bi-footer">
-    <span id="bi-model">benna-rc3 · ready</span>
-    <a href="https://benna.ai" target="_blank" rel="noopener">benna.ai →</a>
-  </div>
-</aside>
 
 <!-- BOOST BOSS RENDERER -->
 <div id="bb-backdrop" onclick="BoostBoss.close()"></div>
@@ -1875,10 +1822,21 @@ window.BoostBoss = (() => {
   return { show, close, togglePlay, toggleMute, trigger, showPaywall, getStats, trackEvent };
 })();
 
-/* ───────────── Benna Inspector ───────────── */
+/* ───────────── Benna Inspector ─────────────
+   Inspector removed from /demo 2026-06-20. If the DOM nodes are absent,
+   skip the entire setup and install no-op renderers so callers don't crash. */
 (function () {
   const panel = document.getElementById('benna-inspector');
   const toggleBtn = document.getElementById('bennaToggle');
+
+  if (!panel || !toggleBtn) {
+    // Inspector intentionally not rendered on this page. Install no-ops.
+    window.toggleBennaInspector = function () {};
+    window.__renderBennaDecisionFromMCP = function () {};
+    window.__renderBennaDecision = function () {};
+    return;
+  }
+
   let panelOpen = false;
   let autoOpenedOnce = false;
 
