@@ -13659,13 +13659,98 @@ function pfParseScreenshots(text) {
             // New Product button
             if (newBtn) newBtn.addEventListener('click', () => openModal('create', null));
 
-            // Modal close affordances
-            if (closeBtn)  closeBtn.addEventListener('click', closeModal);
-            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            // Dirty-tracking for accidental-close protection (Task #161).
+            // We flip productFormDirty=true on any user input inside the
+            // form, and reset it whenever the modal (re)opens. The
+            // requestCloseProductModal wrapper checks the flag and uses
+            // bbConfirm to ask before throwing away changes. Same intent
+            // as the campaign modal's draft prompt but simpler (products
+            // don't have a localStorage-backed draft store — they have
+            // server-side Draft status, which they already get on Save).
+            let productFormDirty = false;
+            const markDirty = () => { productFormDirty = true; };
+            form.addEventListener('input',  markDirty);
+            form.addEventListener('change', markDirty);
+            // Pricing plans live in a sub-section that's inside the
+            // product modal — count their inputs too so editing a plan
+            // and then trying to close the outer modal still warns.
+            // ppInlineList is the container for the inline plan editor;
+            // we attach the dirty marker once it exists in the DOM.
+            (function watchPlanEditor() {
+                const watch = () => {
+                    const list = document.getElementById('ppInlineList');
+                    if (list && !list.dataset.dirtyWatched) {
+                        list.dataset.dirtyWatched = '1';
+                        list.addEventListener('input',  markDirty);
+                        list.addEventListener('change', markDirty);
+                    }
+                };
+                watch();
+                // Plan editor renders lazily — recheck on each modal open.
+                const origOpen = window.openModal || null;
+                // openModal is defined on the same closure; safe to leave
+                // the dirty bookkeeping to the openModal hook below.
+            })();
+            // Whenever the modal opens (create or edit), reset the flag.
+            // openModal is defined below; we hook it after definition.
+            const origOpenModal = openModal;
+            openModal = function (mode, product) {
+                productFormDirty = false;
+                return origOpenModal.apply(this, arguments);
+            };
+
+            async function requestCloseProductModal() {
+                if (!productFormDirty) { closeModal(); return; }
+                const ok = await bbConfirm({
+                    title: 'Discard unsaved changes?',
+                    body:  'You have edits on this product that haven\'t been saved. Discard them?',
+                    confirmText: 'Discard changes',
+                    cancelText:  'Keep editing',
+                    variant:     'danger',
+                });
+                if (ok) closeModal();
+            }
+
+            // Modal close affordances — all 4 routes go through the
+            // dirty-aware request handler so an accidental Esc / backdrop
+            // click can't blow away the form (Task #161).
+            if (closeBtn)  closeBtn.addEventListener('click', requestCloseProductModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', requestCloseProductModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) requestCloseProductModal(); });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+                if (e.key === 'Escape' && modal.classList.contains('active')) requestCloseProductModal();
             });
+            // After a successful save the form is clean again — clear the
+            // dirty flag on the submit handler's success path so closing
+            // immediately after Save doesn't re-prompt.
+            form.addEventListener('submit', () => { setTimeout(() => { productFormDirty = false; }, 100); });
+
+            // Issue B (Task #161) — when the user clicks the outer "Save
+            // product" button while the inline plan editor is OPEN, the
+            // outer submit ignores any plan-form changes and they're
+            // silently lost. Intercept the click in the capture phase so
+            // we can warn the seller before their plan edit disappears.
+            if (submitBtn) {
+                submitBtn.addEventListener('click', async (e) => {
+                    const editor = document.getElementById('ppInlineEditor');
+                    if (!editor || editor.style.display === 'none') return; // closed → continue
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const proceed = await bbConfirm({
+                        title: 'Save the plan first?',
+                        body:  'You have an open plan edit. The product <b>Save changes</b> button doesn\'t save plan fields — those need the plan editor\'s own <b>Save plan</b> button. Click that first, then Save the product.',
+                        confirmText: 'Save product anyway (lose plan edit)',
+                        cancelText:  'Go back to the plan editor',
+                        variant:     'danger',
+                    });
+                    if (proceed) {
+                        // User accepted the risk. Submit the outer form
+                        // bypassing the click handler so the existing
+                        // submit logic runs normally.
+                        form.requestSubmit();
+                    }
+                }, true);
+            }
 
             // Form submit — create or update depending on dataset.mode.
             // Builds a rich payload covering all 3 tabs. Optional fields
