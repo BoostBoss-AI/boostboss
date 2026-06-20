@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi for Browser App · Docs — Boost Boss</title>
+<meta name="description" content="One script tag. 8 placements auto-enable. Boost Boss's runtime for browser-based AI apps.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #0F0F1A; line-height: 1.65; font-size: 16px;
+    background:
+      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%),
+      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.06), transparent 60%),
+      #FAFAF7;
+    min-height: 100vh;
+  }
+  a { color: #FF2D78; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
+  h1 { font-size: 36px; margin-bottom: 12px; }
+  h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; }
+  h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
+  p { margin: 10px 0; color: #4B5563; }
+  pre, code {
+    font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+    font-size: 14px;
+  }
+  code { background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
+  pre {
+    background: #0F0F1A; color: #E5E7EB;
+    padding: 18px 20px; border-radius: 10px; overflow-x: auto;
+    margin: 14px 0;
+  }
+  pre code { background: transparent; padding: 0; color: inherit; }
+  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; }
+  .nav a { color: #6B7280; }
+  .pill {
+    display: inline-block; background: #FFE6F0; color: #E01E65;
+    padding: 4px 10px; border-radius: 100px; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  ul { padding-left: 22px; color: #4B5563; }
+  ul li { margin: 5px 0; }
+  .callout {
+    background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #FF2D78;
+    padding: 14px 18px; border-radius: 10px; margin: 18px 0;
+    font-size: 14.5px;
+  }
+  .callout strong { color: #0F0F1A; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><a href="/docs">← Docs</a></div>
+  <span class="pill">Lumi for Browser App</span>
+  <h1>One script tag. 8 placements.</h1>
+  <p>The fastest install in adtech. Paste one <code>&lt;script&gt;</code> in your <code>&lt;head&gt;</code> and Boost Boss handles everything else — placement auto-detection, ad fetching, impression tracking, click attribution.</p>
+
+  <h2 id="install">Install</h2>
+  <p>Paste this into your site's <code>&lt;head&gt;</code>. Replace <code>YOUR_PUBLISHER_ID</code> with the ID shown on your <a href="/publish/dashboard">publisher dashboard</a>:</p>
+  <pre><code>&lt;script async src="https://boostboss.ai/lumi/v1.js#YOUR_PUBLISHER_ID"&gt;&lt;/script&gt;</code></pre>
+  <p>Refresh your page. The <strong>Browser App</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 30 seconds.</p>
+  <p>That's the whole install. Yes, really.</p>
+
+  <h2 id="what">What this gives you</h2>
+  <p>All 8 Browser App placements auto-enable on install. Boost Boss's auction picks which placement serves per ad request based on user intent + real-time fill. You can't toggle individual placements on or off (and you wouldn't want to — letting publishers turn placements off cuts impressions 20–40%).</p>
+  <ul>
+    <li><strong>Sponsored citation</strong> — woven into AI-generated answers</li>
+    <li><strong>Suggested chip</strong> — tappable quick-reply pill</li>
+    <li><strong>Inline sponsored card</strong> — full content card in chat/feed flow</li>
+    <li><strong>Loading-state ad</strong> — shown while your AI generates</li>
+    <li><strong>Corner unit</strong> — sticky dismissable card pinned to a screen corner</li>
+    <li><strong>Page interstitial</strong> — full-page sponsor between route navigations</li>
+    <li><strong>Empty-state hero</strong> — hero sponsor when a view has no content yet</li>
+    <li><strong>Settings page slot</strong> — modest sponsor card on settings/account routes</li>
+  </ul>
+
+  <h2 id="csp">Strict Content-Security-Policy</h2>
+  <p>If your site enforces a strict CSP header, add <code>boostboss.ai</code> to two directives:</p>
+  <pre><code>Content-Security-Policy:
+  script-src 'self' https://boostboss.ai;
+  connect-src 'self' https://boostboss.ai;</code></pre>
+  <p>No other directives need to change. Lumi does not use <code>eval</code>, inline scripts, or remote-loaded code.</p>
+
+  <h2 id="privacy">Privacy posture</h2>
+  <div class="callout">
+    <strong>Active tab only · no persistence · no cross-site tracking.</strong>
+    <p style="margin-top:6px;">Lumi reads only what's visible on the active tab where your site is loaded. Nothing is persisted to cookies, <code>localStorage</code>, <code>sessionStorage</code>, or IndexedDB. The only data that leaves the page is: publisher ID, page URL host + path, a per-page-load ephemeral session UUID, and a short context summary for ad relevance matching.</p>
+  </div>
+  <p>Lumi never reads from password fields, credit-card fields, or any input with <code>autocomplete="cc-*"</code>. Full posture documented in our <a href="/privacy#ads">privacy policy</a>.</p>
+
+  <h2 id="react">React, Vue, Next.js?</h2>
+  <p>The script tag works in every framework. But if you'd rather wrap it in a component for cleaner integration, see <a href="/docs/browser/react">/docs/browser/react</a> — it's a 12-line wrapper you write once and reuse.</p>
+  <p>We do <strong>not</strong> ship an npm package for the Browser App door. One install path, one set of failure modes, one source of truth. <a href="/publish/browser">Why we chose script-tag-only →</a></p>
+
+  <h2 id="verify">Verifying your install</h2>
+  <p>After pasting the script tag and reloading your site, three things should happen:</p>
+  <ol style="padding-left:22px;color:#4B5563;">
+    <li>Your dashboard's <strong>Browser App</strong> verify badge flips to <strong>Connected</strong> within 30 seconds.</li>
+    <li>Your browser's developer console shows: <code>▲ Lumi · Browser App · pub_... · Connected</code></li>
+    <li>The first real ad impression starts serving within 60 seconds of your first user session.</li>
+  </ol>
+  <p>If you don't see the verify badge update, open the browser console — Lumi logs why it didn't connect (missing publisher ID, blocked by CSP, blocked by an ad blocker, etc.).</p>
+
+  <h2 id="uninstall">Uninstall</h2>
+  <p>Delete the <code>&lt;script&gt;</code> tag from your <code>&lt;head&gt;</code>. That's it. No cleanup. No leftover storage to clear. The runtime never wrote anywhere outside the active page in memory, and that's gone the moment the user navigates away.</p>
+
+  <h2 id="faq">FAQ</h2>
+  <h3>Will ad blockers block this?</h3>
+  <p>Some will. Lumi loads from <code>boostboss.ai</code>; if a user runs uBlock Origin and we're on their blocklist, the script won't execute. That's the same constraint every external script faces (Stripe, Intercom, GA4 included). We are not a tracking pixel — we serve contextual ads — so we are not on most default blocklists.</p>
+
+  <h3>Does it slow down my page?</h3>
+  <p>No. The script is loaded <code>async</code>, doesn't block first paint, and the runtime defers all work to after DOMContentLoaded. Network footprint: ~30KB on first hit, cached for 24h after that.</p>
+
+  <h3>What if I want to opt a specific page out?</h3>
+  <p>Add <code>data-lumi-disable</code> to any element. Lumi skips that subtree. Coming in v1 with the placement renderers.</p>
+
+  <h3>I'm on Lovable / Bolt.new / Webflow / Framer. Can I install?</h3>
+  <p>Yes. All those platforms have a "custom head" or "embed script" field — paste the script tag there.</p>
+
+  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi v0.1.0 · 2026-06-20</p>
+</div>
+</body>
+</html>

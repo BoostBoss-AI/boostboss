@@ -2424,22 +2424,33 @@ init({
                     </div>
                 </div>
 
-                <!-- Door 2: Lumi for Browser App — one script tag in <head> -->
+                <!-- Door 2: Lumi for Browser App — one script tag in <head>.
+                     Rebuilt 2026-06-20 for the v0 install loop: single
+                     paste, no npm path, no config. The runtime at
+                     /lumi/v1.js reads the publisher ID from its own #hash. -->
                 <div class="fw-panel" id="fw-js-snippet" style="display: none;">
                     <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_js_head">1. Drop this one tag in your &lt;head&gt;</h4>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Paste this in your &lt;head&gt; — that's the whole install</h4>
                         <div class="code-block">
                             <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-tag')" data-t="common.copy">Copy</button>
-                            <pre id="code-snippet-tag">&lt;script async
-  src="https://boostboss.ai/lumi.js"
-  data-publisher="pub_abc"&gt;&lt;/script&gt;</pre>
+                            <pre id="code-snippet-tag">&lt;script async src="https://boostboss.ai/lumi/v1.js#<span id="js-pub-token-inline">pub_abc</span>"&gt;&lt;/script&gt;</pre>
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;" data-t="integ.cap_js_async">Async, zero impact on first paint. Replace <code>pub_abc</code> with your publisher ID — your live ID is already filled in for you in your account.</div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One paste. Refresh your site — the <strong>Browser App</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 30 seconds. All 8 placements auto-enable. No npm install, no <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">init()</code>, no slot tags.
+                        </div>
                     </div>
-                    <div>
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;" data-t="integ.step_js_slots">2. That's it — placements auto-render</h4>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                            All 8 Browser App placements (sponsored citation, suggested chip, inline sponsored card, loading-state ad, corner unit, page interstitial, empty-state hero, settings page slot) auto-enable on install. Lumi discovers natural placement opportunities in your DOM and rerenders on SPA route changes via MutationObserver. Theme via CSS variables (<code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-primary</code>, <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-radius</code>, etc.). <a href="/docs/js-snippet" style="color: #FF2D78;" data-t="integ.full_ref">Full reference →</a>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🔒 Privacy posture</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Lumi reads only what's visible on the active tab. Nothing is persisted to cookies, localStorage, or IndexedDB. Page URL + impression context is all that leaves the page.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🛡 Strict CSP?</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Add <code style="font-family:'JetBrains Mono',monospace;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;">boostboss.ai</code> to your <code style="font-family:'JetBrains Mono',monospace;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;">script-src</code> and <code style="font-family:'JetBrains Mono',monospace;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;">connect-src</code> directives. One line each. <a href="/docs/browser#csp" style="color:#04BEFE;text-decoration:underline;">Reference →</a></div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">⚛ React / Next.js?</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">12-line wrapper for component-style integration. <a href="/docs/browser/react" style="color:#FF2D78;text-decoration:underline;">/docs/browser/react →</a></div>
                         </div>
                     </div>
                 </div>
@@ -4163,6 +4174,18 @@ export default function App() {
             // Display copy of the app_id
             const appIdEl = document.getElementById('app-id');
             if (appIdEl) appIdEl.textContent = userProfile.app_id || '—';
+
+            // Browser App door — inject the publisher's real identifier
+            // into the Lumi script-tag snippet so Copy-paste works without
+            // any further substitution. The server-side verify badge query
+            // is keyed on developer_id, so the runtime needs to send the
+            // same string back. UUID is the most reliable identifier we
+            // have client-side (app_id is sometimes missing on fresh
+            // accounts; api_key is sensitive).
+            const jsTokenInline = document.getElementById('js-pub-token-inline');
+            if (jsTokenInline && userProfile.id) {
+                jsTokenInline.textContent = userProfile.id;
+            }
         }
 
         // Scroll to the detailed Integration Test panel and auto-fire it.

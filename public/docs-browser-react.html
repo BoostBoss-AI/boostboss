@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi for Browser App · React wrapper — Boost Boss</title>
+<meta name="description" content="A 12-line React component that mounts the Lumi script tag. Optional — the bare script tag works in React without it.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #0F0F1A; line-height: 1.65; font-size: 16px;
+    background:
+      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%),
+      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.06), transparent 60%),
+      #FAFAF7;
+    min-height: 100vh;
+  }
+  a { color: #FF2D78; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1, h2 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
+  h1 { font-size: 32px; margin-bottom: 12px; }
+  h2 { font-size: 22px; margin-top: 36px; margin-bottom: 10px; }
+  p { margin: 10px 0; color: #4B5563; }
+  code {
+    font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+    font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px;
+  }
+  pre {
+    font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+    background: #0F0F1A; color: #E5E7EB;
+    padding: 18px 20px; border-radius: 10px; overflow-x: auto;
+    margin: 14px 0; font-size: 14px; line-height: 1.6;
+  }
+  pre code { background: transparent; padding: 0; color: inherit; }
+  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; }
+  .nav a { color: #6B7280; }
+  .pill {
+    display: inline-block; background: #FFE6F0; color: #E01E65;
+    padding: 4px 10px; border-radius: 100px; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .callout {
+    background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #04BEFE;
+    padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><a href="/docs/browser">← Lumi for Browser App docs</a></div>
+  <span class="pill">React / Next.js</span>
+  <h1>React wrapper for Lumi</h1>
+  <p>The bare <code>&lt;script&gt;</code> tag from the <a href="/docs/browser">main install doc</a> works fine in React, Next.js, and every other framework — paste it into <code>index.html</code> or <code>app/layout.tsx</code>. <strong>This wrapper is optional.</strong></p>
+
+  <div class="callout">
+    <strong>Why we don't ship this as an npm package.</strong>
+    <p style="margin-top:6px;">Two install paths means two ways to fail, two sets of docs, and two FAQs. We chose <em>one obvious way</em>. If you'd rather wrap the script tag in a component, copy the 12 lines below into your project. We don't ship or version an npm package — you control the wrapper.</p>
+  </div>
+
+  <h2>The wrapper</h2>
+  <p>Copy this into <code>components/LumiScript.tsx</code> (TypeScript) or <code>components/LumiScript.jsx</code> (plain JS):</p>
+  <pre><code>// components/LumiScript.tsx
+import { useEffect } from 'react';
+
+export function LumiScript({ publisherId }: { publisherId: string }) {
+  useEffect(() =&gt; {
+    if (document.querySelector('script[data-lumi]')) return;
+    const s = document.createElement('script');
+    s.src = `https://boostboss.ai/lumi/v1.js#${publisherId}`;
+    s.async = true;
+    s.setAttribute('data-lumi', 'browser-app');
+    document.head.appendChild(s);
+  }, [publisherId]);
+  return null;
+}</code></pre>
+
+  <h2>Use it</h2>
+  <p>Mount it once at your app root — the layout component for App Router, <code>_app.tsx</code> for Pages Router, or the root of your component tree for SPA setups:</p>
+  <pre><code>// app/layout.tsx (Next.js App Router)
+import { LumiScript } from '@/components/LumiScript';
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        &lt;LumiScript publisherId={process.env.NEXT_PUBLIC_LUMI_ID!} /&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+  <h2>Notes</h2>
+  <ul style="padding-left:22px;color:#4B5563;">
+    <li><strong>Guard against double-mount.</strong> The <code>data-lumi</code> attribute check prevents Next.js Strict Mode from injecting the script twice during dev. In production this is a no-op.</li>
+    <li><strong>Pass the publisher ID via env var.</strong> Use <code>NEXT_PUBLIC_LUMI_ID</code> (Next.js), <code>VITE_LUMI_ID</code> (Vite), or your framework's public-env convention. Don't hardcode it into the component.</li>
+    <li><strong>Privacy posture unchanged.</strong> The wrapper imposes no extra data collection — it just mounts the same script tag the main doc shows. See <a href="/privacy#ads">privacy policy</a>.</li>
+    <li><strong>You own this wrapper.</strong> If Lumi ships a v2 with new options, you decide when to update it. We don't push npm version bumps that surprise you.</li>
+  </ul>
+
+  <h2>What about Server Components?</h2>
+  <p>The wrapper above is a Client Component (it uses <code>useEffect</code>). That's intentional — the script tag must mount on the client to access <code>window</code> and <code>document</code>. If you're in a Server Component context, render the script tag directly via Next.js's <code>&lt;Script&gt;</code> component:</p>
+  <pre><code>import Script from 'next/script';
+
+&lt;Script
+  src={`https://boostboss.ai/lumi/v1.js#${process.env.NEXT_PUBLIC_LUMI_ID}`}
+  strategy="afterInteractive"
+/&gt;</code></pre>
+
+  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi v0.1.0 · 2026-06-20</p>
+</div>
+</body>
+</html>

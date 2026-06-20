@@ -167,6 +167,25 @@
     <p>Boost Boss serves ads inside publisher applications. We collect minimal data to render ads and measure impressions/clicks/conversions. We do not engage in cross‑site tracking of end users via cookies in publisher applications without publisher‑surfaced consent.</p>
     <p>Publishers are responsible for obtaining any necessary consent from their end users for ad serving and analytics in their applications, in accordance with applicable law (GDPR, CCPA, PIPL).</p>
 
+    <h3>5.1 Lumi for Browser App — runtime data posture</h3>
+    <p>When a publisher installs the Lumi for Browser App script tag (<code>&lt;script async src="https://boostboss.ai/lumi/v1.js#…"&gt;</code>), the runtime collects the following from each page view:</p>
+    <ul>
+      <li>The publisher's identifier (from the script's URL hash)</li>
+      <li>The host and path of the page where the script is loaded (e.g. <code>example.com/dashboard</code>)</li>
+      <li>An ephemeral session UUID generated per page load (not persisted)</li>
+      <li>For each ad request: a short context summary derived from the page's currently-visible content — used only to match ad relevance via Benna's intent scoring</li>
+    </ul>
+    <p><strong>What the Lumi runtime does NOT do:</strong></p>
+    <ul>
+      <li>Read content from any tab other than the active one</li>
+      <li>Persist any data in cookies, localStorage, sessionStorage, or IndexedDB</li>
+      <li>Read or modify user-typed credentials, payment fields, or any input flagged <code>type="password"</code> / <code>autocomplete="cc-*"</code></li>
+      <li>Track end-users across sites or sessions</li>
+      <li>Send unsolicited data to third-party domains beyond <code>boostboss.ai</code></li>
+    </ul>
+    <p>Publishers running a strict Content-Security-Policy must allowlist <code>boostboss.ai</code> in their <code>script-src</code> and <code>connect-src</code> directives so the runtime can load and send impression events. No other CSP changes are required.</p>
+    <p>React and Next.js publishers may prefer a component-style wrapper around the script tag. We document a 12-line wrapper at <a href="/docs/browser/react">/docs/browser/react</a>; it imposes no additional data collection beyond what the script tag itself does.</p>
+
     <h2 id="retention">6. Data retention</h2>
     <p>We retain personal information for as long as necessary to provide the Services and to comply with legal obligations:</p>
     <ul>

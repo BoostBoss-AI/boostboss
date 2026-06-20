@@ -88,11 +88,14 @@
     { "source": "/status", "destination": "/status.html" },
     { "source": "/playground", "destination": "/playground.html" },
     { "source": "/v1/ad-request", "destination": "/api/ad-request" },
+    { "source": "/lumi/v1.js", "destination": "/lumi-v1.js" },
     { "source": "/docs", "destination": "/docs.html" },
     { "source": "/docs/quickstart", "destination": "/docs-quickstart.html" },
     { "source": "/docs/activation-link", "destination": "/docs-activation-link.html" },
     { "source": "/docs/product-lifecycle", "destination": "/docs-product-lifecycle.html" },
     { "source": "/docs/api-reference", "destination": "/docs-api-reference.html" },
+    { "source": "/docs/browser", "destination": "/docs-browser.html" },
+    { "source": "/docs/browser/react", "destination": "/docs-browser-react.html" },
     { "source": "/docs/mcp", "destination": "/docs-mcp.html" },
     { "source": "/docs/js-snippet", "destination": "/docs-js-snippet.html" },
     { "source": "/docs/npm-sdk", "destination": "/docs-npm-sdk.html" },
@@ -147,6 +150,15 @@
         { "key": "Content-Type", "value": "application/javascript" },
         { "key": "Cache-Control", "value": "public, max-age=3600" },
         { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/lumi-v1.js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "X-Lumi-Door", "value": "browser-app" }
       ]
     },
     {
