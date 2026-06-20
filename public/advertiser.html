@@ -8640,17 +8640,11 @@
                 _billingHistory = [];
             }
 
-            // If no real data, show sample transactions (demo mode only)
-            if (_billingHistory.length === 0) {
-                const now = Date.now();
-                _billingHistory = [
-                    { date: new Date(now - 86400000 * 0).toISOString(), description: '[Sample] Campaign spend — Q2 Launch', type: 'spend', amount: -42.18, balance: 457.82, status: 'settled' },
-                    { date: new Date(now - 86400000 * 1).toISOString(), description: '[Sample] Campaign spend — Brand Awareness', type: 'spend', amount: -28.50, balance: 500.00, status: 'settled' },
-                    { date: new Date(now - 86400000 * 3).toISOString(), description: '[Sample] Deposit via PayPal', type: 'deposit', amount: 500.00, balance: 528.50, status: 'completed' },
-                    { date: new Date(now - 86400000 * 7).toISOString(), description: '[Sample] Campaign spend — Retargeting', type: 'spend', amount: -15.32, balance: 28.50, status: 'settled' },
-                    { date: new Date(now - 86400000 * 10).toISOString(), description: '[Sample] Initial deposit', type: 'deposit', amount: 100.00, balance: 43.82, status: 'completed' },
-                ];
-            }
+            // Sample/demo transactions removed 2026-06-20 — Andy onboarding
+            // adv5 found the [Sample] rows confusing on a brand-new account.
+            // The empty-state row in renderBillingTable() ('No transactions
+            // yet') is the honest fallback; sellers see it until their
+            // first real deposit / campaign spend lands.
 
             renderBillingTable();
         }
@@ -8661,7 +8655,16 @@
             tbody.innerHTML = '';
 
             if (_billingHistory.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">${_T('page.billing.empty','No transactions yet')}</td></tr>`;
+                // Friendlier empty state — matches the home chart's tone
+                // and points the seller at the next action.
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="padding:40px 24px;text-align:center;">` +
+                    '<div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:6px;">' +
+                        _T('page.billing.empty_title','No transactions yet') +
+                    '</div>' +
+                    '<div style="font-size:12.5px;color:#9CA3AF;line-height:1.55;max-width:380px;margin:0 auto;">' +
+                        _T('page.billing.empty_hint','Your deposits and campaign spend will appear here once activity starts. Click + 加值 (top-right of the home page) to fund your wallet.') +
+                    '</div>' +
+                    `</td></tr>`;
                 return;
             }
 
