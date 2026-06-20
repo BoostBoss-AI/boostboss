@@ -822,35 +822,17 @@ module.exports = async function handler(req, res) {
         .maybeSingle();
       if (error) return res.status(500).json({ error: error.message });
 
-      // Auto-create a default pricing plan from the modal's price/currency
-      // so the seller has something to attach proof to from day one.
-      // Plan starts in 'pending' audit status — NOT auto-approved like the
-      // backfilled legacy plans were. New products must go through the
-      // audit gate before they're purchasable. See [[pricing-plans-audit-policy]].
-      if (data && data.id && data.price != null && Number(data.price) > 0) {
-        try {
-          await sb.from("pricing_plans").insert({
-            product_id:     data.id,
-            plan_name:      pickDefaultPlanName(data.sku_type),
-            price:          data.price,
-            currency:       data.currency || "USD",
-            billing_period: pickDefaultBillingPeriod(data.sku_type),
-            // Task #156: default plan starts in 'pending' (plan-level audit
-            // is independent and gets resolved when admin approves the
-            // product). Product-level draft gate is what matters for
-            // keeping things out of the queue.
-            audit_status:   "pending",
-            is_active:      true,
-            is_recommended: true,
-            sort_order:     0,
-            features:       [],
-          });
-        } catch (e) {
-          // Don't fail the product create over a missing default plan —
-          // seller can add one manually on the Pricing plans sub-page.
-          console.warn(`[products] default plan auto-create failed for product ${data.id}:`, e.message);
-        }
-      }
+      // Auto-default-plan removed 2026-06-20 (Task #162). Sellers now add
+      // their pricing tiers explicitly in the Pricing & Affiliate tab —
+      // the Basics tab no longer collects price/currency/sku_type. This
+      // eliminates the two-sources-of-truth confusion where a hidden
+      // auto-plan would shadow the seller's intended pricing structure
+      // (Task #154 was the symptom; this is the structural fix).
+      //
+      // Pre-refactor products that still hit this code path will have
+      // body.price === undefined (modal now sends a blank hidden input)
+      // so the old auto-plan condition (data.price != null && > 0) would
+      // be false anyway. Removing the dead block to keep the file honest.
 
       return res.status(201).json({ product: data });
     }

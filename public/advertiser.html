@@ -4062,31 +4062,16 @@
                   <input type="url" class="form-input" name="image_url" placeholder="https://cdn.example.com/product.png">
                   <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Click 📷 Upload to pick a file, drag it onto the field, or paste a URL.</div>
                 </div>
-                <div class="form-group" style="display:grid;grid-template-columns:1fr 120px 160px;gap:12px;">
-                  <div>
-                    <label class="form-label">Price</label>
-                    <input type="number" class="form-input" name="price" min="0" max="100000" step="0.01" placeholder="49.00">
-                    <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Leave empty for postback-only products.</div>
-                  </div>
-                  <div>
-                    <label class="form-label">Currency</label>
-                    <select class="form-input" name="currency">
-                      <option value="USD" selected>USD</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
-                      <option value="JPY">JPY</option>
-                      <option value="TWD">TWD</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="form-label">SKU type</label>
-                    <select class="form-input" name="sku_type">
-                      <option value="one_time" selected>One-time purchase</option>
-                      <option value="bundle">Bundle</option>
-                      <option value="lifetime">Lifetime access</option>
-                      <option value="subscription_pack">Subscription pack</option>
-                    </select>
-                  </div>
+                <!-- Pricing fields removed from Basics 2026-06-20 (Task #162).
+                     Pricing & Affiliate tab is the single source of truth for
+                     price, currency, billing period. The legacy
+                     products.price / .currency / .sku_type columns stay in
+                     the DB for back-compat (pre-refactor products keep their
+                     values; the form submit handler now omits these fields
+                     entirely so PATCH updates leave existing values alone). -->
+                <div class="form-group" style="padding:14px 16px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;margin:18px 0;">
+                  <div style="font-size:13px;font-weight:700;color:#9A3412;margin-bottom:4px;">💰 Pricing lives in the Pricing &amp; Affiliate tab</div>
+                  <div style="font-size:12.5px;color:#7C2D12;line-height:1.55;">Add your pricing tiers explicitly (Starter / Pro / Team, or whatever fits). One tier is fine for a single-plan product; multiple tiers ship as a plan picker on the buyer page. You won't be able to submit for audit until at least one tier has a proof URL.</div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Default destination URL <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(fallback when no BB page)</span></label>
@@ -13772,13 +13757,15 @@ function pfParseScreenshots(text) {
 
                 const payload = {
                     // Basics
+                    // Task #162: price / currency / sku_type are no longer
+                    // collected here — Pricing & Affiliate tab is the single
+                    // source of truth. Omitting these fields means PATCH
+                    // updates won't touch existing values on legacy products,
+                    // and CREATE will let the DB defaults take over.
                     name:        trim(v('name')),
                     description: trim(v('description')) || null,
                     image_url:   trim(v('image_url')) || null,
                     default_url: trim(v('default_url')),
-                    price:       v('price') === '' ? null : Number(v('price')),
-                    currency:    v('currency') || 'USD',
-                    sku_type:    v('sku_type') || 'one_time',
 
                     // Pricing & Affiliate (the seller-set pool %, drives the split formula)
                     affiliate_pool_pct:     poolPct,
@@ -14503,7 +14490,14 @@ function pfParseScreenshots(text) {
             function renderList() {
                 const listEl = document.getElementById('ppInlineList');
                 if (!_plansCache.length) {
-                    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:12.5px;background:#F9FAFB;border-radius:8px;border:1px dashed #E5E7EB;">No plans yet. Click <strong>+ Add plan</strong> above.</div>';
+                    // Empty state — Task #162 makes this the primary call-to-action
+                    // since Pricing & Affiliate is now the only place pricing
+                    // lives. Sellers land here from Save and need to know
+                    // what to do next.
+                    listEl.innerHTML = '<div style="padding:28px 24px;text-align:center;background:linear-gradient(135deg,#FFF1F6,#FEF3F8);border-radius:10px;border:1px dashed #FBCFE8;">' +
+                        '<div style="font-size:14px;font-weight:700;color:#9D174D;margin-bottom:6px;">Add your first pricing tier 👋</div>' +
+                        '<div style="font-size:12.5px;color:#831843;line-height:1.55;max-width:420px;margin:0 auto;">Click the pink <strong>+ Add plan</strong> button above to define what buyers can purchase. One tier is fine for a single-plan product; add more for tiered pricing.</div>' +
+                        '</div>';
                     return;
                 }
                 listEl.innerHTML = _plansCache.map((p) => {
