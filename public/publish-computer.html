@@ -383,7 +383,7 @@
       <div class="how-step">
         <div class="num">1</div>
         <h4 data-i18n="publish.computer.how1_h4">Install in your desktop app</h4>
-        <p data-i18n="publish.computer.how1_p_html" data-i18n-html>Add <code>@boostbossai/lumi-desktop</code> to your Electron, Tauri, or native build. Init with your publisher ID.</p>
+        <p data-i18n="publish.computer.how1_p_html" data-i18n-html>Run <code>npx @boostbossai/install-desktop YOUR_PUBLISHER_ID</code> in your Electron, Tauri, or native build. The CLI wires up the SDK and initializes it for you.</p>
       </div>
       <div class="how-step">
         <div class="num">2</div>
@@ -404,13 +404,15 @@
   <div class="wrap">
     <span class="section-eyebrow" data-i18n="publish.computer.snippet_eyebrow">Integration snippet</span>
     <h2 class="section-h" data-i18n="publish.computer.snippet_h2">A few lines, your desktop app.</h2>
-<pre class="code-block"><span class="cm">// In your Electron, Tauri, or native renderer:</span>
-<span class="kw">import</span> { Lumi } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-desktop'</span>;
-<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">Lumi</span>({ publisherId: <span class="str">'pub_xxx'</span> });
+<pre class="code-block"><span class="cm"># One-time install in your Electron, Tauri, or native project root:</span>
+<span class="fn">npx</span> @boostbossai/install-desktop pub_xxx
 
-<span class="cm">// Mount any of 10 placements:</span>
-lumi.<span class="fn">mount</span>(<span class="str">'#sidebar-slot'</span>, { format: <span class="str">'sidebar'</span> });
-lumi.<span class="fn">mount</span>(<span class="str">'#preroll'</span>, { format: <span class="str">'preroll-video'</span> });</pre>
+<span class="cm"># That's it. The CLI injects this into your renderer HTML for you:</span>
+&lt;<span class="kw">script</span> async src=<span class="str">"https://boostboss.ai/lumi/v1.js#publisherId=pub_xxx&amp;door=mcp"</span>&gt;&lt;/<span class="kw">script</span>&gt;
+
+<span class="cm"># All 10 placements auto-mount on first launch. Window banner,
+# sidebar slot, modal interstitial, pre-roll video, and more.
+# No JS imports needed — placements attach to your renderer's DOM.</span></pre>
     <p class="code-caption" data-i18n="publish.computer.snippet_caption_html" data-i18n-html>Sound video allowed — desktop apps aren't subject to browser autoplay rules. <a href="/docs/desktop">Full docs →</a></p>
 
     <!-- PRODUCT SHOT: BriefBot Desktop with sponsored block in response -->
