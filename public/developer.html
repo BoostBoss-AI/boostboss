@@ -2477,30 +2477,117 @@
                     </div>
                 </div>
 
-                <!-- Door 4: Lumi for Mobile App (iOS / Android / React Native) -->
+                <!-- Door 4: Lumi for Mobile App (iOS / Android / React Native)
+                     Three-flavor split mirroring AppLovin's pattern. RN is the
+                     recommended path (covers ~80% of AI mobile apps and links
+                     the native iOS + Android SDKs underneath); native iOS and
+                     native Android are documented for publishers who don't
+                     ship React Native. The CLI auto-detects project type but
+                     publishers usually want to see the exact command for
+                     their stack — hence the tabs. -->
                 <div class="fw-panel" id="fw-rest-api" style="display: none;">
-                    <div style="margin-bottom: 14px;">
-                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Run this in your React Native project — that's the whole install</h4>
-                        <div class="code-block">
-                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')" data-t="common.copy">Copy</button>
-                            <pre id="code-rest-env">npx @boostbossai/install-mobile <span id="rest-pub-token-inline">pub_abc</span></pre>
+                    <div style="margin-bottom: 10px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 4px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Mobile App — pick your stack</h4>
+                        <div style="font-size:12px;color:#6B7280;line-height:1.55;margin-bottom:10px;">
+                            React Native covers most AI mobile apps. If your app is native iOS (Swift / Obj-C) or native Android (Kotlin / Java), use those tabs instead — the underlying SDK is the same, just packaged for each ecosystem's native package manager.
                         </div>
-                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
-                            One command. The CLI detects Expo vs bare React Native, installs the runtime, wraps your <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">App.tsx</code> root with <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">&lt;LumiProvider&gt;</code>, and runs <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">pod install</code> on Mac. Rebuild your app — the <strong>Mobile App</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. Uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-mobile --uninstall</code>
+                        <div id="mobile-flavor-tabs" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                            <button type="button" class="mobile-flavor-tab" data-flavor="rn" style="background:#FF2D78;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">React Native (recommended)</button>
+                            <button type="button" class="mobile-flavor-tab" data-flavor="ios" style="background:#F3F4F6;color:#374151;border:0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Native iOS</button>
+                            <button type="button" class="mobile-flavor-tab" data-flavor="android" style="background:#F3F4F6;color:#374151;border:0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Native Android</button>
                         </div>
                     </div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
-                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
-                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🏆 Rewarded video</div>
-                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">The highest-CPM format in adtech ($25–50 CPM). User opts in, you grant them a reward. Drop in anywhere: <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">&lt;RewardedVideo onReward={fn} /&gt;</code></div>
+
+                    <!-- React Native flavor (default visible) -->
+                    <div class="mobile-flavor-panel" data-flavor="rn">
+                        <div style="margin-bottom: 14px;">
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')" data-t="common.copy">Copy</button>
+                                <pre id="code-rest-env">npx @boostbossai/install-mobile <span id="rest-pub-token-inline">pub_abc</span></pre>
+                            </div>
+                            <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                                One command. The CLI detects Expo vs bare React Native, installs the runtime, wraps your <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">App.tsx</code> root with <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">&lt;LumiProvider&gt;</code>, and runs <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">pod install</code> on Mac. Rebuild — the <strong>Mobile App</strong> verify badge flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. Uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-mobile --uninstall</code>
+                            </div>
                         </div>
-                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
-                            <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">📱 Expo + Bare RN</div>
-                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">CLI auto-detects which you have and patches the right entry point. Expo SDK 50+ or React Native 0.74+.</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                            <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                                <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🏆 Rewarded video</div>
+                                <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Highest-CPM format in adtech ($25–50 CPM). User opts in, you grant them a reward. Drop in: <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">&lt;RewardedVideo onReward={fn} /&gt;</code></div>
+                            </div>
+                            <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                                <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">📱 Expo + Bare RN</div>
+                                <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">CLI auto-detects and patches the right entry point. Expo SDK 50+ or React Native 0.74+.</div>
+                            </div>
+                            <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                                <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🎵 Sound + video</div>
+                                <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Native apps escape browser autoplay rules. Pre-roll, rewarded, full-screen — all sound-on, App Store / Play Store compliant.</div>
+                            </div>
                         </div>
-                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
-                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🎵 Sound + video</div>
-                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Native apps escape browser autoplay rules. Pre-roll, rewarded, full-screen — all sound-on, App Store / Play Store compliant.</div>
+                    </div>
+
+                    <!-- Native iOS flavor -->
+                    <div class="mobile-flavor-panel" data-flavor="ios" style="display:none;">
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size:11.5px;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.5;">
+                                <strong>Status:</strong> CocoaPods + Swift Package Manager scaffolds are in place; native Swift implementation ships in a follow-up sprint. The publisher ID below is valid and will start earning the moment the native SDK goes live — no re-registration needed.
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:8px 0 6px;">CocoaPods</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-podfile')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-podfile"># Podfile
+pod 'BoostBossLumi', '~&gt; 0.1.0'</pre>
+                            </div>
+                            <div class="code-block" style="margin-top:6px;">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-pod-install')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-pod-install">pod install</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">Or — Swift Package Manager</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-spm')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-spm"># Xcode → File → Add Packages
+https://github.com/boostbossai/boostboss</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">Then in AppDelegate</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-init')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-init">import BoostBossLumi
+
+LumiSDK.configure(publisherId: "<span id="ios-pub-token-inline">pub_abc</span>")</pre>
+                            </div>
+                            <div style="font-size:12px;color:#6B7280;margin-top:8px;line-height:1.55;">
+                                iOS 14+ · Swift 5.5+ · arm64 (device) + arm64/x86_64 (simulator). Per <a href="/publisher-agreement#section-4" style="color:#FF2D78;text-decoration:underline;">Publisher Agreement §4.1</a>, <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">configure(publisherId:)</code> auto-mounts the BottomBanner + SplashSponsor placements on first launch. Suppress individually with <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">LumiSDK.shared.suppress(.splashSponsor)</code>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Native Android flavor -->
+                    <div class="mobile-flavor-panel" data-flavor="android" style="display:none;">
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size:11.5px;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.5;">
+                                <strong>Status:</strong> Gradle + Maven scaffolds are in place; native Kotlin implementation ships in a follow-up sprint. The publisher ID below is valid and will start earning the moment the native SDK goes live — no re-registration needed.
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:8px 0 6px;">build.gradle.kts (app module)</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-android-gradle')" data-t="common.copy">Copy</button>
+                                <pre id="code-android-gradle">dependencies {
+    implementation("ai.boostboss:lumi:0.1.0")
+}</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">Then in Application.kt</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-android-init')" data-t="common.copy">Copy</button>
+                                <pre id="code-android-init">import ai.boostboss.lumi.LumiSDK
+
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        LumiSDK.configure(this, "<span id="android-pub-token-inline">pub_abc</span>")
+    }
+}</pre>
+                            </div>
+                            <div style="font-size:12px;color:#6B7280;margin-top:8px;line-height:1.55;">
+                                Android 6.0+ (API 23) · Kotlin 1.9+ / Java 17 source compat · arm64-v8a + armeabi-v7a + x86_64. Per <a href="/publisher-agreement#section-4" style="color:#FF2D78;text-decoration:underline;">Publisher Agreement §4.1</a>, <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">configure(context, publisherId)</code> auto-mounts BottomBanner + SplashSponsor. Suppress with <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">LumiSDK.suppress(Placement.SPLASH_SPONSOR)</code>.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4158,12 +4245,46 @@
             // back. UUID is the most reliable identifier we have
             // client-side (app_id is sometimes missing on fresh accounts;
             // api_key is sensitive).
-            ['js-pub-token-inline', 'mcp-pub-token-inline', 'ext-pub-token-inline', 'rest-pub-token-inline']
+            ['js-pub-token-inline', 'mcp-pub-token-inline', 'ext-pub-token-inline',
+             'rest-pub-token-inline', 'ios-pub-token-inline', 'android-pub-token-inline']
                 .forEach(function (id) {
                     const el = document.getElementById(id);
                     if (el && userProfile.id) el.textContent = userProfile.id;
                 });
         }
+
+        // 3-flavor Mobile App install tabs (RN / iOS / Android). Switches
+        // which .mobile-flavor-panel is visible and which tab button looks
+        // active. Wired once on DOMContentLoaded; idempotent if the panel
+        // isn't in the current route view.
+        (function wireMobileFlavorTabs() {
+            const init = () => {
+                const tabs = document.querySelectorAll('.mobile-flavor-tab');
+                if (!tabs.length) return false;
+                tabs.forEach(btn => {
+                    if (btn.__lumiWired) return;
+                    btn.__lumiWired = true;
+                    btn.addEventListener('click', () => {
+                        const want = btn.getAttribute('data-flavor');
+                        document.querySelectorAll('.mobile-flavor-tab').forEach(t => {
+                            const active = t.getAttribute('data-flavor') === want;
+                            t.style.background = active ? '#FF2D78' : '#F3F4F6';
+                            t.style.color      = active ? '#fff'    : '#374151';
+                            t.style.fontWeight = active ? '700'     : '600';
+                        });
+                        document.querySelectorAll('.mobile-flavor-panel').forEach(p => {
+                            p.style.display = p.getAttribute('data-flavor') === want ? '' : 'none';
+                        });
+                    });
+                });
+                return true;
+            };
+            if (!init()) {
+                // Panel not in DOM yet (route not entered) — retry on route-change events.
+                document.addEventListener('lumi:route-changed', init);
+                window.addEventListener('hashchange', init);
+            }
+        })();
 
         // Scroll to the detailed Integration Test panel and auto-fire it.
         // Phase F: also kick the verify poller into "detecting" mode so the
