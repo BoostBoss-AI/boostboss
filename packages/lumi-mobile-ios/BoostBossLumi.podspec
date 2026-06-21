@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
   DESC
 
   s.homepage         = 'https://boostboss.ai/publish/mobile'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
+  s.license          = { :type => 'MIT', :file => 'packages/lumi-mobile-ios/LICENSE' }
   s.author           = { 'Boost Boss' => 'support@boostboss.ai' }
   s.source           = {
     :git => 'https://github.com/BoostBoss-AI/boostboss.git',
@@ -33,7 +33,12 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '14.0'
   s.swift_versions        = ['5.5', '5.6', '5.7', '5.8', '5.9']
 
-  s.source_files = 'Sources/BoostBossLumi/**/*.{swift,h,m}'
+  # Sources live in a subdirectory of the cloned monorepo, so the glob is
+  # rooted at the repo root (where CocoaPods clones), not at the podspec
+  # file's location. Install via:
+  #   pod 'BoostBossLumi',
+  #       :podspec => 'https://raw.githubusercontent.com/BoostBoss-AI/boostboss/main/packages/lumi-mobile-ios/BoostBossLumi.podspec'
+  s.source_files = 'packages/lumi-mobile-ios/Sources/BoostBossLumi/**/*.{swift,h,m}'
   s.frameworks   = 'UIKit', 'Foundation', 'StoreKit'  # StoreKit for SKAdNetwork
 
   s.weak_frameworks = 'AdServices'  # iOS 14.3+ install-referrer-style API
