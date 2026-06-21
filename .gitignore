@@ -9,3 +9,4 @@ benna-ai/
 .vercel
 .env*.local
 launch-kit/outreach-batch-*.csv
+packages/.lumi-mobile-*-v*
