@@ -114,6 +114,21 @@
   <h3 id="safety">What auto-mount never touches</h3>
   <p>The runtime refuses to inject into structural risky containers: code blocks (<code>pre</code> / <code>code</code> / <code>.monaco-editor</code> / <code>.CodeMirror</code>), form inputs (<code>input</code> / <code>textarea</code> / <code>select</code> / <code>[contenteditable]</code>), system messages (<code>[role="alert"]</code> / <code>[role="status"]</code>), and site chrome (<code>header</code> / <code>nav</code> / <code>[role="banner"]</code> / <code>[role="navigation"]</code>). If a placement causes a real UX issue, email <a href="mailto:support@boostboss.ai">support@boostboss.ai</a> and we'll relocate it.</p>
 
+  <h2 id="compatibility">Compatibility</h2>
+  <p><strong>Covers:</strong></p>
+  <ul>
+    <li>Any web app with DOM access — React, Vue, Svelte, Solid, Preact, vanilla JS, plain HTML</li>
+    <li>Any SSR framework — Next.js, Remix, Nuxt, SvelteKit, Astro (auto-mount runs after hydration)</li>
+    <li>Any LLM provider — OpenAI, Anthropic, Gemini, Mistral, Llama, local models. Lumi attaches at the rendering surface, not the API call.</li>
+    <li>Any modern browser — Chrome, Edge, Safari, Firefox, Brave, Arc (modern <code>MutationObserver</code> + <code>IntersectionObserver</code> support, which is universal post-2018)</li>
+  </ul>
+  <p><strong>Does not cover:</strong></p>
+  <ul>
+    <li>Flutter Web — its rendering pipeline doesn't expose a real DOM the runtime can read</li>
+    <li>WASM-only apps with no DOM root (rare, but Yew / Leptos / Sycamore in canvas-only mode count)</li>
+    <li>Apps that strip <code>&lt;script&gt;</code> tags from a sandboxed iframe at runtime (mostly enterprise email previews)</li>
+  </ul>
+
   <h2 id="csp">Strict Content-Security-Policy</h2>
   <p>If your site enforces a strict CSP header, add <code>boostboss.ai</code> to two directives:</p>
   <pre><code>Content-Security-Policy:

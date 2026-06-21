@@ -52,10 +52,27 @@
     <li><strong>System notification</strong> · ~$5.00 RPM — sparingly, OS notification</li>
   </ul>
 
-  <h2 id="tauri">Tauri</h2>
-  <p>v1.2 ships Electron support. Tauri integration is coming in v1.3. For now, manually add this to your renderer HTML's <code>&lt;head&gt;</code>:</p>
-  <pre><code>&lt;script async src="https://boostboss.ai/lumi/v1.js#YOUR_PUBLISHER_ID"&gt;&lt;/script&gt;</code></pre>
+  <h2 id="compatibility">Compatibility</h2>
+  <p><strong>Covers:</strong></p>
+  <ul>
+    <li>Electron — any version with a renderer HTML file, current LTS recommended</li>
+    <li>Tauri — Rust shell + WebView renderer (add the script tag manually + the CSP entries below)</li>
+    <li>Any desktop app that renders its UI in a WebView (NW.js, Neutralino) — install via the script tag</li>
+    <li>macOS, Windows, Linux — the runtime is platform-agnostic JavaScript inside your renderer</li>
+  </ul>
+  <p><strong>Does not cover:</strong></p>
+  <ul>
+    <li>Native macOS apps in Swift / Obj-C using AppKit or SwiftUI — no WebView surface to attach to</li>
+    <li>Native Windows apps in WinUI / WPF / Win32 — same reason</li>
+    <li>Native Linux apps in GTK / Qt — same reason</li>
+    <li>Flutter Desktop — no DOM, no script tag entry point</li>
+  </ul>
+
+  <h3 id="tauri">Tauri install</h3>
+  <p>The install CLI's Electron auto-patch doesn't run on Tauri projects (different file layout). Add the script tag manually to your renderer HTML's <code>&lt;head&gt;</code>:</p>
+  <pre><code>&lt;script async src="https://boostboss.ai/lumi/v1.js#YOUR_PUBLISHER_ID" data-lumi-door="mcp"&gt;&lt;/script&gt;</code></pre>
   <p>And add to your <code>tauri.conf.json</code> CSP: <code>script-src https://boostboss.ai; connect-src https://boostboss.ai;</code></p>
+  <p>The <code>data-lumi-door="mcp"</code> attribute is what tells the runtime to fire the Computer App handshake instead of the Browser App one — same shared runtime, different verify badge.</p>
 
   <h2 id="uninstall">Uninstall</h2>
   <p>From the same project root:</p>

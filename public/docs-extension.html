@@ -61,8 +61,20 @@
   <p>The Chrome Web Store has been Manifest V3-only since 2024. If your extension is still on V2, migrate first (<a href="https://developer.chrome.com/docs/extensions/migrating/">Chrome's guide</a>) and re-run the installer. The CLI errors out on V2 with a link to the migration guide.</p>
   <p>The runtime is bundled into your extension's <code>node_modules/@boostbossai/lumi-extension/dist/</code> at install time — no remote code loading, no <code>eval</code>, fully Manifest V3 compliant.</p>
 
-  <h2 id="firefox-safari">Firefox / Safari</h2>
-  <p>v1.2 supports Chrome / Edge / Brave / Opera (Chromium MV3). Firefox port lands in v1.3. Safari Web Extensions are a separate effort (App Store distribution required) — v1.4. Track progress at <a href="/publish/dashboard">your dashboard</a>.</p>
+  <h2 id="compatibility">Compatibility</h2>
+  <p><strong>Covers:</strong></p>
+  <ul>
+    <li>Chrome — Manifest V3, the Chrome Web Store's only supported manifest since 2024</li>
+    <li>Edge, Brave, Opera, Arc, Vivaldi — Chromium-based browsers that share Chrome's MV3 extension format</li>
+    <li>Popup, side panel, new-tab override, content scripts, service workers</li>
+  </ul>
+  <p><strong>Does not cover:</strong></p>
+  <ul>
+    <li>Firefox WebExtensions — Mozilla maintains a different manifest format (MV2 + their own MV3 dialect); no Lumi port planned</li>
+    <li>Safari Web Extensions — require App Store distribution + native Xcode wrapper; not on roadmap</li>
+    <li>Manifest V2 extensions — migrate to V3 first (<a href="https://developer.chrome.com/docs/extensions/migrating/">Chrome's guide</a>) and re-run the installer</li>
+  </ul>
+  <p style="font-size:13px;color:#9CA3AF;">Chrome MV3 covers ~95% of extension installs in the AI / productivity / developer-tool categories that Boost Boss serves. If your distribution depends on Firefox or Safari, ship Chrome first and we'll fund a port if the impression volume justifies it.</p>
 
   <h2 id="uninstall">Uninstall</h2>
   <pre><code>npx @boostbossai/install-extension --uninstall</code></pre>

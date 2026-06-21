@@ -59,13 +59,32 @@ async function main() {
     process.exit(0);
   }
 
-  const publisherId = argv[0];
+  // Parse --platform=ios|android|rn (force flavor, skip auto-detect).
+  let forcedPlatform = null;
+  const platformArg = argv.find((a) => a.startsWith('--platform='));
+  if (platformArg) {
+    const val = platformArg.split('=')[1];
+    if (!['ios', 'android', 'rn', 'react-native'].includes(val)) {
+      banner.error(
+        `Unknown --platform value: "${val}".`,
+        [
+          'Valid: --platform=ios | --platform=android | --platform=rn',
+          'Omit to auto-detect from your project files.',
+        ]
+      );
+      process.exit(1);
+    }
+    forcedPlatform = val;
+  }
+
+  // First positional arg that isn't a flag is the publisher ID.
+  const publisherId = argv.find((a) => !a.startsWith('-') && !a.startsWith('--'));
 
   if (!publisherId) {
     banner.error(
       'Missing publisher ID.',
       [
-        'Usage: npx @boostbossai/install-mobile <publisherId>',
+        'Usage: npx @boostbossai/install-mobile <publisherId> [--platform=ios|android|rn]',
         `Find your publisher ID at ${DASHBOARD_URL}`,
       ]
     );
@@ -84,21 +103,21 @@ async function main() {
     process.exit(1);
   }
 
-  return install(publisherId);
+  return install(publisherId, forcedPlatform);
 }
 
-async function install(publisherId) {
+async function install(publisherId, forcedPlatform) {
   const cwd = process.cwd();
 
-  // 1. Detect project type.
+  // 1. Detect project type — RN, native iOS, or native Android.
   let detection;
   try {
-    detection = await detectProjectType(cwd);
+    detection = await detectProjectType(cwd, { forcedPlatform });
   } catch (err) {
     banner.error(
-      'Could not read ./package.json in this directory.',
+      'Could not read project files in this directory.',
       [
-        'Run this command from the root of your React Native project.',
+        'Run this command from the root of your React Native, Xcode, or Gradle project.',
         `See ${DOCS_URL} for help.`,
         err && err.message ? err.message : String(err),
       ]
@@ -108,13 +127,33 @@ async function install(publisherId) {
 
   if (detection.type === 'unknown') {
     banner.error(
-      "This doesn't look like a React Native project.",
+      "This doesn't look like a mobile project.",
       [
-        'Lumi for Mobile App requires Expo or bare React Native.',
+        'Lumi for Mobile App looks for one of:',
+        '  - package.json with react-native or expo dep (React Native)',
+        '  - Podfile / Package.swift / *.xcworkspace / *.xcodeproj (native iOS)',
+        '  - build.gradle(.kts) / settings.gradle(.kts) (native Android)',
+        'Force a flavor with --platform=ios|android|rn if auto-detect is wrong.',
         `See ${DOCS_URL} for help.`,
       ]
     );
     process.exit(1);
+  }
+
+  // Print detected platform before doing any work so the user can ctrl-C if wrong.
+  process.stdout.write(
+    `  Detected platform: ${detection.type}` +
+    (detection.marker ? ` (from ${detection.marker})` : '') +
+    `\n`
+  );
+
+  // Native iOS + native Android: scaffolded but not yet implemented.
+  // Don't touch publisher files — print the scaffold status and exit cleanly.
+  if (detection.type === 'ios-native') {
+    return scaffoldedNotice('iOS', publisherId);
+  }
+  if (detection.type === 'android-native') {
+    return scaffoldedNotice('Android', publisherId);
   }
 
   const projectType = detection.type; // 'expo' | 'bare-rn'
@@ -370,7 +409,70 @@ function buildDetectedLabel(detection) {
       ? `Bare React Native ${detection.rnVersion}`
       : 'Bare React Native';
   }
+  if (detection.type === 'ios-native') return 'Native iOS';
+  if (detection.type === 'android-native') return 'Native Android';
   return 'React Native';
+}
+
+/**
+ * Native iOS or native Android project detected. The CocoaPods / Maven
+ * packages exist as scaffolds in this repo but aren't published yet, so
+ * the CLI prints the manual install steps + a status note rather than
+ * trying to patch publisher files. See packages/lumi-mobile-{ios,android}/
+ * SCAFFOLD-STATUS.md.
+ */
+function scaffoldedNotice(platform, publisherId) {
+  const isIos = platform === 'iOS';
+  const c = banner.colors || {};
+  const lines = [];
+  lines.push('');
+  lines.push(
+    `  ${c.pink || ''}${c.bold || ''}▲ Lumi for Mobile App — ${platform} native${c.reset || ''}`
+  );
+  lines.push('');
+  lines.push(
+    `  ${c.yellow || ''}⚠${c.reset || ''}  Native ${platform} SDK is scaffolded but not yet published.`
+  );
+  lines.push('');
+  lines.push('  The package is registered, the install path is documented,');
+  lines.push('  and the public API surface is defined. Real Swift / Kotlin');
+  lines.push('  implementation ships in a follow-up sprint.');
+  lines.push('');
+  lines.push('  Until then, your options:');
+  lines.push('');
+  if (isIos) {
+    lines.push('   1. If your app has a WebView surface (Capacitor, Cordova,');
+    lines.push('      Ionic, native WebView), use the Browser App SDK there:');
+    lines.push(
+      `      ${c.cyan || ''}<script async src="https://boostboss.ai/lumi/v1.js#${publisherId}"></script>${c.reset || ''}`
+    );
+    lines.push('');
+    lines.push('   2. Subscribe to release notifications at');
+    lines.push('      https://boostboss.ai/docs/mobile for the iOS SDK go-live date.');
+    lines.push('');
+    lines.push('   3. Reach out to support@boostboss.ai if you have an');
+    lines.push('      iOS-native AI app launching soon — we may accelerate.');
+  } else {
+    lines.push('   1. If your app has a WebView surface (Cordova, Ionic,');
+    lines.push('      Capacitor, native WebView), use the Browser App SDK there:');
+    lines.push(
+      `      ${c.cyan || ''}<script async src="https://boostboss.ai/lumi/v1.js#${publisherId}"></script>${c.reset || ''}`
+    );
+    lines.push('');
+    lines.push('   2. Subscribe to release notifications at');
+    lines.push('      https://boostboss.ai/docs/mobile for the Android SDK go-live date.');
+    lines.push('');
+    lines.push('   3. Reach out to support@boostboss.ai if you have an');
+    lines.push('      Android-native AI app launching soon — we may accelerate.');
+  }
+  lines.push('');
+  lines.push(
+    `  Your publisher ID ${c.bold || ''}${publisherId}${c.reset || ''} is valid — it'll work as soon as`
+  );
+  lines.push('  the native SDK ships, no re-registration required.');
+  lines.push('');
+  process.stdout.write(lines.join('\n') + '\n');
+  process.exit(0);
 }
 
 main().catch((err) => {

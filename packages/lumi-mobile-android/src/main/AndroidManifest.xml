@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- INTERNET is required to call /api/lumi-fetch + /api/track. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        Optional: ACCESS_NETWORK_STATE lets the SDK avoid firing requests
+        when the device is offline (saves battery, prevents queue buildup).
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!--
+        AD_ID is the new Google-mandated permission for reading the
+        advertising ID on Android 13+. Boost Boss does NOT read AD_ID by
+        default; we use contextual matching instead. If a publisher opts
+        into ID-based attribution, the install CLI will append this
+        permission to their manifest with an explanatory comment.
+    -->
+
+</manifest>
