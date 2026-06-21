@@ -623,10 +623,10 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
         <input type="text" id="crm_app_name" placeholder="The AI app, extension, or bot you ship" maxlength="120">
         <label for="crm_integration">Primary integration door</label>
         <select id="crm_integration">
-          <option value="mcp">MCP server (Claude Desktop, Cursor, Cline)</option>
-          <option value="js-snippet">JS snippet (AI apps, websites)</option>
-          <option value="npm-sdk">NPM SDK (browser extensions, Electron)</option>
-          <option value="rest-api">REST API (Discord, Telegram, Slack bots)</option>
+          <option value="js-snippet">Browser App — AI chat app, web AI tool, hosted site</option>
+          <option value="npm-sdk">Browser Extension App or Mobile App — Chrome/Firefox extension, iOS/Android/RN app</option>
+          <option value="mcp">Computer App — desktop app, Electron, MCP server (Claude Desktop, Cursor, Cline)</option>
+          <option value="rest-api">Other — REST API, Discord/Telegram/Slack bot, custom integration</option>
         </select>
       </div>
     </div>
@@ -716,10 +716,10 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
           <label for="app_type">What are you building?</label>
           <select id="app_type" name="app_type">
             <option value="">Select…</option>
-            <option value="js-snippet">AI chat app or web AI tool</option>
-            <option value="mcp">MCP server / tool for AI agents (Claude Desktop, Cursor, etc.)</option>
-            <option value="npm-sdk">Browser extension or desktop AI app</option>
-            <option value="rest-api">Discord / Telegram / Slack bot</option>
+            <option value="js-snippet">Browser App — AI chat app or web AI tool</option>
+            <option value="npm-sdk">Browser Extension App or Mobile App — extension or iOS/Android/RN</option>
+            <option value="mcp">Computer App — Electron, desktop, MCP server (Claude Desktop, Cursor)</option>
+            <option value="rest-api">Other — Discord/Telegram/Slack bot, REST API</option>
             <option value="multiple">Multiple of the above</option>
             <option value="other">Not sure / something else</option>
           </select>
