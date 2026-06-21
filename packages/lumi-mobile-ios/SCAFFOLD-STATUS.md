@@ -1,65 +1,70 @@
-# BoostBossLumi (iOS) — Scaffold Status
+# BoostBossLumi (iOS) — v0.1 Status
 
-Package directory exists; Swift implementation does not. Below is the
-build order when a real iOS engineering sprint kicks off.
+v0.1.0-alpha shipped 2026-06-21. Real Swift implementation, not stubs.
 
-## What's here
+## What works in v0.1
 
-- `BoostBossLumi.podspec` — CocoaPods spec ready for `pod trunk push`
-- `Package.swift` — Swift Package Manager manifest
-- `Sources/BoostBossLumi/LumiSDK.swift` — public surface stub
-- `README.md` — install + integration story for publishers
-- `LICENSE` — MIT
+- `LumiSDK.configure(publisherId:)` fires the handshake → publisher's
+  Mobile App verify badge flips from "Not started" to "Connected"
+- BottomBanner auto-mounts in the key window's bottom safe area on
+  first launch (UIKit, supports both UIScene and legacy AppDelegate
+  apps)
+- SplashSponsor shows full-screen once per cold launch (module-level
+  flag prevents re-show within a launch)
+- Impression beacons fire to the URL returned with each ad payload
+- Tap on banner / CTA / splash → opens click URL via `UIApplication.open`
+- `LumiSDK.shared.suppress(.bottomBanner)` etc. to suppress individual
+  placements per Publisher Agreement §4.1
 
-## What's not here yet
+## What v0.1 does NOT cover
 
-- Real implementation of `LumiSDK.configure()` —
-  handshake, SKAdNetwork registration, ATT prompt, auto-mount
-- `BottomBanner` UIView subclass
-- `SplashSponsor` UIWindow overlay
-- `Interstitial` view controller
-- `RewardedVideo` AVPlayer integration
-- `Sources/BoostBossLumi/Networking.swift` — `URLSession`-based
-  client for `/api/lumi-fetch` + `/api/track`
-- `Sources/BoostBossLumi/SKAdNetworkBridge.swift` —
-  `SKAdNetwork.registerAppForAdNetworkAttribution()` +
-  conversion-value updates
-- `Tests/BoostBossLumiTests/` — XCTest suite
+- **SKAdNetwork** — Boost Boss isn't yet registered with Apple, so no
+  install attribution. Impression CPM still works, but CPI campaigns
+  need this. Apple registration takes ~1 week wall time once submitted.
+- **AppTrackingTransparency (ATT) prompt** — not displayed; we use
+  contextual matching only (no IDFA) for now
+- **Rewarded video** — separate placement, ~1 week of work to add
+  AVPlayer + skip gate
+- **Interstitial / Pre-roll video** — same story
+- **Inline placements** (citation, chip, card, loading-state) — need
+  publisher-side container API; defer to RN wrapper for now
 
-## Build order when engineering starts
+## Compatibility
 
-1. **Networking client** — `URLSession`-backed POST to
-   `/api/lumi-fetch` and `/api/track`. Mirror the door key
-   `"ios-native"`. Returns an `Ad` struct mapping the JSON.
-2. **Handshake on configure** — fire impression to `/api/track`
-   with `placement_id="lumi_handshake"`, `integration_method="ios-native"`,
-   so the publisher's Mobile App verify badge flips.
-3. **BottomBanner UIView** — auto-mounted in `keyWindow`,
-   pinned to safe-area bottom, dismissable. Fetch from
-   `/api/lumi-fetch` with placement `"bottom_banner"`.
-4. **SplashSponsor overlay** — present once per cold launch
-   (module-level `static var` flag like the RN provider). Full-screen
-   Modal with pink-band background.
-5. **Interstitial + Rewarded** — view controllers presented modally.
-   Rewarded requires AVPlayer + a 5-second skip gate.
-6. **SKAdNetwork registration** — call
-   `SKAdNetwork.registerAppForAdNetworkAttribution()` on iOS 14.0+
-   inside `configure()`. Wire conversion-value updates for downstream
-   signups/purchases.
-7. **ATT prompt** — only if `NSUserTrackingUsageDescription` is set.
-   Optional — if not set, BB falls back to contextual matching.
-8. **Tests** — XCTest on a real iPhone simulator, snapshot tests for
-   each placement.
+- iOS 14.0+ (matches SKAdNetwork v1 availability)
+- Swift 5.5+ / Obj-C
+- arm64 (device), arm64 + x86_64 (simulator)
 
-## Estimated build effort
+## Known v0.1 limitations + planned fixes
 
-3–4 weeks of focused iOS engineering, including SKAdNetwork
-registration paperwork with Apple (~1 week wall time) and one round
-of TestFlight smoke testing with a friendly publisher.
+- BottomBanner uses fixed 64×64 image dimensions — should scale to
+  intrinsic content size in v0.2
+- No retry on network failure — single attempt then quiet failure
+- No request batching when SDK initializes before window is ready
+- No localization support (CTA labels are English-only fallback)
 
-## When to start
+## Install paths
 
-Catalyst-driven: build when CPI campaigns start landing on the
-Mobile App door and the impression-only path no longer captures
-the revenue advertisers expect to pay. Until then, the RN wrapper
-is fine and the scaffold serves as the public commitment.
+v0.1 ships via git source (no CocoaPods Trunk / SPM registry needed):
+
+```ruby
+# Podfile
+pod 'BoostBossLumi', :git => 'https://github.com/boostbossai/boostboss', :branch => 'main'
+```
+
+Or Swift Package Manager:
+
+```
+Xcode → File → Add Packages → https://github.com/boostbossai/boostboss
+```
+
+Both source paths point at `packages/lumi-mobile-ios/`. CocoaPods Trunk
+publication and SPM registry submission come once v1.0 is stable.
+
+## v0.2 roadmap
+
+1. SKAdNetwork registration + integration
+2. ATT prompt (publisher-opt-in)
+3. Rewarded video (AVPlayer + skip gate)
+4. Image scaling fixes
+5. Retry + backoff on network failure
