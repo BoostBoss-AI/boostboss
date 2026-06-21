@@ -2,7 +2,7 @@
 // Lumi for Mobile App — native iOS SDK, Swift Package Manager manifest.
 //
 // Publishers using SPM add this URL in Xcode → File → Add Packages:
-//   https://github.com/boostbossai/boostboss
+//   https://github.com/BoostBoss-AI/boostboss
 // then select the BoostBossLumi target.
 
 import PackageDescription

@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Boost Boss' => 'support@boostboss.ai' }
   s.source           = {
-    :git => 'https://github.com/boostbossai/boostboss.git',
+    :git => 'https://github.com/BoostBoss-AI/boostboss.git',
     :tag => "ios-#{s.version}"
   }
   s.documentation_url = 'https://boostboss.ai/docs/mobile'

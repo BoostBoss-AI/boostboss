@@ -49,13 +49,13 @@ v0.1 ships via git source (no CocoaPods Trunk / SPM registry needed):
 
 ```ruby
 # Podfile
-pod 'BoostBossLumi', :git => 'https://github.com/boostbossai/boostboss', :branch => 'main'
+pod 'BoostBossLumi', :git => 'https://github.com/BoostBoss-AI/boostboss', :branch => 'main'
 ```
 
 Or Swift Package Manager:
 
 ```
-Xcode → File → Add Packages → https://github.com/boostbossai/boostboss
+Xcode → File → Add Packages → https://github.com/BoostBoss-AI/boostboss
 ```
 
 Both source paths point at `packages/lumi-mobile-ios/`. CocoaPods Trunk

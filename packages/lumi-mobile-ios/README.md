@@ -40,7 +40,7 @@ pod install
 In Xcode → File → Add Packages, paste:
 
 ```
-https://github.com/boostbossai/boostboss
+https://github.com/BoostBoss-AI/boostboss
 ```
 
 Select the `BoostBossLumi` target.

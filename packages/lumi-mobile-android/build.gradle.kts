@@ -93,7 +93,7 @@ publishing {
                     }
                 }
                 scm {
-                    url.set("https://github.com/boostbossai/boostboss")
+                    url.set("https://github.com/BoostBoss-AI/boostboss")
                 }
             }
         }
