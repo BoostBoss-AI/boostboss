@@ -36,10 +36,18 @@ export default function App() {
 ```
 
 That's it. `<BottomBanner />` auto-mounts at the screen bottom and starts
-fetching ads on first render. Pass `disableBottomBanner` if you want fully
-manual placement control.
+fetching ads on first render. `<SplashSponsor />` auto-mounts on cold
+start (once per app launch, module-level flag prevents re-show across
+re-mounts). Both follow the [Publisher Agreement §4.1](https://boostboss.ai/publisher-agreement#section-4)
+auto-placement default; opt out with `disableBottomBanner` /
+`disableSplashSponsor` props on `<LumiProvider>`.
 
 ## Opt-in placements
+
+The placements below render only when you mount them — they need a
+publisher trigger point (a screen, a button tap, a level-end). Auto-mount
+doesn't apply because there's no reliable global signal for "now is the
+moment to show a rewarded video."
 
 ```tsx
 import {

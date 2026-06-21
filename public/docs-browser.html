@@ -71,22 +71,22 @@
   <p>That's the whole install. Yes, really.</p>
 
   <h2 id="what">What this gives you</h2>
-  <p>All 8 Browser App placements come with the install. Boost Boss's auction picks which placement serves per ad request based on user intent + real-time fill. You can't toggle individual placements on or off — letting publishers turn placements off cuts impressions 20–40%.</p>
+  <p>All 8 Browser App placements come live with the install. The Lumi runtime auto-mounts every placement — no slot tags, no flags, no opt-in step. Boost Boss's auction picks which placement serves per ad request based on user intent and real-time fill.</p>
   <ul>
     <li><strong>Corner unit</strong> ✅ <em>auto-mounted</em> — sticky dismissable card pinned bottom-right</li>
     <li><strong>Settings page slot</strong> ✅ <em>auto-mounted</em> — sponsored card on routes matching <code>/settings</code> · <code>/billing</code> · <code>/account</code> · <code>/profile</code></li>
     <li><strong>Page interstitial</strong> ✅ <em>auto-mounted</em> — full-page sponsor on SPA route changes (once per page, 60s grace after install)</li>
-    <li><strong>Loading-state ad</strong> ✅ <em>auto + opt-in</em> — auto-detects <code>aria-busy</code> / <code>.spinner</code> / <code>.loading</code> visible >2s, OR explicit <code>&lt;div data-lumi-slot="loading"&gt;</code></li>
-    <li><strong>Sponsored citation</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="citation"&gt;</code> inside your AI-response container</li>
-    <li><strong>Suggested chip</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="chip"&gt;</code> in your suggested-action area</li>
-    <li><strong>Inline sponsored card</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="card"&gt;</code> in your feed flow</li>
-    <li><strong>Empty-state hero</strong> ⚙️ <em>opt-in</em> — <code>&lt;div data-lumi-slot="hero"&gt;</code> in your empty-view container</li>
+    <li><strong>Loading-state ad</strong> ✅ <em>auto-mounted</em> — auto-detects <code>aria-busy</code> / <code>.spinner</code> / <code>.loading</code> visible &gt;2s</li>
+    <li><strong>Sponsored citation</strong> ✅ <em>auto-mounted</em> — heuristic-detected AI-response container, falls back to a safe default</li>
+    <li><strong>Suggested chip</strong> ✅ <em>auto-mounted</em> — heuristic-detected suggested-action row, falls back to a safe default</li>
+    <li><strong>Inline sponsored card</strong> ✅ <em>auto-mounted</em> — heuristic-detected feed container, falls back to a safe default</li>
+    <li><strong>Empty-state hero</strong> ✅ <em>auto-mounted</em> — heuristic-detected empty view, falls back to a safe default</li>
   </ul>
-  <p style="font-size:13px;color:#9CA3AF;margin-top:14px;">v1.3 ships 4 auto-mounted placements + 4 publisher-controlled slot tags. Auto-detection for the 4 opt-in placements ships in v1.4 (after we collect real-publisher DOM patterns to avoid false positives — false-positive ad injection on a chat container ranks among the worst publisher experiences in adtech).</p>
+  <p style="font-size:13px;color:#9CA3AF;margin-top:14px;">v1.5 ships full auto-mount for all 8 placements. Lumi detects common UI patterns (chat containers, suggestion bars, feed lists, empty states, loading spinners) and falls back to a safe default location when an ideal placement can't be confidently detected. Auto-mount never injects into code blocks, password fields, system messages, or navigation chrome — see the safety rules below.</p>
 
-  <h3 id="slots">Slot opt-in — for the 4 placements that need surface knowledge</h3>
-  <p>Some placements need to know <em>where</em> in your app the content makes sense. Rather than guess from DOM heuristics that could fire in the wrong place, place an explicit slot marker:</p>
-  <pre><code>&lt;!-- After your AI response — Lumi will mount a sponsored citation here --&gt;
+  <h3 id="slots">Optional — pin a placement to an explicit spot</h3>
+  <p>If you'd rather pick the exact location for a placement instead of relying on heuristic detection, drop a slot marker. It overrides auto-detection for that placement only:</p>
+  <pre><code>&lt;!-- After your AI response — Lumi will mount a sponsored citation HERE --&gt;
 &lt;div data-lumi-slot="citation"&gt;&lt;/div&gt;
 
 &lt;!-- In your suggested-action row --&gt;
@@ -100,15 +100,19 @@
 
 &lt;!-- During a loading state --&gt;
 &lt;div data-lumi-slot="loading"&gt;&lt;/div&gt;</code></pre>
-  <p>Lumi re-scans for new <code>data-lumi-slot</code> markers every 2 seconds for up to 20 seconds after install, so React/Vue components that mount asynchronously are caught automatically. Already-filled slots are remembered and not re-rendered.</p>
+  <p>Slot markers are optional. Lumi re-scans for new <code>data-lumi-slot</code> markers every 2 seconds for up to 20 seconds after install, so React/Vue components that mount asynchronously are caught automatically. Already-filled slots are remembered and not re-rendered.</p>
 
-  <h3 id="opt-out">Opt-out — exclude a specific placement</h3>
-  <p>Add a <code>data-lumi-disable</code> marker anywhere in the DOM to opt out of a placement type:</p>
+  <h3 id="opt-out">Suppress a specific placement</h3>
+  <p>Auto-mount is on by default per Publisher Agreement §4.1. To suppress a specific placement, add a <code>data-lumi-disable</code> marker anywhere in the DOM:</p>
   <pre><code>&lt;meta data-lumi-disable="corner" /&gt;       &lt;!-- no corner unit --&gt;
 &lt;meta data-lumi-disable="interstitial" /&gt; &lt;!-- no page interstitial --&gt;
-&lt;meta data-lumi-disable="settings" /&gt;     &lt;!-- no settings slot --&gt;
+&lt;meta data-lumi-disable="citation" /&gt;     &lt;!-- no sponsored citation --&gt;
 &lt;meta data-lumi-disable="loading" /&gt;      &lt;!-- no loading-state ad --&gt;
 &lt;meta data-lumi-disable="all" /&gt;          &lt;!-- nothing renders --&gt;</code></pre>
+  <p>Suppressing placements reduces your impression volume and earnings. Suppression is for genuine UX or compliance reasons, not for limiting Lumi's reach.</p>
+
+  <h3 id="safety">What auto-mount never touches</h3>
+  <p>The runtime refuses to inject into structural risky containers: code blocks (<code>pre</code> / <code>code</code> / <code>.monaco-editor</code> / <code>.CodeMirror</code>), form inputs (<code>input</code> / <code>textarea</code> / <code>select</code> / <code>[contenteditable]</code>), system messages (<code>[role="alert"]</code> / <code>[role="status"]</code>), and site chrome (<code>header</code> / <code>nav</code> / <code>[role="banner"]</code> / <code>[role="navigation"]</code>). If a placement causes a real UX issue, email <a href="mailto:support@boostboss.ai">support@boostboss.ai</a> and we'll relocate it.</p>
 
   <h2 id="csp">Strict Content-Security-Policy</h2>
   <p>If your site enforces a strict CSP header, add <code>boostboss.ai</code> to two directives:</p>

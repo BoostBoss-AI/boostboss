@@ -43,20 +43,22 @@ runtime entry points (background, popup, sidepanel, newtab).
 | `src/index.js`                    | Package root re-exports                                      |
 | `dist/background.classic.js`      | Non-module service worker build                              |
 
-## Placements (8/8 live)
+## Placements (8/8 auto-mounted in v0.2.0)
 
-| Placement     | Module                       | Surface                          | Mount pattern                   |
-| ------------- | ---------------------------- | -------------------------------- | ------------------------------- |
-| `popup`       | `src/popup.js`               | popup.html                       | Auto-mount on DOMContentLoaded  |
-| `sidepanel`   | `src/sidepanel.js`           | sidepanel.html                   | Auto-mount on DOMContentLoaded  |
-| `newtab`      | `src/newtab.js`              | newtab.html                      | Auto-mount on DOMContentLoaded  |
-| `card`        | `src/card.js`                | popup or sidepanel               | `LumiCard.mount({ container })` |
-| `citation`    | `src/citation.js`            | popup or sidepanel (under reply) | `LumiCitation.mount({ container })` |
-| `chip`        | `src/chip.js`                | popup or sidepanel (suggest row) | `LumiChip.mount({ container })` |
-| `loading`     | `src/loading.js`             | popup or sidepanel (busy state)  | `LumiLoading.observe({ container })` |
-| `onboarding`  | `src/onboarding.js`          | popup post-install               | `LumiOnboarding.mount({ container })` |
+Every placement auto-mounts inside `popup.html`, `sidepanel.html`, and `newtab.html` — the install CLI wires the surface scripts and the runtime does the rest. Per [Publisher Agreement §4.1](https://boostboss.ai/publisher-agreement#section-4) auto-placement is the default. Publishers suppress individual placements with `<div data-lumi-disable="<placement>"></div>` or pin one to an exact spot with `<div data-lumi-slot="<placement>"></div>`.
 
-5 new placements added in v0.1: `card`, `citation`, `chip`, `loading`, `onboarding`.
+| Placement     | Module                       | Surface                          | Auto-mount strategy              |
+| ------------- | ---------------------------- | -------------------------------- | -------------------------------- |
+| `popup`       | `src/popup.js`               | popup.html                       | Auto-mount on DOMContentLoaded   |
+| `sidepanel`   | `src/sidepanel.js`           | sidepanel.html                   | Auto-mount on DOMContentLoaded   |
+| `newtab`      | `src/newtab.js`              | newtab.html                      | Auto-mount on DOMContentLoaded   |
+| `citation`    | `src/citation.js`            | under AI response                | Heuristic: detected AI container → safe-default fallback |
+| `chip`        | `src/chip.js`                | suggested-action row             | Heuristic: detected suggestion container → safe-default |
+| `card`        | `src/card.js`                | feed flow                        | Heuristic: detected feed container → safe-default |
+| `loading`     | `src/loading.js`             | busy state                       | Heuristic: detected spinner/`aria-busy` → safe-default |
+| `onboarding`  | `src/onboarding.js`          | popup post-install               | Fires once via `chrome.storage.local` seen flag |
+
+The 5 secondary placements (`citation`, `chip`, `card`, `loading`, `onboarding`) are driven by `src/auto-mount.js`, which runs alongside the popup/sidepanel/newtab renderers, observes the DOM with `MutationObserver` for SPA-style late mounts, and refuses to inject into risky containers (code blocks, form inputs, system messages, navigation chrome).
 
 ### Loading-state detection
 
@@ -64,7 +66,7 @@ runtime entry points (background, popup, sidepanel, newtab).
 
 - `[aria-busy="true"]`
 - elements matching `.spinner` or `.loading`
-- elements with `[data-lumi-slot="loading"]` — explicit publisher opt-in
+- elements with `[data-lumi-slot="loading"]` — optional explicit pin
 
 Spinner-like elements that stay visible for **>1.5s** are replaced with a
 sponsored card. Explicit `data-lumi-slot="loading"` markers mount

@@ -1,6 +1,7 @@
 // @boostbossai/lumi-mobile — SplashSponsor
 //
-// Opt-in placement. Brief full-screen sponsor card shown on app launch.
+// Auto-mounted by LumiProvider on cold start per Publisher Agreement §4.1.
+// Brief full-screen sponsor card shown on app launch.
 // Auto-dismisses after 3 seconds OR on tap. Full-screen Modal with a
 // BB-pink gradient-like background, sponsor logo placeholder + tagline +
 // tiny "Powered by Boost Boss" footer + tap-to-skip hint.
