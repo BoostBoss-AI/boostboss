@@ -1645,6 +1645,28 @@ async function supabaseHandler(action, body, req, res) {
     if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
     if (String(password).length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
 
+    // Task #142 — IP-keyed rate limit. Mirrors the main signup's 20/hour
+    // ceiling. The affiliate signup is just as much a spam vector as the
+    // primary signup — and arguably more, since the prize (affiliate
+    // commissions) is more direct than impression revenue.
+    try {
+      const rl = require("./_lib/rate_limit.js");
+      const ip = rl.getClientIp(req);
+      const decision = rl.check(ip, "signup", {
+        limit: Number(process.env.BBX_SIGNUP_RATE_LIMIT) || 20,
+        windowMs: 60 * 60 * 1000,
+        errorMessage:
+          "Too many signups from this network. Please wait an hour and try again, or contact support@boostboss.ai if you believe this is in error.",
+      });
+      if (!decision.allowed) {
+        res.setHeader && res.setHeader("Retry-After", String(decision.retryAfter));
+        return res.status(429).json({
+          error: decision.error,
+          retry_after_seconds: decision.retryAfter,
+        });
+      }
+    } catch (_e) { /* rate-limit module not available — fail open */ }
+
     // Validate enum-like fields against the same vocabulary as the DB
     // CHECK constraints. Belt-and-suspenders so we return a friendlier
     // error than the raw Postgres constraint violation.
@@ -1663,23 +1685,37 @@ async function supabaseHandler(action, body, req, res) {
 
     const cleanEmail = String(email).trim().toLowerCase();
     let userId = null;
+    // Track whether this signup landed on a freshly-created (unconfirmed)
+    // Supabase auth user OR an existing one that the caller authenticated
+    // into. Drives whether we return a session or "check your email".
+    let isNewUnconfirmedUser = false;
 
-    // Try to create a brand-new Supabase auth user first.
-    const { data: createData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email: cleanEmail,
+    // Task #142 — switched from supabaseAdmin.auth.admin.createUser({
+    // email_confirm: true }) to supabaseAnon.auth.signUp() so the
+    // affiliate signup path requires email ownership verification,
+    // matching the main signup flow (Phase 3A change, 2026-06-10). Any
+    // ad-network role that handles money must verify the email actually
+    // belongs to the registering user — otherwise an attacker can claim
+    // arbitrary emails and collect affiliate commissions.
+    const { data: signUpData, error: signUpErr } = await supabaseAnon.auth.signUp({
+      email:    cleanEmail,
       password: String(password),
-      email_confirm: true,  // skip confirmation email — speedy affiliate signup
-      user_metadata: { role: "affiliate" },
+      options: {
+        data: { role: "affiliate" },
+        emailRedirectTo: confirmRedirectFor("affiliate"),
+      },
     });
 
-    if (createErr) {
+    if (signUpErr) {
       // Common case: email already exists in Supabase auth (advertiser
       // or publisher signup elsewhere). The affiliate signup can still
       // proceed for this user — BUT only if they can prove they own the
       // existing account by providing the correct password. This stops
       // an attacker from "registering" with a known email + arbitrary
-      // password and gaining affiliate access.
-      if (/already.*registered|already.*exists|duplicate/i.test(createErr.message || "")) {
+      // password and gaining affiliate access. The existing user is
+      // already confirmed (they confirmed for the other role), so we
+      // can session-mint immediately for them.
+      if (/already.*registered|already.*exists|duplicate/i.test(signUpErr.message || "")) {
         const { data: existSignin, error: existErr } = await supabaseAnon.auth.signInWithPassword({
           email:    cleanEmail,
           password: String(password),
@@ -1691,10 +1727,15 @@ async function supabaseHandler(action, body, req, res) {
         }
         userId = existSignin.user.id;
       } else {
-        return res.status(400).json({ error: createErr.message });
+        return res.status(400).json({ error: signUpErr.message });
       }
-    } else if (createData && createData.user) {
-      userId = createData.user.id;
+    } else if (signUpData && signUpData.user) {
+      userId = signUpData.user.id;
+      // signUp() returns session=null when email confirmation is required
+      // by the Supabase project (which is the correct production config).
+      // When that's the case, we treat the signup as pending and ask the
+      // frontend to show a check-your-email screen instead of logging in.
+      isNewUnconfirmedUser = !signUpData.session;
     } else {
       return res.status(500).json({ error: "Signup failed" });
     }
@@ -1732,7 +1773,21 @@ async function supabaseHandler(action, body, req, res) {
     });
     if (insErr) return res.status(500).json({ error: insErr.message });
 
-    // Sign them in to mint a JWT for the dashboard.
+    // Task #142 — new unconfirmed users have no session to return; ask
+    // the frontend to show a check-your-email screen. The affiliates row
+    // is already inserted above, so it's ready the moment they confirm
+    // the email and sign in normally.
+    if (isNewUnconfirmedUser) {
+      return res.json({
+        success: true,
+        requires_confirmation: true,
+        email: cleanEmail,
+        message: "Check your email to confirm your account.",
+      });
+    }
+
+    // Existing user path — they signed in above with valid credentials,
+    // so their email is already confirmed. Mint a session as before.
     const { data: sessData, error: sessErr } = await supabaseAnon.auth.signInWithPassword({
       email:    cleanEmail,
       password: String(password),
@@ -2103,11 +2158,23 @@ async function supabaseHandler(action, body, req, res) {
 // product branding and lands at the right dashboard afterward.
 function confirmRedirectFor(role) {
   const base = process.env.PUBLIC_BASE || "https://boostboss.ai";
-  return role === "developer" ? `${base}/publish/confirm` : `${base}/ads/confirm`;
+  if (role === "developer") return `${base}/publish/confirm`;
+  if (role === "affiliate") {
+    // Affiliate dashboard lives on its own subdomain (affiliate.boostboss.ai),
+    // overridable via PUBLIC_AFFILIATE_BASE for local/preview deploys.
+    const aff = process.env.PUBLIC_AFFILIATE_BASE || "https://affiliate.boostboss.ai";
+    return `${aff}/confirm`;
+  }
+  return `${base}/ads/confirm`;
 }
 function resetRedirectFor(role) {
   const base = process.env.PUBLIC_BASE || "https://boostboss.ai";
-  return role === "developer" ? `${base}/publish/reset-password` : `${base}/ads/reset-password`;
+  if (role === "developer") return `${base}/publish/reset-password`;
+  if (role === "affiliate") {
+    const aff = process.env.PUBLIC_AFFILIATE_BASE || "https://affiliate.boostboss.ai";
+    return `${aff}/reset-password`;
+  }
+  return `${base}/ads/reset-password`;
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
