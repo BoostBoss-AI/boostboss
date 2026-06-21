@@ -624,9 +624,9 @@ body.dark .policy-modal-close:hover { background: #2A3748; color: #F3F4F6; }
         <label for="crm_integration">Primary integration door</label>
         <select id="crm_integration">
           <option value="mcp">MCP server (Claude Desktop, Cursor, Cline)</option>
-          <option value="js_snippet">JS snippet (AI apps, websites)</option>
-          <option value="npm_sdk">NPM SDK (browser extensions, Electron)</option>
-          <option value="rest">REST API (Discord, Telegram, Slack bots)</option>
+          <option value="js-snippet">JS snippet (AI apps, websites)</option>
+          <option value="npm-sdk">NPM SDK (browser extensions, Electron)</option>
+          <option value="rest-api">REST API (Discord, Telegram, Slack bots)</option>
         </select>
       </div>
     </div>
@@ -1362,12 +1362,18 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     if (selectedRole === "advertiser") payload.company_name = document.getElementById("company_name").value.trim() || undefined;
     if (selectedRole === "developer") payload.app_name = document.getElementById("app_name").value.trim() || undefined;
 
-    // Door-selection Layer 1 — persist the publisher's "what are you building?"
-    // answer to localStorage so the dashboard knows which door to recommend.
-    // Server doesn't need this; pure UX hint. UX-only; not the full plug-and-play upgrade.
+    // Task #144 — the primary signup form's "what are you building?" answer
+    // now flows to BOTH localStorage (for dashboard UI cues) AND the server
+    // (developers.integration_door column). Backend whitelist accepts the
+    // canonical 4-door taxonomy (mcp / js-snippet / npm-sdk / rest-api) plus
+    // "multiple" and "other" catch-alls. Anything else is silently nulled
+    // server-side, so the column never holds garbage.
     if (selectedRole === "developer") {
       const appType = (document.getElementById("app_type") || {}).value || "";
-      if (appType) try { localStorage.setItem("bb_primary_door", appType); } catch (_) {}
+      if (appType) {
+        try { localStorage.setItem("bb_primary_door", appType); } catch (_) {}
+        payload.integration_door = appType;
+      }
     }
 
     const r = await fetch(API + "?action=signup", {

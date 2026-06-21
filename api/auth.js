@@ -636,8 +636,15 @@ async function supabaseHandler(action, body, req, res) {
     if (!role) return res.status(400).json({ error: "Missing or invalid role" });
     // Whitelist the integration door so a misbehaving client can't shove
     // arbitrary strings into the column behind the CHECK constraint.
-    const ALLOWED_DOORS = new Set(["mcp", "js_snippet", "npm_sdk", "rest"]);
-    const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorRaw)) ? doorRaw : null;
+    // Task #144: aligned with the canonical 4-door taxonomy used by the
+    // SDK + /publish/* docs (hyphens, not underscores). Catch-alls
+    // "multiple" and "other" come from the primary signup form's "what
+    // are you building?" question and are accepted as legitimate signal.
+    // Legacy underscored values get rewritten so old clients still work.
+    const DOOR_LEGACY_TO_CANONICAL = { js_snippet: "js-snippet", npm_sdk: "npm-sdk", rest: "rest-api" };
+    const ALLOWED_DOORS = new Set(["mcp", "js-snippet", "npm-sdk", "rest-api", "multiple", "other"]);
+    const doorCandidate = (typeof doorRaw === "string" && DOOR_LEGACY_TO_CANONICAL[doorRaw]) || doorRaw;
+    const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorCandidate)) ? doorCandidate : null;
 
     const { data: { user }, error: meErr } = await supabaseAnon.auth.getUser(token);
     if (meErr || !user) return res.status(401).json({ error: "Invalid or expired token. Sign in again." });
@@ -2110,8 +2117,12 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     return res.status(400).json({ error: "Invalid role" });
   }
   // Whitelist integration_door before it touches the DB CHECK constraint.
-  const ALLOWED_DOORS = new Set(["mcp", "js_snippet", "npm_sdk", "rest"]);
-  const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorRaw)) ? doorRaw : null;
+  // Task #144: canonical hyphenated 4-door taxonomy + "multiple"/"other"
+  // catch-alls. Legacy underscored values rewritten for back-compat.
+  const DOOR_LEGACY_TO_CANONICAL = { js_snippet: "js-snippet", npm_sdk: "npm-sdk", rest: "rest-api" };
+  const ALLOWED_DOORS = new Set(["mcp", "js-snippet", "npm-sdk", "rest-api", "multiple", "other"]);
+  const doorCandidate = (typeof doorRaw === "string" && DOOR_LEGACY_TO_CANONICAL[doorRaw]) || doorRaw;
+  const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorCandidate)) ? doorCandidate : null;
 
   // Phase 3A change (2026-06-10): replaced the previous
   // `supabaseAdmin.auth.admin.createUser({ email_confirm: true })` bypass
