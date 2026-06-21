@@ -284,6 +284,21 @@ module.exports = async function handler(req, res) {
 // 2026-05-28).
 function demoHandler(action, body, req, res) {
   if (action === "signup") {
+    // Task #139 — also rate-limit demo-mode signups so local CI loops
+    // can't accidentally exercise an unbounded creation path.
+    const rl = require("./_lib/rate_limit.js");
+    const ip = rl.getClientIp(req);
+    const decision = rl.check(ip, "signup", {
+      limit: Number(process.env.BBX_SIGNUP_RATE_LIMIT) || 20,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!decision.allowed) {
+      res.setHeader && res.setHeader("Retry-After", String(decision.retryAfter));
+      return res.status(429).json({
+        error: decision.error,
+        retry_after_seconds: decision.retryAfter,
+      });
+    }
     const { email, password, role, company_name, app_name } = body;
     if (!email || !password || !role) return res.status(400).json({ error: "Missing email, password, or role" });
     if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
@@ -459,7 +474,29 @@ async function supabaseHandler(action, body, req, res) {
   // The dashboards no longer expose a "Try the demo" button, so there's
   // no caller for it — users go through normal signup or OAuth.
 
-  if (action === "signup") return signupSupabase(supabaseAdmin, supabaseAnon, body, res);
+  if (action === "signup") {
+    // Task #139 — IP-keyed signup rate limit. Supabase already throttles
+    // ~30 signUp() calls/hour/IP at the project level; this is a second
+    // layer of defense at the application boundary. Limit chosen to be
+    // permissive enough that a single household / coffee shop NAT'd
+    // behind one IP can comfortably onboard ~20 accounts per hour.
+    const rl = require("./_lib/rate_limit.js");
+    const ip = rl.getClientIp(req);
+    const decision = rl.check(ip, "signup", {
+      limit: Number(process.env.BBX_SIGNUP_RATE_LIMIT) || 20,
+      windowMs: 60 * 60 * 1000, // 1 hour
+      errorMessage:
+        "Too many signups from this network. Please wait an hour and try again, or contact support@boostboss.ai if you believe this is in error.",
+    });
+    if (!decision.allowed) {
+      res.setHeader && res.setHeader("Retry-After", String(decision.retryAfter));
+      return res.status(429).json({
+        error: decision.error,
+        retry_after_seconds: decision.retryAfter,
+      });
+    }
+    return signupSupabase(supabaseAdmin, supabaseAnon, body, res);
+  }
 
   if (action === "login") {
     const { email, password, role: wantedRoleRaw } = body;

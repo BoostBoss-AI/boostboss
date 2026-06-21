@@ -10,6 +10,9 @@
 delete process.env.SUPABASE_URL;
 delete process.env.SUPABASE_ANON_KEY;
 process.env.JWT_SECRET = "test-secret-do-not-use";
+// Task #139 — disable rate limiting in tests so the suite can hit
+// /signup hundreds of times against the same in-process limiter.
+process.env.BBX_DISABLE_RATE_LIMIT = "1";
 
 const assert = require("assert");
 const handler = require("../api/auth.js");
@@ -18,6 +21,10 @@ function mockReqRes({ method = "POST", body = {}, query = {}, headers = {} } = {
   const res = {
     _status: 200, _headers: {}, _body: null,
     setHeader(k, v) { this._headers[k.toLowerCase()] = v; },
+    // setSessionCookie() in api/auth.js reads back the existing Set-Cookie
+    // header to append additional cookies. The mock needs this to mirror
+    // the Node http.ServerResponse contract.
+    getHeader(k) { return this._headers[(k || "").toLowerCase()] || null; },
     status(n) { this._status = n; return this; },
     json(obj) { this._body = obj; this._headers["content-type"] = "application/json"; return this; },
     end() { return this; },
