@@ -468,13 +468,30 @@ async function handleCreate(req, res) {
       ? b.target_integration_methods.filter((m) => ["mcp","js-snippet","npm-sdk","rest-api"].includes(m))
       : [],
     optimization_goal: b.optimization_goal || "target_cpa",
-    billing_model: b.billing_model || "cpm",
-    // Phase B (2026-05-11) — conversion event allowlist for CPA campaigns.
-    // Empty array = "any conversion counts". Whitelisted values are free-form
-    // strings the advertiser also passes in trackConversion / pixel.js.
-    conversion_event_types: Array.isArray(b.conversion_event_types)
-      ? b.conversion_event_types.filter((s) => typeof s === "string" && s.length <= 32)
-      : [],
+    // Allowlist billing_model. CPI = AI app user-acquisition variant of
+    // CPA — same accounting math, dedicated label so dashboards can group
+    // user-acquisition campaigns separately from generic CPA. Default cpm
+    // so legacy clients (no field) don't change shape.
+    billing_model: ["cpm","cpc","cpv","cpa","cpi"].includes(b.billing_model)
+      ? b.billing_model : "cpm",
+    // Phase B (2026-05-11) — conversion event allowlist for CPA / CPI
+    // campaigns. Empty array = "any conversion counts". For CPI we
+    // seed ["install"] on create if the caller doesn't pass one — the
+    // dashboard's CPI form always sends it but the API stays safe.
+    conversion_event_types: (function () {
+      const list = Array.isArray(b.conversion_event_types)
+        ? b.conversion_event_types.filter((s) => typeof s === "string" && s.length <= 32)
+        : [];
+      if (list.length === 0 && b.billing_model === "cpi") return ["install"];
+      return list;
+    })(),
+    // CPI-specific advertiser metadata (App Store / Play Store / web app
+    // URL the user will be redirected to on click, plus the postback URL
+    // the advertiser's MMP or backend will hit to confirm an install).
+    // Empty for non-CPI campaigns. All fields nullable for back-compat.
+    app_store_url: b.app_store_url || null,
+    install_postback_url: b.install_postback_url || null,
+    install_event_name: b.install_event_name || (b.billing_model === "cpi" ? "install" : null),
     bid_amount: b.bid_amount || 5.00,
     daily_budget: b.daily_budget || 50.00,
     total_budget: b.total_budget || 1000.00,
@@ -642,6 +659,8 @@ async function handleUpdate(req, res) {
     "target_integration_methods",
     // Conversion-billing allowlist (migration 11 / Phase B)
     "conversion_event_types",
+    // CPI / AI-app-UA metadata
+    "app_store_url", "install_postback_url", "install_event_name",
     // Parent product link (Products migration, 2026-06-12). NULLable so the
     // advertiser can detach a campaign from a product if they restructure.
     "product_id",

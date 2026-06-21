@@ -4770,6 +4770,44 @@
                                 <input type="radio" id="billing-cpa" name="billing_model" value="cpa" required>
                                 <label for="billing-cpa" data-t="newc.bm_cpa">CPA (Cost Per Acquisition)</label>
                             </div>
+                            <div class="radio-option" style="position:relative;">
+                                <input type="radio" id="billing-cpi" name="billing_model" value="cpi" required>
+                                <label for="billing-cpi">CPI · Acquire users for your AI app
+                                    <span style="display:inline-block;margin-left:8px;background:linear-gradient(90deg,#FF2D78,#FFB020);color:#fff;padding:1px 7px;border-radius:100px;font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:1px;">NEW</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- CPI-only fields: app store URL + install postback config.
+                             Shown when billing_model=cpi. This is the AI App-to-App
+                             User Acquisition path — your campaign pays only when a
+                             user installs / signs up for your app. -->
+                        <div id="cpiFieldsRow" style="margin-top:14px; display:none; padding:14px; background:linear-gradient(180deg,#fff7f9 0%,#fffbf0 100%); border:1px solid #FFD6E5; border-radius:10px;">
+                            <div style="font-size:11px;font-weight:700;color:#E01E65;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">AI App UA Configuration</div>
+
+                            <label for="appStoreUrl" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
+                                Destination URL <span style="color:#9CA3AF;font-weight:400;">(App Store, Play Store, or your AI app's signup page)</span>
+                            </label>
+                            <input type="url" id="appStoreUrl" name="app_store_url"
+                                placeholder="https://apps.apple.com/... or https://yourapp.com/signup"
+                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px; margin-bottom:12px; background:#fff;">
+
+                            <label for="installEventName" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
+                                Install event name <span style="color:#9CA3AF;font-weight:400;">(what counts as a converted install)</span>
+                            </label>
+                            <input type="text" id="installEventName" name="install_event_name"
+                                value="install" placeholder="install"
+                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px; margin-bottom:12px; background:#fff;">
+
+                            <label for="installPostbackUrl" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
+                                Install postback URL <span style="color:#9CA3AF;font-weight:400;">(optional — your server-to-server confirmation endpoint)</span>
+                            </label>
+                            <input type="url" id="installPostbackUrl" name="install_postback_url"
+                                placeholder="https://yourapp.com/api/lumi-postback"
+                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px; background:#fff;">
+
+                            <p style="margin:10px 0 0; font-size:12px; color:#4B5563; line-height:1.55;">
+                                <strong style="color:#E01E65;">How CPI works:</strong> You pay your bid only when a publisher's user installs your AI app and your pixel confirms the install. Your ad appears on AI apps whose users match your target intent — e.g., "writing assistant" users discover your AI editor. You won't be charged for impressions or clicks that don't convert.
+                            </p>
                         </div>
                         <div id="conversionTypesRow" style="margin-top:12px; display:none;">
                             <label for="conversionEventTypes" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
@@ -6879,16 +6917,24 @@
         // Show the "Conversion event types" input only when CPA billing is
         // selected (or target_cpa optimization, since the dashboard surfaces
         // a CPA value either way). Empty list always = "any conversion".
+        //
+        // CPI (2026-06-20) adds its own panel — the AI App UA configuration
+        // box (#cpiFieldsRow) — visible only when billing_model='cpi'. CPI
+        // implies the conversion event is pre-set to "install" so the manual
+        // conversion-types row stays hidden when CPI is selected.
         function initConversionTypesToggle() {
             const row = document.getElementById('conversionTypesRow');
+            const cpiRow = document.getElementById('cpiFieldsRow');
             if (!row) return;
             const billingRadios = document.querySelectorAll('input[name="billing_model"]');
             const optGoal = document.getElementById('optimizationGoal');
             function update() {
                 const billing = (document.querySelector('input[name="billing_model"]:checked') || {}).value;
                 const goal = optGoal ? optGoal.value : '';
-                const show = billing === 'cpa' || goal === 'target_cpa' || goal === 'target_roas' || goal === 'max_conversions';
-                row.style.display = show ? '' : 'none';
+                const isCpi = billing === 'cpi';
+                const showConv = (billing === 'cpa' || goal === 'target_cpa' || goal === 'target_roas' || goal === 'max_conversions') && !isCpi;
+                row.style.display = showConv ? '' : 'none';
+                if (cpiRow) cpiRow.style.display = isCpi ? '' : 'none';
             }
             billingRadios.forEach(r => r.addEventListener('change', update));
             // Re-evaluate when optimization goal changes (handled via the
@@ -7493,6 +7539,12 @@
                     const raw = formData.get('conversion_event_types') || '';
                     return String(raw).split(',').map(s => s.trim()).filter(Boolean);
                 })(),
+                // CPI (2026-06-20) — AI App UA metadata. Only meaningful when
+                // billing_model='cpi'. Backend tolerates the fields being set
+                // for non-CPI campaigns (just gets persisted, never read).
+                app_store_url:        formData.get('app_store_url')        || null,
+                install_postback_url: formData.get('install_postback_url') || null,
+                install_event_name:   formData.get('install_event_name')   || (formData.get('billing_model') === 'cpi' ? 'install' : null),
                 // Phase E.5 — per-door creative overrides. Empty object = no
                 // overrides; backend still writes the 'default' row mirroring
                 // campaign-level copy so the auction read path is uniform.
@@ -8135,6 +8187,9 @@
                     total_budget: fd.get('total_budget') || '', bid_amount: fd.get('bid_amount') || '',
                     billing_model: fd.get('billing_model') || 'cpm',
                     conversion_event_types: fd.get('conversion_event_types') || '',
+                    app_store_url: fd.get('app_store_url') || '',
+                    install_postback_url: fd.get('install_postback_url') || '',
+                    install_event_name: fd.get('install_event_name') || '',
                     start_date: fd.get('start_date') || '', end_date: fd.get('end_date') || '',
                     groups: Array.from(selectedGroups),
                     intents: t.intents, hostApps: t.hostApps, mcpTools: t.mcpTools, aiModels: t.aiModels,

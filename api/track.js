@@ -352,15 +352,22 @@ module.exports = async function handler(req, res) {
         .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget, conversion_event_types")
         .eq("id", campaignId).single();
       if (campaign) {
-        // For CPA, the conversion_type must be in the campaign's allowlist
-        // (or the allowlist is empty — meaning "any conversion counts").
+        // For CPA / CPI, the conversion_type must be in the campaign's
+        // allowlist (or the allowlist is empty — meaning "any conversion
+        // counts"). CPI defaults to {"install"} when no allowlist is set.
         let chargeable = true;
         if (event === "conversion") {
-          if (campaign.billing_model !== "cpa") chargeable = false;
+          const isAcqGoal = campaign.billing_model === "cpa" || campaign.billing_model === "cpi";
+          if (!isAcqGoal) chargeable = false;
           else {
             const allow = Array.isArray(campaign.conversion_event_types)
               ? campaign.conversion_event_types : [];
-            if (allow.length > 0 && !allow.includes(conversionType)) chargeable = false;
+            // CPI's default-allowlist is ["install"] when nothing's set —
+            // the advertiser-side dashboard always seeds this on create
+            // but we belt-and-suspenders here too.
+            const effectiveAllow = (allow.length === 0 && campaign.billing_model === "cpi")
+              ? ["install"] : allow;
+            if (effectiveAllow.length > 0 && !effectiveAllow.includes(conversionType)) chargeable = false;
           }
         }
         const cost = chargeable ? computeCost(event, campaign) : 0;
@@ -541,6 +548,14 @@ function computeCost(event, campaign) {
   // caller (track.js handler) is responsible for filtering against the
   // campaign's conversion_event_types allowlist before reaching here.
   if (event === "conversion" && campaign.billing_model === "cpa") {
+    return campaign.bid_amount || 0;
+  }
+  // CPI — AI app user acquisition. Same cost mechanic as CPA but the
+  // expected conversion event is 'install' (the publisher's user
+  // completed installing/signing-up for the advertiser's AI app). The
+  // billing_model split lets dashboards group by goal even though the
+  // accounting math is identical.
+  if (event === "conversion" && campaign.billing_model === "cpi") {
     return campaign.bid_amount || 0;
   }
   return 0;
