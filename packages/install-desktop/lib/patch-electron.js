@@ -5,12 +5,19 @@ const os = require('os');
 
 const SCRIPT_SRC_PREFIX = 'https://boostboss.ai/lumi/v1.js';
 const SCRIPT_MARKER_ATTR = 'data-lumi-install="desktop"';
+// data-lumi-door tells the shared CDN runtime which door key to send
+// to /api/lumi-fetch + /api/track so the publisher's "Computer App"
+// verify badge flips (not the shared Browser App badge). Also gates
+// the desktop-specific placement renderers (window banner, system
+// notification, modal interstitial, sidebar slot, empty-state hero
+// with native sound) in the runtime.
+const DOOR_ATTR = 'data-lumi-door="mcp"';
 
 /**
  * Build the script tag we inject.
  */
 function buildScriptTag(publisherId) {
-  return `<script async src="${SCRIPT_SRC_PREFIX}#${publisherId}" ${SCRIPT_MARKER_ATTR}></script>`;
+  return `<script async src="${SCRIPT_SRC_PREFIX}#${publisherId}" ${SCRIPT_MARKER_ATTR} ${DOOR_ATTR}></script>`;
 }
 
 /**

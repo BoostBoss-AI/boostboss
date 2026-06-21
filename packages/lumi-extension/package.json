@@ -2,16 +2,21 @@
   "name": "@boostbossai/lumi-extension",
   "version": "0.1.0",
   "description": "Lumi for Browser Extension App runtime SDK — Boost Boss's ad placements for Chrome MV3 extensions.",
-  "main": "./src/background.js",
+  "main": "./src/index.js",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/background.js",
-      "default": "./src/background.js"
+      "import": "./src/index.js",
+      "default": "./src/index.js"
     },
     "./popup": "./dist/popup.js",
     "./sidepanel": "./dist/sidepanel.js",
     "./newtab": "./dist/newtab.js",
+    "./citation": "./dist/citation.js",
+    "./chip": "./dist/chip.js",
+    "./card": "./dist/card.js",
+    "./loading": "./dist/loading.js",
+    "./onboarding": "./dist/onboarding.js",
     "./background": "./src/background.js",
     "./shared": "./src/shared.js"
   },

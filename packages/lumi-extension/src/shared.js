@@ -20,6 +20,10 @@ export const PLACEMENTS = {
   SIDEPANEL: 'sidepanel',
   NEWTAB: 'newtab',
   CARD: 'card',          // inline sponsored card (used in onboarding flow)
+  CITATION: 'citation',  // sponsored citation line under an AI response
+  CHIP: 'chip',          // tappable quick-reply pill
+  LOADING: 'loading',    // loading-state ad shown while the extension processes
+  ONBOARDING: 'onboarding', // one-time post-install hero card
 };
 
 const SESSION_KEY = 'lumi_session_id';

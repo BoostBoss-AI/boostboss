@@ -46,7 +46,12 @@
   window.__lumi_browser_loaded = true;
 
   const SDK_VERSION = '0.1.0';
-  const DOOR        = 'js-snippet';   // Internal door key for Lumi for Browser App
+  // Default door = Browser App (js-snippet). Computer App installs inject
+  // a `data-lumi-door="mcp"` attribute on the <script> tag so the same
+  // CDN runtime sends the right door key to /api/lumi-fetch + /api/track.
+  // Resolved during script-tag discovery below.
+  const DOOR_ALLOWLIST = { 'js-snippet': 1, 'mcp': 1 };
+  let DOOR          = 'js-snippet';
   const ENDPOINT    = 'https://boostboss.ai/api/track';
 
   // ── 1. Resolve the publisher ID from our own script src #hash ──────
@@ -68,7 +73,16 @@
         // Accept any non-empty publisher identifier — UUIDs, pub_xxx tokens,
         // sandbox keys (pub_test_xxx). The server-side decides what's valid;
         // the runtime just passes through whatever the dashboard generated.
-        if (/^[a-zA-Z0-9][a-zA-Z0-9_.-]{4,}$/.test(hash)) return hash;
+        if (/^[a-zA-Z0-9][a-zA-Z0-9_.-]{4,}$/.test(hash)) {
+          // Capture door override if the install CLI set it (Computer App
+          // installs add data-lumi-door="mcp" so impressions track to the
+          // right verify badge + the right placement bundle).
+          try {
+            const doorAttr = s.getAttribute && s.getAttribute('data-lumi-door');
+            if (doorAttr && DOOR_ALLOWLIST[doorAttr]) DOOR = doorAttr;
+          } catch (_) {}
+          return hash;
+        }
       }
     } catch (_) { /* swallow — fall through to null */ }
     return null;
@@ -735,6 +749,156 @@
     return 'lumi_' + Math.random().toString(36).slice(2, 12) + '_' + Date.now();
   })();
 
+  // ── 15b. Desktop-only placements (DOOR === 'mcp') ──────────────────
+  // Computer App installs (Electron) get three extra placements the
+  // Browser App door doesn't ship: a slim top window banner, a sticky
+  // sidebar slot, and a system notification via the HTML5 Notification
+  // API (works inside Electron renderers; user has already granted via
+  // the app's main process).
+
+  // Inject desktop-only CSS once
+  let __desktopStylesInjected = false;
+  function injectDesktopStyles() {
+    if (__desktopStylesInjected) return;
+    __desktopStylesInjected = true;
+    const css = [
+      '.lumi-window-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#0F0F1A 0%,#1A1A2E 100%);color:#fff;padding:7px 14px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;font-size:12.5px;display:flex;align-items:center;gap:12px;z-index:2147483100;box-shadow:0 1px 0 rgba(255,255,255,0.06)}',
+      '.lumi-window-banner__pill{background:#FF2D78;color:#fff;font-weight:900;font-size:9px;letter-spacing:0.08em;padding:2px 7px;border-radius:3px;text-transform:uppercase}',
+      '.lumi-window-banner__text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.92}',
+      '.lumi-window-banner__cta{background:#FF2D78;color:#fff;text-decoration:none;font-weight:700;font-size:11.5px;padding:5px 12px;border-radius:6px;cursor:pointer;border:none;font-family:inherit;flex-shrink:0}',
+      '.lumi-window-banner__close{background:transparent;border:none;color:#fff;font-size:14px;opacity:0.5;cursor:pointer;padding:0;width:22px;height:22px;border-radius:4px;flex-shrink:0}',
+      '.lumi-window-banner__close:hover{opacity:1;background:rgba(255,255,255,0.08)}',
+      '.lumi-sidebar{position:fixed;top:54px;right:14px;width:200px;background:#FAFAF7;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;font-size:12px;color:#0F0F1A;z-index:2147482900;box-shadow:0 4px 14px rgba(15,15,26,0.08)}',
+      '.lumi-sidebar__label{font-size:9px;font-weight:700;color:#E01E65;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px}',
+      '.lumi-sidebar__headline{font-weight:700;font-size:12.5px;line-height:1.4;margin-bottom:7px;color:#0F0F1A}',
+      '.lumi-sidebar__cta{display:inline-block;background:#FF2D78;color:#fff;font-weight:700;font-size:11px;padding:5px 11px;border-radius:6px;text-decoration:none;cursor:pointer;border:none;font-family:inherit}',
+      '.lumi-sidebar__close{position:absolute;top:5px;right:7px;background:transparent;border:none;color:#9CA3AF;font-size:13px;cursor:pointer;line-height:1;padding:2px 5px}',
+      '.lumi-sidebar__close:hover{color:#0F0F1A}',
+    ].join('\n');
+    try {
+      const style = document.createElement('style');
+      style.setAttribute('data-lumi-desktop-styles', 'v0.1');
+      style.appendChild(document.createTextNode(css));
+      document.head.appendChild(style);
+    } catch (_) {}
+  }
+
+  // Window banner — slim top strip
+  let __windowBannerShown = false;
+  function renderWindowBanner() {
+    if (__windowBannerShown) return;
+    if (document.querySelector('[data-lumi-disable="window-banner"], [data-lumi-disable="all"]')) return;
+    fetchAd('window_banner').then(function (ad) {
+      if (!ad) return;
+      __windowBannerShown = true;
+      injectDesktopStyles();
+      const el = document.createElement('div');
+      el.className = 'lumi-window-banner';
+      el.setAttribute('role', 'complementary');
+
+      const pill = document.createElement('span');
+      pill.className = 'lumi-window-banner__pill';
+      pill.textContent = 'Sponsored';
+      el.appendChild(pill);
+
+      const text = document.createElement('span');
+      text.className = 'lumi-window-banner__text';
+      text.textContent = (ad.headline || '') + (ad.body ? ' — ' + ad.body : '');
+      el.appendChild(text);
+
+      const cta = document.createElement('button');
+      cta.className = 'lumi-window-banner__cta';
+      cta.type = 'button';
+      cta.textContent = ad.cta_label || 'Try free →';
+      cta.addEventListener('click', function (e) { e.preventDefault(); onClick(ad); });
+      el.appendChild(cta);
+
+      const close = document.createElement('button');
+      close.className = 'lumi-window-banner__close';
+      close.setAttribute('aria-label', 'Close');
+      close.textContent = '×';
+      close.addEventListener('click', function () { try { el.parentNode && el.parentNode.removeChild(el); } catch (_) {} });
+      el.appendChild(close);
+
+      document.body.appendChild(el);
+      observeImpression(el, ad);
+    });
+  }
+
+  // Sidebar slot — sticky card pinned to top-right (under window banner)
+  let __sidebarShown = false;
+  function renderSidebarSlot() {
+    if (__sidebarShown) return;
+    if (document.querySelector('[data-lumi-disable="sidebar"], [data-lumi-disable="all"]')) return;
+    fetchAd('sidebar').then(function (ad) {
+      if (!ad) return;
+      __sidebarShown = true;
+      injectDesktopStyles();
+      const el = document.createElement('div');
+      el.className = 'lumi-sidebar';
+      el.setAttribute('role', 'complementary');
+
+      const close = document.createElement('button');
+      close.className = 'lumi-sidebar__close';
+      close.setAttribute('aria-label', 'Close');
+      close.textContent = '×';
+      close.addEventListener('click', function () { try { el.parentNode && el.parentNode.removeChild(el); } catch (_) {} });
+      el.appendChild(close);
+
+      const label = document.createElement('div');
+      label.className = 'lumi-sidebar__label';
+      label.textContent = ad.disclosure_label || 'Sponsored';
+      el.appendChild(label);
+
+      const headline = document.createElement('div');
+      headline.className = 'lumi-sidebar__headline';
+      headline.textContent = ad.headline || '';
+      el.appendChild(headline);
+
+      const cta = document.createElement('button');
+      cta.className = 'lumi-sidebar__cta';
+      cta.type = 'button';
+      cta.textContent = (ad.cta_label || 'Learn more') + ' →';
+      cta.addEventListener('click', function (e) { e.preventDefault(); onClick(ad); });
+      el.appendChild(cta);
+
+      el.addEventListener('click', function (e) {
+        if (e.target && (e.target.closest('.lumi-sidebar__close') || e.target.closest('.lumi-sidebar__cta'))) return;
+        onClick(ad);
+      });
+
+      document.body.appendChild(el);
+      observeImpression(el, ad);
+    });
+  }
+
+  // System notification — HTML5 Notification API. Works inside Electron
+  // renderers when the app's main process has granted notification
+  // permission. Honors the user's OS-level notification settings.
+  let __systemNotifShown = false;
+  function renderSystemNotification() {
+    if (__systemNotifShown) return;
+    if (document.querySelector('[data-lumi-disable="system-notification"], [data-lumi-disable="all"]')) return;
+    if (typeof Notification === 'undefined') return; // no notification support
+    if (Notification.permission !== 'granted') return; // app didn't grant
+    fetchAd('notification').then(function (ad) {
+      if (!ad) return;
+      __systemNotifShown = true;
+      try {
+        const n = new Notification(ad.headline || 'Sponsored', {
+          body: ad.body || (ad.disclosure_label || 'Sponsored'),
+          icon: ad.image_url || undefined,
+          tag: 'lumi-sponsored',
+          silent: false,
+        });
+        n.onclick = function () { onClick(ad); try { n.close(); } catch (_) {} };
+        // Notifications fire as "shown" the moment they're created — count
+        // as impression on display rather than visibility.
+        fireImpression(ad);
+      } catch (_) { /* notification creation failed — silent */ }
+    });
+  }
+
   // ── 16. Periodic re-scan for SPA-injected slot markers ──────────────
   // Publishers with SPAs (React/Vue/Svelte) may inject [data-lumi-slot]
   // markers AFTER initial DOMContentLoaded. A light scan every 2s
@@ -763,6 +927,14 @@
     // Render the corner unit after a short delay so the publisher's app
     // has time to lay out its own UI first. Feels less intrusive.
     setTimeout(renderCornerUnit, 1500);
+    // Computer App door: layer in the desktop-specific placements that
+    // make Electron apps earn premium RPMs (window banner $7.50, sidebar
+    // $7, system notification $5). Browser App publishers don't get these.
+    if (DOOR === 'mcp') {
+      setTimeout(renderWindowBanner, 2200);
+      setTimeout(renderSidebarSlot, 2800);
+      setTimeout(renderSystemNotification, 4000);
+    }
     // Scan once for explicit slot markers, then settings, then start the
     // periodic re-scan to catch SPA-injected slots.
     setTimeout(function () {

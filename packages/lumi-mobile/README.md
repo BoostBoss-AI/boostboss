@@ -48,10 +48,13 @@ import {
   FullScreenInterstitial,
 } from '@boostbossai/lumi-mobile';
 
-// Rewarded — call onReward to grant credits/lives/etc.
+// Rewarded — real full-screen video player. Install expo-av for native
+// playback; without it, falls back to a sponsored card + wall-clock timer.
 <RewardedVideo
-  buttonLabel="Watch ad for 10 credits"
-  onReward={() => giveUserCredits(10)}
+  rewardAmount={10}
+  rewardUnit="credits"
+  onReward={({ amount, unit }) => giveUserCredits(amount)}
+  onSkip={() => {/* user dismissed early — no reward */}}
 />
 
 // Inline — drop into a feed.
@@ -83,8 +86,11 @@ import {
 
 - Session UUID uses `Math.random()`. Upgrade to `expo-crypto` (Expo) or
   `react-native-get-random-values` (bare) when stricter uniqueness matters.
-- Native video player is stubbed — `<RewardedVideo>` opens click_url in the
-  device browser and treats the click-through as the reward signal.
+- `<RewardedVideo>` and `<PreRollVideo>` use `expo-av` for real native
+  video playback when installed (`expo install expo-av`). It is an
+  optional peer dep — without it, both placements render a sponsored-card
+  fallback. The fallback still fires impressions and resolves
+  `onReward` / `onComplete`, just without a real video frame.
 - TSX ships as-is; your bundler (Metro / Babel) handles transpilation.
 
 ## License
