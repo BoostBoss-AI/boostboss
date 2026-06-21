@@ -106,6 +106,42 @@ function supa() {
   } catch (_) { return null; }
 }
 
+// Anon-keyed client used only for validating user-supplied JWTs via
+// supabase.auth.getUser(token). The service-role client above can't be
+// used for this because it bypasses RLS and would happily return the
+// service-role identity for any input.
+let _supabaseAnon = null;
+function supaAnon() {
+  if (_supabaseAnon) return _supabaseAnon;
+  if (!process.env.SUPABASE_URL) return null;
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || "";
+  if (!anonKey) return null;
+  try {
+    const { createClient } = require("@supabase/supabase-js");
+    _supabaseAnon = createClient(process.env.SUPABASE_URL, anonKey, {
+      auth: { persistSession: false },
+    });
+    return _supabaseAnon;
+  } catch (_) { return null; }
+}
+
+// Extract the authenticated user from the Authorization: Bearer <jwt>
+// header. Returns the Supabase user object, or null if the header is
+// missing / malformed / expired. Used by tenant-scoped routes that
+// previously trusted `?id=` from the query string — see task #152.
+async function getAuthUser(req) {
+  const token = (req.headers && req.headers.authorization || "")
+    .replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+  const anon = supaAnon();
+  if (!anon) return null;
+  try {
+    const { data, error } = await anon.auth.getUser(token);
+    if (error || !data || !data.user) return null;
+    return data.user;
+  } catch (_) { return null; }
+}
+
 // ── In-process demo accounts (reset on cold start) ─────────────────────
 const DEMO = {
   advertisers: new Map(), // id → { id, email, balance, company_name }
@@ -222,36 +258,60 @@ module.exports = async function handler(req, res) {
 };
 
 // ── balance ────────────────────────────────────────────────────────────
+//
+// Task #152 hardening: previously trusted ?id= from the query string. Any
+// signed-in user could read any other tenant's balance. Now requires a
+// valid Bearer JWT and ignores any caller-supplied id — the authenticated
+// user's id IS the advertiser scope. Demo-mode fallback (no Supabase)
+// still uses the query id because demo data is throwaway by definition.
 async function handleBalance(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
-  const { id } = req.query;
-  if (!id) return res.status(400).json({ error: "Missing advertiser id" });
 
   const sb = supa();
   if (sb) {
+    const user = await getAuthUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "Missing or invalid Authorization header" });
+    }
     const { data, error } = await sb.from("advertisers")
-      .select("balance, company_name").eq("id", id).single();
+      .select("balance, company_name").eq("id", user.id).single();
     if (error) return res.status(404).json({ error: "Advertiser not found" });
     return res.json({ balance: Number(data.balance), company_name: data.company_name });
   }
+
+  // Demo mode — no Supabase configured. Keep the old query-id behavior
+  // so the in-process demo state still works for preview deploys.
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: "Missing advertiser id" });
   const a = ensureDemoAdvertiser(id);
   return res.json({ balance: a.balance, company_name: a.company_name });
 }
 
 // ── history ───────────────────────────────────────────────────────────
+//
+// Task #152 hardening: same model as handleBalance — JWT-derived
+// advertiser id in production, fall back to query id only when no
+// Supabase is configured (demo mode).
 async function handleHistory(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
-  const { id } = req.query;
-  if (!id) return res.status(400).json({ error: "Missing advertiser id" });
 
   const sb = supa();
+  let id;
   if (sb) {
+    const user = await getAuthUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "Missing or invalid Authorization header" });
+    }
+    id = user.id;
     // Attempt to read from a transactions table if it exists
     try {
       const { data, error } = await sb.from("transactions")
         .select("*").eq("advertiser_id", id).order("created_at", { ascending: false }).limit(50);
       if (!error && data) return res.json({ transactions: data });
     } catch (_) { /* table may not exist — fall through to demo */ }
+  } else {
+    id = req.query && req.query.id;
+    if (!id) return res.status(400).json({ error: "Missing advertiser id" });
   }
 
   // Demo mode — build real history from ledger + track events + demo deposits
@@ -831,12 +891,13 @@ async function handleRefreshConnect(req, res) {
 // hint. One query, one round-trip.
 async function handlePayoutStatus(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
-  const developerId = req.query && (req.query.developer_id || req.query.id);
-  if (!developerId) return res.status(400).json({ error: "Missing developer_id" });
 
   const sb = supa();
   if (!sb) {
-    // Demo: synthesize a plausible state from the in-memory developer.
+    // Demo mode — no Supabase configured. Keep the old query-id behavior
+    // so the in-process demo state still works for preview deploys.
+    const developerId = req.query && (req.query.developer_id || req.query.id);
+    if (!developerId) return res.status(400).json({ error: "Missing developer_id" });
     const d = DEMO.developers.get(developerId) || ensureDemoDeveloper(developerId);
     return res.json({
       mode: "demo",
@@ -853,6 +914,17 @@ async function handlePayoutStatus(req, res) {
       next_payout_eta: null,
     });
   }
+
+  // Task #152 hardening: previously trusted ?developer_id= from the query
+  // string. Any signed-in user could read any other publisher's balance
+  // and payout state. Now requires a valid Bearer JWT and ignores any
+  // caller-supplied id — the authenticated user's id IS the developer
+  // scope.
+  const user = await getAuthUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "Missing or invalid Authorization header" });
+  }
+  const developerId = user.id;
 
   const { data: dev } = await sb.from("developers")
     .select("id, stripe_account_id, payouts_enabled, payout_blocked, payout_blocked_reason, payout_blocked_at, instant_payouts_enabled, stripe_requirements_due")

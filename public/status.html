@@ -261,7 +261,9 @@ function startRefreshBar() {
     // x-auth-mode). `okOn401: true` tells checkService to count 401 as
     // a passing probe.
     { name: "Auth Service",   desc: "Authentication & session management",endpoint: "/api/auth?action=me",               method: "POST", body: {},                        okOn401: true, check: () => true },
-    { name: "Billing API",    desc: "PayPal billing & payouts",           endpoint: "/api/billing?action=balance&id=status_probe", check: r => typeof r.balance === "number" },
+    // Billing API: post-#152 the balance endpoint requires Bearer auth, so an
+    // unauthenticated probe returns 401 — that IS healthy (auth gate is up).
+    { name: "Billing API",    desc: "PayPal billing & payouts",           endpoint: "/api/billing?action=balance", okOn401: true, check: () => true },
     { name: "Event Tracking", desc: "Impression, click & conversion pixel",endpoint: "/api/track",                       method: "POST", body: { event: "impression", campaign_id: "status_probe", session_id: "status" }, check: r => r.tracked === true },
     { name: "Stats & Reporting",desc: "Analytics aggregation & dashboards",endpoint: "/api/stats?type=advertiser&id=status_probe", check: r => r.daily && Array.isArray(r.daily) },
     { name: "Trust Artifacts", desc: "sellers.json, ads.txt, security.txt",endpoint: "/sellers.json",                    check: r => r.sellers && r.sellers.length > 0 },
