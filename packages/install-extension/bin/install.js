@@ -33,7 +33,7 @@ const PUBLISHER_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{4,}$/;
 const DOCS_URL = 'https://boostboss.ai/docs/extension';
 const DASHBOARD_URL = 'https://boostboss.ai/publish/dashboard';
 const RUNTIME_PKG = '@boostbossai/lumi-extension';
-const RUNTIME_VERSION = '0.1.0';
+const RUNTIME_VERSION = '0.2.0';
 
 // Map surfaces → (manifest key path, runtime js file).
 const SURFACES = [

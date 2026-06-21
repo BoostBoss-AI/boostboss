@@ -707,38 +707,248 @@
     });
   }
 
-  // ── 15. Slot opt-in renderer (citation / chip / inline-card / hero) ─
-  // Publishers can place explicit markers in their DOM:
-  //   <div data-lumi-slot="citation"></div>
-  //   <div data-lumi-slot="chip"></div>
-  //   <div data-lumi-slot="card"></div>
-  //   <div data-lumi-slot="hero"></div>
-  // Auto-detection for these placements is high-risk because they need
-  // chat/feed surface knowledge. The opt-in path is the safe v1.3 path.
-  // Auto-detection ships in v1.4 after we collect heuristic data from
-  // real publishers' DOM patterns.
+  // ── 15. Auto-mount renderers (citation / chip / inline-card / hero) ──
+  // Smart auto-detection with safe fallbacks. Three-tier strategy:
+  //   1. Honor explicit publisher markers first: <div data-lumi-slot="X">
+  //   2. If no marker, try to find the ideal location via heuristic
+  //      selectors (chat containers, suggestion bars, feed lists, empty
+  //      states). Mount there.
+  //   3. If heuristic fails, fall back to a safe default location where
+  //      the placement still serves impressions without breaking publisher
+  //      UI (no false positives on code blocks, forms, system messages).
+  // Publisher can disable any auto-mount with <meta data-lumi-disable="X">.
+  // This is v1.5 — replaces the opt-in-only path from v1.3.
   const SLOT_TO_PLACEMENT = {
     citation: 'citation',
     chip:     'chip',
     card:     'card',
     hero:     'hero',
   };
-  function renderOptInSlots() {
-    if (document.querySelector('[data-lumi-disable="all"]')) return;
-    Object.keys(SLOT_TO_PLACEMENT).forEach(function (slotKey) {
-      const placement = SLOT_TO_PLACEMENT[slotKey];
-      document.querySelectorAll('[data-lumi-slot="' + slotKey + '"]').forEach(function (slot) {
-        if (slot.__lumiFilled) return;
-        slot.__lumiFilled = true;
-        fetchAd(placement).then(function (ad) {
-          if (!ad) { slot.__lumiFilled = false; return; }
-          injectStyles();
-          const el = buildSlotCard(ad);
-          slot.appendChild(el);
-          observeImpression(el, ad);
+
+  // Skip elements that are inside risky containers — code blocks, password
+  // fields, system messages, admin chrome, the publisher's own ad slots,
+  // and anything they've explicitly opted-out of.
+  function isInsideRiskyContainer(el) {
+    if (!el || !el.closest) return false;
+    return !!el.closest(
+      'pre, code, [contenteditable="true"], ' +
+      'input, textarea, select, ' +
+      '[data-lumi-disable], [data-lumi-disable="all"], ' +
+      '[role="alert"], [role="status"], ' +
+      '.system-message, [data-system], ' +
+      '.code-block, .codeblock, .monaco-editor, .CodeMirror, ' +
+      'header, nav, [role="banner"], [role="navigation"], ' +
+      '.lumi-slot, .lumi-corner, .lumi-interstitial, .lumi-loading, .lumi-sidebar, .lumi-window-banner'
+    );
+  }
+
+  // Heuristic finder: AI response containers (used by citation, chip).
+  // Tries the most specific selectors first; falls back to broader ones.
+  function findAIResponseContainer() {
+    const candidates = [
+      // Specific assistant/AI message markers
+      '[data-message-role="assistant"]:last-of-type',
+      '[data-role="assistant"]:last-of-type',
+      '.assistant-message:last-of-type',
+      '.ai-message:last-of-type',
+      '.message.assistant:last-of-type',
+      '.chat-message.ai:last-of-type',
+      '[data-author="ai"]:last-of-type',
+      '[data-author="assistant"]:last-of-type',
+      '[data-from="ai"]:last-of-type',
+      // Generic chat/log roles
+      '[role="log"] > *:last-child',
+      '[role="status"] > *:last-child',
+      // Common class names
+      '.messages > *:last-child:not(.user)',
+      '.chat-messages > *:last-child',
+      '.conversation > *:last-child',
+      '.thread > *:last-child',
+    ];
+    for (const sel of candidates) {
+      try {
+        const el = document.querySelector(sel);
+        if (el && !isInsideRiskyContainer(el)) return el;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  // Heuristic finder: feed / message-list containers (used by card).
+  function findFeedContainer() {
+    const candidates = [
+      '[role="feed"]',
+      '[role="log"]',
+      '.messages',
+      '.chat-messages',
+      '.conversation',
+      '.feed',
+      '.timeline',
+      '.message-list',
+      '[data-message-list]',
+      'main [class*="messages"]',
+      'main [class*="chat"]',
+    ];
+    for (const sel of candidates) {
+      try {
+        const el = document.querySelector(sel);
+        if (el && !isInsideRiskyContainer(el)) {
+          // Only insert into containers that actually have content. An empty
+          // feed is for the hero placement, not card.
+          if (el.children && el.children.length >= 2) return el;
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  // Heuristic finder: empty-state containers (used by hero).
+  function findEmptyStateContainer() {
+    const candidates = [
+      '[data-empty="true"]',
+      '[data-state="empty"]',
+      '.empty-state',
+      '.empty-view',
+      '.no-content',
+      '[role="main"]:empty',
+      'main:empty',
+    ];
+    for (const sel of candidates) {
+      try {
+        const el = document.querySelector(sel);
+        if (el && !isInsideRiskyContainer(el)) return el;
+      } catch (_) {}
+    }
+    // Heuristic fallback: <main> with no children
+    try {
+      const main = document.querySelector('main');
+      if (main && !isInsideRiskyContainer(main)) {
+        const visibleKids = Array.from(main.children).filter(function (c) {
+          return c.offsetParent !== null && !c.classList.contains('lumi-slot');
         });
-      });
+        if (visibleKids.length === 0) return main;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  // Heuristic finder: suggestion / quick-reply container (used by chip).
+  function findSuggestionContainer() {
+    const candidates = [
+      '[data-suggestions]',
+      '[data-quick-replies]',
+      '.suggestions',
+      '.quick-replies',
+      '.suggested-actions',
+      '.suggested-prompts',
+      '.chip-list',
+      '[role="toolbar"][aria-label*="suggest" i]',
+    ];
+    for (const sel of candidates) {
+      try {
+        const el = document.querySelector(sel);
+        if (el && !isInsideRiskyContainer(el)) return el;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  // Safe-default mount points when heuristics fail. These won't be the
+  // ideal placement (lower RPM) but they DO serve impressions safely.
+  // Publisher can override with explicit slot markers for premium placement.
+  function safeDefaultMount(placement) {
+    // Build a free-floating container appended to <body>
+    const wrapper = document.createElement('div');
+    wrapper.className = 'lumi-slot lumi-slot--default';
+    if (placement === 'citation') {
+      // Pin to bottom-left, small text-only line
+      wrapper.style.cssText = 'position:fixed;bottom:14px;left:14px;max-width:280px;z-index:2147483050;font-size:11px;';
+    } else if (placement === 'chip') {
+      // Pin to bottom-left as floating pill
+      wrapper.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:2147483050;';
+    } else if (placement === 'card') {
+      // End of <main> or <body>
+      wrapper.style.cssText = 'margin:24px auto;max-width:520px;';
+    } else if (placement === 'hero') {
+      // Top of viewport when nothing else
+      wrapper.style.cssText = 'margin:16px auto;max-width:640px;';
+    }
+    document.body.appendChild(wrapper);
+    return wrapper;
+  }
+
+  // Tracks whether each placement has already mounted at least once per
+  // page load so we don't double-mount on repeated MutationObserver fires.
+  const __autoMounted = { citation: false, chip: false, card: false, hero: false };
+
+  function tryAutoMount(placement) {
+    if (__autoMounted[placement]) return;
+    if (document.querySelector('[data-lumi-disable="' + placement + '"], [data-lumi-disable="all"]')) return;
+
+    // Tier 1 — explicit publisher marker wins
+    const explicit = document.querySelector('[data-lumi-slot="' + placement + '"]');
+    if (explicit && !explicit.__lumiFilled) {
+      mountAt(explicit, placement, /*isExplicit*/ true);
+      return;
+    }
+
+    // Tier 2 — heuristic detection
+    let target = null;
+    let position = 'append'; // append | after | prepend
+    if (placement === 'citation') {
+      target = findAIResponseContainer();
+      position = 'append';
+    } else if (placement === 'chip') {
+      target = findSuggestionContainer() || findAIResponseContainer();
+      position = target && target.classList && target.classList.contains('suggestions') ? 'append' : 'after';
+    } else if (placement === 'card') {
+      target = findFeedContainer();
+      position = 'append';
+    } else if (placement === 'hero') {
+      target = findEmptyStateContainer();
+      position = 'append';
+    }
+
+    // Tier 3 — safe default fallback
+    if (!target) {
+      target = safeDefaultMount(placement);
+      position = 'append';
+    }
+    mountAt(target, placement, /*isExplicit*/ false, position);
+  }
+
+  function mountAt(target, placement, isExplicit, position) {
+    if (!target || target.__lumiFilled) return;
+    target.__lumiFilled = true;
+    fetchAd(placement).then(function (ad) {
+      if (!ad) { target.__lumiFilled = false; return; }
+      __autoMounted[placement] = true;
+      injectStyles();
+      const el = buildSlotCard(ad);
+      try {
+        if (isExplicit || position === 'append') {
+          target.appendChild(el);
+        } else if (position === 'after' && target.parentNode) {
+          target.parentNode.insertBefore(el, target.nextSibling);
+        } else if (position === 'prepend') {
+          target.insertBefore(el, target.firstChild);
+        } else {
+          target.appendChild(el);
+        }
+        observeImpression(el, ad);
+      } catch (_) {
+        target.__lumiFilled = false;
+      }
     });
+  }
+
+  // Backward-compat shim — old code-paths call renderOptInSlots(). Now
+  // routes through the auto-mount tryer for all 4 placements.
+  function renderOptInSlots() {
+    tryAutoMount('citation');
+    tryAutoMount('chip');
+    tryAutoMount('card');
+    tryAutoMount('hero');
   }
 
   // Ephemeral session id, reused across all ad-fetch calls on this page.

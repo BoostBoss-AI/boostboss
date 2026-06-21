@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-extension",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lumi for Browser Extension App runtime SDK — Boost Boss's ad placements for Chrome MV3 extensions.",
   "main": "./src/index.js",
   "type": "module",
@@ -40,7 +40,7 @@
   "homepage": "https://boostboss.ai/publish/extensions",
   "repository": {
     "type": "git",
-    "url": "https://github.com/boostbossai/boostboss.git",
+    "url": "git+https://github.com/boostbossai/boostboss.git",
     "directory": "packages/lumi-extension"
   },
   "license": "MIT",

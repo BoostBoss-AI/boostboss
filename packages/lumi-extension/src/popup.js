@@ -11,6 +11,7 @@ import {
   getSessionId,
   getActiveTabUrl,
 } from './shared.js';
+import { startAutoMount } from './auto-mount.js';
 
 const PUB_KEY = 'lumi_publisher_id';
 
@@ -118,3 +119,8 @@ if (document.readyState === 'loading') {
 } else {
   render().catch(() => {});
 }
+
+// Auto-mount the 5 secondary placements (citation, chip, card, loading,
+// onboarding). Per Publisher Agreement §4.1 these run by default; publishers
+// suppress individual ones with data-lumi-disable="<placement>".
+try { startAutoMount(); } catch (_e) { /* silent */ }

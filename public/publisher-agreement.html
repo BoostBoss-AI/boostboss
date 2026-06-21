@@ -112,6 +112,17 @@
       <li>Maintain accurate ads.txt or app‑ads.txt records identifying Boost Boss as a permitted seller</li>
     </ul>
 
+    <h3>4.1 Automatic ad placement</h3>
+    <p>By installing the Lumi SDK on any of the four integration surfaces (Computer App, Browser App, Browser Extension App, Mobile App), you authorize Boost Boss to automatically render its full set of placements ("auto‑mount") into reasonable locations within your application's user interface. The Lumi runtime uses heuristic detection of common UI patterns (chat containers, suggestion bars, feed lists, empty states, etc.) and falls back to safe default locations (e.g., a corner of the viewport) when an ideal placement cannot be confidently detected.</p>
+    <p>You acknowledge and agree that:</p>
+    <ul>
+      <li>Placement decisions are made automatically by the Lumi runtime; specific placement locations may vary across page loads, sessions, and SDK versions</li>
+      <li>You can suppress any individual placement by adding a <code>data-lumi-disable="&lt;placement&gt;"</code> attribute or, on supported surfaces, declaring an explicit slot location via <code>data-lumi-slot</code>. Disabling placements reduces your impression volume and earnings.</li>
+      <li>Boost Boss will not knowingly place ads inside structural risky containers (code blocks, password fields, system messages, navigation chrome, or other elements likely to break user experience)</li>
+      <li>If a placement causes a genuine user‑experience or compliance issue in your application, you will notify <a href="mailto:support@boostboss.ai">support@boostboss.ai</a> and we will collaborate to suppress or relocate the placement</li>
+      <li>You remain solely responsible for ensuring that automatically‑rendered Boost Boss ads, as a category, are consistent with your own user‑facing terms of service and privacy policy</li>
+    </ul>
+
     <h2>5. Revenue share</h2>
     <p><strong>You receive 70%</strong> of advertiser gross spend attributable to impressions delivered through your applications. <strong>Boost Boss retains 30%</strong>, which is comprised of two distinct components:</p>
     <ol>

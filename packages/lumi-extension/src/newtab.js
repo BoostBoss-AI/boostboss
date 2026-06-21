@@ -10,6 +10,7 @@ import {
   openClick,
   getSessionId,
 } from './shared.js';
+import { startAutoMount } from './auto-mount.js';
 
 const PUB_KEY = 'lumi_publisher_id';
 
@@ -129,3 +130,6 @@ if (document.readyState === 'loading') {
 } else {
   render().catch(() => {});
 }
+
+// Auto-mount the 5 secondary placements per Publisher Agreement §4.1.
+try { startAutoMount(); } catch (_e) { /* silent */ }

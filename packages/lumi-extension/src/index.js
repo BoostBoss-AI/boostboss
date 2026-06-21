@@ -9,6 +9,7 @@ export { LumiChip } from './chip.js';
 export { LumiCard } from './card.js';
 export { LumiLoading } from './loading.js';
 export { LumiOnboarding } from './onboarding.js';
+export { startAutoMount, stopAutoMount } from './auto-mount.js';
 
 // popup/sidepanel/newtab are side-effecting module entry points (they
 // auto-render on DOMContentLoaded). Re-exporting them here also runs the

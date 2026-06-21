@@ -44,7 +44,7 @@ const PUBLISHER_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{4,}$/;
 const DOCS_URL = 'https://boostboss.ai/docs/mobile';
 const DASHBOARD_URL = 'https://boostboss.ai/publish/dashboard';
 const RUNTIME_PKG = '@boostbossai/lumi-mobile';
-const RUNTIME_VERSION = '0.1.0';
+const RUNTIME_VERSION = '0.2.0';
 const RUNTIME_SPEC_RECORDED = `${RUNTIME_PKG}@^${RUNTIME_VERSION}`;
 
 async function main() {
