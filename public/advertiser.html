@@ -7631,6 +7631,12 @@
         }
 
         // ───────────── BILLING ─────────────
+        // Module-level current balance so renderBillingTable() can compute
+        // a running "Balance After" column without re-fetching. The
+        // transactions table doesn't store a balance_after column (#149)
+        // so we walk newest→oldest from this value.
+        let _currentBalance = 0;
+
         async function loadBalance() {
             try {
                 const r = await fetch(`${API_BASE}/api/billing?action=balance&id=${currentUserData.user_id}`, {
@@ -7638,8 +7644,10 @@
                 });
                 if (r.ok) {
                     const j = await r.json();
-                    document.getElementById('accountBalance').textContent = '$' + formatNumber(j.balance || 0, true);
+                    _currentBalance = Number(j.balance) || 0;
+                    document.getElementById('accountBalance').textContent = '$' + formatNumber(_currentBalance, true);
                 } else if (r.status === 404) {
+                    _currentBalance = 0;
                     document.getElementById('accountBalance').textContent = '$0.00';
                 }
             } catch (e) {
@@ -8680,6 +8688,11 @@
 
         async function loadBillingHistory() {
             const tbody = document.getElementById('billingTableBody');
+            // #149 — ensure _currentBalance is populated before render so
+            // the "Balance After" column doesn't show $0.00 from a race
+            // with loadBalance(). Idempotent — overwrites with the same
+            // value if balance is already loaded.
+            try { await loadBalance(); } catch (_) { /* render anyway */ }
             try {
                 const r = await fetch(`${API_BASE}/api/billing?action=history&id=${currentUserData.user_id}`, {
                     headers: { 'Authorization': `Bearer ${currentUser.token}` }
@@ -8723,23 +8736,41 @@
                 return;
             }
 
+            // #149 — server returns `created_at` (Supabase) or `date` (demo);
+            // we accept either. Fallback to null which we render as "—".
+            const txDate = tx => tx && (tx.created_at || tx.date) || null;
+            const fmtDate = iso => {
+                if (!iso) return '—';
+                const d = new Date(iso);
+                if (isNaN(d.getTime())) return '—';
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            };
+
+            // #149 — transactions schema has no balance_after column. Walk
+            // newest→oldest from current balance. tx.amount carries sign
+            // (positive deposit, negative spend) so we just subtract as we go.
+            let running = _currentBalance;
+
             _billingHistory.forEach(tx => {
                 const row = document.createElement('tr');
-                const isDeposit = tx.amount > 0;
+                const amount = Number(tx.amount) || 0;
+                const isDeposit = amount > 0;
+                const balanceAfterThisTx = running;
+                running -= amount;
                 const statusColor = tx.status === 'completed' || tx.status === 'settled' ? '#059669' : '#D97706';
                 const typeLabel   = _T('page.billing.type_' + tx.type,   tx.type);
                 const statusLabel = _T('page.billing.status_' + tx.status, tx.status);
                 row.innerHTML = `
-                    <td style="white-space: nowrap;">${new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td>${escapeHtml(tx.description)}</td>
+                    <td style="white-space: nowrap;">${fmtDate(txDate(tx))}</td>
+                    <td>${escapeHtml(tx.description || '')}</td>
                     <td><span style="
                         font-size: 11px; padding: 3px 8px; border-radius: 100px; font-weight: 600;
                         background: ${isDeposit ? '#ECFDF5' : '#FEF3F2'}; color: ${isDeposit ? '#059669' : '#DC2626'};
                     ">${escapeHtml(typeLabel)}</span></td>
                     <td style="font-weight: 600; color: ${isDeposit ? '#059669' : '#111'};">
-                        ${isDeposit ? '+' : ''}$${Math.abs(tx.amount).toFixed(2)}
+                        ${isDeposit ? '+' : ''}$${Math.abs(amount).toFixed(2)}
                     </td>
-                    <td style="color: #6B7280;">$${(tx.balance || 0).toFixed(2)}</td>
+                    <td style="color: #6B7280;">$${balanceAfterThisTx.toFixed(2)}</td>
                     <td><span style="font-size: 11px; color: ${statusColor}; font-weight: 500;">${escapeHtml(statusLabel)}</span></td>
                 `;
                 tbody.appendChild(row);
@@ -8752,10 +8783,19 @@
                 showToast('No transactions to export', 'info');
                 return;
             }
-            const header = 'Date,Description,Type,Amount,Balance,Status\n';
-            const rows = _billingHistory.map(tx =>
-                `"${new Date(tx.date).toLocaleDateString()}","${tx.description}","${tx.type}",${tx.amount},${tx.balance || 0},"${tx.status}"`
-            ).join('\n');
+            // #149 — match the rendered table: created_at|date for the date,
+            // and a running balance walked from _currentBalance for Balance After.
+            const header = 'Date,Description,Type,Amount,Balance After,Status\n';
+            let running = _currentBalance;
+            const rows = _billingHistory.map(tx => {
+                const iso = tx.created_at || tx.date || '';
+                const d = iso ? new Date(iso) : null;
+                const dateStr = (d && !isNaN(d.getTime())) ? d.toLocaleDateString() : '';
+                const amount = Number(tx.amount) || 0;
+                const balanceAfter = running;
+                running -= amount;
+                return `"${dateStr}","${(tx.description || '').replace(/"/g, '""')}","${tx.type}",${amount},${balanceAfter.toFixed(2)},"${tx.status}"`;
+            }).join('\n');
             const blob = new Blob([header + rows], { type: 'text/csv' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
