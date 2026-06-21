@@ -8825,40 +8825,39 @@
         }
 
         // ───────────── DUPLICATE CAMPAIGN ─────────────
+        // Task #146 — Copy used to POST immediately with status:'review',
+        // bypassing the seller's chance to inspect or edit. Now it opens
+        // the campaign modal pre-populated with the source data and lets
+        // the seller submit as a brand-new campaign. Cancelling = no row.
+        //
+        // Implementation strategy: reuse openEditModal()'s full populate
+        // pipeline (which fetches the canonical /api/campaigns?action=get
+        // payload and rehydrates every field including targeting pills,
+        // placement groups, intent chips), then immediately null
+        // editingCampaignId so the form's submit handler takes the CREATE
+        // path instead of UPDATE. We also tweak the name + modal title so
+        // it's visually clear this is a draft, not an edit.
         async function duplicateCampaign(campaign) {
-            const dupData = {
-                advertiser_id: currentUserData.user_id,
-                name: campaign.name + ' (Copy)',
-                format: campaign.format || 'native',
-                headline: campaign.headline || '',
-                media_url: campaign.media_url || 'https://via.placeholder.com/300x250',
-                cta_url: campaign.cta_url || '',
-                target_keywords: campaign.target_keywords || [],
-                billing_model: campaign.billing_model || 'cpm',
-                bid_amount: campaign.bid_amount || null,
-                daily_budget: campaign.daily_budget || 50,
-                total_budget: campaign.total_budget || 500,
-                optimization_goal: campaign.optimization_goal || 'target_cpa',
-                target_cpa: campaign.target_cpa || null,
-                target_roas: campaign.target_roas || null,
-                status: 'review'
-            };
-
-            try {
-                const r = await fetch(`${API_BASE}/api/campaigns`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentUser.token}`
-                    },
-                    body: JSON.stringify(dupData)
-                });
-                if (!r.ok) throw new Error('Duplicate failed');
-                showToast(`"${campaign.name}" duplicated`, 'success');
-                loadCampaigns();
-            } catch (e) {
-                showToast('Failed to duplicate: ' + e.message, 'error');
+            const sourceId = campaign && campaign.id;
+            if (!sourceId) {
+                showToast('Cannot duplicate: missing campaign id', 'error');
+                return;
             }
+            try {
+                await openEditModal(sourceId);
+            } catch (e) {
+                showToast('Failed to load source campaign: ' + e.message, 'error');
+                return;
+            }
+            // Switch the modal from EDIT to NEW-FROM-COPY.
+            editingCampaignId = null;
+            const nameInput = campaignForm && campaignForm.querySelector('[name="name"]');
+            if (nameInput && nameInput.value && !/ \(Copy\)\s*$/.test(nameInput.value)) {
+                nameInput.value = nameInput.value + ' (Copy)';
+            }
+            const modalTitle = campaignModal && campaignModal.querySelector('.modal-header h2, h3');
+            if (modalTitle) modalTitle.textContent = 'Duplicate Campaign';
+            showToast('Review the copy, then click Save to create it.', 'info');
         }
 
         // ───────────── PIXEL SNIPPET ─────────────
