@@ -61,9 +61,14 @@ end $$;
 -- A CTA label fallback is provided in code, so we only require it
 -- exists if the advertiser cared to vary it. Headlines + image are
 -- the load-bearing variant counts.
+-- NOTE: products.hero_images is JSONB (an array of URL strings), NOT
+-- text[]. The original draft of this function assumed text[] and broke
+-- the backfill — the FIX migration 28_pilot_creative_variants_FIX.sql
+-- corrects deployed databases. This file is now correct for fresh
+-- deploys too.
 create or replace function public.compute_creative_library_ready(
   p_headlines      text[],
-  p_hero_images    text[],
+  p_hero_images    jsonb,
   p_image_url      text
 ) returns boolean
 language plpgsql
@@ -74,8 +79,15 @@ declare
   v_image_count    int;
 begin
   v_headline_count := coalesce(array_length(p_headlines, 1), 0);
-  v_image_count    := coalesce(array_length(p_hero_images, 1), 0)
-                    + case when p_image_url is not null and p_image_url <> '' then 1 else 0 end;
+
+  v_image_count :=
+    case
+      when p_hero_images is null            then 0
+      when jsonb_typeof(p_hero_images) = 'array'
+        then jsonb_array_length(p_hero_images)
+      else 0
+    end
+    + case when p_image_url is not null and p_image_url <> '' then 1 else 0 end;
 
   return v_headline_count >= 3 and v_image_count >= 1;
 end;
