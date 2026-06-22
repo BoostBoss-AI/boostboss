@@ -15695,13 +15695,25 @@ function pfParseScreenshots(text) {
             let pilotActiveProductId = null;
             let pilotDebounceTimer = null;
 
+            // Token retrieval matches the canonical pattern used by the
+            // products/campaigns loaders elsewhere in this file. The
+            // canonical key is bb_session_token (JSON.stringify wrapper),
+            // with legacy fallbacks. See [[feedback-bb-session-token-format]].
             function getToken() {
                 try {
-                    const raw = localStorage.getItem('bb_session');
-                    if (!raw) return null;
-                    const j = JSON.parse(raw);
-                    return j && j.token ? j.token : null;
-                } catch (_) { return null; }
+                    const raw = localStorage.getItem('bb_session_token');
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            if (parsed && parsed.token) return parsed.token;
+                        } catch (_) {
+                            if (typeof raw === 'string' && raw.length > 20 && !raw.startsWith('{')) return raw;
+                        }
+                    }
+                    const adv = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token');
+                    if (adv) return adv;
+                } catch (_) {}
+                return null;
             }
 
             function activeRoute() {
