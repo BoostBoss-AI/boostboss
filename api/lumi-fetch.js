@@ -111,6 +111,43 @@ async function resolvePublisherApiKey(publisherId) {
   }
 }
 
+// ── Kind → placement_id resolver ───────────────────────────────────
+// The SDK sends a placement KIND ('corner', 'bottom_banner', etc.). The
+// auction needs a placement ROW (with surface/format/floor_cpm). Migration
+// 30 added auto-registration so every publisher with a known door has
+// these rows seeded — this lookup finishes the loop.
+//
+// Cached for 5 minutes per (publisher × kind) — placement metadata is
+// near-static. See [[advertiser-pilot-model]].
+const _placementCache = new Map();
+const PLACEMENT_CACHE_TTL_MS = 5 * 60 * 1000;
+async function resolvePublisherPlacementId(publisherId, kind) {
+  if (!publisherId || !kind) return null;
+  const cacheKey = publisherId + "|" + kind;
+  const now = Date.now();
+  const cached = _placementCache.get(cacheKey);
+  if (cached && now - cached.at < PLACEMENT_CACHE_TTL_MS) return cached.placementId;
+  const sb = supa();
+  if (!sb) return null;
+  try {
+    const { data, error } = await sb.from("placements")
+      .select("id")
+      .eq("developer_id", publisherId)
+      .eq("kind", kind)
+      .eq("status", "active")
+      .maybeSingle();
+    if (error || !data) {
+      _placementCache.set(cacheKey, { at: now, placementId: null });
+      return null;
+    }
+    _placementCache.set(cacheKey, { at: now, placementId: data.id });
+    return data.id;
+  } catch (e) {
+    console.warn("[lumi-fetch] placement lookup failed:", e && e.message);
+    return null;
+  }
+}
+
 module.exports = async function handler(req, res) {
   // CORS — script-tag publishers are on arbitrary origins
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -135,7 +172,9 @@ module.exports = async function handler(req, res) {
   // backward compatibility with the v0 runtime that didn't send this.
   // Allowlist mapped to internal door keys; anything else clamps to
   // 'js-snippet' so a malformed client never poisons the analytics.
-  const DOOR_ALLOWLIST = { 'js-snippet': 1, 'mcp': 1, 'npm-sdk': 1, 'rest-api': 1 };
+  // 'mobile-app' added per [[advertiser-pilot-model]]. Anything else
+  // clamps to 'js-snippet' so a malformed client never poisons analytics.
+  const DOOR_ALLOWLIST = { 'js-snippet': 1, 'mcp': 1, 'npm-sdk': 1, 'rest-api': 1, 'mobile-app': 1 };
   const doorRaw = String(body.door || "js-snippet").trim().toLowerCase();
   const door = DOOR_ALLOWLIST[doorRaw] ? doorRaw : "js-snippet";
 
@@ -159,6 +198,13 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ad: null, reason: "publisher_not_found" });
   }
 
+  // Resolve the publisher's placement row for this kind. Returns null if
+  // (a) the publisher hasn't been auto-registered (legacy account pre-
+  // migration 30) or (b) the kind isn't in this door's template. Either
+  // way mcp.js falls through to surface-only matching, so this is a soft
+  // enhancement: when present it unlocks floor + freq cap + brand safety.
+  const placementId = await resolvePublisherPlacementId(publisherId, placement);
+
   // Log the Origin header for v1.1 allowlist enforcement (no-op in v1.0)
   const origin = (req.headers && (req.headers.origin || req.headers.Origin)) || "";
 
@@ -168,7 +214,10 @@ module.exports = async function handler(req, res) {
   // The MCP auction uses surface as a free-form string today; downstream
   // we parse the prefix ('web-' / 'desktop-' / 'extension-' / 'mobile-')
   // to determine which door's verify badge to flip.
-  const DOOR_SURFACE = { 'js-snippet': 'web', 'mcp': 'desktop', 'npm-sdk': 'extension', 'rest-api': 'mobile' };
+  // 'mobile-app' is the canonical Mobile App door key; legacy 'rest-api'
+  // also still maps to 'mobile' surface for back-compat with older
+  // mobile clients that picked rest-api at signup time.
+  const DOOR_SURFACE = { 'js-snippet': 'web', 'mcp': 'desktop', 'npm-sdk': 'extension', 'rest-api': 'mobile', 'mobile-app': 'mobile' };
   const surfacePrefix = DOOR_SURFACE[door];
 
   const mockReq = {
@@ -189,6 +238,11 @@ module.exports = async function handler(req, res) {
           session_id:         sessionId,
           host_app:           "lumi_" + surfacePrefix + "_app",
           surface:            surfacePrefix + "-" + placement,
+          // Resolved by the kind → row lookup above. Drives floor
+          // enforcement, freq cap, and placement-level brand safety in
+          // mcp.js. Null when the publisher hasn't been auto-registered
+          // — auction still runs, just without placement-aware features.
+          placement_id:       placementId || undefined,
           // Pass the canonical door key so the auction-side tracking
           // recorder knows which integration_method to write — matches
           // the events.integration_method enum the verify badge poller

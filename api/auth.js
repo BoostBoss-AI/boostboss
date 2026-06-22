@@ -641,8 +641,11 @@ async function supabaseHandler(action, body, req, res) {
     // "multiple" and "other" come from the primary signup form's "what
     // are you building?" question and are accepted as legitimate signal.
     // Legacy underscored values get rewritten so old clients still work.
-    const DOOR_LEGACY_TO_CANONICAL = { js_snippet: "js-snippet", npm_sdk: "npm-sdk", rest: "rest-api" };
-    const ALLOWED_DOORS = new Set(["mcp", "js-snippet", "npm-sdk", "rest-api", "multiple", "other"]);
+    const DOOR_LEGACY_TO_CANONICAL = { js_snippet: "js-snippet", npm_sdk: "npm-sdk", rest: "rest-api", mobile_app: "mobile-app" };
+    // Whitelist includes the new 'mobile-app' door key per
+    // [[advertiser-pilot-model]]. Migration 30 updates the DB CHECK
+    // constraint to match.
+    const ALLOWED_DOORS = new Set(["mcp", "js-snippet", "npm-sdk", "rest-api", "mobile-app", "multiple", "other"]);
     const doorCandidate = (typeof doorRaw === "string" && DOOR_LEGACY_TO_CANONICAL[doorRaw]) || doorRaw;
     const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorCandidate)) ? doorCandidate : null;
 
@@ -690,6 +693,21 @@ async function supabaseHandler(action, body, req, res) {
         .select("*").maybeSingle();
       if (error) return res.status(500).json({ error: "Could not create developer profile: " + error.message });
       inserted = data;
+
+      // Auto-register the per-door placement set so the publisher's SDK
+      // installs immediately have inventory to match against. Fire-and-
+      // forget — the RPC is idempotent and silently no-ops for doors
+      // without a template (rest-api / multiple / other). See migration
+      // 30_placement_kind_and_autoreg.sql + [[advertiser-pilot-model]].
+      if (integration_door) {
+        supabaseAdmin.rpc("auto_register_placements_for_developer", {
+          p_developer_id: data.id,
+          p_door:         integration_door,
+        }).then(
+          () => { /* success — placements created or already there */ },
+          (err) => { console.warn("[auth] auto_register_placements failed:", err && err.message); }
+        );
+      }
     }
 
     // Merge the new role into user_metadata.roles[] so the next login on
@@ -2186,8 +2204,10 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
   // Whitelist integration_door before it touches the DB CHECK constraint.
   // Task #144: canonical hyphenated 4-door taxonomy + "multiple"/"other"
   // catch-alls. Legacy underscored values rewritten for back-compat.
-  const DOOR_LEGACY_TO_CANONICAL = { js_snippet: "js-snippet", npm_sdk: "npm-sdk", rest: "rest-api" };
-  const ALLOWED_DOORS = new Set(["mcp", "js-snippet", "npm-sdk", "rest-api", "multiple", "other"]);
+  const DOOR_LEGACY_TO_CANONICAL = { js_snippet: "js-snippet", npm_sdk: "npm-sdk", rest: "rest-api", mobile_app: "mobile-app" };
+  // 'mobile-app' added per [[advertiser-pilot-model]]. Migration 30
+  // updates the DB CHECK constraint to match this whitelist.
+  const ALLOWED_DOORS = new Set(["mcp", "js-snippet", "npm-sdk", "rest-api", "mobile-app", "multiple", "other"]);
   const doorCandidate = (typeof doorRaw === "string" && DOOR_LEGACY_TO_CANONICAL[doorRaw]) || doorRaw;
   const integration_door = (role === "developer" && ALLOWED_DOORS.has(doorCandidate)) ? doorCandidate : null;
 
@@ -2348,6 +2368,19 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
       integration_door: integration_door,  // nullable; whitelisted above
     });
     if (error) console.error("[Auth] Developer insert error:", error.message);
+
+    // Auto-register the per-door placement set so SDK ad requests
+    // immediately match real inventory. Idempotent + fire-and-forget.
+    // See migration 30 + [[advertiser-pilot-model]].
+    if (!error && integration_door) {
+      supabaseAdmin.rpc("auto_register_placements_for_developer", {
+        p_developer_id: userId,
+        p_door:         integration_door,
+      }).then(
+        () => { /* placements created or already there */ },
+        (err) => { console.warn("[Auth] auto_register_placements failed:", err && err.message); }
+      );
+    }
   }
 
   // Existing users (adding a second product) who are ALREADY confirmed
