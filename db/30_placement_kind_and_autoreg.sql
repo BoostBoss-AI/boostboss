@@ -80,7 +80,12 @@ create or replace function public.placement_template_for_door(
 language sql
 immutable
 as $$
-  select * from (values
+  -- Explicit column projection — drops the leading 'door' column from
+  -- the inner VALUES so the function's 6 return columns line up. The
+  -- FIX migration (30_placement_kind_and_autoreg_FIX.sql) is for
+  -- already-deployed DBs that ran the buggy first draft.
+  select t.kind, t.surface, t.format, t.floor_cpm, t.freq_cap, t.display_name
+  from (values
     -- ── Browser App (js-snippet) — 8 ──────────────────────────────
     ('js-snippet'::text, 'corner'::text,        'sidebar'::text,        'native'::text,    1.50::numeric, 5, 'Corner unit'::text),
     ('js-snippet',       'citation',            'chat',                 'text_card',       1.00,          8, 'Sponsored citation'),
