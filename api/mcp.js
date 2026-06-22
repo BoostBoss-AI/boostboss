@@ -245,16 +245,49 @@ function productBoostToVirtualCampaign(product) {
     __pilot_boost_creative_refresh: Number(product.boost_creative_refresh) || 0.5,
     __pilot_boost_confidence_floor: Number(product.boost_confidence_floor) || 0.3,
 
-    // Creative payload — the ad-render code reads these. v0 uses the
-    // product's existing storefront fields; the Creative Library tab
-    // (priority 2) will add proper headline/CTA variant rotation.
-    __pilot_creative: {
-      headline:   product.name,
-      body:       product.description || "",
-      image_url:  product.image_url || (Array.isArray(product.hero_images) ? product.hero_images[0] : null),
-      cta_url:    product.default_url || product.external_marketing_url,
-      cta_label:  "Learn more",
-    },
+    // Creative payload — picks a variant from each library array.
+    // v1: simple random pick (seeded per impression below via a salt).
+    // The boost_creative_refresh slider scales between exploit (low) and
+    // explore (high); a future pass will replace pickOne with a UCB1
+    // multi-arm bandit reading per-variant CTR from auction_logs.
+    __pilot_creative: pickPilotCreative(product),
+  };
+}
+
+// Pick one creative variant set from the product's library. v1 is
+// deterministic-per-product-per-minute so the same publisher request
+// sees consistent copy within a session, but the variant rotates over
+// time so Benna explores the space. The boost_creative_refresh slider
+// will eventually drive bandit explore/exploit; today it just affects
+// the rotation cadence (higher refresh = shorter bucket).
+function pickPilotCreative(product) {
+  const heads = Array.isArray(product.creative_headlines)  ? product.creative_headlines  : [];
+  const bodies = Array.isArray(product.creative_body_copy) ? product.creative_body_copy : [];
+  const ctas  = Array.isArray(product.creative_cta_labels) ? product.creative_cta_labels : [];
+  const imgs  = Array.isArray(product.hero_images)         ? product.hero_images         : [];
+
+  // Rotation bucket — shorter window when creative_refresh is high.
+  const refresh = Number(product.boost_creative_refresh);
+  const refreshVal = Number.isFinite(refresh) ? refresh : 0.5;
+  const bucketMinutes = Math.max(1, Math.round(15 - refreshVal * 14));  // 1..15 min
+  const bucket = Math.floor(Date.now() / (bucketMinutes * 60 * 1000));
+
+  function pickOne(arr, fallback, salt) {
+    if (!arr || arr.length === 0) return fallback;
+    if (arr.length === 1) return arr[0];
+    // Hash bucket + product_id + salt → deterministic-within-bucket index
+    const key = `${bucket}|${product.id}|${salt}`;
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0;
+    return arr[Math.abs(h) % arr.length];
+  }
+
+  return {
+    headline:   pickOne(heads, product.name || "", "head"),
+    body:       pickOne(bodies, product.description || "", "body"),
+    image_url:  pickOne(imgs, product.image_url || null, "img"),
+    cta_url:    product.default_url || product.external_marketing_url,
+    cta_label:  pickOne(ctas, "Learn more", "cta"),
   };
 }
 

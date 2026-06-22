@@ -3219,6 +3219,21 @@
               <!-- Active pilot — visible when a product is selected -->
               <div id="pilotActiveBoost" style="display:none;">
 
+                <!-- Creative readiness nudge — shown when the selected
+                     product hasn't filled the Creatives tab with enough
+                     variants for Benna's bandit. See [[advertiser-pilot-model]]. -->
+                <div id="pilotCreativeNudge" style="display:none; margin-bottom:18px; padding:14px 16px; background:linear-gradient(135deg, #FFFBEB, #FEF3C7); border:1px solid #FDE68A; border-radius:12px;">
+                  <div style="display:flex; align-items:flex-start; gap:12px;">
+                    <div style="font-size:24px; line-height:1;">⚡</div>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:700; color:#92400E; margin-bottom:4px;">Boost will run with a single creative</div>
+                      <div style="font-size:12px; color:#78350F; line-height:1.55; margin-bottom:8px;">Benna's multi-arm bandit needs 3+ headline variants to actually test what wins. Right now we'll show your product name on every impression — workable, but you're leaving CTR on the table.</div>
+                      <a href="#" id="pilotCreativeNudgeLink" style="display:inline-block; padding:6px 12px; background:#92400E; color:#fff; font-size:11px; font-weight:700; border-radius:6px; text-decoration:none; letter-spacing:0.02em;">Open Creatives tab →</a>
+                    </div>
+                  </div>
+                </div>
+
+
                 <!-- Status + live metrics row -->
                 <div id="pilotStatusRow" style="
                   display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:24px;
@@ -4313,6 +4328,9 @@
               <button type="button" class="pf-tab" data-pf-tab="trust" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Who you are as a seller — refunds, deal terms, founder card">Trust</button>
               <button type="button" class="pf-tab" data-pf-tab="pricing" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Pricing tiers + affiliate marketing budget">Pricing &amp; Affiliate</button>
               <button type="button" class="pf-tab" data-pf-tab="fulfillment" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="What happens after they buy — webhook, voucher, redemption">Fulfillment</button>
+              <!-- Creatives tab — variant copy Benna's bandit can test.
+                   See [[advertiser-pilot-model]]. -->
+              <button type="button" class="pf-tab" data-pf-tab="creatives" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Headline / body / CTA variants Benna will rotate for you">Creatives</button>
             </div>
 
             <form id="productForm">
@@ -4716,6 +4734,45 @@
                     <button type="button" id="ppInlineEditorSave" style="padding:8px 16px;border:none;border-radius:8px;background:#FF2D78;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">Save plan</button>
                   </div>
                 </div>
+              </div>
+
+              <!-- ─── TAB 6: CREATIVES — Pilot model variant library ─── -->
+              <div class="pf-panel" data-pf-panel="creatives" style="display:none;">
+                <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF1F6,#FCE7F3);border:1px solid #F9A8D4;border-radius:10px;margin-bottom:18px;">
+                  <div style="font-size:13px;font-weight:700;color:#9D174D;margin-bottom:4px;">Creative variants for Benna</div>
+                  <div style="font-size:11.5px;color:#BE185D;line-height:1.55;">
+                    Give Benna multiple headlines, body lines, and CTAs to test. The auction's multi-arm bandit picks the winning combination per placement. <strong>Aim for 3+ headlines</strong> — that's the minimum for meaningful A/B/n testing.
+                  </div>
+                </div>
+
+                <!-- Headlines -->
+                <div class="form-group">
+                  <label class="form-label">Headline variants <span style="color:#FF2D78;">*</span> <span id="creativeHeadlineCount" style="font-size:11px;color:#9CA3AF;font-weight:400;margin-left:4px;">(0 / 10)</span></label>
+                  <textarea class="form-input" name="creative_headlines_text" rows="5" placeholder="One headline per line. Keep them punchy (≤80 chars works best).&#10;Example:&#10;Stop reconciling Stripe by hand&#10;The webhook-free Stripe toolkit&#10;Stripe billing, without the cron jobs" style="font-family:inherit;line-height:1.5;"></textarea>
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Max 10 headlines, 240 chars each. Benna picks one per impression.</div>
+                </div>
+
+                <!-- Body copy -->
+                <div class="form-group">
+                  <label class="form-label">Body copy variants <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional)</span> <span id="creativeBodyCount" style="font-size:11px;color:#9CA3AF;font-weight:400;margin-left:4px;">(0 / 10)</span></label>
+                  <textarea class="form-input" name="creative_body_copy_text" rows="4" placeholder="One body line per line. Used on larger placement formats.&#10;Example:&#10;Webhook-free reconciliation in 5 minutes.&#10;135+ pre-built workflows, no SDK required." style="font-family:inherit;line-height:1.5;"></textarea>
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Max 10 lines, 240 chars each. Falls back to your product description if empty.</div>
+                </div>
+
+                <!-- CTA labels -->
+                <div class="form-group">
+                  <label class="form-label">CTA button labels <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional)</span> <span id="creativeCtaCount" style="font-size:11px;color:#9CA3AF;font-weight:400;margin-left:4px;">(0 / 10)</span></label>
+                  <textarea class="form-input" name="creative_cta_labels_text" rows="3" placeholder="One label per line. Keep them ≤20 chars.&#10;Example:&#10;Try free&#10;Get started&#10;See it in 60s" style="font-family:inherit;line-height:1.5;"></textarea>
+                  <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Max 10 labels, 60 chars each. Falls back to "Learn more" if empty.</div>
+                </div>
+
+                <!-- Visual library note (re-uses hero_images and hero_video_url) -->
+                <div style="margin-top:18px;padding:12px 14px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;font-size:12px;color:#6B7280;line-height:1.55;">
+                  <strong style="color:#374151;">Images and video?</strong> Already covered. The <em>hero images</em> field on the Basics tab feeds image variants. Your <em>demo video</em> on the Marketing tab is the video creative. Benna picks from those just like the text variants here.
+                </div>
+
+                <!-- Readiness badge -->
+                <div id="creativeReadinessBadge" style="margin-top:14px;padding:12px 14px;border-radius:10px;font-size:12.5px;line-height:1.55;display:none;"></div>
               </div>
 
               <!-- Audit status banner — hidden in CREATE mode, populated by JS in EDIT mode -->
@@ -13426,6 +13483,60 @@ function serializeFeatureBlocks(blocks) {
     }).join('\n\n');
 }
 
+// ── Creative library readiness helper ────────────────────────────
+// Mirrors the DB function compute_creative_library_ready in 28_pilot_creative_variants.sql.
+// Updates the counts + badge live as the advertiser types in the Creatives tab.
+// See [[advertiser-pilot-model]].
+function updateCreativeReadiness() {
+    const form = document.getElementById('productForm');
+    if (!form) return;
+    const countLines = (txt) => String(txt || '').split('\n').map((l) => l.trim()).filter(Boolean).length;
+    const headCount = countLines(form.elements.creative_headlines_text  && form.elements.creative_headlines_text.value);
+    const bodyCount = countLines(form.elements.creative_body_copy_text  && form.elements.creative_body_copy_text.value);
+    const ctaCount  = countLines(form.elements.creative_cta_labels_text && form.elements.creative_cta_labels_text.value);
+    const imgCount  = countLines(form.elements.hero_images_text         && form.elements.hero_images_text.value);
+    const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    setText('creativeHeadlineCount', `(${headCount} / 10)`);
+    setText('creativeBodyCount',     `(${bodyCount} / 10)`);
+    setText('creativeCtaCount',      `(${ctaCount} / 10)`);
+
+    const ready = headCount >= 3 && imgCount >= 1;
+    const badge = document.getElementById('creativeReadinessBadge');
+    if (!badge) return;
+    if (ready) {
+        badge.style.display = '';
+        badge.style.background = '#ECFDF5';
+        badge.style.border = '1px solid #A7F3D0';
+        badge.style.color = '#065F46';
+        badge.innerHTML = `<strong>✓ Ready for Benna.</strong> ${headCount} headlines, ${imgCount} image variant${imgCount === 1 ? '' : 's'}, ${ctaCount} CTA label${ctaCount === 1 ? '' : 's'}. Benna's bandit has room to test.`;
+    } else if (headCount > 0 || imgCount > 0) {
+        const need = [];
+        if (headCount < 3) need.push(`${3 - headCount} more headline${(3 - headCount) === 1 ? '' : 's'}`);
+        if (imgCount < 1) need.push('1 image (Basics tab → Hero images)');
+        badge.style.display = '';
+        badge.style.background = '#FFFBEB';
+        badge.style.border = '1px solid #FDE68A';
+        badge.style.color = '#92400E';
+        badge.innerHTML = `<strong>Almost there.</strong> Add ${need.join(' and ')} so Benna can run a meaningful bandit test.`;
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Wire creative textareas to live-update the readiness badge.
+(function wireCreativeReadiness() {
+    document.addEventListener('input', (e) => {
+        const t = e.target;
+        if (!t || !t.name) return;
+        if (t.name === 'creative_headlines_text'
+            || t.name === 'creative_body_copy_text'
+            || t.name === 'creative_cta_labels_text'
+            || t.name === 'hero_images_text') {
+            try { updateCreativeReadiness(); } catch (_) {}
+        }
+    });
+})();
+
 function pfParseScreenshots(text) {
                 return String(text || '').split('\n').map((s) => s.trim()).filter(Boolean);
             }
@@ -13497,7 +13608,18 @@ function pfParseScreenshots(text) {
                 submitBtn.textContent = mode === 'edit' ? 'Save changes' : 'Save product';
                 form.reset();
                 errBox.style.display = 'none';
-                pfSwitchTab('basics');  // always land on Basics tab when opening
+                // Default to Basics tab, unless the caller asked for a
+                // specific tab via sessionStorage (Pilot Console's
+                // "Open Creatives tab →" deep-link uses this).
+                let initialTab = 'basics';
+                try {
+                    const preferred = sessionStorage.getItem('bb_open_product_modal_tab');
+                    if (preferred) {
+                        initialTab = preferred;
+                        sessionStorage.removeItem('bb_open_product_modal_tab');
+                    }
+                } catch (_) {}
+                pfSwitchTab(initialTab);
 
                 if (product) {
                     // Basics
@@ -13528,6 +13650,15 @@ function pfParseScreenshots(text) {
                     if (form.elements.hero_images_text)    form.elements.hero_images_text.value    = linesOf(product.hero_images);
                     if (form.elements.hero_video_url)      form.elements.hero_video_url.value      = product.hero_video_url || '';
                     if (form.elements.feature_blocks_text) form.elements.feature_blocks_text.value = serializeFeatureBlocks(product.feature_blocks);
+
+                    // Pilot model — Creatives tab variant arrays.
+                    // See [[advertiser-pilot-model]]. Stored as text[] in DB,
+                    // displayed as one-per-line textareas. Counts + readiness
+                    // badge update via the input handler wired below.
+                    if (form.elements.creative_headlines_text)  form.elements.creative_headlines_text.value  = linesOf(product.creative_headlines);
+                    if (form.elements.creative_body_copy_text)  form.elements.creative_body_copy_text.value  = linesOf(product.creative_body_copy);
+                    if (form.elements.creative_cta_labels_text) form.elements.creative_cta_labels_text.value = linesOf(product.creative_cta_labels);
+                    try { updateCreativeReadiness(); } catch (_) {}
 
                     // Trust block
                     if (form.elements.refund_window_days)  form.elements.refund_window_days.value  = product.refund_window_days != null ? product.refund_window_days : '';
@@ -13785,6 +13916,21 @@ function pfParseScreenshots(text) {
                     if (!r.ok) throw new Error(j.error || 'Failed to load products');
                     productsCache = j.products || [];
                     renderList();
+
+                    // Pilot deep-link — open this specific product's modal
+                    // if Pilot Console asked us to. See pilotCreativeNudge
+                    // wiring in the Pilot section. We consume the flag here
+                    // so refresh doesn't re-open the modal.
+                    try {
+                        const targetId = sessionStorage.getItem('bb_open_product_modal_id');
+                        if (targetId) {
+                            sessionStorage.removeItem('bb_open_product_modal_id');
+                            const target = productsCache.find((p) => p.id === targetId);
+                            if (target) {
+                                setTimeout(() => openModal('edit', target), 50);
+                            }
+                        }
+                    } catch (_) {}
                 } catch (e) {
                     list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:#DC2626;font-size:13px;">' + escHtml(e.message || 'Could not load') + '</div>';
                 }
@@ -14265,6 +14411,13 @@ function pfParseScreenshots(text) {
                     best_for:               linesToArr(v('best_for_text')),
                     deal_terms:             linesToArr(v('deal_terms_text')),
                     hero_images:            linesToArr(v('hero_images_text')),
+
+                    // Pilot model — creative variant arrays. See
+                    // [[advertiser-pilot-model]]. DB trigger recomputes
+                    // creative_library_ready on write.
+                    creative_headlines:     linesToArr(v('creative_headlines_text')),
+                    creative_body_copy:     linesToArr(v('creative_body_copy_text')),
+                    creative_cta_labels:    linesToArr(v('creative_cta_labels_text')),
                     hero_video_url:         trim(v('hero_video_url')) || null,
                     feature_blocks:         parseFeatureBlocks(v('feature_blocks_text')),
 
@@ -15832,6 +15985,25 @@ function pfParseScreenshots(text) {
 
                 // Status row
                 renderStatusRow(p);
+
+                // Creative readiness nudge — show if not ready
+                const nudge = document.getElementById('pilotCreativeNudge');
+                const nudgeLink = document.getElementById('pilotCreativeNudgeLink');
+                if (nudge) {
+                    nudge.style.display = (p.creative_library_ready === true) ? 'none' : '';
+                }
+                // The CTA link jumps to Products and opens this product's
+                // modal pre-targeted to the Creatives tab. The Products
+                // page already exposes a row-click that opens the modal;
+                // we tack on a session flag the modal reads on open.
+                if (nudgeLink) {
+                    nudgeLink.onclick = (e) => {
+                        e.preventDefault();
+                        sessionStorage.setItem('bb_open_product_modal_tab', 'creatives');
+                        sessionStorage.setItem('bb_open_product_modal_id', p.id);
+                        window.location.hash = '#/products';
+                    };
+                }
             }
 
             // ── 4. Render status + live metrics row ──────────────────

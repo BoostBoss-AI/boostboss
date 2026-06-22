@@ -543,9 +543,53 @@ function normalizeProduct(body, { partial = false } = {}) {
     }
   }
   // Creative library readiness flag — set by the Creative Library tab
-  // once minimum variant counts are uploaded. Boolean only.
+  // once minimum variant counts are uploaded. Boolean only. NOTE: the
+  // DB trigger products_recompute_creative_ready will overwrite this
+  // on every write — we keep the field here only so a manual override
+  // is possible during testing. Migration 28 ships the trigger.
   if (body.creative_library_ready !== undefined) {
     row.creative_library_ready = Boolean(body.creative_library_ready);
+  }
+
+  // ── Creative variant arrays — fed to Benna's bandit ────────────────
+  // See [[advertiser-pilot-model]]. The text-side variants are stored
+  // as text arrays on the product. Image and video variants reuse the
+  // existing hero_images and hero_video_url fields.
+  //
+  // Cap at 10 entries × 240 chars to stop runaway sizes. Each entry is
+  // trimmed; empty entries are dropped silently so publishers can
+  // freely edit textareas without precision-trimming.
+  function sanitizeVariantArray(arr, fieldName, maxItems, maxLen) {
+    if (!Array.isArray(arr)) {
+      return { error: `${fieldName} must be an array of strings` };
+    }
+    if (arr.length > maxItems) {
+      return { error: `${fieldName}: max ${maxItems} variants` };
+    }
+    const cleaned = [];
+    for (const v of arr) {
+      if (v == null) continue;
+      const s = String(v).trim();
+      if (!s) continue;
+      cleaned.push(s.slice(0, maxLen));
+    }
+    return { value: cleaned };
+  }
+
+  if (body.creative_headlines !== undefined) {
+    const r = sanitizeVariantArray(body.creative_headlines, "creative_headlines", 10, 240);
+    if (r.error) return { error: r.error };
+    row.creative_headlines = r.value;
+  }
+  if (body.creative_body_copy !== undefined) {
+    const r = sanitizeVariantArray(body.creative_body_copy, "creative_body_copy", 10, 240);
+    if (r.error) return { error: r.error };
+    row.creative_body_copy = r.value;
+  }
+  if (body.creative_cta_labels !== undefined) {
+    const r = sanitizeVariantArray(body.creative_cta_labels, "creative_cta_labels", 10, 60);
+    if (r.error) return { error: r.error };
+    row.creative_cta_labels = r.value;
   }
 
   return { row };
@@ -946,6 +990,12 @@ module.exports = async function handler(req, res) {
         "boost_daily_budget_cents",
         "boost_lifetime_budget_cents",
         "creative_library_ready",
+        // Creative variants — editable post-audit per [[advertiser-pilot-model]].
+        // The audit reviewed the product; variant copy is bandit fuel for
+        // Benna and doesn't change what was approved.
+        "creative_headlines",
+        "creative_body_copy",
+        "creative_cta_labels",
       ]);
       const bodyFields = Object.keys(body || {}).filter(k => k !== "id" && k !== "action");
       const isPilotOnly = bodyFields.length > 0 && bodyFields.every(k => PILOT_ONLY_FIELDS.has(k));
