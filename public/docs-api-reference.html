@@ -396,7 +396,7 @@
       <p>Every shipped endpoint, organized by role. Real paths, real auth, real response shapes pulled from the live handlers.</p>
     </div>
 
-    <p>Boost Boss exposes a single REST surface at <code>https://boostboss.ai</code> covering four roles: <strong>publishers</strong> (monetizing AI tools), <strong>advertisers</strong> (running campaigns), <strong>sellers</strong> (using the MoR storefront), and <strong>affiliates</strong> (earning commission on share links). The same account model unifies all four — you sign up once, opt into whatever role(s) you need. A machine-readable spec is at <a href="/openapi.json" class="inline-link">/openapi.json</a>.</p>
+    <p>Boost Boss exposes a single REST surface at <code>https://boostboss.ai</code> covering four roles: <strong>publishers</strong> (monetizing AI tools), <strong>advertisers</strong> (boosting their products), <strong>sellers</strong> (using the MoR storefront), and <strong>affiliates</strong> (earning commission on share links). The same account model unifies all four — you sign up once, opt into whatever role(s) you need. A machine-readable spec is at <a href="/openapi.json" class="inline-link">/openapi.json</a>.</p>
 
     <p>Jump to the role you came here for:</p>
 
@@ -600,7 +600,7 @@
          ADVERTISER
          ════════════════════════════════════════════════════════════════ -->
     <h2 id="advertiser-overview"><span class="role-pill adv">Adv</span>Advertiser endpoints</h2>
-    <p>Advertisers run campaigns through the SuperBoost direct path. Auth: JWT bearer obtained from <code>/api/auth?action=login</code> as role <code>advertiser</code>.</p>
+    <p>Advertisers boost their products through the SuperBoost direct path. The Pilot Console UI talks to <code>/api/products</code> (boost_* fields) and <code>/api/pilot-spend</code>. The <code>/api/campaigns</code> endpoints documented below remain functional for Advanced mode. Auth: JWT bearer obtained from <code>/api/auth?action=login</code> as role <code>advertiser</code>.</p>
 
     <h3 id="adv-campaigns">List campaigns</h3>
     <div class="endpoint"><span class="method get">GET</span><span class="path">/api/campaigns?advertiser_id=&lt;uuid&gt;</span><span class="desc">All campaigns for the authenticated advertiser.</span></div>
