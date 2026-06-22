@@ -279,13 +279,67 @@ function scoreBid(context = {}, campaign = {}, history = null) {
   let target = parseFloat(campaign.target_cpa);
   if (!Number.isFinite(target) || target <= 0) target = 4.5;
   const explore = 1 + (rnd() - 0.5) * 0.08;
-  const bid = +Math.max(0, target * p_convert * explore).toFixed(4);
+  let bid = +Math.max(0, target * p_convert * explore).toFixed(4);
+
+  // ── Pilot model modifiers ─────────────────────────────────────────
+  // See [[advertiser-pilot-model]]. When the candidate is a virtual
+  // campaign synthesized from an active product boost, the five sliders
+  // shift the bid + gate the bid. Real campaigns skip this branch.
+  //
+  //   pacing            → bid multiplier (slow burn ↔ aggressive)
+  //   reach             → effective floor on signalScore (low reach = niche)
+  //   brand_safety      → no direct numeric impact here (filtered earlier
+  //                       at the placement-format step), kept for telemetry
+  //   creative_refresh  → drives bandit exploration in the creative picker
+  //                       (acted on outside scoreBid)
+  //   confidence_floor  → if signalScore < floor, return zero bid (no fill)
+  let pilotEnriched = null;
+  if (campaign.__is_pilot_boost === true) {
+    const pacing = Number(campaign.__pilot_boost_pacing);
+    const reach = Number(campaign.__pilot_boost_reach);
+    const conf  = Number(campaign.__pilot_boost_confidence_floor);
+
+    const pacingMul = Number.isFinite(pacing) ? (0.5 + pacing * 1.5) : 1.0; // 0.5x..2.0x
+    bid = +Math.max(0, bid * pacingMul).toFixed(4);
+
+    // Reach floor: at reach=0, require strong signal (≥0.6 to bid). At
+    // reach=1, no floor. Linear interpolation in between.
+    const reachFloor = Number.isFinite(reach) ? (0.6 * (1 - reach)) : 0;
+    if (signalScore < reachFloor) {
+      bid = 0;
+    }
+
+    // Confidence floor: absolute gate. signalScore is the bounded sum of
+    // weighted matches; a low value means "we don't think this is a fit."
+    // Honor the advertiser's stated minimum.
+    const confVal = Number.isFinite(conf) ? conf : 0;
+    if (signalScore < confVal * 1.0) {  // floor scales 0..1, signalScore ∈ ~[0,1]
+      bid = 0;
+    }
+
+    pilotEnriched = {
+      product_id: campaign.__pilot_product_id || null,
+      objective:  campaign.__pilot_boost_objective || null,
+      pacing_mul: +pacingMul.toFixed(3),
+      reach_floor: +reachFloor.toFixed(3),
+      confidence_floor: confVal,
+      signal_score: +signalScore.toFixed(4),
+      gated: bid === 0,
+    };
+
+    contributions.push({
+      signal: `pilot[pacing=${pacing.toFixed(2)},reach=${reach.toFixed(2)},conf=${confVal.toFixed(2)}]`,
+      weight: 0,
+      lift:   +((pacingMul - 1) * 100).toFixed(1),
+    });
+  }
 
   return {
     bid_usd: bid,
     p_click: +p_click.toFixed(4),
     p_convert: +p_convert.toFixed(4),
     signal_contributions: contributions.sort((a, b) => b.lift - a.lift),
+    pilot: pilotEnriched,  // null for real campaigns, populated for Pilot boosts
     latency_ms: +(3.4 + rnd() * 1.8).toFixed(1),
     model_version: MODEL_VERSION,
     // Phase C — surface the learning state on the result so callers can
