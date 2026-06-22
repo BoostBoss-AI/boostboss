@@ -15951,10 +15951,128 @@ function pfParseScreenshots(text) {
                 loadProductBoostState();
             }
 
+            // ── Spend allocation fetcher ──────────────────────────────
+            let pilotSpendRefreshTimer = null;
+            const PILOT_SPEND_REFRESH_MS = 30 * 1000;  // 30s while page visible
+
+            async function loadPilotSpend(productId) {
+                if (!productId) return;
+                const token = getToken();
+                if (!token) return;
+                try {
+                    const r = await fetch('/api/pilot-spend?product_id=' + encodeURIComponent(productId), {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (!r.ok) {
+                        // 404 = product not found, just keep skeleton
+                        renderSpendBreakdown(null);
+                        return;
+                    }
+                    const j = await r.json();
+                    renderSpendBreakdown(j);
+                } catch (e) {
+                    console.warn('[pilot] spend fetch failed:', e);
+                }
+            }
+
+            function renderSpendBreakdown(data) {
+                const empty = document.getElementById('pilotSpendEmpty');
+                const wrap  = document.getElementById('pilotSpendBreakdown');
+                if (!empty || !wrap) return;
+
+                const totals = data && data.totals;
+                const hasData = totals && Number(totals.impressions) > 0;
+
+                if (!hasData) {
+                    empty.style.display = '';
+                    wrap.style.display  = 'none';
+                    // Still update live counter tiles to 0
+                    updateStatusCounters(totals);
+                    return;
+                }
+
+                empty.style.display = 'none';
+                wrap.style.display  = 'block';
+
+                updateStatusCounters(totals);
+
+                // Render the breakdowns as horizontal bars with percent labels.
+                renderBreakdownBars('pilotSpendByDoor',      data.by_door,      'door',         totals.spend_cents);
+                renderBreakdownBars('pilotSpendByPlacement', data.by_placement, ['placement_id','surface'], totals.spend_cents);
+                renderBreakdownBars('pilotSpendByPublisher', data.by_publisher, 'app_name',     totals.spend_cents);
+                // Creative split — placeholder until we log winning variants.
+                const cv = document.getElementById('pilotSpendByCreative');
+                if (cv) {
+                    cv.innerHTML = '<div style="font-size:11.5px; color:#9CA3AF; padding:8px 10px; background:#FAFAFA; border-radius:6px;">Per-variant breakdown ships once Benna logs which headline + body + CTA combination served each impression. Until then, all winning combos are pooled.</div>';
+                }
+            }
+
+            function renderBreakdownBars(elId, rows, labelKey, totalCents) {
+                const el = document.getElementById(elId);
+                if (!el) return;
+                if (!Array.isArray(rows) || rows.length === 0) {
+                    el.innerHTML = '<div style="font-size:11.5px; color:#9CA3AF;">No data yet.</div>';
+                    return;
+                }
+                const tot = Math.max(1, Number(totalCents) || 1);
+                const fmtUsdCompact = (cents) => '$' + ((Number(cents) || 0) / 100).toFixed(2);
+                function rowLabel(r) {
+                    if (Array.isArray(labelKey)) {
+                        return (r[labelKey[0]] || r[labelKey[1]] || 'unknown');
+                    }
+                    return r[labelKey] || 'unknown';
+                }
+                const max = 5;
+                el.innerHTML = rows.slice(0, max).map((r) => {
+                    const pct = Math.max(0, Math.min(100, ((Number(r.spend_cents) || 0) / tot) * 100));
+                    return '' +
+                      '<div style="margin-bottom:8px;">' +
+                        '<div style="display:flex; justify-content:space-between; font-size:11.5px; color:#374151; margin-bottom:3px;">' +
+                          '<span style="font-weight:600;">' + (rowLabel(r) + '').replace(/[<>]/g, '') + '</span>' +
+                          '<span style="font-variant-numeric:tabular-nums; color:#6B7280;">' + fmtUsdCompact(r.spend_cents) + ' · ' + pct.toFixed(0) + '%</span>' +
+                        '</div>' +
+                        '<div style="height:6px; background:#F3F4F6; border-radius:999px; overflow:hidden;">' +
+                          '<div style="height:100%; width:' + pct + '%; background:linear-gradient(90deg, #FF2D78, #FF6B9D); border-radius:999px;"></div>' +
+                        '</div>' +
+                      '</div>';
+                }).join('');
+            }
+
+            // Update the four status tiles at the top with live numbers.
+            function updateStatusCounters(totals) {
+                const impEl = document.getElementById('pilotImpressionsToday');
+                const objEl = document.getElementById('pilotObjectiveProgress');
+                if (impEl) {
+                    const n = (totals && Number(totals.impressions_today)) || 0;
+                    impEl.textContent = n.toLocaleString();
+                }
+                if (objEl) {
+                    // Objective progress varies by objective. For now show
+                    // clicks (works for awareness/clicks/signups/conversion).
+                    // CPI for install_objective is a future task.
+                    const c = (totals && Number(totals.clicks)) || 0;
+                    objEl.textContent = c.toLocaleString();
+                }
+            }
+
+            function schedulePilotSpendRefresh() {
+                if (pilotSpendRefreshTimer) clearInterval(pilotSpendRefreshTimer);
+                pilotSpendRefreshTimer = setInterval(() => {
+                    if (activeRoute() === 'pilot' && pilotActiveProductId
+                        && document.visibilityState === 'visible') {
+                        loadPilotSpend(pilotActiveProductId);
+                    }
+                }, PILOT_SPEND_REFRESH_MS);
+            }
+
             // ── 3. Load selected product's boost state into controls ─
             function loadProductBoostState() {
                 const p = pilotProducts.find(x => x.id === pilotActiveProductId);
                 if (!p) return;
+                // Kick off the spend fetcher whenever a product is selected.
+                // The 30s refresh interval is set up once on first selection.
+                loadPilotSpend(p.id);
+                if (!pilotSpendRefreshTimer) schedulePilotSpendRefresh();
 
                 // Objective
                 const obj = document.getElementById('pilotObjective');
