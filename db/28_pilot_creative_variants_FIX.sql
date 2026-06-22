@@ -19,6 +19,33 @@
 -- Safe to run on a fresh DB too — the IF EXISTS guards are no-ops.
 -- =====================================================================
 
+-- ── 0. Add the columns if the failed original transaction rolled them back
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_name = 'products' and column_name = 'creative_headlines'
+  ) then
+    alter table public.products
+      add column creative_headlines text[] default '{}';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_name = 'products' and column_name = 'creative_body_copy'
+  ) then
+    alter table public.products
+      add column creative_body_copy text[] default '{}';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_name = 'products' and column_name = 'creative_cta_labels'
+  ) then
+    alter table public.products
+      add column creative_cta_labels text[] default '{}';
+  end if;
+end $$;
+
 -- Drop in dependency order: trigger → trigger function → ready function
 drop trigger  if exists trg_products_creative_ready on public.products;
 drop function if exists public.products_recompute_creative_ready();
