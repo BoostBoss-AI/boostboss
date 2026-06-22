@@ -2582,9 +2582,19 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.home">Home</span>
             </button>
-            <button class="shell-nav-item" data-shell-section="campaigns">
+            <!-- Pilot — the new Advertiser Pilot model entry point.
+                 See [[advertiser-pilot-model]]. Default landing for any
+                 advertiser who has a product with a creative library. -->
+            <button class="shell-nav-item" data-shell-section="pilot">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.pilot">Pilot</span>
+            </button>
+            <!-- Legacy Campaigns nav — hidden by default. Toggle on via the
+                 "Advanced" switch in Setup. Persisted in localStorage as
+                 bb_advanced_mode. See [[advertiser-pilot-model]]. -->
+            <button class="shell-nav-item shell-nav-item--advanced" data-shell-section="campaigns" data-advanced-only="1" style="display:none;">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 21 3 14 12 14 21 10 21 10 12 3 3"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns</span>
+              <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns <span style="font-size:9px;background:#F3F4F6;color:#6B7280;padding:1px 5px;border-radius:3px;margin-left:4px;letter-spacing:0.04em;">ADV</span></span>
             </button>
             <!-- Products — parent entity above campaigns. See [[products-as-parent]]. -->
             <button class="shell-nav-item" data-shell-section="products">
@@ -3166,6 +3176,240 @@
               campaigns to it over time. Affiliates save and share by
               Product. See [[products-as-parent]] memory.
             -->
+            <!-- ════════════════════════════════════════════════════════
+                 PILOT CONSOLE — Advertiser Pilot model (default view).
+                 See [[advertiser-pilot-model]] memory. Replaces the
+                 campaign-builder UX with a product + objective + sliders
+                 + budget flow. Benna handles all placement allocation
+                 across the 37 placements; this UI never asks the
+                 advertiser to pick surfaces, intent tokens, or doors.
+                 ════════════════════════════════════════════════════════ -->
+            <div data-shell-route="pilot">
+              <div class="shell-page-head">
+                <div>
+                  <h1 class="shell-page-title" data-t="page.pilot.title">Pilot</h1>
+                  <div class="shell-page-sub" data-t="page.pilot.sub">Upload your product. Pick a goal. Benna delivers it everywhere our publishers are. You see exactly where every dollar went.</div>
+                </div>
+              </div>
+
+              <!-- Product picker — pills, one per product. Active product
+                   is the boost target. Empty state nudges to /products. -->
+              <div id="pilotProductPicker" style="
+                display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;
+                padding:14px 16px; background:#fff; border:1px solid #E5E7EB;
+                border-radius:12px;
+              ">
+                <div style="font-size:12px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.04em; width:100%; margin-bottom:6px;" data-t="pilot.picker.label">Boosting</div>
+                <div id="pilotProductPills" style="display:flex; flex-wrap:wrap; gap:8px; width:100%;">
+                  <div style="color:#9CA3AF; font-size:13px;" data-t="pilot.picker.loading">Loading your products…</div>
+                </div>
+              </div>
+
+              <!-- Empty state — no products yet -->
+              <div id="pilotEmptyState" style="display:none; text-align:center; padding:60px 24px; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
+                <div style="font-size:48px; margin-bottom:12px;">🚀</div>
+                <h2 style="font-size:20px; font-weight:700; color:#0F0F1A; margin:0 0 6px;" data-t="pilot.empty.title">Add a product to start boosting</h2>
+                <p style="color:#6B7280; font-size:14px; margin:0 0 20px;" data-t="pilot.empty.sub">The Pilot Console runs on top of one of your products. Add a product first, then come back here to set objectives and activate.</p>
+                <a href="#/products" style="
+                  display:inline-block; padding:10px 22px; background:#FF2D78; color:#fff;
+                  font-size:13px; font-weight:700; border-radius:8px; text-decoration:none;
+                " data-t="pilot.empty.cta">+ Add Product</a>
+              </div>
+
+              <!-- Active pilot — visible when a product is selected -->
+              <div id="pilotActiveBoost" style="display:none;">
+
+                <!-- Status + live metrics row -->
+                <div id="pilotStatusRow" style="
+                  display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:24px;
+                ">
+                  <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:14px;">
+                    <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;" data-t="pilot.status.label">Status</div>
+                    <div id="pilotStatusBadge" style="font-size:18px; font-weight:800; color:#0F0F1A;" data-t="pilot.status.inactive">Inactive</div>
+                  </div>
+                  <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:14px;">
+                    <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;" data-t="pilot.budget_remaining.label">Budget remaining</div>
+                    <div id="pilotBudgetRemaining" style="font-size:18px; font-weight:800; color:#0F0F1A;">—</div>
+                  </div>
+                  <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:14px;">
+                    <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;" data-t="pilot.impressions_today.label">Impressions today</div>
+                    <div id="pilotImpressionsToday" style="font-size:18px; font-weight:800; color:#0F0F1A;">—</div>
+                  </div>
+                  <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:14px;">
+                    <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;" data-t="pilot.objective_progress.label">Objective progress</div>
+                    <div id="pilotObjectiveProgress" style="font-size:18px; font-weight:800; color:#0F0F1A;">—</div>
+                  </div>
+                </div>
+
+                <!-- Two-column body: left = controls, right = spend allocation -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+
+                  <!-- LEFT: Pilot controls -->
+                  <div>
+
+                    <!-- Objective dropdown -->
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;" data-t="pilot.objective.title">Objective</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 12px;" data-t="pilot.objective.help">What do you want this boost to optimize for? Benna weights every bid against this.</p>
+                      <select id="pilotObjective" style="
+                        width:100%; padding:10px 12px; border:1px solid #D1D5DB;
+                        border-radius:8px; font-size:13px; font-family:inherit; background:#fff;
+                      ">
+                        <option value="awareness" data-t-attr="text:pilot.objective.awareness">Awareness — maximize impressions on the right audience</option>
+                        <option value="clicks" data-t-attr="text:pilot.objective.clicks">Clicks — drive traffic to your product page</option>
+                        <option value="signups" data-t-attr="text:pilot.objective.signups">Sign-ups — get people to create an account</option>
+                        <option value="conversion" data-t-attr="text:pilot.objective.conversion">Conversion — purchase or paid subscription</option>
+                        <option value="install" data-t-attr="text:pilot.objective.install">Install — mobile app installs (CPI)</option>
+                      </select>
+                    </div>
+
+                    <!-- 5 spectrum sliders -->
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;" data-t="pilot.sliders.title">Spectrum</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 18px;" data-t="pilot.sliders.help">Move each slider to nudge Benna's allocation. Default values are good for most launches.</p>
+
+                      <!-- Pacing -->
+                      <div class="pilot-slider" data-slider-field="boost_pacing" data-slider-min-label="pilot.slider.pacing.min" data-slider-max-label="pilot.slider.pacing.max" data-slider-help="pilot.slider.pacing.help" style="margin-bottom:18px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                          <span style="font-size:12px; font-weight:700; color:#0F0F1A;" data-t="pilot.slider.pacing.title">Pacing</span>
+                          <span class="pilot-slider__value" style="font-size:11px; font-weight:700; color:#FF2D78; font-variant-numeric:tabular-nums;">0.50</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" class="pilot-slider__input" style="width:100%; accent-color:#FF2D78;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#9CA3AF; margin-top:4px;">
+                          <span data-t="pilot.slider.pacing.min">Slow burn</span>
+                          <span data-t="pilot.slider.pacing.max">Aggressive</span>
+                        </div>
+                      </div>
+
+                      <!-- Reach -->
+                      <div class="pilot-slider" data-slider-field="boost_reach" style="margin-bottom:18px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                          <span style="font-size:12px; font-weight:700; color:#0F0F1A;" data-t="pilot.slider.reach.title">Reach</span>
+                          <span class="pilot-slider__value" style="font-size:11px; font-weight:700; color:#FF2D78; font-variant-numeric:tabular-nums;">0.50</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" class="pilot-slider__input" style="width:100%; accent-color:#FF2D78;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#9CA3AF; margin-top:4px;">
+                          <span data-t="pilot.slider.reach.min">Niche (high-intent only)</span>
+                          <span data-t="pilot.slider.reach.max">Broad</span>
+                        </div>
+                      </div>
+
+                      <!-- Brand Safety -->
+                      <div class="pilot-slider" data-slider-field="boost_brand_safety" style="margin-bottom:18px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                          <span style="font-size:12px; font-weight:700; color:#0F0F1A;" data-t="pilot.slider.brand_safety.title">Brand Safety</span>
+                          <span class="pilot-slider__value" style="font-size:11px; font-weight:700; color:#FF2D78; font-variant-numeric:tabular-nums;">0.50</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" class="pilot-slider__input" style="width:100%; accent-color:#FF2D78;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#9CA3AF; margin-top:4px;">
+                          <span data-t="pilot.slider.brand_safety.min">Aggressive (all placements)</span>
+                          <span data-t="pilot.slider.brand_safety.max">Skip interruptive formats</span>
+                        </div>
+                      </div>
+
+                      <!-- Creative Refresh -->
+                      <div class="pilot-slider" data-slider-field="boost_creative_refresh" style="margin-bottom:18px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                          <span style="font-size:12px; font-weight:700; color:#0F0F1A;" data-t="pilot.slider.creative_refresh.title">Creative Refresh</span>
+                          <span class="pilot-slider__value" style="font-size:11px; font-weight:700; color:#FF2D78; font-variant-numeric:tabular-nums;">0.50</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" class="pilot-slider__input" style="width:100%; accent-color:#FF2D78;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#9CA3AF; margin-top:4px;">
+                          <span data-t="pilot.slider.creative_refresh.min">Let winners run</span>
+                          <span data-t="pilot.slider.creative_refresh.max">Rotate aggressively</span>
+                        </div>
+                      </div>
+
+                      <!-- Confidence Floor -->
+                      <div class="pilot-slider" data-slider-field="boost_confidence_floor">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                          <span style="font-size:12px; font-weight:700; color:#0F0F1A;" data-t="pilot.slider.confidence.title">Benna Confidence</span>
+                          <span class="pilot-slider__value" style="font-size:11px; font-weight:700; color:#FF2D78; font-variant-numeric:tabular-nums;">0.30</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="0.3" class="pilot-slider__input" style="width:100%; accent-color:#FF2D78;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#9CA3AF; margin-top:4px;">
+                          <span data-t="pilot.slider.confidence.min">Bid on anything Benna scores</span>
+                          <span data-t="pilot.slider.confidence.max">Top-decile matches only</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Budget + Activate -->
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;" data-t="pilot.budget.title">Budget</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 14px;" data-t="pilot.budget.help">Spent from your wallet balance. Set 0 for no cap (Benna will still respect your wallet).</p>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;" data-t="pilot.budget.daily">Daily cap (USD)</label>
+                          <input type="number" id="pilotDailyBudget" min="0" step="1" value="0" style="
+                            width:100%; padding:9px 11px; border:1px solid #D1D5DB;
+                            border-radius:8px; font-size:13px; font-family:inherit;
+                          ">
+                        </div>
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;" data-t="pilot.budget.lifetime">Lifetime cap (USD)</label>
+                          <input type="number" id="pilotLifetimeBudget" min="0" step="1" value="0" style="
+                            width:100%; padding:9px 11px; border:1px solid #D1D5DB;
+                            border-radius:8px; font-size:13px; font-family:inherit;
+                          ">
+                        </div>
+                      </div>
+
+                      <button id="pilotActivateBtn" onclick="pilotToggleActivation()" style="
+                        width:100%; padding:14px; background:#FF2D78; color:#fff;
+                        border:none; border-radius:10px; font-size:14px; font-weight:800;
+                        cursor:pointer; font-family:inherit; letter-spacing:0.02em;
+                      " data-t="pilot.activate.cta">Activate Boost</button>
+
+                      <p id="pilotActivateNote" style="font-size:11px; color:#9CA3AF; margin:10px 0 0; text-align:center;" data-t="pilot.activate.note">Benna starts allocating immediately. Pause anytime.</p>
+                    </div>
+                  </div>
+
+                  <!-- RIGHT: Spend allocation (the trust layer) -->
+                  <div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;" data-t="pilot.spend.title">Spend allocation</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 14px;" data-t="pilot.spend.help">Where every dollar went. Benna's transparency.</p>
+
+                      <!-- Empty state shown until first impression -->
+                      <div id="pilotSpendEmpty" style="text-align:center; padding:40px 16px; background:#FAFAFA; border-radius:10px; border:1px dashed #E5E7EB;">
+                        <div style="font-size:32px; margin-bottom:8px;">📊</div>
+                        <div style="font-size:13px; font-weight:700; color:#374151; margin-bottom:4px;" data-t="pilot.spend.empty.title">Allocation will appear after the first impression</div>
+                        <div style="font-size:12px; color:#6B7280;" data-t="pilot.spend.empty.sub">Activate boost and Benna will start placing bids within seconds. Every spend gets a transparent breakdown right here.</div>
+                      </div>
+
+                      <!-- Skeleton breakdown — hidden until data lands -->
+                      <div id="pilotSpendBreakdown" style="display:none;">
+                        <div style="margin-bottom:18px;">
+                          <div style="font-size:11px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;" data-t="pilot.spend.by_door">By door</div>
+                          <div id="pilotSpendByDoor" style="font-size:12px; color:#9CA3AF;">—</div>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                          <div style="font-size:11px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;" data-t="pilot.spend.by_placement">By placement</div>
+                          <div id="pilotSpendByPlacement" style="font-size:12px; color:#9CA3AF;">—</div>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                          <div style="font-size:11px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;" data-t="pilot.spend.by_publisher">By publisher</div>
+                          <div id="pilotSpendByPublisher" style="font-size:12px; color:#9CA3AF;">—</div>
+                        </div>
+                        <div>
+                          <div style="font-size:11px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;" data-t="pilot.spend.by_creative">Winning creative variants</div>
+                          <div id="pilotSpendByCreative" style="font-size:12px; color:#9CA3AF;">—</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Trust note -->
+                    <div style="background:linear-gradient(135deg, #FFF5F8, #FFFFFF); border:1px solid #FFD9E5; border-radius:12px; padding:16px;">
+                      <div style="font-size:11px; font-weight:800; color:#FF2D78; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;" data-t="pilot.trust.label">Why this works</div>
+                      <p style="font-size:12px; color:#374151; line-height:1.55; margin:0;" data-t="pilot.trust.copy">Boost Boss is the only ad network that sees real-time intent in AI-native surfaces. Other networks match on cookies and keywords; Benna matches on what the user is actually trying to do. That's why letting Benna allocate beats hand-picking placements — your dollar buys a better-matched eyeball.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- /[data-shell-route="pilot"] -->
+
             <div data-shell-route="products">
               <div class="shell-page-head">
                 <div>
@@ -3618,6 +3862,38 @@
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <!-- ── Advanced mode (legacy Campaigns access) ─────────────
+                 See [[advertiser-pilot-model]]. Pilot Console is the
+                 default workflow; the Campaigns nav stays hidden until
+                 the advertiser flips this toggle. Persisted in
+                 localStorage (bb_advanced_mode), no server round-trip. -->
+            <section style="
+                background: #fff; border: 1px solid #E5E7EB; border-radius: 14px;
+                padding: 24px; margin-top: 20px;
+            ">
+                <h2 style="font-size: 16px; font-weight: 700; color: #0F0F1A; margin: 0 0 4px;" data-t="setup.advanced.title">Advanced mode</h2>
+                <p style="font-size: 12px; color: #6B7280; margin: 0 0 16px;" data-t="setup.advanced.sub">Pilot Console replaced campaign-builder UI. Turn this on if you need direct access to the legacy Campaigns table for edits, comparisons, or CSV export.</p>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="advancedModeToggle" style="
+                        width: 18px; height: 18px; accent-color: #FF2D78; cursor: pointer;
+                    ">
+                    <span style="font-size: 13px; font-weight: 600; color: #374151;" data-t="setup.advanced.toggle">Show Campaigns in sidebar</span>
+                </label>
+                <script>
+                    (function () {
+                        const cb = document.getElementById('advancedModeToggle');
+                        if (!cb) return;
+                        cb.checked = localStorage.getItem('bb_advanced_mode') === '1';
+                        cb.addEventListener('change', () => {
+                            localStorage.setItem('bb_advanced_mode', cb.checked ? '1' : '0');
+                            if (typeof window.applyAdvancedMode === 'function') {
+                                window.applyAdvancedMode();
+                            }
+                        });
+                    })();
+                </script>
             </section>
 
             </div><!-- /[data-shell-route="setup"] -->
@@ -5720,7 +5996,7 @@
             // [data-shell-route="..."] block via the wrapper's
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
-            const VALID_ROUTES = ['home', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'payouts', 'promote', 'setup'];
+            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'payouts', 'promote', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -5791,6 +6067,27 @@
             window.addEventListener('hashchange', () => applyRoute(routeFromHash()));
             // Initial route — paint on load before user clicks anything
             applyRoute(routeFromHash());
+
+            // ── Advanced mode toggle ───────────────────────────────────
+            // Controls visibility of the legacy Campaigns nav item. The
+            // Pilot Console is the default-on workflow per [[advertiser-pilot-model]];
+            // Campaigns nav is hidden until the advertiser opts into
+            // Advanced mode in Setup. Persists across sessions in
+            // localStorage. Exposed as window.applyAdvancedMode so the
+            // Setup tab's toggle handler can call it on change.
+            function applyAdvancedMode() {
+                const on = localStorage.getItem('bb_advanced_mode') === '1';
+                document.querySelectorAll('[data-advanced-only="1"]').forEach((el) => {
+                    el.style.display = on ? '' : 'none';
+                });
+                // If the user is currently sitting on the Campaigns route
+                // but Advanced is off, bounce them to Pilot.
+                if (!on && routeFromHash() === 'campaigns') {
+                    window.location.hash = '#/pilot';
+                }
+            }
+            window.applyAdvancedMode = applyAdvancedMode;
+            applyAdvancedMode();
 
             function syncAvatar() {
                 const avatar = document.getElementById('shellUserAvatar');
@@ -15381,6 +15678,312 @@ function pfParseScreenshots(text) {
             }, 400);
             setTimeout(() => clearInterval(prAuth), 15000);
             setTimeout(maybeLoad, 200);
+        })();
+
+        // ════════════════════════════════════════════════════════════════
+        // PILOT CONSOLE
+        // ────────────────────────────────────────────────────────────────
+        // See [[advertiser-pilot-model]]. Loads on #/pilot. Renders a product
+        // picker, reads boost_* fields from the selected product, wires
+        // sliders + objective + budget to PATCH /api/products, handles the
+        // Activate/Pause toggle. Spend allocation breakdown is a placeholder
+        // skeleton today — real data wires in once the auction-side spend
+        // attribution endpoint exists.
+        // ════════════════════════════════════════════════════════════════
+        (function () {
+            let pilotProducts = [];
+            let pilotActiveProductId = null;
+            let pilotDebounceTimer = null;
+
+            function getToken() {
+                try {
+                    const raw = localStorage.getItem('bb_session');
+                    if (!raw) return null;
+                    const j = JSON.parse(raw);
+                    return j && j.token ? j.token : null;
+                } catch (_) { return null; }
+            }
+
+            function activeRoute() {
+                const w = document.querySelector('[data-shell-active-route]');
+                return w && w.getAttribute('data-shell-active-route');
+            }
+
+            function fmtUSD(cents) {
+                const n = Number(cents) || 0;
+                return '$' + (n / 100).toFixed(2);
+            }
+
+            // ── 1. Load advertiser's products ─────────────────────────
+            async function loadPilotProducts() {
+                const token = getToken();
+                if (!token) return;
+                try {
+                    const r = await fetch('/api/products?limit=100', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const j = await r.json();
+                    pilotProducts = (j.products || []).filter(p => p.status !== 'archived');
+                    renderProductPicker();
+                } catch (e) {
+                    console.warn('[pilot] loadProducts failed:', e);
+                }
+            }
+
+            // ── 2. Render product picker pills ────────────────────────
+            function renderProductPicker() {
+                const empty = document.getElementById('pilotEmptyState');
+                const pills = document.getElementById('pilotProductPills');
+                const active = document.getElementById('pilotActiveBoost');
+                if (!empty || !pills || !active) return;
+
+                if (pilotProducts.length === 0) {
+                    empty.style.display = '';
+                    pills.parentElement.style.display = 'none';
+                    active.style.display = 'none';
+                    return;
+                }
+                empty.style.display = 'none';
+                pills.parentElement.style.display = '';
+                active.style.display = '';
+
+                // Auto-select the first product on first load, or persist
+                // selection in localStorage across navigations.
+                const stored = localStorage.getItem('bb_pilot_selected_product');
+                if (stored && pilotProducts.find(p => p.id === stored)) {
+                    pilotActiveProductId = stored;
+                } else if (!pilotActiveProductId || !pilotProducts.find(p => p.id === pilotActiveProductId)) {
+                    pilotActiveProductId = pilotProducts[0].id;
+                }
+
+                pills.innerHTML = pilotProducts.map(p => {
+                    const isActive = p.id === pilotActiveProductId;
+                    const statusDot = p.boost_status === 'active'
+                        ? '<span style="width:6px;height:6px;background:#22C55E;border-radius:50%;display:inline-block;margin-right:6px;"></span>'
+                        : p.boost_status === 'paused'
+                        ? '<span style="width:6px;height:6px;background:#F59E0B;border-radius:50%;display:inline-block;margin-right:6px;"></span>'
+                        : '<span style="width:6px;height:6px;background:#D1D5DB;border-radius:50%;display:inline-block;margin-right:6px;"></span>';
+                    return '<button data-pilot-pick="' + p.id + '" style="' +
+                        'display:inline-flex; align-items:center; padding:8px 14px;' +
+                        'background:' + (isActive ? '#FF2D78' : '#fff') + ';' +
+                        'color:' + (isActive ? '#fff' : '#374151') + ';' +
+                        'border:1px solid ' + (isActive ? '#FF2D78' : '#E5E7EB') + ';' +
+                        'border-radius:999px; font-size:13px; font-weight:600;' +
+                        'cursor:pointer; font-family:inherit;' +
+                        '">' + statusDot + (p.name || '(untitled)') + '</button>';
+                }).join('');
+
+                pills.querySelectorAll('[data-pilot-pick]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        pilotActiveProductId = btn.getAttribute('data-pilot-pick');
+                        localStorage.setItem('bb_pilot_selected_product', pilotActiveProductId);
+                        renderProductPicker();
+                        loadProductBoostState();
+                    });
+                });
+
+                loadProductBoostState();
+            }
+
+            // ── 3. Load selected product's boost state into controls ─
+            function loadProductBoostState() {
+                const p = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!p) return;
+
+                // Objective
+                const obj = document.getElementById('pilotObjective');
+                if (obj) obj.value = p.boost_objective || 'awareness';
+
+                // Sliders
+                const sliderDefaults = {
+                    boost_pacing: 0.5,
+                    boost_reach: 0.5,
+                    boost_brand_safety: 0.5,
+                    boost_creative_refresh: 0.5,
+                    boost_confidence_floor: 0.3,
+                };
+                document.querySelectorAll('.pilot-slider').forEach(wrap => {
+                    const field = wrap.getAttribute('data-slider-field');
+                    const input = wrap.querySelector('.pilot-slider__input');
+                    const value = wrap.querySelector('.pilot-slider__value');
+                    const v = p[field] != null ? Number(p[field]) : sliderDefaults[field];
+                    if (input) input.value = v;
+                    if (value) value.textContent = Number(v).toFixed(2);
+                });
+
+                // Budget — display in dollars (DB stores cents)
+                const daily = document.getElementById('pilotDailyBudget');
+                const lifetime = document.getElementById('pilotLifetimeBudget');
+                if (daily) daily.value = Math.round((Number(p.boost_daily_budget_cents) || 0) / 100);
+                if (lifetime) lifetime.value = Math.round((Number(p.boost_lifetime_budget_cents) || 0) / 100);
+
+                // Status row
+                renderStatusRow(p);
+            }
+
+            // ── 4. Render status + live metrics row ──────────────────
+            function renderStatusRow(p) {
+                const statusEl = document.getElementById('pilotStatusBadge');
+                const budgetEl = document.getElementById('pilotBudgetRemaining');
+                const btn = document.getElementById('pilotActivateBtn');
+                if (!statusEl || !btn) return;
+
+                const status = p.boost_status || 'inactive';
+                const labels = {
+                    inactive:  { text: 'Inactive',  color: '#6B7280' },
+                    active:    { text: 'Active',    color: '#22C55E' },
+                    paused:    { text: 'Paused',    color: '#F59E0B' },
+                    depleted:  { text: 'Depleted',  color: '#EF4444' },
+                    archived:  { text: 'Archived',  color: '#9CA3AF' },
+                };
+                const l = labels[status] || labels.inactive;
+                statusEl.textContent = l.text;
+                statusEl.style.color = l.color;
+
+                // Activate button label flips based on status.
+                if (status === 'active') {
+                    btn.textContent = 'Pause Boost';
+                    btn.style.background = '#F59E0B';
+                } else if (status === 'paused') {
+                    btn.textContent = 'Resume Boost';
+                    btn.style.background = '#22C55E';
+                } else if (status === 'depleted') {
+                    btn.textContent = 'Top up to resume';
+                    btn.style.background = '#EF4444';
+                } else {
+                    btn.textContent = 'Activate Boost';
+                    btn.style.background = '#FF2D78';
+                }
+
+                // Budget remaining — lifetime cap minus spent. 0 = uncapped.
+                if (budgetEl) {
+                    const cap = Number(p.boost_lifetime_budget_cents) || 0;
+                    const spent = Number(p.boost_spent_cents) || 0;
+                    if (cap > 0) {
+                        const remaining = Math.max(0, cap - spent);
+                        budgetEl.textContent = fmtUSD(remaining);
+                    } else {
+                        budgetEl.textContent = 'Uncapped';
+                    }
+                }
+            }
+
+            // ── 5. Wire slider + objective changes to PATCH ───────────
+            function debouncePatch(payload) {
+                if (pilotDebounceTimer) clearTimeout(pilotDebounceTimer);
+                pilotDebounceTimer = setTimeout(() => savePilotPatch(payload), 350);
+            }
+
+            async function savePilotPatch(payload) {
+                if (!pilotActiveProductId) return;
+                const token = getToken();
+                if (!token) return;
+                try {
+                    const r = await fetch('/api/products?action=update&id=' + encodeURIComponent(pilotActiveProductId), {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token,
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!r.ok) {
+                        const j = await r.json().catch(() => ({}));
+                        console.warn('[pilot] PATCH failed:', j.error || r.status);
+                        return;
+                    }
+                    // Refresh local copy from response
+                    const j = await r.json();
+                    if (j.product) {
+                        const idx = pilotProducts.findIndex(p => p.id === j.product.id);
+                        if (idx >= 0) pilotProducts[idx] = j.product;
+                        renderStatusRow(j.product);
+                    }
+                } catch (e) {
+                    console.warn('[pilot] PATCH error:', e);
+                }
+            }
+
+            function wirePilotControls() {
+                // Objective
+                const obj = document.getElementById('pilotObjective');
+                if (obj && !obj.__wired) {
+                    obj.__wired = true;
+                    obj.addEventListener('change', () => {
+                        savePilotPatch({ boost_objective: obj.value });
+                    });
+                }
+
+                // Sliders — debounced (avoids 100 PATCHes during a drag)
+                document.querySelectorAll('.pilot-slider').forEach(wrap => {
+                    const input = wrap.querySelector('.pilot-slider__input');
+                    const value = wrap.querySelector('.pilot-slider__value');
+                    const field = wrap.getAttribute('data-slider-field');
+                    if (!input || input.__wired) return;
+                    input.__wired = true;
+                    input.addEventListener('input', () => {
+                        if (value) value.textContent = Number(input.value).toFixed(2);
+                        const payload = {};
+                        payload[field] = Number(input.value);
+                        debouncePatch(payload);
+                    });
+                });
+
+                // Budget inputs
+                const daily = document.getElementById('pilotDailyBudget');
+                if (daily && !daily.__wired) {
+                    daily.__wired = true;
+                    daily.addEventListener('change', () => {
+                        savePilotPatch({ boost_daily_budget_cents: Math.round(Number(daily.value || 0) * 100) });
+                    });
+                }
+                const lifetime = document.getElementById('pilotLifetimeBudget');
+                if (lifetime && !lifetime.__wired) {
+                    lifetime.__wired = true;
+                    lifetime.addEventListener('change', () => {
+                        savePilotPatch({ boost_lifetime_budget_cents: Math.round(Number(lifetime.value || 0) * 100) });
+                    });
+                }
+            }
+
+            // ── 6. Activate / Pause / Resume button handler ───────────
+            window.pilotToggleActivation = function () {
+                const p = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!p) return;
+                const current = p.boost_status || 'inactive';
+                let next;
+                if (current === 'active') next = 'paused';
+                else if (current === 'paused') next = 'active';
+                else if (current === 'depleted') {
+                    // Bounce to billing for top-up
+                    window.location.hash = '#/billing';
+                    return;
+                } else next = 'active';
+                savePilotPatch({ boost_status: next });
+            };
+
+            // ── 7. Route loader — only fetch when pilot is active ─────
+            function maybeLoadPilot() {
+                if (activeRoute() === 'pilot') {
+                    loadPilotProducts();
+                    wirePilotControls();
+                }
+            }
+
+            window.addEventListener('hashchange', maybeLoadPilot);
+            // Wait for auth then fire initial load
+            const pilotAuthInterval = setInterval(() => {
+                if (getToken()) {
+                    clearInterval(pilotAuthInterval);
+                    maybeLoadPilot();
+                }
+            }, 400);
+            setTimeout(() => clearInterval(pilotAuthInterval), 15000);
+            setTimeout(maybeLoadPilot, 250);
+
+            // Expose for the Advanced toggle in Setup to refresh after switching.
+            window.refreshPilot = maybeLoadPilot;
         })();
     </script>
 

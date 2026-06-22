@@ -479,6 +479,75 @@ function normalizeProduct(body, { partial = false } = {}) {
     row.feature_blocks = blocks;
   }
 
+  // ── Pilot model — boost activation + sliders ───────────────────────
+  // See [[advertiser-pilot-model]]. Each field is independently optional;
+  // the Pilot Console PATCHes only the field that changed. All numeric
+  // sliders are clamped to [0, 1]. Status + objective are whitelisted.
+  const BOOST_OBJECTIVES = new Set([
+    "awareness", "clicks", "signups", "conversion", "install",
+  ]);
+  const BOOST_STATUSES = new Set([
+    "inactive", "active", "paused", "depleted", "archived",
+  ]);
+  if (body.boost_objective !== undefined) {
+    if (!BOOST_OBJECTIVES.has(body.boost_objective)) {
+      return { error: `boost_objective must be one of: ${Array.from(BOOST_OBJECTIVES).join(", ")}` };
+    }
+    row.boost_objective = body.boost_objective;
+  }
+  if (body.boost_status !== undefined) {
+    if (!BOOST_STATUSES.has(body.boost_status)) {
+      return { error: `boost_status must be one of: ${Array.from(BOOST_STATUSES).join(", ")}` };
+    }
+    row.boost_status = body.boost_status;
+    // Stamp activation timestamp on the first 'active' transition.
+    // We can't tell from the body alone whether this is the first time —
+    // the caller is responsible for omitting boost_activated_at on subsequent
+    // toggles. The DB default of null means "never activated" so we set it
+    // here whenever the new status is active.
+    if (body.boost_status === "active") {
+      row.boost_activated_at = new Date().toISOString();
+    }
+  }
+  // Five spectrum sliders. All numeric, clamped to [0, 1]. The Pilot
+  // Console writes them as floats; we round to 2 decimals to match the
+  // DB's numeric(3,2) precision.
+  const SLIDER_FIELDS = [
+    "boost_pacing",
+    "boost_reach",
+    "boost_brand_safety",
+    "boost_creative_refresh",
+    "boost_confidence_floor",
+  ];
+  for (const f of SLIDER_FIELDS) {
+    if (body[f] !== undefined) {
+      const v = Number(body[f]);
+      if (!Number.isFinite(v) || v < 0 || v > 1) {
+        return { error: `${f} must be a number between 0 and 1` };
+      }
+      row[f] = Math.round(v * 100) / 100;
+    }
+  }
+  // Budget fields — integers in cents.
+  const BUDGET_FIELDS = [
+    "boost_daily_budget_cents",
+    "boost_lifetime_budget_cents",
+  ];
+  for (const f of BUDGET_FIELDS) {
+    if (body[f] !== undefined) {
+      const v = Number(body[f]);
+      if (!Number.isFinite(v) || v < 0 || v > 10_000_000_00) {
+        return { error: `${f} must be a non-negative integer up to $10,000,000 in cents` };
+      }
+      row[f] = Math.round(v);
+    }
+  }
+  // Creative library readiness flag — set by the Creative Library tab
+  // once minimum variant counts are uploaded. Boolean only.
+  if (body.creative_library_ready !== undefined) {
+    row.creative_library_ready = Boolean(body.creative_library_ready);
+  }
+
   return { row };
 }
 
@@ -861,9 +930,29 @@ module.exports = async function handler(req, res) {
       if (existing.advertiser_id !== auth.advertiserId) {
         return res.status(403).json({ error: "Forbidden" });
       }
-      if (existing.audit_status === "approved") {
+      // Carve out Pilot model fields from the approved-product lock.
+      // boost_* + creative_library_ready are runtime ad-delivery controls,
+      // NOT content edits — advertisers must be able to tune objectives,
+      // sliders, budget, and activate/pause on APPROVED products without
+      // re-triggering audit. See [[advertiser-pilot-model]].
+      const PILOT_ONLY_FIELDS = new Set([
+        "boost_objective",
+        "boost_status",
+        "boost_pacing",
+        "boost_reach",
+        "boost_brand_safety",
+        "boost_creative_refresh",
+        "boost_confidence_floor",
+        "boost_daily_budget_cents",
+        "boost_lifetime_budget_cents",
+        "creative_library_ready",
+      ]);
+      const bodyFields = Object.keys(body || {}).filter(k => k !== "id" && k !== "action");
+      const isPilotOnly = bodyFields.length > 0 && bodyFields.every(k => PILOT_ONLY_FIELDS.has(k));
+
+      if (existing.audit_status === "approved" && !isPilotOnly) {
         return res.status(403).json({
-          error: "Approved products are immutable. To make changes, archive this product and create a new one (use 'Duplicate as new' to start from these values).",
+          error: "Approved products are immutable. To make changes, archive this product and create a new one (use 'Duplicate as new' to start from these values). Pilot Console fields (boost_*) remain editable.",
           code:  "product_locked",
         });
       }
