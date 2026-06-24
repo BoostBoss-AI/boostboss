@@ -3192,16 +3192,37 @@
                 </div>
               </div>
 
-              <!-- Product picker — pills, one per product. Active product
-                   is the boost target. Empty state nudges to /products. -->
+              <!-- Active boosts — table doubles as the product selector.
+                   Replaces the older pill picker per Andy 2026-06-24. Each
+                   row shows the product's boost state + budgets; clicking
+                   selects that product as the active boost target for the
+                   panes below. See [[advertiser-pilot-model]]. -->
               <div id="pilotProductPicker" style="
-                display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;
-                padding:14px 16px; background:#fff; border:1px solid #E5E7EB;
-                border-radius:12px;
+                margin-bottom:18px; background:#fff; border:1px solid #E5E7EB;
+                border-radius:14px; padding:18px 20px;
               ">
-                <div style="font-size:12px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.04em; width:100%; margin-bottom:6px;" data-t="pilot.picker.label">Boosting</div>
-                <div id="pilotProductPills" style="display:flex; flex-wrap:wrap; gap:8px; width:100%;">
-                  <div style="color:#9CA3AF; font-size:13px;" data-t="pilot.picker.loading">Loading your products…</div>
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                  <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0;" data-t="pilot.picker.label">Active boosts</h3>
+                  <span style="font-size:11px; color:#9CA3AF;" data-t="pilot.picker.hint">Click a row to switch which product the Pilot controls below.</span>
+                </div>
+                <div style="overflow-x:auto; border:1px solid #F0F0F2; border-radius:10px;">
+                  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead style="background:#FAFAFA;">
+                      <tr>
+                        <th style="text-align:left; padding:10px 14px; font-weight:700; color:#6B7280; text-transform:uppercase; font-size:10.5px; letter-spacing:0.04em;" data-t="pilot.picker.col.name">Name</th>
+                        <th style="text-align:left; padding:10px 14px; font-weight:700; color:#6B7280; text-transform:uppercase; font-size:10.5px; letter-spacing:0.04em;" data-t="pilot.picker.col.status">Status</th>
+                        <th style="text-align:right; padding:10px 14px; font-weight:700; color:#6B7280; text-transform:uppercase; font-size:10.5px; letter-spacing:0.04em;" data-t="pilot.picker.col.daily">Daily budget</th>
+                        <th style="text-align:right; padding:10px 14px; font-weight:700; color:#6B7280; text-transform:uppercase; font-size:10.5px; letter-spacing:0.04em;" data-t="pilot.picker.col.total">Total budget</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pilotProductPills">
+                      <tr><td colspan="4" style="padding:24px 14px; text-align:center; color:#9CA3AF; font-size:12px;" data-t="pilot.picker.loading">Loading your products…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:8px;">
+                  <span style="font-size:11.5px; color:#9CA3AF;" data-t="pilot.picker.footer">Want multiple creatives, advanced targeting, deep analytics? The full Campaigns surface has it all.</span>
+                  <a href="#/campaigns" id="pilotOpenCampaignsLink" style="font-size:12.5px; font-weight:700; color:#FF2D78; text-decoration:none;" data-t="pilot.picker.open_campaigns">Open Campaigns →</a>
                 </div>
               </div>
 
@@ -16158,23 +16179,24 @@ function pfParseScreenshots(text) {
                 }
             }
 
-            // ── 2. Render product picker pills ────────────────────────
+            // ── 2. Render product picker (Active boosts table) ─────────
             function renderProductPicker() {
                 const empty = document.getElementById('pilotEmptyState');
                 const pills = document.getElementById('pilotProductPills');
+                const picker = document.getElementById('pilotProductPicker');
                 const active = document.getElementById('pilotActiveBoost');
                 const tabStrip = document.getElementById('pilotTabStrip');
-                if (!empty || !pills || !active) return;
+                if (!empty || !pills || !active || !picker) return;
 
                 if (pilotProducts.length === 0) {
                     empty.style.display = '';
-                    pills.parentElement.style.display = 'none';
+                    picker.style.display = 'none';
                     active.style.display = 'none';
                     if (tabStrip) tabStrip.style.display = 'none';
                     return;
                 }
                 empty.style.display = 'none';
-                pills.parentElement.style.display = '';
+                picker.style.display = '';
                 if (tabStrip) tabStrip.style.display = '';
                 // active pane shown by the tab switcher; default to Boost
                 pilotSwitchInternalTab(pilotCurrentInternalTab);
@@ -16188,31 +16210,65 @@ function pfParseScreenshots(text) {
                     pilotActiveProductId = pilotProducts[0].id;
                 }
 
-                pills.innerHTML = pilotProducts.map(p => {
+                // Render rows. Each row is a clickable selector for which
+                // product the Pilot panes below operate on. Active row gets
+                // a left pink border + light pink background.
+                const fmtBudget = (cents) => {
+                    const n = Number(cents) || 0;
+                    if (n === 0) return '<span style="color:#9CA3AF;">—</span>';
+                    return '$' + (n / 100).toFixed(2);
+                };
+                const statusBadge = (s) => {
+                    const map = {
+                        active:   { bg:'#ECFDF5', fg:'#065F46', label:'Active' },
+                        paused:   { bg:'#FFFBEB', fg:'#92400E', label:'Paused' },
+                        depleted: { bg:'#FEF2F2', fg:'#991B1B', label:'Depleted' },
+                        archived: { bg:'#F3F4F6', fg:'#6B7280', label:'Archived' },
+                        inactive: { bg:'#F9FAFB', fg:'#6B7280', label:'Inactive' },
+                    };
+                    const cfg = map[s] || map.inactive;
+                    return '<span style="display:inline-block; padding:3px 9px; border-radius:999px;' +
+                        ' background:' + cfg.bg + '; color:' + cfg.fg + ';' +
+                        ' font-size:11px; font-weight:700; letter-spacing:0.02em;">' + cfg.label + '</span>';
+                };
+                pills.innerHTML = pilotProducts.map((p) => {
                     const isActive = p.id === pilotActiveProductId;
-                    const statusDot = p.boost_status === 'active'
-                        ? '<span style="width:6px;height:6px;background:#22C55E;border-radius:50%;display:inline-block;margin-right:6px;"></span>'
-                        : p.boost_status === 'paused'
-                        ? '<span style="width:6px;height:6px;background:#F59E0B;border-radius:50%;display:inline-block;margin-right:6px;"></span>'
-                        : '<span style="width:6px;height:6px;background:#D1D5DB;border-radius:50%;display:inline-block;margin-right:6px;"></span>';
-                    return '<button data-pilot-pick="' + p.id + '" style="' +
-                        'display:inline-flex; align-items:center; padding:8px 14px;' +
-                        'background:' + (isActive ? '#FF2D78' : '#fff') + ';' +
-                        'color:' + (isActive ? '#fff' : '#374151') + ';' +
-                        'border:1px solid ' + (isActive ? '#FF2D78' : '#E5E7EB') + ';' +
-                        'border-radius:999px; font-size:13px; font-weight:600;' +
-                        'cursor:pointer; font-family:inherit;' +
-                        '">' + statusDot + (p.name || '(untitled)') + '</button>';
+                    const rowBg = isActive ? '#FFF5F8' : '#fff';
+                    const borderLeft = isActive ? '3px solid #FF2D78' : '3px solid transparent';
+                    const name = (p.name || '(untitled)').replace(/[<>]/g, '');
+                    return '<tr data-pilot-pick="' + p.id + '" style="' +
+                        'cursor:pointer; background:' + rowBg + '; border-left:' + borderLeft + ';' +
+                        'border-top:1px solid #F0F0F2;' +
+                        '">' +
+                        '<td style="padding:12px 14px; font-weight:' + (isActive ? '700' : '600') + '; color:#0F0F1A;">' + name + '</td>' +
+                        '<td style="padding:12px 14px;">' + statusBadge(p.boost_status || 'inactive') + '</td>' +
+                        '<td style="padding:12px 14px; text-align:right; font-variant-numeric:tabular-nums; color:#374151;">' + fmtBudget(p.boost_daily_budget_cents) + '</td>' +
+                        '<td style="padding:12px 14px; text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:#0F0F1A;">' + fmtBudget(p.boost_lifetime_budget_cents) + '</td>' +
+                        '</tr>';
                 }).join('');
 
-                pills.querySelectorAll('[data-pilot-pick]').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        pilotActiveProductId = btn.getAttribute('data-pilot-pick');
+                pills.querySelectorAll('[data-pilot-pick]').forEach((row) => {
+                    row.addEventListener('click', () => {
+                        pilotActiveProductId = row.getAttribute('data-pilot-pick');
                         localStorage.setItem('bb_pilot_selected_product', pilotActiveProductId);
                         renderProductPicker();
                         loadProductBoostState();
                     });
                 });
+
+                // Wire "Open Campaigns →" link — flip Advanced mode on so
+                // the destination route is actually visible in the sidebar
+                // and the route guard doesn't bounce back to home.
+                const openLink = document.getElementById('pilotOpenCampaignsLink');
+                if (openLink && !openLink.__wired) {
+                    openLink.__wired = true;
+                    openLink.addEventListener('click', () => {
+                        localStorage.setItem('bb_advanced_mode', '1');
+                        if (typeof window.applyAdvancedMode === 'function') {
+                            window.applyAdvancedMode();
+                        }
+                    });
+                }
 
                 loadProductBoostState();
             }
