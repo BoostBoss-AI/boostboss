@@ -3207,7 +3207,7 @@
               ">
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                   <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0;" data-t="pilot.picker.label">Active boosts</h3>
-                  <span style="font-size:11px; color:#9CA3AF;" data-t="pilot.picker.hint">Click a row to switch which product Boost Ads controls below.</span>
+                  <span style="font-size:11px; color:#9CA3AF;" data-t="pilot.picker.hint">Click a row to open that campaign's control board.</span>
                 </div>
                 <div style="overflow-x:auto; border:1px solid #F0F0F2; border-radius:10px;">
                   <table style="width:100%; border-collapse:collapse; font-size:13px;">
@@ -3245,6 +3245,24 @@
                    Boost (sliders, objective, budget, spend allocation)
                    Creatives (company identity + creative library)
                    Both panes share the active product selected above. -->
+              <!-- Detail-view breadcrumb — shows when a campaign is open.
+                   Click to return to the Active boosts list. Per Andy 2026-06-24:
+                   each campaign now has its own control board (the 4 sub-tabs
+                   below). The list is the entry point; the tabs are the
+                   per-campaign detail view. -->
+              <div id="pilotDetailBreadcrumb" style="display:none; margin-bottom:14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <button type="button" id="pilotBackToList" style="
+                  background:none; border:1px solid #E5E7EB; padding:7px 14px;
+                  border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;
+                  font-family:inherit; color:#374151;
+                ">← All boosts</button>
+                <div style="flex:1; min-width:0;">
+                  <div id="pilotDetailTitle" style="font-size:18px; font-weight:800; color:#0F0F1A; line-height:1.2;"></div>
+                  <div id="pilotDetailSubtitle" style="font-size:12px; color:#6B7280; margin-top:3px;"></div>
+                </div>
+                <div id="pilotDetailStatusBadge"></div>
+              </div>
+
               <div id="pilotTabStrip" style="
                 display:none; margin-bottom:18px; border-bottom:1px solid #E5E7EB;
               ">
@@ -16309,7 +16327,36 @@ function pfParseScreenshots(text) {
             let pilotProducts = [];
             let pilotActiveProductId = null;
             let pilotDebounceTimer = null;
-            let pilotCurrentInternalTab = 'boost';  // 'boost' | 'creatives'
+            let pilotCurrentInternalTab = 'boost';  // 'boost' | 'campaigns' | 'affiliate' | 'creatives'
+            // View mode — 'list' shows the Active boosts table only; 'detail'
+            // shows the breadcrumb + tab strip + active campaign's panes.
+            // Default to list so users land on the campaign picker. Per
+            // Andy 2026-06-24 — each campaign has its own control board.
+            let pilotViewMode = 'list';  // 'list' | 'detail'
+
+            // Switch view mode + (in detail mode) which campaign is open.
+            // Persists to localStorage so reload returns to the same view.
+            function pilotEnterDetailView(campaignId) {
+                if (!campaignId) return;
+                pilotActiveProductId = campaignId;
+                pilotViewMode = 'detail';
+                localStorage.setItem('bb_pilot_selected_product', campaignId);
+                localStorage.setItem('bb_pilot_view_mode', 'detail');
+                renderProductPicker();
+            }
+            function pilotEnterListView() {
+                pilotViewMode = 'list';
+                localStorage.setItem('bb_pilot_view_mode', 'list');
+                // Revert any embedded routes (Campaigns/Affiliate) so the
+                // standalone routes still work if the user navigates there.
+                if (typeof pilotRevertRouteFromPane === 'function') {
+                    pilotRevertRouteFromPane('campaigns');
+                    pilotRevertRouteFromPane('affiliate');
+                }
+                renderProductPicker();
+            }
+            window.pilotEnterDetailView = pilotEnterDetailView;
+            window.pilotEnterListView = pilotEnterListView;
 
             // ── Internal tab switcher (Boost / Creatives) ─────────────
             // The Pilot route has two stacked panes — Boost (sliders +
@@ -16465,21 +16512,58 @@ function pfParseScreenshots(text) {
                     picker.style.display = 'none';
                     active.style.display = 'none';
                     if (tabStrip) tabStrip.style.display = 'none';
+                    const bc = document.getElementById('pilotDetailBreadcrumb');
+                    if (bc) bc.style.display = 'none';
                     return;
                 }
                 empty.style.display = 'none';
-                picker.style.display = '';
-                if (tabStrip) tabStrip.style.display = '';
-                // active pane shown by the tab switcher; default to Boost
-                pilotSwitchInternalTab(pilotCurrentInternalTab);
 
-                // Auto-select the first product on first load, or persist
-                // selection in localStorage across navigations.
-                const stored = localStorage.getItem('bb_pilot_selected_product');
-                if (stored && pilotProducts.find(p => p.id === stored)) {
-                    pilotActiveProductId = stored;
+                // Restore active campaign selection from localStorage if
+                // present, otherwise default to the first row. Detail mode
+                // requires a valid selection — drop back to list mode if
+                // the stored selection no longer exists.
+                const storedId = localStorage.getItem('bb_pilot_selected_product');
+                if (storedId && pilotProducts.find(p => p.id === storedId)) {
+                    pilotActiveProductId = storedId;
                 } else if (!pilotActiveProductId || !pilotProducts.find(p => p.id === pilotActiveProductId)) {
                     pilotActiveProductId = pilotProducts[0].id;
+                }
+
+                // Restore view mode. Default 'list' if no stored preference
+                // or if the stored selection vanished.
+                if (!localStorage.getItem('bb_pilot_view_mode')) {
+                    pilotViewMode = 'list';
+                } else {
+                    pilotViewMode = localStorage.getItem('bb_pilot_view_mode') === 'detail' ? 'detail' : 'list';
+                }
+
+                // ── Show/hide based on view mode ──────────────────
+                const tabStripEl = tabStrip;
+                const breadcrumb = document.getElementById('pilotDetailBreadcrumb');
+                if (pilotViewMode === 'detail') {
+                    picker.style.display = 'none';  // hide list
+                    if (breadcrumb) breadcrumb.style.display = '';
+                    if (tabStripEl) tabStripEl.style.display = '';
+                    renderDetailBreadcrumb();
+                    // Load the selected campaign's slider/objective/budget
+                    // values into the Boost pane controls, then activate
+                    // whichever sub-tab the user last had open.
+                    loadProductBoostState();
+                    pilotSwitchInternalTab(pilotCurrentInternalTab);
+                    // Skip the row rendering below — we're not showing the table.
+                    return;
+                } else {
+                    picker.style.display = '';
+                    if (breadcrumb) breadcrumb.style.display = 'none';
+                    if (tabStripEl) tabStripEl.style.display = 'none';
+                    // Hide all panes in list mode
+                    document.querySelectorAll('[data-pilot-pane]').forEach((pane) => { pane.style.display = 'none'; });
+                    // Revert any reparented routes so the list mode renders
+                    // cleanly + standalone routes still work.
+                    if (typeof pilotRevertRouteFromPane === 'function') {
+                        pilotRevertRouteFromPane('campaigns');
+                        pilotRevertRouteFromPane('affiliate');
+                    }
                 }
 
                 // Render rows. Each row is a clickable selector for which
@@ -16523,11 +16607,13 @@ function pfParseScreenshots(text) {
 
                 pills.querySelectorAll('[data-pilot-pick]').forEach((row) => {
                     row.addEventListener('click', () => {
-                        pilotActiveProductId = row.getAttribute('data-pilot-pick');
-                        localStorage.setItem('bb_pilot_selected_product', pilotActiveProductId);
-                        renderProductPicker();
-                        loadProductBoostState();
+                        const id = row.getAttribute('data-pilot-pick');
+                        // Drill into the campaign's detail view. Loading
+                        // the boost state happens after the picker re-renders
+                        // in detail mode.
+                        pilotEnterDetailView(id);
                     });
+                    row.style.cursor = 'pointer';
                 });
 
                 // Wire "Open Campaigns →" link — flip Advanced mode on so
@@ -16660,6 +16746,42 @@ function pfParseScreenshots(text) {
                     }
                 }, PILOT_SPEND_REFRESH_MS);
             }
+
+            // Render the detail-view breadcrumb (back button + campaign
+            // name + status badge). Called whenever we render in detail mode.
+            function renderDetailBreadcrumb() {
+                const c = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!c) return;
+                const titleEl = document.getElementById('pilotDetailTitle');
+                const subEl = document.getElementById('pilotDetailSubtitle');
+                const badgeWrap = document.getElementById('pilotDetailStatusBadge');
+                if (titleEl) titleEl.textContent = c.name || '(untitled campaign)';
+                if (subEl) {
+                    const dailyTxt = c.daily_budget ? '$' + Number(c.daily_budget).toFixed(2) + '/day' : 'No daily cap';
+                    const totalTxt = c.total_budget ? '$' + Number(c.total_budget).toFixed(2) + ' total' : 'Uncapped';
+                    subEl.textContent = dailyTxt + ' · ' + totalTxt;
+                }
+                if (badgeWrap) {
+                    const map = {
+                        active:    { bg:'#ECFDF5', fg:'#065F46', label:'Active' },
+                        paused:    { bg:'#FFFBEB', fg:'#92400E', label:'Paused' },
+                        in_review: { bg:'#EFF6FF', fg:'#1E40AF', label:'In review' },
+                        completed: { bg:'#F3F4F6', fg:'#6B7280', label:'Completed' },
+                        depleted:  { bg:'#FEF2F2', fg:'#991B1B', label:'Depleted' },
+                        rejected:  { bg:'#FEF2F2', fg:'#991B1B', label:'Rejected' },
+                    };
+                    const cfg = map[c.status] || { bg:'#F9FAFB', fg:'#6B7280', label: c.status || 'Inactive' };
+                    badgeWrap.innerHTML = '<span style="display:inline-block; padding:4px 10px; border-radius:999px;' +
+                        ' background:' + cfg.bg + '; color:' + cfg.fg + ';' +
+                        ' font-size:11px; font-weight:700; letter-spacing:0.02em;">' + cfg.label + '</span>';
+                }
+            }
+
+            // Wire the back button once.
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest && e.target.closest('#pilotBackToList');
+                if (btn) pilotEnterListView();
+            });
 
             // ── 3. Load selected product's boost state into controls ─
             function loadProductBoostState() {
