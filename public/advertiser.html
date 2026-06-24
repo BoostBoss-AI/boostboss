@@ -3216,8 +3216,31 @@
                 " data-t="pilot.empty.cta">+ Add Product</a>
               </div>
 
-              <!-- Active pilot — visible when a product is selected -->
-              <div id="pilotActiveBoost" style="display:none;">
+              <!-- Internal tab strip — Pilot has two views:
+                   Boost (sliders, objective, budget, spend allocation)
+                   Creatives (company identity + creative library)
+                   Both panes share the active product selected above. -->
+              <div id="pilotTabStrip" style="
+                display:none; margin-bottom:18px; border-bottom:1px solid #E5E7EB;
+              ">
+                <div style="display:flex; gap:4px;">
+                  <button type="button" class="pilot-tab pilot-tab-active" data-pilot-tab="boost" style="
+                    background:none; border:none; padding:12px 18px;
+                    font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+                    border-bottom:2px solid transparent; margin-bottom:-1px;
+                    color:#FF2D78; border-bottom-color:#FF2D78;
+                  ">Boost</button>
+                  <button type="button" class="pilot-tab" data-pilot-tab="creatives" style="
+                    background:none; border:none; padding:12px 18px;
+                    font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+                    border-bottom:2px solid transparent; margin-bottom:-1px;
+                    color:#6B7280;
+                  ">Creatives</button>
+                </div>
+              </div>
+
+              <!-- ───────────────── BOOST PANE ───────────────── -->
+              <div id="pilotActiveBoost" style="display:none;" data-pilot-pane="boost">
 
                 <!-- Creative readiness nudge — shown when the selected
                      product hasn't filled the Creatives tab with enough
@@ -3422,7 +3445,186 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div><!-- /pilotActiveBoost -->
+
+              <!-- ───────────────── CREATIVES PANE ─────────────────
+                   Company identity + creative library for the active
+                   product. Saves write back to the product row. See
+                   [[advertiser-pilot-model]]. -->
+              <div id="pilotCreativesPane" style="display:none;" data-pilot-pane="creatives">
+
+                <!-- Intro callout -->
+                <div style="padding:16px 18px; background:linear-gradient(135deg, #FFF5F8, #FFFFFF); border:1px solid #FFD9E5; border-radius:14px; margin-bottom:20px;">
+                  <div style="font-size:12px; font-weight:800; color:#FF2D78; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Brand kit + creative library</div>
+                  <p style="font-size:13px; color:#374151; line-height:1.55; margin:0;">Everything Benna shows your audience. Company identity stamps every impression with brand trust; creative variants give Benna's bandit room to find what wins. Edit anytime — changes apply to the next auction round.</p>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+
+                  <!-- LEFT: Company identity -->
+                  <div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Company identity</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Who's behind the product. Appears under "Sponsored by" on every placement.</p>
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Company logo URL</label>
+                      <input type="url" id="pilotCompanyLogo" placeholder="https://cdn.example.com/logo.svg" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Company website</label>
+                      <input type="url" id="pilotCompanyWebsite" placeholder="https://example.com" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">One-line tagline</label>
+                      <input type="text" id="pilotCompanyTagline" maxlength="160" placeholder="The webhook-free Stripe billing toolkit" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">About</label>
+                      <textarea id="pilotCompanyAbout" rows="4" maxlength="2000" placeholder="Two or three sentences. Who you are, what you do, who you serve." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
+                    </div>
+
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Company details</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Surfaces on hover cards + product page. Optional but helps brand trust.</p>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">City</label>
+                          <input type="text" id="pilotCompanyCity" maxlength="80" placeholder="Taipei" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                        </div>
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Country (ISO 2)</label>
+                          <input type="text" id="pilotCompanyCountry" maxlength="2" placeholder="TW" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; text-transform:uppercase;">
+                        </div>
+                      </div>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Team size</label>
+                          <select id="pilotCompanySize" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; background:#fff;">
+                            <option value="">Select…</option>
+                            <option value="solo">Solo founder</option>
+                            <option value="2-10">2-10</option>
+                            <option value="11-50">11-50</option>
+                            <option value="51-200">51-200</option>
+                            <option value="201-1000">201-1000</option>
+                            <option value="1000+">1000+</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Growth stage</label>
+                          <select id="pilotCompanyGrowthStage" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; background:#fff;">
+                            <option value="">Select…</option>
+                            <option value="pre_launch">Pre-launch</option>
+                            <option value="public_beta">Public beta</option>
+                            <option value="launched">Launched</option>
+                            <option value="growth">Growth</option>
+                            <option value="mature">Mature</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Funding status</label>
+                          <select id="pilotCompanyFundingStatus" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; background:#fff;">
+                            <option value="">Select…</option>
+                            <option value="bootstrapped">Bootstrapped</option>
+                            <option value="pre_seed">Pre-seed</option>
+                            <option value="seed">Seed</option>
+                            <option value="series_a">Series A</option>
+                            <option value="series_b_plus">Series B+</option>
+                            <option value="acquired">Acquired</option>
+                            <option value="public">Public</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Founded date</label>
+                          <input type="date" id="pilotCompanyFoundedDate" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Founder card</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Real person + photo lifts trust by ~25% on AI-app placements. Optional but recommended.</p>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Founder name</label>
+                          <input type="text" id="pilotFounderName" maxlength="120" placeholder="Andy Dasouth" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                        </div>
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Role</label>
+                          <input type="text" id="pilotFounderRole" maxlength="120" placeholder="CEO &amp; co-founder" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                        </div>
+                      </div>
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Photo URL</label>
+                      <input type="url" id="pilotFounderPhoto" placeholder="https://cdn.example.com/founder.jpg" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">LinkedIn URL</label>
+                      <input type="url" id="pilotFounderLinkedin" placeholder="https://linkedin.com/in/andy" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                    </div>
+                  </div>
+
+                  <!-- RIGHT: Creative library -->
+                  <div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Creative library</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Variants Benna's multi-arm bandit will test. Aim for <strong>3+ headlines</strong> — the minimum for meaningful A/B/n testing.</p>
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Headline variants <span style="color:#FF2D78;">*</span> <span id="pilotHeadlineCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
+                      <textarea id="pilotCreativeHeadlines" rows="5" placeholder="One headline per line. Keep them punchy (≤80 chars works best).&#10;Stop reconciling Stripe by hand&#10;The webhook-free Stripe toolkit&#10;Stripe billing, without the cron jobs" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:4px;"></textarea>
+                      <div style="font-size:11px; color:#9CA3AF; margin-bottom:14px;">Max 10, 240 chars each. Benna picks one per impression.</div>
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Body copy variants <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="pilotBodyCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
+                      <textarea id="pilotCreativeBody" rows="4" placeholder="One body line per line. Used on larger placement formats.&#10;Webhook-free reconciliation in 5 minutes.&#10;135+ pre-built workflows, no SDK required." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:4px;"></textarea>
+                      <div style="font-size:11px; color:#9CA3AF; margin-bottom:14px;">Falls back to your product description if empty.</div>
+
+                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">CTA button labels <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="pilotCtaCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
+                      <textarea id="pilotCreativeCta" rows="3" placeholder="One label per line. Keep them ≤20 chars.&#10;Try free&#10;Get started&#10;See it in 60s" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:4px;"></textarea>
+                      <div style="font-size:11px; color:#9CA3AF;">Falls back to "Learn more" if empty.</div>
+                    </div>
+
+                    <!-- Readiness badge -->
+                    <div id="pilotCreativeReadiness" style="margin-bottom:14px; padding:12px 14px; border-radius:10px; font-size:12.5px; line-height:1.55; display:none;"></div>
+
+                    <!-- Trust block (refund + guarantee) — separate card -->
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px;">
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Trust signals</h3>
+                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Shown next to the CTA where space allows. Lowers checkout friction.</p>
+
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Refund window (days)</label>
+                          <input type="number" id="pilotRefundWindow" min="0" max="365" placeholder="30" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                        </div>
+                        <div>
+                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Guarantee label</label>
+                          <input type="text" id="pilotGuarantee" maxlength="120" placeholder="60-day money-back" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Visual library reminder -->
+                    <div style="margin-top:14px; padding:12px 14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; font-size:12px; color:#6B7280; line-height:1.55;">
+                      <strong style="color:#374151;">Need to update images or video?</strong> Hero images and the demo video are still managed in the product's Basics + Marketing tabs. Benna picks from those automatically.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Save bar -->
+                <div style="margin-top:24px; padding:16px 20px; background:#fff; border:1px solid #E5E7EB; border-radius:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                  <div style="font-size:12px; color:#6B7280;">Changes apply on the next auction round. Auto-save disabled — hit save to push.</div>
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <span id="pilotCreativesSaveStatus" style="font-size:12px; color:#9CA3AF;"></span>
+                    <button type="button" id="pilotCreativesSaveBtn" onclick="pilotSaveCreatives()" style="
+                      padding:10px 22px; background:#FF2D78; color:#fff; border:none;
+                      border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;
+                      font-family:inherit; letter-spacing:0.02em;
+                    ">Save changes</button>
+                  </div>
+                </div>
+              </div><!-- /pilotCreativesPane -->
+
             </div><!-- /[data-shell-route="pilot"] -->
 
             <div data-shell-route="products">
@@ -4328,9 +4530,10 @@
               <button type="button" class="pf-tab" data-pf-tab="trust" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Who you are as a seller — refunds, deal terms, founder card">Trust</button>
               <button type="button" class="pf-tab" data-pf-tab="pricing" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Pricing tiers + affiliate marketing budget">Pricing &amp; Affiliate</button>
               <button type="button" class="pf-tab" data-pf-tab="fulfillment" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="What happens after they buy — webhook, voucher, redemption">Fulfillment</button>
-              <!-- Creatives tab — variant copy Benna's bandit can test.
-                   See [[advertiser-pilot-model]]. -->
-              <button type="button" class="pf-tab" data-pf-tab="creatives" style="background:none;border:none;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;color:#6B7280;" title="Headline / body / CTA variants Benna will rotate for you">Creatives</button>
+              <!-- Creatives tab removed from product modal — moved to its
+                   own pane inside /pilot (under the Creatives internal tab)
+                   so company identity + creative library live together as
+                   the advertiser's brand kit. See [[advertiser-pilot-model]]. -->
             </div>
 
             <form id="productForm">
@@ -4736,8 +4939,11 @@
                 </div>
               </div>
 
-              <!-- ─── TAB 6: CREATIVES — Pilot model variant library ─── -->
-              <div class="pf-panel" data-pf-panel="creatives" style="display:none;">
+              <!-- ─── TAB 6: CREATIVES — REMOVED, moved to /pilot Creatives sub-tab.
+                   Markup kept for the modal but hidden so removing the tab
+                   button is the only visible change. Set hidden=true so
+                   any stray pfSwitchTab('creatives') call doesn't show it. -->
+              <div class="pf-panel" data-pf-panel="creatives" style="display:none;" hidden>
                 <div style="padding:14px 16px;background:linear-gradient(135deg,#FFF1F6,#FCE7F3);border:1px solid #F9A8D4;border-radius:10px;margin-bottom:18px;">
                   <div style="font-size:13px;font-weight:700;color:#9D174D;margin-bottom:4px;">Creative variants for Benna</div>
                   <div style="font-size:11.5px;color:#BE185D;line-height:1.55;">
@@ -15847,6 +16053,37 @@ function pfParseScreenshots(text) {
             let pilotProducts = [];
             let pilotActiveProductId = null;
             let pilotDebounceTimer = null;
+            let pilotCurrentInternalTab = 'boost';  // 'boost' | 'creatives'
+
+            // ── Internal tab switcher (Boost / Creatives) ─────────────
+            // The Pilot route has two stacked panes — Boost (sliders +
+            // spend allocation) and Creatives (company identity + variant
+            // library). Product picker sits above both and is shared.
+            // See [[advertiser-pilot-model]].
+            function pilotSwitchInternalTab(which) {
+                pilotCurrentInternalTab = (which === 'creatives') ? 'creatives' : 'boost';
+                document.querySelectorAll('.pilot-tab').forEach((btn) => {
+                    const active = btn.getAttribute('data-pilot-tab') === pilotCurrentInternalTab;
+                    btn.classList.toggle('pilot-tab-active', active);
+                    btn.style.color = active ? '#FF2D78' : '#6B7280';
+                    btn.style.borderBottomColor = active ? '#FF2D78' : 'transparent';
+                });
+                document.querySelectorAll('[data-pilot-pane]').forEach((pane) => {
+                    pane.style.display = (pane.getAttribute('data-pilot-pane') === pilotCurrentInternalTab) ? '' : 'none';
+                });
+                if (pilotCurrentInternalTab === 'creatives') {
+                    pilotLoadCreativesPane();
+                }
+            }
+            window.pilotSwitchInternalTab = pilotSwitchInternalTab;
+
+            // Wire tab buttons (once)
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest && e.target.closest('.pilot-tab');
+                if (!btn) return;
+                const which = btn.getAttribute('data-pilot-tab');
+                if (which) pilotSwitchInternalTab(which);
+            });
 
             // Token retrieval matches the canonical pattern used by the
             // products/campaigns loaders elsewhere in this file. The
@@ -15901,17 +16138,21 @@ function pfParseScreenshots(text) {
                 const empty = document.getElementById('pilotEmptyState');
                 const pills = document.getElementById('pilotProductPills');
                 const active = document.getElementById('pilotActiveBoost');
+                const tabStrip = document.getElementById('pilotTabStrip');
                 if (!empty || !pills || !active) return;
 
                 if (pilotProducts.length === 0) {
                     empty.style.display = '';
                     pills.parentElement.style.display = 'none';
                     active.style.display = 'none';
+                    if (tabStrip) tabStrip.style.display = 'none';
                     return;
                 }
                 empty.style.display = 'none';
                 pills.parentElement.style.display = '';
-                active.style.display = '';
+                if (tabStrip) tabStrip.style.display = '';
+                // active pane shown by the tab switcher; default to Boost
+                pilotSwitchInternalTab(pilotCurrentInternalTab);
 
                 // Auto-select the first product on first load, or persist
                 // selection in localStorage across navigations.
@@ -16110,19 +16351,182 @@ function pfParseScreenshots(text) {
                 if (nudge) {
                     nudge.style.display = (p.creative_library_ready === true) ? 'none' : '';
                 }
-                // The CTA link jumps to Products and opens this product's
-                // modal pre-targeted to the Creatives tab. The Products
-                // page already exposes a row-click that opens the modal;
-                // we tack on a session flag the modal reads on open.
+                // Click → switch internal Pilot tab to Creatives.
+                // Stays on /pilot, no navigation, scrolls to top.
                 if (nudgeLink) {
                     nudgeLink.onclick = (e) => {
                         e.preventDefault();
-                        sessionStorage.setItem('bb_open_product_modal_tab', 'creatives');
-                        sessionStorage.setItem('bb_open_product_modal_id', p.id);
-                        window.location.hash = '#/products';
+                        pilotSwitchInternalTab('creatives');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     };
                 }
             }
+
+            // ── Creatives pane: load active product into the fields ──
+            function pilotLoadCreativesPane() {
+                const p = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!p) return;
+                const set = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = (val == null ? '' : val);
+                };
+                const linesOf = (arr) => Array.isArray(arr) ? arr.filter(Boolean).join('\n') : '';
+
+                // Company identity
+                set('pilotCompanyLogo',           p.company_logo_url);
+                set('pilotCompanyWebsite',        p.company_website_url);
+                set('pilotCompanyTagline',        p.company_tagline);
+                set('pilotCompanyAbout',          p.company_about);
+                set('pilotCompanyCity',           p.company_city);
+                set('pilotCompanyCountry',        p.company_country_code);
+                set('pilotCompanySize',           p.company_size);
+                set('pilotCompanyGrowthStage',    p.company_growth_stage);
+                set('pilotCompanyFundingStatus',  p.company_funding_status);
+                set('pilotCompanyFoundedDate',    p.company_founded_date ? String(p.company_founded_date).slice(0, 10) : '');
+
+                // Founder card
+                set('pilotFounderName',     p.founder_name);
+                set('pilotFounderRole',     p.founder_role);
+                set('pilotFounderPhoto',    p.founder_photo_url);
+                set('pilotFounderLinkedin', p.founder_linkedin_url);
+
+                // Creative library variants
+                set('pilotCreativeHeadlines', linesOf(p.creative_headlines));
+                set('pilotCreativeBody',      linesOf(p.creative_body_copy));
+                set('pilotCreativeCta',       linesOf(p.creative_cta_labels));
+
+                // Trust signals
+                set('pilotRefundWindow', p.refund_window_days);
+                set('pilotGuarantee',    p.guarantee_label);
+
+                pilotUpdateCreativeCounts();
+            }
+
+            // Live count + readiness mirror inside the Pilot pane.
+            function pilotUpdateCreativeCounts() {
+                const countLines = (txt) => String(txt || '').split('\n').map((l) => l.trim()).filter(Boolean).length;
+                const heads = countLines(document.getElementById('pilotCreativeHeadlines') && document.getElementById('pilotCreativeHeadlines').value);
+                const bodies = countLines(document.getElementById('pilotCreativeBody') && document.getElementById('pilotCreativeBody').value);
+                const ctas = countLines(document.getElementById('pilotCreativeCta') && document.getElementById('pilotCreativeCta').value);
+                const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+                setText('pilotHeadlineCount', '(' + heads + ' / 10)');
+                setText('pilotBodyCount',     '(' + bodies + ' / 10)');
+                setText('pilotCtaCount',      '(' + ctas + ' / 10)');
+
+                // Readiness badge — same threshold as the modal version
+                const p = pilotProducts.find(x => x.id === pilotActiveProductId);
+                const imgCount = p && Array.isArray(p.hero_images) ? p.hero_images.length : 0
+                              + (p && p.image_url ? 1 : 0);
+                const ready = heads >= 3 && imgCount >= 1;
+                const badge = document.getElementById('pilotCreativeReadiness');
+                if (!badge) return;
+                if (ready) {
+                    badge.style.display = '';
+                    badge.style.background = '#ECFDF5';
+                    badge.style.border = '1px solid #A7F3D0';
+                    badge.style.color = '#065F46';
+                    badge.innerHTML = '<strong>✓ Ready for Benna.</strong> ' + heads + ' headlines, ' + imgCount + ' image variant' + (imgCount === 1 ? '' : 's') + ', ' + ctas + ' CTA label' + (ctas === 1 ? '' : 's') + '. Benna\'s bandit has room to test.';
+                } else if (heads > 0 || imgCount > 0) {
+                    const need = [];
+                    if (heads < 3) need.push((3 - heads) + ' more headline' + ((3 - heads) === 1 ? '' : 's'));
+                    if (imgCount < 1) need.push('1 hero image (Products tab → Basics)');
+                    badge.style.display = '';
+                    badge.style.background = '#FFFBEB';
+                    badge.style.border = '1px solid #FDE68A';
+                    badge.style.color = '#92400E';
+                    badge.innerHTML = '<strong>Almost there.</strong> Add ' + need.join(' and ') + ' so Benna can run a meaningful bandit test.';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            // Live count update — wired once via delegation
+            document.addEventListener('input', (e) => {
+                const t = e.target;
+                if (!t || !t.id) return;
+                if (t.id === 'pilotCreativeHeadlines'
+                    || t.id === 'pilotCreativeBody'
+                    || t.id === 'pilotCreativeCta') {
+                    pilotUpdateCreativeCounts();
+                }
+            });
+
+            // ── Save Creatives pane → PATCH active product ────────────
+            window.pilotSaveCreatives = async function () {
+                if (!pilotActiveProductId) return;
+                const btn = document.getElementById('pilotCreativesSaveBtn');
+                const status = document.getElementById('pilotCreativesSaveStatus');
+                const get = (id) => {
+                    const el = document.getElementById(id);
+                    return el ? el.value : '';
+                };
+                const lines = (id) => String(get(id) || '').split('\n').map((l) => l.trim()).filter(Boolean);
+                const orNull = (v) => (v == null || String(v).trim() === '') ? null : v;
+                const payload = {
+                    // Company identity
+                    company_logo_url:        orNull(get('pilotCompanyLogo').trim()),
+                    company_website_url:     orNull(get('pilotCompanyWebsite').trim()),
+                    company_tagline:         orNull(get('pilotCompanyTagline').trim()),
+                    company_about:           orNull(get('pilotCompanyAbout').trim()),
+                    company_city:            orNull(get('pilotCompanyCity').trim()),
+                    company_country_code:    orNull(get('pilotCompanyCountry').trim().toUpperCase()),
+                    company_size:            orNull(get('pilotCompanySize')),
+                    company_growth_stage:    orNull(get('pilotCompanyGrowthStage')),
+                    company_funding_status:  orNull(get('pilotCompanyFundingStatus')),
+                    company_founded_date:    orNull(get('pilotCompanyFoundedDate')),
+                    // Founder
+                    founder_name:            orNull(get('pilotFounderName').trim()),
+                    founder_role:            orNull(get('pilotFounderRole').trim()),
+                    founder_photo_url:       orNull(get('pilotFounderPhoto').trim()),
+                    founder_linkedin_url:    orNull(get('pilotFounderLinkedin').trim()),
+                    // Creative library
+                    creative_headlines:      lines('pilotCreativeHeadlines'),
+                    creative_body_copy:      lines('pilotCreativeBody'),
+                    creative_cta_labels:     lines('pilotCreativeCta'),
+                    // Trust signals
+                    refund_window_days:      get('pilotRefundWindow') === '' ? null : Number(get('pilotRefundWindow')),
+                    guarantee_label:         orNull(get('pilotGuarantee').trim()),
+                };
+                if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; btn.style.opacity = '0.7'; }
+                if (status) { status.textContent = ''; }
+                try {
+                    const token = getToken();
+                    const r = await fetch('/api/products?action=update&id=' + encodeURIComponent(pilotActiveProductId), {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token,
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!r.ok) {
+                        const j = await r.json().catch(() => ({}));
+                        throw new Error(j.error || 'HTTP ' + r.status);
+                    }
+                    const j = await r.json();
+                    if (j.product) {
+                        const idx = pilotProducts.findIndex(p => p.id === j.product.id);
+                        if (idx >= 0) pilotProducts[idx] = j.product;
+                        renderStatusRow(j.product);
+                    }
+                    if (status) {
+                        status.textContent = '✓ Saved';
+                        status.style.color = '#22C55E';
+                        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+                    }
+                    // Re-render the picker so the boost-status dot stays in sync
+                    renderProductPicker();
+                    // Update readiness badge live in case headlines crossed threshold
+                    pilotUpdateCreativeCounts();
+                } catch (e) {
+                    if (status) {
+                        status.textContent = '✗ ' + (e.message || 'Save failed');
+                        status.style.color = '#EF4444';
+                    }
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Save changes'; btn.style.opacity = '1'; }
+                }
+            };
 
             // ── 4. Render status + live metrics row ──────────────────
             function renderStatusRow(p) {
