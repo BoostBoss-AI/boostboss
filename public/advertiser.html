@@ -5056,6 +5056,27 @@
                 </div>
 
                 <form id="campaignForm">
+                    <!-- Tab strip — Basics / Creatives. Added Phase B of
+                         the Pilot pivot 2026-06-24. Basics holds all the
+                         original campaign fields; Creatives houses the
+                         variant arrays (creative_headlines/body/cta)
+                         Benna's bandit rotates through. -->
+                    <div class="cm-tabs" style="display:flex; gap:4px; border-bottom:1px solid #E5E7EB; margin-bottom:20px;">
+                        <button type="button" class="cm-tab cm-tab-active" data-cm-tab="basics" style="
+                            background:none; border:none; padding:11px 18px;
+                            font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+                            border-bottom:2px solid #FF2D78; margin-bottom:-1px; color:#FF2D78;
+                        ">Basics</button>
+                        <button type="button" class="cm-tab" data-cm-tab="creatives" style="
+                            background:none; border:none; padding:11px 18px;
+                            font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+                            border-bottom:2px solid transparent; margin-bottom:-1px; color:#6B7280;
+                        ">Creatives</button>
+                    </div>
+
+                    <!-- ───────── BASICS PANE ───────── -->
+                    <div data-cm-pane="basics">
+
                     <!-- Phase E.5 — Landing-page URL autofill -->
                     <div class="form-group">
                         <label class="form-label"><span data-t="newc.url">Landing Page URL</span> <span style="font-size:11px;color:#9CA3AF;font-weight:400;" data-t="newc.url_hint">(we'll autofill the headline, subtext, and image)</span></label>
@@ -5500,6 +5521,47 @@
                             </div>
                         </div>
                     </div>
+
+                    </div><!-- /[data-cm-pane="basics"] -->
+
+                    <!-- ───────── CREATIVES PANE ───────── -->
+                    <!-- Per [[advertiser-pilot-model]]. Benna rotates among
+                         these variants on every impression; the headline /
+                         subtext / CTA fields on the Basics tab are the
+                         single-creative fallback when these arrays are empty. -->
+                    <div data-cm-pane="creatives" style="display:none;">
+
+                        <!-- Intro callout -->
+                        <div style="padding:14px 16px; background:linear-gradient(135deg, #FFF1F6, #FCE7F3); border:1px solid #F9A8D4; border-radius:10px; margin-bottom:18px;">
+                            <div style="font-size:13px; font-weight:700; color:#9D174D; margin-bottom:4px;">Creative library — give Benna room to test</div>
+                            <p style="font-size:12px; color:#BE185D; line-height:1.55; margin:0;">Variants the bandit will rotate across the 37 placements. <strong>3+ headlines</strong> is the minimum for meaningful A/B/n testing. Body and CTA variants are optional but boost CTR.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Headline variants <span style="color:#FF2D78;">*</span> <span id="cmHeadlineCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
+                            <textarea class="form-input" name="creative_headlines_text" rows="5" placeholder="One headline per line. Keep them punchy (≤80 chars works best).&#10;Stop reconciling Stripe by hand&#10;The webhook-free Stripe toolkit&#10;Stripe billing, without the cron jobs" style="font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
+                            <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Max 10, 240 chars each. Benna picks one per impression.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Body copy variants <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="cmBodyCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
+                            <textarea class="form-input" name="creative_body_copy_text" rows="4" placeholder="One body line per line. Used on larger placement formats.&#10;Webhook-free reconciliation in 5 minutes.&#10;135+ pre-built workflows, no SDK required." style="font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
+                            <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Falls back to the Subtext field on Basics if empty.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CTA button labels <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="cmCtaCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
+                            <textarea class="form-input" name="creative_cta_labels_text" rows="3" placeholder="One label per line. Keep them ≤20 chars.&#10;Try free&#10;Get started&#10;See it in 60s" style="font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
+                            <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Falls back to the CTA Button Text on Basics if empty.</div>
+                        </div>
+
+                        <!-- Readiness badge -->
+                        <div id="cmCreativeReadiness" style="margin-bottom:14px; padding:12px 14px; border-radius:10px; font-size:12.5px; line-height:1.55; display:none;"></div>
+
+                        <div style="padding:12px 14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; font-size:12px; color:#6B7280; line-height:1.55;">
+                            <strong style="color:#374151;">Note:</strong> The single Headline / Subtext / CTA fields on Basics still set the fallback creative — what Benna shows when there are no variants yet (or on placements that don't support rotation).
+                        </div>
+                    </div><!-- /[data-cm-pane="creatives"] -->
 
                     <!-- Launch Button -->
                     <button type="submit" class="launch-btn" id="launchCampaignBtn" data-t="newc.launch">Launch Campaign</button>
@@ -8057,6 +8119,15 @@
                 }
             }
 
+            // Parse the per-line variant textareas into arrays. Empty
+            // textareas yield empty arrays — Benna falls back to the
+            // single headline/subtext/cta_label fields below when arrays
+            // are empty. See [[advertiser-pilot-model]].
+            const linesToArr = (s) => String(s || '').split('\n').map((l) => l.trim()).filter(Boolean);
+            const creativeHeadlines = linesToArr(formData.get('creative_headlines_text'));
+            const creativeBodyCopy  = linesToArr(formData.get('creative_body_copy_text'));
+            const creativeCtaLabels = linesToArr(formData.get('creative_cta_labels_text'));
+
             const campaignData = {
                 advertiser_id: currentUserData.user_id,
                 name: formData.get('name'),
@@ -8075,6 +8146,12 @@
                 daily_budget: parseFloat(formData.get('daily_budget')),
                 total_budget: parseFloat(formData.get('total_budget')),
                 optimization_goal: document.getElementById('optimizationGoal').value,
+                // Pilot model — Phase B 2026-06-24. The per-line textareas
+                // on the Creatives tab; trigger keeps creative_library_ready
+                // in sync on the DB side.
+                creative_headlines:  creativeHeadlines,
+                creative_body_copy:  creativeBodyCopy,
+                creative_cta_labels: creativeCtaLabels,
                 target_cpa: document.getElementById('optimizationGoal').value === 'target_cpa'
                     ? parseFloat(document.getElementById('targetCpaValue').value) || null
                     : null,
@@ -8525,6 +8602,15 @@
                 form.querySelector('[name="daily_budget"]').value = c.daily_budget || '';
                 form.querySelector('[name="total_budget"]').value = c.total_budget || '';
                 if (form.querySelector('[name="bid_amount"]')) form.querySelector('[name="bid_amount"]').value = c.bid_amount || '';
+
+                // Pilot model — Phase B 2026-06-24. Populate the variant
+                // textareas from the campaign's creative_* arrays so the
+                // user sees what's already saved when editing.
+                const linesOf = (arr) => Array.isArray(arr) ? arr.filter(Boolean).join('\n') : '';
+                if (form.querySelector('[name="creative_headlines_text"]'))  form.querySelector('[name="creative_headlines_text"]').value  = linesOf(c.creative_headlines);
+                if (form.querySelector('[name="creative_body_copy_text"]'))  form.querySelector('[name="creative_body_copy_text"]').value  = linesOf(c.creative_body_copy);
+                if (form.querySelector('[name="creative_cta_labels_text"]')) form.querySelector('[name="creative_cta_labels_text"]').value = linesOf(c.creative_cta_labels);
+                try { cmUpdateCreativeCounts(); } catch (_) {}
                 // Restore the saved placement groups — campaign rows carry
                 // only placement_tier; map it back to the group set.
                 selectedGroups = groupsFromCampaign(c.placement_tier);
@@ -8598,6 +8684,71 @@
             }
         }
 
+        // ─── CAMPAIGN MODAL: Basics / Creatives tab switcher ─────────
+        // Phase B Pilot pivot 2026-06-24. Delegated click handler so
+        // re-renders don't unbind. Active tab gets pink fg + border-bottom.
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('.cm-tab');
+            if (!btn || !campaignModal.contains(btn)) return;
+            const which = btn.getAttribute('data-cm-tab');
+            if (!which) return;
+            campaignModal.querySelectorAll('.cm-tab').forEach((b) => {
+                const active = b.getAttribute('data-cm-tab') === which;
+                b.classList.toggle('cm-tab-active', active);
+                b.style.color = active ? '#FF2D78' : '#6B7280';
+                b.style.borderBottomColor = active ? '#FF2D78' : 'transparent';
+            });
+            campaignModal.querySelectorAll('[data-cm-pane]').forEach((pane) => {
+                pane.style.display = (pane.getAttribute('data-cm-pane') === which) ? '' : 'none';
+            });
+        });
+
+        // Live count + readiness badge for the Creatives tab.
+        function cmUpdateCreativeCounts() {
+            if (!campaignForm) return;
+            const countLines = (txt) => String(txt || '').split('\n').map((l) => l.trim()).filter(Boolean).length;
+            const heads  = countLines(campaignForm.elements['creative_headlines_text']  && campaignForm.elements['creative_headlines_text'].value);
+            const bodies = countLines(campaignForm.elements['creative_body_copy_text']  && campaignForm.elements['creative_body_copy_text'].value);
+            const ctas   = countLines(campaignForm.elements['creative_cta_labels_text'] && campaignForm.elements['creative_cta_labels_text'].value);
+            const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+            setText('cmHeadlineCount', '(' + heads + ' / 10)');
+            setText('cmBodyCount',     '(' + bodies + ' / 10)');
+            setText('cmCtaCount',      '(' + ctas + ' / 10)');
+
+            // Readiness — mirrors compute_campaign_creative_ready in
+            // migration 31: 3+ headlines AND a creative image (the campaign
+            // already requires a Creative on Basics, so image is virtually
+            // always present at this point).
+            const badge = document.getElementById('cmCreativeReadiness');
+            if (!badge) return;
+            if (heads >= 3) {
+                badge.style.display = '';
+                badge.style.background = '#ECFDF5';
+                badge.style.border = '1px solid #A7F3D0';
+                badge.style.color = '#065F46';
+                badge.innerHTML = '<strong>✓ Ready for Benna.</strong> ' + heads + ' headlines, ' + bodies + ' body variant' + (bodies === 1 ? '' : 's') + ', ' + ctas + ' CTA label' + (ctas === 1 ? '' : 's') + '. Bandit has room to test.';
+            } else if (heads > 0) {
+                const need = (3 - heads) + ' more headline' + ((3 - heads) === 1 ? '' : 's');
+                badge.style.display = '';
+                badge.style.background = '#FFFBEB';
+                badge.style.border = '1px solid #FDE68A';
+                badge.style.color = '#92400E';
+                badge.innerHTML = '<strong>Almost there.</strong> Add ' + need + ' so Benna can run a meaningful bandit test.';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        // Wire input listeners (delegated, runs once)
+        document.addEventListener('input', (e) => {
+            const t = e.target;
+            if (!t || !t.name || !campaignModal.contains(t)) return;
+            if (t.name === 'creative_headlines_text'
+                || t.name === 'creative_body_copy_text'
+                || t.name === 'creative_cta_labels_text') {
+                try { cmUpdateCreativeCounts(); } catch (_) {}
+            }
+        });
+
         // Override create handler to support edit mode
         const _origSubmit = handleCreateCampaign;
         campaignForm.removeEventListener('submit', handleCreateCampaign);
@@ -8627,12 +8778,16 @@
 
                 const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
                 const formData = new FormData(campaignForm);
+                // Parse the per-line variant textareas (Pilot model, Phase B).
+                const linesToArr = (s) => String(s || '').split('\n').map((l) => l.trim()).filter(Boolean);
                 const updateData = {
                     id: editingCampaignId,
                     name: formData.get('name'),
                     format: formatFromGroups(),
                     placement_tier: placementTierFromGroups(),
                     headline: formData.get('headline'),
+                    subtext: formData.get('subtext') || '',
+                    cta_label: formData.get('cta_text') || undefined,
                     cta_url: formData.get('cta_url'),
                     target_keywords: intents,
                     billing_model: formData.get('billing_model'),
@@ -8648,6 +8803,10 @@
                     target_integration_methods: getSelectedIntegrationMethods(),
                     // Parent product. Empty string from the <select> = NULL (standalone campaign).
                     product_id: (formData.get('product_id') || '').toString().trim() || null,
+                    // Pilot model — Phase B 2026-06-24
+                    creative_headlines:  linesToArr(formData.get('creative_headlines_text')),
+                    creative_body_copy:  linesToArr(formData.get('creative_body_copy_text')),
+                    creative_cta_labels: linesToArr(formData.get('creative_cta_labels_text')),
                 };
 
                 try {
@@ -8687,6 +8846,18 @@
             editingCampaignId = null;
             const modalTitle = campaignModal.querySelector('.modal-header h2, h3');
             if (modalTitle) modalTitle.textContent = 'Create New Campaign';
+            // Reset tab strip to Basics on every close so the next open
+            // doesn't accidentally land on Creatives. Phase B 2026-06-24.
+            campaignModal.querySelectorAll('.cm-tab').forEach((b) => {
+                const isBasics = b.getAttribute('data-cm-tab') === 'basics';
+                b.classList.toggle('cm-tab-active', isBasics);
+                b.style.color = isBasics ? '#FF2D78' : '#6B7280';
+                b.style.borderBottomColor = isBasics ? '#FF2D78' : 'transparent';
+            });
+            campaignModal.querySelectorAll('[data-cm-pane]').forEach((pane) => {
+                pane.style.display = (pane.getAttribute('data-cm-pane') === 'basics') ? '' : 'none';
+            });
+            try { cmUpdateCreativeCounts(); } catch (_) {}
             _origClose();
         };
 
