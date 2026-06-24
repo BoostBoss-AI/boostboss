@@ -2605,10 +2605,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.performance">Performance</span>
             </button>
-            <button class="shell-nav-item" data-shell-section="billing">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.billing">Billing</span>
-            </button>
+            <!-- Billing nav removed 2026-06-24 — merged into Settings →
+                 Billing & funds. The /#/billing hash route is also retired;
+                 see VALID_ROUTES + the billing route section below (both gone). -->
+
             <button class="shell-nav-item" data-shell-section="payouts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.payouts">Payouts</span>
@@ -3746,47 +3746,11 @@
               </div>
             </div><!-- /[data-shell-route="product-orders"] -->
             <!-- ═══════ ROUTE: billing ═══════ -->
-            <div data-shell-route="billing">
+            <!-- Standalone /#/billing route removed 2026-06-24 — merged
+                 into Settings → Billing & funds. The transaction table +
+                 loader + CSV export all live in the settings modal now.
+                 See window.exportBillingCSV + sectionBilling(). -->
 
-            <!-- Route page header. "Billing History" inline title removed
-                 below; route page-head is now the heading anchor. -->
-            <div class="shell-page-head">
-                <div>
-                    <h1 class="shell-page-title" data-t="page.billing.title">Billing</h1>
-                    <div class="shell-page-sub" data-t="page.billing.sub">Account funding and transaction history</div>
-                </div>
-            </div>
-
-            <!-- Billing History (.campaigns-title removed in Phase 3 —
-                 route page-head above carries the heading). margin-top
-                 was 0 to chain after Campaigns in scroll layout; reset
-                 now that this is the first child of its route. -->
-            <div class="campaigns-section">
-                <div class="campaigns-header" style="justify-content: flex-end;">
-                    <button id="exportBillingBtn" style="
-                        padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
-                        background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
-                        font-family: inherit; color: #374151;
-                    " data-t="chrome.export_csv">Export CSV</button>
-                </div>
-                <table class="campaigns-table" style="font-size: 13px;">
-                    <thead>
-                        <tr>
-                            <th data-t="billing.date">Date</th>
-                            <th data-t="billing.description">Description</th>
-                            <th data-t="billing.type">Type</th>
-                            <th data-t="billing.amount">Amount</th>
-                            <th data-t="billing.balance_after">Balance After</th>
-                            <th data-t="billing.status">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="billingTableBody">
-                        <tr><td colspan="6" class="loading" data-t="billing.loading">Loading transactions...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            </div><!-- /[data-shell-route="billing"] -->
 
             <!-- ═══════ ROUTE: payouts (seller MoR settlements) ═══════
                  Where sellers see what BB owes them from MoR captures,
@@ -6259,7 +6223,8 @@
             // [data-shell-route="..."] block via the wrapper's
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
-            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'billing', 'payouts', 'promote', 'setup'];
+            // 'billing' removed 2026-06-24 — merged into Settings → Billing & funds.
+            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'payouts', 'promote', 'setup'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -9246,8 +9211,11 @@
         // ───────────── BILLING HISTORY ─────────────
         let _billingHistory = [];
 
-        async function loadBillingHistory() {
-            const tbody = document.getElementById('billingTableBody');
+        async function loadBillingHistory(targetTbodyId) {
+            // targetTbodyId defaults to the settings-modal tbody now that
+            // the standalone Billing route is retired. Callers can pass
+            // 'billingTableBody' for legacy contexts.
+            const tbodyId = targetTbodyId || 'aSetBillingTableBody';
             // #149 — ensure _currentBalance is populated before render so
             // the "Balance After" column doesn't show $0.00 from a race
             // with loadBalance(). Idempotent — overwrites with the same
@@ -9274,11 +9242,12 @@
             // yet') is the honest fallback; sellers see it until their
             // first real deposit / campaign spend lands.
 
-            renderBillingTable();
+            renderBillingTable(tbodyId);
         }
 
-        function renderBillingTable() {
-            const tbody = document.getElementById('billingTableBody');
+        function renderBillingTable(targetTbodyId) {
+            const tbody = document.getElementById(targetTbodyId || 'aSetBillingTableBody');
+            if (!tbody) return;  // tolerate absence (route removed)
             const _T = (k, fb) => (window.dashT ? (window.dashT(k) || fb) : fb);
             tbody.innerHTML = '';
 
@@ -9337,8 +9306,10 @@
             });
         }
 
-        // Export billing CSV
-        document.getElementById('exportBillingBtn').addEventListener('click', () => {
+        // Export billing CSV — exposed as window.exportBillingCSV so the
+        // Settings modal's Billing & funds export button can call it after
+        // the standalone /billing route was retired 2026-06-24.
+        window.exportBillingCSV = function () {
             if (_billingHistory.length === 0) {
                 showToast('No transactions to export', 'info');
                 return;
@@ -9362,7 +9333,13 @@
             a.download = `boostboss-billing-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             showToast('Billing CSV downloaded', 'success');
-        });
+        };
+        // Legacy attach for the (now-removed) standalone Billing route's
+        // button. Kept defensive so a future re-add doesn't need wiring.
+        (function () {
+            const legacyBtn = document.getElementById('exportBillingBtn');
+            if (legacyBtn) legacyBtn.addEventListener('click', window.exportBillingCSV);
+        })();
 
         // ───────────── CAMPAIGN CSV EXPORT ─────────────
         function exportCampaignsCSV() {
@@ -9438,11 +9415,14 @@
             }
         }
 
-        // ───────────── PATCH loadStats to also load billing history ─────────────
+        // ───────────── PATCH loadStats to also refresh pixel snippet ─────────────
+        // loadBillingHistory() removed from this hook 2026-06-24 — the
+        // billing table now lives inside the Settings modal and loads
+        // only when that section opens. Loading on every loadStats() was
+        // wasteful and wrote to a tbody that no longer exists in the DOM.
         const __origLoadStats2 = loadStats;
         loadStats = async function() {
             await __origLoadStats2();
-            loadBillingHistory();
             updatePixelSnippet();
         };
 
@@ -12599,9 +12579,37 @@
                     </div>
                     <button id="aSetAddFunds" style="width:100%;padding:11px;border:none;border-radius:8px;background:var(--accent-primary);color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;font-family:inherit;">${esc(t('billing.add_funds'))}</button>
                     <div style="${HINT}">${esc(t('billing.add_funds_hint'))}</div>
-                    <div style="border-top:1px solid #F0F0F2;margin-top:18px;padding-top:14px;">
-                        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px;">${esc(t('billing.history_title'))}</div>
-                        <div style="font-size:11.5px;color:#9CA3AF;line-height:1.5;">${esc(t('billing.history_hint'))}</div>
+
+                    <!-- Billing history — full transaction table, consolidated
+                         here from the retired standalone Billing route per
+                         Andy's request 2026-06-24. Same data + render logic
+                         as before; renderBillingTable() accepts a target
+                         tbody id so we can reuse it across surfaces. -->
+                    <div style="border-top:1px solid #F0F0F2;margin-top:18px;padding-top:18px;">
+                        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px;">${esc(t('billing.history_title'))}</div>
+                                <div style="font-size:11.5px;color:#9CA3AF;line-height:1.5;">${esc(t('page.billing.sub'))}</div>
+                            </div>
+                            <button id="aSetExportBilling" style="padding:7px 13px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">${esc(t('chrome.export_csv'))}</button>
+                        </div>
+                        <div style="overflow-x:auto;border:1px solid #F0F0F2;border-radius:10px;">
+                            <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+                                <thead style="background:#FAFAFA;">
+                                    <tr>
+                                        <th style="text-align:left;padding:9px 12px;font-weight:700;color:#6B7280;text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;">${esc(t('billing.date'))}</th>
+                                        <th style="text-align:left;padding:9px 12px;font-weight:700;color:#6B7280;text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;">${esc(t('billing.description'))}</th>
+                                        <th style="text-align:left;padding:9px 12px;font-weight:700;color:#6B7280;text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;">${esc(t('billing.type'))}</th>
+                                        <th style="text-align:right;padding:9px 12px;font-weight:700;color:#6B7280;text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;">${esc(t('billing.amount'))}</th>
+                                        <th style="text-align:right;padding:9px 12px;font-weight:700;color:#6B7280;text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;">${esc(t('billing.balance_after'))}</th>
+                                        <th style="text-align:left;padding:9px 12px;font-weight:700;color:#6B7280;text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;">${esc(t('billing.status'))}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="aSetBillingTableBody">
+                                    <tr><td colspan="6" style="padding:24px 12px;text-align:center;color:#9CA3AF;font-size:12px;">${esc(t('billing.loading'))}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>`;
             }
 
@@ -12890,6 +12898,23 @@
                     const btn = Array.from(document.querySelectorAll('button')).find((b) => /add funds/i.test((b.textContent || '').trim()));
                     if (btn) btn.click();
                 });
+
+                // ── Billing history table — fires when the Billing & funds
+                // section renders. Reuses loadBillingHistory() which now
+                // accepts a target tbody id. The standalone /billing route
+                // was retired 2026-06-24 — this is the only entry point.
+                const billingTbody = settingsModal.querySelector('#aSetBillingTableBody');
+                if (billingTbody && typeof loadBillingHistory === 'function') {
+                    loadBillingHistory('aSetBillingTableBody');
+                }
+                const exportBilling = settingsModal.querySelector('#aSetExportBilling');
+                if (exportBilling) {
+                    exportBilling.addEventListener('click', () => {
+                        if (typeof window.exportBillingCSV === 'function') {
+                            window.exportBillingCSV();
+                        }
+                    });
+                }
                 body.querySelectorAll('.aSetNotif').forEach((cb) => {
                     cb.addEventListener('change', () => {
                         const prefs = getNotifPrefs();
