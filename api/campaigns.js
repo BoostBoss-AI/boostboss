@@ -664,6 +664,22 @@ async function handleUpdate(req, res) {
     // Parent product link (Products migration, 2026-06-12). NULLable so the
     // advertiser can detach a campaign from a product if they restructure.
     "product_id",
+    // ── Pilot model (migration 31) — see [[advertiser-pilot-model]] ──
+    // boost_status is intentionally NOT here — use the existing `status`
+    // column which now also accepts 'depleted'. Budget fields are also
+    // intentionally not duplicated — daily_budget / total_budget /
+    // spent_total are the existing canonical sources.
+    "boost_objective",
+    "boost_pacing",
+    "boost_reach",
+    "boost_brand_safety",
+    "boost_creative_refresh",
+    "boost_confidence_floor",
+    "boost_activated_at",
+    "creative_headlines",
+    "creative_body_copy",
+    "creative_cta_labels",
+    "creative_library_ready",  // trigger overwrites on the way in
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];
@@ -678,6 +694,57 @@ async function handleUpdate(req, res) {
       && !["ai-native", "display", "interruptive"].includes(updates.placement_tier)) {
     updates.placement_tier = null;
   }
+
+  // ── Pilot model validation ────────────────────────────────────────
+  // Whitelist boost_objective; clamp the five sliders to [0,1]; sanitize
+  // creative variant arrays (cap 10 entries, trim each). Stamp
+  // boost_activated_at when transitioning into 'active' from any other
+  // state — callers can omit it.
+  const BOOST_OBJECTIVES = new Set(["awareness","clicks","signups","conversion","install"]);
+  if (updates.boost_objective !== undefined && !BOOST_OBJECTIVES.has(updates.boost_objective)) {
+    return res.status(400).json({ error: `boost_objective must be one of: ${Array.from(BOOST_OBJECTIVES).join(", ")}` });
+  }
+  const SLIDER_KEYS = ["boost_pacing","boost_reach","boost_brand_safety","boost_creative_refresh","boost_confidence_floor"];
+  for (const k of SLIDER_KEYS) {
+    if (updates[k] === undefined) continue;
+    const v = Number(updates[k]);
+    if (!Number.isFinite(v) || v < 0 || v > 1) {
+      return res.status(400).json({ error: `${k} must be a number between 0 and 1` });
+    }
+    updates[k] = Math.round(v * 100) / 100;
+  }
+  function sanitizeVariantArray(arr, fieldName, maxItems, maxLen) {
+    if (!Array.isArray(arr)) return { error: `${fieldName} must be an array of strings` };
+    if (arr.length > maxItems) return { error: `${fieldName}: max ${maxItems} variants` };
+    const cleaned = [];
+    for (const v of arr) {
+      if (v == null) continue;
+      const s = String(v).trim();
+      if (!s) continue;
+      cleaned.push(s.slice(0, maxLen));
+    }
+    return { value: cleaned };
+  }
+  if (updates.creative_headlines !== undefined) {
+    const r = sanitizeVariantArray(updates.creative_headlines, "creative_headlines", 10, 240);
+    if (r.error) return res.status(400).json({ error: r.error });
+    updates.creative_headlines = r.value;
+  }
+  if (updates.creative_body_copy !== undefined) {
+    const r = sanitizeVariantArray(updates.creative_body_copy, "creative_body_copy", 10, 240);
+    if (r.error) return res.status(400).json({ error: r.error });
+    updates.creative_body_copy = r.value;
+  }
+  if (updates.creative_cta_labels !== undefined) {
+    const r = sanitizeVariantArray(updates.creative_cta_labels, "creative_cta_labels", 10, 60);
+    if (r.error) return res.status(400).json({ error: r.error });
+    updates.creative_cta_labels = r.value;
+  }
+  // First-activation stamp — only set if status is flipping to 'active'.
+  if (updates.status === "active" && updates.boost_activated_at === undefined) {
+    updates.boost_activated_at = new Date().toISOString();
+  }
+
   updates.updated_at = new Date().toISOString();
 
   const sb = supa();

@@ -1,12 +1,17 @@
 // =====================================================================
-// /api/pilot-spend.js — Pilot Console spend allocation feed
+// /api/pilot-spend.js — Boost Ads spend allocation feed
 // =====================================================================
 //
-// GET /api/pilot-spend?product_id=<uuid>
+// GET /api/pilot-spend?campaign_id=<uuid>
 //
-// Returns the breakdown the Pilot Console's right-column "Spend
+// Returns the breakdown the Boost Ads tab's right-column "Spend
 // allocation" panel renders: totals + by_door + by_placement +
 // by_publisher + last_14_days. See [[advertiser-pilot-model]].
+//
+// Phase D.4 pivot 2026-06-24: query param renamed from product_id →
+// campaign_id, ownership check delegated to the campaigns-keyed RPC
+// (get_pilot_spend_summary in migration 32). For backward compat with
+// pre-pivot client builds, ?product_id= is accepted as an alias.
 //
 // Auth: Bearer JWT (advertiser owner of the product). Ownership is
 // enforced inside the RPC (get_pilot_spend_summary), not here, so the
@@ -74,30 +79,30 @@ module.exports = async function handler(req, res) {
   const auth = await requireAdvertiser(req);
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
 
-  const productId = (req.query && req.query.product_id) || null;
-  if (!productId) {
-    return res.status(400).json({ error: "product_id is required" });
+  // Accept campaign_id (canonical) or product_id (legacy alias).
+  const campaignId =
+    (req.query && (req.query.campaign_id || req.query.product_id)) || null;
+  if (!campaignId) {
+    return res.status(400).json({ error: "campaign_id is required" });
   }
-  // Defensive UUID shape check — RPC will reject otherwise, but we'd
-  // rather return a clean 400.
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId)) {
-    return res.status(400).json({ error: "product_id must be a valid UUID" });
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId)) {
+    return res.status(400).json({ error: "campaign_id must be a valid UUID" });
   }
 
   try {
     const { data, error } = await sb.rpc("get_pilot_spend_summary", {
-      p_product_id:    productId,
+      p_campaign_id:   campaignId,
       p_advertiser_id: auth.advertiserId,
     });
     if (error) {
       console.warn("[pilot-spend] RPC error:", error.message);
       return res.status(500).json({ error: error.message });
     }
-    // RPC returns its own ownership error when the advertiser doesn't
-    // own the product — translate to 404 so the frontend can show a
-    // "product not found" empty state.
-    if (data && data.error === "product_not_found_or_not_owned") {
-      return res.status(404).json({ error: "Product not found" });
+    // RPC returns its own ownership error when the caller doesn't own
+    // the campaign — translate to 404 so the frontend can show a
+    // "campaign not found" empty state.
+    if (data && data.error === "campaign_not_found_or_not_owned") {
+      return res.status(404).json({ error: "Campaign not found" });
     }
     return res.json(data || {});
   } catch (e) {

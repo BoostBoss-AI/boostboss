@@ -16217,20 +16217,29 @@ function pfParseScreenshots(text) {
                 return '$' + (n / 100).toFixed(2);
             }
 
-            // ── 1. Load advertiser's products ─────────────────────────
+            // ── 1. Load advertiser's CAMPAIGNS (was products until 2026-06-24) ──
+            // Boost Ads now operates on campaigns per [[advertiser-pilot-model]]
+            // clarification. pilotProducts / pilotActiveProductId variable
+            // names kept for back-compat to avoid renaming everywhere; values
+            // are now CAMPAIGN rows / campaign id.
             async function loadPilotProducts() {
                 const token = getToken();
                 if (!token) return;
                 try {
-                    const r = await fetch('/api/products?limit=100', {
+                    const r = await fetch('/api/campaigns?limit=100', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     const j = await r.json();
-                    pilotProducts = (j.products || []).filter(p => p.status !== 'archived');
+                    // Hide rejected campaigns from the pilot view; everything
+                    // else is fair game (active, paused, in_review, completed,
+                    // depleted). Sort by recently-touched first.
+                    pilotProducts = (j.campaigns || j.data || [])
+                        .filter(c => c.status !== 'rejected')
+                        .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
                     renderProductPicker();
                 } catch (e) {
-                    console.warn('[pilot] loadProducts failed:', e);
+                    console.warn('[pilot] loadCampaigns failed:', e);
                 }
             }
 
@@ -16266,39 +16275,41 @@ function pfParseScreenshots(text) {
                 }
 
                 // Render rows. Each row is a clickable selector for which
-                // product the Pilot panes below operate on. Active row gets
-                // a left pink border + light pink background.
-                const fmtBudget = (cents) => {
-                    const n = Number(cents) || 0;
+                // CAMPAIGN the Boost Ads panes below operate on. Active row
+                // gets a left pink border + light pink background.
+                // Campaigns store budgets in USD (numeric), not cents.
+                const fmtBudget = (usd) => {
+                    const n = Number(usd) || 0;
                     if (n === 0) return '<span style="color:#9CA3AF;">—</span>';
-                    return '$' + (n / 100).toFixed(2);
+                    return '$' + n.toFixed(2);
                 };
                 const statusBadge = (s) => {
                     const map = {
-                        active:   { bg:'#ECFDF5', fg:'#065F46', label:'Active' },
-                        paused:   { bg:'#FFFBEB', fg:'#92400E', label:'Paused' },
-                        depleted: { bg:'#FEF2F2', fg:'#991B1B', label:'Depleted' },
-                        archived: { bg:'#F3F4F6', fg:'#6B7280', label:'Archived' },
-                        inactive: { bg:'#F9FAFB', fg:'#6B7280', label:'Inactive' },
+                        active:    { bg:'#ECFDF5', fg:'#065F46', label:'Active' },
+                        paused:    { bg:'#FFFBEB', fg:'#92400E', label:'Paused' },
+                        in_review: { bg:'#EFF6FF', fg:'#1E40AF', label:'In review' },
+                        completed: { bg:'#F3F4F6', fg:'#6B7280', label:'Completed' },
+                        depleted:  { bg:'#FEF2F2', fg:'#991B1B', label:'Depleted' },
+                        rejected:  { bg:'#FEF2F2', fg:'#991B1B', label:'Rejected' },
                     };
-                    const cfg = map[s] || map.inactive;
+                    const cfg = map[s] || { bg:'#F9FAFB', fg:'#6B7280', label: s || 'Inactive' };
                     return '<span style="display:inline-block; padding:3px 9px; border-radius:999px;' +
                         ' background:' + cfg.bg + '; color:' + cfg.fg + ';' +
                         ' font-size:11px; font-weight:700; letter-spacing:0.02em;">' + cfg.label + '</span>';
                 };
-                pills.innerHTML = pilotProducts.map((p) => {
-                    const isActive = p.id === pilotActiveProductId;
+                pills.innerHTML = pilotProducts.map((c) => {
+                    const isActive = c.id === pilotActiveProductId;
                     const rowBg = isActive ? '#FFF5F8' : '#fff';
                     const borderLeft = isActive ? '3px solid #FF2D78' : '3px solid transparent';
-                    const name = (p.name || '(untitled)').replace(/[<>]/g, '');
-                    return '<tr data-pilot-pick="' + p.id + '" style="' +
+                    const name = (c.name || '(untitled campaign)').replace(/[<>]/g, '');
+                    return '<tr data-pilot-pick="' + c.id + '" style="' +
                         'cursor:pointer; background:' + rowBg + '; border-left:' + borderLeft + ';' +
                         'border-top:1px solid #F0F0F2;' +
                         '">' +
                         '<td style="padding:12px 14px; font-weight:' + (isActive ? '700' : '600') + '; color:#0F0F1A;">' + name + '</td>' +
-                        '<td style="padding:12px 14px;">' + statusBadge(p.boost_status || 'inactive') + '</td>' +
-                        '<td style="padding:12px 14px; text-align:right; font-variant-numeric:tabular-nums; color:#374151;">' + fmtBudget(p.boost_daily_budget_cents) + '</td>' +
-                        '<td style="padding:12px 14px; text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:#0F0F1A;">' + fmtBudget(p.boost_lifetime_budget_cents) + '</td>' +
+                        '<td style="padding:12px 14px;">' + statusBadge(c.status || 'in_review') + '</td>' +
+                        '<td style="padding:12px 14px; text-align:right; font-variant-numeric:tabular-nums; color:#374151;">' + fmtBudget(c.daily_budget) + '</td>' +
+                        '<td style="padding:12px 14px; text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:#0F0F1A;">' + fmtBudget(c.total_budget) + '</td>' +
                         '</tr>';
                 }).join('');
 
@@ -16337,7 +16348,7 @@ function pfParseScreenshots(text) {
                 const token = getToken();
                 if (!token) return;
                 try {
-                    const r = await fetch('/api/pilot-spend?product_id=' + encodeURIComponent(productId), {
+                    const r = await fetch('/api/pilot-spend?campaign_id=' + encodeURIComponent(productId), {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) {
@@ -16472,11 +16483,12 @@ function pfParseScreenshots(text) {
                     if (value) value.textContent = Number(v).toFixed(2);
                 });
 
-                // Budget — display in dollars (DB stores cents)
+                // Budget — campaigns store as USD numeric (daily_budget /
+                // total_budget), no cents conversion needed anymore.
                 const daily = document.getElementById('pilotDailyBudget');
                 const lifetime = document.getElementById('pilotLifetimeBudget');
-                if (daily) daily.value = Math.round((Number(p.boost_daily_budget_cents) || 0) / 100);
-                if (lifetime) lifetime.value = Math.round((Number(p.boost_lifetime_budget_cents) || 0) / 100);
+                if (daily) daily.value = Math.round(Number(p.daily_budget) || 0);
+                if (lifetime) lifetime.value = Math.round(Number(p.total_budget) || 0);
 
                 // Status row
                 renderStatusRow(p);
@@ -16500,40 +16512,30 @@ function pfParseScreenshots(text) {
 
             // ── Creatives pane: load active product into the fields ──
             function pilotLoadCreativesPane() {
-                const p = pilotProducts.find(x => x.id === pilotActiveProductId);
-                if (!p) return;
+                const c = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!c) return;
                 const set = (id, val) => {
                     const el = document.getElementById(id);
                     if (el) el.value = (val == null ? '' : val);
                 };
                 const linesOf = (arr) => Array.isArray(arr) ? arr.filter(Boolean).join('\n') : '';
 
-                // Company identity
-                set('pilotCompanyLogo',           p.company_logo_url);
-                set('pilotCompanyWebsite',        p.company_website_url);
-                set('pilotCompanyTagline',        p.company_tagline);
-                set('pilotCompanyAbout',          p.company_about);
-                set('pilotCompanyCity',           p.company_city);
-                set('pilotCompanyCountry',        p.company_country_code);
-                set('pilotCompanySize',           p.company_size);
-                set('pilotCompanyGrowthStage',    p.company_growth_stage);
-                set('pilotCompanyFundingStatus',  p.company_funding_status);
-                set('pilotCompanyFoundedDate',    p.company_founded_date ? String(p.company_founded_date).slice(0, 10) : '');
+                // Company identity + Founder + Trust live on the parent
+                // Product, not the Campaign. When the campaign is linked
+                // to a product, mirror those fields read-only-ish (still
+                // editable but they save back to the parent product, not
+                // the campaign). For tonight's pivot we just clear them
+                // — Phase F will wire the product-linked editor.
+                ['pilotCompanyLogo','pilotCompanyWebsite','pilotCompanyTagline','pilotCompanyAbout',
+                 'pilotCompanyCity','pilotCompanyCountry','pilotCompanySize','pilotCompanyGrowthStage',
+                 'pilotCompanyFundingStatus','pilotCompanyFoundedDate',
+                 'pilotFounderName','pilotFounderRole','pilotFounderPhoto','pilotFounderLinkedin',
+                 'pilotRefundWindow','pilotGuarantee'].forEach((id) => set(id, ''));
 
-                // Founder card
-                set('pilotFounderName',     p.founder_name);
-                set('pilotFounderRole',     p.founder_role);
-                set('pilotFounderPhoto',    p.founder_photo_url);
-                set('pilotFounderLinkedin', p.founder_linkedin_url);
-
-                // Creative library variants
-                set('pilotCreativeHeadlines', linesOf(p.creative_headlines));
-                set('pilotCreativeBody',      linesOf(p.creative_body_copy));
-                set('pilotCreativeCta',       linesOf(p.creative_cta_labels));
-
-                // Trust signals
-                set('pilotRefundWindow', p.refund_window_days);
-                set('pilotGuarantee',    p.guarantee_label);
+                // Creative library variants — now on the campaign row.
+                set('pilotCreativeHeadlines', linesOf(c.creative_headlines));
+                set('pilotCreativeBody',      linesOf(c.creative_body_copy));
+                set('pilotCreativeCta',       linesOf(c.creative_cta_labels));
 
                 pilotUpdateCreativeCounts();
             }
@@ -16549,11 +16551,12 @@ function pfParseScreenshots(text) {
                 setText('pilotBodyCount',     '(' + bodies + ' / 10)');
                 setText('pilotCtaCount',      '(' + ctas + ' / 10)');
 
-                // Readiness badge — same threshold as the modal version
-                const p = pilotProducts.find(x => x.id === pilotActiveProductId);
-                const imgCount = p && Array.isArray(p.hero_images) ? p.hero_images.length : 0
-                              + (p && p.image_url ? 1 : 0);
-                const ready = heads >= 3 && imgCount >= 1;
+                // Readiness — campaigns: 3+ headlines AND a creative image
+                // (media_url or poster_url, mirroring the DB trigger in
+                // migration 31).
+                const c = pilotProducts.find(x => x.id === pilotActiveProductId);
+                const hasImage = !!(c && (c.media_url || c.poster_url));
+                const ready = heads >= 3 && hasImage;
                 const badge = document.getElementById('pilotCreativeReadiness');
                 if (!badge) return;
                 if (ready) {
@@ -16561,11 +16564,11 @@ function pfParseScreenshots(text) {
                     badge.style.background = '#ECFDF5';
                     badge.style.border = '1px solid #A7F3D0';
                     badge.style.color = '#065F46';
-                    badge.innerHTML = '<strong>✓ Ready for Benna.</strong> ' + heads + ' headlines, ' + imgCount + ' image variant' + (imgCount === 1 ? '' : 's') + ', ' + ctas + ' CTA label' + (ctas === 1 ? '' : 's') + '. Benna\'s bandit has room to test.';
-                } else if (heads > 0 || imgCount > 0) {
+                    badge.innerHTML = '<strong>✓ Ready for Benna.</strong> ' + heads + ' headlines, image set, ' + ctas + ' CTA label' + (ctas === 1 ? '' : 's') + '. Benna\'s bandit has room to test.';
+                } else if (heads > 0 || hasImage) {
                     const need = [];
                     if (heads < 3) need.push((3 - heads) + ' more headline' + ((3 - heads) === 1 ? '' : 's'));
-                    if (imgCount < 1) need.push('1 hero image (Products tab → Basics)');
+                    if (!hasImage) need.push('a creative image (Campaign modal → media_url)');
                     badge.style.display = '';
                     badge.style.background = '#FFFBEB';
                     badge.style.border = '1px solid #FDE68A';
@@ -16587,7 +16590,11 @@ function pfParseScreenshots(text) {
                 }
             });
 
-            // ── Save Creatives pane → PATCH active product ────────────
+            // ── Save Creatives pane → PATCH active campaign ───────────
+            // Boost Ads now operates on campaigns. The Creatives pane saves
+            // the variant arrays back to the campaign row. Company identity
+            // + founder + trust fields live on the parent Product (edited
+            // via Affiliate tab) — wiring deferred to Phase F.
             window.pilotSaveCreatives = async function () {
                 if (!pilotActiveProductId) return;
                 const btn = document.getElementById('pilotCreativesSaveBtn');
@@ -16597,37 +16604,17 @@ function pfParseScreenshots(text) {
                     return el ? el.value : '';
                 };
                 const lines = (id) => String(get(id) || '').split('\n').map((l) => l.trim()).filter(Boolean);
-                const orNull = (v) => (v == null || String(v).trim() === '') ? null : v;
                 const payload = {
-                    // Company identity
-                    company_logo_url:        orNull(get('pilotCompanyLogo').trim()),
-                    company_website_url:     orNull(get('pilotCompanyWebsite').trim()),
-                    company_tagline:         orNull(get('pilotCompanyTagline').trim()),
-                    company_about:           orNull(get('pilotCompanyAbout').trim()),
-                    company_city:            orNull(get('pilotCompanyCity').trim()),
-                    company_country_code:    orNull(get('pilotCompanyCountry').trim().toUpperCase()),
-                    company_size:            orNull(get('pilotCompanySize')),
-                    company_growth_stage:    orNull(get('pilotCompanyGrowthStage')),
-                    company_funding_status:  orNull(get('pilotCompanyFundingStatus')),
-                    company_founded_date:    orNull(get('pilotCompanyFoundedDate')),
-                    // Founder
-                    founder_name:            orNull(get('pilotFounderName').trim()),
-                    founder_role:            orNull(get('pilotFounderRole').trim()),
-                    founder_photo_url:       orNull(get('pilotFounderPhoto').trim()),
-                    founder_linkedin_url:    orNull(get('pilotFounderLinkedin').trim()),
-                    // Creative library
+                    id: pilotActiveProductId,  // campaigns endpoint expects id in body
                     creative_headlines:      lines('pilotCreativeHeadlines'),
                     creative_body_copy:      lines('pilotCreativeBody'),
                     creative_cta_labels:     lines('pilotCreativeCta'),
-                    // Trust signals
-                    refund_window_days:      get('pilotRefundWindow') === '' ? null : Number(get('pilotRefundWindow')),
-                    guarantee_label:         orNull(get('pilotGuarantee').trim()),
                 };
                 if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; btn.style.opacity = '0.7'; }
                 if (status) { status.textContent = ''; }
                 try {
                     const token = getToken();
-                    const r = await fetch('/api/products?action=update&id=' + encodeURIComponent(pilotActiveProductId), {
+                    const r = await fetch('/api/campaigns?action=update', {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
@@ -16640,10 +16627,11 @@ function pfParseScreenshots(text) {
                         throw new Error(j.error || 'HTTP ' + r.status);
                     }
                     const j = await r.json();
-                    if (j.product) {
-                        const idx = pilotProducts.findIndex(p => p.id === j.product.id);
-                        if (idx >= 0) pilotProducts[idx] = j.product;
-                        renderStatusRow(j.product);
+                    const fresh = j.campaign || j.data || j.product;
+                    if (fresh && fresh.id) {
+                        const idx = pilotProducts.findIndex(p => p.id === fresh.id);
+                        if (idx >= 0) pilotProducts[idx] = fresh;
+                        renderStatusRow(fresh);
                     }
                     if (status) {
                         status.textContent = '✓ Saved';
@@ -16665,21 +16653,24 @@ function pfParseScreenshots(text) {
             };
 
             // ── 4. Render status + live metrics row ──────────────────
+            // Status is now read directly from campaign.status (which includes
+            // 'depleted' per migration 31). Budget is USD numeric, not cents.
             function renderStatusRow(p) {
                 const statusEl = document.getElementById('pilotStatusBadge');
                 const budgetEl = document.getElementById('pilotBudgetRemaining');
                 const btn = document.getElementById('pilotActivateBtn');
                 if (!statusEl || !btn) return;
 
-                const status = p.boost_status || 'inactive';
+                const status = p.status || 'in_review';
                 const labels = {
-                    inactive:  { text: 'Inactive',  color: '#6B7280' },
+                    in_review: { text: 'In review',  color: '#1E40AF' },
                     active:    { text: 'Active',    color: '#22C55E' },
                     paused:    { text: 'Paused',    color: '#F59E0B' },
+                    completed: { text: 'Completed', color: '#6B7280' },
                     depleted:  { text: 'Depleted',  color: '#EF4444' },
-                    archived:  { text: 'Archived',  color: '#9CA3AF' },
+                    rejected:  { text: 'Rejected',  color: '#EF4444' },
                 };
-                const l = labels[status] || labels.inactive;
+                const l = labels[status] || { text: status, color: '#6B7280' };
                 statusEl.textContent = l.text;
                 statusEl.style.color = l.color;
 
@@ -16687,24 +16678,43 @@ function pfParseScreenshots(text) {
                 if (status === 'active') {
                     btn.textContent = 'Pause Boost';
                     btn.style.background = '#F59E0B';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
                 } else if (status === 'paused') {
                     btn.textContent = 'Resume Boost';
                     btn.style.background = '#22C55E';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
                 } else if (status === 'depleted') {
                     btn.textContent = 'Top up to resume';
                     btn.style.background = '#EF4444';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                } else if (status === 'in_review') {
+                    btn.textContent = 'Pending review';
+                    btn.style.background = '#9CA3AF';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
+                } else if (status === 'rejected') {
+                    btn.textContent = 'Rejected';
+                    btn.style.background = '#9CA3AF';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
                 } else {
                     btn.textContent = 'Activate Boost';
                     btn.style.background = '#FF2D78';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
                 }
 
-                // Budget remaining — lifetime cap minus spent. 0 = uncapped.
+                // Budget remaining — total_budget minus spent_total. Both USD.
+                // 0 total = uncapped.
                 if (budgetEl) {
-                    const cap = Number(p.boost_lifetime_budget_cents) || 0;
-                    const spent = Number(p.boost_spent_cents) || 0;
+                    const cap = Number(p.total_budget) || 0;
+                    const spent = Number(p.spent_total) || 0;
                     if (cap > 0) {
                         const remaining = Math.max(0, cap - spent);
-                        budgetEl.textContent = fmtUSD(remaining);
+                        budgetEl.textContent = '$' + remaining.toFixed(2);
                     } else {
                         budgetEl.textContent = 'Uncapped';
                     }
@@ -16722,25 +16732,31 @@ function pfParseScreenshots(text) {
                 const token = getToken();
                 if (!token) return;
                 try {
-                    const r = await fetch('/api/products?action=update&id=' + encodeURIComponent(pilotActiveProductId), {
+                    // Boost Ads now operates on campaigns. The payload key is
+                    // 'id' in body (campaigns endpoint expects it there).
+                    const r = await fetch('/api/campaigns?action=update', {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token,
                         },
-                        body: JSON.stringify(payload),
+                        body: JSON.stringify(Object.assign({ id: pilotActiveProductId }, payload)),
                     });
                     if (!r.ok) {
                         const j = await r.json().catch(() => ({}));
                         console.warn('[pilot] PATCH failed:', j.error || r.status);
                         return;
                     }
-                    // Refresh local copy from response
+                    // Refresh local copy from response. Campaigns endpoint
+                    // returns the updated row under `campaign` or `data`.
                     const j = await r.json();
-                    if (j.product) {
-                        const idx = pilotProducts.findIndex(p => p.id === j.product.id);
-                        if (idx >= 0) pilotProducts[idx] = j.product;
-                        renderStatusRow(j.product);
+                    const fresh = j.campaign || j.data || j.product;
+                    if (fresh && fresh.id) {
+                        const idx = pilotProducts.findIndex(p => p.id === fresh.id);
+                        if (idx >= 0) pilotProducts[idx] = fresh;
+                        renderStatusRow(fresh);
+                        // Picker badge (status pill) reflects the new row state
+                        renderProductPicker();
                     }
                 } catch (e) {
                     console.warn('[pilot] PATCH error:', e);
@@ -16772,37 +16788,47 @@ function pfParseScreenshots(text) {
                     });
                 });
 
-                // Budget inputs
+                // Budget inputs — campaigns store as USD numeric (no cents).
                 const daily = document.getElementById('pilotDailyBudget');
                 if (daily && !daily.__wired) {
                     daily.__wired = true;
                     daily.addEventListener('change', () => {
-                        savePilotPatch({ boost_daily_budget_cents: Math.round(Number(daily.value || 0) * 100) });
+                        savePilotPatch({ daily_budget: Number(daily.value || 0) });
                     });
                 }
                 const lifetime = document.getElementById('pilotLifetimeBudget');
                 if (lifetime && !lifetime.__wired) {
                     lifetime.__wired = true;
                     lifetime.addEventListener('change', () => {
-                        savePilotPatch({ boost_lifetime_budget_cents: Math.round(Number(lifetime.value || 0) * 100) });
+                        savePilotPatch({ total_budget: Number(lifetime.value || 0) });
                     });
                 }
             }
 
             // ── 6. Activate / Pause / Resume button handler ───────────
+            // Toggles campaign.status. in_review / rejected are non-toggleable
+            // (the button is already disabled in renderStatusRow for those).
             window.pilotToggleActivation = function () {
                 const p = pilotProducts.find(x => x.id === pilotActiveProductId);
                 if (!p) return;
-                const current = p.boost_status || 'inactive';
+                const current = p.status || 'in_review';
                 let next;
                 if (current === 'active') next = 'paused';
                 else if (current === 'paused') next = 'active';
                 else if (current === 'depleted') {
-                    // Bounce to billing for top-up
-                    window.location.hash = '#/billing';
+                    // Bounce to settings → billing & funds for top-up
+                    if (typeof window.openSettingsModal === 'function') {
+                        window.openSettingsModal('billing');
+                    }
                     return;
-                } else next = 'active';
-                savePilotPatch({ boost_status: next });
+                } else if (current === 'completed') {
+                    next = 'active';  // reactivate completed campaigns
+                } else if (current === 'in_review' || current === 'rejected') {
+                    return;  // can't toggle from these states
+                } else {
+                    next = 'active';
+                }
+                savePilotPatch({ status: next });
             };
 
             // ── 7. Route loader — only fetch when pilot is active ─────

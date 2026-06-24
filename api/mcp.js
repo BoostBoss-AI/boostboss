@@ -164,131 +164,29 @@ function deriveIntentTokensFromContext(text) {
   return out;
 }
 
-// ── Pilot model: product → virtual campaign ────────────────────────────
-// See [[advertiser-pilot-model]]. An active product boost is rendered
-// into a campaign-shaped object so it can flow through the existing
-// auction filter + scoring chain. Targeting is auto-derived from product
-// metadata (name + descriptions + tags). The five Pilot sliders ride
-// along as __pilot_* fields; benna.js reads them to modulate the score
-// and bid. The "campaign id" is prefixed with `pboost_` so the win-tracking
-// code can distinguish a real campaign win from a product-boost win and
-// debit boost_spent_cents on the latter.
-function productBoostToVirtualCampaign(product) {
-  if (!product || !product.id) return null;
-
-  // Auto-derive intent tokens from product metadata.
-  // Concatenate the richest available text fields, tokenize, dedupe, cap.
-  const textBlob = [
-    product.name || "",
-    product.description || "",
-    product.long_description || "",
-    Array.isArray(product.tldr_bullets)   ? product.tldr_bullets.join(" ")   : "",
-    Array.isArray(product.best_for)       ? product.best_for.join(" ")       : "",
-    Array.isArray(product.alternative_to) ? product.alternative_to.join(" ") : "",
-    Array.isArray(product.integrations)   ? product.integrations.join(" ")   : "",
-  ].join(" ");
-  const intentTokens = deriveIntentTokensFromContext(textBlob);
-
-  // boost_reach drives target_surfaces. At reach 0 → niche only (no
-  // surfaces enumerated — Benna requires a strong intent match). At reach
-  // 1 → empty array (match any surface).
-  const reach = Number(product.boost_reach);
-  const reachVal = Number.isFinite(reach) ? reach : 0.5;
-  const allSurfaces = ["chat", "tool_response", "sidebar", "loading_screen", "status_line", "web"];
-  const surfaces = reachVal >= 0.5 ? [] : allSurfaces.slice(0, Math.max(1, Math.round(allSurfaces.length * reachVal)));
-
-  // boost_brand_safety filters interruptive formats out of the candidate
-  // surfaces. High brand_safety → drop interstitial / rewarded equivalents.
-  const safety = Number(product.boost_brand_safety);
-  const safetyVal = Number.isFinite(safety) ? safety : 0.5;
-  const formatVal = safetyVal > 0.7 ? "native" : "image";  // simple v0 mapping
-
-  // Pacing affects the base bid (target_cpa). Higher pacing = bid more
-  // aggressively to consume budget faster. Cap at 3x baseline.
-  const pacing = Number(product.boost_pacing);
-  const pacingVal = Number.isFinite(pacing) ? pacing : 0.5;
-  const baseCpa = 4.5;
-  const target_cpa = +(baseCpa * (0.5 + pacingVal * 1.5)).toFixed(2);
-
-  return {
-    // Standard campaign fields the existing auction chain reads
-    id: `pboost_${product.id}`,
-    name: product.name || "Untitled boost",
-    advertiser_id: product.advertiser_id,
-    status: "active",
-    bid_amount: target_cpa,
-    target_cpa,
-    format: formatVal,
-    optimization_goal: product.boost_objective || "awareness",
-    iab_cat: [],
-    adomain: [],
-
-    // Targeting — auto-derived
-    target_intent_tokens: intentTokens,
-    target_active_tools:  [],
-    target_host_apps:     [],
-    target_surfaces:      surfaces,
-    target_keywords:      [],
-    target_integration_methods: [],  // empty = reach all 4 doors
-
-    // Cosine path — left null so the Jaccard path runs. A future pass
-    // can pre-embed product descriptions and populate this.
-    intent_embedding: null,
-
-    // ── Pilot markers — read by benna.js scoreBid for slider modifiers
-    __is_pilot_boost: true,
-    __pilot_product_id: product.id,
-    __pilot_boost_objective:        product.boost_objective || "awareness",
-    __pilot_boost_pacing:           pacingVal,
-    __pilot_boost_reach:            reachVal,
-    __pilot_boost_brand_safety:     safetyVal,
-    __pilot_boost_creative_refresh: Number(product.boost_creative_refresh) || 0.5,
-    __pilot_boost_confidence_floor: Number(product.boost_confidence_floor) || 0.3,
-
-    // Creative payload — picks a variant from each library array.
-    // v1: simple random pick (seeded per impression below via a salt).
-    // The boost_creative_refresh slider scales between exploit (low) and
-    // explore (high); a future pass will replace pickOne with a UCB1
-    // multi-arm bandit reading per-variant CTR from auction_logs.
-    __pilot_creative: pickPilotCreative(product),
-  };
-}
-
-// Pick one creative variant set from the product's library. v1 is
-// deterministic-per-product-per-minute so the same publisher request
-// sees consistent copy within a session, but the variant rotates over
-// time so Benna explores the space. The boost_creative_refresh slider
-// will eventually drive bandit explore/exploit; today it just affects
-// the rotation cadence (higher refresh = shorter bucket).
-function pickPilotCreative(product) {
-  const heads = Array.isArray(product.creative_headlines)  ? product.creative_headlines  : [];
-  const bodies = Array.isArray(product.creative_body_copy) ? product.creative_body_copy : [];
-  const ctas  = Array.isArray(product.creative_cta_labels) ? product.creative_cta_labels : [];
-  const imgs  = Array.isArray(product.hero_images)         ? product.hero_images         : [];
-
-  // Rotation bucket — shorter window when creative_refresh is high.
-  const refresh = Number(product.boost_creative_refresh);
+// ── Pilot model: pick one creative variant from a campaign's library ──
+// See [[advertiser-pilot-model]]. After the 2026-06-24 correction, the
+// Pilot model operates on real campaigns (not synthesized product
+// boosts), so the auction pulls campaigns directly and this helper
+// rotates among the variant arrays attached to each campaign.
+//
+// Deterministic within a time bucket so the same publisher request
+// sees consistent copy within a session — but the variant rotates over
+// time so Benna explores the variant space. boost_creative_refresh
+// controls the bucket length (higher = shorter = faster rotation =
+// more exploration). Future pass: replace with UCB1 multi-arm bandit
+// reading per-variant CTR from auction_logs.
+function pickCampaignVariant(campaignId, variants, salt, refreshSlider) {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+  if (variants.length === 1) return variants[0];
+  const refresh = Number(refreshSlider);
   const refreshVal = Number.isFinite(refresh) ? refresh : 0.5;
   const bucketMinutes = Math.max(1, Math.round(15 - refreshVal * 14));  // 1..15 min
   const bucket = Math.floor(Date.now() / (bucketMinutes * 60 * 1000));
-
-  function pickOne(arr, fallback, salt) {
-    if (!arr || arr.length === 0) return fallback;
-    if (arr.length === 1) return arr[0];
-    // Hash bucket + product_id + salt → deterministic-within-bucket index
-    const key = `${bucket}|${product.id}|${salt}`;
-    let h = 0;
-    for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0;
-    return arr[Math.abs(h) % arr.length];
-  }
-
-  return {
-    headline:   pickOne(heads, product.name || "", "head"),
-    body:       pickOne(bodies, product.description || "", "body"),
-    image_url:  pickOne(imgs, product.image_url || null, "img"),
-    cta_url:    product.default_url || product.external_marketing_url,
-    cta_label:  pickOne(ctas, "Learn more", "cta"),
-  };
+  const key = `${bucket}|${campaignId}|${salt}`;
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0;
+  return variants[Math.abs(h) % variants.length];
 }
 
 // ── Context derivation (MCP args → Benna bid context) ──────────────────
@@ -644,21 +542,16 @@ async function handleGetSponsoredContent(body, args, res) {
   // boosts compete in the same auction; whichever scores higher wins.
   let campaigns;
   if (sb) {
-    const [campaignsResult, boostsResult] = await Promise.all([
-      sb.from("campaigns").select("*").eq("status", "active"),
-      sb.from("products").select("*").eq("boost_status", "active"),
-    ]);
-    const realCampaigns = (campaignsResult && campaignsResult.data) || [];
-    const activeBoosts = (boostsResult && boostsResult.data) || [];
-
-    // Synthesize a virtual campaign from each active product boost.
-    const virtualCampaigns = activeBoosts.map(productBoostToVirtualCampaign);
-
-    campaigns = realCampaigns.concat(virtualCampaigns);
-    if (campaigns.length === 0) {
+    // Active campaigns only. Per [[advertiser-pilot-model]] correction
+    // 2026-06-24: campaigns themselves now carry boost_* fields (via
+    // migration 31), so we no longer synthesize "virtual campaigns" from
+    // products. The Pilot model operates directly on real campaign rows.
+    const { data, error } = await sb.from("campaigns").select("*").eq("status", "active");
+    if (error || !data || data.length === 0) {
       emitLog("no_match", { no_fill_reason: "no_campaigns", eligibility: { pool_size: 0 } });
       return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns", auction_id: auctionId });
     }
+    campaigns = data;
   } else {
     campaigns = demoCampaigns();
     if (campaigns.length === 0) {
@@ -847,6 +740,7 @@ async function handleGetSponsoredContent(body, args, res) {
       // target_* columns to compute per-signal contributions; scorePrice()
       // (below) handles the §9 auction pricing.
       const prediction = benna.scoreBid(bennaCtx, {
+        id: c.id,
         target_cpa: c.target_cpa || c.bid_amount || 4.5,
         goal: c.optimization_goal || "target_cpa",
         format: c.format,
@@ -855,17 +749,15 @@ async function handleGetSponsoredContent(body, args, res) {
         target_host_apps:    c.target_host_apps    || [],
         target_surfaces:     c.target_surfaces     || [],
         target_keywords:     c.target_keywords     || [],
-        // Pilot model — passed through so benna.js can apply slider
-        // modifiers and gate by the confidence floor. See
-        // [[advertiser-pilot-model]]. Real campaigns omit these fields,
-        // and the modifier branch in benna.js is a no-op for them.
-        __is_pilot_boost:               c.__is_pilot_boost === true,
-        __pilot_boost_objective:        c.__pilot_boost_objective,
-        __pilot_boost_pacing:           c.__pilot_boost_pacing,
-        __pilot_boost_reach:            c.__pilot_boost_reach,
-        __pilot_boost_brand_safety:     c.__pilot_boost_brand_safety,
-        __pilot_boost_creative_refresh: c.__pilot_boost_creative_refresh,
-        __pilot_boost_confidence_floor: c.__pilot_boost_confidence_floor,
+        // Pilot model — pass through the campaign's own boost_* columns
+        // (migration 31). benna.js reads these directly; no virtual-
+        // campaign synthesis layer anymore. See [[advertiser-pilot-model]].
+        boost_objective:        c.boost_objective,
+        boost_pacing:           c.boost_pacing,
+        boost_reach:            c.boost_reach,
+        boost_brand_safety:     c.boost_brand_safety,
+        boost_creative_refresh: c.boost_creative_refresh,
+        boost_confidence_floor: c.boost_confidence_floor,
       }, cHistory);
       const priced = benna.scorePrice({
         placement: scorePlacement,
@@ -966,39 +858,39 @@ async function handleGetSponsoredContent(body, args, res) {
   const p = winner.prediction;
   sessionCache.set(sessionId, Date.now());
 
-  // ── Pilot model: creative + spend tracking ───────────────────────
-  // If the winner is a Pilot product boost, hydrate the creative from
-  // the __pilot_creative blob synthesized at the top of the auction.
-  // Also fire a background debit against boost_spent_cents — when the
-  // running spend exceeds boost_lifetime_budget_cents, the next auction
-  // round will see boost_status='depleted' and exclude this candidate.
-  // See [[advertiser-pilot-model]].
-  if (w.__is_pilot_boost === true && w.__pilot_creative) {
-    const pc = w.__pilot_creative;
-    if (pc.headline)  w.headline   = pc.headline;
-    if (pc.body)      w.subtext    = pc.body;
-    if (pc.image_url) w.media_url  = pc.image_url;
-    if (pc.cta_label) w.cta_label  = pc.cta_label;
-    if (pc.cta_url)   w.cta_url    = pc.cta_url;
+  // ── Pilot model: bandit creative pick + spend debit ──────────────
+  // The winning campaign carries creative_headlines/body/cta variant
+  // arrays (migration 31). If any of those arrays are non-empty, we
+  // rotate a variant in via pickCampaignCreative() so Benna's bandit
+  // actually has something to test. Otherwise fall through to the
+  // campaign's single headline/subtext/cta_label fields.
+  if (Array.isArray(w.creative_headlines) && w.creative_headlines.length > 0) {
+    const pickedHead = pickCampaignVariant(w.id, w.creative_headlines, "head", w.boost_creative_refresh);
+    if (pickedHead) w.headline = pickedHead;
+  }
+  if (Array.isArray(w.creative_body_copy) && w.creative_body_copy.length > 0) {
+    const pickedBody = pickCampaignVariant(w.id, w.creative_body_copy, "body", w.boost_creative_refresh);
+    if (pickedBody) w.subtext = pickedBody;
+  }
+  if (Array.isArray(w.creative_cta_labels) && w.creative_cta_labels.length > 0) {
+    const pickedCta = pickCampaignVariant(w.id, w.creative_cta_labels, "cta", w.boost_creative_refresh);
+    if (pickedCta) w.cta_label = pickedCta;
+  }
 
-    // Fire-and-forget debit. effective_price_cpm is dollars per 1000
-    // impressions; we record the cost of THIS single impression
-    // (effective_price_cpm / 1000 dollars = effective_price_cpm × 0.1
-    // cents). Caps are enforced on the next round by the boost_status
-    // filter (depleted excludes the row from the candidate pool).
-    if (sb && w.__pilot_product_id) {
-      const cpm = Number(winner.effective_price_cpm) || (winner.priced && Number(winner.priced.price_cpm)) || 0;
-      const debitCents = Math.max(0, Math.round(cpm * 0.1));  // (cpm / 1000) * 100
-      if (debitCents > 0) {
-        // Use raw SQL for an atomic increment + a conditional flip to
-        // 'depleted' when the new total exceeds the lifetime budget.
-        sb.rpc("increment_boost_spend", {
-          p_product_id: w.__pilot_product_id,
-          p_cents:      debitCents,
-        }).then((r) => { /* best-effort, log on failure */ }, (err) => {
-          console.warn("[pilot] boost_spend debit failed:", err && err.message);
-        });
-      }
+  // Spend debit — campaign won, charge against campaigns.spent_total via
+  // the increment_boost_spend RPC. Auto-deplete on total_budget cap.
+  // effective_price_cpm is USD per 1000 impressions; this impression
+  // costs effective_price_cpm / 1000 USD (so × 100 = cents).
+  if (sb && w.id) {
+    const cpm = Number(winner.effective_price_cpm) || (winner.priced && Number(winner.priced.price_cpm)) || 0;
+    const debitCents = Math.max(0, Math.round(cpm * 0.1));  // (cpm / 1000) × 100
+    if (debitCents > 0) {
+      sb.rpc("increment_boost_spend", {
+        p_campaign_id: w.id,
+        p_cents:       debitCents,
+      }).then(() => {}, (err) => {
+        console.warn("[pilot] boost_spend debit failed:", err && err.message);
+      });
     }
   }
 
@@ -1006,11 +898,11 @@ async function handleGetSponsoredContent(body, args, res) {
   // If the advertiser supplied door-specific copy via the
   // campaign_creatives table (migration 14), prefer that row; otherwise
   // fall back to the campaign's 'default' row; otherwise fall back to
-  // the legacy fields on the campaign itself. We override `w`'s
-  // creative-shaped fields in-place so the rest of the response builder
-  // below doesn't need to know about the table. Pilot boosts skip this
-  // because the campaign_creatives table is keyed on a real campaign id.
-  if (!(w.__is_pilot_boost === true)) {
+  // the legacy fields on the campaign itself (or the variant we just
+  // rotated in above). We override `w`'s creative-shaped fields in-place
+  // so the rest of the response builder doesn't need to know about the
+  // table.
+  {
     const doorForCreative = args._integration_method || "default";
     const creative = await resolveCampaignCreative(w.id, doorForCreative);
     if (creative) {

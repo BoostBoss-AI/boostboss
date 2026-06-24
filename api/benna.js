@@ -282,9 +282,10 @@ function scoreBid(context = {}, campaign = {}, history = null) {
   let bid = +Math.max(0, target * p_convert * explore).toFixed(4);
 
   // ── Pilot model modifiers ─────────────────────────────────────────
-  // See [[advertiser-pilot-model]]. When the candidate is a virtual
-  // campaign synthesized from an active product boost, the five sliders
-  // shift the bid + gate the bid. Real campaigns skip this branch.
+  // See [[advertiser-pilot-model]]. After the 2026-06-24 correction the
+  // Pilot model operates on real campaigns; their boost_* columns
+  // (migration 31) drive the slider math. A campaign with NULL boost
+  // sliders behaves identically to the pre-Pilot path (no modifier).
   //
   //   pacing            → bid multiplier (slow burn ↔ aggressive)
   //   reach             → effective floor on signalScore (low reach = niche)
@@ -294,10 +295,15 @@ function scoreBid(context = {}, campaign = {}, history = null) {
   //                       (acted on outside scoreBid)
   //   confidence_floor  → if signalScore < floor, return zero bid (no fill)
   let pilotEnriched = null;
-  if (campaign.__is_pilot_boost === true) {
-    const pacing = Number(campaign.__pilot_boost_pacing);
-    const reach = Number(campaign.__pilot_boost_reach);
-    const conf  = Number(campaign.__pilot_boost_confidence_floor);
+  const hasPilotFields =
+    campaign.boost_pacing != null
+    || campaign.boost_reach != null
+    || campaign.boost_confidence_floor != null
+    || campaign.boost_objective != null;
+  if (hasPilotFields) {
+    const pacing = Number(campaign.boost_pacing);
+    const reach  = Number(campaign.boost_reach);
+    const conf   = Number(campaign.boost_confidence_floor);
 
     const pacingMul = Number.isFinite(pacing) ? (0.5 + pacing * 1.5) : 1.0; // 0.5x..2.0x
     bid = +Math.max(0, bid * pacingMul).toFixed(4);
@@ -309,18 +315,18 @@ function scoreBid(context = {}, campaign = {}, history = null) {
       bid = 0;
     }
 
-    // Confidence floor: absolute gate. signalScore is the bounded sum of
-    // weighted matches; a low value means "we don't think this is a fit."
-    // Honor the advertiser's stated minimum.
+    // Confidence floor: absolute gate. signalScore is the bounded sum
+    // of weighted matches; a low value means "we don't think this is a
+    // fit." Honor the advertiser's stated minimum.
     const confVal = Number.isFinite(conf) ? conf : 0;
     if (signalScore < confVal * 1.0) {  // floor scales 0..1, signalScore ∈ ~[0,1]
       bid = 0;
     }
 
     pilotEnriched = {
-      product_id: campaign.__pilot_product_id || null,
-      objective:  campaign.__pilot_boost_objective || null,
-      pacing_mul: +pacingMul.toFixed(3),
+      campaign_id: campaign.id || null,
+      objective:   campaign.boost_objective || null,
+      pacing_mul:  +pacingMul.toFixed(3),
       reach_floor: +reachFloor.toFixed(3),
       confidence_floor: confVal,
       signal_score: +signalScore.toFixed(4),
@@ -328,7 +334,7 @@ function scoreBid(context = {}, campaign = {}, history = null) {
     };
 
     contributions.push({
-      signal: `pilot[pacing=${pacing.toFixed(2)},reach=${reach.toFixed(2)},conf=${confVal.toFixed(2)}]`,
+      signal: `pilot[pacing=${(Number.isFinite(pacing)?pacing:0.5).toFixed(2)},reach=${(Number.isFinite(reach)?reach:0.5).toFixed(2)},conf=${confVal.toFixed(2)}]`,
       weight: 0,
       lift:   +((pacingMul - 1) * 100).toFixed(1),
     });
