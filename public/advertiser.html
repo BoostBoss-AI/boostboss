@@ -2596,10 +2596,14 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 21 3 14 12 14 21 10 21 10 12 3 3"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns <span style="font-size:9px;background:#F3F4F6;color:#6B7280;padding:1px 5px;border-radius:3px;margin-left:4px;letter-spacing:0.04em;">ADV</span></span>
             </button>
-            <!-- Products — parent entity above campaigns. See [[products-as-parent]]. -->
-            <button class="shell-nav-item" data-shell-section="products">
+            <!-- Affiliate sidebar nav — hidden by default 2026-06-24. The
+                 Affiliate marketplace catalog now lives inside Boost Ads
+                 as a sub-tab between Campaigns and Creatives. Toggle on
+                 via Setup → Advanced mode if you need direct access to
+                 the standalone /#/products route. -->
+            <button class="shell-nav-item shell-nav-item--advanced" data-shell-section="products" data-advanced-only="1" style="display:none;">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.products">Affiliate</span>
+              <span class="shell-nav-item__label" data-t="shell.nav.products">Affiliate <span style="font-size:9px;background:#F3F4F6;color:#6B7280;padding:1px 5px;border-radius:3px;margin-left:4px;letter-spacing:0.04em;">ADV</span></span>
             </button>
             <button class="shell-nav-item" data-shell-section="performance">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
@@ -3261,6 +3265,16 @@
                     border-bottom:2px solid transparent; margin-bottom:-1px;
                     color:#6B7280;
                   ">Campaigns</button>
+                  <!-- Affiliate sub-tab — same reparenting pattern as
+                       Campaigns. Embeds the Affiliate marketplace catalog
+                       (the legacy /#/products route) inside Boost Ads
+                       between Campaigns and Creatives. Per Andy 2026-06-24. -->
+                  <button type="button" class="pilot-tab" data-pilot-tab="affiliate" style="
+                    background:none; border:none; padding:12px 18px;
+                    font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+                    border-bottom:2px solid transparent; margin-bottom:-1px;
+                    color:#6B7280;
+                  ">Affiliate</button>
                   <button type="button" class="pilot-tab" data-pilot-tab="creatives" style="
                     background:none; border:none; padding:12px 18px;
                     font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
@@ -3485,6 +3499,12 @@
                    the same DOM means no duplicated handlers or markup. -->
               <div id="pilotCampaignsPane" style="display:none;" data-pilot-pane="campaigns"></div>
 
+              <!-- ───────────────── AFFILIATE PANE ─────────────────
+                   Same reparenting pattern. The data-shell-route="products"
+                   element (the Affiliate marketplace catalog) gets moved in
+                   when this sub-tab activates, reverts on deactivation. -->
+              <div id="pilotAffiliatePane" style="display:none;" data-pilot-pane="affiliate"></div>
+
               <!-- ───────────────── CREATIVES PANE ─────────────────
                    Company identity + creative library for the active
                    product. Saves write back to the product row. See
@@ -3665,7 +3685,7 @@
 
             </div><!-- /[data-shell-route="pilot"] -->
 
-            <div data-shell-route="products">
+            <div data-shell-route="products" id="legacyAffiliateRoute">
               <div class="shell-page-head">
                 <div>
                   <h1 class="shell-page-title" data-t="page.products.title">Affiliate</h1>
@@ -6408,9 +6428,11 @@
                 document.querySelectorAll('[data-advanced-only="1"]').forEach((el) => {
                     el.style.display = on ? '' : 'none';
                 });
-                // If the user is currently sitting on the Campaigns route
-                // but Advanced is off, bounce them to Pilot.
-                if (!on && routeFromHash() === 'campaigns') {
+                // If the user is sitting on a route now hidden behind
+                // Advanced (Campaigns or the standalone Affiliate/products
+                // route), bounce them to Boost Ads (#/pilot). Both routes
+                // are embedded as sub-tabs there.
+                if (!on && (routeFromHash() === 'campaigns' || routeFromHash() === 'products')) {
                     window.location.hash = '#/pilot';
                 }
             }
@@ -16294,38 +16316,48 @@ function pfParseScreenshots(text) {
             // spend allocation) and Creatives (company identity + variant
             // library). Product picker sits above both and is shared.
             // See [[advertiser-pilot-model]].
-            // Track the campaigns element's original parent so we can move
-            // it back when leaving the Campaigns sub-tab or navigating
-            // away from /pilot entirely.
-            let pilotCampaignsOriginalParent = null;
-            let pilotCampaignsOriginalNextSibling = null;
+            // Track each embedded route's original DOM position so we can
+            // put it back when the sub-tab deactivates or the user leaves
+            // /pilot entirely. Generalised over the two embedded routes
+            // (Campaigns + Affiliate) — same shape, just different ids.
+            const pilotEmbedded = {
+                campaigns: { routeId: 'legacyCampaignsRoute', paneId: 'pilotCampaignsPane', origParent: null, origNextSibling: null },
+                affiliate: { routeId: 'legacyAffiliateRoute', paneId: 'pilotAffiliatePane',  origParent: null, origNextSibling: null },
+            };
 
-            function pilotMoveCampaignsIntoPane() {
-                const route = document.getElementById('legacyCampaignsRoute');
-                const pane = document.getElementById('pilotCampaignsPane');
+            function pilotMoveRouteIntoPane(key) {
+                const cfg = pilotEmbedded[key];
+                if (!cfg) return;
+                const route = document.getElementById(cfg.routeId);
+                const pane = document.getElementById(cfg.paneId);
                 if (!route || !pane) return;
                 if (route.parentElement === pane) return;  // already there
-                // Remember where it was so we can put it back.
-                pilotCampaignsOriginalParent = route.parentElement;
-                pilotCampaignsOriginalNextSibling = route.nextSibling;
+                cfg.origParent = route.parentElement;
+                cfg.origNextSibling = route.nextSibling;
                 pane.appendChild(route);
-                // Override the data-shell-route CSS hiding rule by inlining display.
+                // Override the data-shell-route CSS hiding rule via inline display.
                 route.style.display = 'block';
             }
 
-            function pilotRevertCampaignsFromPane() {
-                const route = document.getElementById('legacyCampaignsRoute');
-                if (!route || !pilotCampaignsOriginalParent) return;
-                if (route.parentElement === pilotCampaignsOriginalParent) {
+            function pilotRevertRouteFromPane(key) {
+                const cfg = pilotEmbedded[key];
+                if (!cfg) return;
+                const route = document.getElementById(cfg.routeId);
+                if (!route || !cfg.origParent) return;
+                if (route.parentElement === cfg.origParent) {
                     route.style.display = '';
                     return;
                 }
-                pilotCampaignsOriginalParent.insertBefore(route, pilotCampaignsOriginalNextSibling);
-                route.style.display = '';  // hand visibility back to CSS
+                cfg.origParent.insertBefore(route, cfg.origNextSibling);
+                route.style.display = '';
             }
 
+            // Back-compat aliases — older code paths called these explicitly.
+            function pilotMoveCampaignsIntoPane()   { pilotMoveRouteIntoPane('campaigns'); }
+            function pilotRevertCampaignsFromPane() { pilotRevertRouteFromPane('campaigns'); }
+
             function pilotSwitchInternalTab(which) {
-                const valid = (which === 'creatives' || which === 'campaigns') ? which : 'boost';
+                const valid = (which === 'creatives' || which === 'campaigns' || which === 'affiliate') ? which : 'boost';
                 pilotCurrentInternalTab = valid;
                 document.querySelectorAll('.pilot-tab').forEach((btn) => {
                     const active = btn.getAttribute('data-pilot-tab') === pilotCurrentInternalTab;
@@ -16339,12 +16371,17 @@ function pfParseScreenshots(text) {
                 if (pilotCurrentInternalTab === 'creatives') {
                     pilotLoadCreativesPane();
                 }
-                // Campaigns sub-tab — reparent the legacy campaigns route
-                // element into our empty pane on entry, revert on exit.
+                // Reparent embedded routes into their panes on entry,
+                // revert when leaving. Only ONE can be embedded at a time.
                 if (pilotCurrentInternalTab === 'campaigns') {
-                    pilotMoveCampaignsIntoPane();
+                    pilotMoveRouteIntoPane('campaigns');
+                    pilotRevertRouteFromPane('affiliate');
+                } else if (pilotCurrentInternalTab === 'affiliate') {
+                    pilotMoveRouteIntoPane('affiliate');
+                    pilotRevertRouteFromPane('campaigns');
                 } else {
-                    pilotRevertCampaignsFromPane();
+                    pilotRevertRouteFromPane('campaigns');
+                    pilotRevertRouteFromPane('affiliate');
                 }
             }
             window.pilotSwitchInternalTab = pilotSwitchInternalTab;
@@ -17011,14 +17048,19 @@ function pfParseScreenshots(text) {
             }
 
             window.addEventListener('hashchange', maybeLoadPilot);
-            // Safety net: when leaving the /pilot route entirely while the
-            // Campaigns sub-tab was active, revert the legacy campaigns
-            // route element back to its original location so /#/campaigns
-            // still renders correctly.
+            // Safety net: when leaving /pilot entirely while a route was
+            // embedded in a sub-tab, revert it back to its original
+            // location so the standalone routes (/#/campaigns, /#/products)
+            // still render correctly.
             window.addEventListener('hashchange', () => {
-                if (activeRoute() !== 'pilot' && pilotCurrentInternalTab === 'campaigns') {
-                    pilotRevertCampaignsFromPane();
-                    pilotCurrentInternalTab = 'boost';
+                if (activeRoute() !== 'pilot') {
+                    if (pilotCurrentInternalTab === 'campaigns') {
+                        pilotRevertRouteFromPane('campaigns');
+                        pilotCurrentInternalTab = 'boost';
+                    } else if (pilotCurrentInternalTab === 'affiliate') {
+                        pilotRevertRouteFromPane('affiliate');
+                        pilotCurrentInternalTab = 'boost';
+                    }
                 }
             });
             // Wait for auth then fire initial load
