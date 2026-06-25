@@ -16799,7 +16799,12 @@ function pfParseScreenshots(text) {
                     document.querySelectorAll('.pilot-affiliate-row').forEach((r) => { r.style.display = 'none'; });
                 } else {
                     if (emptyEl) emptyEl.style.display = 'none';
-                    document.querySelectorAll('.pilot-affiliate-row').forEach((r) => { r.style.display = ''; });
+                    // Restore the static "None" row's flex layout. Setting
+                    // style.display='' would WIPE the inline display:flex
+                    // and let <label> fall back to display:inline, which
+                    // collapses the radio+text+border layout. Must set
+                    // 'flex' explicitly.
+                    document.querySelectorAll('.pilot-affiliate-row').forEach((r) => { r.style.display = 'flex'; });
                     if (listEl) {
                         listEl.innerHTML = pilotAffiliateProducts.map((p) => {
                             const name = (p.name || '(untitled product)').replace(/[<>]/g, '');
