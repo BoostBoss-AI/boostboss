@@ -507,7 +507,8 @@
 .shell-wrap[data-shell-active-route="product-orders"]  [data-shell-route="product-orders"],
 .shell-wrap[data-shell-active-route="billing"]         [data-shell-route="billing"],
 .shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],
-.shell-wrap[data-shell-active-route="setup"]           [data-shell-route="setup"],
+/* setup route retired 2026-06-25 — pixel moved into Settings,
+   Automated Rules deleted, Advanced mode deleted. */
 .shell-wrap[data-shell-active-route="integrations"]    [data-shell-route="integrations"],
 .shell-wrap[data-shell-active-route="placements"]      [data-shell-route="placements"],
 .shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],

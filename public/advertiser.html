@@ -2589,21 +2589,16 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.pilot">Boost Ads</span>
             </button>
-            <!-- Legacy Campaigns nav — hidden by default. Toggle on via the
-                 "Advanced" switch in Setup. Persisted in localStorage as
-                 bb_advanced_mode. See [[advertiser-pilot-model]]. -->
-            <button class="shell-nav-item shell-nav-item--advanced" data-shell-section="campaigns" data-advanced-only="1" style="display:none;">
+            <!-- Campaigns + Affiliate are always visible 2026-06-25.
+                 Advanced mode toggle deleted — these were hidden behind
+                 bb_advanced_mode, but per Andy they should always appear. -->
+            <button class="shell-nav-item" data-shell-section="campaigns">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 21 3 14 12 14 21 10 21 10 12 3 3"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns <span style="font-size:9px;background:#F3F4F6;color:#6B7280;padding:1px 5px;border-radius:3px;margin-left:4px;letter-spacing:0.04em;">ADV</span></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.campaigns">Campaigns</span>
             </button>
-            <!-- Affiliate sidebar nav — hidden by default 2026-06-24. The
-                 Affiliate marketplace catalog now lives inside Boost Ads
-                 as a sub-tab between Campaigns and Creatives. Toggle on
-                 via Setup → Advanced mode if you need direct access to
-                 the standalone /#/products route. -->
-            <button class="shell-nav-item shell-nav-item--advanced" data-shell-section="products" data-advanced-only="1" style="display:none;">
+            <button class="shell-nav-item" data-shell-section="products">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.products">Affiliate <span style="font-size:9px;background:#F3F4F6;color:#6B7280;padding:1px 5px;border-radius:3px;margin-left:4px;letter-spacing:0.04em;">ADV</span></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.products">Affiliate</span>
             </button>
             <button class="shell-nav-item" data-shell-section="performance">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
@@ -2621,10 +2616,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.promote">Promote</span>
             </button>
-            <button class="shell-nav-item" data-shell-section="setup">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.setup">Setup</span>
-            </button>
+            <!-- Setup nav removed 2026-06-25. Pixel snippet moved to
+                 Settings → Conversion tracking. Automated Rules deleted
+                 (was localStorage-only, no backend processor). Advanced
+                 mode toggle deleted (Campaigns + Affiliate always visible). -->
             <button class="shell-nav-item" data-shell-section="settings">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.settings">Settings</span>
@@ -4134,200 +4129,16 @@
 
             </div><!-- /[data-shell-route="promote"] -->
 
-            <!-- ═══════ ROUTE: setup ═══════ -->
-            <div data-shell-route="setup">
+            <!-- ROUTE: setup — RETIRED 2026-06-25.
+                 Pixel snippet moved into Settings (Conversion tracking tab).
+                 Automated Rules deleted entirely (was localStorage-only with
+                 no backend processor). Advanced mode deleted (Campaigns +
+                 Affiliate are always visible in the sidebar now). -->
 
-            <!-- Route page header — replaces .setup-group-header which
-                 was removed below. -->
-            <div class="shell-page-head">
-                <div>
-                    <h1 class="shell-page-title" data-t="chrome.setup">Setup</h1>
-                    <div class="shell-page-sub" data-t="setup.sub">One-time configuration · pixel and rules</div>
-                </div>
-            </div>
-
-            <!-- SETUP GROUP — Conversion Pixel + Automated Rules.
-                 Both are one-time configuration tasks. .setup-group-header
-                 removed in Phase 3 — heading is now in the route page-head
-                 above. -->
-            <section class="setup-group" aria-label="Setup">
-                <div class="setup-group-grid">
-                    <!-- Conversion Tracking column -->
-                    <div class="setup-card" id="pixelSection">
-                        <div class="setup-card-header">
-                            <div class="setup-card-title" data-t="setup.conv_title">Conversion tracking</div>
-                            <span class="setup-card-pill" id="pixelStatus" data-t="setup.conv_not_detected">Not detected yet</span>
-                        </div>
-                        <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
-                            <span data-t="setup.conv_desc_a">Track conversions on your site to unlock Benna's CPA and ROAS optimization. Add this snippet before the closing</span> <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> <span data-t="setup.conv_desc_b">tag on your conversion page.</span>
-                        </p>
-                        <div style="
-                            background: #0A0A14; border-radius: 10px; padding: 14px; position: relative;
-                            font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px;
-                            color: #B0B0C7; line-height: 1.55; overflow-x: auto;
-                        ">
-                            <button id="copyPixelBtn" style="
-                                position: absolute; top: 8px; right: 8px;
-                                background: rgba(255,255,255,0.1); border: none;
-                                padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
-                                font-size: 11px; cursor: pointer; font-family: inherit;
-                            " data-t="common.copy">Copy</button>
-                            <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script async src="https://boostboss.ai/pixel.js"
-  data-advertiser-id="<span id="pixelAdvId" style="color: #FF2D78;">YOUR_ADVERTISER_ID</span>"&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.bbq = window.bbq || [];
-  bbq.push(['track', 'signup', { value: 29.99, currency: 'USD' }]);
-&lt;/script&gt;</pre>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
-                            <span data-t="setup.test_end_to_end">Test end-to-end:</span> <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
-                        </div>
-                    </div>
-
-                    <!-- Automated Rules column -->
-                    <div class="setup-card">
-                        <div class="setup-card-header">
-                            <div class="setup-card-title" data-t="setup.rules_title">Automated rules</div>
-                            <button id="addRuleBtn" style="
-                                padding: 6px 12px; background: var(--accent-primary); color: #fff;
-                                border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
-                                cursor: pointer; font-family: inherit;
-                            " data-t="setup.add_rule">+ Add rule</button>
-                        </div>
-                        <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;" data-t="setup.rules_desc">
-                            Trigger actions automatically when performance crosses thresholds — pause campaigns, shift budget, raise bids on winning audiences.
-                        </p>
-                        <div id="rulesContainer">
-                            <div id="rulesEmpty" style="
-                                text-align: center; padding: 28px 16px; color: #9CA3AF;
-                                background: #FAFAFA; border-radius: 10px; border: 1px dashed #E5E7EB;
-                            ">
-                                <div style="font-size: 28px; margin-bottom: 6px;">🤖</div>
-                                <div style="font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 4px;" data-t="setup.no_rules">No rules yet</div>
-                                <div style="font-size: 12px;" data-t="setup.no_rules_sub">Automate campaign actions based on performance</div>
-                            </div>
-                            <div id="rulesList"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ── Advanced mode (legacy Campaigns access) ─────────────
-                 See [[advertiser-pilot-model]]. Pilot Console is the
-                 default workflow; the Campaigns nav stays hidden until
-                 the advertiser flips this toggle. Persisted in
-                 localStorage (bb_advanced_mode), no server round-trip. -->
-            <section style="
-                background: #fff; border: 1px solid #E5E7EB; border-radius: 14px;
-                padding: 24px; margin-top: 20px;
-            ">
-                <h2 style="font-size: 16px; font-weight: 700; color: #0F0F1A; margin: 0 0 4px;" data-t="setup.advanced.title">Advanced mode</h2>
-                <p style="font-size: 12px; color: #6B7280; margin: 0 0 16px;" data-t="setup.advanced.sub">Boost Ads replaced the campaign-builder UI. Turn this on if you need direct access to the legacy Campaigns table for edits, comparisons, or CSV export.</p>
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" id="advancedModeToggle" style="
-                        width: 18px; height: 18px; accent-color: #FF2D78; cursor: pointer;
-                    ">
-                    <span style="font-size: 13px; font-weight: 600; color: #374151;" data-t="setup.advanced.toggle">Show Campaigns in sidebar</span>
-                </label>
-                <script>
-                    (function () {
-                        const cb = document.getElementById('advancedModeToggle');
-                        if (!cb) return;
-                        cb.checked = localStorage.getItem('bb_advanced_mode') === '1';
-                        cb.addEventListener('change', () => {
-                            localStorage.setItem('bb_advanced_mode', cb.checked ? '1' : '0');
-                            if (typeof window.applyAdvancedMode === 'function') {
-                                window.applyAdvancedMode();
-                            }
-                        });
-                    })();
-                </script>
-            </section>
-
-            </div><!-- /[data-shell-route="setup"] -->
-
-            <!-- Add Rule Modal — z-index must exceed the sticky <header>
-                 (1000) so the modal doesn't sit behind the top nav.
-                 Kept OUTSIDE any [data-shell-route] wrapper so it can
-                 open from any route (triggered from setup but also
-                 referenced from other contexts). -->
-            <div id="ruleModal" style="
-                display: none; position: fixed; inset: 0; z-index: 9999;
-                background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
-            ">
-                <div style="
-                    background: #fff; border-radius: 16px; width: 480px; max-width: 90vw;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.2); padding: 28px;
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="font-size: 20px; font-weight: 700;" data-t="rule.title">Create Rule</h2>
-                        <button id="ruleCloseBtn" style="
-                            background: #F3F4F6; border: none; width: 32px; height: 32px;
-                            border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
-                        ">×</button>
-                    </div>
-                    <div style="margin-bottom: 14px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.name">Rule Name</label>
-                        <input type="text" id="ruleName" placeholder="e.g., Pause low CTR campaigns" data-t-placeholder="rule.name_ph" style="
-                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
-                            border-radius: 8px; font-size: 14px; font-family: inherit;
-                        ">
-                    </div>
-                    <div style="margin-bottom: 14px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.when">When</label>
-                        <div style="display: flex; gap: 8px;">
-                            <select id="ruleMetric" style="
-                                flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
-                                border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
-                            ">
-                                <option value="ctr" data-t="rule.metric_ctr">CTR</option>
-                                <option value="spend" data-t="rule.metric_spend">Total Spend</option>
-                                <option value="daily_spend" data-t="rule.metric_daily">Daily Spend</option>
-                                <option value="impressions" data-t="rule.metric_imp">Impressions</option>
-                                <option value="cpa" data-t="rule.metric_cpa">CPA</option>
-                            </select>
-                            <select id="ruleOp" style="
-                                width: 80px; padding: 10px; border: 1px solid #E5E7EB;
-                                border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
-                            ">
-                                <option value="gt" data-t="rule.op_gt">above</option>
-                                <option value="lt" data-t="rule.op_lt">below</option>
-                                <option value="eq" data-t="rule.op_eq">equals</option>
-                            </select>
-                            <input type="number" id="ruleValue" placeholder="0.5" step="0.01" style="
-                                width: 100px; padding: 10px 14px; border: 1px solid #E5E7EB;
-                                border-radius: 8px; font-size: 13px; font-family: inherit;
-                            ">
-                        </div>
-                    </div>
-                    <div style="margin-bottom: 14px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.then">Then</label>
-                        <select id="ruleAction" style="
-                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
-                            border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
-                        ">
-                            <option value="pause" data-t="rule.act_pause">Pause the campaign</option>
-                            <option value="notify" data-t="rule.act_notify">Send me an email alert</option>
-                            <option value="increase_bid" data-t="rule.act_inc">Increase bid by 10%</option>
-                            <option value="decrease_bid" data-t="rule.act_dec">Decrease bid by 10%</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="rule.apply_to">Apply to</label>
-                        <select id="ruleCampaign" style="
-                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
-                            border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
-                        ">
-                            <option value="all" data-t="rule.all_live">All live campaigns</option>
-                        </select>
-                    </div>
-                    <button id="ruleSaveBtn" style="
-                        width: 100%; padding: 12px; background: var(--accent-primary); color: #fff;
-                        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
-                        cursor: pointer; font-family: inherit;
-                    " data-t="rule.create">Create Rule</button>
-                </div>
-            </div>
+            <!-- Add Rule Modal retired 2026-06-25 alongside Automated Rules.
+                 The whole feature was localStorage-only (no backend processor),
+                 so a rule did nothing. Pilot/Boost Ads + Benna handle pacing,
+                 reach gates, and budget reallocation autonomously. -->
 
             <!-- Compare Modal — z-index must exceed the sticky <header>
                  (1000) so the modal doesn't sit behind the top nav. -->
@@ -6453,7 +6264,8 @@
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
             // 'billing' removed 2026-06-24 — merged into Settings → Billing & funds.
-            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'payouts', 'promote', 'setup'];
+            // 'setup' removed 2026-06-25 — see the sidebar nav comment.
+            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'payouts', 'promote'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -6525,28 +6337,11 @@
             // Initial route — paint on load before user clicks anything
             applyRoute(routeFromHash());
 
-            // ── Advanced mode toggle ───────────────────────────────────
-            // Controls visibility of the legacy Campaigns nav item. The
-            // Pilot Console is the default-on workflow per [[advertiser-pilot-model]];
-            // Campaigns nav is hidden until the advertiser opts into
-            // Advanced mode in Setup. Persists across sessions in
-            // localStorage. Exposed as window.applyAdvancedMode so the
-            // Setup tab's toggle handler can call it on change.
-            function applyAdvancedMode() {
-                const on = localStorage.getItem('bb_advanced_mode') === '1';
-                document.querySelectorAll('[data-advanced-only="1"]').forEach((el) => {
-                    el.style.display = on ? '' : 'none';
-                });
-                // If the user is sitting on a route now hidden behind
-                // Advanced (Campaigns or the standalone Affiliate/products
-                // route), bounce them to Boost Ads (#/pilot). Both routes
-                // are embedded as sub-tabs there.
-                if (!on && (routeFromHash() === 'campaigns' || routeFromHash() === 'products')) {
-                    window.location.hash = '#/pilot';
-                }
-            }
-            window.applyAdvancedMode = applyAdvancedMode;
-            applyAdvancedMode();
+            // Advanced mode retired 2026-06-25 — Campaigns + Affiliate
+            // are always visible now. Kept window.applyAdvancedMode as a
+            // no-op for back-compat with any cached page/code paths that
+            // still reference it (e.g. older deferred scripts).
+            window.applyAdvancedMode = function () { /* no-op */ };
 
             function syncAvatar() {
                 const avatar = document.getElementById('shellUserAvatar');
@@ -9738,22 +9533,13 @@
         }
 
         // ───────────── PIXEL SNIPPET ─────────────
-        document.getElementById('copyPixelBtn').addEventListener('click', () => {
-            const code = document.getElementById('pixelCode').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                showToast('Pixel code copied!', 'success');
-                document.getElementById('copyPixelBtn').textContent = 'Copied!';
-                setTimeout(() => document.getElementById('copyPixelBtn').textContent = 'Copy', 2000);
-            });
-        });
-
-        // Set advertiser ID in pixel snippet
-        function updatePixelSnippet() {
-            const el = document.getElementById('pixelAdvId');
-            if (el && currentUserData?.user_id) {
-                el.textContent = currentUserData.user_id;
-            }
-        }
+        // Standalone /setup route retired 2026-06-25; the snippet now lives
+        // inside Settings → Conversion tracking, where sectionPixel() bakes
+        // the current advertiser ID into a fresh snippet on each modal open.
+        // The copy handler is wired in renderBody() (#aSetPixelCopy).
+        // updatePixelSnippet stays as a no-op so the loadStats hook below
+        // does not throw when it calls into a now-irrelevant function.
+        function updatePixelSnippet() { /* no-op — snippet rendered in Settings */ }
 
         // ───────────── PATCH loadStats to also refresh pixel snippet ─────────────
         // loadBillingHistory() removed from this hook 2026-06-24 — the
@@ -9876,107 +9662,9 @@
             variantContainer.appendChild(div);
         });
 
-        // ───────────── AUTOMATED RULES ─────────────
-        let savedRules = JSON.parse(localStorage.getItem('bb_rules') || '[]');
-        const ruleModal = document.getElementById('ruleModal');
-
-        function renderRules() {
-            const list = document.getElementById('rulesList');
-            const empty = document.getElementById('rulesEmpty');
-            if (savedRules.length === 0) {
-                empty.style.display = 'block';
-                list.innerHTML = '';
-                return;
-            }
-            empty.style.display = 'none';
-            const opLabels = { gt: 'above', lt: 'below', eq: 'equals' };
-            const actionLabels = { pause: 'Pause campaign', notify: 'Email alert', increase_bid: 'Increase bid 10%', decrease_bid: 'Decrease bid 10%' };
-            list.innerHTML = savedRules.map((r, i) => `
-                <div style="
-                    display: flex; align-items: center; justify-content: space-between;
-                    padding: 14px 18px; border-bottom: 1px solid #F3F4F6;
-                ">
-                    <div style="flex: 1;">
-                        <div style="font-size: 14px; font-weight: 600; color: #111; margin-bottom: 4px;">${escapeHtml(r.name)}</div>
-                        <div style="font-size: 12px; color: #6B7280;">
-                            When <strong>${r.metric}</strong> is ${opLabels[r.op] || r.op} <strong>${r.value}</strong>
-                            → <span style="color: var(--accent-primary);">${actionLabels[r.action] || r.action}</span>
-                            · Applies to: ${r.campaign === 'all' ? 'All live campaigns' : r.campaign}
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                        <label style="position: relative; display: inline-block; width: 36px; height: 20px;">
-                            <input type="checkbox" ${r.enabled ? 'checked' : ''} data-rule-idx="${i}" class="rule-toggle" style="opacity: 0; width: 0; height: 0;">
-                            <span style="
-                                position: absolute; cursor: pointer; inset: 0;
-                                background: ${r.enabled ? '#FF2D78' : '#D1D5DB'};
-                                border-radius: 100px; transition: 0.2s;
-                            "></span>
-                            <span style="
-                                position: absolute; top: 2px; left: ${r.enabled ? '18px' : '2px'}; width: 16px; height: 16px;
-                                background: #fff; border-radius: 50%; transition: 0.2s;
-                                box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-                            "></span>
-                        </label>
-                        <button onclick="deleteRule(${i})" style="
-                            background: none; border: none; color: #9CA3AF; cursor: pointer;
-                            font-size: 16px; padding: 4px;
-                        " title="Delete rule">×</button>
-                    </div>
-                </div>
-            `).join('');
-
-            // Wire toggle switches
-            list.querySelectorAll('.rule-toggle').forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const idx = parseInt(this.dataset.ruleIdx);
-                    savedRules[idx].enabled = this.checked;
-                    localStorage.setItem('bb_rules', JSON.stringify(savedRules));
-                    renderRules();
-                });
-            });
-        }
-
-        function deleteRule(idx) {
-            savedRules.splice(idx, 1);
-            localStorage.setItem('bb_rules', JSON.stringify(savedRules));
-            renderRules();
-            showToast('Rule deleted', 'info');
-        }
-
-        document.getElementById('addRuleBtn').addEventListener('click', () => {
-            // Populate campaign dropdown
-            const sel = document.getElementById('ruleCampaign');
-            sel.innerHTML = '<option value="all">All live campaigns</option>';
-            _cachedCampaigns.forEach(c => {
-                sel.innerHTML += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
-            });
-            ruleModal.style.display = 'flex';
-        });
-        document.getElementById('ruleCloseBtn').addEventListener('click', () => ruleModal.style.display = 'none');
-        ruleModal.addEventListener('click', (e) => { if (e.target === ruleModal) ruleModal.style.display = 'none'; });
-
-        document.getElementById('ruleSaveBtn').addEventListener('click', () => {
-            const name = document.getElementById('ruleName').value.trim();
-            if (!name) { showToast('Rule name is required', 'error'); return; }
-            const rule = {
-                name,
-                metric: document.getElementById('ruleMetric').value,
-                op: document.getElementById('ruleOp').value,
-                value: document.getElementById('ruleValue').value,
-                action: document.getElementById('ruleAction').value,
-                campaign: document.getElementById('ruleCampaign').value,
-                enabled: true,
-                created: new Date().toISOString(),
-            };
-            savedRules.push(rule);
-            localStorage.setItem('bb_rules', JSON.stringify(savedRules));
-            ruleModal.style.display = 'none';
-            renderRules();
-            showToast(`Rule "${name}" created`, 'success');
-        });
-
-        renderRules();
+        // AUTOMATED RULES retired 2026-06-25. Was localStorage-only with no
+        // backend processor — rules persisted but nothing read them. Pilot
+        // sliders + Benna handle pacing/reach/budget reallocation autonomously.
 
         // ───────────── NOTIFICATIONS ─────────────
         const notifBtn = document.getElementById('notifBtn');
@@ -10128,10 +9816,14 @@
                 settingsModal.querySelector('#aSetSave').addEventListener('click', handleSave);
             }
             // Sections list is a function so labels re-render when language changes.
+            // 'pixel' added 2026-06-25 with the Setup-route retirement — the
+            // conversion-tracking snippet moved into Settings since its own
+            // standalone page was overkill.
             function sectionList() {
                 return [
                     { key: 'account',  label: t('nav.account') },
                     { key: 'billing',  label: t('nav.billing') },
+                    { key: 'pixel',    label: t('nav.pixel') },
                     { key: 'api',      label: t('nav.api') },
                     { key: 'notifs',   label: t('nav.notifs') },
                     { key: 'language', label: t('nav.language') },
@@ -10219,6 +9911,11 @@
                     'modal.title': 'Settings',  'modal.close': 'Close',  'modal.save': 'Save changes',
                     'nav.account': 'Account',  'nav.billing': 'Billing & funds',  'nav.api': 'API access',
                     'nav.notifs': 'Notifications',  'nav.language': 'Language',  'nav.security': 'Security',
+                    // 'pixel' added 2026-06-25 with the Setup-route retirement.
+                    'nav.pixel': 'Conversion tracking',
+                    'pixel.desc': "Paste this snippet before the closing head tag on your conversion page (signup confirmation, purchase complete, etc.). It tells Boost Boss when a visitor actually converted, which unlocks Benna's CPA + ROAS optimization and closes the affiliate commission attribution chain.",
+                    'pixel.test_link_label': 'Test end-to-end:',
+                    'pixel.hint': "Snippet uses your advertiser ID. If conversions are not firing, open your conversion page and check that pixel.js loaded — the Network tab should show a POST to /api/track.",
                     'common.copy': 'Copy',  'common.show': 'Show',  'common.hide': 'Hide',  'common.saved': '✓ Saved',
                     'account.company': 'Company name',
                     'account.company_hint': 'Shown on your campaigns and billing receipts.',
@@ -12973,6 +12670,42 @@
                     </div>`;
             }
 
+            // Conversion tracking pixel — relocated from /setup 2026-06-25.
+            //
+            // CRITICAL: never write the literal 7-char sequence
+            // [less-than][slash]script[greater-than] anywhere in this source
+            // file, in any context (string, template, JS comment, HTML
+            // comment). The HTML parser scans for that exact sequence and
+            // terminates the parent script tag if it sees it — that wrecks
+            // the rest of the dashboard. We build the snippet by concatenating
+            // pieces so the token never appears in source. The browser still
+            // renders it correctly in the pre tag at runtime.
+            function sectionPixel() {
+                const d = u();
+                const advId = esc(d.user_id || 'YOUR_ADVERTISER_ID');
+                const CLOSE = '</scr' + 'ipt>';
+                const OPEN_A = '<scr' + 'ipt async src="https://boostboss.ai/pixel.js"\n  data-advertiser-id="';
+                const OPEN_B = '<scr' + 'ipt>';
+                const snippet =
+                    OPEN_A + advId + '">' + CLOSE + '\n' +
+                    OPEN_B + '\n' +
+                    '  window.bbq = window.bbq || [];\n' +
+                    "  bbq.push(['track', 'signup', { value: 29.99, currency: 'USD' }]);\n" +
+                    CLOSE;
+                return `
+                    <div style="font-size:12.5px;color:#6B7280;margin-bottom:14px;line-height:1.55;">
+                        ${esc(t('pixel.desc'))}
+                    </div>
+                    <div style="background:#0A0A14;border-radius:10px;padding:14px;position:relative;font-family:'SFMono-Regular',Consolas,monospace;font-size:12px;color:#B0B0C7;line-height:1.55;overflow-x:auto;">
+                        <button id="aSetPixelCopy" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.1);border:none;padding:4px 10px;border-radius:6px;color:#B0B0C7;font-size:11px;cursor:pointer;font-family:inherit;">${esc(t('common.copy'))}</button>
+                        <pre id="aSetPixelCode" style="margin:0;white-space:pre-wrap;color:#B0B0C7;">${esc(snippet)}</pre>
+                    </div>
+                    <div style="margin-top:10px;font-size:12px;color:#6B7280;">
+                        ${esc(t('pixel.test_link_label'))} <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
+                    </div>
+                    <div style="${HINT}">${esc(t('pixel.hint'))}</div>`;
+            }
+
             function sectionNotifs() {
                 const n = getNotifPrefs();
                 const toggle = (key, title, desc) => `
@@ -13182,7 +12915,15 @@
 
             function renderBody() {
                 const body = settingsModal.querySelector('#aSetBody');
-                const map = { account: sectionAccount, billing: sectionBilling, api: sectionApi, notifs: sectionNotifs, language: sectionLanguage, security: sectionSecurity };
+                const map = {
+                    account:  sectionAccount,
+                    billing:  sectionBilling,
+                    pixel:    sectionPixel,
+                    api:      sectionApi,
+                    notifs:   sectionNotifs,
+                    language: sectionLanguage,
+                    security: sectionSecurity,
+                };
                 body.innerHTML = (map[activeSection] || sectionAccount)();
                 // Language picker — saves to bb_dashboard_lang and
                 // immediately re-renders the modal in the chosen language,
@@ -13260,6 +13001,18 @@
                         const prefs = getNotifPrefs();
                         prefs[cb.dataset.notif] = cb.checked;
                         saveNotifPrefs(prefs);
+                    });
+                });
+
+                // Pixel section — copy-to-clipboard for the snippet pre block.
+                const pixelCopy = settingsModal.querySelector('#aSetPixelCopy');
+                if (pixelCopy) pixelCopy.addEventListener('click', () => {
+                    const code = (settingsModal.querySelector('#aSetPixelCode') || {}).textContent || '';
+                    if (!code) return;
+                    navigator.clipboard.writeText(code).then(() => {
+                        const original = pixelCopy.textContent;
+                        pixelCopy.textContent = '✓ Copied';
+                        setTimeout(() => { pixelCopy.textContent = original; }, 1800);
                     });
                 });
                 // Security — change password.
@@ -13411,14 +13164,22 @@
                 }
             }
 
-            function openModal() {
-                activeSection = 'account';
+            // initialSection optional — when a known section key is passed
+            // the modal opens directly on that tab. Used by the help-panel
+            // 'Pixel Setup' link, by the deposit-promote flow's billing jump,
+            // and by any cross-module caller that wants to deep-link into a
+            // Settings sub-tab without a hash route.
+            function openModal(initialSection) {
+                const valid = sectionList().some((s) => s.key === initialSection);
+                activeSection = valid ? initialSection : 'account';
                 renderModalChrome();   // builds innerHTML + wires close/cancel/save buttons
                 renderNav();
                 renderBody();
                 settingsModal.style.display = 'flex';
             }
             function closeModal() { settingsModal.style.display = 'none'; }
+            // Exposed for cross-module callers — 'pixel' / 'billing' / etc.
+            window.openSettingsModal = openModal;
             function handleSave() {
                 const companyInput = settingsModal.querySelector('#aSetCompany');
                 const newCompany = companyInput ? companyInput.value.trim() : '';
@@ -13470,7 +13231,6 @@
             { label: 'Compare Campaigns', icon: '⚖️', action: () => openCompareModal(), keywords: 'compare side by side' },
             { label: 'Add Deposit', icon: '💰', action: () => document.getElementById('depositBtn').click(), keywords: 'deposit money fund balance' },
             { label: 'Account Settings', icon: '⚙️', action: () => document.getElementById('settingsBtn').click(), keywords: 'settings account profile' },
-            { label: 'Add Automated Rule', icon: '🤖', action: () => document.getElementById('addRuleBtn').click(), keywords: 'rule automation' },
             { label: 'Refresh Data', icon: '🔄', action: () => { loadStats(); loadCampaigns(); showToast('Data refreshed', 'info', 1500); }, keywords: 'refresh reload update' },
             { label: 'Toggle Notifications', icon: '🔔', action: () => notifBtn.click(), keywords: 'notifications alerts bell' },
             { label: 'Logout', icon: '🚪', action: () => document.getElementById('logoutBtn').click(), keywords: 'logout sign out' },
@@ -13809,7 +13569,7 @@
                     { icon: '📖', label: 'Documentation', url: '/docs', desc: 'Full API & SDK docs' },
                     { icon: '🧠', label: 'Benna AI Guide', url: '/docs/api-reference#benna-overview', desc: 'How optimization works' },
                     { icon: '💳', label: 'Billing FAQ', url: '/docs/api-reference#billing', desc: 'Deposits, invoices, payouts' },
-                    { icon: '📊', label: 'Pixel Setup', url: '#pixelSection', desc: 'Install conversion tracking' },
+                    { icon: '📊', label: 'Pixel Setup', url: '#settings:pixel', desc: 'Install conversion tracking' },
                     { icon: '📧', label: 'Contact Support', url: 'mailto:support@boostboss.ai', desc: 'support@boostboss.ai' },
                 ].map(item => `
                     <a href="${item.url}" style="
@@ -13850,12 +13610,16 @@
             }
         });
 
-        // Pixel section link from help panel
-        helpPanel.querySelector('a[href="#pixelSection"]')?.addEventListener('click', (e) => {
+        // Pixel section link from help panel — deep-links into the new
+        // Settings → Conversion tracking tab. The standalone /setup route
+        // was retired 2026-06-25 and the pixel block moved into Settings.
+        helpPanel.querySelector('a[href="#settings:pixel"]')?.addEventListener('click', (e) => {
             e.preventDefault();
             helpOpen = false;
             helpPanel.style.display = 'none';
-            document.getElementById('pixelSection').scrollIntoView({ behavior: 'smooth' });
+            if (typeof window.openSettingsModal === 'function') {
+                window.openSettingsModal('pixel');
+            }
         });
 
         // ───────────── DATA FRESHNESS & AUTO-REFRESH ─────────────
@@ -16868,12 +16632,12 @@ function pfParseScreenshots(text) {
                             // The standalone Affiliate page (#/products) hosts
                             // the New Product button — invoke it.
                             const productPageBtn = document.querySelector('[data-shell-route="products"] .new-campaign-btn, [data-shell-route="products"] button[id*="newProduct"], [data-shell-route="products"] button[id*="NewProduct"]');
-                            // Fallback: navigate to /#/products if we can't trigger inline (Advanced mode auto-on).
+                            // Fallback: navigate to /#/products if we can't trigger inline.
+                            // (Advanced mode toggle deleted 2026-06-25; Affiliate
+                            // is always visible now so the route resolves.)
                             if (productPageBtn) {
                                 productPageBtn.click();
                             } else {
-                                localStorage.setItem('bb_advanced_mode', '1');
-                                if (typeof window.applyAdvancedMode === 'function') window.applyAdvancedMode();
                                 window.location.hash = '#/products';
                             }
                         });
