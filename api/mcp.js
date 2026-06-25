@@ -859,22 +859,121 @@ async function handleGetSponsoredContent(body, args, res) {
   sessionCache.set(sessionId, Date.now());
 
   // ── Pilot model: bandit creative pick + spend debit ──────────────
-  // The winning campaign carries creative_headlines/body/cta variant
-  // arrays (migration 31). If any of those arrays are non-empty, we
-  // rotate a variant in via pickCampaignCreative() so Benna's bandit
-  // actually has something to test. Otherwise fall through to the
-  // campaign's single headline/subtext/cta_label fields.
-  if (Array.isArray(w.creative_headlines) && w.creative_headlines.length > 0) {
-    const pickedHead = pickCampaignVariant(w.id, w.creative_headlines, "head", w.boost_creative_refresh);
+  // Inheritance order per [[advertiser-pilot-model]] 2026-06-25:
+  //   1. campaign.creative_* variant arrays (per-campaign override)
+  //   2. advertiser's global creative_assets row (the Creatives sidebar
+  //      library — single source of truth across 37 placements)
+  //   3. campaign's legacy single headline/subtext/cta_label fields
+  //
+  // The library row is fetched lazily — only after the auction has a
+  // winner, so the cost is one extra Supabase call per won auction
+  // (not per candidate). Best-effort: if it fails or the row doesn't
+  // exist yet, we silently fall through to (1) or (3).
+  let assetsRow = null;
+  if (sb && w.advertiser_id) {
+    try {
+      const { data: aRow } = await sb
+        .from("creative_assets")
+        .select("*")
+        .eq("advertiser_id", w.advertiser_id)
+        .maybeSingle();
+      if (aRow) assetsRow = aRow;
+    } catch (_) { /* never block the auction on the library fetch */ }
+  }
+
+  // Map placement.format → which library length to pull from.
+  //   text_card  → *_short   (chips, citations — ≤30 char headlines, ≤80 body)
+  //   native     → *_medium  (cards, hero, splash — ≤55 char headlines, ≤140 body)
+  //   image      → *_short   (optional overlay only; the image carries the message)
+  //   video      → *_medium  (rendered on the endcard, after video completes)
+  function lengthSlotForFormat(fmt) {
+    switch (fmt) {
+      case "text_card": return "short";
+      case "native":    return "medium";
+      case "image":     return "short";
+      case "video":     return "medium";
+      default:          return "medium";
+    }
+  }
+  function libraryArrayFor(kind, lenSlot) {
+    if (!assetsRow) return null;
+    const key = kind + "_" + lenSlot;  // 'headlines_medium', 'body_short', etc.
+    const arr = assetsRow[key];
+    if (Array.isArray(arr) && arr.length > 0) return arr;
+    return null;
+  }
+  function effectiveVariants(campaignArr, libraryKind, lenSlot) {
+    // Campaign array wins if populated. Otherwise pull from library.
+    if (Array.isArray(campaignArr) && campaignArr.length > 0) return campaignArr;
+    return libraryArrayFor(libraryKind, lenSlot) || null;
+  }
+
+  const lenSlot = lengthSlotForFormat(w.format);
+  const headVariants = effectiveVariants(w.creative_headlines, "headlines", lenSlot);
+  const bodyVariants = effectiveVariants(w.creative_body_copy,  "body",      lenSlot);
+  // CTAs are length-agnostic in the library (just cta_labels).
+  const ctaVariants  = (Array.isArray(w.creative_cta_labels) && w.creative_cta_labels.length > 0)
+    ? w.creative_cta_labels
+    : (assetsRow && Array.isArray(assetsRow.cta_labels) && assetsRow.cta_labels.length > 0
+        ? assetsRow.cta_labels
+        : null);
+
+  if (headVariants) {
+    const pickedHead = pickCampaignVariant(w.id, headVariants, "head", w.boost_creative_refresh);
     if (pickedHead) w.headline = pickedHead;
   }
-  if (Array.isArray(w.creative_body_copy) && w.creative_body_copy.length > 0) {
-    const pickedBody = pickCampaignVariant(w.id, w.creative_body_copy, "body", w.boost_creative_refresh);
+  if (bodyVariants) {
+    const pickedBody = pickCampaignVariant(w.id, bodyVariants, "body", w.boost_creative_refresh);
     if (pickedBody) w.subtext = pickedBody;
   }
-  if (Array.isArray(w.creative_cta_labels) && w.creative_cta_labels.length > 0) {
-    const pickedCta = pickCampaignVariant(w.id, w.creative_cta_labels, "cta", w.boost_creative_refresh);
+  if (ctaVariants) {
+    const pickedCta = pickCampaignVariant(w.id, ctaVariants, "cta", w.boost_creative_refresh);
     if (pickedCta) w.cta_label = pickedCta;
+  }
+
+  // Image fallback: if the campaign has no media_url, pull a library
+  // image of the aspect ratio that best matches the placement.kind.
+  // Benna rotates among multiple library images using the same bucketed
+  // hash as the text variants.
+  if (!w.media_url && assetsRow && placement && placement.kind) {
+    const ASPECT_BY_KIND = {
+      // 16:9 landscape — the workhorse aspect
+      "corner":                "images_16_9",
+      "card":                  "images_16_9",
+      "hero":                  "images_16_9",
+      "loading":               "images_16_9",
+      "new_tab":               "images_16_9",
+      "splash_sponsor":        "images_16_9",
+      "popup_card":            "images_16_9",
+      "side_panel":            "images_16_9",
+      "install_onboarding":    "images_16_9",
+      "settings":              "images_16_9",
+      "sidebar":               "images_16_9",
+      "inline_native_banner":  "images_16_9",
+      "inline_sponsored_card": "images_16_9",
+      "loading_state_ad":      "images_16_9",
+      // 9:16 portrait — mobile vertical
+      "interstitial":          "images_9_16",
+      // 3:1 banner — narrow status surfaces
+      "bottom_banner":         "images_3_1",
+      "window_banner":         "images_3_1",
+      "system_notification":   "images_3_1",
+    };
+    const aspectKey = ASPECT_BY_KIND[placement.kind] || "images_16_9";
+    const imgs = assetsRow[aspectKey];
+    if (Array.isArray(imgs) && imgs.length > 0) {
+      const picked = pickCampaignVariant(w.id, imgs, "img", w.boost_creative_refresh);
+      if (picked) w.media_url = picked;
+    }
+  }
+
+  // Video fallback: only used when format=video. Pick orientation by
+  // placement.kind hint (rewarded_video / pre_roll_video default landscape).
+  if (!w.media_url && w.format === "video" && assetsRow) {
+    const portraitKind = (placement && /portrait|vertical|9_16/.test(placement.kind || ""));
+    w.media_url  = portraitKind ? (assetsRow.video_portrait_url || assetsRow.video_landscape_url)
+                                : (assetsRow.video_landscape_url || assetsRow.video_portrait_url);
+    if (!w.poster_url) w.poster_url = assetsRow.video_poster_url || null;
   }
 
   // Spend debit — campaign won, charge against campaigns.spent_total via
@@ -960,6 +1059,23 @@ async function handleGetSponsoredContent(body, args, res) {
     winning_price_cpm: +winner.effective_price_cpm.toFixed(4),
   });
 
+  // ── Brand kit + voucher — pulled from the global creative_assets row
+  // for the winning campaign's advertiser. Additive to the sponsored
+  // payload; SDKs render "sponsored by [brand]" lines with logos when
+  // present, and the voucher endcard on rewarded/interstitial formats.
+  const brandKit = assetsRow ? {
+    name:        assetsRow.brand_name        || null,
+    logo_url:    assetsRow.brand_logo_url    || null,
+    favicon_url: assetsRow.brand_favicon_url || null,
+    color:       assetsRow.brand_color       || null,
+    domain:      assetsRow.brand_domain      || null,
+  } : null;
+  const voucher = (assetsRow && assetsRow.voucher_value_text) ? {
+    value_text:       assetsRow.voucher_value_text,
+    code:             assetsRow.voucher_code             || null,
+    redemption_url:   assetsRow.voucher_redemption_url   || null,
+  } : null;
+
   return jsonRpc(res, body.id, {
     sponsored: {
       campaign_id: w.id,
@@ -971,6 +1087,10 @@ async function handleGetSponsoredContent(body, args, res) {
       cta_label: w.cta_label,
       cta_url: ctaUrl,
       skippable_after_sec: w.skippable_after_sec || 3,
+      // Library-sourced extras — null when the advertiser hasn't filled
+      // their /creatives library yet. SDKs should treat these as optional.
+      brand_kit: brandKit,
+      voucher:   voucher,
       tracking: {
         impression:     `${track}&event=impression`,
         click:          `${track}&event=click`,

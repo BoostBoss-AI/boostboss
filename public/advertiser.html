@@ -3780,9 +3780,18 @@
               <div id="pilotCreativesPane" style="display:none;" data-pilot-pane="creatives">
 
                 <!-- Intro callout -->
-                <div style="padding:16px 18px; background:linear-gradient(135deg, #FFF5F8, #FFFFFF); border:1px solid #FFD9E5; border-radius:14px; margin-bottom:20px;">
+                <div style="padding:16px 18px; background:linear-gradient(135deg, #FFF5F8, #FFFFFF); border:1px solid #FFD9E5; border-radius:14px; margin-bottom:14px;">
                   <div style="font-size:12px; font-weight:800; color:#FF2D78; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Brand kit + creative library</div>
                   <p style="font-size:13px; color:#374151; line-height:1.55; margin:0;">Everything Benna shows your audience. Company identity stamps every impression with brand trust; creative variants give Benna's bandit room to find what wins. Edit anytime — changes apply to the next auction round.</p>
+                </div>
+
+                <!-- Library inheritance banner — shown when the global /creatives
+                     library has assets the campaign will inherit unless overridden
+                     in this pane. Wires up via pilotRenderLibraryInheritance(). -->
+                <div id="pilotLibraryInherit" style="display:none; padding:12px 14px; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px; margin-bottom:20px; font-size:12.5px; color:#3730A3; line-height:1.55;">
+                  <strong style="color:#1E3A8A;">✓ Inheriting from your Creatives library.</strong>
+                  <span id="pilotLibraryInheritSummary">Headlines, body, CTAs you leave blank here will pull from the global library.</span>
+                  <a href="#/creatives" style="color:#FF2D78; font-weight:700; text-decoration:none; margin-left:4px;">Open library →</a>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
@@ -17605,7 +17614,37 @@ function pfParseScreenshots(text) {
                 }
             }
 
-            // ── Creatives pane: load active product into the fields ──
+            // ── Global creative library cache (the /creatives sidebar route).
+            // Fetched lazily once per session; used to show inheritance preview
+            // in the campaign Creatives sub-tab. Per [[advertiser-pilot-model]]
+            // 2026-06-25 — library is the source of truth; campaign fields
+            // override only what they explicitly fill in.
+            let pilotLibraryAssets = null;
+            let pilotLibraryLoading = false;
+            async function pilotLoadLibraryAssets() {
+                if (pilotLibraryAssets || pilotLibraryLoading) return pilotLibraryAssets;
+                const token = getToken();
+                if (!token) return null;
+                pilotLibraryLoading = true;
+                try {
+                    const r = await fetch('/api/creative-assets', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (r.ok) {
+                        const j = await r.json();
+                        pilotLibraryAssets = j.assets || null;
+                    }
+                } catch (e) { /* best-effort */ }
+                pilotLibraryLoading = false;
+                return pilotLibraryAssets;
+            }
+
+            // ── Creatives pane: load active campaign into the fields ──
+            // Inheritance order per slot:
+            //   - If campaign has its own variant array → use that
+            //   - Else show library variants as placeholder (greyed)
+            // The actual rendered ad pulls the same way at auction time
+            // in mcp.js — campaign override → library → legacy single field.
             function pilotLoadCreativesPane() {
                 const c = pilotProducts.find(x => x.id === pilotActiveProductId);
                 if (!c) return;
@@ -17633,6 +17672,63 @@ function pfParseScreenshots(text) {
                 set('pilotCreativeCta',       linesOf(c.creative_cta_labels));
 
                 pilotUpdateCreativeCounts();
+
+                // Apply library inheritance (async, non-blocking)
+                pilotLoadLibraryAssets().then(() => pilotApplyLibraryInheritance(c));
+            }
+
+            // Hydrate placeholders from the global /creatives library + flip
+            // the inheritance banner on. Format-appropriate length pick:
+            // we default to 'medium' since campaigns are most often shown
+            // in native format. The campaign's actual format determines what
+            // mcp.js picks at auction; this is just an editor preview.
+            function pilotApplyLibraryInheritance(campaign) {
+                const lib = pilotLibraryAssets;
+                const banner = document.getElementById('pilotLibraryInherit');
+                const summary = document.getElementById('pilotLibraryInheritSummary');
+                if (!banner) return;
+                if (!lib || !lib.brand_name && !(lib.headlines_short || []).length && !(lib.headlines_medium || []).length && !(lib.cta_labels || []).length) {
+                    banner.style.display = 'none';
+                    return;
+                }
+                // Surface the banner so the user understands inheritance.
+                banner.style.display = '';
+                // Build per-textarea inheritance preview as ghost placeholder.
+                const ghostList = (arr) => (Array.isArray(arr) && arr.length > 0)
+                    ? arr.filter(Boolean).slice(0, 3).join('\n')
+                    : '';
+                function ghost(elId, libArr, fallbackArr) {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    // Only show placeholder when the campaign field is empty.
+                    if ((el.value || '').trim().length > 0) {
+                        el.placeholder = el.getAttribute('data-original-placeholder')
+                                       || el.placeholder;
+                        return;
+                    }
+                    if (!el.getAttribute('data-original-placeholder')) {
+                        el.setAttribute('data-original-placeholder', el.placeholder || '');
+                    }
+                    const lines = ghostList(libArr) || ghostList(fallbackArr);
+                    if (lines) el.placeholder = '(inherited from library — overwrite to override)\n' + lines;
+                }
+                // Show medium-length variants in the textarea ghost since
+                // they're the most common rendered slot.
+                ghost('pilotCreativeHeadlines', lib.headlines_medium, lib.headlines_short);
+                ghost('pilotCreativeBody',      lib.body_medium,      lib.body_short);
+                ghost('pilotCreativeCta',       lib.cta_labels);
+
+                // Count what's inheritable — bake into the banner summary.
+                const heads = (lib.headlines_short || []).length + (lib.headlines_medium || []).length + (lib.headlines_long || []).length;
+                const bodies = (lib.body_short || []).length + (lib.body_medium || []).length + (lib.body_long || []).length;
+                const ctas = (lib.cta_labels || []).length;
+                const parts = [];
+                if (heads > 0)  parts.push(heads  + ' headline'  + (heads === 1 ? '' : 's'));
+                if (bodies > 0) parts.push(bodies + ' body line' + (bodies === 1 ? '' : 's'));
+                if (ctas > 0)   parts.push(ctas   + ' CTA'        + (ctas === 1 ? '' : 's'));
+                if (summary && parts.length > 0) {
+                    summary.textContent = ' Library has ' + parts.join(', ') + ' available. Empty fields below will inherit.';
+                }
             }
 
             // Live count + readiness mirror inside the Pilot pane.
