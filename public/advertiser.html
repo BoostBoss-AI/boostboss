@@ -17929,11 +17929,53 @@ function pfParseScreenshots(text) {
                 // Status row
                 renderStatusRow(p);
 
-                // Creative readiness nudge — show if not ready
+                // Creative readiness nudge — hide if EITHER:
+                //   (a) campaign has its own creative_library_ready flag set, OR
+                //   (b) the global /creatives library has ≥3 headlines (any
+                //       length) AND ≥1 image — campaign inherits from there.
+                // The original logic only looked at (a), which meant any
+                // campaign launched through the new wizard (empty creative_*
+                // arrays) always failed the check even when the library was
+                // fully filled. See [[advertiser-pilot-model]] inheritance.
                 const nudge = document.getElementById('pilotCreativeNudge');
                 const nudgeLink = document.getElementById('pilotCreativeNudgeLink');
                 if (nudge) {
-                    nudge.style.display = (p.creative_library_ready === true) ? 'none' : '';
+                    const lib = pilotLibraryAssets || {};
+                    const libHeadlines =
+                        (lib.headlines_short  || []).filter(Boolean).length +
+                        (lib.headlines_medium || []).filter(Boolean).length +
+                        (lib.headlines_long   || []).filter(Boolean).length;
+                    const libHasImage =
+                        !!lib.brand_logo_url ||
+                        (lib.images_16_9 || []).length > 0 ||
+                        (lib.images_9_16 || []).length > 0 ||
+                        (lib.images_3_1  || []).length > 0 ||
+                        (lib.images_2_1  || []).length > 0;
+                    const libraryCovers = libHeadlines >= 3 && libHasImage;
+                    const ready = (p.creative_library_ready === true) || libraryCovers;
+                    nudge.style.display = ready ? 'none' : '';
+                }
+                // If the library hasn't loaded yet at first render, refresh
+                // the nudge state once it lands. Idempotent — second pass is
+                // a no-op if the library was already loaded.
+                if (typeof pilotLoadLibraryAssets === 'function' && !pilotLibraryAssets) {
+                    pilotLoadLibraryAssets().then(() => {
+                        if (nudge && pilotLibraryAssets) {
+                            const lib2 = pilotLibraryAssets;
+                            const heads2 =
+                                (lib2.headlines_short  || []).filter(Boolean).length +
+                                (lib2.headlines_medium || []).filter(Boolean).length +
+                                (lib2.headlines_long   || []).filter(Boolean).length;
+                            const img2 = !!lib2.brand_logo_url ||
+                                (lib2.images_16_9 || []).length > 0 ||
+                                (lib2.images_9_16 || []).length > 0 ||
+                                (lib2.images_3_1  || []).length > 0 ||
+                                (lib2.images_2_1  || []).length > 0;
+                            if ((p.creative_library_ready === true) || (heads2 >= 3 && img2)) {
+                                nudge.style.display = 'none';
+                            }
+                        }
+                    });
                 }
                 // Click → switch internal Pilot tab to Creatives.
                 // Stays on /pilot, no navigation, scrolls to top.
