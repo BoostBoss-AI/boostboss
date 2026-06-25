@@ -16996,6 +16996,12 @@ function pfParseScreenshots(text) {
 
             // ── Direct upload to Supabase Storage ───────────────────
             // Path convention: {advertiser_id}/{kind}-{timestamp}-{filename}
+            // Uses setSession() to attach the user's JWT to the client's
+            // auth context before upload — some @supabase/supabase-js
+            // versions ignore global.headers on storage requests and fall
+            // back to the anon key, which fails the bucket's RLS check
+            // (auth.uid() = NULL → 'new row violates row-level security').
+            // setSession is the canonical way to authenticate as the user.
             async function upload(file, kind) {
                 if (!file) return null;
                 const isVideo = (kind === 'video_landscape' || kind === 'video_portrait');
@@ -17012,6 +17018,22 @@ function pfParseScreenshots(text) {
                 if (!advertiserId) {
                     showStatus('✗ Not authenticated', 'error');
                     return null;
+                }
+                const token = getToken();
+                if (!token) {
+                    showStatus('✗ Session expired — refresh and try again', 'error');
+                    return null;
+                }
+                // Attach the user JWT to the client's auth state. refresh_token
+                // is empty because we don't track Supabase's refresh cycle
+                // (BB's auth-guard handles session rotation separately).
+                try {
+                    await client.auth.setSession({
+                        access_token: token,
+                        refresh_token: '',
+                    });
+                } catch (sessionErr) {
+                    console.warn('[creatives] setSession error (continuing):', sessionErr);
                 }
                 showStatus('Uploading…');
                 const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
