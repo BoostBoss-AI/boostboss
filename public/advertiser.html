@@ -2414,6 +2414,38 @@
         .ca-save-btn:hover { filter: brightness(1.06); }
         .ca-save-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
+        /* Per-section completeness bar — sits under the .ca-summary title,
+           fills left-to-right based on how many requirements are met.
+           Red for low coverage, amber for partial, green for ready. */
+        .ca-progress {
+            margin-top: 8px;
+            height: 5px;
+            background: #F3F4F6;
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+        .ca-progress__fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.25s ease, background 0.2s;
+            background: #DC2626;
+        }
+        .ca-progress__fill.is-partial { background: #F59E0B; }
+        .ca-progress__fill.is-ready { background: #10B981; }
+        .ca-progress__label {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #6B7280;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        .ca-progress__label.is-ready { color: #047857; }
+        .ca-progress__label.is-partial { color: #B45309; }
+        .ca-progress__label.is-empty { color: #B91C1C; }
+
         /* ─── Pilot Creatives sub-tab — inheritance preview + override pattern.
               Per-section block with read-only display by default, swaps into
               an editor when the user clicks 'Override for this campaign'. ─── */
@@ -4360,7 +4392,7 @@
               </div>
 
               <!-- ─────────── SECTION 1: Brand kit ─────────── -->
-              <details open class="ca-section" data-ca-section="brand">
+              <details class="ca-section" data-ca-section="brand">
                 <summary class="ca-summary">
                   <span class="ca-summary-title">Brand kit</span>
                   <span class="ca-summary-sub">Name · logo · favicon · color · domain. Feeds every placement.</span>
@@ -4404,7 +4436,7 @@
               </details>
 
               <!-- ─────────── SECTION 2: Headlines ─────────── -->
-              <details open class="ca-section" data-ca-section="headlines">
+              <details class="ca-section" data-ca-section="headlines">
                 <summary class="ca-summary">
                   <span class="ca-summary-title">Headlines</span>
                   <span class="ca-summary-sub">3 lengths × 1–10 variants. Benna A/B picks per placement.</span>
@@ -16915,12 +16947,101 @@ function pfParseScreenshots(text) {
                     });
                     hydrateScalarFields();
                     renderCoverage();
+                    renderProgressBars();
                     wireSaveBars();
                     wireSectionPersistence();
                 } catch (e) {
                     console.warn('[creatives] load failed:', e);
                     showStatus('Could not load assets', 'error');
                 }
+            }
+
+            // Compute completeness % per section and paint a progress bar
+            // inside each .ca-summary. Bars are red < 33%, amber 33-99%,
+            // green at 100%. Re-runs on every field change (queueSave) so
+            // the user gets live feedback.
+            function sectionCompleteness() {
+                const has = (v) => !!(v && String(v).trim());
+                const len = (a) => (Array.isArray(a) ? a.filter(Boolean).length : 0);
+                const brandChecks = [
+                    has(state.brand_name),
+                    has(state.brand_logo_url),
+                    has(state.brand_color),
+                    has(state.brand_domain),
+                    has(state.brand_favicon_url),
+                ];
+                const headlineChecks = [
+                    len(state.headlines_short)  > 0,
+                    len(state.headlines_medium) > 0,
+                    len(state.headlines_long)   > 0,
+                ];
+                const bodyChecks = [
+                    len(state.body_short)  > 0,
+                    len(state.body_medium) > 0,
+                    len(state.body_long)   > 0,
+                ];
+                const ctasChecks = [ len(state.cta_labels) > 0 ];
+                const imageChecks = [
+                    len(state.images_16_9) > 0,
+                    len(state.images_9_16) > 0,
+                    len(state.images_3_1)  > 0,
+                    len(state.images_2_1)  > 0,
+                ];
+                const videoChecks = [
+                    has(state.video_landscape_url) || has(state.video_portrait_url),
+                    has(state.video_poster_url),
+                ];
+                const voucherChecks = [
+                    has(state.voucher_value_text),
+                    has(state.voucher_redemption_url),
+                ];
+                function pct(arr) {
+                    if (arr.length === 0) return 0;
+                    return Math.round((arr.filter(Boolean).length / arr.length) * 100);
+                }
+                return {
+                    brand:     pct(brandChecks),
+                    headlines: pct(headlineChecks),
+                    body:      pct(bodyChecks),
+                    ctas:      pct(ctasChecks),
+                    images:    pct(imageChecks),
+                    videos:    pct(videoChecks),
+                    voucher:   pct(voucherChecks),
+                };
+            }
+            function renderProgressBars() {
+                const pcts = sectionCompleteness();
+                document.querySelectorAll('details.ca-section[data-ca-section]').forEach((det) => {
+                    const key = det.getAttribute('data-ca-section');
+                    const p = (pcts && key in pcts) ? pcts[key] : 0;
+                    const summary = det.querySelector('summary.ca-summary');
+                    if (!summary) return;
+                    let wrap = summary.querySelector('.ca-progress');
+                    let label = summary.querySelector('.ca-progress__label');
+                    if (!wrap) {
+                        wrap = document.createElement('div');
+                        wrap.className = 'ca-progress';
+                        const fill = document.createElement('div');
+                        fill.className = 'ca-progress__fill';
+                        wrap.appendChild(fill);
+                        summary.appendChild(wrap);
+                    }
+                    if (!label) {
+                        label = document.createElement('div');
+                        label.className = 'ca-progress__label';
+                        summary.appendChild(label);
+                    }
+                    const fill = wrap.querySelector('.ca-progress__fill');
+                    fill.style.width = p + '%';
+                    fill.classList.toggle('is-partial', p > 0 && p < 100);
+                    fill.classList.toggle('is-ready', p === 100);
+                    label.classList.toggle('is-ready', p === 100);
+                    label.classList.toggle('is-partial', p > 0 && p < 100);
+                    label.classList.toggle('is-empty', p === 0);
+                    label.textContent = p === 100 ? '✓ Complete'
+                        : p === 0 ? 'Not started'
+                        : p + '% complete';
+                });
             }
 
             // Persist each <details class="ca-section">'s open/closed state
@@ -17005,11 +17126,13 @@ function pfParseScreenshots(text) {
             let pending = {};
             function queueSave(partial) {
                 Object.assign(pending, partial);
-                // Re-render coverage immediately so the ○ / ✓ chips on
-                // the Placement coverage card flip in real time as the
-                // user fills out the library. State has already been
-                // updated by the caller before reaching here.
+                // Re-render coverage + per-section progress bars
+                // immediately so the ○ / ✓ chips on the Placement coverage
+                // card and the under-title progress bars flip in real time
+                // as the user fills out the library. State has already
+                // been updated by the caller before reaching here.
                 try { renderCoverage(); } catch (_) {}
+                try { renderProgressBars(); } catch (_) {}
                 clearTimeout(saveTimer);
                 showStatus('Saving…');
                 saveTimer = setTimeout(flushSave, 600);
