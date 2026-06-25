@@ -2234,6 +2234,151 @@
             .setup-group-grid { grid-template-columns: 1fr; }
         }
 
+        /* ─── Creatives (asset library) — global per-advertiser styling ─── */
+        .ca-section {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .ca-section[open] { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .ca-summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .ca-summary::-webkit-details-marker { display: none; }
+        .ca-summary:hover { background: #FAFAFA; }
+        .ca-summary-title { font-size: 15px; font-weight: 700; color: #0F0F1A; }
+        .ca-summary-sub { font-size: 12px; color: #6B7280; }
+        .ca-body {
+            padding: 6px 20px 20px;
+            border-top: 1px solid #F3F4F6;
+        }
+        .ca-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .ca-hint {
+            font-size: 11px;
+            color: #9CA3AF;
+            font-weight: 400;
+        }
+        .ca-input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #fff;
+            color: #111827;
+        }
+        .ca-input:focus { outline: none; border-color: #FF2D78; box-shadow: 0 0 0 3px rgba(255,45,120,0.12); }
+        .ca-upload-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .ca-upload-btn, .ca-image-add, .ca-variant-add {
+            padding: 8px 14px;
+            background: #fff;
+            border: 1px solid #FF2D78;
+            color: #FF2D78;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+        .ca-upload-btn:hover, .ca-image-add:hover, .ca-variant-add:hover { background: #FFF5F8; }
+        .ca-img-preview {
+            background: #F9FAFB url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D1D5DB' stroke-width='1.5'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E") center/40% no-repeat;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            flex-shrink: 0;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .ca-img-preview.has-image {
+            background-color: #fff;
+        }
+        .ca-variant-block, .ca-image-block {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed #F3F4F6;
+        }
+        .ca-variant-block:first-child, .ca-image-block:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        .ca-variant-head, .ca-image-head {
+            font-size: 13px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        .ca-variant-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+        .ca-variant-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .ca-variant-row .ca-input { flex: 1; }
+        .ca-variant-row .ca-remove, .ca-image-row .ca-remove {
+            padding: 6px 10px;
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            color: #9CA3AF;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .ca-variant-row .ca-remove:hover, .ca-image-row .ca-remove:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+        .ca-image-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .ca-image-row {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ca-image-row img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .ca-image-row .ca-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(4px);
+            padding: 3px 8px;
+        }
+        .ca-char-counter {
+            font-size: 10.5px;
+            color: #9CA3AF;
+            min-width: 40px;
+            text-align: right;
+        }
+
         .benna-engine {
             background: #0A0A14;
             color: #F5F5F7;
@@ -2604,6 +2749,15 @@
             <button class="shell-nav-item" data-shell-section="products">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.products">Affiliate</span>
+            </button>
+            <!-- Creatives — global reusable asset library (Google-Ads style).
+                 Feeds all 37 placements across the 4 doors. Brand kit +
+                 headlines/body/CTAs in 3 lengths + images in 5 aspect ratios
+                 + videos + voucher. Campaigns inherit from here (wiring lands
+                 in a follow-up). See [[advertiser-pilot-model]]. -->
+            <button class="shell-nav-item" data-shell-section="creatives">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.creatives">Creatives</span>
             </button>
             <!-- Performance nav removed 2026-06-25. The Benna engine + auction
                  intelligence content moved into the (now-renamed) Performance
@@ -3917,7 +4071,258 @@
                 </div>
               </div>
             </div><!-- /[data-shell-route="product-orders"] -->
-            <!-- ═══════ ROUTE: billing ═══════ -->
+
+            <!-- ═══════ ROUTE: creatives — global asset library ═══════
+                 Google-Ads-style. Advertiser defines each asset once;
+                 Benna composes the 37-placement renders by combining
+                 brand kit + headline + body + CTA + best-fit image/video.
+                 Schema: db/33_creative_assets.sql.
+                 API: /api/creative-assets (GET/PATCH).
+                 Uploads: direct browser → Supabase Storage bucket
+                 'creative-assets', then the resulting public URL is
+                 PATCHed into the row here. -->
+            <div data-shell-route="creatives">
+              <div class="shell-page-head">
+                <div>
+                  <h1 class="shell-page-title" data-t="creatives.title">Creatives</h1>
+                  <div class="shell-page-sub" data-t="creatives.sub">Define each asset once. Benna combines them to render across all 37 placements.</div>
+                </div>
+                <div id="creativesReadyChip" style="display:none;align-items:center;gap:6px;padding:6px 12px;border-radius:100px;background:#ECFDF5;border:1px solid #A7F3D0;font-size:12px;font-weight:700;color:#065F46;">
+                  <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10B981;"></span>
+                  <span data-t="creatives.ready_chip">Library ready</span>
+                </div>
+              </div>
+
+              <!-- Status banner — minimum-viable checklist -->
+              <div id="creativesChecklist" style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:12px;padding:14px 18px;margin-bottom:18px;">
+                <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:6px;" data-t="creatives.min_setup_h">Minimum viable setup</div>
+                <div style="font-size:12px;color:#78350F;line-height:1.6;" data-t="creatives.min_setup_p">Brand name + brand logo + ≥1 headline + ≥1 CTA covers 27 of the 37 placements (text_card + native formats). Images and videos unlock the remaining 10.</div>
+              </div>
+
+              <!-- Coverage matrix — which formats are powered by what -->
+              <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
+                <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px;" data-t="creatives.coverage_h">Placement coverage</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+                  <div style="padding:10px 12px;background:#FAFAFA;border-radius:8px;">
+                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em;">text_card · 8 slots</div>
+                    <div id="covTextCard" style="font-size:12.5px;color:#374151;margin-top:4px;">Needs: brand name + short headline + short body + CTA</div>
+                  </div>
+                  <div style="padding:10px 12px;background:#FAFAFA;border-radius:8px;">
+                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em;">native · 19 slots</div>
+                    <div id="covNative" style="font-size:12.5px;color:#374151;margin-top:4px;">Needs: logo + medium headline + medium body + CTA + 16:9 image</div>
+                  </div>
+                  <div style="padding:10px 12px;background:#FAFAFA;border-radius:8px;">
+                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em;">image · 8 slots</div>
+                    <div id="covImage" style="font-size:12.5px;color:#374151;margin-top:4px;">Needs: best-fit aspect ratio banner image</div>
+                  </div>
+                  <div style="padding:10px 12px;background:#FAFAFA;border-radius:8px;">
+                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em;">video · 2 slots</div>
+                    <div id="covVideo" style="font-size:12.5px;color:#374151;margin-top:4px;">Needs: 16:9 or 9:16 MP4 + poster + endcard CTA</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ─────────── SECTION 1: Brand kit ─────────── -->
+              <details open class="ca-section" data-ca-section="brand">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">Brand kit</span>
+                  <span class="ca-summary-sub">Name · logo · favicon · color · domain. Feeds every placement.</span>
+                </summary>
+                <div class="ca-body">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div>
+                      <label class="ca-label">Brand name <span class="ca-hint">(≤40 char)</span></label>
+                      <input type="text" id="caBrandName" class="ca-input" maxlength="40" placeholder="e.g. Stripe Atlas">
+                    </div>
+                    <div>
+                      <label class="ca-label">Verified domain <span class="ca-hint">(for "sponsored by" line)</span></label>
+                      <input type="text" id="caBrandDomain" class="ca-input" maxlength="120" placeholder="e.g. stripe.com">
+                    </div>
+                    <div>
+                      <label class="ca-label">Brand color <span class="ca-hint">(hex, e.g. #FF2D78)</span></label>
+                      <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="color" id="caBrandColorPicker" style="width:38px;height:38px;padding:2px;border:1px solid #E5E7EB;border-radius:8px;cursor:pointer;">
+                        <input type="text" id="caBrandColor" class="ca-input" maxlength="16" placeholder="#FF2D78" style="flex:1;">
+                      </div>
+                    </div>
+                    <div></div>
+                    <div>
+                      <label class="ca-label">Logo <span class="ca-hint">(1:1 square, ≥512×512, PNG/SVG transparent)</span></label>
+                      <div class="ca-upload-row">
+                        <div id="caBrandLogoPreview" class="ca-img-preview" style="width:64px;height:64px;"></div>
+                        <input type="text" id="caBrandLogoUrl" class="ca-input" placeholder="Paste URL or upload" style="flex:1;">
+                        <button type="button" class="ca-upload-btn" data-ca-upload="brand_logo">Upload</button>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="ca-label">Favicon <span class="ca-hint">(32×32 PNG)</span></label>
+                      <div class="ca-upload-row">
+                        <div id="caBrandFaviconPreview" class="ca-img-preview" style="width:64px;height:64px;"></div>
+                        <input type="text" id="caBrandFaviconUrl" class="ca-input" placeholder="Paste URL or upload" style="flex:1;">
+                        <button type="button" class="ca-upload-btn" data-ca-upload="brand_favicon">Upload</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- ─────────── SECTION 2: Headlines ─────────── -->
+              <details open class="ca-section" data-ca-section="headlines">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">Headlines</span>
+                  <span class="ca-summary-sub">3 lengths × 1–10 variants. Benna A/B picks per placement.</span>
+                </summary>
+                <div class="ca-body">
+                  <div class="ca-variant-block" data-ca-field="headlines_short" data-ca-itemlen="30" data-ca-max="10">
+                    <div class="ca-variant-head"><strong>Short</strong> <span class="ca-hint">≤30 char · feeds chips, citations, status-line banners</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                  <div class="ca-variant-block" data-ca-field="headlines_medium" data-ca-itemlen="55" data-ca-max="10">
+                    <div class="ca-variant-head"><strong>Medium</strong> <span class="ca-hint">≤55 char · feeds cards, native, splash, hero, loading</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                  <div class="ca-variant-block" data-ca-field="headlines_long" data-ca-itemlen="90" data-ca-max="10">
+                    <div class="ca-variant-head"><strong>Long</strong> <span class="ca-hint">≤90 char · feeds interstitials, side panels, settings, onboarding</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                </div>
+              </details>
+
+              <!-- ─────────── SECTION 3: Body copy ─────────── -->
+              <details class="ca-section" data-ca-section="body">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">Body copy</span>
+                  <span class="ca-summary-sub">3 lengths × 1–10 variants. Descriptions paired with headlines.</span>
+                </summary>
+                <div class="ca-body">
+                  <div class="ca-variant-block" data-ca-field="body_short" data-ca-itemlen="80" data-ca-max="10">
+                    <div class="ca-variant-head"><strong>Short</strong> <span class="ca-hint">≤80 char · chip subtitles</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                  <div class="ca-variant-block" data-ca-field="body_medium" data-ca-itemlen="140" data-ca-max="10">
+                    <div class="ca-variant-head"><strong>Medium</strong> <span class="ca-hint">≤140 char · card descriptions, citations</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                  <div class="ca-variant-block" data-ca-field="body_long" data-ca-itemlen="280" data-ca-max="10">
+                    <div class="ca-variant-head"><strong>Long</strong> <span class="ca-hint">≤280 char · interstitial copy, sidebar detail</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                </div>
+              </details>
+
+              <!-- ─────────── SECTION 4: CTA labels ─────────── -->
+              <details class="ca-section" data-ca-section="ctas">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">CTA labels</span>
+                  <span class="ca-summary-sub">1–5 button labels. Benna picks per placement format.</span>
+                </summary>
+                <div class="ca-body">
+                  <div class="ca-variant-block" data-ca-field="cta_labels" data-ca-itemlen="20" data-ca-max="5">
+                    <div class="ca-variant-head"><span class="ca-hint">≤20 char each · e.g. "Try free" · "Get started" · "Install now"</span></div>
+                    <div class="ca-variant-list"></div>
+                    <button type="button" class="ca-variant-add">+ Add variant</button>
+                  </div>
+                </div>
+              </details>
+
+              <!-- ─────────── SECTION 5: Images ─────────── -->
+              <details class="ca-section" data-ca-section="images">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">Images</span>
+                  <span class="ca-summary-sub">5 aspect ratios. Benna picks best-fit per placement.</span>
+                </summary>
+                <div class="ca-body">
+                  <div class="ca-image-block" data-ca-field="images_16_9">
+                    <div class="ca-image-head"><strong>16:9 landscape</strong> <span class="ca-hint">≥1280×720 · cards, splash, hero, new-tab, landscape video poster</span></div>
+                    <div class="ca-image-list"></div>
+                    <button type="button" class="ca-image-add" data-ca-upload="images_16_9">+ Upload image</button>
+                  </div>
+                  <div class="ca-image-block" data-ca-field="images_9_16">
+                    <div class="ca-image-head"><strong>9:16 portrait</strong> <span class="ca-hint">≥720×1280 · mobile interstitial, portrait inline, portrait video poster</span></div>
+                    <div class="ca-image-list"></div>
+                    <button type="button" class="ca-image-add" data-ca-upload="images_9_16">+ Upload image</button>
+                  </div>
+                  <div class="ca-image-block" data-ca-field="images_3_1">
+                    <div class="ca-image-head"><strong>3:1 banner</strong> <span class="ca-hint">≥900×300 · bottom banner, window banner, status_line</span></div>
+                    <div class="ca-image-list"></div>
+                    <button type="button" class="ca-image-add" data-ca-upload="images_3_1">+ Upload image</button>
+                  </div>
+                  <div class="ca-image-block" data-ca-field="images_2_1">
+                    <div class="ca-image-head"><strong>2:1 wide</strong> <span class="ca-hint">≥1200×600 · loading-screen panel</span></div>
+                    <div class="ca-image-list"></div>
+                    <button type="button" class="ca-image-add" data-ca-upload="images_2_1">+ Upload image</button>
+                  </div>
+                </div>
+              </details>
+
+              <!-- ─────────── SECTION 6: Videos ─────────── -->
+              <details class="ca-section" data-ca-section="videos">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">Videos <span class="ca-hint">(optional — mobile rewarded + pre-roll only)</span></span>
+                  <span class="ca-summary-sub">2 orientations + poster + endcard. Skip if you don't run mobile video.</span>
+                </summary>
+                <div class="ca-body">
+                  <div>
+                    <label class="ca-label">Landscape 16:9 video <span class="ca-hint">(MP4, 15–30s, ≤20MB)</span></label>
+                    <div class="ca-upload-row">
+                      <input type="text" id="caVideoLandscape" class="ca-input" placeholder="Paste URL or upload" style="flex:1;">
+                      <button type="button" class="ca-upload-btn" data-ca-upload="video_landscape">Upload</button>
+                    </div>
+                  </div>
+                  <div style="margin-top:14px;">
+                    <label class="ca-label">Portrait 9:16 video <span class="ca-hint">(MP4, 15–30s, ≤20MB)</span></label>
+                    <div class="ca-upload-row">
+                      <input type="text" id="caVideoPortrait" class="ca-input" placeholder="Paste URL or upload" style="flex:1;">
+                      <button type="button" class="ca-upload-btn" data-ca-upload="video_portrait">Upload</button>
+                    </div>
+                  </div>
+                  <div style="margin-top:14px;">
+                    <label class="ca-label">Poster image <span class="ca-hint">(shown before play tap)</span></label>
+                    <div class="ca-upload-row">
+                      <div id="caVideoPosterPreview" class="ca-img-preview" style="width:96px;height:54px;"></div>
+                      <input type="text" id="caVideoPoster" class="ca-input" placeholder="Paste URL or upload" style="flex:1;">
+                      <button type="button" class="ca-upload-btn" data-ca-upload="video_poster">Upload</button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- ─────────── SECTION 7: Voucher / promo ─────────── -->
+              <details class="ca-section" data-ca-section="voucher">
+                <summary class="ca-summary">
+                  <span class="ca-summary-title">Voucher / promo <span class="ca-hint">(optional)</span></span>
+                  <span class="ca-summary-sub">Endcard offer shown after rewarded video and on interstitials.</span>
+                </summary>
+                <div class="ca-body">
+                  <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
+                    <div>
+                      <label class="ca-label">Voucher value text <span class="ca-hint">(≤80 char)</span></label>
+                      <input type="text" id="caVoucherValue" class="ca-input" maxlength="80" placeholder="e.g. Get $10 off your first order">
+                    </div>
+                    <div>
+                      <label class="ca-label">Voucher code <span class="ca-hint">(optional, ≤32 char)</span></label>
+                      <input type="text" id="caVoucherCode" class="ca-input" maxlength="32" placeholder="e.g. BBSAVE10">
+                    </div>
+                  </div>
+                  <div style="margin-top:14px;">
+                    <label class="ca-label">Redemption URL <span class="ca-hint">(where the voucher click leads)</span></label>
+                    <input type="url" id="caVoucherUrl" class="ca-input" placeholder="https://yourapp.com/redeem">
+                  </div>
+                </div>
+              </details>
+
+              <!-- Hidden save status — debounced PATCH toast -->
+              <div id="caSaveStatus" style="position:fixed;bottom:24px;right:24px;display:none;padding:8px 14px;background:#1F2937;color:#fff;border-radius:8px;font-size:12.5px;font-weight:600;z-index:9000;box-shadow:0 4px 12px rgba(0,0,0,0.15);">Saving…</div>
+
+              <!-- Hidden file input — reused for every upload button -->
+              <input type="file" id="caFileInput" style="display:none;">
+            </div><!-- /[data-shell-route="creatives"] -->
             <!-- Standalone /#/billing route removed 2026-06-24 — merged
                  into Settings → Billing & funds. The transaction table +
                  loader + CSV export all live in the settings modal now.
@@ -5523,6 +5928,12 @@
         const SUPABASE_URL = "https://glogijhwbrdkkjdsjujc.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0";
 
+        // Expose on window so later script blocks (Creatives route IIFE etc.)
+        // can reach the credentials. `const` at script-top-level is scoped to
+        // its own <script> tag — separate script blocks can't see it.
+        window.SUPABASE_URL = SUPABASE_URL;
+        window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+
         // API Base URL (adjust if needed)
         const API_BASE = window.location.origin;
 
@@ -6254,7 +6665,7 @@
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'payouts'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'payouts'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -10103,6 +10514,13 @@
                     'auc.door_untagged': 'Untagged',
                     'auc.door_untagged_hint': 'Pre-tag legacy traffic',
                     'shell.nav.home': 'Performance',
+                    'shell.nav.creatives': 'Creatives',
+                    'creatives.title': 'Creatives',
+                    'creatives.sub': 'Define each asset once. Benna combines them to render across all 37 placements.',
+                    'creatives.ready_chip': 'Library ready',
+                    'creatives.min_setup_h': 'Minimum viable setup',
+                    'creatives.min_setup_p': 'Brand name + brand logo + ≥1 headline + ≥1 CTA covers 27 of the 37 placements (text_card + native formats). Images and videos unlock the remaining 10.',
+                    'creatives.coverage_h': 'Placement coverage',
                     'shell.nav.performance': 'Performance',
                     'shell.nav.integrations': 'Integrations',
                     'shell.nav.placements': 'Placements',
@@ -15862,6 +16280,408 @@ function pfParseScreenshots(text) {
                 if (getToken()) { clearInterval(poAuth); maybeLoad(); }
             }, 400);
             setTimeout(() => clearInterval(poAuth), 15000);
+            setTimeout(maybeLoad, 200);
+        })();
+    </script>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         Creatives route — global asset library IIFE.
+         Loads /api/creative-assets on route enter, hydrates the form,
+         debounce-saves on change, handles direct uploads to Supabase
+         Storage bucket 'creative-assets'. See db/33_creative_assets.sql.
+         ═════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            'use strict';
+
+            const API = '/api/creative-assets';
+            const BUCKET = 'creative-assets';
+            const MAX_IMAGE_MB = 5;
+            const MAX_VIDEO_MB = 20;
+
+            // ── Supabase JS client (lazy) — used only for direct Storage uploads.
+            // The anon key lives in window.__SUPABASE_ANON_KEY (set by auth-guard.js).
+            let _sb = null;
+            function sb() {
+                if (_sb) return _sb;
+                const url = window.__SUPABASE_URL || (window.SUPABASE_URL) || '';
+                const key = window.__SUPABASE_ANON_KEY || (window.SUPABASE_ANON_KEY) || '';
+                if (!url || !key || typeof window.supabase === 'undefined') return null;
+                _sb = window.supabase.createClient(url, key);
+                return _sb;
+            }
+
+            function getToken() {
+                try {
+                    const raw = localStorage.getItem('bb_session_token');
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    return (parsed && parsed.token) || null;
+                } catch (_) { return null; }
+            }
+
+            // ── State ────────────────────────────────────────────────
+            // Mirrors the row shape. Hydrated by load(); patched by save().
+            let state = null;
+            let advertiserId = null;
+            let saveTimer = null;
+            let supabaseClient = null;
+
+            function showStatus(text, kind) {
+                const el = document.getElementById('caSaveStatus');
+                if (!el) return;
+                el.textContent = text;
+                el.style.background = kind === 'error' ? '#DC2626' : (kind === 'ok' ? '#10B981' : '#1F2937');
+                el.style.display = 'block';
+                clearTimeout(el.__timer);
+                if (kind === 'ok' || kind === 'error') {
+                    el.__timer = setTimeout(() => { el.style.display = 'none'; }, 2000);
+                }
+            }
+
+            // ── Variant rows (headlines, body, CTAs) ────────────────
+            function renderVariantBlock(block) {
+                const field = block.getAttribute('data-ca-field');
+                const itemLen = parseInt(block.getAttribute('data-ca-itemlen'), 10) || 100;
+                const max = parseInt(block.getAttribute('data-ca-max'), 10) || 10;
+                const list = block.querySelector('.ca-variant-list');
+                const items = Array.isArray(state[field]) ? state[field] : [];
+                list.innerHTML = '';
+                items.forEach((val, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'ca-variant-row';
+                    row.innerHTML = '<input type="text" class="ca-input" maxlength="' + itemLen + '">' +
+                                    '<span class="ca-char-counter"></span>' +
+                                    '<button type="button" class="ca-remove" title="Remove">×</button>';
+                    const input = row.querySelector('input');
+                    const counter = row.querySelector('.ca-char-counter');
+                    input.value = val;
+                    counter.textContent = val.length + '/' + itemLen;
+                    input.addEventListener('input', () => {
+                        items[i] = input.value;
+                        counter.textContent = input.value.length + '/' + itemLen;
+                        queueSave({ [field]: items.slice() });
+                    });
+                    row.querySelector('.ca-remove').addEventListener('click', () => {
+                        items.splice(i, 1);
+                        queueSave({ [field]: items.slice() });
+                        renderVariantBlock(block);
+                    });
+                    list.appendChild(row);
+                });
+                const addBtn = block.querySelector('.ca-variant-add');
+                addBtn.disabled = items.length >= max;
+                addBtn.textContent = items.length >= max ? ('Max ' + max + ' reached') : '+ Add variant';
+                addBtn.onclick = () => {
+                    if (items.length >= max) return;
+                    items.push('');
+                    state[field] = items;
+                    renderVariantBlock(block);
+                    // focus the new row
+                    const rows = list.querySelectorAll('.ca-variant-row input');
+                    if (rows.length) rows[rows.length - 1].focus();
+                };
+            }
+
+            // ── Image rows (5 aspect ratios) ────────────────────────
+            function renderImageBlock(block) {
+                const field = block.getAttribute('data-ca-field');
+                const list = block.querySelector('.ca-image-list');
+                const items = Array.isArray(state[field]) ? state[field] : [];
+                list.innerHTML = '';
+                items.forEach((url, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'ca-image-row';
+                    row.innerHTML = '<img src="' + escAttr(url) + '" alt="">' +
+                                    '<button type="button" class="ca-remove" title="Remove">×</button>';
+                    row.querySelector('.ca-remove').addEventListener('click', () => {
+                        items.splice(i, 1);
+                        queueSave({ [field]: items.slice() });
+                        renderImageBlock(block);
+                    });
+                    list.appendChild(row);
+                });
+            }
+
+            function escAttr(s) {
+                return String(s == null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            // ── Brand kit + scalar text fields ──────────────────────
+            function hydrateScalarFields() {
+                const map = {
+                    caBrandName:      'brand_name',
+                    caBrandDomain:    'brand_domain',
+                    caBrandColor:     'brand_color',
+                    caBrandLogoUrl:   'brand_logo_url',
+                    caBrandFaviconUrl:'brand_favicon_url',
+                    caVideoLandscape: 'video_landscape_url',
+                    caVideoPortrait:  'video_portrait_url',
+                    caVideoPoster:    'video_poster_url',
+                    caVoucherValue:   'voucher_value_text',
+                    caVoucherCode:    'voucher_code',
+                    caVoucherUrl:     'voucher_redemption_url',
+                };
+                Object.keys(map).forEach((elId) => {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    const field = map[elId];
+                    el.value = state[field] || '';
+                    el.oninput = () => {
+                        state[field] = el.value;
+                        queueSave({ [field]: el.value });
+                        if (elId === 'caBrandLogoUrl') paintPreview('caBrandLogoPreview', el.value);
+                        if (elId === 'caBrandFaviconUrl') paintPreview('caBrandFaviconPreview', el.value);
+                        if (elId === 'caVideoPoster') paintPreview('caVideoPosterPreview', el.value);
+                    };
+                });
+                // Color picker mirrors the hex input
+                const picker = document.getElementById('caBrandColorPicker');
+                const colorInput = document.getElementById('caBrandColor');
+                if (picker && colorInput) {
+                    const sync = (val) => {
+                        if (/^#[0-9a-f]{6}$/i.test(val)) picker.value = val;
+                        else picker.value = '#FF2D78';
+                    };
+                    sync(state.brand_color || '');
+                    picker.oninput = () => { colorInput.value = picker.value; colorInput.dispatchEvent(new Event('input')); };
+                }
+                paintPreview('caBrandLogoPreview', state.brand_logo_url);
+                paintPreview('caBrandFaviconPreview', state.brand_favicon_url);
+                paintPreview('caVideoPosterPreview', state.video_poster_url);
+            }
+
+            function paintPreview(elId, url) {
+                const el = document.getElementById(elId);
+                if (!el) return;
+                if (url) {
+                    el.style.backgroundImage = 'url("' + url.replace(/"/g, '\\"') + '")';
+                    el.style.backgroundSize = 'contain';
+                    el.style.backgroundPosition = 'center';
+                    el.style.backgroundRepeat = 'no-repeat';
+                    el.classList.add('has-image');
+                } else {
+                    el.style.backgroundImage = '';
+                    el.classList.remove('has-image');
+                }
+            }
+
+            // ── Coverage hints — flip green ticks once requirements met ─
+            function renderCoverage() {
+                const hasBrandName = !!(state.brand_name || '').trim();
+                const hasLogo = !!state.brand_logo_url;
+                const nShort = (state.headlines_short || []).filter(Boolean).length;
+                const nMed = (state.headlines_medium || []).filter(Boolean).length;
+                const nCta = (state.cta_labels || []).filter(Boolean).length;
+                const bodyShort = (state.body_short || []).filter(Boolean).length;
+                const bodyMed = (state.body_medium || []).filter(Boolean).length;
+                const has169 = (state.images_16_9 || []).filter(Boolean).length;
+                const has916 = (state.images_9_16 || []).filter(Boolean).length;
+                const has31 = (state.images_3_1 || []).filter(Boolean).length;
+                const has21 = (state.images_2_1 || []).filter(Boolean).length;
+                const hasVideo = !!(state.video_landscape_url || state.video_portrait_url);
+
+                function set(elId, ok, text) {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    el.innerHTML = (ok ? '<span style="color:#10B981;">✓</span> ' : '<span style="color:#9CA3AF;">○</span> ') + text;
+                }
+                set('covTextCard', hasBrandName && nShort > 0 && bodyShort > 0 && nCta > 0,
+                    'Needs: brand name + short headline + short body + CTA');
+                set('covNative',   hasBrandName && hasLogo && nMed > 0 && bodyMed > 0 && nCta > 0 && has169,
+                    'Needs: logo + medium headline + medium body + CTA + 16:9 image');
+                set('covImage',    (has169 || has916 || has31 || has21),
+                    'Needs: any aspect-ratio banner image');
+                set('covVideo',    hasVideo && !!state.video_poster_url,
+                    'Needs: 16:9 or 9:16 MP4 + poster + endcard CTA');
+
+                const chip = document.getElementById('creativesReadyChip');
+                if (chip) chip.style.display = state.library_ready ? 'inline-flex' : 'none';
+                const check = document.getElementById('creativesChecklist');
+                if (check) check.style.display = state.library_ready ? 'none' : '';
+            }
+
+            // ── Load + render ───────────────────────────────────────
+            async function load() {
+                const tk = getToken();
+                if (!tk) return;
+                try {
+                    const r = await fetch(API, { headers: { 'Authorization': 'Bearer ' + tk } });
+                    if (!r.ok) {
+                        showStatus('Could not load assets', 'error');
+                        return;
+                    }
+                    const j = await r.json();
+                    state = j.assets || {};
+                    advertiserId = state.advertiser_id || null;
+                    // Render every variant + image block
+                    document.querySelectorAll('[data-ca-field]').forEach((block) => {
+                        if (block.classList.contains('ca-variant-block')) renderVariantBlock(block);
+                        else if (block.classList.contains('ca-image-block')) renderImageBlock(block);
+                    });
+                    hydrateScalarFields();
+                    renderCoverage();
+                } catch (e) {
+                    console.warn('[creatives] load failed:', e);
+                    showStatus('Could not load assets', 'error');
+                }
+            }
+
+            // ── Debounced PATCH ─────────────────────────────────────
+            let pending = {};
+            function queueSave(partial) {
+                Object.assign(pending, partial);
+                clearTimeout(saveTimer);
+                showStatus('Saving…');
+                saveTimer = setTimeout(flushSave, 600);
+            }
+            async function flushSave() {
+                const tk = getToken();
+                if (!tk) return;
+                const body = pending; pending = {};
+                if (Object.keys(body).length === 0) return;
+                try {
+                    const r = await fetch(API, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tk },
+                        body: JSON.stringify(body),
+                    });
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const j = await r.json();
+                    state = j.assets || state;
+                    renderCoverage();
+                    showStatus('✓ Saved', 'ok');
+                } catch (e) {
+                    console.warn('[creatives] save failed:', e);
+                    showStatus('✗ Save failed', 'error');
+                }
+            }
+
+            // ── Direct upload to Supabase Storage ───────────────────
+            // Path convention: {advertiser_id}/{kind}-{timestamp}-{filename}
+            async function upload(file, kind) {
+                if (!file) return null;
+                const isVideo = (kind === 'video_landscape' || kind === 'video_portrait');
+                const maxMb = isVideo ? MAX_VIDEO_MB : MAX_IMAGE_MB;
+                if (file.size > maxMb * 1024 * 1024) {
+                    showStatus('✗ File over ' + maxMb + 'MB', 'error');
+                    return null;
+                }
+                const client = sb();
+                if (!client) {
+                    showStatus('✗ Upload client not ready', 'error');
+                    return null;
+                }
+                if (!advertiserId) {
+                    showStatus('✗ Not authenticated', 'error');
+                    return null;
+                }
+                showStatus('Uploading…');
+                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
+                const path = advertiserId + '/' + kind + '-' + Date.now() + '-' + safeName;
+                const { error } = await client.storage.from(BUCKET).upload(path, file, {
+                    cacheControl: '31536000',
+                    upsert: false,
+                    contentType: file.type || undefined,
+                });
+                if (error) {
+                    console.warn('[creatives] upload error:', error);
+                    showStatus('✗ ' + (error.message || 'Upload failed'), 'error');
+                    return null;
+                }
+                const { data: pub } = client.storage.from(BUCKET).getPublicUrl(path);
+                return (pub && pub.publicUrl) || null;
+            }
+
+            // ── Upload buttons — single hidden file input reused ────
+            function wireUploadButtons() {
+                const fileInput = document.getElementById('caFileInput');
+                if (!fileInput) return;
+                let activeKind = null;
+                document.querySelectorAll('[data-ca-upload]').forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        activeKind = btn.getAttribute('data-ca-upload');
+                        // Pick file accept attr based on kind
+                        if (activeKind === 'video_landscape' || activeKind === 'video_portrait') {
+                            fileInput.accept = 'video/mp4,video/webm,video/quicktime';
+                        } else {
+                            fileInput.accept = 'image/png,image/jpeg,image/webp,image/svg+xml';
+                        }
+                        fileInput.value = '';
+                        fileInput.click();
+                    });
+                });
+                fileInput.addEventListener('change', async () => {
+                    const file = fileInput.files && fileInput.files[0];
+                    if (!file || !activeKind) return;
+                    const url = await upload(file, activeKind);
+                    if (!url) return;
+                    // Where to write the resulting URL
+                    if (activeKind === 'brand_logo') {
+                        state.brand_logo_url = url;
+                        document.getElementById('caBrandLogoUrl').value = url;
+                        paintPreview('caBrandLogoPreview', url);
+                        queueSave({ brand_logo_url: url });
+                    } else if (activeKind === 'brand_favicon') {
+                        state.brand_favicon_url = url;
+                        document.getElementById('caBrandFaviconUrl').value = url;
+                        paintPreview('caBrandFaviconPreview', url);
+                        queueSave({ brand_favicon_url: url });
+                    } else if (activeKind === 'video_landscape') {
+                        state.video_landscape_url = url;
+                        document.getElementById('caVideoLandscape').value = url;
+                        queueSave({ video_landscape_url: url });
+                    } else if (activeKind === 'video_portrait') {
+                        state.video_portrait_url = url;
+                        document.getElementById('caVideoPortrait').value = url;
+                        queueSave({ video_portrait_url: url });
+                    } else if (activeKind === 'video_poster') {
+                        state.video_poster_url = url;
+                        document.getElementById('caVideoPoster').value = url;
+                        paintPreview('caVideoPosterPreview', url);
+                        queueSave({ video_poster_url: url });
+                    } else if (activeKind === 'images_16_9' || activeKind === 'images_9_16' || activeKind === 'images_3_1' || activeKind === 'images_2_1') {
+                        const arr = (state[activeKind] || []).slice();
+                        arr.push(url);
+                        state[activeKind] = arr;
+                        queueSave({ [activeKind]: arr });
+                        const block = document.querySelector('[data-ca-field="' + activeKind + '"]');
+                        if (block) renderImageBlock(block);
+                    }
+                });
+            }
+
+            // ── Route gate ──────────────────────────────────────────
+            let loadedOnce = false;
+            function maybeLoad() {
+                const wrap = document.querySelector('[data-shell-active-route]');
+                const active = wrap && wrap.getAttribute('data-shell-active-route');
+                if (active !== 'creatives') return;
+                if (!getToken()) return;
+                if (!loadedOnce) {
+                    loadedOnce = true;
+                    wireUploadButtons();
+                    load();
+                }
+            }
+
+            // ── Bootstrap ──────────────────────────────────────────
+            // Load Supabase JS client lazily on first need (not eagerly —
+            // most sessions never visit /creatives).
+            function ensureSupabaseScript() {
+                if (window.supabase && typeof window.supabase.createClient === 'function') return;
+                // The Supabase global IS already loaded from the <head> CDN
+                // (line 19, @supabase/supabase-js@2). This is just a guard.
+            }
+
+            window.addEventListener('hashchange', maybeLoad);
+            const caAuth = setInterval(() => {
+                if (getToken()) { clearInterval(caAuth); ensureSupabaseScript(); maybeLoad(); }
+            }, 400);
+            setTimeout(() => clearInterval(caAuth), 15000);
             setTimeout(maybeLoad, 200);
         })();
     </script>
