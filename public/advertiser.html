@@ -9540,128 +9540,18 @@
                 badge.style.display = 'none';
             }
         }
-        // Wire input listeners (delegated, runs once)
-        document.addEventListener('input', (e) => {
-            const t = e.target;
-            if (!t || !t.name || !campaignModal.contains(t)) return;
-            if (t.name === 'creative_headlines_text'
-                || t.name === 'creative_body_copy_text'
-                || t.name === 'creative_cta_labels_text') {
-                try { cmUpdateCreativeCounts(); } catch (_) {}
-            }
-        });
-
-        // Override create handler to support edit mode
-        const _origSubmit = handleCreateCampaign;
-        campaignForm.removeEventListener('submit', handleCreateCampaign);
-        campaignForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (editingCampaignId) {
-                // UPDATE mode — share the same in-flight guard the create
-                // path uses (Tasks #145, #153). Edit double-clicks were
-                // creating duplicate updates AND duplicate campaigns
-                // depending on timing.
-                if (_campaignFormInFlight) return;
-                _campaignFormInFlight = true;
-                const launchBtn = document.getElementById('launchCampaignBtn');
-                const origText = launchBtn ? launchBtn.textContent : '';
-                if (launchBtn) {
-                    launchBtn.disabled = true;
-                    launchBtn.textContent = 'Saving…';
-                }
-                const releaseGuard = () => {
-                    _campaignFormInFlight = false;
-                    if (launchBtn) {
-                        launchBtn.disabled = false;
-                        launchBtn.textContent = origText || 'Save Changes';
-                    }
-                };
-
-                const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
-                const formData = new FormData(campaignForm);
-                // Parse the per-line variant textareas (Pilot model, Phase B).
-                const linesToArr = (s) => String(s || '').split('\n').map((l) => l.trim()).filter(Boolean);
-                const updateData = {
-                    id: editingCampaignId,
-                    name: formData.get('name'),
-                    format: formatFromGroups(),
-                    placement_tier: placementTierFromGroups(),
-                    headline: formData.get('headline'),
-                    subtext: formData.get('subtext') || '',
-                    cta_label: formData.get('cta_text') || undefined,
-                    cta_url: formData.get('cta_url'),
-                    target_keywords: intents,
-                    billing_model: formData.get('billing_model'),
-                    bid_amount: parseFloat(formData.get('bid_amount')) || null,
-                    daily_budget: parseFloat(formData.get('daily_budget')),
-                    total_budget: parseFloat(formData.get('total_budget')),
-                    // BBX MCP-native targeting — same shape as create path
-                    target_intent_tokens: intents,
-                    target_host_apps: hostApps.map(canonicaliseHostApp),
-                    target_active_tools: mcpTools.map(canonicaliseMcpTool),
-                    target_surfaces: getSelectedSurfaces(),
-                    // Per-door opt-in (migration 09). Empty array = all four doors.
-                    target_integration_methods: getSelectedIntegrationMethods(),
-                    // Parent product. Empty string from the <select> = NULL (standalone campaign).
-                    product_id: (formData.get('product_id') || '').toString().trim() || null,
-                    // Pilot model — Phase B 2026-06-24
-                    creative_headlines:  linesToArr(formData.get('creative_headlines_text')),
-                    creative_body_copy:  linesToArr(formData.get('creative_body_copy_text')),
-                    creative_cta_labels: linesToArr(formData.get('creative_cta_labels_text')),
-                };
-
-                try {
-                    const r = await fetch(`${API_BASE}/api/campaigns?action=update`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${currentUser.token}`
-                        },
-                        body: JSON.stringify(updateData)
-                    });
-                    if (!r.ok) {
-                        const err = await r.json();
-                        throw new Error(err.error || 'Update failed');
-                    }
-                    showToast('Campaign updated!', 'success');
-                    editingCampaignId = null;
-                    closeModal();
-                    loadCampaigns();
-                    loadStats();
-                } catch (err) {
-                    showToast(err.message, 'error');
-                } finally {
-                    releaseGuard();
-                }
-            } else {
-                // CREATE mode — call original handler. handleCreateCampaign
-                // sets _campaignFormInFlight itself and releases in its own
-                // finally, so don't double-guard here.
-                _origSubmit.call(this, e);
-            }
-        });
-
-        // Patch closeModal to reset edit state
-        const _origClose = closeModal;
-        closeModal = function() {
-            editingCampaignId = null;
-            const modalTitle = campaignModal.querySelector('.modal-header h2, h3');
-            if (modalTitle) modalTitle.textContent = 'Create New Campaign';
-            // Reset tab strip to Basics on every close so the next open
-            // doesn't accidentally land on Creatives. Phase B 2026-06-24.
-            campaignModal.querySelectorAll('.cm-tab').forEach((b) => {
-                const isBasics = b.getAttribute('data-cm-tab') === 'basics';
-                b.classList.toggle('cm-tab-active', isBasics);
-                b.style.color = isBasics ? '#FF2D78' : '#6B7280';
-                b.style.borderBottomColor = isBasics ? '#FF2D78' : 'transparent';
-            });
-            campaignModal.querySelectorAll('[data-cm-pane]').forEach((pane) => {
-                pane.style.display = (pane.getAttribute('data-cm-pane') === 'basics') ? '' : 'none';
-            });
-            try { cmUpdateCreativeCounts(); } catch (_) {}
-            _origClose();
-        };
+        // Legacy form-submit override + closeModal patch removed 2026-06-25.
+        // The Phase B block here used to wrap the campaignForm with an
+        // edit-mode submit handler and reassign closeModal to reset state.
+        // Edit + Duplicate now route through the 3-step wizard
+        // (openNewCampaignWizard) which PATCHes /api/campaigns?action=update
+        // directly. The closeModal patch and the input-event delegator are
+        // dead because the legacy campaignModal is being retired.
+        //
+        // These were the parse-time killers identified after the 0ee9327
+        // dashboard-blanking incident: removing const campaignForm before
+        // removing these top-level statements turned them into
+        // `undefined.removeEventListener(...)` → TypeError → blank page.
 
         // ───────────── CAMPAIGN DRAFTS (localStorage) ─────────────
         // Drafts are stored client-side, keyed per advertiser. Closing a
