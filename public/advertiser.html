@@ -3681,19 +3681,12 @@
               <!-- ───────────────── BOOST PANE ───────────────── -->
               <div id="pilotActiveBoost" style="display:none;" data-pilot-pane="boost">
 
-                <!-- Creative readiness nudge — shown when the selected
-                     product hasn't filled the Creatives tab with enough
-                     variants for Benna's bandit. See [[advertiser-pilot-model]]. -->
-                <div id="pilotCreativeNudge" style="display:none; margin-bottom:18px; padding:14px 16px; background:linear-gradient(135deg, #FFFBEB, #FEF3C7); border:1px solid #FDE68A; border-radius:12px;">
-                  <div style="display:flex; align-items:flex-start; gap:12px;">
-                    <div style="font-size:24px; line-height:1;">⚡</div>
-                    <div style="flex:1; min-width:0;">
-                      <div style="font-size:13px; font-weight:700; color:#92400E; margin-bottom:4px;">Boost will run with a single creative</div>
-                      <div style="font-size:12px; color:#78350F; line-height:1.55; margin-bottom:8px;">Benna's multi-arm bandit needs 3+ headline variants to actually test what wins. Right now we'll show your product name on every impression — workable, but you're leaving CTR on the table.</div>
-                      <a href="#" id="pilotCreativeNudgeLink" style="display:inline-block; padding:6px 12px; background:#92400E; color:#fff; font-size:11px; font-weight:700; border-radius:6px; text-decoration:none; letter-spacing:0.02em;">Open Creatives tab →</a>
-                    </div>
-                  </div>
-                </div>
+                <!-- Yellow creative-readiness nudge retired 2026-06-25.
+                     Moved into the New Campaign wizard (step 1) so the
+                     warning fires when it's actually actionable — before
+                     launch, not after the campaign is already live. By the
+                     time a row reaches Active Boosts the decision is
+                     already locked. -->
 
 
                 <!-- Status + live metrics row -->
@@ -5649,6 +5642,22 @@
             <div class="ncw-step" data-ncw-step="1">
               <div style="font-size:18px;font-weight:700;color:#0F0F1A;margin-bottom:4px;">What are we launching?</div>
               <div style="font-size:12.5px;color:#6B7280;margin-bottom:18px;line-height:1.5;">Name it, pick your goal, drop a destination URL. Benna pulls everything else (headlines, body, images, brand kit) from your global <a href="#/creatives" style="color:#FF2D78;font-weight:600;text-decoration:none;">Creatives library</a>.</div>
+
+              <!-- Library-readiness warning — populated by ncwUpdateLibraryWarning()
+                   when the wizard opens. Hidden when the global library has
+                   ≥3 headlines. The warning fires here (pre-launch) instead of
+                   on the Boost sub-tab so the advertiser sees it when it's
+                   still actionable. -->
+              <div id="ncwLibraryWarning" style="display:none;margin-bottom:14px;padding:12px 14px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:10px;">
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                  <div style="font-size:18px;line-height:1;flex-shrink:0;">⚡</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12.5px;font-weight:700;color:#92400E;margin-bottom:2px;" id="ncwLibraryWarningTitle">Your Creatives library is light</div>
+                    <div style="font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:6px;" id="ncwLibraryWarningBody">Benna's multi-arm bandit needs 3+ headline variants to actually test what wins. Without them, this campaign serves a single creative — workable but you're leaving CTR on the table.</div>
+                    <a href="#/creatives" id="ncwLibraryWarningLink" style="display:inline-block;padding:5px 10px;background:#92400E;color:#fff;font-size:10.5px;font-weight:700;border-radius:5px;text-decoration:none;letter-spacing:0.02em;">Fill it now →</a>
+                  </div>
+                </div>
+              </div>
 
               <label class="ncw-label">Campaign name</label>
               <input type="text" id="ncwName" class="ncw-input" maxlength="120" placeholder="e.g. StripeFlow signup push — June 2026">
@@ -18007,63 +18016,10 @@ function pfParseScreenshots(text) {
                 // Status row
                 renderStatusRow(p);
 
-                // Creative readiness nudge — hide if EITHER:
-                //   (a) campaign has its own creative_library_ready flag set, OR
-                //   (b) the global /creatives library has ≥3 headlines (any
-                //       length) AND ≥1 image — campaign inherits from there.
-                // The original logic only looked at (a), which meant any
-                // campaign launched through the new wizard (empty creative_*
-                // arrays) always failed the check even when the library was
-                // fully filled. See [[advertiser-pilot-model]] inheritance.
-                const nudge = document.getElementById('pilotCreativeNudge');
-                const nudgeLink = document.getElementById('pilotCreativeNudgeLink');
-                if (nudge) {
-                    const lib = pilotLibraryAssets || {};
-                    const libHeadlines =
-                        (lib.headlines_short  || []).filter(Boolean).length +
-                        (lib.headlines_medium || []).filter(Boolean).length +
-                        (lib.headlines_long   || []).filter(Boolean).length;
-                    const libHasImage =
-                        !!lib.brand_logo_url ||
-                        (lib.images_16_9 || []).length > 0 ||
-                        (lib.images_9_16 || []).length > 0 ||
-                        (lib.images_3_1  || []).length > 0 ||
-                        (lib.images_2_1  || []).length > 0;
-                    const libraryCovers = libHeadlines >= 3 && libHasImage;
-                    const ready = (p.creative_library_ready === true) || libraryCovers;
-                    nudge.style.display = ready ? 'none' : '';
-                }
-                // If the library hasn't loaded yet at first render, refresh
-                // the nudge state once it lands. Idempotent — second pass is
-                // a no-op if the library was already loaded.
-                if (typeof pilotLoadLibraryAssets === 'function' && !pilotLibraryAssets) {
-                    pilotLoadLibraryAssets().then(() => {
-                        if (nudge && pilotLibraryAssets) {
-                            const lib2 = pilotLibraryAssets;
-                            const heads2 =
-                                (lib2.headlines_short  || []).filter(Boolean).length +
-                                (lib2.headlines_medium || []).filter(Boolean).length +
-                                (lib2.headlines_long   || []).filter(Boolean).length;
-                            const img2 = !!lib2.brand_logo_url ||
-                                (lib2.images_16_9 || []).length > 0 ||
-                                (lib2.images_9_16 || []).length > 0 ||
-                                (lib2.images_3_1  || []).length > 0 ||
-                                (lib2.images_2_1  || []).length > 0;
-                            if ((p.creative_library_ready === true) || (heads2 >= 3 && img2)) {
-                                nudge.style.display = 'none';
-                            }
-                        }
-                    });
-                }
-                // Click → switch internal Pilot tab to Creatives.
-                // Stays on /pilot, no navigation, scrolls to top.
-                if (nudgeLink) {
-                    nudgeLink.onclick = (e) => {
-                        e.preventDefault();
-                        pilotSwitchInternalTab('creatives');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    };
-                }
+                // Yellow creative-readiness nudge retired 2026-06-25 — the
+                // warning moved into the New Campaign wizard step 1 so it
+                // fires before launch, not after. By the time a campaign
+                // is here in Active Boosts, the decision is already locked.
             }
 
             // ── Global creative library cache (the /creatives sidebar route).
@@ -18682,8 +18638,55 @@ function pfParseScreenshots(text) {
                 showStep(1);
                 // Pre-fetch products for step 3 in the background
                 if (!productsLoaded) loadProducts();
+                // Pre-fetch creative_assets library to drive the readiness
+                // warning at the top of step 1. Async — the warning starts
+                // hidden and pops in once the fetch lands.
+                refreshLibraryWarning();
                 const nameEl = document.getElementById('ncwName');
                 if (nameEl) setTimeout(() => nameEl.focus(), 50);
+            }
+
+            // Library-readiness warning at the top of step 1. Hits the same
+            // /api/creative-assets endpoint /creatives uses; shows the
+            // yellow ⚡ block when the global library has < 3 headlines
+            // (the bandit's minimum for meaningful A/B/n testing).
+            async function refreshLibraryWarning() {
+                const warn = document.getElementById('ncwLibraryWarning');
+                const titleEl = document.getElementById('ncwLibraryWarningTitle');
+                const bodyEl = document.getElementById('ncwLibraryWarningBody');
+                if (!warn) return;
+                warn.style.display = 'none';
+                const token = getToken();
+                if (!token) return;
+                try {
+                    const r = await fetch('/api/creative-assets', {
+                        headers: { 'Authorization': 'Bearer ' + token },
+                    });
+                    if (!r.ok) return;
+                    const j = await r.json();
+                    const lib = (j && j.assets) || {};
+                    const heads =
+                        (lib.headlines_short  || []).filter(Boolean).length +
+                        (lib.headlines_medium || []).filter(Boolean).length +
+                        (lib.headlines_long   || []).filter(Boolean).length;
+                    const hasBrandName = !!(lib.brand_name && String(lib.brand_name).trim());
+                    if (heads >= 3 && hasBrandName) {
+                        warn.style.display = 'none';
+                        return;
+                    }
+                    // Tailor the message to what's actually missing.
+                    if (!hasBrandName && heads < 3) {
+                        if (titleEl) titleEl.textContent = 'Your Creatives library is empty';
+                        if (bodyEl)  bodyEl.textContent  = 'Without a brand kit and at least 3 headline variants, this campaign serves a single fallback creative. Benna can\'t A/B-test what wins until you fill the library.';
+                    } else if (!hasBrandName) {
+                        if (titleEl) titleEl.textContent = 'No brand kit set';
+                        if (bodyEl)  bodyEl.textContent  = 'Without a brand name and logo, this campaign serves without the "Sponsored by …" line. Add a brand kit so every impression carries trust.';
+                    } else {
+                        if (titleEl) titleEl.textContent = 'Your Creatives library has < 3 headlines';
+                        if (bodyEl)  bodyEl.textContent  = 'Benna\'s multi-arm bandit needs 3+ headline variants to actually test what wins. Add more variants so this campaign can A/B at impression time.';
+                    }
+                    warn.style.display = '';
+                } catch (_) { /* silent — warning stays hidden on fetch error */ }
             }
             function close() {
                 wizard.classList.remove('active');
