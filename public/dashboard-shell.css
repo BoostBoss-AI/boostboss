@@ -512,7 +512,7 @@
 .shell-wrap[data-shell-active-route="integrations"]    [data-shell-route="integrations"],
 .shell-wrap[data-shell-active-route="placements"]      [data-shell-route="placements"],
 .shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],
-.shell-wrap[data-shell-active-route="promote"]         [data-shell-route="promote"],
+/* promote route retired 2026-06-25 — balance cards moved to Payouts. */
 .shell-wrap[data-shell-active-route="usage"]           [data-shell-route="usage"],
 .shell-wrap[data-shell-active-route="api"]             [data-shell-route="api"] {
     display: block;

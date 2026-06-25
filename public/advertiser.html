@@ -2612,10 +2612,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.payouts">Payouts</span>
             </button>
-            <button class="shell-nav-item" data-shell-section="promote">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.promote">Promote</span>
-            </button>
+            <!-- Promote nav removed 2026-06-25. Balance cards (MoR earnings +
+                 Ad credit) moved to the top of the Payouts page. The 'Active
+                 campaigns' table was redundant with Boost Ads' own performance
+                 dashboard, so it was deleted along with the rest of the route. -->
             <!-- Setup nav removed 2026-06-25. Pixel snippet moved to
                  Settings → Conversion tracking. Automated Rules deleted
                  (was localStorage-only, no backend processor). Advanced
@@ -3926,6 +3926,51 @@
                 </div>
               </div>
 
+              <!-- ═════ MoR earnings + Ad credit cards ═════
+                   Moved here from the retired /promote route 2026-06-25.
+                   IDs preserved (promoteBalance, promoteAdCredit, etc.) so
+                   the existing wireOnce(), openConvertModal(), and balance
+                   refresh handlers keep working unchanged. -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-bottom:18px;">
+
+                <!-- MoR earnings (cashable / convertible) -->
+                <div style="background:linear-gradient(135deg,#FFF5F8 0%,#F5FBFF 100%);border:1.5px solid #E5E7EB;border-radius:14px;padding:22px 24px;">
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7280;font-weight:700;" data-t="page.promote.mor_label">MoR earnings (unsettled)</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#111827;margin-top:4px;">
+                    $<span id="promoteBalance">0.00</span>
+                  </div>
+                  <div style="font-size:12.5px;color:#374151;margin-top:6px;line-height:1.5;" data-t="page.promote.mor_desc">
+                    From settled MoR captures. Cash out via PayPal, or convert to ad credit to spend in BB.
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+                    <button id="promoteCashoutBtn" style="background:#1A1A2E;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
+                      <span data-t="page.promote.btn_cashout">Cash out via PayPal</span>
+                    </button>
+                    <button id="promoteConvertBtn" style="background:#fff;color:#4338CA;border:1px solid #C7D2FE;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;" data-t="page.promote.btn_convert">
+                      ↻ Convert to ad credit
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Ad credit (spend pool) -->
+                <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);border:1.5px solid #C7D2FE;border-radius:14px;padding:22px 24px;">
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;" data-t="page.promote.credit_label">Ad credit (available to spend)</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#3730A3;margin-top:4px;">
+                    $<span id="promoteAdCredit">0.00</span>
+                  </div>
+                  <div style="font-size:12.5px;color:#4338CA;margin-top:6px;line-height:1.5;">
+                    <span data-t="page.promote.credit_desc">Pre-funded ad budget — already inside BB.</span> <span id="promoteAdCreditCount" style="color:#6366F1;">No conversions yet.</span>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+                    <button id="promoteCreateCampaignBtn" style="background:#FF2D78;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(255,45,120,0.32);">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      <span data-t="page.promote.btn_create">Create campaign</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <!-- Top stat cards: available + lifetime + next payout date -->
               <div id="payoutsStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px;">
                 <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
@@ -4002,132 +4047,62 @@
               </div>
             </div><!-- /[data-shell-route="payouts"] -->
 
-            <!-- ═══════ ROUTE: promote (use MoR earnings as ad budget) ═══════
-                 Mirrors the publisher-side 推廣 / Promote page in developer.html.
-                 Money never leaves the system — instead of withdrawing settled
-                 funds to PayPal, sellers reinvest them into campaigns. -->
-            <div data-shell-route="promote">
-              <div class="shell-page-head">
-                <div>
-                  <h1 class="shell-page-title" data-t="page.promote.title">Promote</h1>
-                  <div class="shell-page-sub" data-t="page.promote.sub">Reuse your MoR earnings to acquire customers on the Boost Boss network. Spend in the system → no PayPal round-trip.</div>
+            <!-- ROUTE: promote — RETIRED 2026-06-25.
+                 Balance cards (MoR earnings + Ad credit) moved to top of
+                 Payouts. Active campaigns table + 'Open Campaigns →' link
+                 deleted (Boost Ads has its own per-campaign performance
+                 dashboard). Convert-to-credit modal kept below outside any
+                 route wrapper so the Convert button on Payouts still works. -->
+
+            <!-- Convert-to-credit modal — position:fixed, lives outside the
+                 routed shell so any page can open it. Originally inside the
+                 /promote route; moved here when /promote was retired. -->
+            <div id="convertModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+              <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.3);overflow:hidden;">
+                <!-- Header with gradient -->
+                <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);padding:22px 26px;border-bottom:1px solid #E5E7EB;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                    <div>
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;margin-bottom:4px;" data-t="page.promote.convert_kicker">Convert to ad credit</div>
+                      <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.3;" data-t="page.promote.convert_h">How much to convert?</div>
+                    </div>
+                    <button type="button" id="convertModalClose" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 4px;">×</button>
+                  </div>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:24px 26px;">
+                  <!-- Available chip -->
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:18px;">
+                    <span style="font-size:12.5px;color:#6B7280;font-weight:600;" data-t="page.promote.convert_available">Available MoR balance</span>
+                    <span style="font-size:16px;font-weight:700;color:#111827;">$<span id="convertModalAvailable">0.00</span></span>
+                  </div>
+
+                  <!-- Amount input -->
+                  <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:8px;" data-t="page.promote.convert_label_amount">Amount to convert (USD)</label>
+                  <div style="position:relative;margin-bottom:8px;">
+                    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:#6B7280;">$</span>
+                    <input type="number" id="convertModalAmount" min="0.01" step="0.01" style="width:100%;padding:14px 16px 14px 32px;border:2px solid #C7D2FE;border-radius:10px;font-size:22px;font-weight:700;font-family:inherit;color:#111827;background:#fff;">
+                    <button type="button" id="convertModalMaxBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" data-t="page.promote.convert_max">MAX</button>
+                  </div>
+                  <div style="font-size:11px;color:#9CA3AF;margin-bottom:18px;line-height:1.5;" data-t="page.promote.convert_round_hint">Rounds up to the nearest covered sale (MoR captures are atomic — can't be split mid-row).</div>
+
+                  <!-- Trade-off explainer -->
+                  <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#92400E;line-height:1.55;margin-bottom:8px;">
+                    <strong data-t="page.promote.convert_warn_strong">⚠ One-way conversion.</strong> <span data-t="page.promote.convert_warn_body">Once converted, the funds stay inside BB as ad credit — they can no longer be paid out to your PayPal. (Support can reverse it in exceptional cases.)</span>
+                  </div>
+
+                  <!-- Error display -->
+                  <div id="convertModalErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:10px 12px;border-radius:8px;font-size:12.5px;margin-top:12px;"></div>
+                </div>
+
+                <!-- Footer with actions -->
+                <div style="display:flex;justify-content:flex-end;gap:8px;padding:18px 26px;border-top:1px solid #F3F4F6;background:#FAFAFA;">
+                  <button type="button" id="convertModalCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;" data-t="common.cancel">Cancel</button>
+                  <button type="button" id="convertModalConfirm" style="padding:10px 22px;border:none;border-radius:10px;background:linear-gradient(135deg,#FF2D78 0%,#4338CA 100%);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(255,45,120,0.32);" data-t="page.promote.convert_btn">↻ Convert</button>
                 </div>
               </div>
-
-              <!-- Two balance cards: MoR earnings + Ad credit -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-bottom:24px;">
-
-                <!-- MoR earnings (cashable / convertible) -->
-                <div style="background:linear-gradient(135deg,#FFF5F8 0%,#F5FBFF 100%);border:1.5px solid #E5E7EB;border-radius:14px;padding:22px 24px;">
-                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#6B7280;font-weight:700;" data-t="page.promote.mor_label">MoR earnings (unsettled)</div>
-                  <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#111827;margin-top:4px;">
-                    $<span id="promoteBalance">0.00</span>
-                  </div>
-                  <div style="font-size:12.5px;color:#374151;margin-top:6px;line-height:1.5;" data-t="page.promote.mor_desc">
-                    From settled MoR captures. Cash out via PayPal, or convert to ad credit to spend in BB.
-                  </div>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-                    <button id="promoteCashoutBtn" style="background:#1A1A2E;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
-                      <span data-t="page.promote.btn_cashout">Cash out via PayPal</span>
-                    </button>
-                    <button id="promoteConvertBtn" style="background:#fff;color:#4338CA;border:1px solid #C7D2FE;border-radius:8px;padding:9px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;" data-t="page.promote.btn_convert">
-                      ↻ Convert to ad credit
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Ad credit (spend pool) -->
-                <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);border:1.5px solid #C7D2FE;border-radius:14px;padding:22px 24px;">
-                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;" data-t="page.promote.credit_label">Ad credit (available to spend)</div>
-                  <div style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#3730A3;margin-top:4px;">
-                    $<span id="promoteAdCredit">0.00</span>
-                  </div>
-                  <div style="font-size:12.5px;color:#4338CA;margin-top:6px;line-height:1.5;">
-                    <span data-t="page.promote.credit_desc">Pre-funded ad budget — already inside BB.</span> <span id="promoteAdCreditCount" style="color:#6366F1;">No conversions yet.</span>
-                  </div>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-                    <button id="promoteCreateCampaignBtn" style="background:#FF2D78;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(255,45,120,0.32);">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                      <span data-t="page.promote.btn_create">Create campaign</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Active campaigns -->
-              <div style="margin-bottom:24px;">
-                <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:#111827;" data-t="page.promote.active_h">Active campaigns</h3>
-                <div id="promoteCampaignsList">
-                  <div id="promoteEmptyState" style="border:1.5px dashed #E5E7EB;border-radius:14px;padding:48px 24px;text-align:center;color:#6B7280;">
-                    <div style="font-size:42px;margin-bottom:12px;">📣</div>
-                    <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:#111827;margin-bottom:6px;" data-t="page.promote.empty_h">No campaigns yet</div>
-                    <div style="font-size:14px;line-height:1.55;max-width:480px;margin:0 auto;" data-t="page.promote.empty_p">
-                      When you create your first campaign, it'll appear here with live impressions, clicks, and spend. Your MoR earnings can fund it directly — no PayPal deposit needed.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bottom hint: full advertiser features -->
-              <div style="border-top:1px solid #E5E7EB;padding-top:18px;margin-top:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                <div style="font-size:13px;color:#6B7280;" data-t="page.promote.graduate_hint">
-                  Want multiple creatives, advanced targeting, deep analytics? The full Campaigns surface has it all.
-                </div>
-                <a href="#/campaigns" style="font-size:14px;font-weight:600;color:#FF2D78;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                  <span data-t="page.promote.graduate_link">Open Campaigns</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </a>
-              </div>
-              <!-- Convert-to-credit modal (BB-styled — replaces the native browser confirm() prompt) -->
-              <div id="convertModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
-                <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.3);overflow:hidden;">
-                  <!-- Header with gradient -->
-                  <div style="background:linear-gradient(135deg,#EEF2FF 0%,#FFF1F6 100%);padding:22px 26px;border-bottom:1px solid #E5E7EB;">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-                      <div>
-                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4338CA;font-weight:700;margin-bottom:4px;" data-t="page.promote.convert_kicker">Convert to ad credit</div>
-                        <div style="font-size:18px;font-weight:700;color:#111827;line-height:1.3;" data-t="page.promote.convert_h">How much to convert?</div>
-                      </div>
-                      <button type="button" id="convertModalClose" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 4px;">×</button>
-                    </div>
-                  </div>
-
-                  <!-- Body -->
-                  <div style="padding:24px 26px;">
-                    <!-- Available chip -->
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:18px;">
-                      <span style="font-size:12.5px;color:#6B7280;font-weight:600;" data-t="page.promote.convert_available">Available MoR balance</span>
-                      <span style="font-size:16px;font-weight:700;color:#111827;">$<span id="convertModalAvailable">0.00</span></span>
-                    </div>
-
-                    <!-- Amount input -->
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:8px;" data-t="page.promote.convert_label_amount">Amount to convert (USD)</label>
-                    <div style="position:relative;margin-bottom:8px;">
-                      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:#6B7280;">$</span>
-                      <input type="number" id="convertModalAmount" min="0.01" step="0.01" style="width:100%;padding:14px 16px 14px 32px;border:2px solid #C7D2FE;border-radius:10px;font-size:22px;font-weight:700;font-family:inherit;color:#111827;background:#fff;">
-                      <button type="button" id="convertModalMaxBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" data-t="page.promote.convert_max">MAX</button>
-                    </div>
-                    <div style="font-size:11px;color:#9CA3AF;margin-bottom:18px;line-height:1.5;" data-t="page.promote.convert_round_hint">Rounds up to the nearest covered sale (MoR captures are atomic — can't be split mid-row).</div>
-
-                    <!-- Trade-off explainer -->
-                    <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#92400E;line-height:1.55;margin-bottom:8px;">
-                      <strong data-t="page.promote.convert_warn_strong">⚠ One-way conversion.</strong> <span data-t="page.promote.convert_warn_body">Once converted, the funds stay inside BB as ad credit — they can no longer be paid out to your PayPal. (Support can reverse it in exceptional cases.)</span>
-                    </div>
-
-                    <!-- Error display -->
-                    <div id="convertModalErr" style="display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:10px 12px;border-radius:8px;font-size:12.5px;margin-top:12px;"></div>
-                  </div>
-
-                  <!-- Footer with actions -->
-                  <div style="display:flex;justify-content:flex-end;gap:8px;padding:18px 26px;border-top:1px solid #F3F4F6;background:#FAFAFA;">
-                    <button type="button" id="convertModalCancel" style="padding:10px 18px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;" data-t="common.cancel">Cancel</button>
-                    <button type="button" id="convertModalConfirm" style="padding:10px 22px;border:none;border-radius:10px;background:linear-gradient(135deg,#FF2D78 0%,#4338CA 100%);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(255,45,120,0.32);" data-t="page.promote.convert_btn">↻ Convert</button>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /[data-shell-route="promote"] -->
+            </div>
 
             <!-- ROUTE: setup — RETIRED 2026-06-25.
                  Pixel snippet moved into Settings (Conversion tracking tab).
@@ -6264,8 +6239,9 @@
             // data-shell-active-route attribute. Falls back to 'home'
             // when the hash is empty or unrecognized.
             // 'billing' removed 2026-06-24 — merged into Settings → Billing & funds.
-            // 'setup' removed 2026-06-25 — see the sidebar nav comment.
-            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'payouts', 'promote'];
+            // 'setup' removed 2026-06-25 — pixel moved to Settings.
+            // 'promote' removed 2026-06-25 — balance cards moved to top of Payouts.
+            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'payouts'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -15878,10 +15854,14 @@ function pfParseScreenshots(text) {
     </script>
 
     <!-- ═════════════════════════════════════════════════════════════════
-         Promote route — /ads/dashboard#/promote
-         Mirrors developer.html publisher Promote. Balance = MoR earnings;
-         CTAs link to existing flows (Payouts for cash out, New Campaign
-         modal for ad creation). Phase 2 wires the credit-deduction mechanic.
+         MoR balance + Ad credit handlers — formerly the /promote route IIFE.
+         The /promote sidebar route was retired 2026-06-25 and the balance
+         cards moved to the top of /payouts. This IIFE still wires up the
+         buttons by ID (promoteBalance, promoteAdCredit, promoteCashoutBtn,
+         promoteConvertBtn, promoteCreateCampaignBtn, convertModal*) — those
+         IDs were preserved during the move, so the handlers are untouched
+         except for the route-check inside maybeLoad() which now fires on
+         /payouts instead of /promote.
          ═════════════════════════════════════════════════════════════════ -->
     <script>
         (function () {
@@ -16039,53 +16019,10 @@ function pfParseScreenshots(text) {
                 }
             }
 
-            async function loadActiveCampaigns() {
-                const tk = getToken();
-                if (!tk) return;
-                try {
-                    // /api/campaigns supports advertiser_id filter + status=active
-                    const advId = (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.user_id) || '';
-                    if (!advId) return;
-                    const r = await fetch('/api/campaigns?advertiser_id=' + encodeURIComponent(advId) + '&status=active', {
-                        headers: { 'Authorization': 'Bearer ' + tk },
-                    });
-                    if (!r.ok) return;
-                    const j = await r.json();
-                    const campaigns = (j.campaigns || []).filter((c) => c.status === 'active' || c.status === 'in_review');
-                    renderActiveCampaigns(campaigns);
-                } catch (_) {}
-            }
-
-            function renderActiveCampaigns(items) {
-                const wrap = document.getElementById('promoteCampaignsList');
-                if (!wrap) return;
-                if (!items.length) return;  // keep empty state as-is
-                wrap.innerHTML = `
-                    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;">
-                        <table style="width:100%;border-collapse:collapse;font-family:inherit;">
-                            <thead>
-                                <tr style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
-                                    <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Name</th>
-                                    <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Status</th>
-                                    <th style="padding:11px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Daily budget</th>
-                                    <th style="padding:11px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Total budget</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${items.map((c) => `
-                                    <tr style="border-bottom:1px solid #F3F4F6;">
-                                        <td style="padding:11px 16px;font-size:14px;color:#111827;font-weight:600;">${esc(c.name || '—')}</td>
-                                        <td style="padding:11px 16px;font-size:12.5px;">
-                                            <span style="display:inline-block;padding:3px 9px;border-radius:11px;background:${c.status === 'active' ? '#ECFDF5' : '#FEF3C7'};color:${c.status === 'active' ? '#059669' : '#92400E'};font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">${esc(c.status)}</span>
-                                        </td>
-                                        <td style="padding:11px 16px;text-align:right;font-size:13px;color:#374151;">$${fmtUsd(c.daily_budget)}</td>
-                                        <td style="padding:11px 16px;text-align:right;font-size:13px;color:#111827;font-weight:700;">$${fmtUsd(c.total_budget)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>`;
-            }
+            // loadActiveCampaigns + renderActiveCampaigns retired 2026-06-25.
+            // The active-campaigns table was redundant with Boost Ads' own
+            // per-campaign performance dashboard, so it was deleted along
+            // with the rest of the /promote route.
 
             function wireOnce() {
                 const cashout = document.getElementById('promoteCashoutBtn');
@@ -16144,12 +16081,15 @@ function pfParseScreenshots(text) {
             function maybeLoad() {
                 const wrap = document.querySelector('[data-shell-active-route]');
                 const active = wrap && wrap.getAttribute('data-shell-active-route');
-                if (active !== 'promote') return;
+                // Was 'promote' before 2026-06-25; the balance cards moved
+                // into Payouts when /promote was retired, so we now fire on
+                // 'payouts' instead. loadActiveCampaigns dropped along with
+                // its target DOM node.
+                if (active !== 'payouts') return;
                 if (!getToken()) return;
                 wireOnce();
                 loadBalance();
                 loadAdCredit();
-                loadActiveCampaigns();
             }
 
             // Expose a refresh hook so other parts of the page (e.g. the
