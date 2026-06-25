@@ -775,9 +775,12 @@ async function handleUpdate(req, res) {
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];
   // Validate the door allowlist if it was updated.
+  // 'mobile-app' added 2026-06-25 to mirror the create-side allowlist
+  // (migration 34) so PATCHes from the wizard don't silently drop the
+  // Mobile App door selection.
   if (Array.isArray(updates.target_integration_methods)) {
     updates.target_integration_methods = updates.target_integration_methods
-      .filter((m) => ["mcp","js-snippet","npm-sdk","rest-api"].includes(m));
+      .filter((m) => ["mcp","js-snippet","npm-sdk","rest-api","mobile-app"].includes(m));
   }
   // Validate placement_tier if it was updated — only the 3 known tiers or
   // null. An unrecognised value is coerced to null (unrestricted).

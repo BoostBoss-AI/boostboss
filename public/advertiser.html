@@ -3656,16 +3656,11 @@
                 </div>
               </div>
 
-              <!-- Empty state — no products yet -->
-              <div id="pilotEmptyState" style="display:none; text-align:center; padding:60px 24px; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
-                <div style="font-size:48px; margin-bottom:12px;">🚀</div>
-                <h2 style="font-size:20px; font-weight:700; color:#0F0F1A; margin:0 0 6px;" data-t="pilot.empty.title">Add a product to start boosting</h2>
-                <p style="color:#6B7280; font-size:14px; margin:0 0 20px;" data-t="pilot.empty.sub">Boost Ads runs on top of one of your products. Add a product first, then come back here to set objectives and activate.</p>
-                <a href="#/products" style="
-                  display:inline-block; padding:10px 22px; background:#FF2D78; color:#fff;
-                  font-size:13px; font-weight:700; border-radius:8px; text-decoration:none;
-                " data-t="pilot.empty.cta">+ Add Product</a>
-              </div>
+              <!-- Empty state removed 2026-06-25 per Andy. When no active
+                   campaign exists, the Boost Ads page renders blank below
+                   the heading — users go to the Campaigns sub-tab (or the
+                   global Campaigns page) to create or check pending review
+                   status. No standalone "+ Add Product" CTA. -->
 
               <!-- Internal tab strip — Pilot has two views:
                    Boost (sliders, objective, budget, spend allocation)
@@ -7732,9 +7727,21 @@
                                     showToast('Error updating campaign', 'error');
                                 }
                             } else if (action === 'edit') {
-                                openEditModal(campaignId);
+                                // Route through the 3-step wizard 2026-06-25
+                                // (legacy openEditModal retired). Wizard
+                                // PATCHes the row on submit and preserves
+                                // budget / sliders / creative_* overrides.
+                                if (typeof window.openNewCampaignWizard === 'function') {
+                                    window.openNewCampaignWizard({ mode: 'edit', campaignId });
+                                } else {
+                                    showToast('Edit modal not ready — refresh the page.', 'error');
+                                }
                             } else if (action === 'duplicate') {
-                                duplicateCampaign(campaign);
+                                if (typeof window.openNewCampaignWizard === 'function') {
+                                    window.openNewCampaignWizard({ mode: 'duplicate', campaignId });
+                                } else {
+                                    showToast('Duplicate flow not ready — refresh the page.', 'error');
+                                }
                             }
                         });
                     });
@@ -10116,12 +10123,19 @@
         document.getElementById('detailClose').addEventListener('click', closeCampaignDetail);
         detailOverlay.addEventListener('click', closeCampaignDetail);
 
-        // Edit button inside detail panel
+        // Edit button inside detail panel — routes through the 3-step
+        // wizard 2026-06-25 (legacy openEditModal retired).
         document.getElementById('detailEditBtn').addEventListener('click', () => {
-            if (detailCampaignId) {
-                closeCampaignDetail();
-                setTimeout(() => openEditModal(detailCampaignId), 300);
-            }
+            if (!detailCampaignId) return;
+            const id = detailCampaignId;
+            closeCampaignDetail();
+            setTimeout(() => {
+                if (typeof window.openNewCampaignWizard === 'function') {
+                    window.openNewCampaignWizard({ mode: 'edit', campaignId: id });
+                } else if (typeof showToast === 'function') {
+                    showToast('Edit modal not ready — refresh the page.', 'error');
+                }
+            }, 300);
         });
 
         // Pause/Resume button inside detail panel
@@ -17797,11 +17811,6 @@ function pfParseScreenshots(text) {
             // derives advertiser_id from the Bearer JWT and ignores any
             // ?advertiser_id query param. We can't accidentally leak other
             // tenants' campaigns from here. Status filter is server-side too.
-            // Total campaign count (any status) for the Boost Ads empty
-            // state. Lets us distinguish "no campaigns at all" from
-            // "campaigns exist but none active yet (e.g. pending review)".
-            let pilotTotalCampaignCount = 0;
-
             async function loadPilotProducts() {
                 const token = getToken();
                 if (!token) return;
@@ -17809,17 +17818,13 @@ function pfParseScreenshots(text) {
                     // Active Boosts table = only campaigns currently running.
                     // Per Andy 2026-06-25 — paused/in_review/etc. live in the
                     // Campaigns sub-tab, not the at-a-glance Active list.
-                    // We fetch ALL so we can count non-active campaigns and
-                    // show the right empty state.
-                    const r = await fetch('/api/campaigns', {
+                    const r = await fetch('/api/campaigns?status=active', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     const j = await r.json();
-                    const all = (j.campaigns || j.data || [])
+                    pilotProducts = (j.campaigns || j.data || [])
                         .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
-                    pilotTotalCampaignCount = all.length;
-                    pilotProducts = all.filter(c => c.status === 'active' || c.status === 'live');
                     renderProductPicker();
                 } catch (e) {
                     console.warn('[pilot] loadCampaigns failed:', e);
@@ -17828,45 +17833,22 @@ function pfParseScreenshots(text) {
 
             // ── 2. Render product picker (Active boosts table) ─────────
             function renderProductPicker() {
-                const empty = document.getElementById('pilotEmptyState');
                 const pills = document.getElementById('pilotProductPills');
                 const picker = document.getElementById('pilotProductPicker');
                 const active = document.getElementById('pilotActiveBoost');
                 const tabStrip = document.getElementById('pilotTabStrip');
-                if (!empty || !pills || !active || !picker) return;
+                if (!pills || !active || !picker) return;
 
                 if (pilotProducts.length === 0) {
-                    // Distinguish two cases:
-                    //   (a) No campaigns at all → original "Create your first
-                    //       campaign" CTA stays as written in the empty card.
-                    //   (b) Campaigns exist but none are active (e.g. pending
-                    //       admin review) → rewrite the empty card to point
-                    //       at the Campaigns page where they can see status.
-                    const titleEl = empty.querySelector('h2');
-                    const subEl   = empty.querySelector('p');
-                    const ctaEl   = empty.querySelector('a');
-                    if (pilotTotalCampaignCount > 0 && titleEl && subEl && ctaEl) {
-                        const n = pilotTotalCampaignCount;
-                        titleEl.textContent = 'No live boosts yet';
-                        subEl.textContent = 'You have ' + n + ' campaign' + (n === 1 ? '' : 's') +
-                            ' awaiting admin review. Boost Ads shows campaigns once they go live — see Campaigns for status.';
-                        ctaEl.textContent = 'See Campaigns →';
-                        ctaEl.setAttribute('href', '#/campaigns');
-                    } else if (titleEl && subEl && ctaEl) {
-                        // Restore original copy in case it was overwritten on a
-                        // prior render (e.g. user deleted their pending campaign).
-                        titleEl.textContent = 'Add a product to start boosting';
-                        subEl.textContent = 'Boost Ads runs on top of one of your products. Add a product first, then come back here to set objectives and activate.';
-                        ctaEl.textContent = '+ Add Product';
-                        ctaEl.setAttribute('href', '#/products');
-                    }
-                    empty.style.display = '';
+                    // No active campaigns — render blank below the heading.
+                    // No empty-state card per Andy 2026-06-25; users navigate
+                    // to the Campaigns sub-tab / page to create or check
+                    // pending status.
                     picker.style.display = 'none';
                     active.style.display = 'none';
                     if (tabStrip) tabStrip.style.display = 'none';
                     return;
                 }
-                empty.style.display = 'none';
                 picker.style.display = '';
                 if (tabStrip) tabStrip.style.display = '';
 
@@ -18952,8 +18934,25 @@ function pfParseScreenshots(text) {
                 });
             }
 
-            function open() {
+            // Wizard mode + edit-target state. Extended 2026-06-25 so the
+            // same wizard handles create + edit + duplicate. Edit PATCHes
+            // the existing row; duplicate POSTs a new row pre-filled from
+            // the source. The legacy campaignModal is being retired in
+            // favour of this single flow.
+            let wizardMode = 'create';          // 'create' | 'edit' | 'duplicate'
+            let editingCampaignId = null;       // set when mode === 'edit'
+
+            // open() accepts { mode, campaignId }.
+            //   mode='create'    → blank wizard, POST on submit (default)
+            //   mode='edit'      → pre-filled, PATCH on submit
+            //   mode='duplicate' → pre-filled with ' (Copy)' suffix, POST
+            async function open(opts) {
+                const o = opts || {};
+                wizardMode = (o.mode === 'edit' || o.mode === 'duplicate') ? o.mode : 'create';
+                editingCampaignId = (wizardMode === 'edit') ? (o.campaignId || null) : null;
+
                 resetForm();
+                applyModeChrome();
                 wizard.classList.add('active');
                 wizard.style.display = '';
                 document.body.style.overflow = 'hidden';
@@ -18964,8 +18963,132 @@ function pfParseScreenshots(text) {
                 // warning at the top of step 1. Async — the warning starts
                 // hidden and pops in once the fetch lands.
                 refreshLibraryWarning();
+
+                // Pre-fill in edit/duplicate mode. Fetch the source campaign
+                // and overlay every field onto the wizard. Step 3 affiliate
+                // attach also has to wait for productsList to finish loading
+                // before the radio can be selected — handled inside prefill.
+                if ((wizardMode === 'edit' || wizardMode === 'duplicate') && o.campaignId) {
+                    await loadCampaignForEditOrDup(o.campaignId);
+                }
+
                 const nameEl = document.getElementById('ncwName');
-                if (nameEl) setTimeout(() => nameEl.focus(), 50);
+                if (nameEl) setTimeout(() => { try { nameEl.focus(); nameEl.select(); } catch (_) {} }, 50);
+            }
+
+            // Swap the title + submit-button label based on mode. Keeps the
+            // wizard chrome unambiguous so the user knows whether they're
+            // about to launch new or save edits.
+            function applyModeChrome() {
+                const titleEl = wizard.querySelector('.modal-title');
+                const launchBtn = document.getElementById('ncwLaunch');
+                const defaultBtn = document.getElementById('ncwLaunchDefaults');
+                if (wizardMode === 'edit') {
+                    if (titleEl) titleEl.textContent = 'Edit campaign';
+                    if (launchBtn) launchBtn.textContent = 'Save changes';
+                    if (defaultBtn) defaultBtn.style.display = 'none'; // no "launch w/ defaults" mid-edit
+                } else if (wizardMode === 'duplicate') {
+                    if (titleEl) titleEl.textContent = 'Duplicate campaign';
+                    if (launchBtn) launchBtn.textContent = 'Launch copy';
+                    if (defaultBtn) defaultBtn.style.display = '';
+                } else {
+                    if (titleEl) titleEl.textContent = 'New campaign';
+                    if (launchBtn) launchBtn.textContent = 'Launch campaign';
+                    if (defaultBtn) defaultBtn.style.display = '';
+                }
+            }
+
+            // Fetch source campaign + pre-fill all 3 steps. Used for both
+            // edit and duplicate. The campaign row carries every field the
+            // wizard touches (boost_*, target_*, cta_url, product_id).
+            async function loadCampaignForEditOrDup(id) {
+                const token = getToken();
+                if (!token) return;
+                try {
+                    const r = await fetch('/api/campaigns?action=get&id=' + encodeURIComponent(id), {
+                        headers: { 'Authorization': 'Bearer ' + token },
+                    });
+                    if (!r.ok) {
+                        showErr('ncwStep1Err', 'Could not load the campaign to ' +
+                            (wizardMode === 'edit' ? 'edit' : 'duplicate') + '. Try again.');
+                        return;
+                    }
+                    const j = await r.json();
+                    const c = j.campaign || j;
+                    if (!c) return;
+                    prefillFromCampaign(c);
+                } catch (e) {
+                    showErr('ncwStep1Err', 'Network error loading campaign: ' + e.message);
+                }
+            }
+
+            // Overlay a campaign row onto the wizard's 3 steps. Tolerates
+            // missing fields (legacy campaigns) and silently no-ops on any
+            // input that's gone from the DOM.
+            function prefillFromCampaign(c) {
+                // Step 1 — name + objective + URL
+                const nameEl = document.getElementById('ncwName');
+                if (nameEl) {
+                    const baseName = c.name || '';
+                    // Duplicate mode → append ' (Copy)' unless it's already there
+                    nameEl.value = (wizardMode === 'duplicate' && baseName && !/ \(Copy\)\s*$/.test(baseName))
+                        ? baseName + ' (Copy)'
+                        : baseName;
+                }
+                const urlEl = document.getElementById('ncwUrl');
+                if (urlEl) urlEl.value = c.cta_url || '';
+                const obj = c.boost_objective || 'signups';
+                const objRadio = wizard.querySelector('input[name="ncwObjective"][value="' + obj + '"]');
+                if (objRadio) objRadio.checked = true;
+
+                // Step 2 — doors + geo + lang + intent tokens
+                const doors = Array.isArray(c.target_integration_methods) ? c.target_integration_methods : [];
+                wizard.querySelectorAll('.ncw-door').forEach((cb) => {
+                    // Empty allowlist on the campaign row = "all doors" semantically.
+                    // Reflect that as every checkbox checked in the wizard.
+                    cb.checked = (doors.length === 0) ? true : doors.includes(cb.value);
+                });
+                const geos = Array.isArray(c.target_regions) ? c.target_regions : [];
+                const geoEl = document.getElementById('ncwGeo');
+                if (geoEl) {
+                    const g = geos[0] || 'global';
+                    // Only set if it's a known option; otherwise default to global.
+                    const opt = geoEl.querySelector('option[value="' + g + '"]');
+                    geoEl.value = opt ? g : 'global';
+                }
+                const langs = Array.isArray(c.target_languages) ? c.target_languages : [];
+                const langEl = document.getElementById('ncwLang');
+                if (langEl) {
+                    const l = langs.length === 0 ? 'all' : langs[0];
+                    const opt = langEl.querySelector('option[value="' + l + '"]');
+                    langEl.value = opt ? l : 'en';
+                }
+                const intentEl = document.getElementById('ncwIntent');
+                if (intentEl) {
+                    const tokens = Array.isArray(c.target_intent_tokens) ? c.target_intent_tokens : [];
+                    intentEl.value = tokens.join(', ');
+                }
+
+                // Step 3 — affiliate attach. Product list may still be
+                // loading at first paint; if it isn't ready yet, defer the
+                // radio selection until renderProducts() lands.
+                const pid = c.product_id || '';
+                const selectProductRadio = () => {
+                    const radio = wizard.querySelector('input[name="ncwAffiliate"][value="' + (pid || '') + '"]');
+                    if (radio) radio.checked = true;
+                };
+                if (productsLoaded || !pid) {
+                    selectProductRadio();
+                } else {
+                    // Re-attempt after each products refresh until it sticks
+                    const tick = setInterval(() => {
+                        if (productsLoaded) {
+                            selectProductRadio();
+                            clearInterval(tick);
+                        }
+                    }, 80);
+                    setTimeout(() => clearInterval(tick), 4000);
+                }
             }
 
             // Library-readiness warning at the top of step 1. Hits the same
@@ -19131,40 +19254,60 @@ function pfParseScreenshots(text) {
                     return;
                 }
 
-                const payload = {
-                    advertiser_id:   advertiserId,
+                // Common fields all 3 modes write. Sliders + budget defaults
+                // are only included on create/duplicate (new rows) — edit
+                // leaves them untouched so the user's prior tuning survives.
+                const baseFields = {
                     name:            name,
                     cta_url:         url,
                     boost_objective: objective,
-                    // Sliders default to 0.5 (handleCreate also clamps).
-                    boost_pacing: 0.5, boost_reach: 0.5, boost_brand_safety: 0.5,
-                    boost_creative_refresh: 0.5, boost_confidence_floor: 0.5,
-                    // Auto-default budget — tunable in the Boost sub-tab post-launch.
-                    daily_budget: 5,
-                    total_budget: 50,
-                    // Door filter — empty array = all doors. handleCreate filters
-                    // unknown values silently. mobile-app added 2026-06-25.
                     target_integration_methods: doors,
-                    // Geo / lang. Single-value selects from the UI; server expects arrays.
                     target_regions:   geo === 'global' ? ['global'] : [geo],
                     target_languages: lang === 'all'  ? []           : [lang],
                     target_intent_tokens: intentTokens,
-                    // Affiliate attach — same field the Boost Ads → Affiliate sub-tab uses.
                     product_id: productId,
-                    // Empty creative_* arrays — campaign inherits from /creatives library.
-                    creative_headlines:  [],
-                    creative_body_copy:  [],
-                    creative_cta_labels: [],
                 };
+
+                let endpoint, method, payload;
+                if (wizardMode === 'edit') {
+                    // PATCH — only the fields the wizard owns. Server merges
+                    // onto the existing row; everything else (budget, status,
+                    // sliders the user already tuned, creative_* overrides)
+                    // is preserved.
+                    endpoint = '/api/campaigns?action=update';
+                    method = 'POST'; // handleUpdate accepts POST or PATCH; POST avoids CORS preflight
+                    payload = Object.assign({ id: editingCampaignId }, baseFields);
+                } else {
+                    // create or duplicate → fresh row
+                    endpoint = '/api/campaigns?action=create';
+                    method = 'POST';
+                    payload = Object.assign({
+                        advertiser_id: advertiserId,
+                        // Sliders default to 0.5 (handleCreate also clamps).
+                        boost_pacing: 0.5, boost_reach: 0.5, boost_brand_safety: 0.5,
+                        boost_creative_refresh: 0.5, boost_confidence_floor: 0.5,
+                        // Auto-default budget — tunable in the Boost sub-tab post-launch.
+                        daily_budget: 5,
+                        total_budget: 50,
+                        // Empty creative_* arrays — campaign inherits from /creatives library.
+                        creative_headlines:  [],
+                        creative_body_copy:  [],
+                        creative_cta_labels: [],
+                    }, baseFields);
+                }
 
                 const btn = document.getElementById('ncwLaunch');
                 const defaultBtn = document.getElementById('ncwLaunchDefaults');
-                if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+                const savingLabel = wizardMode === 'edit' ? 'Saving…' : 'Launching…';
+                const restoreLabel = wizardMode === 'edit' ? 'Save changes'
+                                   : wizardMode === 'duplicate' ? 'Launch copy'
+                                   : 'Launch campaign';
+                if (btn) { btn.disabled = true; btn.textContent = savingLabel; }
                 if (defaultBtn) { defaultBtn.disabled = true; }
                 const token = getToken();
                 try {
-                    const r = await fetch('/api/campaigns?action=create', {
-                        method: 'POST',
+                    const r = await fetch(endpoint, {
+                        method: method,
                         headers: {
                             'Content-Type': 'application/json',
                             ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
@@ -19177,7 +19320,10 @@ function pfParseScreenshots(text) {
                     }
                     close();
                     if (typeof window.showToast === 'function') {
-                        window.showToast('Campaign launched — Benna will start serving once approved.', 'success');
+                        const toastMsg = wizardMode === 'edit'
+                            ? 'Campaign updated.'
+                            : 'Campaign launched — Benna will start serving once approved.';
+                        window.showToast(toastMsg, 'success');
                     }
                     // Force a full page reload after wizard success — there
                     // are too many local list caches (Boost Ads active boosts,
@@ -19195,9 +19341,10 @@ function pfParseScreenshots(text) {
                         } catch (_) { window.location.reload(); }
                     }, 50);
                 } catch (e) {
-                    showErr(currentStep === 1 ? 'ncwStep1Err' : 'ncwStep3Err', e.message || 'Failed to launch.');
+                    showErr(currentStep === 1 ? 'ncwStep1Err' : 'ncwStep3Err',
+                        e.message || (wizardMode === 'edit' ? 'Failed to save.' : 'Failed to launch.'));
                 } finally {
-                    if (btn) { btn.disabled = false; btn.textContent = 'Launch campaign'; }
+                    if (btn) { btn.disabled = false; btn.textContent = restoreLabel; }
                     if (defaultBtn) { defaultBtn.disabled = false; }
                 }
             }
