@@ -2379,6 +2379,106 @@
             text-align: right;
         }
 
+        /* ─── Pilot Creatives sub-tab — inheritance preview + override pattern.
+              Per-section block with read-only display by default, swaps into
+              an editor when the user clicks 'Override for this campaign'. ─── */
+        .pilot-cs {
+            padding: 14px 0;
+            border-top: 1px solid #F3F4F6;
+        }
+        .pilot-cs:first-of-type {
+            padding-top: 0;
+            border-top: none;
+        }
+        .pilot-cs.is-override .pilot-cs-source {
+            color: #FF2D78;
+        }
+        .pilot-cs-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .pilot-cs-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0F0F1A;
+            line-height: 1.2;
+        }
+        .pilot-cs-source {
+            font-size: 11px;
+            color: #6B7280;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        .pilot-cs-toggle {
+            padding: 6px 11px;
+            border: 1px solid #E5E7EB;
+            background: #fff;
+            color: #374151;
+            border-radius: 7px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .pilot-cs-toggle:hover { background: #F9FAFB; border-color: #D1D5DB; }
+        .pilot-cs.is-override .pilot-cs-toggle {
+            background: #FFF5F8;
+            border-color: #FF2D78;
+            color: #FF2D78;
+        }
+        .pilot-cs-readonly {
+            background: #FAFAFA;
+            border: 1px solid #F3F4F6;
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+        .pilot-cs-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .pilot-cs-list li {
+            font-size: 13px;
+            color: #111827;
+            padding: 5px 0;
+            border-bottom: 1px dashed #F3F4F6;
+            line-height: 1.5;
+        }
+        .pilot-cs-list li:last-child { border-bottom: none; }
+        .pilot-cs-list li::before {
+            content: "•";
+            color: #FF2D78;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+        .pilot-cs-empty {
+            font-size: 12.5px;
+            color: #9CA3AF;
+            font-style: italic;
+            padding: 4px 0;
+        }
+        .pilot-cs-hint {
+            font-size: 11.5px;
+            color: #6B7280;
+        }
+        .pilot-cs-revert {
+            background: none;
+            border: none;
+            color: #6B7280;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 0;
+            text-decoration: underline;
+        }
+        .pilot-cs-revert:hover { color: #FF2D78; }
+
         .benna-engine {
             background: #0A0A14;
             color: #F5F5F7;
@@ -3779,169 +3879,173 @@
                    [[advertiser-pilot-model]]. -->
               <div id="pilotCreativesPane" style="display:none;" data-pilot-pane="creatives">
 
-                <!-- Intro callout -->
+                <!-- Intro callout — re-framed for inheritance model.
+                     This pane is now a read-only preview of what mcp.js will
+                     pull from the global library at impression time. Per-section
+                     'Override for this campaign' toggle reveals an editor that
+                     writes to the campaign row; clearing the override falls
+                     back to the library. -->
                 <div style="padding:16px 18px; background:linear-gradient(135deg, #FFF5F8, #FFFFFF); border:1px solid #FFD9E5; border-radius:14px; margin-bottom:14px;">
-                  <div style="font-size:12px; font-weight:800; color:#FF2D78; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Brand kit + creative library</div>
-                  <p style="font-size:13px; color:#374151; line-height:1.55; margin:0;">Everything Benna shows your audience. Company identity stamps every impression with brand trust; creative variants give Benna's bandit room to find what wins. Edit anytime — changes apply to the next auction round.</p>
+                  <div style="font-size:12px; font-weight:800; color:#FF2D78; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Inherited from your Creatives library</div>
+                  <p style="font-size:13px; color:#374151; line-height:1.55; margin:0;">This campaign serves the assets shown below at impression time. Edit them in <a href="#/creatives" style="color:#FF2D78;font-weight:700;text-decoration:none;">/creatives</a> to update across every campaign — or override per-section here for this campaign only.</p>
                 </div>
 
-                <!-- Library inheritance banner — shown when the global /creatives
-                     library has assets the campaign will inherit unless overridden
-                     in this pane. Wires up via pilotRenderLibraryInheritance(). -->
-                <div id="pilotLibraryInherit" style="display:none; padding:12px 14px; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px; margin-bottom:20px; font-size:12.5px; color:#3730A3; line-height:1.55;">
-                  <strong style="color:#1E3A8A;">✓ Inheriting from your Creatives library.</strong>
-                  <span id="pilotLibraryInheritSummary">Headlines, body, CTAs you leave blank here will pull from the global library.</span>
-                  <a href="#/creatives" style="color:#FF2D78; font-weight:700; text-decoration:none; margin-left:4px;">Open library →</a>
+                <!-- Library empty-state — shown when the advertiser hasn't filled
+                     /creatives yet. Hides automatically once any library asset exists. -->
+                <div id="pilotLibraryEmpty" style="display:none; padding:18px; background:#FFFBEB; border:1px solid #FCD34D; border-radius:12px; margin-bottom:20px;">
+                  <div style="font-size:13px; font-weight:700; color:#92400E; margin-bottom:4px;">Your library is empty</div>
+                  <div style="font-size:12.5px; color:#78350F; margin-bottom:12px; line-height:1.55;">Fill in the global Creatives library so this campaign inherits brand + headlines + CTAs automatically. Or override every field here just for this campaign.</div>
+                  <a href="#/creatives" style="display:inline-block; padding:8px 14px; background:#FF2D78; color:#fff; border-radius:8px; font-size:12.5px; font-weight:700; text-decoration:none;">Open library →</a>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
 
-                  <!-- LEFT: Company identity -->
+                  <!-- LEFT: Brand kit (read-only preview from library).
+                       The old Company identity / details / Founder / Trust
+                       cards were stripped 2026-06-25 — they wrote to product
+                       fields that aren't actually consumed at impression
+                       time, and the campaign sub-tab is now an inheritance
+                       preview of the global library only. Source of truth
+                       lives in /creatives. Hidden legacy input IDs preserved
+                       below for back-compat with any cached loader code. -->
                   <div>
                     <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
-                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Company identity</h3>
-                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Who's behind the product. Appears under "Sponsored by" on every placement.</p>
-
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Company logo URL</label>
-                      <input type="url" id="pilotCompanyLogo" placeholder="https://cdn.example.com/logo.svg" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
-
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Company website</label>
-                      <input type="url" id="pilotCompanyWebsite" placeholder="https://example.com" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
-
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">One-line tagline</label>
-                      <input type="text" id="pilotCompanyTagline" maxlength="160" placeholder="The webhook-free Stripe billing toolkit" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
-
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">About</label>
-                      <textarea id="pilotCompanyAbout" rows="4" maxlength="2000" placeholder="Two or three sentences. Who you are, what you do, who you serve." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
-                    </div>
-
-                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
-                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Company details</h3>
-                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Surfaces on hover cards + product page. Optional but helps brand trust.</p>
-
-                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+                      <div class="pilot-cs-head" style="margin-bottom:14px;">
                         <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">City</label>
-                          <input type="text" id="pilotCompanyCity" maxlength="80" placeholder="Taipei" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
+                          <div class="pilot-cs-title">Brand kit</div>
+                          <div class="pilot-cs-source">Inherited from library · read-only here</div>
                         </div>
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Country (ISO 2)</label>
-                          <input type="text" id="pilotCompanyCountry" maxlength="2" placeholder="TW" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; text-transform:uppercase;">
-                        </div>
+                        <a href="#/creatives" style="padding:6px 11px; border:1px solid #FF2D78; color:#FF2D78; border-radius:7px; font-size:11.5px; font-weight:700; text-decoration:none;">Edit in library</a>
                       </div>
 
-                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Team size</label>
-                          <select id="pilotCompanySize" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; background:#fff;">
-                            <option value="">Select…</option>
-                            <option value="solo">Solo founder</option>
-                            <option value="2-10">2-10</option>
-                            <option value="11-50">11-50</option>
-                            <option value="51-200">51-200</option>
-                            <option value="201-1000">201-1000</option>
-                            <option value="1000+">1000+</option>
-                          </select>
+                      <!-- Logo + brand name -->
+                      <div id="pilotBrandKitPreview" style="display:flex; gap:14px; align-items:center; padding:14px 16px; background:#FAFAFA; border:1px solid #F3F4F6; border-radius:10px; margin-bottom:12px;">
+                        <div id="pilotBrandKitLogo" style="width:56px; height:56px; flex-shrink:0; background:#fff url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D1D5DB' stroke-width='1.5'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E\") center/55% no-repeat; border:1px solid #E5E7EB; border-radius:10px;"></div>
+                        <div style="flex:1; min-width:0;">
+                          <div id="pilotBrandKitName" style="font-size:15px; font-weight:700; color:#0F0F1A; line-height:1.3;">No brand name set</div>
+                          <div id="pilotBrandKitDomain" style="font-size:12px; color:#6B7280; margin-top:2px;">—</div>
                         </div>
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Growth stage</label>
-                          <select id="pilotCompanyGrowthStage" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; background:#fff;">
-                            <option value="">Select…</option>
-                            <option value="pre_launch">Pre-launch</option>
-                            <option value="public_beta">Public beta</option>
-                            <option value="launched">Launched</option>
-                            <option value="growth">Growth</option>
-                            <option value="mature">Mature</option>
-                          </select>
-                        </div>
+                        <div id="pilotBrandKitColor" style="width:24px; height:24px; border-radius:6px; border:1px solid #E5E7EB; background:#fff;" title="Brand color"></div>
                       </div>
 
-                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Funding status</label>
-                          <select id="pilotCompanyFundingStatus" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; background:#fff;">
-                            <option value="">Select…</option>
-                            <option value="bootstrapped">Bootstrapped</option>
-                            <option value="pre_seed">Pre-seed</option>
-                            <option value="seed">Seed</option>
-                            <option value="series_a">Series A</option>
-                            <option value="series_b_plus">Series B+</option>
-                            <option value="acquired">Acquired</option>
-                            <option value="public">Public</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Founded date</label>
-                          <input type="date" id="pilotCompanyFoundedDate" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
-                        </div>
+                      <!-- Voucher preview — only shown if library has one set -->
+                      <div id="pilotVoucherPreview" style="display:none; padding:12px 14px; background:#FFF7ED; border:1px solid #FED7AA; border-radius:10px; margin-bottom:12px;">
+                        <div style="font-size:11px; font-weight:700; color:#9A3412; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px;">Voucher endcard</div>
+                        <div id="pilotVoucherValue" style="font-size:13px; font-weight:600; color:#7C2D12;">—</div>
+                        <div id="pilotVoucherCode" style="font-size:11px; color:#9A3412; margin-top:3px; font-family:monospace;"></div>
+                      </div>
+
+                      <div style="font-size:12px; color:#6B7280; line-height:1.55;">
+                        Brand kit and voucher live globally in your library. They serve identically across every campaign — there's no per-campaign override here.
                       </div>
                     </div>
 
-                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px;">
-                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Founder card</h3>
-                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Real person + photo lifts trust by ~25% on AI-app placements. Optional but recommended.</p>
-
-                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Founder name</label>
-                          <input type="text" id="pilotFounderName" maxlength="120" placeholder="Andy Dasouth" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
-                        </div>
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Role</label>
-                          <input type="text" id="pilotFounderRole" maxlength="120" placeholder="CEO &amp; co-founder" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
-                        </div>
-                      </div>
-
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Photo URL</label>
-                      <input type="url" id="pilotFounderPhoto" placeholder="https://cdn.example.com/founder.jpg" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; margin-bottom:14px;">
-
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">LinkedIn URL</label>
-                      <input type="url" id="pilotFounderLinkedin" placeholder="https://linkedin.com/in/andy" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
-                    </div>
+                    <!-- Hidden legacy inputs — kept so pilotLoadCreativesPane's
+                         set() calls don't throw on undefined elements. Phase F
+                         can drop these entirely once we audit cached refs. -->
+                    <span style="display:none;">
+                      <input id="pilotCompanyLogo"><input id="pilotCompanyWebsite"><input id="pilotCompanyTagline"><textarea id="pilotCompanyAbout"></textarea>
+                      <input id="pilotCompanyCity"><input id="pilotCompanyCountry"><select id="pilotCompanySize"></select><select id="pilotCompanyGrowthStage"></select>
+                      <select id="pilotCompanyFundingStatus"></select><input id="pilotCompanyFoundedDate">
+                      <input id="pilotFounderName"><input id="pilotFounderRole"><input id="pilotFounderPhoto"><input id="pilotFounderLinkedin">
+                      <input id="pilotRefundWindow"><input id="pilotGuarantee">
+                    </span>
                   </div>
 
-                  <!-- RIGHT: Creative library -->
+                  <!-- RIGHT: Creative library — read-only preview + overrides.
+                       Each section (Headlines / Body / CTAs) starts in
+                       read-only 'inherited from library' mode showing
+                       library values. Click 'Override for this campaign'
+                       to swap into the editor; the textarea pre-populates
+                       with the campaign's current creative_* array (or
+                       blank if never overridden). Clearing the override
+                       reverts the campaign to library inheritance. -->
                   <div>
                     <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px; margin-bottom:14px;">
-                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Creative library</h3>
-                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Variants Benna's multi-arm bandit will test. Aim for <strong>3+ headlines</strong> — the minimum for meaningful A/B/n testing.</p>
 
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Headline variants <span style="color:#FF2D78;">*</span> <span id="pilotHeadlineCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
-                      <textarea id="pilotCreativeHeadlines" rows="5" placeholder="One headline per line. Keep them punchy (≤80 chars works best).&#10;Stop reconciling Stripe by hand&#10;The webhook-free Stripe toolkit&#10;Stripe billing, without the cron jobs" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:4px;"></textarea>
-                      <div style="font-size:11px; color:#9CA3AF; margin-bottom:14px;">Max 10, 240 chars each. Benna picks one per impression.</div>
+                      <!-- ─── Headlines section ─── -->
+                      <div class="pilot-cs" data-cs-field="creative_headlines" data-cs-library-keys="headlines_medium,headlines_short,headlines_long">
+                        <div class="pilot-cs-head">
+                          <div>
+                            <div class="pilot-cs-title">Headlines</div>
+                            <div class="pilot-cs-source" data-cs-source>Inherited from library</div>
+                          </div>
+                          <button type="button" class="pilot-cs-toggle" data-cs-toggle>Override for this campaign</button>
+                        </div>
+                        <div class="pilot-cs-readonly" data-cs-readonly>
+                          <ul class="pilot-cs-list" data-cs-list></ul>
+                          <div class="pilot-cs-empty" data-cs-empty style="display:none;">No headlines in your library yet — add some in /creatives.</div>
+                        </div>
+                        <div class="pilot-cs-editor" data-cs-editor style="display:none;">
+                          <textarea data-cs-textarea rows="5" placeholder="One headline per line. ≤90 chars each, max 10 variants." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:6px;"></textarea>
+                          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <span class="pilot-cs-hint" data-cs-count>0 variants</span>
+                            <button type="button" class="pilot-cs-revert" data-cs-revert>← Use library default</button>
+                          </div>
+                        </div>
+                      </div>
 
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Body copy variants <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="pilotBodyCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
-                      <textarea id="pilotCreativeBody" rows="4" placeholder="One body line per line. Used on larger placement formats.&#10;Webhook-free reconciliation in 5 minutes.&#10;135+ pre-built workflows, no SDK required." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:4px;"></textarea>
-                      <div style="font-size:11px; color:#9CA3AF; margin-bottom:14px;">Falls back to your product description if empty.</div>
+                      <!-- ─── Body copy section ─── -->
+                      <div class="pilot-cs" data-cs-field="creative_body_copy" data-cs-library-keys="body_medium,body_short,body_long">
+                        <div class="pilot-cs-head">
+                          <div>
+                            <div class="pilot-cs-title">Body copy</div>
+                            <div class="pilot-cs-source" data-cs-source>Inherited from library</div>
+                          </div>
+                          <button type="button" class="pilot-cs-toggle" data-cs-toggle>Override for this campaign</button>
+                        </div>
+                        <div class="pilot-cs-readonly" data-cs-readonly>
+                          <ul class="pilot-cs-list" data-cs-list></ul>
+                          <div class="pilot-cs-empty" data-cs-empty style="display:none;">No body copy in your library yet.</div>
+                        </div>
+                        <div class="pilot-cs-editor" data-cs-editor style="display:none;">
+                          <textarea data-cs-textarea rows="4" placeholder="One body line per line. ≤280 chars each, max 10 variants." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:6px;"></textarea>
+                          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <span class="pilot-cs-hint" data-cs-count>0 variants</span>
+                            <button type="button" class="pilot-cs-revert" data-cs-revert>← Use library default</button>
+                          </div>
+                        </div>
+                      </div>
 
-                      <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">CTA button labels <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="pilotCtaCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
-                      <textarea id="pilotCreativeCta" rows="3" placeholder="One label per line. Keep them ≤20 chars.&#10;Try free&#10;Get started&#10;See it in 60s" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:4px;"></textarea>
-                      <div style="font-size:11px; color:#9CA3AF;">Falls back to "Learn more" if empty.</div>
+                      <!-- ─── CTA labels section ─── -->
+                      <div class="pilot-cs" data-cs-field="creative_cta_labels" data-cs-library-keys="cta_labels">
+                        <div class="pilot-cs-head">
+                          <div>
+                            <div class="pilot-cs-title">CTA button labels</div>
+                            <div class="pilot-cs-source" data-cs-source>Inherited from library</div>
+                          </div>
+                          <button type="button" class="pilot-cs-toggle" data-cs-toggle>Override for this campaign</button>
+                        </div>
+                        <div class="pilot-cs-readonly" data-cs-readonly>
+                          <ul class="pilot-cs-list" data-cs-list></ul>
+                          <div class="pilot-cs-empty" data-cs-empty style="display:none;">No CTA labels in your library yet.</div>
+                        </div>
+                        <div class="pilot-cs-editor" data-cs-editor style="display:none;">
+                          <textarea data-cs-textarea rows="3" placeholder="One CTA per line. ≤20 chars each, max 5 variants." style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit; line-height:1.5; resize:vertical; margin-bottom:6px;"></textarea>
+                          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <span class="pilot-cs-hint" data-cs-count>0 variants</span>
+                            <button type="button" class="pilot-cs-revert" data-cs-revert>← Use library default</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Legacy text counter spans — kept for back-compat with
+                           pilotUpdateCreativeCounts; populated by the new wiring. -->
+                      <span id="pilotHeadlineCount" style="display:none;"></span>
+                      <span id="pilotBodyCount" style="display:none;"></span>
+                      <span id="pilotCtaCount" style="display:none;"></span>
                     </div>
 
                     <!-- Readiness badge -->
                     <div id="pilotCreativeReadiness" style="margin-bottom:14px; padding:12px 14px; border-radius:10px; font-size:12.5px; line-height:1.55; display:none;"></div>
 
-                    <!-- Trust block (refund + guarantee) — separate card -->
-                    <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:18px;">
-                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 4px;">Trust signals</h3>
-                      <p style="font-size:12px; color:#6B7280; margin:0 0 16px;">Shown next to the CTA where space allows. Lowers checkout friction.</p>
-
-                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Refund window (days)</label>
-                          <input type="number" id="pilotRefundWindow" min="0" max="365" placeholder="30" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
-                        </div>
-                        <div>
-                          <label style="display:block; font-size:11px; font-weight:700; color:#374151; margin-bottom:4px;">Guarantee label</label>
-                          <input type="text" id="pilotGuarantee" maxlength="120" placeholder="60-day money-back" style="width:100%; padding:9px 11px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-family:inherit;">
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Visual library reminder -->
-                    <div style="margin-top:14px; padding:12px 14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; font-size:12px; color:#6B7280; line-height:1.55;">
-                      <strong style="color:#374151;">Need to update images or video?</strong> Hero images and the demo video are still managed in the product's Basics + Marketing tabs. Benna picks from those automatically.
+                    <!-- Library quick link — points back to /creatives for
+                         brand kit, images, videos, voucher edits. Replaces
+                         the old "Trust signals" card (refund/guarantee live
+                         on Products now) and the "Visual library reminder"
+                         (which pointed at the now-deprecated product tabs). -->
+                    <div style="margin-top:14px; padding:14px 16px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; font-size:12.5px; color:#374151; line-height:1.55;">
+                      <strong style="color:#0F0F1A;">Need to add images, videos, or a voucher?</strong> All visual + endcard assets live in your global <a href="#/creatives" style="color:#FF2D78; font-weight:700; text-decoration:none;">Creatives library</a> and Benna picks per placement automatically.
                     </div>
                   </div>
                 </div>
@@ -17639,114 +17743,219 @@ function pfParseScreenshots(text) {
                 return pilotLibraryAssets;
             }
 
-            // ── Creatives pane: load active campaign into the fields ──
-            // Inheritance order per slot:
-            //   - If campaign has its own variant array → use that
-            //   - Else show library variants as placeholder (greyed)
-            // The actual rendered ad pulls the same way at auction time
-            // in mcp.js — campaign override → library → legacy single field.
+            // ── Creatives pane: render the inheritance preview + per-section
+            // override editor. Sections are encoded as .pilot-cs blocks in
+            // the HTML with three data attrs:
+            //   data-cs-field          — the campaign column to PATCH
+            //   data-cs-library-keys   — comma-separated library array keys
+            //                            to preview (first match wins for
+            //                            the source label)
+            // A section is in OVERRIDE mode when the campaign's column is a
+            // non-empty array; otherwise it's in INHERIT mode (read-only).
             function pilotLoadCreativesPane() {
                 const c = pilotProducts.find(x => x.id === pilotActiveProductId);
                 if (!c) return;
-                const set = (id, val) => {
-                    const el = document.getElementById(id);
-                    if (el) el.value = (val == null ? '' : val);
-                };
-                const linesOf = (arr) => Array.isArray(arr) ? arr.filter(Boolean).join('\n') : '';
 
-                // Company identity + Founder + Trust live on the parent
-                // Product, not the Campaign. When the campaign is linked
-                // to a product, mirror those fields read-only-ish (still
-                // editable but they save back to the parent product, not
-                // the campaign). For tonight's pivot we just clear them
-                // — Phase F will wire the product-linked editor.
-                ['pilotCompanyLogo','pilotCompanyWebsite','pilotCompanyTagline','pilotCompanyAbout',
-                 'pilotCompanyCity','pilotCompanyCountry','pilotCompanySize','pilotCompanyGrowthStage',
-                 'pilotCompanyFundingStatus','pilotCompanyFoundedDate',
-                 'pilotFounderName','pilotFounderRole','pilotFounderPhoto','pilotFounderLinkedin',
-                 'pilotRefundWindow','pilotGuarantee'].forEach((id) => set(id, ''));
+                // Async — fetch library, then render every section.
+                pilotLoadLibraryAssets().then(() => pilotRenderCreativeSections(c));
+            }
 
-                // Creative library variants — now on the campaign row.
-                set('pilotCreativeHeadlines', linesOf(c.creative_headlines));
-                set('pilotCreativeBody',      linesOf(c.creative_body_copy));
-                set('pilotCreativeCta',       linesOf(c.creative_cta_labels));
+            function pilotRenderCreativeSections(campaign) {
+                const lib = pilotLibraryAssets || {};
+
+                // Library empty-state — show only if NOTHING is in the library.
+                const libHasAny =
+                    !!(lib.brand_name || lib.brand_logo_url) ||
+                    (lib.headlines_short || []).length +
+                    (lib.headlines_medium || []).length +
+                    (lib.headlines_long || []).length +
+                    (lib.cta_labels || []).length > 0;
+                const emptyEl = document.getElementById('pilotLibraryEmpty');
+                if (emptyEl) emptyEl.style.display = libHasAny ? 'none' : '';
+
+                // Brand kit preview (always inherited; no per-campaign override here)
+                pilotRenderBrandKitPreview(lib);
+
+                // Per-section blocks
+                document.querySelectorAll('#pilotCreativesPane .pilot-cs').forEach((block) => {
+                    pilotRenderCreativeSection(block, campaign, lib);
+                });
 
                 pilotUpdateCreativeCounts();
-
-                // Apply library inheritance (async, non-blocking)
-                pilotLoadLibraryAssets().then(() => pilotApplyLibraryInheritance(c));
             }
 
-            // Hydrate placeholders from the global /creatives library + flip
-            // the inheritance banner on. Format-appropriate length pick:
-            // we default to 'medium' since campaigns are most often shown
-            // in native format. The campaign's actual format determines what
-            // mcp.js picks at auction; this is just an editor preview.
-            function pilotApplyLibraryInheritance(campaign) {
-                const lib = pilotLibraryAssets;
-                const banner = document.getElementById('pilotLibraryInherit');
-                const summary = document.getElementById('pilotLibraryInheritSummary');
-                if (!banner) return;
-                if (!lib || !lib.brand_name && !(lib.headlines_short || []).length && !(lib.headlines_medium || []).length && !(lib.cta_labels || []).length) {
-                    banner.style.display = 'none';
-                    return;
-                }
-                // Surface the banner so the user understands inheritance.
-                banner.style.display = '';
-                // Build per-textarea inheritance preview as ghost placeholder.
-                const ghostList = (arr) => (Array.isArray(arr) && arr.length > 0)
-                    ? arr.filter(Boolean).slice(0, 3).join('\n')
-                    : '';
-                function ghost(elId, libArr, fallbackArr) {
-                    const el = document.getElementById(elId);
-                    if (!el) return;
-                    // Only show placeholder when the campaign field is empty.
-                    if ((el.value || '').trim().length > 0) {
-                        el.placeholder = el.getAttribute('data-original-placeholder')
-                                       || el.placeholder;
-                        return;
+            function pilotRenderBrandKitPreview(lib) {
+                const nameEl   = document.getElementById('pilotBrandKitName');
+                const domainEl = document.getElementById('pilotBrandKitDomain');
+                const logoEl   = document.getElementById('pilotBrandKitLogo');
+                const colorEl  = document.getElementById('pilotBrandKitColor');
+                if (nameEl)   nameEl.textContent = (lib.brand_name || '').trim() || 'No brand name set';
+                if (domainEl) domainEl.textContent = (lib.brand_domain || '').trim() || '—';
+                if (logoEl) {
+                    if (lib.brand_logo_url) {
+                        logoEl.style.backgroundImage = 'url("' + String(lib.brand_logo_url).replace(/"/g, '\\"') + '")';
+                        logoEl.style.backgroundSize = 'contain';
+                        logoEl.style.backgroundPosition = 'center';
+                        logoEl.style.backgroundRepeat = 'no-repeat';
                     }
-                    if (!el.getAttribute('data-original-placeholder')) {
-                        el.setAttribute('data-original-placeholder', el.placeholder || '');
-                    }
-                    const lines = ghostList(libArr) || ghostList(fallbackArr);
-                    if (lines) el.placeholder = '(inherited from library — overwrite to override)\n' + lines;
                 }
-                // Show medium-length variants in the textarea ghost since
-                // they're the most common rendered slot.
-                ghost('pilotCreativeHeadlines', lib.headlines_medium, lib.headlines_short);
-                ghost('pilotCreativeBody',      lib.body_medium,      lib.body_short);
-                ghost('pilotCreativeCta',       lib.cta_labels);
+                if (colorEl) {
+                    const c = (lib.brand_color || '').trim();
+                    colorEl.style.background = /^#[0-9a-f]{6}$/i.test(c) ? c : '#fff';
+                }
 
-                // Count what's inheritable — bake into the banner summary.
-                const heads = (lib.headlines_short || []).length + (lib.headlines_medium || []).length + (lib.headlines_long || []).length;
-                const bodies = (lib.body_short || []).length + (lib.body_medium || []).length + (lib.body_long || []).length;
-                const ctas = (lib.cta_labels || []).length;
-                const parts = [];
-                if (heads > 0)  parts.push(heads  + ' headline'  + (heads === 1 ? '' : 's'));
-                if (bodies > 0) parts.push(bodies + ' body line' + (bodies === 1 ? '' : 's'));
-                if (ctas > 0)   parts.push(ctas   + ' CTA'        + (ctas === 1 ? '' : 's'));
-                if (summary && parts.length > 0) {
-                    summary.textContent = ' Library has ' + parts.join(', ') + ' available. Empty fields below will inherit.';
+                // Voucher preview — only if value text set
+                const vPrev = document.getElementById('pilotVoucherPreview');
+                if (vPrev) {
+                    if (lib.voucher_value_text) {
+                        vPrev.style.display = '';
+                        const vVal  = document.getElementById('pilotVoucherValue');
+                        const vCode = document.getElementById('pilotVoucherCode');
+                        if (vVal)  vVal.textContent  = lib.voucher_value_text;
+                        if (vCode) vCode.textContent = lib.voucher_code ? 'Code: ' + lib.voucher_code : '';
+                    } else {
+                        vPrev.style.display = 'none';
+                    }
                 }
             }
 
-            // Live count + readiness mirror inside the Pilot pane.
+            function pilotRenderCreativeSection(block, campaign, lib) {
+                const field = block.getAttribute('data-cs-field');
+                const libraryKeys = (block.getAttribute('data-cs-library-keys') || '').split(',').map((s) => s.trim()).filter(Boolean);
+                const campaignArr = Array.isArray(campaign[field]) ? campaign[field].filter(Boolean) : [];
+                const hasOverride = campaignArr.length > 0;
+
+                const sourceEl   = block.querySelector('[data-cs-source]');
+                const readonlyEl = block.querySelector('[data-cs-readonly]');
+                const editorEl   = block.querySelector('[data-cs-editor]');
+                const toggleEl   = block.querySelector('[data-cs-toggle]');
+                const textareaEl = block.querySelector('[data-cs-textarea]');
+                const revertEl   = block.querySelector('[data-cs-revert]');
+                const listEl     = block.querySelector('[data-cs-list]');
+                const emptyEl    = block.querySelector('[data-cs-empty]');
+                const countEl    = block.querySelector('[data-cs-count]');
+
+                // Find library values to preview (first non-empty key wins).
+                let libArr = [];
+                let pickedKey = null;
+                for (const k of libraryKeys) {
+                    const a = Array.isArray(lib[k]) ? lib[k].filter(Boolean) : [];
+                    if (a.length > 0) { libArr = a; pickedKey = k; break; }
+                }
+
+                // Apply mode
+                const showOverride = hasOverride;
+                block.classList.toggle('is-override', showOverride);
+                readonlyEl.style.display = showOverride ? 'none' : '';
+                editorEl.style.display   = showOverride ? '' : 'none';
+                toggleEl.textContent     = showOverride ? '✓ Overridden' : 'Override for this campaign';
+
+                // Source label
+                if (sourceEl) {
+                    if (showOverride) {
+                        sourceEl.textContent = 'Customized for this campaign (' + campaignArr.length + ' variant' + (campaignArr.length === 1 ? '' : 's') + ')';
+                    } else if (libArr.length > 0) {
+                        const slot = pickedKey === 'cta_labels' ? '' : (' · ' + pickedKey.split('_')[1] + ' length');
+                        sourceEl.textContent = 'Inherited from library' + slot;
+                    } else {
+                        sourceEl.textContent = 'No library value · campaign will use defaults';
+                    }
+                }
+
+                // Read-only list (library preview)
+                if (listEl && emptyEl) {
+                    listEl.innerHTML = '';
+                    if (libArr.length === 0) {
+                        emptyEl.style.display = '';
+                    } else {
+                        emptyEl.style.display = 'none';
+                        libArr.slice(0, 10).forEach((v) => {
+                            const li = document.createElement('li');
+                            li.textContent = v;
+                            listEl.appendChild(li);
+                        });
+                    }
+                }
+
+                // Editor textarea — populate with the campaign override (if any).
+                if (textareaEl) {
+                    textareaEl.value = campaignArr.join('\n');
+                }
+                pilotUpdateSectionCount(block);
+
+                // Wire (idempotent)
+                if (!block.__wired) {
+                    block.__wired = true;
+                    toggleEl.addEventListener('click', () => {
+                        const isCurrentlyOverride = block.classList.contains('is-override');
+                        if (isCurrentlyOverride) {
+                            // Already in override mode — clicking the button just
+                            // scrolls to the editor; it's the explicit "revert"
+                            // link that drops back to library inheritance.
+                            textareaEl.focus();
+                            return;
+                        }
+                        // Switch from inherit → override. Pre-populate the
+                        // textarea with the library values so the user can
+                        // tweak instead of starting blank.
+                        block.classList.add('is-override');
+                        readonlyEl.style.display = 'none';
+                        editorEl.style.display = '';
+                        if (!textareaEl.value && libArr.length > 0) {
+                            textareaEl.value = libArr.join('\n');
+                        }
+                        toggleEl.textContent = '✓ Overridden';
+                        if (sourceEl) sourceEl.textContent = 'Customized for this campaign (unsaved)';
+                        textareaEl.focus();
+                        pilotUpdateSectionCount(block);
+                    });
+                    revertEl.addEventListener('click', () => {
+                        textareaEl.value = '';
+                        block.classList.remove('is-override');
+                        readonlyEl.style.display = '';
+                        editorEl.style.display = 'none';
+                        toggleEl.textContent = 'Override for this campaign';
+                        const slot = pickedKey ? ' · ' + (pickedKey === 'cta_labels' ? 'library' : pickedKey.split('_')[1] + ' length') : '';
+                        if (sourceEl) sourceEl.textContent = libArr.length > 0
+                            ? 'Inherited from library' + slot
+                            : 'No library value · campaign will use defaults';
+                        pilotUpdateSectionCount(block);
+                    });
+                    textareaEl.addEventListener('input', () => pilotUpdateSectionCount(block));
+                }
+            }
+
+            function pilotUpdateSectionCount(block) {
+                const textareaEl = block.querySelector('[data-cs-textarea]');
+                const countEl    = block.querySelector('[data-cs-count]');
+                if (!textareaEl || !countEl) return;
+                const n = String(textareaEl.value || '').split('\n').map((l) => l.trim()).filter(Boolean).length;
+                countEl.textContent = n + ' variant' + (n === 1 ? '' : 's');
+            }
+
+            // Readiness mirror inside the Pilot pane. Counts effective
+            // headline/CTA availability — campaign override if present,
+            // else library values — so the "ready for Benna" check stays
+            // honest about what mcp.js will actually serve.
             function pilotUpdateCreativeCounts() {
-                const countLines = (txt) => String(txt || '').split('\n').map((l) => l.trim()).filter(Boolean).length;
-                const heads = countLines(document.getElementById('pilotCreativeHeadlines') && document.getElementById('pilotCreativeHeadlines').value);
-                const bodies = countLines(document.getElementById('pilotCreativeBody') && document.getElementById('pilotCreativeBody').value);
-                const ctas = countLines(document.getElementById('pilotCreativeCta') && document.getElementById('pilotCreativeCta').value);
-                const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
-                setText('pilotHeadlineCount', '(' + heads + ' / 10)');
-                setText('pilotBodyCount',     '(' + bodies + ' / 10)');
-                setText('pilotCtaCount',      '(' + ctas + ' / 10)');
-
-                // Readiness — campaigns: 3+ headlines AND a creative image
-                // (media_url or poster_url, mirroring the DB trigger in
-                // migration 31).
                 const c = pilotProducts.find(x => x.id === pilotActiveProductId);
-                const hasImage = !!(c && (c.media_url || c.poster_url));
+                if (!c) return;
+                const lib = pilotLibraryAssets || {};
+                const effectiveLen = (camp, libKeys) => {
+                    const cArr = Array.isArray(camp) ? camp.filter(Boolean) : [];
+                    if (cArr.length > 0) return cArr.length;
+                    for (const k of libKeys) {
+                        const a = Array.isArray(lib[k]) ? lib[k].filter(Boolean) : [];
+                        if (a.length > 0) return a.length;
+                    }
+                    return 0;
+                };
+                const heads = effectiveLen(c.creative_headlines, ['headlines_medium', 'headlines_short', 'headlines_long']);
+                const ctas  = effectiveLen(c.creative_cta_labels, ['cta_labels']);
+
+                const hasImage = !!(c && (c.media_url || c.poster_url)) ||
+                    (lib.images_16_9 || []).length > 0 ||
+                    (lib.images_9_16 || []).length > 0;
                 const ready = heads >= 3 && hasImage;
                 const badge = document.getElementById('pilotCreativeReadiness');
                 if (!badge) return;
@@ -17755,11 +17964,11 @@ function pfParseScreenshots(text) {
                     badge.style.background = '#ECFDF5';
                     badge.style.border = '1px solid #A7F3D0';
                     badge.style.color = '#065F46';
-                    badge.innerHTML = '<strong>✓ Ready for Benna.</strong> ' + heads + ' headlines, image set, ' + ctas + ' CTA label' + (ctas === 1 ? '' : 's') + '. Benna\'s bandit has room to test.';
+                    badge.innerHTML = '<strong>✓ Ready for Benna.</strong> ' + heads + ' effective headlines, ' + ctas + ' CTA' + (ctas === 1 ? '' : 's') + ', image set. Benna\'s bandit has room to test.';
                 } else if (heads > 0 || hasImage) {
                     const need = [];
-                    if (heads < 3) need.push((3 - heads) + ' more headline' + ((3 - heads) === 1 ? '' : 's'));
-                    if (!hasImage) need.push('a creative image (Campaign modal → media_url)');
+                    if (heads < 3) need.push((3 - heads) + ' more headline' + ((3 - heads) === 1 ? '' : 's') + ' (in library or override)');
+                    if (!hasImage) need.push('an image (in library or campaign)');
                     badge.style.display = '';
                     badge.style.background = '#FFFBEB';
                     badge.style.border = '1px solid #FDE68A';
@@ -17770,37 +17979,37 @@ function pfParseScreenshots(text) {
                 }
             }
 
-            // Live count update — wired once via delegation
-            document.addEventListener('input', (e) => {
-                const t = e.target;
-                if (!t || !t.id) return;
-                if (t.id === 'pilotCreativeHeadlines'
-                    || t.id === 'pilotCreativeBody'
-                    || t.id === 'pilotCreativeCta') {
-                    pilotUpdateCreativeCounts();
-                }
-            });
-
             // ── Save Creatives pane → PATCH active campaign ───────────
-            // Boost Ads now operates on campaigns. The Creatives pane saves
-            // the variant arrays back to the campaign row. Company identity
-            // + founder + trust fields live on the parent Product (edited
-            // via Affiliate tab) — wiring deferred to Phase F.
+            // Inheritance-aware save 2026-06-25:
+            //   - For each .pilot-cs section: read the current mode.
+            //   - If 'override' (is-override class) → write textarea lines
+            //     to the campaign field. Empty array still counts as override
+            //     because the user explicitly chose to override with nothing
+            //     (rare but valid — e.g. "no CTA for this campaign").
+            //   - If 'inherit' → write an empty array, which mcp.js treats
+            //     as 'fall through to library'.
+            // The campaigns API stores text[] columns; null vs [] both fall
+            // through in mcp.js's Array.isArray + length-check guard. We
+            // send [] so the column is canonicalized.
             window.pilotSaveCreatives = async function () {
                 if (!pilotActiveProductId) return;
                 const btn = document.getElementById('pilotCreativesSaveBtn');
                 const status = document.getElementById('pilotCreativesSaveStatus');
-                const get = (id) => {
-                    const el = document.getElementById(id);
-                    return el ? el.value : '';
-                };
-                const lines = (id) => String(get(id) || '').split('\n').map((l) => l.trim()).filter(Boolean);
-                const payload = {
-                    id: pilotActiveProductId,  // campaigns endpoint expects id in body
-                    creative_headlines:      lines('pilotCreativeHeadlines'),
-                    creative_body_copy:      lines('pilotCreativeBody'),
-                    creative_cta_labels:     lines('pilotCreativeCta'),
-                };
+                const payload = { id: pilotActiveProductId };
+                document.querySelectorAll('#pilotCreativesPane .pilot-cs').forEach((block) => {
+                    const field = block.getAttribute('data-cs-field');
+                    if (!field) return;
+                    const inOverride = block.classList.contains('is-override');
+                    if (inOverride) {
+                        const ta = block.querySelector('[data-cs-textarea]');
+                        const lines = String((ta && ta.value) || '').split('\n')
+                            .map((l) => l.trim()).filter(Boolean);
+                        payload[field] = lines;
+                    } else {
+                        // Inherit → clear the campaign override.
+                        payload[field] = [];
+                    }
+                });
                 if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; btn.style.opacity = '0.7'; }
                 if (status) { status.textContent = ''; }
                 try {
