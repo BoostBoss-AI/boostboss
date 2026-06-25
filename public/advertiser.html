@@ -4368,8 +4368,11 @@
                 <div style="font-size:12px;color:#78350F;line-height:1.6;" data-t="creatives.min_setup_p">Brand name + brand logo + ≥1 headline + ≥1 CTA covers 27 of the 37 placements (text_card + native formats). Images and videos unlock the remaining 10.</div>
               </div>
 
-              <!-- Coverage matrix — which formats are powered by what -->
-              <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
+              <!-- Coverage matrix — which formats are powered by what.
+                   Auto-hides once all 4 coverage chips flip green (handled
+                   by renderCoverage). The overall-completeness pill on
+                   the right keeps showing the % even after this card hides. -->
+              <div id="creativesCoverageCard" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
                   <div style="font-size:13px;font-weight:700;color:#111827;" data-t="creatives.coverage_h">Placement coverage</div>
                   <!-- Overall completeness pill — average across the 7
@@ -16917,7 +16920,9 @@ function pfParseScreenshots(text) {
                 const has21 = (state.images_2_1 || []).filter(Boolean).length;
                 const hasVideo = !!(state.video_landscape_url || state.video_portrait_url);
 
+                let okCount = 0;
                 function set(elId, ok, text) {
+                    if (ok) okCount += 1;
                     const el = document.getElementById(elId);
                     if (!el) return;
                     el.innerHTML = (ok ? '<span style="color:#10B981;">✓</span> ' : '<span style="color:#9CA3AF;">○</span> ') + text;
@@ -16930,6 +16935,15 @@ function pfParseScreenshots(text) {
                     'Needs: any aspect-ratio banner image');
                 set('covVideo',    hasVideo && !!state.video_poster_url,
                     'Needs: 16:9 or 9:16 MP4 + poster + endcard CTA');
+
+                // Hide the whole Placement coverage card once all 4 formats
+                // are met — the user doesn't need to see the nudge list
+                // anymore, and the overall-completeness pill stays visible
+                // up top for at-a-glance status.
+                const coverageCard = document.getElementById('creativesCoverageCard');
+                if (coverageCard) {
+                    coverageCard.style.display = (okCount === 4) ? 'none' : '';
+                }
 
                 // The old library-ready chip was retired 2026-06-25 in
                 // favor of the overall-completeness pill next to the
