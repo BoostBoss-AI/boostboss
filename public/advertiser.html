@@ -2884,10 +2884,20 @@
                  Was a standalone /performance route; now lives directly under
                  the Daily Impressions chart on Home so the whole "where am I
                  + how is the engine doing + what's happening in auctions"
-                 picture sits on one scrollable page. The route page-head
-                 was dropped (Home's "Overview" page-head at the top covers
-                 the section). -->
+                 picture sits on one scrollable page. Section header below
+                 separates this from the chart; "Benna Engine" naming per Andy
+                 since this whole block is Benna's live cockpit. -->
             <div data-shell-route="home">
+
+            <!-- Section header (in-page) above the Benna group. Mirrors the
+                 .shell-page-head visual but uses an h2 so the page only has
+                 one h1 (the Home "Overview" head). -->
+            <div class="shell-page-head" style="margin-top:32px;">
+                <div>
+                    <h2 class="shell-page-title" data-t="perf.title" style="font-size:22px;">Benna Engine</h2>
+                    <div class="shell-page-sub" data-t="perf.sub">Engine status and auction signal · last 7 days</div>
+                </div>
+            </div>
 
             <!-- PERFORMANCE GROUP — Benna Engine (dark, live status) +
                  Auction Intelligence (white, data view). One outer wrapper
@@ -9852,7 +9862,7 @@
                     'chart.peak':  'Peak day',
                     'chart.avg':   'Daily avg',
                     'chart.total': 'Total',
-                    'perf.title': 'Performance', 'perf.sub': 'Engine status and auction signal · last 7 days',
+                    'perf.title': 'Benna Engine', 'perf.sub': 'Engine status and auction signal · last 7 days',
                     'filter.all': 'All', 'filter.live': 'Live', 'filter.paused': 'Paused', 'filter.in_review': 'In Review',
                     'table.campaign_name': 'CAMPAIGN NAME', 'table.status': 'STATUS', 'table.benna': 'BENNA',
                     'table.format': 'FORMAT', 'table.impressions': 'IMPRESSIONS', 'table.clicks': 'CLICKS',
@@ -10305,7 +10315,7 @@
                     'chart.peak':  '高峰日',
                     'chart.avg':   '日均',
                     'chart.total': '总计',
-                    'perf.title': '效果表现', 'perf.sub': '引擎状态与拍卖信号 · 近 7 天',
+                    'perf.title': 'Benna 引擎', 'perf.sub': '引擎状态与拍卖信号 · 近 7 天',
                     'filter.all': '全部', 'filter.live': '运行中', 'filter.paused': '已暂停', 'filter.in_review': '审核中',
                     'table.campaign_name': '广告名称', 'table.status': '状态', 'table.benna': 'BENNA',
                     'table.format': '格式', 'table.impressions': '展示数', 'table.clicks': '点击数',
@@ -10753,7 +10763,7 @@
                     'chart.peak':  '高峰日',
                     'chart.avg':   '日均',
                     'chart.total': '總計',
-                    'perf.title': '成效表現', 'perf.sub': '引擎狀態與競價訊號 · 近 7 天',
+                    'perf.title': 'Benna 引擎', 'perf.sub': '引擎狀態與競價訊號 · 近 7 天',
                     'filter.all': '全部', 'filter.live': '進行中', 'filter.paused': '已暫停', 'filter.in_review': '審核中',
                     'table.campaign_name': '廣告名稱', 'table.status': '狀態', 'table.benna': 'BENNA',
                     'table.format': '格式', 'table.impressions': '曝光數', 'table.clicks': '點擊數',
@@ -11201,7 +11211,7 @@
                     'chart.peak':  'ピーク日',
                     'chart.avg':   '日次平均',
                     'chart.total': '合計',
-                    'perf.title': 'パフォーマンス', 'perf.sub': 'エンジン状態とオークション信号 · 過去 7 日',
+                    'perf.title': 'Benna エンジン', 'perf.sub': 'エンジン状態とオークション信号 · 過去 7 日',
                     'filter.all': 'すべて', 'filter.live': '実行中', 'filter.paused': '一時停止', 'filter.in_review': '審査中',
                     'table.campaign_name': 'キャンペーン名', 'table.status': 'ステータス', 'table.benna': 'BENNA',
                     'table.format': 'フォーマット', 'table.impressions': 'インプレッション', 'table.clicks': 'クリック',
@@ -11649,7 +11659,7 @@
                     'chart.peak':  '피크일',
                     'chart.avg':   '일 평균',
                     'chart.total': '합계',
-                    'perf.title': '퍼포먼스', 'perf.sub': '엔진 상태 및 옥션 시그널 · 최근 7일',
+                    'perf.title': 'Benna 엔진', 'perf.sub': '엔진 상태 및 옥션 시그널 · 최근 7일',
                     'filter.all': '전체', 'filter.live': '실행중', 'filter.paused': '일시정지', 'filter.in_review': '심사중',
                     'table.campaign_name': '캠페인 이름', 'table.status': '상태', 'table.benna': 'BENNA',
                     'table.format': '포맷', 'table.impressions': '임프레션', 'table.clicks': '클릭',
@@ -12097,7 +12107,7 @@
                     'chart.peak':  'Ngày cao điểm',
                     'chart.avg':   'Trung bình ngày',
                     'chart.total': 'Tổng',
-                    'perf.title': 'Hiệu suất', 'perf.sub': 'Trạng thái engine và tín hiệu đấu giá · 7 ngày gần nhất',
+                    'perf.title': 'Benna Engine', 'perf.sub': 'Trạng thái engine và tín hiệu đấu giá · 7 ngày gần nhất',
                     'filter.all': 'Tất cả', 'filter.live': 'Đang chạy', 'filter.paused': 'Tạm dừng', 'filter.in_review': 'Đang duyệt',
                     'table.campaign_name': 'TÊN CHIẾN DỊCH', 'table.status': 'TRẠNG THÁI', 'table.benna': 'BENNA',
                     'table.format': 'ĐỊNH DẠNG', 'table.impressions': 'IMPRESSION', 'table.clicks': 'CLICK',
