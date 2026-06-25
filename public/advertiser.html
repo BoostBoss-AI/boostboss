@@ -2378,6 +2378,41 @@
             min-width: 40px;
             text-align: right;
         }
+        /* Per-section Save bar — injected by wireSaveBars() on load. Auto-save
+           still runs, but the explicit Save chip + button give users a
+           clear "done" signal for each section. */
+        .ca-save-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #F3F4F6;
+        }
+        .ca-save-chip {
+            font-size: 12px;
+            font-weight: 700;
+            color: #059669;
+            padding: 4px 10px;
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            border-radius: 100px;
+        }
+        .ca-save-btn {
+            padding: 8px 18px;
+            background: #FF2D78;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: filter 0.12s;
+        }
+        .ca-save-btn:hover { filter: brightness(1.06); }
+        .ca-save-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
         /* ─── Pilot Creatives sub-tab — inheritance preview + override pattern.
               Per-section block with read-only display by default, swaps into
@@ -16865,10 +16900,53 @@ function pfParseScreenshots(text) {
                     });
                     hydrateScalarFields();
                     renderCoverage();
+                    wireSaveBars();
                 } catch (e) {
                     console.warn('[creatives] load failed:', e);
                     showStatus('Could not load assets', 'error');
                 }
+            }
+
+            // Inject a per-section Save button at the bottom of each
+            // .ca-body. Auto-save still runs (debounced) — these buttons
+            // give the user explicit confirmation by force-flushing the
+            // pending PATCH immediately and showing a localized ✓ Saved
+            // chip on the section itself. Idempotent: skips sections that
+            // already have a save bar from a previous load() pass.
+            function wireSaveBars() {
+                document.querySelectorAll('#pilotCreativesPane, [data-shell-route="creatives"]').forEach(() => {});
+                document.querySelectorAll('.ca-section .ca-body').forEach((body) => {
+                    if (body.querySelector('.ca-save-bar')) return; // already wired
+                    const bar = document.createElement('div');
+                    bar.className = 'ca-save-bar';
+                    const chip = document.createElement('span');
+                    chip.className = 'ca-save-chip';
+                    chip.style.display = 'none';
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'ca-save-btn';
+                    btn.textContent = 'Save section';
+                    btn.addEventListener('click', async () => {
+                        btn.disabled = true;
+                        const original = btn.textContent;
+                        btn.textContent = 'Saving…';
+                        try {
+                            await flushSave();
+                            chip.textContent = '✓ Saved';
+                            chip.style.display = '';
+                            setTimeout(() => { chip.style.display = 'none'; }, 1800);
+                        } catch (_) {
+                            chip.textContent = '✗ Save failed';
+                            chip.style.display = '';
+                        } finally {
+                            btn.disabled = false;
+                            btn.textContent = original;
+                        }
+                    });
+                    bar.appendChild(chip);
+                    bar.appendChild(btn);
+                    body.appendChild(bar);
+                });
             }
 
             // ── Debounced PATCH ─────────────────────────────────────
