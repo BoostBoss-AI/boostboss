@@ -16916,10 +16916,47 @@ function pfParseScreenshots(text) {
                     hydrateScalarFields();
                     renderCoverage();
                     wireSaveBars();
+                    wireSectionPersistence();
                 } catch (e) {
                     console.warn('[creatives] load failed:', e);
                     showStatus('Could not load assets', 'error');
                 }
+            }
+
+            // Persist each <details class="ca-section">'s open/closed state
+            // across reloads in localStorage. Without this every visit
+            // resets the sections to their HTML-declared defaults
+            // (open/open/closed/closed/...) which is annoying when an
+            // advertiser is iterating on one section.
+            const CA_SECTION_KEY = 'bb_creatives_section_state';
+            function loadSectionState() {
+                try {
+                    const raw = localStorage.getItem(CA_SECTION_KEY);
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                } catch (_) { return null; }
+            }
+            function saveSectionState(map) {
+                try { localStorage.setItem(CA_SECTION_KEY, JSON.stringify(map)); }
+                catch (_) { /* quota / private mode — silent */ }
+            }
+            function wireSectionPersistence() {
+                const stored = loadSectionState();
+                document.querySelectorAll('details.ca-section[data-ca-section]').forEach((det) => {
+                    const key = det.getAttribute('data-ca-section');
+                    // Restore — only when stored state is explicitly set; if a
+                    // section was never toggled, keep the HTML default.
+                    if (stored && Object.prototype.hasOwnProperty.call(stored, key)) {
+                        det.open = !!stored[key];
+                    }
+                    if (det.__caStateWired) return;
+                    det.__caStateWired = true;
+                    det.addEventListener('toggle', () => {
+                        const fresh = loadSectionState() || {};
+                        fresh[key] = !!det.open;
+                        saveSectionState(fresh);
+                    });
+                });
             }
 
             // Inject a per-section Save button at the bottom of each
