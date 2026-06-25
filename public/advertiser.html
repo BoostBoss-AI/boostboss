@@ -3558,10 +3558,61 @@
               </div>
 
               <!-- ───────────────── AFFILIATE PANE ─────────────────
-                   Same reparenting pattern. The data-shell-route="products"
-                   element (the Affiliate marketplace catalog) gets moved in
-                   when this sub-tab activates, reverts on deactivation. -->
-              <div id="pilotAffiliatePane" style="display:none;" data-pilot-pane="affiliate"></div>
+                   Per-campaign affiliate attach picker. The advertiser
+                   picks ONE affiliate product from their catalog — when
+                   the campaign serves on a placement, it carries that
+                   product as its complimentary affiliate link.
+                   Reuses the existing campaigns.product_id field.
+                   Per Andy 2026-06-25 — replaces the earlier legacy-page
+                   reparenting (which conflated catalog management with
+                   per-campaign attach selection). -->
+              <div id="pilotAffiliatePane" style="display:none;" data-pilot-pane="affiliate">
+                <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:20px;">
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                    <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0;">Attach an affiliate product</h3>
+                    <button type="button" id="pilotAffiliateNewBtn" style="
+                      padding:7px 13px; background:#fff; border:1px solid #FF2D78;
+                      color:#FF2D78; border-radius:7px; font-size:12px; font-weight:700;
+                      cursor:pointer; font-family:inherit;
+                    ">+ New affiliate product</button>
+                  </div>
+                  <p style="font-size:12px; color:#6B7280; margin:0 0 18px; line-height:1.55;">
+                    When this campaign serves on a placement, it'll include a complimentary affiliate link to the product you pick here. Affiliates can promote that product and earn commission on every sale.
+                  </p>
+
+                  <!-- "None" option — campaign with no affiliate attach -->
+                  <label class="pilot-affiliate-row" data-affiliate-id="" style="
+                    display:flex; align-items:flex-start; gap:12px;
+                    padding:14px 16px; border:1px solid #E5E7EB; border-radius:10px;
+                    margin-bottom:8px; cursor:pointer; transition:background 0.15s;
+                  ">
+                    <input type="radio" name="pilotAffiliateAttach" value="" style="margin-top:2px; accent-color:#FF2D78;">
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:700; color:#0F0F1A;">No affiliate attachment</div>
+                      <div style="font-size:11.5px; color:#6B7280; margin-top:3px;">Campaign serves as a regular ad — no complimentary affiliate link.</div>
+                    </div>
+                  </label>
+
+                  <!-- Product list — populated by renderAffiliateAttachList() -->
+                  <div id="pilotAffiliateList" style="margin-top:12px;">
+                    <div style="font-size:12px; color:#9CA3AF; padding:24px 12px; text-align:center;">Loading your affiliate products…</div>
+                  </div>
+
+                  <!-- Empty state — no products created yet -->
+                  <div id="pilotAffiliateEmpty" style="display:none; text-align:center; padding:36px 18px; background:#FAFAFA; border-radius:10px; margin-top:12px;">
+                    <div style="font-size:32px; margin-bottom:8px;">🤝</div>
+                    <div style="font-size:13px; font-weight:700; color:#374151; margin-bottom:4px;">No affiliate products yet</div>
+                    <div style="font-size:12px; color:#6B7280; max-width:380px; margin:0 auto 14px;">Create your first affiliate product to start attaching complimentary links to your campaigns. Affiliates will be able to promote it for commission.</div>
+                    <button type="button" id="pilotAffiliateEmptyBtn" style="
+                      padding:8px 16px; background:#FF2D78; color:#fff; border:none;
+                      border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer;
+                      font-family:inherit;
+                    ">+ New affiliate product</button>
+                  </div>
+
+                  <div id="pilotAffiliateSaveStatus" style="margin-top:14px; font-size:12px; color:#9CA3AF; text-align:right; min-height:18px;"></div>
+                </div>
+              </div>
 
               <!-- ───────────────── CREATIVES PANE ─────────────────
                    Company identity + creative library for the active
@@ -16429,16 +16480,15 @@ function pfParseScreenshots(text) {
                 if (pilotCurrentInternalTab === 'creatives') {
                     pilotLoadCreativesPane();
                 }
-                // Campaigns sub-tab is now a per-campaign performance
-                // dashboard (not the embedded legacy fleet page). Affiliate
-                // still reparents the legacy marketplace catalog inline.
+                // Campaigns sub-tab = per-campaign performance dashboard.
+                // Affiliate sub-tab = per-campaign affiliate attach picker.
+                // Neither reparents the legacy routes anymore — both are
+                // custom panes that derive their content from the active
+                // campaign + a lightweight backend fetch.
                 if (pilotCurrentInternalTab === 'campaigns') {
-                    pilotRevertRouteFromPane('affiliate');
                     renderCampaignsPerfPane();
                 } else if (pilotCurrentInternalTab === 'affiliate') {
-                    pilotMoveRouteIntoPane('affiliate');
-                } else {
-                    pilotRevertRouteFromPane('affiliate');
+                    renderAffiliateAttachPane();
                 }
             }
             window.pilotSwitchInternalTab = pilotSwitchInternalTab;
@@ -16708,6 +16758,162 @@ function pfParseScreenshots(text) {
                 // The "Full campaign management →" link was removed per
                 // Andy 2026-06-25. New Campaign entry now lives only at
                 // the Active Boosts footer button (#pilotNewCampaignBtn).
+            }
+
+            // ── Affiliate sub-tab: per-campaign attach picker ────────
+            // Lists the advertiser's affiliate products (from /api/products,
+            // server-scoped to the authed advertiser). A single-select
+            // radio attaches one product to the active campaign as its
+            // complimentary affiliate link. PATCHes campaigns.product_id
+            // on change. Per [[advertiser-pilot-model]] 2026-06-25.
+            let pilotAffiliateProducts = [];
+            async function renderAffiliateAttachPane() {
+                const c = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!c) return;
+                const token = getToken();
+                if (!token) return;
+                const listEl = document.getElementById('pilotAffiliateList');
+                const emptyEl = document.getElementById('pilotAffiliateEmpty');
+
+                // Load products on first render (or refresh on every entry
+                // — products list is small + the user just created one).
+                try {
+                    const r = await fetch('/api/products?limit=100', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (r.ok) {
+                        const j = await r.json();
+                        pilotAffiliateProducts = (j.products || [])
+                            .filter(p => p.status !== 'archived');
+                    }
+                } catch (e) {
+                    console.warn('[pilot] affiliate products fetch failed:', e);
+                }
+
+                // Empty-state: no products yet
+                if (!pilotAffiliateProducts.length) {
+                    if (listEl) listEl.innerHTML = '';
+                    if (emptyEl) emptyEl.style.display = '';
+                    // Hide the "None" radio + the list when empty — empty
+                    // state's own CTA tells the story.
+                    document.querySelectorAll('.pilot-affiliate-row').forEach((r) => { r.style.display = 'none'; });
+                } else {
+                    if (emptyEl) emptyEl.style.display = 'none';
+                    document.querySelectorAll('.pilot-affiliate-row').forEach((r) => { r.style.display = ''; });
+                    if (listEl) {
+                        listEl.innerHTML = pilotAffiliateProducts.map((p) => {
+                            const name = (p.name || '(untitled product)').replace(/[<>]/g, '');
+                            const desc = (p.description || '').replace(/[<>]/g, '').slice(0, 140);
+                            const commission = p.default_commission_pct
+                                ? Number(p.default_commission_pct).toFixed(1) + '% commission pool'
+                                : 'No commission set';
+                            const audit = p.audit_status || 'draft';
+                            const auditChip = audit === 'approved'
+                                ? '<span style="display:inline-block; padding:2px 7px; border-radius:999px; background:#ECFDF5; color:#065F46; font-size:10px; font-weight:700; letter-spacing:0.02em;">APPROVED</span>'
+                                : '<span style="display:inline-block; padding:2px 7px; border-radius:999px; background:#FFFBEB; color:#92400E; font-size:10px; font-weight:700; letter-spacing:0.02em;">' + audit.toUpperCase() + '</span>';
+                            return '<label class="pilot-affiliate-row" data-affiliate-id="' + p.id + '" style="' +
+                                'display:flex; align-items:flex-start; gap:12px;' +
+                                'padding:14px 16px; border:1px solid #E5E7EB; border-radius:10px;' +
+                                'margin-bottom:8px; cursor:pointer; transition:background 0.15s;' +
+                                '">' +
+                                '<input type="radio" name="pilotAffiliateAttach" value="' + p.id + '" style="margin-top:2px; accent-color:#FF2D78;">' +
+                                '<div style="flex:1; min-width:0;">' +
+                                  '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">' +
+                                    '<span style="font-size:13px; font-weight:700; color:#0F0F1A;">' + name + '</span>' +
+                                    auditChip +
+                                  '</div>' +
+                                  '<div style="font-size:11.5px; color:#6B7280; line-height:1.5;">' + (desc || '<em style="color:#9CA3AF;">No description</em>') + '</div>' +
+                                  '<div style="font-size:11px; color:#9CA3AF; margin-top:4px;">' + commission + '</div>' +
+                                '</div>' +
+                                '</label>';
+                        }).join('');
+                    }
+                }
+
+                // Sync the radio state with the active campaign's current
+                // product_id selection. Empty value = "None" option checked.
+                const currentId = c.product_id || '';
+                document.querySelectorAll('input[name="pilotAffiliateAttach"]').forEach((input) => {
+                    input.checked = input.value === currentId;
+                });
+                // Highlight the selected row's background
+                document.querySelectorAll('.pilot-affiliate-row').forEach((row) => {
+                    const isSel = row.getAttribute('data-affiliate-id') === currentId;
+                    row.style.background = isSel ? '#FFF5F8' : '#fff';
+                    row.style.borderColor = isSel ? '#FF2D78' : '#E5E7EB';
+                });
+
+                // Wire change handler once
+                if (!document.body.__pilotAffiliateWired) {
+                    document.body.__pilotAffiliateWired = true;
+                    document.addEventListener('change', (e) => {
+                        if (e.target && e.target.name === 'pilotAffiliateAttach') {
+                            pilotSaveAffiliateAttach(e.target.value);
+                        }
+                    });
+                }
+
+                // Wire the "+ New affiliate product" buttons (both header + empty-state)
+                ['pilotAffiliateNewBtn', 'pilotAffiliateEmptyBtn'].forEach((id) => {
+                    const btn = document.getElementById(id);
+                    if (btn && !btn.__wired) {
+                        btn.__wired = true;
+                        btn.addEventListener('click', () => {
+                            // Open the legacy product create modal directly.
+                            // The standalone Affiliate page (#/products) hosts
+                            // the New Product button — invoke it.
+                            const productPageBtn = document.querySelector('[data-shell-route="products"] .new-campaign-btn, [data-shell-route="products"] button[id*="newProduct"], [data-shell-route="products"] button[id*="NewProduct"]');
+                            // Fallback: navigate to /#/products if we can't trigger inline (Advanced mode auto-on).
+                            if (productPageBtn) {
+                                productPageBtn.click();
+                            } else {
+                                localStorage.setItem('bb_advanced_mode', '1');
+                                if (typeof window.applyAdvancedMode === 'function') window.applyAdvancedMode();
+                                window.location.hash = '#/products';
+                            }
+                        });
+                    }
+                });
+            }
+
+            async function pilotSaveAffiliateAttach(productId) {
+                if (!pilotActiveProductId) return;
+                const token = getToken();
+                if (!token) return;
+                const statusEl = document.getElementById('pilotAffiliateSaveStatus');
+                if (statusEl) { statusEl.textContent = 'Saving…'; statusEl.style.color = '#9CA3AF'; }
+                try {
+                    const r = await fetch('/api/campaigns?action=update', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token,
+                        },
+                        body: JSON.stringify({
+                            id: pilotActiveProductId,
+                            product_id: productId || null,
+                        }),
+                    });
+                    if (!r.ok) {
+                        const j = await r.json().catch(() => ({}));
+                        throw new Error(j.error || 'HTTP ' + r.status);
+                    }
+                    const j = await r.json();
+                    const fresh = j.campaign || j.data;
+                    if (fresh && fresh.id) {
+                        const idx = pilotProducts.findIndex(p => p.id === fresh.id);
+                        if (idx >= 0) pilotProducts[idx] = fresh;
+                    }
+                    if (statusEl) {
+                        statusEl.textContent = productId ? '✓ Attached' : '✓ Detached';
+                        statusEl.style.color = '#22C55E';
+                        setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+                    }
+                    // Re-render so the row highlight reflects the new selection
+                    renderAffiliateAttachPane();
+                } catch (e) {
+                    if (statusEl) { statusEl.textContent = '✗ ' + (e.message || 'Save failed'); statusEl.style.color = '#EF4444'; }
+                }
             }
 
             function renderSpendBreakdown(data) {
