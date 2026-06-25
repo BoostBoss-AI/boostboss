@@ -40,18 +40,18 @@ end $$;
 
 
 -- ── 2. Add the fresh constraint with mobile-app included ─────────────
--- Per-element validation via UNNEST. Empty array allowed (= no filter,
--- campaign matches all doors). NULL allowed (column nullable for
--- back-compat with pre-migration-09 rows).
+-- Uses the `<@` subset operator (every element of LHS array is in RHS
+-- array). Subqueries aren't allowed in CHECK constraints — earlier draft
+-- used an unnest+bool_and subquery and Postgres rejected it with
+-- "cannot use subquery in check constraint". The subset operator is the
+-- idiomatic array-validation pattern.
+--
+-- NULL and empty array are both vacuously valid (no elements to violate).
 alter table public.campaigns
   add constraint campaigns_target_integration_methods_chk
   check (
     target_integration_methods is null
-    or array_length(target_integration_methods, 1) is null  -- empty array
-    or (
-      select bool_and(m in ('mcp', 'js-snippet', 'npm-sdk', 'rest-api', 'mobile-app'))
-      from unnest(target_integration_methods) as m
-    )
+    or target_integration_methods <@ ARRAY['mcp','js-snippet','npm-sdk','rest-api','mobile-app']::text[]
   );
 
 
