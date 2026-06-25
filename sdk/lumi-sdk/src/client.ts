@@ -106,6 +106,18 @@ export class Client {
   }
 }
 
+interface BrandKitWire {
+  name?:        string | null;
+  logo_url?:    string | null;
+  favicon_url?: string | null;
+  color?:       string | null;
+  domain?:      string | null;
+}
+interface VoucherWire {
+  value_text?:     string | null;
+  code?:           string | null;
+  redemption_url?: string | null;
+}
 interface SponsoredWire {
   campaign_id: string;
   type?: string;
@@ -116,6 +128,10 @@ interface SponsoredWire {
   cta_url: string;
   disclosure_label?: string;
   tracking?: { impression?: string; click?: string; close?: string; dismiss?: string };
+  /** @since backend 2026-06-25 — global Creatives library brand kit. */
+  brand_kit?: BrandKitWire | null;
+  /** @since backend 2026-06-25 — global Creatives library voucher endcard. */
+  voucher?:   VoucherWire | null;
 }
 interface AuctionWire {
   auction_id?: string;
@@ -123,6 +139,26 @@ interface AuctionWire {
 }
 
 function adFromWire(s: SponsoredWire, a?: AuctionWire): AdPayload {
+  // Brand kit + voucher: hydrate only when the server included them AND
+  // at least one field is non-null. Older backends omit these entirely;
+  // older SDK consumers ignore the optional fields. Forward-compatible
+  // both ways.
+  const bk = s.brand_kit && (s.brand_kit.name || s.brand_kit.logo_url || s.brand_kit.domain)
+    ? {
+        name:       s.brand_kit.name       ?? null,
+        logoUrl:    s.brand_kit.logo_url   ?? null,
+        faviconUrl: s.brand_kit.favicon_url ?? null,
+        color:      s.brand_kit.color      ?? null,
+        domain:     s.brand_kit.domain     ?? null,
+      }
+    : null;
+  const vc = s.voucher && s.voucher.value_text
+    ? {
+        valueText:     s.voucher.value_text     ?? null,
+        code:          s.voucher.code           ?? null,
+        redemptionUrl: s.voucher.redemption_url ?? null,
+      }
+    : null;
   return {
     adId:            s.campaign_id,
     auctionId:       a?.auction_id ?? null,
@@ -141,5 +177,7 @@ function adFromWire(s: SponsoredWire, a?: AuctionWire): AdPayload {
     },
     disclosureLabel: s.disclosure_label ?? "Sponsored",
     isSandbox:       a?.sandbox === true,
+    brandKit:        bk,
+    voucher:         vc,
   };
 }

@@ -222,6 +222,18 @@ export class LumiMCP {
 // Internal helpers
 // ─────────────────────────────────────────────────────────────────────────
 
+interface BrandKitWire {
+  name?:        string | null;
+  logo_url?:    string | null;
+  favicon_url?: string | null;
+  color?:       string | null;
+  domain?:      string | null;
+}
+interface VoucherWire {
+  value_text?:     string | null;
+  code?:           string | null;
+  redemption_url?: string | null;
+}
 interface SponsoredWire {
   campaign_id: string;
   advertiser_id?: string;
@@ -239,6 +251,9 @@ interface SponsoredWire {
     close?: string;
     video_complete?: string;
   };
+  /** @since backend 2026-06-25 — global Creatives library. */
+  brand_kit?: BrandKitWire | null;
+  voucher?:   VoucherWire | null;
 }
 
 interface AuctionWire {
@@ -263,11 +278,32 @@ function unwrapToolText<T>(raw: unknown): T | null {
 
 function adFromWire(s: SponsoredWire, a?: AuctionWire, placement: PlacementFormat = "card"): Ad {
   const auctionId = a?.auction_id ?? "";
+  // Hydrate brand kit + voucher only when present + non-empty. Older
+  // backends omit these entirely; the Ad class treats them as optional.
+  const bk = s.brand_kit && (s.brand_kit.name || s.brand_kit.logo_url || s.brand_kit.domain)
+    ? {
+        name:       s.brand_kit.name       ?? null,
+        logoUrl:    s.brand_kit.logo_url   ?? null,
+        faviconUrl: s.brand_kit.favicon_url ?? null,
+        color:      s.brand_kit.color      ?? null,
+        domain:     s.brand_kit.domain     ?? null,
+      }
+    : null;
+  const vc = s.voucher && s.voucher.value_text
+    ? {
+        valueText:     s.voucher.value_text     ?? null,
+        code:          s.voucher.code           ?? null,
+        redemptionUrl: s.voucher.redemption_url ?? null,
+      }
+    : null;
+  // advertiserName falls back to brandKit.name so legacy callers reading
+  // ad.advertiserName see something useful once the library is filled.
+  const advertiserName = bk?.name ?? undefined;
   return new Ad(
     {
       adId:            s.campaign_id,
       auctionId,
-      advertiserName:  undefined, // backend does not currently surface; reserved
+      advertiserName,
       headline:        s.headline,
       subtext:         s.subtext,
       mediaUrl:        s.media_url,
@@ -275,6 +311,8 @@ function adFromWire(s: SponsoredWire, a?: AuctionWire, placement: PlacementForma
       ctaUrl:          s.cta_url,
       disclosureLabel: s.disclosure_label || "Sponsored",
       intentMatchScore: a?.intent_match_score,
+      brandKit:        bk,
+      voucher:         vc,
     },
     {
       trackingImpression: s.tracking?.impression ?? null,

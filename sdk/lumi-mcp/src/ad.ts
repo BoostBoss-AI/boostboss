@@ -2,7 +2,7 @@
  * Ad — the rendered-side object returned from fetchAd().
  * Carries the creative payload plus methods for MCP rendering and tracking.
  */
-import type { AdPayload, MCPContentBlock, PlacementFormat } from "./types.js";
+import type { AdPayload, BrandKit, MCPContentBlock, PlacementFormat, Voucher } from "./types.js";
 
 export interface AdInternals {
   trackingImpression?: string | null;
@@ -10,11 +10,16 @@ export interface AdInternals {
 }
 
 /** Eyebrow / disclosure line per MCP placement. The legal disclosure label
- *  is always present; placement only adds framing. */
-function eyebrow(disclosure: string, placement: PlacementFormat): string {
-  if (placement === "citation") return `— ${disclosure} · source —`;
-  if (placement === "toolrec")  return `— ${disclosure} · recommended —`;
-  return `— ${disclosure} —`;
+ *  is always present; placement only adds framing. When a brand kit is
+ *  available, we substitute the brand name for a richer 'Sponsored by'
+ *  line — better trust signal than the bare disclosure. */
+function eyebrow(disclosure: string, placement: PlacementFormat, brandKit?: BrandKit | null): string {
+  const brandLabel = brandKit?.name
+    ? `${disclosure} by ${brandKit.name}${brandKit.domain ? ` (${brandKit.domain})` : ""}`
+    : disclosure;
+  if (placement === "citation") return `— ${brandLabel} · source —`;
+  if (placement === "toolrec")  return `— ${brandLabel} · recommended —`;
+  return `— ${brandLabel} —`;
 }
 
 export class Ad implements AdPayload {
@@ -28,6 +33,10 @@ export class Ad implements AdPayload {
   readonly ctaUrl: string;
   readonly disclosureLabel: string;
   readonly intentMatchScore?: number;
+  /** Brand kit from the advertiser's Creatives library. Null when unset. */
+  readonly brandKit?: BrandKit | null;
+  /** Voucher / promo endcard from the library. Null when unset. */
+  readonly voucher?: Voucher | null;
   /** The placement requested in fetchAd(); toMCPBlock() defaults to it. */
   readonly placement: PlacementFormat;
 
@@ -45,6 +54,8 @@ export class Ad implements AdPayload {
     this.ctaUrl          = payload.ctaUrl;
     this.disclosureLabel = payload.disclosureLabel;
     this.intentMatchScore = payload.intentMatchScore;
+    this.brandKit        = payload.brandKit ?? null;
+    this.voucher         = payload.voucher  ?? null;
     this.placement       = placement;
     this._internals      = internals;
   }
@@ -72,13 +83,21 @@ export class Ad implements AdPayload {
    */
   toMCPBlock(placement: PlacementFormat = this.placement): MCPContentBlock {
     const lines: string[] = [];
-    lines.push(eyebrow(this.disclosureLabel, placement));
+    // Eyebrow now uses the brand kit (when set) for a richer 'Sponsored
+    // by [name] (domain)' line instead of the bare disclosure.
+    lines.push(eyebrow(this.disclosureLabel, placement, this.brandKit));
     lines.push(this.headline);
     if (this.subtext) lines.push(this.subtext);
     const url = this.clickThroughUrl();
     if (this.ctaLabel || url) {
       const label = this.ctaLabel || "Learn more";
       lines.push(`${label}: ${url}`);
+    }
+    // Voucher endcard — sits below the CTA on rewarded/interstitial-style
+    // placements. In MCP text blocks, surface it as a 🎟 prefixed line.
+    if (this.voucher?.valueText) {
+      const codeFrag = this.voucher.code ? ` (code: ${this.voucher.code})` : "";
+      lines.push(`🎟 ${this.voucher.valueText}${codeFrag}`);
     }
     return {
       type: "text",

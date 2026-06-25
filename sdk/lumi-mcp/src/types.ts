@@ -43,6 +43,26 @@ export interface FetchAdRequest {
   hostApp?: string;
 }
 
+/** Optional brand-kit fields sourced from the advertiser's global Creatives
+ *  library. The MCP host renders them as a single 'Sponsored by [name]'
+ *  line prepended to the content block. Null when the advertiser hasn't
+ *  filled their library yet. Added in lumi-mcp 0.5.0 / backend 2026-06-25. */
+export interface BrandKit {
+  name?:       string | null;
+  logoUrl?:    string | null;
+  faviconUrl?: string | null;
+  color?:      string | null;
+  domain?:     string | null;
+}
+
+/** Optional voucher / promo endcard from the global library. Rendered as
+ *  a single line below the CTA in the MCP content block. Null when not set. */
+export interface Voucher {
+  valueText?:     string | null;
+  code?:          string | null;
+  redemptionUrl?: string | null;
+}
+
 export interface AdPayload {
   /** Server-issued ad identifier; pass to track* methods if you build custom tracking. */
   adId: string;
@@ -65,6 +85,10 @@ export interface AdPayload {
   disclosureLabel: string;
   /** Server-supplied benna intent-match score, if available. */
   intentMatchScore?: number;
+  /** Brand kit from the advertiser's global Creatives library. @since 0.5.0 */
+  brandKit?: BrandKit | null;
+  /** Voucher / promo endcard from the global library. @since 0.5.0 */
+  voucher?: Voucher | null;
 }
 
 /**

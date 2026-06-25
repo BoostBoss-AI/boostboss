@@ -32,6 +32,20 @@ const CSS = `
 .lumi-x { position: absolute; top: 8px; right: 10px; width: 26px; height: 26px; border: none; background: transparent; cursor: pointer; font-size: 20px; line-height: 1; color: var(--_m); border-radius: 50%; padding: 0; }
 .lumi-x:hover { background: rgba(0,0,0,0.05); color: var(--_t); }
 
+/* brand line — logo + 'Sponsored by [name] · [domain]' (Creatives library brand_kit) */
+.lumi-brand { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: var(--_m); line-height: 1.2; }
+.lumi-brand__logo { width: 18px; height: 18px; border-radius: 4px; object-fit: contain; background: #fff; flex-shrink: 0; }
+.lumi-brand__name { font-weight: 700; color: var(--_t); }
+.lumi-brand__domain { color: var(--_m); }
+.lumi-brand__dot { color: var(--_m); }
+
+/* voucher endcard — sits above the CTA on corner/newtab when set */
+.lumi-voucher { display: flex; align-items: flex-start; gap: 8px; padding: 8px 11px; background: rgba(255, 247, 237, 0.85); border: 1px solid rgba(252, 211, 77, 0.55); border-radius: 8px; }
+.lumi-voucher__icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.lumi-voucher__body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lumi-voucher__value { font-size: 12px; font-weight: 700; color: #92400E; line-height: 1.3; }
+.lumi-voucher__code { font-size: 10.5px; color: #9A3412; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.04em; }
+
 /* corner — sticky anchored unit */
 .lumi-corner-anchor { position: fixed; bottom: 24px; right: 24px; width: 320px; z-index: 2147483646; }
 .lumi-corner { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--_bg); border: 1px solid var(--_b); border-radius: var(--_r); box-shadow: 0 16px 48px rgba(0,0,0,0.22); }
@@ -152,6 +166,69 @@ function addMedia(parent: HTMLElement, ad: AdPayload, cls: string): void {
   parent.appendChild(img);
 }
 
+/** Brand line — logo + "Sponsored by [name] · [domain]". Null when the
+ *  advertiser hasn't filled their Creatives library. */
+function makeBrandLine(ad: AdPayload): HTMLElement | null {
+  const bk = ad.brandKit;
+  if (!bk || (!bk.name && !bk.logoUrl && !bk.domain)) return null;
+  const wrap = document.createElement("span");
+  wrap.className = "lumi-brand";
+  if (bk.logoUrl) {
+    const img = document.createElement("img");
+    img.className = "lumi-brand__logo";
+    img.src = bk.logoUrl;
+    img.alt = "";
+    img.onerror = () => img.remove();
+    wrap.appendChild(img);
+  }
+  if (bk.name) {
+    const lead = document.createTextNode("Sponsored by ");
+    wrap.appendChild(lead);
+    const n = document.createElement("span");
+    n.className = "lumi-brand__name";
+    n.textContent = bk.name;
+    wrap.appendChild(n);
+  }
+  if (bk.domain) {
+    const dot = document.createElement("span");
+    dot.className = "lumi-brand__dot";
+    dot.textContent = bk.name ? " · " : "";
+    wrap.appendChild(dot);
+    const d = document.createElement("span");
+    d.className = "lumi-brand__domain";
+    d.textContent = bk.domain;
+    wrap.appendChild(d);
+  }
+  return wrap;
+}
+
+/** Voucher endcard — small offer tile sitting above the CTA on corner +
+ *  newtab. Null when no voucher is set on the global library. */
+function makeVoucher(ad: AdPayload): HTMLElement | null {
+  const v = ad.voucher;
+  if (!v || !v.valueText) return null;
+  const wrap = document.createElement("div");
+  wrap.className = "lumi-voucher";
+  const icon = document.createElement("span");
+  icon.className = "lumi-voucher__icon";
+  icon.textContent = "🎟";
+  wrap.appendChild(icon);
+  const body = document.createElement("div");
+  body.className = "lumi-voucher__body";
+  const value = document.createElement("span");
+  value.className = "lumi-voucher__value";
+  value.textContent = v.valueText;
+  body.appendChild(value);
+  if (v.code) {
+    const code = document.createElement("span");
+    code.className = "lumi-voucher__code";
+    code.textContent = "Code: " + v.code;
+    body.appendChild(code);
+  }
+  wrap.appendChild(body);
+  return wrap;
+}
+
 export interface RenderResult {
   /** Element mounted outside the slot (corner anchor); null otherwise. Tracked for cleanup. */
   backdrop: HTMLElement | null;
@@ -187,6 +264,9 @@ function renderCorner(el: HTMLElement, ad: AdPayload, onClick: () => void, onClo
     onClose();
   }));
   card.appendChild(makeDisclosure(ad.disclosureLabel));
+  // Brand line directly under the disclosure — logo + "Sponsored by [name] · [domain]"
+  const brand = makeBrandLine(ad);
+  if (brand) card.appendChild(brand);
   addMedia(card, ad, "lumi-corner__media");
   const h = document.createElement("p");
   h.className = "lumi-corner__title"; h.textContent = ad.headline;
@@ -196,6 +276,9 @@ function renderCorner(el: HTMLElement, ad: AdPayload, onClick: () => void, onClo
     s.className = "lumi-corner__sub"; s.textContent = ad.body;
     card.appendChild(s);
   }
+  // Voucher endcard sits above the CTA when the advertiser set one.
+  const voucher = makeVoucher(ad);
+  if (voucher) card.appendChild(voucher);
   card.appendChild(buildCta(ad, "lumi-corner__cta", onClick));
   anchor.appendChild(card);
   document.body.appendChild(anchor);
@@ -212,6 +295,8 @@ function renderNewtab(el: HTMLElement, ad: AdPayload, onClick: () => void, onClo
     onClose();
   }));
   el.appendChild(makeDisclosure(ad.disclosureLabel));
+  const brandNT = makeBrandLine(ad);
+  if (brandNT) el.appendChild(brandNT);
   addMedia(el, ad, "lumi-newtab__media");
   const h = document.createElement("p");
   h.className = "lumi-newtab__title"; h.textContent = ad.headline;
@@ -221,6 +306,8 @@ function renderNewtab(el: HTMLElement, ad: AdPayload, onClick: () => void, onClo
     s.className = "lumi-newtab__sub"; s.textContent = ad.body;
     el.appendChild(s);
   }
+  const voucherNT = makeVoucher(ad);
+  if (voucherNT) el.appendChild(voucherNT);
   el.appendChild(buildCta(ad, "lumi-newtab__cta", onClick));
   return { backdrop: null };
 }
@@ -259,6 +346,8 @@ function renderToolrec(el: HTMLElement, ad: AdPayload, onClick: () => void, onCl
   head.appendChild(eyebrow);
   head.appendChild(makeDisclosure(ad.disclosureLabel));
   el.appendChild(head);
+  const brandTR = makeBrandLine(ad);
+  if (brandTR) el.appendChild(brandTR);
   const h = document.createElement("p");
   h.className = "lumi-toolrec__title"; h.textContent = ad.headline;
   el.appendChild(h);
