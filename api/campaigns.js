@@ -417,14 +417,24 @@ async function handleGet(req, res) {
 async function handleCreate(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   const b = req.body || {};
-  if (!b.advertiser_id || !b.headline || !b.cta_url) {
-    return res.status(400).json({ error: "Missing required fields: advertiser_id, headline, cta_url" });
+  // 2026-06-25 — headline is no longer required at create time. The new
+  // wizard launches campaigns with empty creative_* fields, and mcp.js
+  // inherits headline/body/CTA from the advertiser's global creative_assets
+  // library at impression time. cta_url stays required (per-campaign
+  // destination is the one field that can't inherit). advertiser_id stays
+  // required (server-derived from the JWT in handleList; legacy create
+  // path still accepts it in the body for back-compat).
+  if (!b.advertiser_id || !b.cta_url) {
+    return res.status(400).json({ error: "Missing required fields: advertiser_id, cta_url" });
   }
-  // Visual formats (image, corner, video, fullscreen) require a media_url;
-  // only native is text-only.
-  if (["image", "corner", "video", "fullscreen"].includes(b.format) && !b.media_url) {
-    return res.status(400).json({ error: `media_url is required for ${b.format} format campaigns` });
-  }
+  // Visual formats (image, corner, video, fullscreen) used to require a
+  // media_url. With the global creative_assets library, mcp.js falls back
+  // to library images per placement.kind aspect ratio when the campaign
+  // has no media_url. So this gate is now soft — only block if BOTH the
+  // campaign has no media_url AND format is explicitly visual AND we can
+  // tell ahead of time that the library is empty (we can't, so just drop
+  // the check). Image-format campaigns with no library images still serve
+  // text-only at impression time, which is degraded but not broken.
 
   // Validate numeric bounds on financial fields
   const bidAmount = Number(b.bid_amount || 5);
@@ -510,8 +520,12 @@ async function handleCreate(req, res) {
     // Per-campaign opt-in to specific publisher integration doors
     // (db/09_target_integration_methods.sql). Allowlisted to the four
     // X-Lumi-Source values; anything else is dropped silently. Empty = all.
+    // Per-campaign door filter. 'mobile-app' added 2026-06-25 alongside
+    // the new 4-door Mobile App door (migration 30). Legacy 4 stay for
+    // back-compat with pre-pivot integrations + the new wizard's door
+    // multi-select writes here.
     target_integration_methods: Array.isArray(b.target_integration_methods)
-      ? b.target_integration_methods.filter((m) => ["mcp","js-snippet","npm-sdk","rest-api"].includes(m))
+      ? b.target_integration_methods.filter((m) => ["mcp","js-snippet","npm-sdk","rest-api","mobile-app"].includes(m))
       : [],
     optimization_goal: b.optimization_goal || "target_cpa",
     // Allowlist billing_model. CPI = AI app user-acquisition variant of
@@ -545,8 +559,20 @@ async function handleCreate(req, res) {
     end_date: b.end_date || null,
     skippable_after_sec: b.skippable_after_sec || 3,
     spent_today: 0, spent_total: 0,
+    // ── Pilot / Boost Ads fields (migration 31, 2026-06-24) ──────────
+    // boost_objective whitelisted to the 5 known values; anything else
+    // falls back to null so the row still inserts. Sliders default to
+    // 0.5 (neutral) — matches the new wizard's auto-default behavior.
+    boost_objective: ["awareness","clicks","signups","conversion","install"].includes(b.boost_objective)
+      ? b.boost_objective : null,
+    boost_pacing:           Number.isFinite(Number(b.boost_pacing))           ? Math.max(0, Math.min(1, Number(b.boost_pacing)))           : 0.5,
+    boost_reach:            Number.isFinite(Number(b.boost_reach))            ? Math.max(0, Math.min(1, Number(b.boost_reach)))            : 0.5,
+    boost_brand_safety:     Number.isFinite(Number(b.boost_brand_safety))     ? Math.max(0, Math.min(1, Number(b.boost_brand_safety)))     : 0.5,
+    boost_creative_refresh: Number.isFinite(Number(b.boost_creative_refresh)) ? Math.max(0, Math.min(1, Number(b.boost_creative_refresh))) : 0.5,
+    boost_confidence_floor: Number.isFinite(Number(b.boost_confidence_floor)) ? Math.max(0, Math.min(1, Number(b.boost_confidence_floor))) : 0.5,
     // Parent product. Nullable for back-compat with pre-Products campaigns
     // and for the "standalone campaign" path. See [[products-as-parent]].
+    // Also doubles as the affiliate-attach link per Boost Ads sub-tab logic.
     product_id: b.product_id || null,
     // Ad-credit funding marker (Phase 3 of Promote flow). When true, this
     // campaign's total_budget was pre-funded from advertiser_credit_spend

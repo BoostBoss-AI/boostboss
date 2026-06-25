@@ -2479,6 +2479,102 @@
         }
         .pilot-cs-revert:hover { color: #FF2D78; }
 
+        /* ─── New Campaign Wizard ─── */
+        .ncw-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .ncw-input {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1px solid #E5E7EB;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-family: inherit;
+            color: #111827;
+            background: #fff;
+            box-sizing: border-box;
+        }
+        .ncw-input:focus { outline: none; border-color: #FF2D78; box-shadow: 0 0 0 3px rgba(255,45,120,0.12); }
+        select.ncw-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='1,1 6,7 11,1'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 10px; padding-right: 34px; }
+
+        .ncw-radio, .ncw-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid #E5E7EB;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .ncw-radio:hover, .ncw-check:hover { background: #FAFAFA; border-color: #D1D5DB; }
+        .ncw-radio input, .ncw-check input { margin-top: 2px; accent-color: #FF2D78; flex-shrink: 0; }
+        .ncw-radio span, .ncw-check span { font-size: 13px; color: #111827; line-height: 1.4; }
+        .ncw-radio:has(input:checked), .ncw-check:has(input:checked) {
+            background: #FFF5F8;
+            border-color: #FF2D78;
+        }
+
+        .ncw-next, .ncw-launch {
+            padding: 10px 22px;
+            background: #FF2D78;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(255,45,120,0.25);
+            transition: filter 0.12s;
+        }
+        .ncw-next:hover, .ncw-launch:hover { filter: brightness(1.06); }
+        .ncw-back {
+            padding: 9px 16px;
+            background: #fff;
+            color: #374151;
+            border: 1px solid #E5E7EB;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .ncw-back:hover { background: #F9FAFB; }
+        .ncw-link {
+            background: none;
+            border: none;
+            color: #6B7280;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 0;
+            text-decoration: underline;
+        }
+        .ncw-link:hover { color: #FF2D78; }
+
+        .ncw-affiliate-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .ncw-affiliate-row:hover { background: #FAFAFA; }
+        .ncw-affiliate-row:has(input:checked) {
+            background: #FFF5F8;
+            border-color: #FF2D78;
+        }
+
         .benna-engine {
             background: #0A0A14;
             color: #F5F5F7;
@@ -5491,6 +5587,129 @@
           }
         </style>
 
+        <!-- ═══════════════════════════════════════════════════════════════
+             NEW CAMPAIGN WIZARD — 3-step modal that retired the legacy
+             campaignModal for CREATE flows 2026-06-25. The legacy modal
+             stays in the DOM (just below) for EDIT operations only; edit
+             callers set editingCampaignId and openModal() as before.
+             Wizard fields are deliberately minimal because the global
+             /creatives library now feeds all creative content; sliders
+             and budget land via the Boost sub-tab post-creation.
+             ═══════════════════════════════════════════════════════════════ -->
+        <div id="newCampaignWizard" class="modal" style="display:none;">
+          <div class="modal-content" style="max-width:560px;width:calc(100vw - 32px);">
+            <div class="modal-header" style="display:flex;align-items:center;gap:12px;justify-content:space-between;">
+              <h2 class="modal-title" style="margin:0;">New campaign</h2>
+              <button class="modal-close" type="button" id="ncwClose">×</button>
+            </div>
+
+            <!-- Progress dots -->
+            <div id="ncwProgress" style="display:flex;gap:6px;justify-content:center;padding:14px 0 18px;">
+              <div class="ncw-dot" data-step="1" style="width:8px;height:8px;border-radius:50%;background:#FF2D78;"></div>
+              <div class="ncw-dot" data-step="2" style="width:8px;height:8px;border-radius:50%;background:#E5E7EB;"></div>
+              <div class="ncw-dot" data-step="3" style="width:8px;height:8px;border-radius:50%;background:#E5E7EB;"></div>
+            </div>
+
+            <!-- ─── Step 1 — Essentials ─── -->
+            <div class="ncw-step" data-ncw-step="1">
+              <div style="font-size:18px;font-weight:700;color:#0F0F1A;margin-bottom:4px;">What are we launching?</div>
+              <div style="font-size:12.5px;color:#6B7280;margin-bottom:18px;line-height:1.5;">Name it, pick your goal, drop a destination URL. Benna pulls everything else (headlines, body, images, brand kit) from your global <a href="#/creatives" style="color:#FF2D78;font-weight:600;text-decoration:none;">Creatives library</a>.</div>
+
+              <label class="ncw-label">Campaign name</label>
+              <input type="text" id="ncwName" class="ncw-input" maxlength="120" placeholder="e.g. StripeFlow signup push — June 2026">
+
+              <label class="ncw-label" style="margin-top:14px;">Goal</label>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label class="ncw-radio"><input type="radio" name="ncwObjective" value="awareness"><span><strong>Awareness</strong> — get seen by relevant users</span></label>
+                <label class="ncw-radio"><input type="radio" name="ncwObjective" value="clicks"><span><strong>Clicks</strong> — drive traffic to your page</span></label>
+                <label class="ncw-radio"><input type="radio" name="ncwObjective" value="signups" checked><span><strong>Signups</strong> — collect free accounts or leads</span></label>
+                <label class="ncw-radio"><input type="radio" name="ncwObjective" value="conversion"><span><strong>Purchases</strong> — close paid conversions</span></label>
+                <label class="ncw-radio"><input type="radio" name="ncwObjective" value="install"><span><strong>App installs</strong> — only useful if you're on Mobile placements</span></label>
+              </div>
+
+              <label class="ncw-label" style="margin-top:14px;">Destination URL</label>
+              <input type="url" id="ncwUrl" class="ncw-input" placeholder="https://yourapp.com/signup">
+              <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Where the click leads. Will have <code>?bbx_auc=...&bbx_cmp=...</code> appended at click time for attribution.</div>
+
+              <div id="ncwStep1Err" style="display:none;margin-top:10px;padding:8px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#991B1B;font-size:12.5px;"></div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #F3F4F6;">
+                <button type="button" id="ncwLaunchDefaults" class="ncw-link">Launch with defaults →</button>
+                <button type="button" id="ncwNext1" class="ncw-next">Continue →</button>
+              </div>
+            </div>
+
+            <!-- ─── Step 2 — Targeting ─── -->
+            <div class="ncw-step" data-ncw-step="2" style="display:none;">
+              <div style="font-size:18px;font-weight:700;color:#0F0F1A;margin-bottom:4px;">Where + who?</div>
+              <div style="font-size:12.5px;color:#6B7280;margin-bottom:18px;line-height:1.5;">Defaults to "everywhere, worldwide" — Benna picks the best placements for your goal. Filter here only if you have a strong opinion.</div>
+
+              <label class="ncw-label">Doors <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(uncheck to exclude)</span></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <label class="ncw-check"><input type="checkbox" class="ncw-door" value="js-snippet" checked><span>Browser App <span style="color:#9CA3AF;">(8 placements)</span></span></label>
+                <label class="ncw-check"><input type="checkbox" class="ncw-door" value="npm-sdk" checked><span>Browser Extension <span style="color:#9CA3AF;">(8)</span></span></label>
+                <label class="ncw-check"><input type="checkbox" class="ncw-door" value="mcp" checked><span>Computer App <span style="color:#9CA3AF;">(11)</span></span></label>
+                <label class="ncw-check"><input type="checkbox" class="ncw-door" value="mobile-app" checked><span>Mobile App <span style="color:#9CA3AF;">(10)</span></span></label>
+              </div>
+
+              <label class="ncw-label" style="margin-top:14px;">Geo</label>
+              <select id="ncwGeo" class="ncw-input">
+                <option value="global" selected>Worldwide</option>
+                <option value="US">United States only</option>
+                <option value="EU">Europe only</option>
+                <option value="APAC">APAC only</option>
+              </select>
+
+              <label class="ncw-label" style="margin-top:14px;">Language</label>
+              <select id="ncwLang" class="ncw-input">
+                <option value="en" selected>English</option>
+                <option value="all">All languages</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="vi">Vietnamese</option>
+              </select>
+
+              <label class="ncw-label" style="margin-top:14px;">Intent tokens <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(optional — Benna matches against page context)</span></label>
+              <input type="text" id="ncwIntent" class="ncw-input" placeholder="e.g. stripe, billing, checkout">
+              <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Comma-separated. Boosts your bid on requests where Benna sees these tokens in the publisher's page context.</div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #F3F4F6;">
+                <button type="button" id="ncwBack2" class="ncw-back">← Back</button>
+                <button type="button" id="ncwNext2" class="ncw-next">Continue →</button>
+              </div>
+            </div>
+
+            <!-- ─── Step 3 — Affiliate attach ─── -->
+            <div class="ncw-step" data-ncw-step="3" style="display:none;">
+              <div style="font-size:18px;font-weight:700;color:#0F0F1A;margin-bottom:4px;">Attach an affiliate product?</div>
+              <div style="font-size:12.5px;color:#6B7280;margin-bottom:18px;line-height:1.5;">If this campaign serves on a placement, optionally include a complementary affiliate product link. Affiliates can promote that product and earn commission on every sale. Mirrors the Boost Ads → Affiliate sub-tab.</div>
+
+              <div id="ncwAffiliateList">
+                <label class="ncw-affiliate-row" data-affiliate-id="">
+                  <input type="radio" name="ncwAffiliate" value="" checked style="margin-top:2px;accent-color:#FF2D78;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:700;color:#0F0F1A;">No affiliate attachment</div>
+                    <div style="font-size:11.5px;color:#6B7280;margin-top:3px;">Campaign serves as a regular ad — no complimentary affiliate link.</div>
+                  </div>
+                </label>
+                <!-- Product rows injected by ncwRenderAffiliates() -->
+              </div>
+
+              <div id="ncwAffiliateEmpty" style="display:none;padding:14px 16px;background:#FAFAFA;border:1px solid #E5E7EB;border-radius:10px;text-align:center;font-size:12.5px;color:#6B7280;margin-top:8px;">
+                You haven't created any affiliate products yet. <a href="#/products" style="color:#FF2D78;font-weight:600;text-decoration:none;">Create one</a> to attach it here.
+              </div>
+
+              <div id="ncwStep3Err" style="display:none;margin-top:10px;padding:8px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#991B1B;font-size:12.5px;"></div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #F3F4F6;">
+                <button type="button" id="ncwBack3" class="ncw-back">← Back</button>
+                <button type="button" id="ncwLaunch" class="ncw-launch">Launch campaign</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="campaignModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -6526,8 +6745,18 @@
 
             // Demo quick-start removed 2026-05-28 — demo mode no longer offered.
 
-            // Modal
-            newCampaignBtn.addEventListener('click', openModal);
+            // Modal — '+ New Campaign' button now opens the 3-step wizard
+            // (2026-06-25). The old campaignModal stays in the DOM and is
+            // still opened by EDIT paths that set editingCampaignId first
+            // then call openModal() directly. Falls back to openModal() if
+            // the wizard hasn't loaded for some reason (shouldn't happen).
+            newCampaignBtn.addEventListener('click', () => {
+                if (typeof window.openNewCampaignWizard === 'function') {
+                    window.openNewCampaignWizard();
+                } else {
+                    openModal();
+                }
+            });
             modalCloseBtn.addEventListener('click', requestCloseCampaignModal);
             campaignModal.addEventListener('click', (e) => {
                 if (e.target === campaignModal) requestCloseCampaignModal();
@@ -13746,7 +13975,7 @@
         document.body.appendChild(cmdPalette);
 
         const cmdActions = [
-            { label: 'New Campaign', icon: '🚀', action: () => openModal(), keywords: 'create campaign new' },
+            { label: 'New Campaign', icon: '🚀', action: () => (window.openNewCampaignWizard ? window.openNewCampaignWizard() : openModal()), keywords: 'create campaign new' },
             { label: 'Export Campaigns CSV', icon: '📄', action: () => exportCampaignsCSV(), keywords: 'export download csv' },
             { label: 'Compare Campaigns', icon: '⚖️', action: () => openCompareModal(), keywords: 'compare side by side' },
             { label: 'Add Deposit', icon: '💰', action: () => document.getElementById('depositBtn').click(), keywords: 'deposit money fund balance' },
@@ -17294,21 +17523,20 @@ function pfParseScreenshots(text) {
                     });
                 });
 
-                // Wire the "+ New Campaign" button to open the campaign
-                // create modal directly. The legacy campaigns route's
-                // own button (#newCampaignBtn) handler opens the same
-                // modal via window-scoped openModal, so we just call it.
+                // Wire the "+ New Campaign" button to open the 3-step
+                // wizard (2026-06-25). Falls back to clicking the legacy
+                // #newCampaignBtn — which also opens the wizard now — if
+                // the global helper isn't available for any reason.
                 const newBtn = document.getElementById('pilotNewCampaignBtn');
                 if (newBtn && !newBtn.__wired) {
                     newBtn.__wired = true;
                     newBtn.addEventListener('click', () => {
-                        // The legacy "+ New Campaign" button calls
-                        // openModal() which is scoped to that listener.
-                        // Easiest cross-scope path: click the legacy button
-                        // programmatically — it always exists in the DOM
-                        // even when the legacy nav is hidden.
-                        const legacyBtn = document.getElementById('newCampaignBtn');
-                        if (legacyBtn) legacyBtn.click();
+                        if (typeof window.openNewCampaignWizard === 'function') {
+                            window.openNewCampaignWizard();
+                        } else {
+                            const legacyBtn = document.getElementById('newCampaignBtn');
+                            if (legacyBtn) legacyBtn.click();
+                        }
                     });
                 }
 
@@ -18268,6 +18496,285 @@ function pfParseScreenshots(text) {
 
             // Expose for the Advanced toggle in Setup to refresh after switching.
             window.refreshPilot = maybeLoadPilot;
+        })();
+    </script>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         New Campaign Wizard — 3-step modal IIFE. Retires the legacy
+         campaignModal for CREATE flows 2026-06-25. Old modal stays in
+         the DOM for EDIT operations (editingCampaignId is set, then
+         openModal() is called). The wizard ships a minimal payload to
+         /api/campaigns?action=create — everything else (creatives,
+         sliders, budget) inherits from the Creatives library / Boost
+         sub-tab defaults applied in handleCreate.
+         ═════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            'use strict';
+
+            const wizard = document.getElementById('newCampaignWizard');
+            if (!wizard) return;
+
+            // ── State ───────────────────────────────────────────────
+            let currentStep = 1;
+            let productsList = [];
+            let productsLoaded = false;
+
+            // ── Token helper (matches the bb_session_token JSON shape) ──
+            function getToken() {
+                try {
+                    const raw = localStorage.getItem('bb_session_token');
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.token) return parsed.token;
+                } catch (_) {}
+                const adv = localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token');
+                return adv || null;
+            }
+            function getAdvertiserId() {
+                try {
+                    const raw = localStorage.getItem('bb_user_data');
+                    if (raw) {
+                        const u = JSON.parse(raw);
+                        if (u && u.user_id) return u.user_id;
+                    }
+                } catch (_) {}
+                return null;
+            }
+
+            // ── Step transitions ────────────────────────────────────
+            function showStep(n) {
+                currentStep = n;
+                wizard.querySelectorAll('.ncw-step').forEach((s) => {
+                    s.style.display = (Number(s.getAttribute('data-ncw-step')) === n) ? '' : 'none';
+                });
+                wizard.querySelectorAll('.ncw-dot').forEach((d) => {
+                    const k = Number(d.getAttribute('data-step'));
+                    d.style.background = (k <= n) ? '#FF2D78' : '#E5E7EB';
+                });
+            }
+
+            function open() {
+                resetForm();
+                wizard.classList.add('active');
+                wizard.style.display = '';
+                document.body.style.overflow = 'hidden';
+                showStep(1);
+                // Pre-fetch products for step 3 in the background
+                if (!productsLoaded) loadProducts();
+                const nameEl = document.getElementById('ncwName');
+                if (nameEl) setTimeout(() => nameEl.focus(), 50);
+            }
+            function close() {
+                wizard.classList.remove('active');
+                wizard.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+
+            function resetForm() {
+                document.getElementById('ncwName').value = '';
+                document.getElementById('ncwUrl').value = '';
+                document.getElementById('ncwIntent').value = '';
+                document.getElementById('ncwGeo').value = 'global';
+                document.getElementById('ncwLang').value = 'en';
+                const signups = wizard.querySelector('input[name="ncwObjective"][value="signups"]');
+                if (signups) signups.checked = true;
+                wizard.querySelectorAll('.ncw-door').forEach((c) => { c.checked = true; });
+                const noAttach = wizard.querySelector('input[name="ncwAffiliate"][value=""]');
+                if (noAttach) noAttach.checked = true;
+                hideErrors();
+            }
+            function hideErrors() {
+                ['ncwStep1Err','ncwStep3Err'].forEach((id) => {
+                    const e = document.getElementById(id);
+                    if (e) { e.style.display = 'none'; e.textContent = ''; }
+                });
+            }
+            function showErr(stepId, msg) {
+                const e = document.getElementById(stepId);
+                if (!e) return;
+                e.textContent = msg;
+                e.style.display = '';
+            }
+
+            // ── Step 1 validation ───────────────────────────────────
+            function validateStep1() {
+                hideErrors();
+                const name = (document.getElementById('ncwName').value || '').trim();
+                const url  = (document.getElementById('ncwUrl').value  || '').trim();
+                if (!name) { showErr('ncwStep1Err', 'Campaign name is required.'); return false; }
+                if (!url)  { showErr('ncwStep1Err', 'Destination URL is required.'); return false; }
+                try { new URL(url); }
+                catch (_) { showErr('ncwStep1Err', 'Destination URL must be a valid URL (https://…).'); return false; }
+                return true;
+            }
+
+            // ── Step 3 products + render ────────────────────────────
+            async function loadProducts() {
+                const token = getToken();
+                if (!token) return;
+                try {
+                    const r = await fetch('/api/products?limit=100', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (r.ok) {
+                        const j = await r.json();
+                        productsList = (j.products || []).filter((p) => p.status !== 'archived');
+                        productsLoaded = true;
+                        renderProducts();
+                    }
+                } catch (_) {}
+            }
+            function renderProducts() {
+                const list = document.getElementById('ncwAffiliateList');
+                const empty = document.getElementById('ncwAffiliateEmpty');
+                if (!list) return;
+                // Strip prior product rows (keep the 'No attachment' default)
+                list.querySelectorAll('.ncw-affiliate-row[data-product-row]').forEach((r) => r.remove());
+                if (!productsList.length) {
+                    if (empty) empty.style.display = '';
+                    return;
+                }
+                if (empty) empty.style.display = 'none';
+                productsList.forEach((p) => {
+                    const row = document.createElement('label');
+                    row.className = 'ncw-affiliate-row';
+                    row.setAttribute('data-product-row', '1');
+                    const name = (p.name || '(untitled)').replace(/[<>]/g, '');
+                    const desc = String(p.description || '').replace(/[<>]/g, '').slice(0, 140);
+                    const commission = p.default_commission_pct
+                        ? (Number(p.default_commission_pct).toFixed(1) + '% commission')
+                        : 'No commission set';
+                    const audit = p.audit_status || 'draft';
+                    const auditChip = audit === 'approved'
+                        ? '<span style="display:inline-block;padding:2px 7px;border-radius:999px;background:#ECFDF5;color:#065F46;font-size:10px;font-weight:700;letter-spacing:0.02em;">APPROVED</span>'
+                        : '<span style="display:inline-block;padding:2px 7px;border-radius:999px;background:#FFFBEB;color:#92400E;font-size:10px;font-weight:700;letter-spacing:0.02em;">' + audit.toUpperCase() + '</span>';
+                    row.innerHTML =
+                        '<input type="radio" name="ncwAffiliate" value="' + p.id + '" style="margin-top:2px;accent-color:#FF2D78;flex-shrink:0;">' +
+                        '<div style="flex:1;min-width:0;">' +
+                          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">' +
+                            '<span style="font-size:13px;font-weight:700;color:#0F0F1A;">' + name + '</span>' +
+                            auditChip +
+                          '</div>' +
+                          '<div style="font-size:11.5px;color:#6B7280;line-height:1.5;">' + (desc || '<em style="color:#9CA3AF;">No description</em>') + '</div>' +
+                          '<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">' + commission + '</div>' +
+                        '</div>';
+                    list.appendChild(row);
+                });
+            }
+
+            // ── Submit / launch ─────────────────────────────────────
+            async function launch() {
+                hideErrors();
+                const name = (document.getElementById('ncwName').value || '').trim();
+                const url  = (document.getElementById('ncwUrl').value  || '').trim();
+                const objectiveEl = wizard.querySelector('input[name="ncwObjective"]:checked');
+                const objective   = objectiveEl ? objectiveEl.value : 'signups';
+                const doors = Array.from(wizard.querySelectorAll('.ncw-door:checked')).map((c) => c.value);
+                const geo  = document.getElementById('ncwGeo').value || 'global';
+                const lang = document.getElementById('ncwLang').value || 'en';
+                const intentRaw = (document.getElementById('ncwIntent').value || '').trim();
+                const intentTokens = intentRaw
+                    ? intentRaw.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20)
+                    : [];
+                const affEl = wizard.querySelector('input[name="ncwAffiliate"]:checked');
+                const productId = (affEl && affEl.value) || null;
+
+                const advertiserId = getAdvertiserId();
+                if (!advertiserId) {
+                    showErr('ncwStep3Err', 'Not signed in. Refresh and try again.');
+                    return;
+                }
+
+                const payload = {
+                    advertiser_id:   advertiserId,
+                    name:            name,
+                    cta_url:         url,
+                    boost_objective: objective,
+                    // Sliders default to 0.5 (handleCreate also clamps).
+                    boost_pacing: 0.5, boost_reach: 0.5, boost_brand_safety: 0.5,
+                    boost_creative_refresh: 0.5, boost_confidence_floor: 0.5,
+                    // Auto-default budget — tunable in the Boost sub-tab post-launch.
+                    daily_budget: 5,
+                    total_budget: 50,
+                    // Door filter — empty array = all doors. handleCreate filters
+                    // unknown values silently. mobile-app added 2026-06-25.
+                    target_integration_methods: doors,
+                    // Geo / lang. Single-value selects from the UI; server expects arrays.
+                    target_regions:   geo === 'global' ? ['global'] : [geo],
+                    target_languages: lang === 'all'  ? []           : [lang],
+                    target_intent_tokens: intentTokens,
+                    // Affiliate attach — same field the Boost Ads → Affiliate sub-tab uses.
+                    product_id: productId,
+                    // Empty creative_* arrays — campaign inherits from /creatives library.
+                    creative_headlines:  [],
+                    creative_body_copy:  [],
+                    creative_cta_labels: [],
+                };
+
+                const btn = document.getElementById('ncwLaunch');
+                const defaultBtn = document.getElementById('ncwLaunchDefaults');
+                if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+                if (defaultBtn) { defaultBtn.disabled = true; }
+                const token = getToken();
+                try {
+                    const r = await fetch('/api/campaigns?action=create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!r.ok) {
+                        const j = await r.json().catch(() => ({}));
+                        throw new Error(j.error || ('HTTP ' + r.status));
+                    }
+                    close();
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('Campaign launched — Benna will start serving once approved.', 'success');
+                    }
+                    // Refresh the Boost Ads campaigns list so the new row appears.
+                    if (typeof window.refreshPilot === 'function') {
+                        try { window.refreshPilot(); } catch (_) {}
+                    }
+                    // Navigate to Boost Ads so the user sees their new campaign.
+                    if (!/#\/pilot/.test(window.location.hash)) {
+                        window.location.hash = '#/pilot';
+                    }
+                } catch (e) {
+                    showErr(currentStep === 1 ? 'ncwStep1Err' : 'ncwStep3Err', e.message || 'Failed to launch.');
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Launch campaign'; }
+                    if (defaultBtn) { defaultBtn.disabled = false; }
+                }
+            }
+
+            // ── Wire ────────────────────────────────────────────────
+            document.getElementById('ncwClose').addEventListener('click', close);
+            wizard.addEventListener('click', (e) => { if (e.target === wizard) close(); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && wizard.style.display !== 'none') close();
+            });
+
+            document.getElementById('ncwNext1').addEventListener('click', () => {
+                if (validateStep1()) showStep(2);
+            });
+            document.getElementById('ncwLaunchDefaults').addEventListener('click', () => {
+                if (validateStep1()) launch();
+            });
+            document.getElementById('ncwBack2').addEventListener('click', () => showStep(1));
+            document.getElementById('ncwNext2').addEventListener('click', () => {
+                // Step 2 has no required fields — straight to step 3.
+                showStep(3);
+                if (!productsLoaded) loadProducts();
+            });
+            document.getElementById('ncwBack3').addEventListener('click', () => showStep(2));
+            document.getElementById('ncwLaunch').addEventListener('click', launch);
+
+            // Public API — both create triggers call this.
+            window.openNewCampaignWizard = open;
+            window.closeNewCampaignWizard = close;
         })();
     </script>
 
