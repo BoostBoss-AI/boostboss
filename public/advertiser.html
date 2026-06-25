@@ -17005,6 +17005,11 @@ function pfParseScreenshots(text) {
             let pending = {};
             function queueSave(partial) {
                 Object.assign(pending, partial);
+                // Re-render coverage immediately so the ○ / ✓ chips on
+                // the Placement coverage card flip in real time as the
+                // user fills out the library. State has already been
+                // updated by the caller before reaching here.
+                try { renderCoverage(); } catch (_) {}
                 clearTimeout(saveTimer);
                 showStatus('Saving…');
                 saveTimer = setTimeout(flushSave, 600);
