@@ -3523,12 +3523,13 @@
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                             font-family: inherit; color: #374151;
                         " data-t="chrome.compare">Compare</button>
-                        <div id="draftsWrap" style="position:relative;">
-                            <button type="button" id="draftsBtn" style="
-                                padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
-                                background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
-                                font-family: inherit; color: #374151;
-                            "><span data-t="campaigns.drafts">Drafts</span> <span id="draftsCount"></span> ▾</button>
+                        <!-- Drafts dropdown permanently hidden 2026-06-25 (Phase 2).
+                             renderDraftsUI() was deleted along with the draft
+                             system; the wizard does not expose Save-as-draft.
+                             Element kept (display:none) only so any data-t
+                             translator lookup doesn't crash. -->
+                        <div id="draftsWrap" style="display:none;">
+                            <button type="button" id="draftsBtn"><span data-t="campaigns.drafts">Drafts</span> <span id="draftsCount"></span></button>
                             <div id="draftsMenu"></div>
                         </div>
                         <button class="new-campaign-btn" id="newCampaignBtn" data-t="chrome.new_campaign">+ New Campaign</button>
@@ -5822,6 +5823,19 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+        // Translation lookup helper. Originally defined inside the legacy
+        // modal cluster — restored here 2026-06-25 (Phase 2 follow-up)
+        // because LIVE code in updateBennaEngineCounters,
+        // renderAuctionSummary, and ~15 other callsites depends on it.
+        // Returns the translated value if available, else the fallback.
+        function tt(key, fallback) {
+            try {
+                const v = (window.dashT && window.dashT(key)) || null;
+                if (v && v !== key) return v;
+            } catch (_) {}
+            return fallback;
+        }
+
         // Toast notification system
         function showToast(message, type = 'success', duration = 3500) {
             const container = document.getElementById('toastContainer');
