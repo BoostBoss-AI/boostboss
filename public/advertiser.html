@@ -7690,11 +7690,7 @@
                         <td>$${formatNumber(budget, true)}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="action-btn" data-action="${campaign.status === 'live' ? 'pause' : 'resume'}" data-campaign-id="${campaign.id}" data-t="${campaign.status === 'live' ? 'action.pause' : 'action.resume'}">
-                                    ${campaign.status === 'live' ? 'Pause' : 'Resume'}
-                                </button>
-                                <button class="action-btn" data-action="edit" data-campaign-id="${campaign.id}" data-t="action.edit">Edit</button>
-                                <button class="action-btn" data-action="duplicate" data-campaign-id="${campaign.id}" style="color: #6B7280;" data-t="action.dup">Dup</button>
+                                ${renderCampaignActions(campaign)}
                             </div>
                         </td>
                     `;
@@ -7748,6 +7744,48 @@
             // Re-run the chrome translator over the freshly-inserted rows so
             // action buttons (Pause/Resume/Edit/Dup) render in the active language.
             if (typeof window.applyDashboardChrome === 'function') window.applyDashboardChrome();
+        }
+
+        // ── Status-aware action buttons (2026-06-25) ──────────────────
+        // The server only accepts paused→active for "resume" and
+        // active→paused for "pause". The old code blindly rendered
+        // "Resume" for every non-live status, which produced
+        // "Campaign not found or cannot resume from current status"
+        // errors when an in_review (or rejected) campaign was clicked.
+        //
+        // Matrix:
+        //   live / active         → Pause + Edit + Dup
+        //   paused                → Resume + Edit + Dup
+        //   in_review / review    → Edit + Dup    (admin must approve first)
+        //   rejected              → Edit + Dup    (Edit re-submits for review)
+        //   completed / depleted  → Dup           (terminal, nothing to tune)
+        //   cancelled / archived  → Dup           (terminal)
+        //
+        // Edit + Dup are always wired to the legacy campaignModal,
+        // which already reads creative_* / target_intent_tokens /
+        // target_host_apps / doors / sliders from new-wizard
+        // campaigns (see openEditModal). The modal UX itself is
+        // tracked as a separate refactor.
+        function renderCampaignActions(campaign) {
+            const s = campaign.status;
+            const id = campaign.id;
+            const btn = (action, label, tKey, extra) =>
+                '<button class="action-btn" data-action="' + action +
+                '" data-campaign-id="' + id + '" data-t="' + tKey + '"' +
+                (extra || '') + '>' + label + '</button>';
+            const editBtn = btn('edit', 'Edit', 'action.edit', '');
+            const dupBtn  = btn('duplicate', 'Dup', 'action.dup', ' style="color:#6B7280;"');
+            if (s === 'live' || s === 'active') {
+                return btn('pause', 'Pause', 'action.pause', '') + editBtn + dupBtn;
+            }
+            if (s === 'paused') {
+                return btn('resume', 'Resume', 'action.resume', '') + editBtn + dupBtn;
+            }
+            if (s === 'in_review' || s === 'review' || s === 'rejected') {
+                return editBtn + dupBtn;
+            }
+            // completed / depleted / cancelled / archived / anything else
+            return dupBtn;
         }
 
         // Per-campaign Benna chip based on paused/live + inferred age
@@ -9798,23 +9836,25 @@
         }
 
         // ── Drafts dropdown beside "+ New Campaign" ──
+        // Hidden by default 2026-06-25: the 3-step wizard doesn't expose
+        // a "Save as draft" affordance, so this dropdown is empty for
+        // any user created after that date. We keep the code path so
+        // legacy localStorage drafts from before the wizard still surface
+        // — but if drafts.length === 0, the whole wrap stays hidden to
+        // avoid cluttering the Campaigns chrome.
         function renderDraftsUI() {
             const wrap = document.getElementById('draftsWrap');
             const menu = document.getElementById('draftsMenu');
             const count = document.getElementById('draftsCount');
             if (!wrap || !menu) return;
             const drafts = loadDrafts().slice().sort((a, b) => b.savedAt - a.savedAt);
-            wrap.style.display = '';
-            if (count) count.textContent = '(' + drafts.length + ')';
             if (drafts.length === 0) {
+                wrap.style.display = 'none';
                 menu.classList.remove('open');
-                menu.innerHTML =
-                    '<div style="padding:14px 16px;font-size:12px;color:#6B7280;line-height:1.5;">' +
-                        'No drafts yet. Start a new campaign and choose ' +
-                        '<strong>Save as draft</strong> when you close it to come back to it later.' +
-                    '</div>';
                 return;
             }
+            wrap.style.display = '';
+            if (count) count.textContent = '(' + drafts.length + ')';
             menu.innerHTML = drafts.map((d) =>
                 '<div class="draft-row" data-draft="' + d.id + '">' +
                     '<div class="draft-row-main">' +
@@ -17757,6 +17797,11 @@ function pfParseScreenshots(text) {
             // derives advertiser_id from the Bearer JWT and ignores any
             // ?advertiser_id query param. We can't accidentally leak other
             // tenants' campaigns from here. Status filter is server-side too.
+            // Total campaign count (any status) for the Boost Ads empty
+            // state. Lets us distinguish "no campaigns at all" from
+            // "campaigns exist but none active yet (e.g. pending review)".
+            let pilotTotalCampaignCount = 0;
+
             async function loadPilotProducts() {
                 const token = getToken();
                 if (!token) return;
@@ -17764,13 +17809,17 @@ function pfParseScreenshots(text) {
                     // Active Boosts table = only campaigns currently running.
                     // Per Andy 2026-06-25 — paused/in_review/etc. live in the
                     // Campaigns sub-tab, not the at-a-glance Active list.
-                    const r = await fetch('/api/campaigns?status=active', {
+                    // We fetch ALL so we can count non-active campaigns and
+                    // show the right empty state.
+                    const r = await fetch('/api/campaigns', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     const j = await r.json();
-                    pilotProducts = (j.campaigns || j.data || [])
+                    const all = (j.campaigns || j.data || [])
                         .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+                    pilotTotalCampaignCount = all.length;
+                    pilotProducts = all.filter(c => c.status === 'active' || c.status === 'live');
                     renderProductPicker();
                 } catch (e) {
                     console.warn('[pilot] loadCampaigns failed:', e);
@@ -17787,6 +17836,30 @@ function pfParseScreenshots(text) {
                 if (!empty || !pills || !active || !picker) return;
 
                 if (pilotProducts.length === 0) {
+                    // Distinguish two cases:
+                    //   (a) No campaigns at all → original "Create your first
+                    //       campaign" CTA stays as written in the empty card.
+                    //   (b) Campaigns exist but none are active (e.g. pending
+                    //       admin review) → rewrite the empty card to point
+                    //       at the Campaigns page where they can see status.
+                    const titleEl = empty.querySelector('h2');
+                    const subEl   = empty.querySelector('p');
+                    const ctaEl   = empty.querySelector('a');
+                    if (pilotTotalCampaignCount > 0 && titleEl && subEl && ctaEl) {
+                        const n = pilotTotalCampaignCount;
+                        titleEl.textContent = 'No live boosts yet';
+                        subEl.textContent = 'You have ' + n + ' campaign' + (n === 1 ? '' : 's') +
+                            ' awaiting admin review. Boost Ads shows campaigns once they go live — see Campaigns for status.';
+                        ctaEl.textContent = 'See Campaigns →';
+                        ctaEl.setAttribute('href', '#/campaigns');
+                    } else if (titleEl && subEl && ctaEl) {
+                        // Restore original copy in case it was overwritten on a
+                        // prior render (e.g. user deleted their pending campaign).
+                        titleEl.textContent = 'Add a product to start boosting';
+                        subEl.textContent = 'Boost Ads runs on top of one of your products. Add a product first, then come back here to set objectives and activate.';
+                        ctaEl.textContent = '+ Add Product';
+                        ctaEl.setAttribute('href', '#/products');
+                    }
                     empty.style.display = '';
                     picker.style.display = 'none';
                     active.style.display = 'none';
