@@ -2578,9 +2578,14 @@
           </div>
 
           <div class="shell-sidebar__nav" role="navigation" aria-label="Dashboard sections">
+            <!-- 'Home' renamed to 'Performance' 2026-06-25 — the route slug
+                 stays 'home' (preserves any saved bookmarks pointing at #/home)
+                 but the label + icon reflect what the page now actually shows:
+                 stats row + impressions chart + the Benna engine panel + the
+                 auction-intelligence panel (formerly the /performance route). -->
             <button class="shell-nav-item is-active" data-shell-section="home">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.home">Home</span>
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.home">Performance</span>
             </button>
             <!-- Pilot — the new Advertiser Pilot model entry point.
                  See [[advertiser-pilot-model]]. Default landing for any
@@ -2600,10 +2605,9 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.products">Affiliate</span>
             </button>
-            <button class="shell-nav-item" data-shell-section="performance">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-              <span class="shell-nav-item__label" data-t="shell.nav.performance">Performance</span>
-            </button>
+            <!-- Performance nav removed 2026-06-25. The Benna engine + auction
+                 intelligence content moved into the (now-renamed) Performance
+                 entry above — same content, one page instead of two. -->
             <!-- Billing nav removed 2026-06-24 — merged into Settings →
                  Billing & funds. The /#/billing hash route is also retired;
                  see VALID_ROUTES + the billing route section below (both gone). -->
@@ -2876,18 +2880,14 @@
 
             </div><!-- /[data-shell-route="home"] (chart block) -->
 
-            <!-- ═══════ ROUTE: performance ═══════ -->
-            <div data-shell-route="performance">
-
-            <!-- Route page header. Replaces the inner
-                 .performance-group-header — that header is removed below
-                 since the route header now anchors the page. -->
-            <div class="shell-page-head">
-                <div>
-                    <h1 class="shell-page-title" data-t="perf.title">Performance</h1>
-                    <div class="shell-page-sub" data-t="perf.sub">Engine status and auction signal · last 7 days</div>
-                </div>
-            </div>
+            <!-- ═══════ Performance group — merged into Home 2026-06-25 ═══════
+                 Was a standalone /performance route; now lives directly under
+                 the Daily Impressions chart on Home so the whole "where am I
+                 + how is the engine doing + what's happening in auctions"
+                 picture sits on one scrollable page. The route page-head
+                 was dropped (Home's "Overview" page-head at the top covers
+                 the section). -->
+            <div data-shell-route="home">
 
             <!-- PERFORMANCE GROUP — Benna Engine (dark, live status) +
                  Auction Intelligence (white, data view). One outer wrapper
@@ -3017,7 +3017,7 @@
             </div>
             </section> <!-- /.performance-group -->
 
-            </div><!-- /[data-shell-route="performance"] -->
+            </div><!-- /[data-shell-route="home"] (Performance group block) -->
 
             <!-- ═══════ ROUTE: campaigns ═══════ -->
             <div data-shell-route="campaigns" id="legacyCampaignsRoute">
@@ -6241,7 +6241,10 @@
             // 'billing' removed 2026-06-24 — merged into Settings → Billing & funds.
             // 'setup' removed 2026-06-25 — pixel moved to Settings.
             // 'promote' removed 2026-06-25 — balance cards moved to top of Payouts.
-            const VALID_ROUTES = ['home', 'pilot', 'performance', 'campaigns', 'products', 'product-orders', 'payouts'];
+            // 'performance' removed 2026-06-25 — merged into 'home' (renamed
+            //   Performance in the sidebar). Old #/performance bookmarks now
+            //   fall back to #/home via routeFromHash's invalid-route guard.
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'payouts'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -10089,7 +10092,7 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': 'Untagged',
                     'auc.door_untagged_hint': 'Pre-tag legacy traffic',
-                    'shell.nav.home': 'Home',
+                    'shell.nav.home': 'Performance',
                     'shell.nav.performance': 'Performance',
                     'shell.nav.integrations': 'Integrations',
                     'shell.nav.placements': 'Placements',
@@ -10537,7 +10540,7 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '未标记',
                     'auc.door_untagged_hint': '标记前的旧流量',
-                    'shell.nav.home': '首页',
+                    'shell.nav.home': '效果',
                     'shell.nav.performance': '效果',
                     'shell.nav.integrations': '集成',
                     'shell.nav.placements': '版位',
@@ -10985,7 +10988,7 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '未標記',
                     'auc.door_untagged_hint': '標記前的舊流量',
-                    'shell.nav.home': '首頁',
+                    'shell.nav.home': '成效',
                     'shell.nav.performance': '效果',
                     'shell.nav.integrations': '整合',
                     'shell.nav.placements': '版位',
@@ -11433,7 +11436,7 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '未タグ',
                     'auc.door_untagged_hint': 'タグ前のレガシー トラフィック',
-                    'shell.nav.home': 'ホーム',
+                    'shell.nav.home': 'パフォーマンス',
                     'shell.nav.performance': 'パフォーマンス',
                     'shell.nav.integrations': '統合',
                     'shell.nav.placements': '配置',
@@ -11881,7 +11884,7 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': '태그 없음',
                     'auc.door_untagged_hint': '태그 이전의 레거시 트래픽',
-                    'shell.nav.home': '홈',
+                    'shell.nav.home': '성과',
                     'shell.nav.performance': '성과',
                     'shell.nav.integrations': '통합',
                     'shell.nav.placements': '위치',
@@ -12329,7 +12332,7 @@
                     'auc.door_bots_hint': 'Discord · Telegram · Slack',
                     'auc.door_untagged': 'Chưa tag',
                     'auc.door_untagged_hint': 'Traffic legacy trước khi tag',
-                    'shell.nav.home': 'Trang chủ',
+                    'shell.nav.home': 'Hiệu suất',
                     'shell.nav.performance': 'Hiệu suất',
                     'shell.nav.integrations': 'Tích hợp',
                     'shell.nav.placements': 'Vị trí',
