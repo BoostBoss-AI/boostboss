@@ -3493,11 +3493,68 @@
               </div><!-- /pilotActiveBoost -->
 
               <!-- ───────────────── CAMPAIGNS PANE ─────────────────
-                   Empty by design. The data-shell-route="campaigns" element
-                   gets JS-reparented into this pane when the Campaigns
-                   sub-tab activates, and reverts on deactivation. Reusing
-                   the same DOM means no duplicated handlers or markup. -->
-              <div id="pilotCampaignsPane" style="display:none;" data-pilot-pane="campaigns"></div>
+                   Per-campaign performance dashboard. Shows the 8 stat
+                   cards (active / budget / spent / remaining / clicks /
+                   CPC / CTR / CPM) for the currently SELECTED campaign in
+                   the Active Boosts table above. Replaces the full legacy
+                   campaigns-page embed per Andy 2026-06-25. For full
+                   fleet management, open the legacy /#/campaigns route
+                   via Advanced mode. -->
+              <div id="pilotCampaignsPane" style="display:none;" data-pilot-pane="campaigns">
+                <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:20px;">
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; flex-wrap:wrap; gap:8px;">
+                    <div>
+                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 3px;">Campaign performance</h3>
+                      <div id="pilotCampaignsPaneSubtitle" style="font-size:12px; color:#6B7280;">Live metrics for the selected campaign.</div>
+                    </div>
+                    <a href="#/campaigns" id="pilotCampaignsFullViewLink" style="font-size:12px; font-weight:700; color:#FF2D78; text-decoration:none;">Full campaign management →</a>
+                  </div>
+
+                  <!-- Row 1: 4 financial cards -->
+                  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:12px;">
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #22C55E; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Status</div>
+                      <div id="pilotPerfStatus" style="font-size:20px; font-weight:800; color:#22C55E;">—</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #F59E0B; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Total budget</div>
+                      <div id="pilotPerfTotalBudget" style="font-size:20px; font-weight:800; color:#0F0F1A;">—</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #F59E0B; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Spent</div>
+                      <div id="pilotPerfSpent" style="font-size:20px; font-weight:800; color:#F59E0B;">—</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #FF2D78; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Remaining</div>
+                      <div id="pilotPerfRemaining" style="font-size:20px; font-weight:800; color:#FF2D78;">—</div>
+                    </div>
+                  </div>
+
+                  <!-- Row 2: 4 engagement cards -->
+                  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;">
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #3B82F6; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Total clicks</div>
+                      <div id="pilotPerfClicks" style="font-size:20px; font-weight:800; color:#0F0F1A;">—</div>
+                      <div id="pilotPerfImpressions" style="font-size:11px; color:#6B7280; margin-top:4px;">0 impressions</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #F59E0B; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Avg CPC</div>
+                      <div id="pilotPerfCpc" style="font-size:20px; font-weight:800; color:#F59E0B;">—</div>
+                      <div style="font-size:11px; color:#6B7280; margin-top:4px;">Cost per click</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #FF2D78; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">CTR</div>
+                      <div id="pilotPerfCtr" style="font-size:20px; font-weight:800; color:#0F0F1A;">—</div>
+                      <div style="font-size:11px; color:#6B7280; margin-top:4px;">Clicks ÷ impressions</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #E5E7EB; border-top:3px solid #F59E0B; border-radius:10px; padding:14px;">
+                      <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Avg CPM</div>
+                      <div id="pilotPerfCpm" style="font-size:20px; font-weight:800; color:#F59E0B;">—</div>
+                      <div style="font-size:11px; color:#6B7280; margin-top:4px;">Cost per 1k impressions</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <!-- ───────────────── AFFILIATE PANE ─────────────────
                    Same reparenting pattern. The data-shell-route="products"
@@ -16371,16 +16428,15 @@ function pfParseScreenshots(text) {
                 if (pilotCurrentInternalTab === 'creatives') {
                     pilotLoadCreativesPane();
                 }
-                // Reparent embedded routes into their panes on entry,
-                // revert when leaving. Only ONE can be embedded at a time.
+                // Campaigns sub-tab is now a per-campaign performance
+                // dashboard (not the embedded legacy fleet page). Affiliate
+                // still reparents the legacy marketplace catalog inline.
                 if (pilotCurrentInternalTab === 'campaigns') {
-                    pilotMoveRouteIntoPane('campaigns');
                     pilotRevertRouteFromPane('affiliate');
+                    renderCampaignsPerfPane();
                 } else if (pilotCurrentInternalTab === 'affiliate') {
                     pilotMoveRouteIntoPane('affiliate');
-                    pilotRevertRouteFromPane('campaigns');
                 } else {
-                    pilotRevertRouteFromPane('campaigns');
                     pilotRevertRouteFromPane('affiliate');
                 }
             }
@@ -16556,6 +16612,7 @@ function pfParseScreenshots(text) {
 
             // ── Spend allocation fetcher ──────────────────────────────
             let pilotSpendRefreshTimer = null;
+            let pilotLastSpendData = null;  // cached so renderCampaignsPerfPane can read it
             const PILOT_SPEND_REFRESH_MS = 30 * 1000;  // 30s while page visible
 
             async function loadPilotSpend(productId) {
@@ -16567,14 +16624,90 @@ function pfParseScreenshots(text) {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) {
-                        // 404 = product not found, just keep skeleton
+                        pilotLastSpendData = null;
                         renderSpendBreakdown(null);
+                        renderCampaignsPerfPane();
                         return;
                     }
                     const j = await r.json();
+                    pilotLastSpendData = j;
                     renderSpendBreakdown(j);
+                    renderCampaignsPerfPane();  // mirror the metrics into the Campaigns sub-tab cards
                 } catch (e) {
                     console.warn('[pilot] spend fetch failed:', e);
+                }
+            }
+
+            // ── Campaigns sub-tab: per-campaign performance cards ────
+            // Pulls from the active campaign row (budget/status) + the
+            // cached spend summary (impressions/clicks/spend). Fires on
+            // every spend refresh + every sub-tab activation.
+            function renderCampaignsPerfPane() {
+                const c = pilotProducts.find(x => x.id === pilotActiveProductId);
+                if (!c) return;
+                const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+                const fmtUSD = (n) => '$' + (Number(n) || 0).toFixed(2);
+                const fmtInt = (n) => (Number(n) || 0).toLocaleString();
+
+                // Status card — Active count for THIS campaign.
+                const isActive = c.status === 'active';
+                const statusLabels = {
+                    active: 'Active', paused: 'Paused', in_review: 'In review',
+                    completed: 'Completed', depleted: 'Depleted', rejected: 'Rejected',
+                };
+                set('pilotPerfStatus', statusLabels[c.status] || c.status || '—');
+                const statusEl = document.getElementById('pilotPerfStatus');
+                if (statusEl) {
+                    statusEl.style.color = isActive ? '#22C55E'
+                        : c.status === 'paused' ? '#F59E0B'
+                        : c.status === 'depleted' || c.status === 'rejected' ? '#EF4444'
+                        : '#6B7280';
+                }
+
+                const totalBudget = Number(c.total_budget) || 0;
+                const spentTotal = Number(c.spent_total) || 0;
+                const remaining = Math.max(0, totalBudget - spentTotal);
+
+                set('pilotPerfTotalBudget', totalBudget > 0 ? fmtUSD(totalBudget) : 'Uncapped');
+                set('pilotPerfSpent', fmtUSD(spentTotal));
+                set('pilotPerfRemaining', totalBudget > 0 ? fmtUSD(remaining) : '—');
+
+                // Engagement cards — from spend summary.
+                const totals = (pilotLastSpendData && pilotLastSpendData.totals) || {};
+                const clicks = Number(totals.clicks) || 0;
+                const impressions = Number(totals.impressions) || 0;
+                const spendCents = Number(totals.spend_cents) || 0;
+
+                set('pilotPerfClicks', fmtInt(clicks));
+                set('pilotPerfImpressions', fmtInt(impressions) + ' impression' + (impressions === 1 ? '' : 's'));
+
+                const cpc = clicks > 0 ? (spendCents / 100) / clicks : 0;
+                set('pilotPerfCpc', clicks > 0 ? '$' + cpc.toFixed(2) : '—');
+
+                const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+                set('pilotPerfCtr', impressions > 0 ? ctr.toFixed(2) + '%' : '—');
+
+                const cpm = impressions > 0 ? ((spendCents / 100) / impressions) * 1000 : 0;
+                set('pilotPerfCpm', impressions > 0 ? '$' + cpm.toFixed(2) : '—');
+
+                // Subtitle — campaign name + lifetime activation date
+                const subtitle = document.getElementById('pilotCampaignsPaneSubtitle');
+                if (subtitle) {
+                    const name = c.name || '(untitled campaign)';
+                    const since = c.boost_activated_at
+                        ? ' · Active since ' + new Date(c.boost_activated_at).toLocaleDateString()
+                        : '';
+                    subtitle.textContent = name + since;
+                }
+
+                // Full-management link → open Campaigns route (Advanced mode auto-on)
+                const link = document.getElementById('pilotCampaignsFullViewLink');
+                if (link && !link.__wired) {
+                    link.__wired = true;
+                    link.addEventListener('click', () => {
+                        localStorage.setItem('bb_advanced_mode', '1');
+                        if (typeof window.applyAdvancedMode === 'function') window.applyAdvancedMode();
+                    });
                 }
             }
 
@@ -17061,11 +17194,12 @@ function pfParseScreenshots(text) {
             // still render correctly.
             window.addEventListener('hashchange', () => {
                 if (activeRoute() !== 'pilot') {
-                    if (pilotCurrentInternalTab === 'campaigns') {
-                        pilotRevertRouteFromPane('campaigns');
-                        pilotCurrentInternalTab = 'boost';
-                    } else if (pilotCurrentInternalTab === 'affiliate') {
+                    // Campaigns no longer reparents (it's a perf dashboard now),
+                    // so only the affiliate route needs the revert dance.
+                    if (pilotCurrentInternalTab === 'affiliate') {
                         pilotRevertRouteFromPane('affiliate');
+                        pilotCurrentInternalTab = 'boost';
+                    } else if (pilotCurrentInternalTab === 'campaigns') {
                         pilotCurrentInternalTab = 'boost';
                     }
                 }
