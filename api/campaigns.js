@@ -490,7 +490,11 @@ async function handleCreate(req, res) {
     // 500s in production ("invalid input syntax for type uuid").
     id: b.id || crypto.randomUUID(),
     advertiser_id: b.advertiser_id,
-    name: b.name || b.headline.slice(0, 40),
+    // name: prefer explicit name, else first 40 chars of headline if any,
+    // else a generic fallback. 2026-06-25: headline is now optional at
+    // create time (library inheritance), so .slice() on undefined would
+    // throw — guard for it.
+    name: b.name || (b.headline ? b.headline.slice(0, 40) : "Untitled campaign"),
     status: "in_review", // always starts in review
     format: b.format || "native",
     // Placement tier — which inventory class this campaign's budget buys
@@ -498,7 +502,12 @@ async function handleCreate(req, res) {
     // unrestricted (back-compat for campaigns created before this field).
     placement_tier: ["ai-native", "display", "interruptive"].includes(b.placement_tier)
       ? b.placement_tier : null,
-    headline: b.headline,
+    // headline: required-but-defaulted. campaigns.headline has a NOT NULL
+    // constraint in prod, but with library inheritance the campaign-level
+    // value is just a fallback (mcp.js overrides with library variants at
+    // serve time). Default to the campaign name so the column stays
+    // populated; if neither was sent, use a generic placeholder.
+    headline: b.headline || b.name || "Untitled campaign",
     subtext: b.subtext || "",
     media_url: b.media_url || "",
     poster_url: b.poster_url || null,
