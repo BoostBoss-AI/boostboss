@@ -16685,16 +16685,22 @@ function pfParseScreenshots(text) {
             const MAX_IMAGE_MB = 5;
             const MAX_VIDEO_MB = 20;
 
-            // ── Supabase JS client (lazy) — used only for direct Storage uploads.
-            // The anon key lives in window.__SUPABASE_ANON_KEY (set by auth-guard.js).
-            let _sb = null;
+            // ── Supabase JS client — built fresh per upload with the
+            // current user's Authorization header so RLS resolves
+            // auth.uid() correctly. Caching a single client risks using
+            // a stale token across sessions, and the anon-only client
+            // sees auth.uid() = NULL → 'new row violates row-level
+            // security' on every storage write.
             function sb() {
-                if (_sb) return _sb;
                 const url = window.__SUPABASE_URL || (window.SUPABASE_URL) || '';
                 const key = window.__SUPABASE_ANON_KEY || (window.SUPABASE_ANON_KEY) || '';
                 if (!url || !key || typeof window.supabase === 'undefined') return null;
-                _sb = window.supabase.createClient(url, key);
-                return _sb;
+                const token = getToken();
+                return window.supabase.createClient(url, key, {
+                    global: {
+                        headers: token ? { Authorization: 'Bearer ' + token } : {},
+                    },
+                });
             }
 
             function getToken() {
