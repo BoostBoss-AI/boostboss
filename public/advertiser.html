@@ -5794,526 +5794,11 @@
           </div>
         </div>
 
-        <div id="campaignModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title" data-t="newc.title">New Campaign</h2>
-                    <button class="modal-close" id="modalCloseBtn">×</button>
-                </div>
-
-                <form id="campaignForm">
-                    <!-- Tab strip — Basics / Creatives. Added Phase B of
-                         the Pilot pivot 2026-06-24. Basics holds all the
-                         original campaign fields; Creatives houses the
-                         variant arrays (creative_headlines/body/cta)
-                         Benna's bandit rotates through. -->
-                    <div class="cm-tabs" style="display:flex; gap:4px; border-bottom:1px solid #E5E7EB; margin-bottom:20px;">
-                        <button type="button" class="cm-tab cm-tab-active" data-cm-tab="basics" style="
-                            background:none; border:none; padding:11px 18px;
-                            font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
-                            border-bottom:2px solid #FF2D78; margin-bottom:-1px; color:#FF2D78;
-                        ">Basics</button>
-                        <button type="button" class="cm-tab" data-cm-tab="creatives" style="
-                            background:none; border:none; padding:11px 18px;
-                            font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
-                            border-bottom:2px solid transparent; margin-bottom:-1px; color:#6B7280;
-                        ">Creatives</button>
-                    </div>
-
-                    <!-- ───────── BASICS PANE ───────── -->
-                    <div data-cm-pane="basics">
-
-                    <!-- Phase E.5 — Landing-page URL autofill -->
-                    <div class="form-group">
-                        <label class="form-label"><span data-t="newc.url">Landing Page URL</span> <span style="font-size:11px;color:#9CA3AF;font-weight:400;" data-t="newc.url_hint">(we'll autofill the headline, subtext, and image)</span></label>
-                        <div class="url-autofill">
-                            <input type="url" class="form-input" id="urlAutofillInput" placeholder="https://your-landing-page.com" data-t-placeholder="newc.url_ph">
-                            <button type="button" class="url-autofill-btn" id="urlAutofillBtn" data-t="newc.fetch">Fetch</button>
-                        </div>
-                        <div class="url-autofill-status" id="urlAutofillStatus"></div>
-                    </div>
-
-                    <!-- Campaign Name -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.name">Campaign Name</label>
-                        <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" data-t-placeholder="newc.name_ph" required>
-                    </div>
-
-                    <!-- Product picker — attaches this campaign to a parent product.
-                         See [[products-as-parent]]. Optional for back-compat with
-                         pre-Products campaigns. Populated by loadProductOptions(). -->
-                    <div class="form-group">
-                        <label class="form-label">Product <span style="font-size:11px;color:#9CA3AF;font-weight:400;">(parent — affiliates browse and save by product)</span></label>
-                        <select class="form-input campaign-field" name="product_id" id="campaignProductSelect">
-                            <option value="">— No product (standalone campaign) —</option>
-                        </select>
-                        <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">
-                            Don't see your product? <a href="#/products" style="color:#FF2D78;font-weight:600;text-decoration:none;">Add one →</a>
-                        </div>
-                    </div>
-
-                    <!-- File Upload -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.upload">Upload Creative</label>
-                        <div class="file-upload-area" id="uploadArea">
-                            <div class="upload-icon">📁</div>
-                            <div class="upload-text" data-t="newc.upload_drop">Drag & drop your file here</div>
-                            <div class="upload-subtext" data-t="newc.upload_click">or click to browse</div>
-                        </div>
-                        <input type="file" class="file-input" id="fileInput" accept="image/*">
-                    </div>
-
-                    <!-- Headline -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.headline">Headline</label>
-                        <input type="text" class="form-input campaign-field" name="headline" placeholder="Enter ad headline" data-t-placeholder="newc.headline_ph" required>
-                    </div>
-
-                    <!-- Subtext -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.subtext">Subtext</label>
-                        <input type="text" class="form-input campaign-field" name="subtext" placeholder="Enter additional text" data-t-placeholder="newc.subtext_ph">
-                    </div>
-
-                    <!-- A/B Variants -->
-                    <div class="form-group">
-                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span><span data-t="newc.ab">A/B Variants</span> <span style="font-size: 11px; color: #9CA3AF; font-weight: 400;" data-t="newc.ab_opt">(optional)</span></span>
-                            <button type="button" id="addVariantBtn" style="
-                                font-size: 12px; color: var(--accent-primary); background: none;
-                                border: 1px dashed var(--accent-primary); padding: 4px 10px;
-                                border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit;
-                            " data-t="newc.add_variant">+ Add Variant</button>
-                        </label>
-                        <div id="variantContainer" style="margin-top: 8px;"></div>
-                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 6px;">
-                            Benna will automatically split traffic and optimize toward the winning creative.
-                        </div>
-                    </div>
-
-                    <!-- CTA Button Text -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.cta_btn">CTA Button Text</label>
-                        <input type="text" class="form-input campaign-field" name="cta_text" placeholder="e.g., Learn More, Shop Now" data-t-placeholder="newc.cta_btn_ph" required>
-                    </div>
-
-                    <!-- CTA URL -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.cta_url">CTA URL</label>
-                        <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
-                    </div>
-
-                    <!-- Advertiser Domain -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.adomain">Advertiser Domain</label>
-                        <input type="text" class="form-input campaign-field" name="adomain" placeholder="e.g., example.com" style="font-size:13px;">
-                        <div style="font-size:11px;color:#6B7280;margin-top:4px;">Used for brand safety checks. Enter your company domain.</div>
-                    </div>
-
-                    <!-- IAB Category -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.category">Content Category</label>
-                        <select class="form-input campaign-field" name="iab_cat" style="font-size:13px;">
-                            <option value="" data-t="newc.cat_select">Select category (optional)</option>
-                            <option value="IAB3">Business</option>
-                            <option value="IAB5">Education</option>
-                            <option value="IAB19">Technology & Computing</option>
-                            <option value="IAB4">Careers</option>
-                            <option value="IAB22">Shopping</option>
-                            <option value="IAB13">Personal Finance</option>
-                            <option value="IAB7">Health & Fitness</option>
-                            <option value="IAB1">Arts & Entertainment</option>
-                            <option value="IAB17">Sports</option>
-                            <option value="IAB20">Travel</option>
-                        </select>
-                    </div>
-
-                    <!-- AI Targeting Section — the section heading is now
-                         "Ad placement"; the "AI-native targeting" heading was
-                         moved down to sit above the intent / context signals. -->
-                    <div class="ai-targeting-section">
-                        <div class="ai-targeting-header" style="margin-bottom:6px;">
-                            <div class="ai-targeting-title">
-                                <span class="spark">✦</span>
-                                <span data-t="newc.placement">Ad placement</span>
-                            </div>
-                        </div>
-                        <div style="font-size:12px;color:#6B7280;line-height:1.5;margin-bottom:1rem;" data-t="newc.placement_intro">
-                            Select a placement group; every placement in it is included. Click any card to preview your ad inside the publisher's product.
-                        </div>
-
-                        <!-- #formatTierGroups is rendered by
-                             renderFormatTierGroups() — each card is a live
-                             preview of the campaign creative. -->
-                        <div class="targeting-block">
-                            <div id="formatTierGroups"><!-- rendered by renderFormatTierGroups() --></div>
-                        </div>
-
-                        <!-- AI-native targeting — intent / context signals.
-                             Heading moved here from the top of the section. -->
-                        <div class="ai-targeting-header" style="margin-top:1.5rem;border-top:1px solid #E5D9E0;padding-top:1.25rem;">
-                            <div class="ai-targeting-title">
-                                <span class="spark">✦</span>
-                                <span data-t="newc.ai_target">AI-native targeting</span>
-                            </div>
-                            <span class="ai-targeting-badge" data-t="newc.bb_ai_badge">Boost Boss AI</span>
-                        </div>
-
-                        <!-- Intent signals -->
-                        <div class="targeting-block">
-                            <div class="targeting-label">
-                                <span data-t="newc.intent">Intent signals</span>
-                                <span class="hint" data-t="newc.intent_hint">— what users are trying to do</span>
-                            </div>
-                            <div class="intent-input-row">
-                                <input type="text" id="intentInput" placeholder="e.g. debugging python, writing a pitch deck" data-t-placeholder="newc.intent_ph">
-                                <button type="button" class="target-pill" id="intentAddBtn" data-t="newc.intent_add">+ Add</button>
-                            </div>
-                            <div id="intentChips"></div>
-                            <div class="target-pills-row" id="intentSuggestions" style="margin-top: 6px;">
-                                <span class="hint" style="font-size: 11px; color: #6B7280; width: 100%; margin-bottom: 4px;" data-t="newc.suggested">Suggested:</span>
-                            </div>
-                        </div>
-
-                        <!-- Host apps -->
-                        <div class="targeting-block">
-                            <div class="targeting-label">
-                                <span data-t="newc.host_apps">Host apps</span>
-                                <span class="hint" data-t="newc.host_apps_hint">— where your ad appears</span>
-                            </div>
-                            <div class="target-pills-row" id="hostAppsRow">
-                                <div class="target-pill" data-value="claude" data-color="pink">Claude</div>
-                                <div class="target-pill" data-value="chatgpt" data-color="pink">ChatGPT</div>
-                                <div class="target-pill" data-value="cursor" data-color="pink">Cursor</div>
-                                <div class="target-pill" data-value="perplexity" data-color="pink">Perplexity</div>
-                                <div class="target-pill" data-value="replit" data-color="pink">Replit</div>
-                                <div class="target-pill" data-value="windsurf" data-color="pink">Windsurf</div>
-                            </div>
-                        </div>
-
-                        <!-- MCP tools -->
-                        <div class="targeting-block">
-                            <div class="targeting-label">
-                                <span data-t="newc.mcp_tools">Active MCP tools</span>
-                                <span class="hint" data-t="newc.mcp_tools_hint">— session context</span>
-                            </div>
-                            <div class="target-pills-row" id="mcpToolsRow">
-                                <div class="target-pill" data-value="filesystem" data-color="cyan">filesystem</div>
-                                <div class="target-pill" data-value="github" data-color="cyan">github</div>
-                                <div class="target-pill" data-value="terminal" data-color="cyan">terminal</div>
-                                <div class="target-pill" data-value="browser" data-color="cyan">browser</div>
-                                <div class="target-pill" data-value="slack" data-color="cyan">slack</div>
-                                <div class="target-pill" data-value="notion" data-color="cyan">notion</div>
-                                <div class="target-pill" data-value="figma" data-color="cyan">figma</div>
-                                <div class="target-pill" data-value="linear" data-color="cyan">linear</div>
-                            </div>
-                        </div>
-
-                        <!-- AI models -->
-                        <div class="targeting-block">
-                            <div class="targeting-label">
-                                <span data-t="newc.ai_model">AI model</span>
-                                <span class="hint" data-t="newc.ai_model_hint">— optional</span>
-                            </div>
-                            <div class="target-pills-row" id="aiModelsRow">
-                                <div class="target-pill" data-value="claude-opus" data-color="yellow">Claude Opus</div>
-                                <div class="target-pill" data-value="claude-sonnet" data-color="yellow">Claude Sonnet</div>
-                                <div class="target-pill" data-value="gpt-4" data-color="yellow">GPT-4</div>
-                                <div class="target-pill" data-value="gpt-5" data-color="yellow">GPT-5</div>
-                                <div class="target-pill" data-value="gemini" data-color="yellow">Gemini</div>
-                            </div>
-                        </div>
-
-                        <!-- BBX placement surfaces — protocol §4.1.
-                             Empty selection = bid on every surface. -->
-                        <div class="targeting-block">
-                            <div class="targeting-label">
-                                <span data-t="newc.surfaces">Surfaces</span>
-                                <span class="hint" data-t="newc.surfaces_hint">— where the ad renders. Leave empty for any.</span>
-                            </div>
-                            <div class="target-pills-row" id="surfacesRow">
-                                <div class="target-pill" data-value="chat" data-color="pink" data-t="newc.surf_chat">Chat inline</div>
-                                <div class="target-pill" data-value="tool_response" data-color="pink" data-t="newc.surf_tool">Tool response</div>
-                                <div class="target-pill" data-value="sidebar" data-color="pink" data-t="newc.surf_sidebar">Sidebar</div>
-                                <div class="target-pill" data-value="loading_screen" data-color="pink" data-t="newc.surf_loading">Loading screen</div>
-                                <div class="target-pill" data-value="status_line" data-color="pink" data-t="newc.surf_status">Status line</div>
-                                <div class="target-pill" data-value="web" data-color="pink" data-t="newc.surf_web">Web</div>
-                            </div>
-                        </div>
-
-                        <!-- Reach estimator -->
-                        <div class="reach-estimator">
-                            <div class="reach-stat">
-                                <div class="label" data-t="newc.reach_daily">Daily reach</div>
-                                <div class="value pink" id="reachDaily">420K–480K</div>
-                            </div>
-                            <div class="reach-stat">
-                                <div class="label" data-t="newc.reach_match">Match score</div>
-                                <div class="value cyan" id="reachMatch" data-t="newc.match_broad">Broad</div>
-                            </div>
-                            <div class="reach-stat">
-                                <div class="label" data-t="newc.reach_ecpa">Est. eCPA</div>
-                                <div class="value" id="reachEcpa">$2.40</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Billing Model -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.billing_model">Billing Model</label>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" id="billing-cpm" name="billing_model" value="cpm" required checked>
-                                <label for="billing-cpm" data-t="newc.bm_cpm">CPM (Cost Per Mille)</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="billing-cpc" name="billing_model" value="cpc" required>
-                                <label for="billing-cpc" data-t="newc.bm_cpc">CPC (Cost Per Click)</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="billing-cpv" name="billing_model" value="cpv" required>
-                                <label for="billing-cpv" data-t="newc.bm_cpv">CPV (Cost Per View)</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="billing-cpa" name="billing_model" value="cpa" required>
-                                <label for="billing-cpa" data-t="newc.bm_cpa">CPA (Cost Per Acquisition)</label>
-                            </div>
-                            <div class="radio-option" style="position:relative;">
-                                <input type="radio" id="billing-cpi" name="billing_model" value="cpi" required>
-                                <label for="billing-cpi">CPI · Acquire users for your AI app
-                                    <span style="display:inline-block;margin-left:8px;background:linear-gradient(90deg,#FF2D78,#FFB020);color:#fff;padding:1px 7px;border-radius:100px;font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:1px;">NEW</span>
-                                </label>
-                            </div>
-                        </div>
-                        <!-- CPI-only fields: app store URL + install postback config.
-                             Shown when billing_model=cpi. This is the AI App-to-App
-                             User Acquisition path — your campaign pays only when a
-                             user installs / signs up for your app. -->
-                        <div id="cpiFieldsRow" style="margin-top:14px; display:none; padding:14px; background:linear-gradient(180deg,#fff7f9 0%,#fffbf0 100%); border:1px solid #FFD6E5; border-radius:10px;">
-                            <div style="font-size:11px;font-weight:700;color:#E01E65;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">AI App UA Configuration</div>
-
-                            <label for="appStoreUrl" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
-                                Destination URL <span style="color:#9CA3AF;font-weight:400;">(App Store, Play Store, or your AI app's signup page)</span>
-                            </label>
-                            <input type="url" id="appStoreUrl" name="app_store_url"
-                                placeholder="https://apps.apple.com/... or https://yourapp.com/signup"
-                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px; margin-bottom:12px; background:#fff;">
-
-                            <label for="installEventName" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
-                                Install event name <span style="color:#9CA3AF;font-weight:400;">(what counts as a converted install)</span>
-                            </label>
-                            <input type="text" id="installEventName" name="install_event_name"
-                                value="install" placeholder="install"
-                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px; margin-bottom:12px; background:#fff;">
-
-                            <label for="installPostbackUrl" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
-                                Install postback URL <span style="color:#9CA3AF;font-weight:400;">(optional — your server-to-server confirmation endpoint)</span>
-                            </label>
-                            <input type="url" id="installPostbackUrl" name="install_postback_url"
-                                placeholder="https://yourapp.com/api/lumi-postback"
-                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px; background:#fff;">
-
-                            <p style="margin:10px 0 0; font-size:12px; color:#4B5563; line-height:1.55;">
-                                <strong style="color:#E01E65;">How CPI works:</strong> You pay your bid only when a publisher's user installs your AI app and your pixel confirms the install. Your ad appears on AI apps whose users match your target intent — e.g., "writing assistant" users discover your AI editor. You won't be charged for impressions or clicks that don't convert.
-                            </p>
-                        </div>
-                        <div id="conversionTypesRow" style="margin-top:12px; display:none;">
-                            <label for="conversionEventTypes" style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
-                                <span data-t="newc.conv_types">Conversion event types</span>
-                                <span style="font-weight:400; color:#6B7280;"><span data-t="newc.conv_types_hint_a">(comma-separated, e.g.</span> <code>signup, purchase</code><span data-t="newc.conv_types_hint_b">; empty = any)</span></span>
-                            </label>
-                            <input type="text" id="conversionEventTypes" name="conversion_event_types"
-                                placeholder="signup, purchase, lead" data-t-placeholder="newc.conv_types_ph"
-                                style="width:100%; padding:10px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:14px;">
-                            <p style="margin:6px 0 0; font-size:12px; color:#6B7280;">
-                                <span data-t="newc.conv_charged_a">Only conversions whose</span> <code>type</code> <span data-t="newc.conv_charged_b">matches this list will be charged. Configure conversion firing in the</span>
-                                <a href="/docs-api-reference#api-conversion" target="_blank" style="color:#2563EB;" data-t="newc.conv_docs">conversion beacon docs</a>.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Benna Optimization Goal -->
-                    <div class="benna-section">
-                        <div class="benna-header">
-                            <div class="benna-title">
-                                <div class="benna-mark">B</div>
-                                <div>
-                                    <div data-t="newc.benna_opt">Benna optimization</div>
-                                    <div class="benna-subtitle" data-t="newc.benna_opt_sub">Set a goal. The engine handles bidding.</div>
-                                </div>
-                            </div>
-                            <span class="benna-badge" data-t="newc.powered_by_benna">Powered by Benna</span>
-                        </div>
-
-                        <div class="goal-grid">
-                            <div class="goal-tile recommended" data-goal="target_cpa">
-                                <span class="goal-kbd">1</span>
-                                <div class="goal-label">01 · tCPA</div>
-                                <div class="goal-name" data-t="newc.goal_tcpa_name">Target CPA</div>
-                                <div class="goal-desc" data-t="newc.goal_tcpa_desc">Hit a cost per acquisition. Benna tunes bids in real time.</div>
-                            </div>
-                            <div class="goal-tile" data-goal="target_roas">
-                                <span class="goal-kbd">2</span>
-                                <div class="goal-label">02 · tROAS</div>
-                                <div class="goal-name" data-t="newc.goal_troas_name">Target ROAS</div>
-                                <div class="goal-desc" data-t="newc.goal_troas_desc">Optimize for return on ad spend. Ideal for revenue campaigns.</div>
-                            </div>
-                            <div class="goal-tile" data-goal="max_conversions">
-                                <span class="goal-kbd">3</span>
-                                <div class="goal-label">03 · MaxConv</div>
-                                <div class="goal-name" data-t="newc.goal_maxconv_name">Max Conversions</div>
-                                <div class="goal-desc" data-t="newc.goal_maxconv_desc">Spend the full budget on the highest-probability converters.</div>
-                            </div>
-                            <div class="goal-tile" data-goal="manual">
-                                <span class="goal-kbd">4</span>
-                                <div class="goal-label">04 · Manual</div>
-                                <div class="goal-name" data-t="newc.goal_manual_name">Manual bid</div>
-                                <div class="goal-desc" data-t="newc.goal_manual_desc">You set a fixed bid. Benna signals still applied to targeting.</div>
-                            </div>
-                        </div>
-
-                        <!-- Target value input (Target CPA) -->
-                        <div class="goal-target-input active" id="goalTargetCpa">
-                            <label data-t="newc.goal_tcpa_name">Target CPA</label>
-                            <span class="dollar">$</span>
-                            <input type="number" id="targetCpaValue" placeholder="4.50" step="0.01" min="0">
-                            <span class="unit" data-t="newc.per_conversion">per conversion</span>
-                        </div>
-
-                        <!-- Target value input (Target ROAS) -->
-                        <div class="goal-target-input" id="goalTargetRoas">
-                            <label data-t="newc.goal_troas_name">Target ROAS</label>
-                            <input type="number" id="targetRoasValue" placeholder="3.0" step="0.1" min="0" style="padding-left: 8px;">
-                            <span class="unit" data-t="newc.return_on_spend">× return on spend</span>
-                        </div>
-
-                        <input type="hidden" id="optimizationGoal" name="optimization_goal" value="target_cpa">
-
-                        <!-- Benna plan -->
-                        <div class="benna-plan" id="bennaPlan">
-                            <span class="pulse"></span>
-                            <span>
-                                <span data-t="newc.benna_plan_a">Benna will score every eligible impression against your targeting signals and auto-bid up to a ceiling that hits your</span> <strong><span data-t="newc.benna_plan_target">target CPA of</span> $4.50</strong>. <span data-t="newc.benna_plan_b">Expect a</span> <code data-t="newc.learning_phase">learning phase</code> <span data-t="newc.benna_plan_c">of 48–72 hours while the engine calibrates on your conversion events, then steady optimization. Live adjustments viewable in the campaign dashboard.</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Bid Amount (only shown for Manual goal) -->
-                    <div class="form-group manual-bid-wrap" id="manualBidWrap">
-                        <label class="form-label" data-t="newc.bid_amount">Bid Amount</label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="color: var(--text); font-weight: 600;">$</span>
-                            <input type="number" class="form-input campaign-field" name="bid_amount" placeholder="0.00" min="0" step="0.01">
-                        </div>
-                    </div>
-
-                    <!-- Estimated cost for the selected placement tier -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.est_cost">Estimated Cost</label>
-                        <div id="formatCostEstimate" style="padding: 10px 12px; background: #FAFAF7; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 12px; color: #6B7280; line-height: 1.6;">
-                            <!-- populated by updateFormatEstimate() -->
-                        </div>
-                    </div>
-
-                    <!-- Daily Budget -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.daily_budget">Daily Budget</label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="color: var(--text); font-weight: 600;">$</span>
-                            <input type="number" class="form-input campaign-field" name="daily_budget" placeholder="0.00" min="0" step="0.01" required>
-                        </div>
-                    </div>
-
-                    <!-- Total Budget -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.total_budget">Total Budget</label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="color: var(--text); font-weight: 600;">$</span>
-                            <input type="number" class="form-input campaign-field" name="total_budget" placeholder="0.00" min="0" step="0.01" required>
-                        </div>
-                    </div>
-
-                    <!-- Ad-credit funding toggle (Phase 3 of Promote flow).
-                         When the seller has converted MoR earnings into ad
-                         credit, surface a one-click option to pay for this
-                         campaign out of that credit instead of PayPal. -->
-                    <div class="form-group" id="adCreditFundGroup" style="display:none;">
-                        <label style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(255,45,120,0.25);border-radius:10px;background:linear-gradient(135deg,rgba(255,45,120,0.06),rgba(0,255,224,0.04));cursor:pointer;">
-                            <input type="checkbox" id="useAdCreditCheckbox" name="use_ad_credit" style="margin-top:3px;width:18px;height:18px;accent-color:#FF2D78;cursor:pointer;">
-                            <div style="flex:1;">
-                                <div style="font-weight:700;color:var(--text);font-size:14px;">
-                                    Fund from ad credit
-                                    <span id="adCreditBalChip" style="margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(0,255,224,0.15);color:#00C9B0;font-size:11px;font-weight:700;">$0.00 available</span>
-                                </div>
-                                <div style="font-size:12px;color:#6B7280;margin-top:4px;">
-                                    Use your converted MoR earnings to pay for this campaign — no PayPal charge.
-                                </div>
-                                <div id="adCreditValidationMsg" style="display:none;margin-top:6px;font-size:12px;color:#DC2626;font-weight:600;"></div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Schedule -->
-                    <div class="form-group">
-                        <label class="form-label" data-t="newc.schedule">Schedule (optional)</label>
-                        <div style="display: flex; gap: 10px;">
-                            <div style="flex: 1;">
-                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;" data-t="newc.start_date">Start Date</label>
-                                <input type="date" class="form-input campaign-field" name="start_date" style="font-family: inherit;">
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;" data-t="newc.end_date">End Date</label>
-                                <input type="date" class="form-input campaign-field" name="end_date" style="font-family: inherit;">
-                            </div>
-                        </div>
-                    </div>
-
-                    </div><!-- /[data-cm-pane="basics"] -->
-
-                    <!-- ───────── CREATIVES PANE ───────── -->
-                    <!-- Per [[advertiser-pilot-model]]. Benna rotates among
-                         these variants on every impression; the headline /
-                         subtext / CTA fields on the Basics tab are the
-                         single-creative fallback when these arrays are empty. -->
-                    <div data-cm-pane="creatives" style="display:none;">
-
-                        <!-- Intro callout -->
-                        <div style="padding:14px 16px; background:linear-gradient(135deg, #FFF1F6, #FCE7F3); border:1px solid #F9A8D4; border-radius:10px; margin-bottom:18px;">
-                            <div style="font-size:13px; font-weight:700; color:#9D174D; margin-bottom:4px;">Creative library — give Benna room to test</div>
-                            <p style="font-size:12px; color:#BE185D; line-height:1.55; margin:0;">Variants the bandit will rotate across the 37 placements. <strong>3+ headlines</strong> is the minimum for meaningful A/B/n testing. Body and CTA variants are optional but boost CTR.</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Headline variants <span style="color:#FF2D78;">*</span> <span id="cmHeadlineCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
-                            <textarea class="form-input" name="creative_headlines_text" rows="5" placeholder="One headline per line. Keep them punchy (≤80 chars works best).&#10;Stop reconciling Stripe by hand&#10;The webhook-free Stripe toolkit&#10;Stripe billing, without the cron jobs" style="font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
-                            <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Max 10, 240 chars each. Benna picks one per impression.</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Body copy variants <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="cmBodyCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
-                            <textarea class="form-input" name="creative_body_copy_text" rows="4" placeholder="One body line per line. Used on larger placement formats.&#10;Webhook-free reconciliation in 5 minutes.&#10;135+ pre-built workflows, no SDK required." style="font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
-                            <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Falls back to the Subtext field on Basics if empty.</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">CTA button labels <span style="font-size:11px; color:#9CA3AF; font-weight:400;">(optional)</span> <span id="cmCtaCount" style="font-size:11px; color:#9CA3AF; font-weight:400; margin-left:4px;">(0 / 10)</span></label>
-                            <textarea class="form-input" name="creative_cta_labels_text" rows="3" placeholder="One label per line. Keep them ≤20 chars.&#10;Try free&#10;Get started&#10;See it in 60s" style="font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
-                            <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Falls back to the CTA Button Text on Basics if empty.</div>
-                        </div>
-
-                        <!-- Readiness badge -->
-                        <div id="cmCreativeReadiness" style="margin-bottom:14px; padding:12px 14px; border-radius:10px; font-size:12.5px; line-height:1.55; display:none;"></div>
-
-                        <div style="padding:12px 14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; font-size:12px; color:#6B7280; line-height:1.55;">
-                            <strong style="color:#374151;">Note:</strong> The single Headline / Subtext / CTA fields on Basics still set the fallback creative — what Benna shows when there are no variants yet (or on placements that don't support rotation).
-                        </div>
-                    </div><!-- /[data-cm-pane="creatives"] -->
-
-                    <!-- Launch Button -->
-                    <button type="submit" class="launch-btn" id="launchCampaignBtn" data-t="newc.launch">Launch Campaign</button>
-                </form>
-            </div>
-        </div>
+        <!-- #campaignModal div deleted 2026-06-25 (Phase 1 sub-chunk 2).
+             Edit + Dup + + New Campaign all route through
+             #newCampaignWizard above. The form-submit override + input
+             listener + closeModal patch that wired this div were removed
+             in the prior sub-chunk. -->
 
         <!-- Footer removed 2026-06-15 -->
 
@@ -6829,117 +6314,21 @@
 
             // Demo quick-start removed 2026-05-28 — demo mode no longer offered.
 
-            // Modal — '+ New Campaign' button now opens the 3-step wizard
-            // (2026-06-25). The old campaignModal stays in the DOM and is
-            // still opened by EDIT paths that set editingCampaignId first
-            // then call openModal() directly. Falls back to openModal() if
-            // the wizard hasn't loaded for some reason (shouldn't happen).
-            newCampaignBtn.addEventListener('click', () => {
-                if (typeof window.openNewCampaignWizard === 'function') {
-                    window.openNewCampaignWizard();
-                } else {
-                    openModal();
-                }
-            });
-            modalCloseBtn.addEventListener('click', requestCloseCampaignModal);
-            campaignModal.addEventListener('click', (e) => {
-                if (e.target === campaignModal) requestCloseCampaignModal();
-            });
-
-            // Campaign form
-            campaignForm.addEventListener('submit', handleCreateCampaign);
-
-            // ── Format card selection + Live Preview wiring ──────────────
-            // Click a card = select its radio. Selected-state styling is driven
-            // by the `.selected` class on the card for the currently-checked radio.
-            initFormatCardsAndLivePreview();
-
-            // File upload
-            uploadArea.addEventListener('click', () => fileInput.click());
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
-                    updateUploadAreaText(files[0].name);
-                }
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    updateUploadAreaText(e.target.files[0].name);
-                }
-            });
-
-            // AI targeting — intent input
-            intentInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && intentInput.value.trim()) {
-                    e.preventDefault();
-                    addIntentChip(intentInput.value.trim());
-                    intentInput.value = '';
-                    updateReachEstimate();
-                }
-            });
-            intentAddBtn.addEventListener('click', () => {
-                if (intentInput.value.trim()) {
-                    addIntentChip(intentInput.value.trim());
-                    intentInput.value = '';
-                    updateReachEstimate();
-                }
-            });
-
-            // Render intent suggestions
-            renderIntentSuggestions();
-
-            // Target pill toggles (includes new BBX surfaces row)
-            document.querySelectorAll('#hostAppsRow .target-pill, #mcpToolsRow .target-pill, #aiModelsRow .target-pill, #surfacesRow .target-pill').forEach(pill => {
-                pill.addEventListener('click', () => {
-                    const color = pill.getAttribute('data-color');
-                    pill.classList.toggle('selected');
-                    if (color) {
-                        pill.classList.toggle(color);
+            // + New Campaign button opens the 3-step wizard. Legacy modal
+            // wiring (modalCloseBtn / campaignModal / campaignForm / file
+            // upload / intent input / pill toggles / door cards / Escape
+            // handler that closed the modal) removed 2026-06-25 alongside
+            // the modal HTML deletion. The legacy const decls (campaignModal,
+            // campaignForm, etc.) still exist below and now resolve to null —
+            // they're dead but harmless because nothing references them at
+            // parse time anymore.
+            if (newCampaignBtn) {
+                newCampaignBtn.addEventListener('click', () => {
+                    if (typeof window.openNewCampaignWizard === 'function') {
+                        window.openNewCampaignWizard();
                     }
-                    updateReachEstimate();
                 });
-            });
-
-            // Door cards — toggle data-active flag, refresh summary
-            document.querySelectorAll('#doorsRow .door-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const wasActive = card.getAttribute('data-active') === 'true';
-                    card.setAttribute('data-active', wasActive ? 'false' : 'true');
-                    updateDoorsSummary();
-                    updateReachEstimate();
-                });
-            });
-            updateDoorsSummary();
-
-            // Escape key — close the topmost layer: draft prompt, then the
-            // in-context preview popup, then the campaign modal.
-            document.addEventListener('keydown', (e) => {
-                if (e.key !== 'Escape') return;
-                const dp = document.getElementById('draftPrompt');
-                if (dp && dp.classList.contains('active')) {
-                    hideDraftPrompt();
-                    return;
-                }
-                const ppm = document.getElementById('placementPreviewModal');
-                if (ppm && ppm.classList.contains('active')) {
-                    closePlacementContext();
-                    return;
-                }
-                if (campaignModal.classList.contains('active')) {
-                    requestCloseCampaignModal();
-                }
-            });
+            }
         }
 
         // Auth handlers
@@ -8290,6 +7679,13 @@
             const cpaVal = document.getElementById('targetCpaValue');
             const roasVal = document.getElementById('targetRoasValue');
             const manualBid = document.querySelector('#manualBidWrap input[name="bid_amount"]');
+            // Null-guard 2026-06-25: all of these elements lived inside the
+            // legacy #campaignModal which is gone in Phase 1 sub-chunk 2.
+            // Bailing here prevents `hiddenInput.value = goal` from throwing
+            // on every dashboard load and blanking the page.
+            if (!hiddenInput || !cpaInput || !roasInput || !manualWrap || !bennaPlan || !cpaVal || !roasVal) {
+                return;
+            }
 
             function render(goal) {
                 tiles.forEach(t => t.classList.toggle('selected', t.dataset.goal === goal));
@@ -10401,41 +9797,50 @@
         }
 
         // ───────────── A/B VARIANTS ─────────────
+        // The addVariantBtn + variantContainer lived inside the legacy
+        // #campaignModal which is gone 2026-06-25. Both elements are now
+        // null. Wrapped in a null-guard so the top-level addEventListener
+        // doesn't throw at parse time and blank the page. The wizard's
+        // global Creatives library replaces this old per-campaign A/B
+        // variant UI — bandit rotation runs on creative_headlines/body/cta
+        // arrays sourced from /creatives, not from this in-modal form.
         let variantCount = 0;
         const variantContainer = document.getElementById('variantContainer');
-
-        document.getElementById('addVariantBtn').addEventListener('click', () => {
-            if (variantCount >= 3) {
-                showToast('Maximum 3 variants allowed', 'info');
-                return;
-            }
-            variantCount++;
-            const letter = String.fromCharCode(65 + variantCount); // B, C, D
-            const div = document.createElement('div');
-            div.className = 'variant-row';
-            div.style.cssText = 'background: #FAFAFA; border-radius: 10px; padding: 14px; margin-bottom: 8px; position: relative;';
-            div.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 12px; font-weight: 700; color: var(--accent-primary);">Variant ${letter}</span>
-                    <button type="button" class="remove-variant" style="
-                        background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 14px;
-                    ">×</button>
-                </div>
-                <input type="text" name="variant_headline_${variantCount}" placeholder="Alternative headline" style="
-                    width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB;
-                    border-radius: 6px; font-size: 13px; font-family: inherit; margin-bottom: 6px;
-                ">
-                <input type="text" name="variant_cta_${variantCount}" placeholder="Alternative CTA text" style="
-                    width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB;
-                    border-radius: 6px; font-size: 13px; font-family: inherit;
-                ">
-            `;
-            div.querySelector('.remove-variant').addEventListener('click', () => {
-                div.remove();
-                variantCount--;
+        const addVariantBtn = document.getElementById('addVariantBtn');
+        if (addVariantBtn && variantContainer) {
+            addVariantBtn.addEventListener('click', () => {
+                if (variantCount >= 3) {
+                    showToast('Maximum 3 variants allowed', 'info');
+                    return;
+                }
+                variantCount++;
+                const letter = String.fromCharCode(65 + variantCount); // B, C, D
+                const div = document.createElement('div');
+                div.className = 'variant-row';
+                div.style.cssText = 'background: #FAFAFA; border-radius: 10px; padding: 14px; margin-bottom: 8px; position: relative;';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; font-weight: 700; color: var(--accent-primary);">Variant ${letter}</span>
+                        <button type="button" class="remove-variant" style="
+                            background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 14px;
+                        ">×</button>
+                    </div>
+                    <input type="text" name="variant_headline_${variantCount}" placeholder="Alternative headline" style="
+                        width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB;
+                        border-radius: 6px; font-size: 13px; font-family: inherit; margin-bottom: 6px;
+                    ">
+                    <input type="text" name="variant_cta_${variantCount}" placeholder="Alternative CTA text" style="
+                        width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB;
+                        border-radius: 6px; font-size: 13px; font-family: inherit;
+                    ">
+                `;
+                div.querySelector('.remove-variant').addEventListener('click', () => {
+                    div.remove();
+                    variantCount--;
+                });
+                variantContainer.appendChild(div);
             });
-            variantContainer.appendChild(div);
-        });
+        }
 
         // AUTOMATED RULES retired 2026-06-25. Was localStorage-only with no
         // backend processor — rules persisted but nothing read them. Pilot
