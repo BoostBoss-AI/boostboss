@@ -3225,8 +3225,12 @@
                   </table>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:8px;">
-                  <span style="font-size:11.5px; color:#9CA3AF;" data-t="pilot.picker.footer">Want multiple creatives, advanced targeting, deep analytics? The full Campaigns surface has it all.</span>
-                  <a href="#/campaigns" id="pilotOpenCampaignsLink" style="font-size:12.5px; font-weight:700; color:#FF2D78; text-decoration:none;" data-t="pilot.picker.open_campaigns">Open Campaigns →</a>
+                  <span style="font-size:11.5px; color:#9CA3AF;" data-t="pilot.picker.footer">Ready to ship another ad? Spin up a new campaign — Benna will start serving it across the 37 placements as soon as it's approved.</span>
+                  <button type="button" id="pilotNewCampaignBtn" style="
+                    padding:8px 16px; background:#FF2D78; color:#fff; border:none;
+                    border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer;
+                    font-family:inherit; letter-spacing:0.02em;
+                  " data-t="pilot.picker.new_campaign">+ New Campaign</button>
                 </div>
               </div>
 
@@ -3502,12 +3506,9 @@
                    via Advanced mode. -->
               <div id="pilotCampaignsPane" style="display:none;" data-pilot-pane="campaigns">
                 <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:20px;">
-                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; flex-wrap:wrap; gap:8px;">
-                    <div>
-                      <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 3px;">Campaign performance</h3>
-                      <div id="pilotCampaignsPaneSubtitle" style="font-size:12px; color:#6B7280;">Live metrics for the selected campaign.</div>
-                    </div>
-                    <a href="#/campaigns" id="pilotCampaignsFullViewLink" style="font-size:12px; font-weight:700; color:#FF2D78; text-decoration:none;">Full campaign management →</a>
+                  <div style="margin-bottom:18px;">
+                    <h3 style="font-size:14px; font-weight:700; color:#0F0F1A; margin:0 0 3px;">Campaign performance</h3>
+                    <div id="pilotCampaignsPaneSubtitle" style="font-size:12px; color:#6B7280;">Live metrics for the selected campaign.</div>
                   </div>
 
                   <!-- Row 1: 4 financial cards -->
@@ -16593,17 +16594,21 @@ function pfParseScreenshots(text) {
                     });
                 });
 
-                // Wire "Open Campaigns →" link — flip Advanced mode on so
-                // the destination route is actually visible in the sidebar
-                // and the route guard doesn't bounce back to home.
-                const openLink = document.getElementById('pilotOpenCampaignsLink');
-                if (openLink && !openLink.__wired) {
-                    openLink.__wired = true;
-                    openLink.addEventListener('click', () => {
-                        localStorage.setItem('bb_advanced_mode', '1');
-                        if (typeof window.applyAdvancedMode === 'function') {
-                            window.applyAdvancedMode();
-                        }
+                // Wire the "+ New Campaign" button to open the campaign
+                // create modal directly. The legacy campaigns route's
+                // own button (#newCampaignBtn) handler opens the same
+                // modal via window-scoped openModal, so we just call it.
+                const newBtn = document.getElementById('pilotNewCampaignBtn');
+                if (newBtn && !newBtn.__wired) {
+                    newBtn.__wired = true;
+                    newBtn.addEventListener('click', () => {
+                        // The legacy "+ New Campaign" button calls
+                        // openModal() which is scoped to that listener.
+                        // Easiest cross-scope path: click the legacy button
+                        // programmatically — it always exists in the DOM
+                        // even when the legacy nav is hidden.
+                        const legacyBtn = document.getElementById('newCampaignBtn');
+                        if (legacyBtn) legacyBtn.click();
                     });
                 }
 
@@ -16700,15 +16705,9 @@ function pfParseScreenshots(text) {
                     subtitle.textContent = name + since;
                 }
 
-                // Full-management link → open Campaigns route (Advanced mode auto-on)
-                const link = document.getElementById('pilotCampaignsFullViewLink');
-                if (link && !link.__wired) {
-                    link.__wired = true;
-                    link.addEventListener('click', () => {
-                        localStorage.setItem('bb_advanced_mode', '1');
-                        if (typeof window.applyAdvancedMode === 'function') window.applyAdvancedMode();
-                    });
-                }
+                // The "Full campaign management →" link was removed per
+                // Andy 2026-06-25. New Campaign entry now lives only at
+                // the Active Boosts footer button (#pilotNewCampaignBtn).
             }
 
             function renderSpendBreakdown(data) {
