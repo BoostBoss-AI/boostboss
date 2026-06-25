@@ -545,13 +545,12 @@ async function handleCreate(req, res) {
       if (list.length === 0 && b.billing_model === "cpi") return ["install"];
       return list;
     })(),
-    // CPI-specific advertiser metadata (App Store / Play Store / web app
-    // URL the user will be redirected to on click, plus the postback URL
-    // the advertiser's MMP or backend will hit to confirm an install).
-    // Empty for non-CPI campaigns. All fields nullable for back-compat.
-    app_store_url: b.app_store_url || null,
-    install_postback_url: b.install_postback_url || null,
-    install_event_name: b.install_event_name || (b.billing_model === "cpi" ? "install" : null),
+    // CPI-specific advertiser metadata — only included when the caller
+    // actually sent values or billing_model is cpi. These columns aren't
+    // present on every campaigns table (e.g. clean prod installs that
+    // skipped the CPI migration), so omitting them avoids
+    // 'column not found in schema cache' Supabase errors for the 99%
+    // of campaigns that don't need them. Reattached via spread below.
     bid_amount: b.bid_amount || 5.00,
     daily_budget: b.daily_budget || 50.00,
     total_budget: b.total_budget || 1000.00,
@@ -581,6 +580,17 @@ async function handleCreate(req, res) {
     credit_funded_amount: useAdCredit ? totalBudget : 0,
     created_at: now, updated_at: now,
   };
+
+  // Optional CPI fields — spread in only when the caller is actually
+  // running an install campaign. Keeps the row free of columns that
+  // some prod DBs don't have (saw 'Could not find the app_store_url
+  // column in schema cache' from clean installs that skipped the CPI
+  // migration). Safe-by-omission for the 99% non-CPI path.
+  if (b.billing_model === "cpi" || b.app_store_url || b.install_postback_url || b.install_event_name) {
+    if (b.app_store_url)        row.app_store_url        = b.app_store_url;
+    if (b.install_postback_url) row.install_postback_url = b.install_postback_url;
+    row.install_event_name = b.install_event_name || (b.billing_model === "cpi" ? "install" : null);
+  }
 
   // Run creative policy check immediately
   const policy = validateCreativePolicy(row);
