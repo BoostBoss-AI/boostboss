@@ -15,6 +15,8 @@ import {
   openClick,
   getSessionId,
   getActiveTabUrl,
+  makeBrandLine,
+  makeVoucher,
 } from './shared.js';
 
 const PUB_KEY = 'lumi_publisher_id';
@@ -90,6 +92,10 @@ export const LumiCard = {
 
     root.appendChild(pillRow);
 
+    // Brand line — Creatives library brand_kit.
+    const brand = makeBrandLine(ad);
+    if (brand) root.appendChild(brand);
+
     if (ad.image_url) {
       const img = document.createElement('img');
       img.src = ad.image_url;
@@ -117,6 +123,10 @@ export const LumiCard = {
       body.style.cssText = 'font-size:12px;color:#4B5563;line-height:1.4;margin-bottom:10px';
       root.appendChild(body);
     }
+
+    // Voucher endcard — Creatives library voucher.
+    const voucher = makeVoucher(ad);
+    if (voucher) root.appendChild(voucher);
 
     const cta = document.createElement('button');
     cta.setAttribute('type', 'button');

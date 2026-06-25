@@ -10,6 +10,8 @@ import {
   openClick,
   getSessionId,
   getActiveTabUrl,
+  makeBrandLine,
+  makeVoucher,
 } from './shared.js';
 import { startAutoMount } from './auto-mount.js';
 
@@ -62,6 +64,10 @@ async function render() {
   label.style.cssText = 'font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px';
   root.appendChild(label);
 
+  // Brand line — logo + "Sponsored by [name] · [domain]" from the library.
+  const brand = makeBrandLine(ad);
+  if (brand) root.appendChild(brand);
+
   const headline = document.createElement('div');
   headline.textContent = ad.headline || '';
   headline.style.cssText = 'font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.3';
@@ -73,6 +79,10 @@ async function render() {
     body.style.cssText = 'font-size:12px;color:#444;line-height:1.4;margin-bottom:8px';
     root.appendChild(body);
   }
+
+  // Voucher endcard above the CTA when set.
+  const voucher = makeVoucher(ad);
+  if (voucher) root.appendChild(voucher);
 
   const ctaRow = document.createElement('div');
   ctaRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px';

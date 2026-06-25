@@ -193,6 +193,89 @@ export function openClick(ad) {
   catch (_e) { /* silent */ }
 }
 
+/**
+ * Build a brand line — small "Sponsored by [brand] · [domain]" row with logo,
+ * pulled from the advertiser's global Creatives library (ad.brand_kit). Returns
+ * null when the library is empty. Inline styles since the extension renders
+ * cross-origin in the popup/sidepanel — no shared stylesheet.
+ */
+export function makeBrandLine(ad) {
+  const bk = ad && ad.brand_kit;
+  if (!bk || (!bk.name && !bk.logo_url && !bk.domain)) return null;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = [
+    'display: flex',
+    'align-items: center',
+    'gap: 6px',
+    'font-size: 11px',
+    'color: #6b7280',
+    'line-height: 1.2',
+    'margin-bottom: 6px',
+  ].join(';');
+  if (bk.logo_url) {
+    const img = document.createElement('img');
+    img.src = bk.logo_url;
+    img.alt = '';
+    img.style.cssText = 'width:16px;height:16px;border-radius:3px;object-fit:contain;background:#fff;flex-shrink:0';
+    img.onerror = function () { img.remove(); };
+    wrap.appendChild(img);
+  }
+  if (bk.name) {
+    wrap.appendChild(document.createTextNode('Sponsored by '));
+    const n = document.createElement('span');
+    n.textContent = bk.name;
+    n.style.cssText = 'font-weight:700;color:#111';
+    wrap.appendChild(n);
+  }
+  if (bk.domain) {
+    const sep = document.createElement('span');
+    sep.textContent = bk.name ? ' · ' : '';
+    wrap.appendChild(sep);
+    const d = document.createElement('span');
+    d.textContent = bk.domain;
+    wrap.appendChild(d);
+  }
+  return wrap;
+}
+
+/**
+ * Build a voucher endcard — amber pill with offer value + optional code.
+ * Pulled from ad.voucher. Returns null when not set.
+ */
+export function makeVoucher(ad) {
+  const v = ad && ad.voucher;
+  if (!v || !v.value_text) return null;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = [
+    'display: flex',
+    'align-items: flex-start',
+    'gap: 7px',
+    'padding: 7px 10px',
+    'background: #fff7ed',
+    'border: 1px solid rgba(252,211,77,0.55)',
+    'border-radius: 7px',
+    'margin: 6px 0',
+  ].join(';');
+  const icon = document.createElement('span');
+  icon.textContent = '🎟';
+  icon.style.cssText = 'font-size:14px;line-height:1;flex-shrink:0';
+  wrap.appendChild(icon);
+  const body = document.createElement('div');
+  body.style.cssText = 'display:flex;flex-direction:column;gap:1px;min-width:0';
+  const value = document.createElement('span');
+  value.textContent = v.value_text;
+  value.style.cssText = 'font-size:11.5px;font-weight:700;color:#92400e;line-height:1.3';
+  body.appendChild(value);
+  if (v.code) {
+    const code = document.createElement('span');
+    code.textContent = 'Code: ' + v.code;
+    code.style.cssText = 'font-size:10px;color:#9a3412;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:0.04em';
+    body.appendChild(code);
+  }
+  wrap.appendChild(body);
+  return wrap;
+}
+
 function randomUuid() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();

@@ -9,6 +9,8 @@ import {
   openClick,
   getSessionId,
   getActiveTabUrl,
+  makeBrandLine,
+  makeVoucher,
 } from './shared.js';
 import { startAutoMount } from './auto-mount.js';
 
@@ -62,6 +64,10 @@ async function render() {
   label.style.cssText = 'font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px';
   root.appendChild(label);
 
+  // Brand line — Creatives library brand_kit.
+  const brand = makeBrandLine(ad);
+  if (brand) root.appendChild(brand);
+
   if (ad.image_url) {
     const img = document.createElement('img');
     img.src = ad.image_url;
@@ -81,6 +87,10 @@ async function render() {
     body.style.cssText = 'font-size:13px;color:#444;line-height:1.4;margin-bottom:10px';
     root.appendChild(body);
   }
+
+  // Voucher endcard — Creatives library voucher.
+  const voucher = makeVoucher(ad);
+  if (voucher) root.appendChild(voucher);
 
   const ctaRow = document.createElement('div');
   ctaRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px';

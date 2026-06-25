@@ -123,6 +123,28 @@
   display: inline-block; font-size: 11px; font-weight: 600;
   color: var(--_m); letter-spacing: 0.04em; text-transform: uppercase;
 }
+/* ── brand line (Creatives library brand_kit) ── */
+.lumi-brand {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11px; color: var(--_m); line-height: 1.2;
+}
+.lumi-brand__logo {
+  width: 18px; height: 18px; border-radius: 4px; object-fit: contain;
+  background: #fff; flex-shrink: 0;
+}
+.lumi-brand__name { font-weight: 700; color: var(--_t); }
+.lumi-brand__domain, .lumi-brand__dot { color: var(--_m); }
+/* ── voucher endcard (Creatives library voucher) ── */
+.lumi-voucher {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 11px; background: rgba(255, 247, 237, 0.85);
+  border: 1px solid rgba(252, 211, 77, 0.55); border-radius: 8px;
+}
+.lumi-voucher__icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.lumi-voucher__body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lumi-voucher__value { font-size: 12px; font-weight: 700; color: #92400E; line-height: 1.3; }
+.lumi-voucher__code { font-size: 10.5px; color: #9A3412;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.04em; }
 .lumi-cta {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--_p); color: #fff; font-weight: 600; font-size: 13px;
@@ -341,6 +363,30 @@
       return null;
     }
 
+    // brand_kit + voucher arrived in the wire 2026-06-25 alongside the
+    // global Creatives library. Hydrate only when present + non-empty;
+    // older backends omit them entirely. Forward + back compatible —
+    // older snippet versions just ignore the unread fields.
+    var bk = null;
+    var bkRaw = payload.sponsored.brand_kit;
+    if (bkRaw && (bkRaw.name || bkRaw.logo_url || bkRaw.domain)) {
+      bk = {
+        name:       bkRaw.name        || null,
+        logoUrl:    bkRaw.logo_url    || null,
+        faviconUrl: bkRaw.favicon_url || null,
+        color:      bkRaw.color       || null,
+        domain:     bkRaw.domain      || null,
+      };
+    }
+    var vc = null;
+    var vcRaw = payload.sponsored.voucher;
+    if (vcRaw && vcRaw.value_text) {
+      vc = {
+        valueText:     vcRaw.value_text     || null,
+        code:          vcRaw.code           || null,
+        redemptionUrl: vcRaw.redemption_url || null,
+      };
+    }
     return {
       adId:         payload.sponsored.campaign_id,
       auctionId:    payload.auction && payload.auction.auction_id,
@@ -353,6 +399,8 @@
       disclosure:   payload.sponsored.disclosure_label || "Sponsored",
       tracking:     payload.sponsored.tracking || {},
       isSandbox:    !!(payload.auction && payload.auction.sandbox),
+      brandKit:     bk,
+      voucher:      vc,
     };
   }
 
@@ -387,6 +435,68 @@
     span.className = "lumi-disclosure";
     span.textContent = ad.disclosure;
     return span;
+  }
+
+  // Brand line — logo + "Sponsored by [name] · [domain]". Returns null
+  // when the advertiser hasn't filled their global Creatives library.
+  function makeBrandLine(ad) {
+    const bk = ad.brandKit;
+    if (!bk || (!bk.name && !bk.logoUrl && !bk.domain)) return null;
+    const wrap = document.createElement("span");
+    wrap.className = "lumi-brand";
+    if (bk.logoUrl) {
+      const img = document.createElement("img");
+      img.className = "lumi-brand__logo";
+      img.src = bk.logoUrl;
+      img.alt = "";
+      img.onerror = function () { img.remove(); };
+      wrap.appendChild(img);
+    }
+    if (bk.name) {
+      wrap.appendChild(document.createTextNode("Sponsored by "));
+      const n = document.createElement("span");
+      n.className = "lumi-brand__name";
+      n.textContent = bk.name;
+      wrap.appendChild(n);
+    }
+    if (bk.domain) {
+      const dot = document.createElement("span");
+      dot.className = "lumi-brand__dot";
+      dot.textContent = bk.name ? " · " : "";
+      wrap.appendChild(dot);
+      const d = document.createElement("span");
+      d.className = "lumi-brand__domain";
+      d.textContent = bk.domain;
+      wrap.appendChild(d);
+    }
+    return wrap;
+  }
+
+  // Voucher endcard — sits above the CTA on card + corner placements.
+  // Null when no voucher is set on the library.
+  function makeVoucher(ad) {
+    const v = ad.voucher;
+    if (!v || !v.valueText) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "lumi-voucher";
+    const icon = document.createElement("span");
+    icon.className = "lumi-voucher__icon";
+    icon.textContent = "🎟";
+    wrap.appendChild(icon);
+    const body = document.createElement("div");
+    body.className = "lumi-voucher__body";
+    const value = document.createElement("span");
+    value.className = "lumi-voucher__value";
+    value.textContent = v.valueText;
+    body.appendChild(value);
+    if (v.code) {
+      const code = document.createElement("span");
+      code.className = "lumi-voucher__code";
+      code.textContent = "Code: " + v.code;
+      body.appendChild(code);
+    }
+    wrap.appendChild(body);
+    return wrap;
   }
 
   function closeButton(onClick) {
@@ -733,6 +843,8 @@
     }));
     el.appendChild(saveAffiliateButton(ad, el));
     el.appendChild(makeDisclosure(ad));
+    var brandC = makeBrandLine(ad);
+    if (brandC) el.appendChild(brandC);
     addMedia(el, ad, "lumi-cardbox__media");
     const h = document.createElement("p");
     h.className = "lumi-cardbox__title";
@@ -744,6 +856,8 @@
       s.textContent = ad.subtext;
       el.appendChild(s);
     }
+    var voucherC = makeVoucher(ad);
+    if (voucherC) el.appendChild(voucherC);
     el.appendChild(buildCta(ad, el, "lumi-cardbox__cta"));
   }
 
@@ -762,6 +876,8 @@
     }));
     card.appendChild(saveAffiliateButton(ad, el));
     card.appendChild(makeDisclosure(ad));
+    var brandCorner = makeBrandLine(ad);
+    if (brandCorner) card.appendChild(brandCorner);
     addMedia(card, ad, "lumi-corner__media");
     const h = document.createElement("p");
     h.className = "lumi-corner__title";
@@ -773,6 +889,8 @@
       s.textContent = ad.subtext;
       card.appendChild(s);
     }
+    var voucherCorner = makeVoucher(ad);
+    if (voucherCorner) card.appendChild(voucherCorner);
     card.appendChild(buildCta(ad, el, "lumi-corner__cta"));
     anchor.appendChild(card);
     document.body.appendChild(anchor);

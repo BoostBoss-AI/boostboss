@@ -9,6 +9,8 @@ import {
   observeImpression,
   openClick,
   getSessionId,
+  makeBrandLine,
+  makeVoucher,
 } from './shared.js';
 import { startAutoMount } from './auto-mount.js';
 
@@ -63,8 +65,17 @@ async function render() {
 
   const label = document.createElement('div');
   label.textContent = 'Sponsored';
-  label.style.cssText = 'font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px';
+  label.style.cssText = 'font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px';
   inner.appendChild(label);
+
+  // Brand line — Creatives library brand_kit.
+  const brand = makeBrandLine(ad);
+  if (brand) {
+    // Center the brand line on the hero canvas.
+    brand.style.justifyContent = 'center';
+    brand.style.marginBottom = '14px';
+    inner.appendChild(brand);
+  }
 
   if (ad.image_url) {
     const img = document.createElement('img');
@@ -82,8 +93,16 @@ async function render() {
   if (ad.body) {
     const body = document.createElement('p');
     body.textContent = ad.body;
-    body.style.cssText = 'font-size:17px;line-height:1.5;color:#444;margin:0 0 28px';
+    body.style.cssText = 'font-size:17px;line-height:1.5;color:#444;margin:0 0 20px';
     inner.appendChild(body);
+  }
+
+  // Voucher endcard — Creatives library voucher.
+  const voucher = makeVoucher(ad);
+  if (voucher) {
+    voucher.style.margin = '0 auto 20px';
+    voucher.style.maxWidth = '320px';
+    inner.appendChild(voucher);
   }
 
   const cta = document.createElement('button');

@@ -20,6 +20,7 @@ import {
 import { useLumi } from '../LumiProvider';
 import { fetchAd, fireImpression } from '../api';
 import { PLACEMENTS, type Ad } from '../types';
+import { BrandLine } from './BrandLine';
 
 export interface SplashSponsorProps {
   onDismiss: () => void;

@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lumi for Browser Extension App runtime SDK — Boost Boss's ad placements for Chrome MV3 extensions.",
   "main": "./src/index.js",
   "type": "module",

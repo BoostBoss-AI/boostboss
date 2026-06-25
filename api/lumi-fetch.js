@@ -307,6 +307,28 @@ module.exports = async function handler(req, res) {
     ? trackClick + (trackClick.includes("?") ? "&" : "?") + "to=" + encodeURIComponent(s.cta_url)
     : (trackClick || s.cta_url);
 
+  // brand_kit + voucher — passed through from the upstream /api/mcp
+  // response which pulls them from the advertiser's global Creatives
+  // library (db/33_creative_assets.sql). Null when the library is empty.
+  // Both fields use snake_case on the wire here to match the rest of
+  // the lumi-fetch response shape; the SDK transforms to camelCase.
+  const bk = (s.brand_kit && (s.brand_kit.name || s.brand_kit.logo_url || s.brand_kit.domain))
+    ? {
+        name:        s.brand_kit.name        || null,
+        logo_url:    s.brand_kit.logo_url    || null,
+        favicon_url: s.brand_kit.favicon_url || null,
+        color:       s.brand_kit.color       || null,
+        domain:      s.brand_kit.domain      || null,
+      }
+    : null;
+  const vc = (s.voucher && s.voucher.value_text)
+    ? {
+        value_text:     s.voucher.value_text     || null,
+        code:           s.voucher.code           || null,
+        redemption_url: s.voucher.redemption_url || null,
+      }
+    : null;
+
   return res.status(200).json({
     ad: {
       ad_id:            s.campaign_id,
@@ -322,6 +344,8 @@ module.exports = async function handler(req, res) {
       impression_url:   (s.tracking && s.tracking.impression) || null,
       disclosure_label: s.disclosure_label || "Sponsored",
       sandbox:          a.sandbox === true,
+      brand_kit:        bk,
+      voucher:          vc,
     },
   });
 };

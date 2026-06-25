@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-mobile",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lumi for Mobile App runtime SDK — Boost Boss's ad placements for React Native (Expo + bare).",
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",

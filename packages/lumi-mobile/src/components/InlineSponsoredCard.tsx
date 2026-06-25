@@ -18,6 +18,7 @@ import {
 import { useLumi } from '../LumiProvider';
 import { fetchAd, fireImpression } from '../api';
 import { PLACEMENTS, type Ad } from '../types';
+import { BrandLine, Voucher } from './BrandLine';
 
 export interface InlineSponsoredCardProps {
   contextHint?: string | null;
@@ -68,6 +69,7 @@ export function InlineSponsoredCard({
         <View style={styles.disclosure}>
           <Text style={styles.disclosureText}>Sponsored</Text>
         </View>
+        <BrandLine ad={ad} />
         <Text style={styles.headline} numberOfLines={2}>
           {(ad.headline as string) || (ad.brand as string) || 'Sponsored'}
         </Text>
@@ -76,6 +78,7 @@ export function InlineSponsoredCard({
             {ad.body as string}
           </Text>
         ) : null}
+        <Voucher ad={ad} />
         <TouchableOpacity
           onPress={onPress}
           activeOpacity={0.85}

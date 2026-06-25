@@ -19,6 +19,7 @@ import {
 import { useLumi } from '../LumiProvider';
 import { fetchAd, fireImpression } from '../api';
 import { PLACEMENTS, type Ad } from '../types';
+import { BrandLine, Voucher } from './BrandLine';
 
 export interface FullScreenInterstitialProps {
   visible: boolean;
@@ -96,12 +97,14 @@ export function FullScreenInterstitial({
               ) : (
                 <View style={[styles.hero, styles.heroFallback]} />
               )}
+              <BrandLine ad={ad} align="center" />
               <Text style={styles.headline}>
                 {(ad.headline as string) || (ad.brand as string) || 'Sponsored'}
               </Text>
               {ad.body ? (
                 <Text style={styles.bodyText}>{ad.body as string}</Text>
               ) : null}
+              <Voucher ad={ad} />
               <TouchableOpacity style={styles.ctaBtn} onPress={onPress}>
                 <Text style={styles.ctaText}>{(ad.cta as string) || 'Learn more'}</Text>
               </TouchableOpacity>
