@@ -1,0 +1,46 @@
+{
+  "name": "@boostbossai/lumi-browser",
+  "version": "0.1.0",
+  "description": "Lumi for Browser App runtime SDK — Boost Boss's ad placements as an importable npm module. Same renderer as the JS snippet, with brand kit + voucher endcards from your Creatives library.",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "Apache-2.0",
+  "author": "Boost Boss <hello@boostboss.ai> (https://boostboss.ai)",
+  "homepage": "https://boostboss.ai/publish/web",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BoostBoss-AI/boostboss.git",
+    "directory": "packages/lumi-browser"
+  },
+  "bugs": {
+    "url": "https://github.com/BoostBoss-AI/boostboss/issues",
+    "email": "hello@boostboss.ai"
+  },
+  "keywords": [
+    "boost-boss",
+    "lumi",
+    "ads",
+    "ad-network",
+    "browser",
+    "web",
+    "ai-app",
+    "monetization",
+    "sponsored-content"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
