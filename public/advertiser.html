@@ -18734,14 +18734,21 @@ function pfParseScreenshots(text) {
                     if (typeof window.showToast === 'function') {
                         window.showToast('Campaign launched — Benna will start serving once approved.', 'success');
                     }
-                    // Refresh the Boost Ads campaigns list so the new row appears.
-                    if (typeof window.refreshPilot === 'function') {
-                        try { window.refreshPilot(); } catch (_) {}
-                    }
-                    // Navigate to Boost Ads so the user sees their new campaign.
-                    if (!/#\/pilot/.test(window.location.hash)) {
-                        window.location.hash = '#/pilot';
-                    }
+                    // Force a full page reload after wizard success — there
+                    // are too many local list caches (Boost Ads active boosts,
+                    // Campaigns list, Performance counters) and partial
+                    // refreshers don't catch all of them. Reload to /#/pilot
+                    // so the user lands on the Boost Ads dashboard with
+                    // every list freshly fetched, including the new
+                    // in_review campaign in the Campaigns page table.
+                    setTimeout(() => {
+                        try {
+                            window.location.hash = '#/pilot';
+                            // 200ms grace so the toast is visible briefly
+                            // before the reload kicks in.
+                            setTimeout(() => window.location.reload(), 700);
+                        } catch (_) { window.location.reload(); }
+                    }, 50);
                 } catch (e) {
                     showErr(currentStep === 1 ? 'ncwStep1Err' : 'ncwStep3Err', e.message || 'Failed to launch.');
                 } finally {
