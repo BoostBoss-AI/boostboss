@@ -3614,7 +3614,7 @@
               <div class="shell-page-head">
                 <div>
                   <h1 class="shell-page-title" data-t="page.pilot.title">Boost Ads</h1>
-                  <div class="shell-page-sub" data-t="page.pilot.sub">Upload your product. Pick a goal. Benna delivers it everywhere our publishers are. You see exactly where every dollar went.</div>
+                  <div class="shell-page-sub" data-t="page.pilot.sub">Upload your campaign. Pick a goal. Benna delivers it everywhere our publishers are. You see exactly where every dollar went.</div>
                 </div>
               </div>
 
@@ -3656,11 +3656,22 @@
                 </div>
               </div>
 
-              <!-- Empty state removed 2026-06-25 per Andy. When no active
-                   campaign exists, the Boost Ads page renders blank below
-                   the heading — users go to the Campaigns sub-tab (or the
-                   global Campaigns page) to create or check pending review
-                   status. No standalone "+ Add Product" CTA. -->
+              <!-- Empty state — shown when the advertiser has no live
+                   boosts. Copy adapts based on whether they have ANY
+                   campaigns at all (rocket + "Create your first campaign"
+                   CTA → +New Campaign wizard) vs campaigns existing but
+                   none active yet (e.g. pending admin review, copy
+                   rewritten in renderProductPicker to "No live boosts yet"
+                   → See Campaigns link). -->
+              <div id="pilotEmptyState" style="display:none; text-align:center; padding:60px 24px; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
+                <div style="font-size:48px; margin-bottom:12px;">🚀</div>
+                <h2 style="font-size:20px; font-weight:700; color:#0F0F1A; margin:0 0 6px;" id="pilotEmptyStateTitle">Create your first campaign</h2>
+                <p style="color:#6B7280; font-size:14px; margin:0 0 20px;" id="pilotEmptyStateSub">Boost Ads runs your live campaigns. Spin one up to start serving across the 37 placements.</p>
+                <a href="#" id="pilotEmptyStateCta" style="
+                  display:inline-block; padding:10px 22px; background:#FF2D78; color:#fff;
+                  font-size:13px; font-weight:700; border-radius:8px; text-decoration:none;
+                ">+ New Campaign</a>
+              </div>
 
               <!-- Internal tab strip — Pilot has two views:
                    Boost (sliders, objective, budget, spend allocation)
@@ -17106,6 +17117,11 @@ function pfParseScreenshots(text) {
             // derives advertiser_id from the Bearer JWT and ignores any
             // ?advertiser_id query param. We can't accidentally leak other
             // tenants' campaigns from here. Status filter is server-side too.
+            // Total campaign count (any status) for the Boost Ads empty
+            // state. Lets us distinguish "no campaigns at all" from
+            // "campaigns exist but none active yet (e.g. pending review)".
+            let pilotTotalCampaignCount = 0;
+
             async function loadPilotProducts() {
                 const token = getToken();
                 if (!token) return;
@@ -17113,13 +17129,17 @@ function pfParseScreenshots(text) {
                     // Active Boosts table = only campaigns currently running.
                     // Per Andy 2026-06-25 — paused/in_review/etc. live in the
                     // Campaigns sub-tab, not the at-a-glance Active list.
-                    const r = await fetch('/api/campaigns?status=active', {
+                    // We fetch ALL so we can count non-active campaigns and
+                    // adapt the empty-state copy.
+                    const r = await fetch('/api/campaigns', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     const j = await r.json();
-                    pilotProducts = (j.campaigns || j.data || [])
+                    const all = (j.campaigns || j.data || [])
                         .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+                    pilotTotalCampaignCount = all.length;
+                    pilotProducts = all.filter(c => c.status === 'active' || c.status === 'live');
                     renderProductPicker();
                 } catch (e) {
                     console.warn('[pilot] loadCampaigns failed:', e);
@@ -17128,6 +17148,7 @@ function pfParseScreenshots(text) {
 
             // ── 2. Render product picker (Active boosts table) ─────────
             function renderProductPicker() {
+                const empty = document.getElementById('pilotEmptyState');
                 const pills = document.getElementById('pilotProductPills');
                 const picker = document.getElementById('pilotProductPicker');
                 const active = document.getElementById('pilotActiveBoost');
@@ -17135,15 +17156,47 @@ function pfParseScreenshots(text) {
                 if (!pills || !active || !picker) return;
 
                 if (pilotProducts.length === 0) {
-                    // No active campaigns — render blank below the heading.
-                    // No empty-state card per Andy 2026-06-25; users navigate
-                    // to the Campaigns sub-tab / page to create or check
-                    // pending status.
+                    // Adapt empty-state copy per total count:
+                    //   0 total → "Create your first campaign" + wizard CTA
+                    //   >0 total but 0 active → "No live boosts yet — N
+                    //                            awaiting admin review" +
+                    //                            See Campaigns CTA
+                    if (empty) {
+                        const titleEl = document.getElementById('pilotEmptyStateTitle');
+                        const subEl   = document.getElementById('pilotEmptyStateSub');
+                        const ctaEl   = document.getElementById('pilotEmptyStateCta');
+                        if (pilotTotalCampaignCount > 0) {
+                            const n = pilotTotalCampaignCount;
+                            if (titleEl) titleEl.textContent = 'No live boosts yet';
+                            if (subEl)   subEl.textContent   = 'You have ' + n + ' campaign' + (n === 1 ? '' : 's') +
+                                ' awaiting admin review. Boost Ads shows campaigns once they go live — see Campaigns for status.';
+                            if (ctaEl) {
+                                ctaEl.textContent = 'See Campaigns →';
+                                ctaEl.setAttribute('href', '#/campaigns');
+                                ctaEl.onclick = null;
+                            }
+                        } else {
+                            if (titleEl) titleEl.textContent = 'Create your first campaign';
+                            if (subEl)   subEl.textContent   = 'Boost Ads runs your live campaigns. Spin one up to start serving across the 37 placements.';
+                            if (ctaEl) {
+                                ctaEl.textContent = '+ New Campaign';
+                                ctaEl.setAttribute('href', '#');
+                                ctaEl.onclick = (e) => {
+                                    e.preventDefault();
+                                    if (typeof window.openNewCampaignWizard === 'function') {
+                                        window.openNewCampaignWizard();
+                                    }
+                                };
+                            }
+                        }
+                        empty.style.display = '';
+                    }
                     picker.style.display = 'none';
                     active.style.display = 'none';
                     if (tabStrip) tabStrip.style.display = 'none';
                     return;
                 }
+                if (empty) empty.style.display = 'none';
                 picker.style.display = '';
                 if (tabStrip) tabStrip.style.display = '';
 
