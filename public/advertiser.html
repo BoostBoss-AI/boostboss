@@ -16430,20 +16430,24 @@ function pfParseScreenshots(text) {
             // clarification. pilotProducts / pilotActiveProductId variable
             // names kept for back-compat to avoid renaming everywhere; values
             // are now CAMPAIGN rows / campaign id.
+            //
+            // Tenant scoping: the backend (api/campaigns.js handleList)
+            // derives advertiser_id from the Bearer JWT and ignores any
+            // ?advertiser_id query param. We can't accidentally leak other
+            // tenants' campaigns from here. Status filter is server-side too.
             async function loadPilotProducts() {
                 const token = getToken();
                 if (!token) return;
                 try {
-                    const r = await fetch('/api/campaigns?limit=100', {
+                    // Active Boosts table = only campaigns currently running.
+                    // Per Andy 2026-06-25 — paused/in_review/etc. live in the
+                    // Campaigns sub-tab, not the at-a-glance Active list.
+                    const r = await fetch('/api/campaigns?status=active', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     const j = await r.json();
-                    // Hide rejected campaigns from the pilot view; everything
-                    // else is fair game (active, paused, in_review, completed,
-                    // depleted). Sort by recently-touched first.
                     pilotProducts = (j.campaigns || j.data || [])
-                        .filter(c => c.status !== 'rejected')
                         .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
                     renderProductPicker();
                 } catch (e) {

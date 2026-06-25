@@ -335,18 +335,43 @@ module.exports = async function handler(req, res) {
 
 // ── list ────────────────────────────────────────────────────────────────
 async function handleList(req, res) {
-  const { advertiser_id, status: filterStatus } = req.query;
+  const { status: filterStatus } = req.query;
   const sb = supa();
   if (sb) {
-    let q = sb.from("campaigns").select("*").order("created_at", { ascending: false });
-    if (advertiser_id) q = q.eq("advertiser_id", advertiser_id);
+    // ── Cross-tenant data leak fix 2026-06-25 ────────────────────────
+    // Previously trusted ?advertiser_id from the query string — meaning
+    // a caller could omit it and receive ALL advertisers' campaigns.
+    // Now we derive advertiser_id server-side from the Bearer JWT and
+    // ignore the query-string value entirely. Same pattern Task #152
+    // applied to the products + billing endpoints.
+    const authHeader = (req.headers && req.headers.authorization) || "";
+    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!bearer) return res.status(401).json({ error: "Bearer token required" });
+    let authedAdvertiserId = null;
+    try {
+      const { data, error } = await sb.auth.getUser(bearer);
+      if (error || !data || !data.user) {
+        return res.status(401).json({ error: "Invalid or expired session" });
+      }
+      authedAdvertiserId = data.user.id;
+    } catch (_) {
+      return res.status(401).json({ error: "Auth check failed" });
+    }
+
+    let q = sb.from("campaigns").select("*")
+      .eq("advertiser_id", authedAdvertiserId)
+      .order("created_at", { ascending: false });
     if (filterStatus) q = q.eq("status", filterStatus);
     const { data, error } = await q;
     if (error) return res.status(500).json({ error: error.message });
     return res.json({ campaigns: data });
   }
+  // Demo branch (no Supabase) — admin console is open, so we honor the
+  // query-string advertiser_id directly. Production hits the Supabase
+  // branch above which enforces Bearer-derived scoping.
+  const demoAdvertiserId = req.query && req.query.advertiser_id;
   let camps = [...DEMO_CAMPAIGNS.values()];
-  if (advertiser_id) camps = camps.filter((c) => c.advertiser_id === advertiser_id);
+  if (demoAdvertiserId) camps = camps.filter((c) => c.advertiser_id === demoAdvertiserId);
   if (filterStatus) camps = camps.filter((c) => c.status === filterStatus);
   camps.sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
   return res.json({ campaigns: camps });
@@ -358,8 +383,29 @@ async function handleGet(req, res) {
   if (!id) return res.status(400).json({ error: "Missing campaign id" });
   const sb = supa();
   if (sb) {
-    const { data, error } = await sb.from("campaigns").select("*").eq("id", id).single();
-    if (error || !data) return res.status(404).json({ error: "Campaign not found" });
+    // Cross-tenant fix 2026-06-25: enforce advertiser ownership on single
+    // fetches too. Otherwise any caller with a valid token could request
+    // any campaign id and read its full row.
+    const authHeader = (req.headers && req.headers.authorization) || "";
+    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!bearer) return res.status(401).json({ error: "Bearer token required" });
+    let authedAdvertiserId = null;
+    try {
+      const { data, error } = await sb.auth.getUser(bearer);
+      if (error || !data || !data.user) {
+        return res.status(401).json({ error: "Invalid or expired session" });
+      }
+      authedAdvertiserId = data.user.id;
+    } catch (_) {
+      return res.status(401).json({ error: "Auth check failed" });
+    }
+
+    const { data, error } = await sb.from("campaigns").select("*")
+      .eq("id", id)
+      .eq("advertiser_id", authedAdvertiserId)
+      .maybeSingle();
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data) return res.status(404).json({ error: "Campaign not found" });
     return res.json({ campaign: data });
   }
   const c = DEMO_CAMPAIGNS.get(id);
