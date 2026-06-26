@@ -155,7 +155,7 @@ a{color:inherit;text-decoration:none}svg{display:block}
 <div class="page-fx"></div>
 <div class="topbar">
   <a class="brand" href="/"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
-  <a class="back" href="/" id="back-link">← Back to site</a>
+  <a class="back" href="/ads" id="back-link">← Back to SuperBoost</a>
 </div>
 
 <!-- ── Cross-role onboarding modal — moved out of the card so its
@@ -440,9 +440,15 @@ a{color:inherit;text-decoration:none}svg{display:block}
                          '<li><span class="ck">✓</span><span>Pay for <b>outcomes</b> — CPM, CPC, CPA</span></li>';
       statcard.innerHTML = '<div class="big">$1.93</div><div class="lbl">avg eCPA across live campaigns</div><div class="live"><span class="d"></span>LIVE</div>';
     }
-    // Update topbar back-link to point at the right marketing page
+    // Update topbar back-link: text + href both adapt per role to
+    // match the Claude Design copy exactly:
+    //   advertiser  → '← Back to SuperBoost' -> /ads
+    //   developer   → '← Back to Publishers' -> /publish
     var back = document.getElementById('back-link');
-    if (back) back.setAttribute('href', role === 'developer' ? '/publish' : '/ads');
+    if (back) {
+      back.setAttribute('href', role === 'developer' ? '/publish' : '/ads');
+      back.textContent = role === 'developer' ? '← Back to Publishers' : '← Back to SuperBoost';
+    }
   }
   // Run once now and again on next tick (after lockRoleFromPath sets selectedRole)
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
