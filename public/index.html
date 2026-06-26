@@ -1,1153 +1,759 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- BB_I18N_PRELOAD: zero-flash language preference. Mirrors i18n.js. Do not edit by hand — run scripts/i18n_inject_preload.py. -->
-<style>html.bb-i18n-loading{visibility:hidden}</style>
-<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/mcp':1,'/publish/ai-apps':1,'/publish/extensions':1,'/publish/bots':1,'/publish/no-code':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
-<!-- /BB_I18N_PRELOAD -->
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boost Boss — The ad network for AI apps</title>
-<meta name="description" content="Boost Boss is the first MCP-powered ad network for AI applications. Monetize your AI app. Reach AI-native audiences.">
-<meta property="og:title" content="Boost Boss — The ad network for AI apps">
-<meta property="og:description" content="MCP-powered ads for AI apps. Monetize your product. Reach AI-native audiences.">
-<meta property="og:url" content="https://boostboss.ai">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Boost Boss — The ad network for AI apps">
-<meta name="twitter:description" content="MCP-powered ads for AI apps. Monetize your product. Reach AI-native audiences.">
-<link rel="canonical" href="https://boostboss.ai">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Boost Boss — The ad network built for AI surfaces</title>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --pink: #FF2D78;
-    --pink-dark: #E01E65;
-    --cyan: #04BEFE;
-    --yellow: #FFE600;
-    --ink: #1A1A2E;
-    --ink-soft: #4B4B5E;
-    --muted: #6B7280;
-    --line: #EAEAEF;
-    --bg: #FFFFFF;
-    --bg-soft: #FAFAF7;
-  }
-
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--ink);
-    line-height: 1.55;
+    font-family: var(--font-body);
+    color: var(--text-on-dark);
+    background: var(--bb-surface-0);
     -webkit-font-smoothing: antialiased;
-    font-size: 16px;
-    /* Shared pastel-tinted cream canvas (matches /publish) */
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  svg { display: block; }
+
+  /* Fixed dark aurora behind the WHOLE page so the below-fold flows out
+     of the hero on one continuous dark surface (no light break). */
+  .page-fx {
+    position: fixed; inset: 0; z-index: -5; pointer-events: none;
     background:
-      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%),
-      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%),
-      #FAFAF7;
-    background-attachment: fixed;
-    min-height: 100vh;
+      radial-gradient(ellipse 42% 30% at 12% 12%, rgba(255, 45, 120, 0.16), transparent 60%),
+      radial-gradient(ellipse 44% 34% at 88% 38%, rgba(0, 255, 224, 0.10), transparent 62%),
+      radial-gradient(ellipse 50% 40% at 50% 78%, rgba(217, 70, 239, 0.12), transparent 60%),
+      var(--bb-surface-0);
+  }
+  .page-fx.grain {
+    z-index: -4; opacity: 0.5;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
-  a { color: inherit; text-decoration: none; }
-  img, svg { display: block; max-width: 100%; }
+  /* ════════════════════════════════════════════════════════════
+     HERO SHELL — dark aurora surface
+     ════════════════════════════════════════════════════════════ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--bb-surface-0);
+  }
 
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  /* Layer 1 — drifting aurora mesh */
+  .aurora {
+    position: absolute; inset: -20%;
+    z-index: -3;
+    background:
+      radial-gradient(ellipse 46% 40% at 22% 12%, rgba(255, 45, 120, 0.42), transparent 60%),
+      radial-gradient(ellipse 50% 45% at 82% 18%, rgba(0, 255, 224, 0.26), transparent 62%),
+      radial-gradient(ellipse 55% 50% at 60% 92%, rgba(217, 70, 239, 0.30), transparent 60%),
+      radial-gradient(ellipse 40% 35% at 8% 78%, rgba(4, 190, 254, 0.22), transparent 60%);
+    filter: blur(8px) saturate(1.15);
+    animation: auroraDrift 22s var(--ease-in-out) infinite alternate;
+  }
+  @keyframes auroraDrift {
+    0%   { transform: translate3d(0,0,0) scale(1); }
+    50%  { transform: translate3d(2.5%, -2%, 0) scale(1.08); }
+    100% { transform: translate3d(-2%, 2.5%, 0) scale(1.04); }
+  }
 
-  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+  /* Layer 2 — fine grain + vignette to seat the glow */
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 90% 80% at 50% 40%, transparent 40%, rgba(11,11,20,0.65) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
 
-  /* ──────────── NAV ──────────── */
-  /* Floating (position: fixed) so the body canvas sits behind the nav
-     as one continuous surface. Transparent on top; subtle frosted tint
-     when scrolled. Matches /publish and /ads. */
+  /* Layer 3 — particle network canvas */
+  #particles {
+    position: absolute; inset: 0; z-index: -1;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     NAV
+     ════════════════════════════════════════════════════════════ */
   nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: transparent;
-    transition: background 0.3s, backdrop-filter 0.3s, border 0.3s;
+    position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-nav);
+    transition: background var(--dur-base), backdrop-filter var(--dur-base), border-color var(--dur-base);
+    border-bottom: 1px solid transparent;
   }
   nav.scrolled {
-    background: rgba(250, 250, 247, 0.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(15, 15, 26, 0.06);
+    background: var(--glass-dark-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: var(--glass-dark-border);
   }
+  /* Adaptive: once scrolled past the dark hero onto the cream canvas,
+     the fixed nav flips to a light frosted treatment with ink text. */
+  nav.over-light {
+    background: var(--glass-bg);
+    border-bottom: var(--glass-border);
+  }
+  nav.over-light .brand-name { color: var(--bb-ink); }
+  nav.over-light .nav-links a { color: var(--bb-ink-soft); }
+  nav.over-light .nav-links a:hover { color: var(--bb-pink); }
+  nav.over-light .btn-ghost-d {
+    background: transparent; color: var(--bb-ink); border-color: rgba(15,15,26,0.18);
+  }
+  nav.over-light .btn-ghost-d:hover { background: rgba(15,15,26,0.04); border-color: rgba(15,15,26,0.32); }
   .nav-inner {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    height: 64px;
-    max-width: 1200px; margin: 0 auto; padding: 0 24px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    height: var(--nav-h); max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter);
   }
-  .nav-inner > .brand    { justify-self: start; }
-  .nav-inner > .nav-links { justify-self: center; }
-  .nav-inner > .nav-ctas { justify-self: end; }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
-  .brand-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px; font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--ink);
-  }
-  .nav-links {
-    display: flex; gap: 28px; align-items: center;
-  }
+  .brand { display: flex; align-items: center; gap: 10px; justify-self: start; }
+  .brand-mark { width: 34px; height: 34px; filter: drop-shadow(0 4px 12px rgba(255,45,120,0.35)); }
+  .brand-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: var(--ls-tight); color: #fff; }
+  .nav-links { display: flex; gap: 28px; align-items: center; justify-self: center; }
   .nav-links a {
-    font-size: 14.5px; font-weight: 700;
-    color: var(--ink);
-    transition: color 0.15s, opacity 0.15s;
-    opacity: 0.92;
+    font-size: 14.5px; font-weight: 600; color: rgba(244,244,248,0.82);
+    transition: color var(--dur-fast);
   }
-  .nav-links a:hover { opacity: 1; color: var(--pink); }
-  .nav-ctas { display: flex; gap: 10px; align-items: center; }
-
-  /* Publisher dropdown — hover-revealed sub-menu listing the 5 door pages.
-     Caret ▾ on the parent link signals "menu inside." Bridging zone above
-     the panel prevents flicker when the cursor crosses the gap. */
-  .nav-dropdown { position: relative; display: inline-flex; align-items: center; gap: 6px; }
-  /* Solid filled triangle — sibling of the link (NOT inside it) so the
-     i18n script's textContent replacement on language switch can't wipe
-     it out. Always 100% visible, inherits ink color. */
-  .nav-dropdown > .nav-caret {
-    width: 10px; height: 10px;
-    flex-shrink: 0;
-    display: inline-block;
-    fill: var(--ink);
-    opacity: 0.9;
-    pointer-events: none;
-  }
-  /* Bridging zone — invisible strip between trigger and panel so the panel
-     stays open while the cursor crosses. */
-  .nav-dropdown::after {
-    content: ""; position: absolute;
-    top: 100%; left: -16px; right: -16px; height: 14px;
-  }
-  .dropdown-panel {
-    position: absolute;
-    top: calc(100% + 14px);
-    left: 50%;
-    transform: translateX(-50%) translateY(-6px);
-    background: #fff;
-    border: 1px solid rgba(15, 15, 26, 0.08);
-    border-radius: 12px;
-    padding: 8px;
-    min-width: 260px;
-    box-shadow: 0 14px 36px rgba(15, 15, 26, 0.12);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.18s ease-out, transform 0.18s ease-out, visibility 0s linear 0.18s;
-    z-index: 200;
-  }
-  .nav-dropdown:hover .dropdown-panel,
-  .nav-dropdown:focus-within .dropdown-panel {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
-    transition: opacity 0.18s ease-out, transform 0.18s ease-out, visibility 0s linear 0s;
-  }
-  .dropdown-panel a {
-    display: block;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: var(--ink) !important;
-    opacity: 1 !important;
-    white-space: nowrap;
-  }
-  .dropdown-panel a:hover {
-    background: rgba(255, 45, 120, 0.06);
-    color: var(--pink) !important;
-  }
-  .dropdown-panel .dp-divider {
-    height: 1px; background: rgba(15, 15, 26, 0.06);
-    margin: 6px 4px;
-  }
-  .dropdown-panel a.dp-overview {
-    font-weight: 700 !important;
-    color: var(--pink) !important;
-  }
-
-  /* Language toggle — bordered pill: globe + EN, opens dropdown */
-  .nav-lang-wrap { position: relative; }
-  .nav-lang {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 12px; border-radius: 9px;
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--ink);
-    font-size: 13.5px; font-weight: 600;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .nav-lang:hover {
-    border-color: var(--ink-soft);
-    background: var(--bg-soft);
-  }
-  .nav-lang svg { width: 16px; height: 16px; stroke-width: 1.8; }
-  .nav-lang-menu {
-    display: none;
-    position: absolute; top: calc(100% + 8px); right: 0;
-    min-width: 180px;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 8px;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
-    z-index: 200;
-  }
-  .nav-lang-wrap.open .nav-lang-menu { display: block; }
-  .nav-lang-menu a {
-    display: block;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 14.5px; color: var(--ink);
-    text-decoration: none;
-    font-weight: 500;
-    transition: background 0.1s, color 0.1s;
-  }
-  .nav-lang-menu a:hover { background: var(--bg-soft); }
-  .nav-lang-menu a.active { color: var(--pink); font-weight: 700; }
+  .nav-links a:hover { color: #fff; }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; justify-self: end; }
 
   .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
-    padding: 9px 18px; border-radius: 8px;
-    border: 1.5px solid transparent;
-    cursor: pointer; transition: all 0.15s;
-    text-decoration: none; white-space: nowrap;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font-family: var(--font-body); font-weight: 600; font-size: 14.5px;
+    padding: 9px 18px; border-radius: var(--r-sm);
+    border: 1.5px solid transparent; cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-snappy), background var(--dur-fast), box-shadow var(--dur-fast), border-color var(--dur-fast);
+    white-space: nowrap;
   }
-  .btn-ghost { color: var(--ink); background: transparent; }
-  .btn-ghost:hover { background: var(--bg-soft); }
-  .btn-primary {
-    background: var(--pink); color: #fff;
-    border-color: var(--pink);
-  }
-  .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
-  .btn-outline {
-    background: #fff; color: var(--ink);
-    border-color: var(--ink);
-  }
-  .btn-outline:hover { background: var(--ink); color: #fff; }
-  .btn-lg { padding: 13px 24px; font-size: 15.5px; border-radius: 10px; }
+  .btn:active { transform: var(--press-scale); }
+  .btn-primary { background: var(--bb-pink); color: #fff; border-color: var(--bb-pink); box-shadow: 0 6px 20px rgba(255,45,120,0.32); }
+  .btn-primary:hover { background: var(--bb-pink-dark); border-color: var(--bb-pink-dark); box-shadow: var(--glow-pink); transform: translateY(-2px); }
+  .btn-ghost-d { background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.18); }
+  .btn-ghost-d:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.32); transform: translateY(-2px); }
+  .btn-lg { padding: 14px 26px; font-size: 15.5px; border-radius: var(--r-md); }
 
-  /* ──────────── HERO ──────────── */
-  /* HERO — top padding clears the fixed nav (64px) + breathing room */
-  .hero {
-    padding: 128px 0 88px;
-    text-align: center;
+  /* ════════════════════════════════════════════════════════════
+     HERO CONTENT
+     ════════════════════════════════════════════════════════════ */
+  .hero-grid {
+    position: relative; z-index: 2;
+    max-width: var(--container); margin: 0 auto; padding: var(--hero-top) var(--gutter) 80px;
+    display: grid; grid-template-columns: 1.04fr 0.96fr; gap: 56px; align-items: center;
+    min-height: 100vh;
   }
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; padding-top: 120px; text-align: center; }
+  }
+
+  /* ---- Left column ---- */
   .badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--bg-soft);
-    border: 1px solid var(--line);
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 13px; font-weight: 500;
-    color: var(--ink-soft);
+    display: inline-flex; align-items: center; gap: 9px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    padding: 7px 15px; border-radius: var(--r-pill);
+    font-size: 13px; font-weight: 500; color: rgba(244,244,248,0.92);
     margin-bottom: 28px;
   }
-  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pink); }
+  .badge .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--bb-cyan);
+    box-shadow: 0 0 0 0 rgba(0,255,224,0.6);
+    animation: livePulse 1.9s var(--ease-out) infinite;
+  }
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0,255,224,0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(0,255,224,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,255,224,0); }
+  }
+  @media (max-width: 980px) { .badge { margin-left: auto; margin-right: auto; } }
+
   .hero h1 {
-    font-size: clamp(40px, 6vw, 72px);
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-    margin-bottom: 24px;
+    font-family: var(--font-display);
+    font-size: var(--fs-display-xl);
+    font-weight: 700; line-height: var(--lh-tight);
+    letter-spacing: var(--ls-display);
+    color: #fff; margin-bottom: 24px;
   }
-  .hero h1 .accent-pink { color: var(--pink); }
-  .hero h1 .accent-cyan { color: var(--cyan); }
-  .hero p.sub {
-    font-size: clamp(17px, 1.6vw, 20px);
-    color: var(--ink-soft);
-    max-width: 620px;
-    margin: 0 auto 36px;
-    line-height: 1.5;
+  .hero h1 .grad {
+    background: var(--grad-aurora);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradShift 6s linear infinite;
   }
-  .hero-ctas { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-
-  /* Hero visual */
-  .hero-visual {
-    max-width: 1000px; margin: 64px auto 0;
-    position: relative;
-  }
-  .hero-card {
-    background: var(--bg-soft);
-    border: 1.5px solid var(--ink);
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 10px 10px 0 var(--ink);
-  }
-  .hero-card-inner {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    min-height: 380px;
-    padding: 28px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    text-align: left;
-  }
-  .mock-panel {
-    background: var(--bg-soft);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 18px;
-  }
-  .mock-panel .k { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
-  .mock-panel .v { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--ink); }
-  .mock-panel .trend { font-size: 13px; color: #10B981; font-weight: 600; margin-top: 4px; }
-  .mock-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .mock-chart { height: 120px; display: flex; align-items: flex-end; gap: 6px; margin-top: 12px; }
-  .mock-chart span { flex: 1; background: var(--pink); border-radius: 4px 4px 0 0; }
-  .mock-chart span:nth-child(2) { background: var(--cyan); }
-  .mock-chart span:nth-child(4) { background: var(--cyan); }
-  .mock-chart span:nth-child(6) { background: var(--yellow); }
-  .mock-ad {
-    background: var(--ink);
-    color: #fff;
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .mock-ad .label { font-size: 10px; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-  .mock-ad h5 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin-bottom: 6px; color: #fff; }
-  .mock-ad p { font-size: 13px; color: #A0A0B0; margin-bottom: 14px; }
-  .mock-ad .cta {
-    display: inline-block; padding: 7px 14px; background: var(--pink); color: #fff;
-    border-radius: 6px; font-size: 13px; font-weight: 600;
+  @keyframes gradShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 220% 50%; }
   }
 
-  /* ──────────── TRUSTED BY ──────────── */
-  .trusted {
-    padding: 48px 0;
+  /* Headline staggered mask-reveal */
+  .reveal-line { display: block; overflow: hidden; }
+  .reveal-line > span {
+    display: block;
+    transform: translateY(110%);
+    animation: lineUp 0.9s var(--ease-spring) forwards;
   }
+  .reveal-line:nth-child(1) > span { animation-delay: 0.05s; }
+  .reveal-line:nth-child(2) > span { animation-delay: 0.16s; }
+  .reveal-line:nth-child(3) > span { animation-delay: 0.27s; }
+  @keyframes lineUp { to { transform: translateY(0); } }
+
+  .hero .sub {
+    font-size: var(--fs-lead); color: rgba(244,244,248,0.74);
+    max-width: 520px; margin-bottom: 18px; line-height: 1.5;
+    opacity: 0; animation: fadeUp 0.8s var(--ease-out) 0.5s forwards;
+  }
+  @media (max-width: 980px) { .hero .sub { margin-left: auto; margin-right: auto; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+  /* Intent-moat line */
+  .moat {
+    display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 13.5px; letter-spacing: 0.01em;
+    color: rgba(244,244,248,0.6); margin-bottom: 34px;
+    opacity: 0; animation: fadeUp 0.8s var(--ease-out) 0.62s forwards;
+  }
+  @media (max-width: 980px) { .moat { justify-content: center; } }
+  .moat .strike { color: rgba(244,244,248,0.42); text-decoration: line-through; text-decoration-color: rgba(255,45,120,0.7); }
+  .moat .arrow { color: var(--bb-cyan); }
+  .moat .live { color: #fff; font-weight: 600; }
+  .moat .live b { color: var(--bb-cyan); font-weight: 600; }
+
+  .hero-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp 0.8s var(--ease-out) 0.72s forwards;
+  }
+  @media (max-width: 980px) { .hero-ctas { justify-content: center; } }
+
+  .trusted { margin-top: 44px; opacity: 0; animation: fadeUp 0.8s var(--ease-out) 0.85s forwards; }
   .trusted p {
-    text-align: center; font-size: 13px; color: var(--muted);
-    font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
-    margin-bottom: 24px;
+    font-size: 11px; color: rgba(244,244,248,0.45); font-weight: 600;
+    text-transform: uppercase; letter-spacing: var(--ls-caps); margin-bottom: 16px;
   }
-  .trusted-row {
-    display: flex; justify-content: center; flex-wrap: wrap;
-    gap: 40px; align-items: center;
-    opacity: 0.65;
-  }
+  .trusted-row { display: flex; flex-wrap: wrap; gap: 26px; align-items: center; }
+  @media (max-width: 980px) { .trusted-row { justify-content: center; } }
   .trusted-row span {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px; font-weight: 600; color: var(--ink-soft);
+    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+    color: rgba(244,244,248,0.5); transition: color var(--dur-fast);
+  }
+  .trusted-row span:hover { color: rgba(244,244,248,0.85); }
+
+  /* ════════════════════════════════════════════════════════════
+     RIGHT COLUMN — parallax marketplace visual
+     ════════════════════════════════════════════════════════════ */
+  .stage {
+    position: relative; height: 480px;
+    perspective: 1200px;
+    opacity: 0; animation: fadeUp 1s var(--ease-out) 0.4s forwards;
+  }
+  @media (max-width: 980px) { .stage { height: 440px; max-width: 460px; margin: 0 auto; } }
+
+  .float { position: absolute; will-change: transform; transition: transform 0.15s var(--ease-out); }
+
+  /* Glassy dark cards */
+  .gcard {
+    background: linear-gradient(160deg, rgba(28,28,43,0.92), rgba(15,15,26,0.92));
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    padding: 18px 18px 16px;
+  }
+  .gcard .gc-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px;
+    padding: 4px 10px; border-radius: var(--r-pill); margin-bottom: 12px;
+  }
+  .gcard.pub .gc-label { background: rgba(16,185,129,0.16); color: #34D399; }
+  .gcard.adv .gc-label { background: rgba(255,45,120,0.16); color: #FF6FA3; }
+  .gc-label .d { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: livePulse 1.7s infinite; }
+  .gc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .gc-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+  .gc-row:last-of-type { border-bottom: none; }
+  .gc-row .k { font-size: 11.5px; color: rgba(244,244,248,0.5); }
+  .gc-row .v { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #fff; }
+  .gc-row .v .up { color: #34D399; font-size: 10.5px; margin-left: 5px; }
+  .gc-row .v .dn { color: var(--bb-pink); font-size: 10.5px; margin-left: 5px; }
+  .gc-chart { display: flex; align-items: flex-end; gap: 3px; height: 34px; margin-top: 10px; }
+  .gc-chart span { flex: 1; border-radius: 2px 2px 0 0; transform-origin: bottom; animation: barRise 0.9s var(--ease-spring) backwards; }
+  .gcard.pub .gc-chart span { background: linear-gradient(180deg, #34D399, rgba(52,211,153,0.25)); }
+  .gcard.adv .gc-chart span { background: linear-gradient(180deg, var(--bb-pink), rgba(255,45,120,0.25)); }
+  @keyframes barRise { from { transform: scaleY(0); } }
+
+  .card-pub { top: 8px; left: 0; width: 248px; z-index: 3; }
+  .card-adv { bottom: 10px; right: 0; width: 248px; z-index: 3; }
+
+  /* Center rocket core */
+  .core {
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 132px; height: 132px; z-index: 4;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .core .ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(255,45,120,0.4); animation: coreRing 3.2s var(--ease-out) infinite; }
+  .core .ring.r2 { animation-delay: 1.06s; border-color: rgba(0,255,224,0.4); }
+  .core .ring.r3 { animation-delay: 2.12s; border-color: rgba(255,230,0,0.35); }
+  @keyframes coreRing { 0% { transform: scale(0.55); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+  .core .disc {
+    width: 80px; height: 80px; border-radius: 22px;
+    background: var(--grad-pink);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--glow-pink), inset 0 1px 0 rgba(255,255,255,0.3);
+    position: relative; z-index: 2;
+    animation: coreBob 4s var(--ease-in-out) infinite;
+  }
+  @keyframes coreBob { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-7px) rotate(4deg); } }
+  .core .disc img { width: 46px; height: 46px; }
+  .core-tag {
+    position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 700; color: #fff; white-space: nowrap; text-align: center;
+  }
+  .core-tag small { display: block; font-family: var(--font-mono); font-size: 9.5px; font-weight: 500; color: var(--bb-cyan); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 2px; }
+
+  /* SVG connectors with flowing dashes */
+  .connectors { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; overflow: visible; }
+  .connectors path { fill: none; stroke-width: 1.6; stroke-dasharray: 5 7; }
+  .flow-a { stroke: rgba(52,211,153,0.55); animation: dashFlow 1.1s linear infinite; }
+  .flow-b { stroke: rgba(255,45,120,0.55); animation: dashFlow 1.1s linear infinite reverse; }
+  @keyframes dashFlow { to { stroke-dashoffset: -24; } }
+
+  /* Floating micro-pills */
+  .micro {
+    position: absolute; z-index: 5;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 13px; border-radius: var(--r-pill);
+    background: rgba(15,15,26,0.82); border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    font-size: 11.5px; font-weight: 700; color: #fff; white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    animation: floatBob 4.5s var(--ease-in-out) infinite;
+  }
+  .micro .swatch { width: 8px; height: 8px; border-radius: 50%; }
+  .micro.m1 { top: -6px; right: 36px; animation-delay: 0s; }
+  .micro.m2 { bottom: 64px; left: -18px; animation-delay: 1.4s; }
+  @keyframes floatBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+
+  /* Scroll cue */
+  .scroll-cue {
+    position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 3;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase;
+    color: rgba(244,244,248,0.4);
+    opacity: 0; animation: fadeUp 1s var(--ease-out) 1.1s forwards;
+  }
+  .scroll-cue .mouse { width: 22px; height: 34px; border: 1.5px solid rgba(244,244,248,0.35); border-radius: 12px; position: relative; }
+  .scroll-cue .mouse::after { content: ""; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 3px; height: 6px; border-radius: 2px; background: var(--bb-cyan); animation: wheel 1.8s var(--ease-in-out) infinite; }
+  @keyframes wheel { 0% { opacity: 0; transform: translate(-50%,0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,12px); } }
+  @media (max-width: 980px) { .scroll-cue { display: none; } }
+
+  /* Robustness: if entrances are NOT enabled (page hidden / paused /
+     reduced-motion / no-JS), force every animated-in element to its
+     visible resting state so content is never stuck invisible. */
+  html:not(.anim) .reveal-line > span,
+  html:not(.anim) .hero .sub,
+  html:not(.anim) .moat,
+  html:not(.anim) .hero-ctas,
+  html:not(.anim) .trusted,
+  html:not(.anim) .stage,
+  html:not(.anim) .gc-chart span { opacity: 1 !important; transform: none !important; animation: none !important; }
+  html:not(.anim) .scroll-cue { opacity: 1 !important; animation: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal-line > span, .hero .sub, .moat, .hero-ctas, .trusted, .stage, .scroll-cue { opacity: 1 !important; transform: none !important; }
+    [data-reveal] { opacity: 1 !important; transform: none !important; }
   }
 
-  /* ──────────── SECTION ──────────── */
-  section.feature {
-    padding: 96px 0;
+  /* ════════════════════════════════════════════════════════════
+     BELOW-FOLD — continuous dark surface, motion-driven
+     ════════════════════════════════════════════════════════════ */
+  .section { position: relative; padding: var(--section-y) 0; }
+  .wrap { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); }
+
+  /* Animated gradient hairline divider between sections */
+  .divider { height: 1px; max-width: var(--container); margin: 0 auto; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent); position: relative; overflow: hidden; }
+  .divider::after { content: ""; position: absolute; top: 0; left: -30%; width: 30%; height: 100%; background: linear-gradient(90deg, transparent, var(--bb-cyan), transparent); animation: sweep 5s linear infinite; }
+  @keyframes sweep { to { left: 130%; } }
+
+  /* Scroll reveals — fade-up plus directional + scale variants */
+  [data-reveal] {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+    transition-delay: var(--reveal-delay, 0s);
   }
-  .feature-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-  }
-  .feature-grid.reverse .feature-text { order: 2; }
+  [data-reveal="left"]  { transform: translateX(-40px); }
+  [data-reveal="right"] { transform: translateX(40px); }
+  [data-reveal="scale"] { transform: scale(0.94); }
+  [data-reveal].is-visible { opacity: 1; transform: none; }
+  html:not(.anim) [data-reveal] { opacity: 1 !important; transform: none !important; }
+
+  /* Parallax (JS-driven translateY via --py) */
+  [data-parallax] { transform: translate3d(0, var(--py, 0px), 0); will-change: transform; }
+
   .eyebrow {
-    display: inline-block;
-    font-size: 13px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    padding: 5px 10px;
-    border-radius: 6px;
-    margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.1px;
+    padding: 6px 13px; border-radius: var(--r-pill); margin-bottom: 18px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
   }
-  .eyebrow.pink { background: #FFE6EE; color: var(--pink); }
-  .eyebrow.cyan { background: #D6F5FE; color: #0195CC; }
-  .eyebrow.yellow { background: #FFF8B8; color: #8A7700; }
-  .feature-text h2 {
-    font-size: clamp(32px, 4vw, 48px);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    margin-bottom: 20px;
-  }
-  .feature-text p {
-    font-size: 18px;
-    color: var(--ink-soft);
-    margin-bottom: 28px;
-    line-height: 1.55;
-  }
-  .bullet-list { list-style: none; margin-bottom: 32px; }
-  .bullet-list li {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 10px 0;
-    font-size: 16px;
-    color: var(--ink);
-  }
-  .check {
-    flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px;
-    background: var(--pink); color: #fff;
-    border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
-  }
-  .check.cyan { background: var(--cyan); }
-  .check.yellow { background: var(--yellow); color: var(--ink); }
+  .eyebrow.pink   { color: #FF6FA3; border-color: rgba(255,45,120,0.30); background: rgba(255,45,120,0.08); }
+  .eyebrow.cyan   { color: var(--bb-cyan); border-color: rgba(0,255,224,0.30); background: rgba(0,255,224,0.07); }
+  .eyebrow.yellow { color: var(--bb-yellow); border-color: rgba(255,230,0,0.30); background: rgba(255,230,0,0.07); }
 
-  /* Visual blocks */
+  .section-head { max-width: 720px; margin: 0 auto 56px; text-align: center; }
+  .section-head h2 { font-family: var(--font-display); font-size: var(--fs-h2); font-weight: 700; color: #fff; letter-spacing: var(--ls-heading); line-height: 1.1; margin-bottom: 16px; }
+  .section-head h2 .grad { background: var(--grad-aurora); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .section-head p { font-size: 18px; color: rgba(244,244,248,0.66); }
+
+  /* ═══ Marquee — infinite partner-logo scroll ═══ */
+  .marquee { position: relative; overflow: hidden; padding: 28px 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee-label { text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: rgba(244,244,248,0.4); margin-bottom: 22px; }
+  .marquee-track { display: flex; width: max-content; gap: 56px; animation: marquee 26s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-track span { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: rgba(244,244,248,0.5); white-space: nowrap; transition: color var(--dur-fast); }
+  .marquee-track span:hover { color: #fff; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ---- Alternating feature rows ---- */
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+  .feature-grid.reverse .ftext { order: 2; }
+  .ftext h2 { font-family: var(--font-display); font-size: var(--fs-h2); color: #fff; line-height: 1.1; letter-spacing: var(--ls-heading); margin-bottom: 18px; }
+  .ftext p.lead { font-size: 18px; color: rgba(244,244,248,0.66); margin-bottom: 26px; }
+  .blist { list-style: none; margin-bottom: 30px; display: flex; flex-direction: column; gap: 13px; }
+  .blist li { display: flex; gap: 12px; align-items: flex-start; font-size: 15.5px; color: rgba(244,244,248,0.88); }
+  .blist li strong { font-weight: 700; color: #fff; }
+  .blist .ck { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--bb-pink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; margin-top: 1px; }
+  .blist .ck.cyan { background: var(--bb-cyan-link); }
+  .blist .ck.yellow { background: var(--bb-yellow); color: var(--bb-ink); }
+
+  /* Visual card shell — dark glass with a soft gradient-glow border */
   .vis-card {
-    background: var(--bg-soft);
-    border: 1.5px solid var(--ink);
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 6px 6px 0 var(--ink);
+    position: relative;
+    background: linear-gradient(160deg, rgba(28,28,43,0.82), rgba(15,15,26,0.82));
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--r-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .vis-card::before {
+    content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: linear-gradient(140deg, rgba(255,45,120,0.5), transparent 40%, transparent 60%, rgba(0,255,224,0.4));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0.6;
   }
   .code-block {
-    background: var(--ink);
-    color: #E5E7EB;
-    border-radius: 12px;
-    padding: 22px 24px;
-    font-family: 'JetBrains Mono', 'Monaco', monospace;
-    font-size: 13.5px;
-    line-height: 1.7;
-    overflow-x: auto;
+    background: rgba(7,7,12,0.7); color: #E5E7EB;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--r-md); padding: 22px 24px;
+    font-family: var(--font-mono); font-size: 13.5px; line-height: 1.7;
+    overflow-x: auto; white-space: pre;
   }
-  .code-block .k { color: var(--pink); }
-  .code-block .s { color: var(--yellow); }
+  .code-block .k { color: #FF6FA3; }
+  .code-block .s { color: var(--bb-yellow); }
   .code-block .c { color: #6B7280; }
-  .code-block .f { color: var(--cyan); }
+  .code-block .f { color: var(--bb-cyan); }
 
-  /* Campaign card mock */
-  .campaign-mock { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 14px; }
-  .campaign-mock:last-child { margin-bottom: 0; }
-  .campaign-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .campaign-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
-  .pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .pill-active { background: #D1FADF; color: #027A48; }
-  .pill-paused { background: #FFF3D6; color: #8A6A00; }
-  .campaign-stats { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
-  .campaign-stats strong { color: var(--ink); font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+  /* Campaign mock cards — dark glass */
+  .camp { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: var(--r-md); padding: 16px 18px; margin-bottom: 12px; transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base), background var(--dur-base); }
+  .camp:last-child { margin-bottom: 0; }
+  .camp:hover { transform: var(--hover-lift-sm); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+  .camp-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .camp-title { font-family: var(--font-display); font-weight: 700; font-size: 15.5px; color: #fff; }
+  .pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: var(--r-pill); text-transform: uppercase; letter-spacing: 0.5px; }
+  .pill-active { background: rgba(16,185,129,0.18); color: #34D399; }
+  .pill-paused { background: rgba(255,230,0,0.16); color: var(--bb-yellow); }
+  .camp-stats { display: flex; gap: 22px; font-size: 13px; color: rgba(244,244,248,0.5); }
+  .camp-stats strong { color: #fff; font-weight: 700; font-family: var(--font-display); }
 
-  /* ──────────── 3 CARDS ──────────── */
-  .three-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+  /* ════════════════════════════════════════════════════════════
+     BENNA INTENT DECODER — the moat, made visible
+     ════════════════════════════════════════════════════════════ */
+  .decoder-wrap { max-width: 860px; margin: 0 auto; }
+  .decoder {
+    background: linear-gradient(165deg, #15151F 0%, #0F0F1A 100%);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--r-2xl);
+    box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255,255,255,0.06);
+    padding: 34px 36px 38px;
+    position: relative; overflow: hidden;
   }
-  .card-flat {
-    background: var(--bg);
-    border: 1.5px solid var(--ink);
-    border-radius: 14px;
-    padding: 28px;
-    transition: all 0.15s;
+  .decoder::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 50% at 80% 0%, rgba(0,255,224,0.10), transparent 60%),
+               radial-gradient(ellipse 50% 50% at 10% 100%, rgba(255,45,120,0.12), transparent 60%);
   }
-  .card-flat:hover { transform: translateY(-4px); box-shadow: 6px 6px 0 var(--ink); }
-  .card-flat .icon-chip {
-    width: 44px; height: 44px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-    font-size: 22px; font-weight: 700;
+  .decoder > * { position: relative; z-index: 1; }
+  .dec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+  .dec-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bb-cyan); box-shadow: 0 0 0 0 rgba(0,255,224,0.5); animation: livePulse 1.9s infinite; }
+  .dec-head .t { font-family: var(--font-mono); font-size: 12px; color: rgba(244,244,248,0.55); letter-spacing: 0.04em; text-transform: uppercase; }
+  .dec-msg {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px; border-bottom-left-radius: 4px;
+    padding: 15px 18px; font-size: 15.5px; color: #fff; max-width: 80%; margin-bottom: 26px;
   }
-  .chip-pink { background: var(--pink); color: #fff; }
-  .chip-cyan { background: var(--cyan); color: var(--ink); }
-  .chip-yellow { background: var(--yellow); color: var(--ink); }
-  .card-flat h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .card-flat p { color: var(--ink-soft); font-size: 15px; }
+  .dec-msg .cursor { color: var(--bb-cyan); }
+  .dec-arrow { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 12px; color: rgba(244,244,248,0.5); margin-bottom: 18px; }
+  .dec-arrow .line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,255,224,0.5), transparent); }
+  .dec-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 26px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 14px; border-radius: var(--r-pill);
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+    font-size: 13px; color: rgba(244,244,248,0.85);
+    opacity: 0; transform: translateY(10px) scale(0.96);
+    transition: opacity 0.4s var(--ease-spring), transform 0.4s var(--ease-spring);
+  }
+  .chip.on { opacity: 1; transform: none; }
+  html:not(.anim) .chip { opacity: 1 !important; transform: none !important; }
 
-  /* ──────────── STATS ──────────── */
-  .stats-bar {
-    padding: 64px 0;
-    background: var(--ink);
+  /* Pinned, scroll-scrubbed decoder stage */
+  .decoder-stage { position: relative; height: 230vh; }
+  .decoder-pin { position: sticky; top: 0; min-height: 100vh; display: flex; align-items: center; }
+  .decoder-pin .section-head { margin-bottom: 34px; }
+  .decoder-pin .section-head h2 s { color: rgba(244,244,248,0.4); text-decoration-color: rgba(255,45,120,0.7); }
+  .decoder-pin .section-head h2 .ig { background: var(--grad-aurora); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  html:not(.anim) .decoder-stage { height: auto; }
+  html:not(.anim) .decoder-pin { position: static; min-height: 0; padding: var(--section-y) 0; }
+  .dec-progress { margin-top: 22px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .dec-progress span { display: block; height: 100%; width: 0%; background: var(--grad-brand); }
+  .chip .key { font-family: var(--font-mono); font-size: 11px; color: rgba(244,244,248,0.45); }
+  .chip .val { font-weight: 700; color: #fff; }
+  .chip.cyan { border-color: rgba(0,255,224,0.4); box-shadow: 0 0 18px rgba(0,255,224,0.12); }
+  .chip.cyan .val { color: var(--bb-cyan); }
+  .chip.pink { border-color: rgba(255,45,120,0.4); box-shadow: 0 0 18px rgba(255,45,120,0.12); }
+  .chip.pink .val { color: #FF6FA3; }
+  .dec-match {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    padding: 16px 20px; border-radius: var(--r-md);
+    background: linear-gradient(100deg, rgba(255,45,120,0.16), rgba(0,255,224,0.10));
+    border: 1px solid rgba(255,255,255,0.12);
+    opacity: 0; transform: translateY(14px); transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
   }
-  .stats-bar .wrap { }
-  .stats-row {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+  .dec-match.on { opacity: 1; transform: none; }
+  html:not(.anim) .dec-match { opacity: 1 !important; transform: none !important; }
+  .dec-match .ml { font-size: 13px; color: rgba(244,244,248,0.6); }
+  .dec-match .mr { display: flex; align-items: center; gap: 10px; }
+  .dec-match .badge-app { display: flex; align-items: center; gap: 9px; font-family: var(--font-display); font-weight: 700; color: #fff; font-size: 15px; }
+  .dec-match .badge-app .ico { width: 26px; height: 26px; border-radius: 7px; background: var(--grad-pink); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .dec-match .score { font-family: var(--font-mono); font-size: 13px; color: var(--bb-cyan); }
+  /* old-way caption */
+  .dec-vs { text-align: center; margin-top: 22px; font-size: 14px; color: var(--bb-muted); opacity: 0; transition: opacity 0.5s var(--ease-out); }
+  .dec-vs.on { opacity: 1; }
+  html:not(.anim) .dec-vs { opacity: 1 !important; }
+  .dec-vs s { color: #9aa0ad; }
+
+  /* ════════════════════════════════════════════════════════════
+     STATS BAND — glowing band on the dark surface
+     ════════════════════════════════════════════════════════════ */
+  .stats-band { position: relative; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.015); }
+  .stats-band::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 50% 90% at 15% 50%, rgba(255,45,120,0.16), transparent 60%),
+               radial-gradient(ellipse 50% 90% at 85% 50%, rgba(0,255,224,0.12), transparent 60%);
   }
+  .stats-row { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
   .stat { text-align: center; color: #fff; }
-  .stat .n {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 52px; font-weight: 700;
-    line-height: 1;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-  }
-  .stat .n.pink { color: var(--pink); }
-  .stat .n.cyan { color: var(--cyan); }
-  .stat .n.yellow { color: var(--yellow); }
-  .stat .l { font-size: 14px; color: #A0A0B0; font-weight: 500; }
+  .stat .n { font-family: var(--font-display); font-size: var(--fs-stat); font-weight: 700; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .stat .n.pink { color: var(--bb-pink); }
+  .stat .n.cyan { color: var(--bb-cyan); }
+  .stat .n.yellow { color: var(--bb-yellow); }
+  .stat .l { font-size: 14px; color: rgba(244,244,248,0.55); font-weight: 500; }
 
-  /* ──────────── HOW IT WORKS ──────────── */
-  section.how {
-    padding: 96px 0;
-    text-align: center;
-  }
-  .section-header { max-width: 680px; margin: 0 auto 56px; text-align: center; }
-  .section-header h2 {
-    font-size: clamp(32px, 4vw, 44px);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    margin-bottom: 16px;
-  }
-  .section-header p { font-size: 18px; color: var(--ink-soft); }
-  .steps {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: left;
-  }
+  /* ════════════════════════════════════════════════════════════
+     HOW IT WORKS — 3 steps (dark glass)
+     ════════════════════════════════════════════════════════════ */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
   .step {
-    padding: 32px 28px;
-    border: 1.5px solid var(--line);
-    border-radius: 14px;
-    background: #fff;
-    position: relative;
+    position: relative; padding: 30px 26px;
+    background: linear-gradient(160deg, rgba(28,28,43,0.6), rgba(15,15,26,0.6));
+    border: 1px solid rgba(255,255,255,0.09); border-radius: var(--r-lg);
+    transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base), box-shadow var(--dur-base);
   }
-  .step-num {
-    position: absolute; top: 24px; right: 24px;
-    width: 32px; height: 32px;
-    border: 1.5px solid var(--ink);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700; font-size: 14px;
-  }
-  .step h3 { font-size: 19px; font-weight: 700; margin: 16px 0 8px; }
-  .step p { font-size: 15px; color: var(--ink-soft); }
-  .step .icon-chip { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+  .step:hover { transform: var(--hover-lift); border-color: rgba(255,255,255,0.22); box-shadow: var(--shadow-xl); }
+  .step-num { position: absolute; top: 22px; right: 22px; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: rgba(244,244,248,0.7); }
+  .step .chip-ico { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; }
+  .chip-pink { background: rgba(255,45,120,0.16); }
+  .chip-cyan { background: rgba(0,255,224,0.16); }
+  .chip-yellow { background: rgba(255,230,0,0.16); }
+  .step h3 { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .step p { font-size: 14.5px; color: rgba(244,244,248,0.62); }
 
-  /* ──────────── BIG CTA ──────────── */
-  section.big-cta {
-    padding: 96px 24px;
+  /* ════════════════════════════════════════════════════════════
+     BIG CTA
+     ════════════════════════════════════════════════════════════ */
+  .cta-box {
+    position: relative; overflow: hidden;
+    max-width: 1000px; margin: 0 auto;
+    background: var(--grad-pink);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: var(--r-2xl);
+    box-shadow: var(--glow-pink), 0 30px 80px rgba(0,0,0,0.4);
+    padding: 76px 48px; text-align: center; color: #fff;
   }
-  .big-cta-box {
-    /* Shared bottom-wedge gradient with yellow+cyan glow (matches /publish) */
-    background: linear-gradient(135deg, #FF2D78 0%, #E01E65 55%, #B81654 100%);
-    color: #fff;
-    border: 2px solid var(--ink);
-    border-radius: 24px;
-    box-shadow: 12px 12px 0 var(--ink);
-    padding: 80px 48px;
-    text-align: center;
-    max-width: 1000px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
+  .cta-box::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(circle at 28% 50%, rgba(255,230,0,0.24), transparent 55%),
+               radial-gradient(circle at 78% 45%, rgba(0,255,224,0.22), transparent 55%);
   }
-  .big-cta-box::before {
-    content: ''; position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 30% 50%, rgba(255, 230, 0, 0.22), transparent 55%),
-      radial-gradient(circle at 75% 45%, rgba(4, 190, 254, 0.18), transparent 55%);
-    pointer-events: none;
-  }
-  .big-cta-box > * { position: relative; z-index: 1; }
-  .big-cta-box h2 {
-    font-size: clamp(36px, 5vw, 56px);
-    color: #fff;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: 20px;
-  }
-  .big-cta-box p {
-    font-size: 18px; color: #fff; opacity: 0.9;
-    max-width: 560px; margin: 0 auto 36px;
-  }
-  .big-cta-box .btn {
-    background: #fff; color: var(--pink); border-color: #fff;
-  }
-  .big-cta-box .btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .big-cta-box .btn.outline-white { background: transparent; color: #fff; border-color: #fff; }
-  .big-cta-box .btn.outline-white:hover { background: #fff; color: var(--pink); }
-  /* Decorative bits */
-  .deco-sparkle {
-    position: absolute; font-size: 40px; pointer-events: none;
-  }
-  .deco-sparkle.s1 { top: 24px; left: 40px; }
-  .deco-sparkle.s2 { bottom: 24px; right: 40px; }
+  .cta-box > * { position: relative; z-index: 1; }
+  .cta-box h2 { font-family: var(--font-display); font-size: clamp(34px, 4.5vw, 52px); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 18px; }
+  .cta-box p { font-size: 18px; opacity: 0.92; max-width: 540px; margin: 0 auto 32px; }
+  .cta-ctas { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .cta-box .btn-white { background: #fff; color: var(--bb-pink); border-color: #fff; }
+  .cta-box .btn-white:hover { background: var(--bb-ink); color: #fff; border-color: var(--bb-ink); transform: translateY(-2px); }
+  .cta-box .btn-clear { background: transparent; color: #fff; border-color: rgba(255,255,255,0.6); }
+  .cta-box .btn-clear:hover { background: #fff; color: var(--bb-pink); border-color: #fff; transform: translateY(-2px); }
 
-  /* ──────────── FOOTER ──────────── */
-  footer {
-    background: #fff;
-    padding: 64px 0 32px;
-  }
-  .foot-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-    gap: 40px;
-    padding-bottom: 48px;
-  }
-  .foot-col h4 {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .foot-col ul { list-style: none; }
-  .foot-col li { padding: 6px 0; }
-  .foot-col a { font-size: 14.5px; color: var(--ink-soft); }
-  .foot-col a:hover { color: var(--pink); }
-  .foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .foot-tag { font-size: 14px; color: var(--ink-soft); line-height: 1.6; max-width: 280px; }
-  .foot-bottom {
-    display: flex; justify-content: space-between;
-    padding-top: 24px; font-size: 13px; color: var(--muted);
-  }
+  /* ════════════════════════════════════════════════════════════
+     FOOTER
+     ════════════════════════════════════════════════════════════ */
+  footer.site { background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.08); padding: 60px 0 36px; }
+  .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 44px; }
+  .foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .foot-brand img { width: 32px; height: 32px; }
+  .foot-brand .brand-name { color: #fff; }
+  .foot-tag { font-size: 14px; color: rgba(244,244,248,0.6); line-height: 1.6; max-width: 300px; }
+  .foot-col h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: rgba(244,244,248,0.45); margin-bottom: 14px; }
+  .foot-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .foot-col a { font-size: 14px; color: rgba(244,244,248,0.66); transition: color var(--dur-fast); }
+  .foot-col a:hover { color: var(--bb-pink); }
+  .foot-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 13px; color: rgba(244,244,248,0.45); }
 
-  /* ──────────── RESPONSIVE ──────────── */
-  @media (max-width: 900px) {
-    .nav-links { display: none; }
-    .hero { padding: 104px 0 48px; }
-    .hero-card-inner { grid-template-columns: 1fr; min-height: 0; }
+  @media (max-width: 980px) {
     .feature-grid { grid-template-columns: 1fr; gap: 40px; }
-    .feature-grid.reverse .feature-text { order: 0; }
-    .three-cards { grid-template-columns: 1fr; }
+    .feature-grid.reverse .ftext { order: 0; }
     .stats-row { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
     .steps { grid-template-columns: 1fr; }
     .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-    .big-cta-box { padding: 56px 28px; box-shadow: 8px 8px 0 var(--ink); }
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════
-     ManyChat-style interactions — live chat mockup, scroll reveals,
-     counter animations. Matches the /ads + /publish treatment.
-     ═══════════════════════════════════════════════════════════════════ */
-
-  /* Keep hero-visual wrapper but flip it to relative so floating pills land on top */
-  .hero-visual.bb-chat-host { position: relative; max-width: 560px; margin: 56px auto 0; }
-
-  /* ═══════════════════════════════════════════════════════════════════
-     LANDING NETWORK OVERVIEW — two-sided marketplace visualization.
-     Publisher card (earnings) on the left, Advertiser card (campaigns)
-     on the right, Boost Boss rocket pulsing in the middle with animated
-     connector lines showing bids flowing both ways.
-     ═══════════════════════════════════════════════════════════════════ */
-  .network-hero {
-    position: relative;
-    max-width: 1000px; margin: 72px auto 0;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 28px;
-    align-items: center;
-  }
-
-  .network-side {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 22px 22px 20px;
-    box-shadow: 0 20px 48px rgba(15, 15, 26, 0.08);
-    text-align: left;
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .network-side:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 28px 60px rgba(15, 15, 26, 0.12);
-  }
-  .network-side .ns-label {
-    font-size: 10px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    margin-bottom: 10px;
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px; border-radius: 100px;
-  }
-  .network-side.pub .ns-label { background: #E6F9EF; color: #059669; }
-  .network-side.adv .ns-label { background: #FFE6EE; color: var(--pink-dark); }
-  .network-side .ns-label .dot {
-    width: 6px; height: 6px; border-radius: 50%; background: currentColor;
-    animation: nhPulse 1.6s ease-in-out infinite;
-  }
-  @keyframes nhPulse {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.35; }
-  }
-  .network-side .ns-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px; font-weight: 700;
-    margin-bottom: 14px; color: var(--ink);
-  }
-  .network-side .ns-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 10px 0; border-bottom: 1px dashed var(--line);
-  }
-  .network-side .ns-row:last-child { border-bottom: none; }
-  .network-side .ns-row .k { font-size: 12px; color: var(--muted); font-weight: 500; }
-  .network-side .ns-row .v {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px; font-weight: 700; color: var(--ink);
-  }
-  .network-side .ns-row .v .up { color: #10B981; font-size: 11px; margin-left: 4px; font-weight: 600; }
-  .network-side .ns-row .v .dn { color: var(--pink); font-size: 11px; margin-left: 4px; font-weight: 600; }
-
-  /* Mini chart strip */
-  .ns-chart {
-    margin-top: 10px;
-    height: 38px;
-    display: flex; align-items: flex-end; gap: 3px;
-  }
-  .ns-chart span { flex: 1; border-radius: 2px 2px 0 0; background: var(--line); transition: height 0.4s ease; }
-  .network-side.pub .ns-chart span { background: linear-gradient(180deg, #10B981, #6EE7B7); }
-  .network-side.adv .ns-chart span { background: linear-gradient(180deg, var(--pink), #FFB3CE); }
-
-  /* Center node — rocket + pulse ring + connector lines */
-  .network-core {
-    position: relative;
-    width: 140px; height: 140px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .network-core .core-rings {
-    position: absolute; inset: 0;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 45, 120, 0.2);
-    animation: coreRing 3s ease-out infinite;
-  }
-  .network-core .core-rings.r2 {
-    animation-delay: 1s;
-    border-color: rgba(4, 190, 254, 0.2);
-  }
-  .network-core .core-rings.r3 {
-    animation-delay: 2s;
-    border-color: rgba(255, 230, 0, 0.2);
-  }
-  @keyframes coreRing {
-    0%   { transform: scale(0.6); opacity: 0; }
-    30%  { opacity: 1; }
-    100% { transform: scale(1.3); opacity: 0; }
-  }
-  .network-core .core-disc {
-    width: 80px; height: 80px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 14px 40px rgba(255, 45, 120, 0.35);
-    position: relative; z-index: 2;
-  }
-  .network-core .core-disc .rocket {
-    font-size: 38px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-  }
-  .network-core .core-label {
-    position: absolute; bottom: -28px; left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 12px; font-weight: 700;
-    color: var(--ink);
-    white-space: nowrap;
-  }
-  .network-core .core-label small {
-    display: block; font-size: 10px; font-weight: 500;
-    color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.8px;
-    margin-top: 1px;
-  }
-
-  /* Animated bid-flow dots traveling along the connector lines.
-     Use thin SVG-less absolutely-positioned spans for simplicity. */
-  .network-hero::before,
-  .network-hero::after {
-    content: '';
-    position: absolute; top: 50%;
-    height: 2px;
-    background: repeating-linear-gradient(
-      90deg,
-      rgba(255, 45, 120, 0.45) 0 6px,
-      transparent 6px 14px
-    );
-    background-size: 14px 2px;
-    animation: flowRight 1.6s linear infinite;
-  }
-  .network-hero::before {
-    left: calc(33% + 14px); right: calc(50% + 70px);
-    transform: translateY(-50%);
-    animation: flowLeft 1.6s linear infinite;
-  }
-  .network-hero::after {
-    left: calc(50% + 70px); right: calc(33% + 14px);
-    transform: translateY(-50%);
-    background: repeating-linear-gradient(
-      90deg,
-      rgba(4, 190, 254, 0.45) 0 6px,
-      transparent 6px 14px
-    );
-  }
-  @keyframes flowRight { from { background-position: 0 0; } to { background-position: 28px 0; } }
-  @keyframes flowLeft  { from { background-position: 0 0; } to { background-position: -28px 0; } }
-
-  @media (max-width: 900px) {
-    .network-hero {
-      grid-template-columns: 1fr;
-      max-width: 420px;
-      gap: 20px;
-    }
-    .network-core { width: 100%; height: 100px; transform: rotate(90deg); }
-    .network-hero::before, .network-hero::after { display: none; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .network-core .core-rings { animation: none !important; opacity: 0.3; }
-    .network-hero::before, .network-hero::after { animation: none !important; }
-    .network-side .ns-label .dot { animation: none !important; }
-  }
-
-  .chat-mock {
-    background: #fff; border-radius: 20px;
-    border: 1px solid var(--line);
-    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.08),
-                0 10px 28px rgba(15, 15, 26, 0.05);
-    overflow: hidden; position: relative;
-  }
-  .chat-mock-head {
-    display: flex; align-items: center; gap: 10px;
-    padding: 14px 18px;
-    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
-    border-bottom: 1px solid var(--line);
-  }
-  .chat-mock-head .app-icon {
-    width: 30px; height: 30px; border-radius: 8px;
-    background: linear-gradient(135deg, #FF8A1F, #FF5E3A); color: #fff;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 800; font-size: 15px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .chat-mock-head .app-name { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .chat-mock-head .app-name small {
-    display: block; font-size: 11px; color: var(--muted);
-    font-weight: 500; margin-top: 1px;
-  }
-  .chat-mock-head .live-dot {
-    margin-left: auto;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #10B981;
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
-    animation: bbLivePulse 1.8s ease-out infinite;
-  }
-  @keyframes bbLivePulse {
-    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
-    70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-  }
-  .chat-mock-body {
-    padding: 22px 20px 20px;
-    min-height: 340px;
-    display: flex; flex-direction: column; gap: 12px;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(255, 45, 120, 0.04), transparent 40%),
-      radial-gradient(circle at 90% 100%, rgba(4, 190, 254, 0.04), transparent 40%),
-      #fff;
-  }
-  .chat-bubble {
-    max-width: 88%;
-    padding: 11px 14px; border-radius: 14px;
-    font-size: 14px; line-height: 1.5;
-    opacity: 0; transform: translateY(8px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-  .chat-bubble.visible { opacity: 1; transform: translateY(0); }
-  .chat-bubble.user {
-    align-self: flex-end;
-    background: var(--ink); color: #fff;
-    border-bottom-right-radius: 4px;
-  }
-  .chat-bubble.ai {
-    align-self: flex-start;
-    background: var(--bg-soft); color: var(--ink);
-    border: 1px solid var(--line);
-    border-bottom-left-radius: 4px;
-  }
-  .chat-typing {
-    display: inline-flex; gap: 4px; align-items: center;
-    padding: 14px 16px;
-    background: var(--bg-soft);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    border-bottom-left-radius: 4px;
-    align-self: flex-start;
-    opacity: 0; transition: opacity 0.25s ease;
-  }
-  .chat-typing.visible { opacity: 1; }
-  .chat-typing span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--muted);
-    animation: bbTyping 1.1s ease-in-out infinite;
-  }
-  .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
-  .chat-typing span:nth-child(3) { animation-delay: 0.30s; }
-  @keyframes bbTyping {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
-    30%          { transform: translateY(-3px); opacity: 1; }
-  }
-
-  .chat-sponsor {
-    margin-top: 6px; position: relative;
-    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
-    border: 1.5px solid var(--pink);
-    border-radius: 14px;
-    padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 6px;
-    opacity: 0; transform: translateY(16px);
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 10px 28px rgba(255, 45, 120, 0.18);
-  }
-  .chat-sponsor.visible { opacity: 1; transform: translateY(0); }
-  .chat-sponsor::before {
-    content: '✨ via Boost Boss';
-    position: absolute; top: -10px; left: 14px;
-    background: var(--pink); color: #fff;
-    font-size: 10px; font-weight: 700;
-    padding: 3px 9px; border-radius: 100px;
-    letter-spacing: 0.4px;
-  }
-  .chat-sponsor .sp-label {
-    font-size: 10px; font-weight: 700; color: var(--pink);
-    text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px;
-  }
-  .chat-sponsor .sp-title { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.3; }
-  .chat-sponsor .sp-sub   { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
-  .chat-sponsor .sp-cta {
-    display: inline-block; align-self: flex-start;
-    margin-top: 4px;
-    background: var(--pink); color: #fff;
-    padding: 8px 14px; border-radius: 8px;
-    font-size: 13px; font-weight: 700;
-  }
-
-  /* Floating pills for the landing page — neutral "network is alive" cues */
-  .bb-chat-host .float-pill {
-    position: absolute;
-    padding: 8px 14px; border-radius: 100px;
-    background: #fff;
-    border: 1px solid var(--line);
-    font-size: 12.5px; font-weight: 700;
-    color: var(--ink);
-    box-shadow: 0 10px 24px rgba(15, 15, 26, 0.08);
-    animation: bbFloatBob 4s ease-in-out infinite;
-    white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 6px;
-    z-index: 2;
-  }
-  .bb-chat-host .float-pill .dot-color {
-    width: 8px; height: 8px; border-radius: 50%;
-  }
-  .bb-chat-host .float-pill.fp-1 { top: 4%; left: -16px; animation-delay: 0s; }
-  .bb-chat-host .float-pill.fp-2 { top: 38%; right: -26px; animation-delay: 0.9s; }
-  .bb-chat-host .float-pill.fp-3 { bottom: 14%; left: -32px; animation-delay: 1.8s; }
-  @keyframes bbFloatBob {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-8px); }
-  }
-
-  /* Scroll reveals */
-  [data-reveal] {
-    opacity: 0; transform: translateY(24px);
-    transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
-                transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-    transition-delay: var(--reveal-delay, 0s);
-    will-change: opacity, transform;
-  }
-  [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
-  @media (prefers-reduced-motion: reduce) {
-    [data-reveal] { opacity: 1; transform: none; transition: none; }
-    .chat-bubble, .chat-sponsor, .chat-typing, .float-pill {
-      opacity: 1 !important; transform: none !important; animation: none !important;
-    }
-  }
-
-  /* Stats counter shimmer */
-  .stat .n[data-count].counting {
-    background: linear-gradient(90deg, var(--pink), var(--pink) 50%, var(--cyan));
-    background-size: 200% 100%;
-    background-position: 100% 50%;
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: bbCountShimmer 1.4s ease-out;
-  }
-  @keyframes bbCountShimmer {
-    from { background-position: 100% 50%; }
-    to   { background-position: 0% 50%; }
+    .cta-box { padding: 52px 28px; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav id="mainNav">
+<div class="page-fx"></div>
+<div class="page-fx grain"></div>
+
+<nav id="nav">
   <div class="nav-inner">
-    <a class="brand" href="/">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
-<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>
-<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
-<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
-<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-      <span class="brand-name">Boost Boss</span>
-    </a>
-
+    <a class="brand" href="#"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
     <div class="nav-links">
-      <div class="nav-dropdown">
-        <a href="/publish" data-i18n="nav.publishers">Publishers</a>
-        <svg class="nav-caret" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.5 3.5 L5 7 L8.5 3.5 Z"/></svg>
-        <div class="dropdown-panel" role="menu">
-          <a href="/publish/mcp"        data-i18n="nav.publisher_mcp">MCP Server Developers</a>
-          <a href="/publish/ai-apps"    data-i18n="nav.publisher_ai_apps">AI App Builders</a>
-          <a href="/publish/extensions" data-i18n="nav.publisher_extensions">Browser Extension Developers</a>
-          <a href="/publish/bots"       data-i18n="nav.publisher_bots">AI Bot Developers</a>
-          <a href="/publish/no-code"    data-i18n="nav.publisher_no_code">Custom GPT &amp; No-Code Authors</a>
-          <div class="dp-divider"></div>
-          <a class="dp-overview" href="/publish" data-i18n="nav.publisher_overview">All publishers · overview →</a>
-        </div>
-      </div>
-      <a href="/ads" target="_blank" rel="noopener" data-i18n="nav.superboost_html" data-i18n-html>Super<span style="color: var(--pink);">Boost Ads</span></a>
-      <a href="/exchange" data-i18n="nav.bbx">BBX</a>
-      <a href="/demo" data-i18n="nav.live_demo">Live Demo ↗</a>
+      <a href="/publish">Publishers</a>
+      <a href="#">SuperBoost Ads</a>
+      <a href="#">BBX</a>
+      <a href="#">Live Demo ↗</a>
     </div>
-
     <div class="nav-ctas">
-      <div class="nav-lang-wrap" id="navLangWrap">
-        <button class="nav-lang" aria-label="Change language" onclick="document.getElementById('navLangWrap').classList.toggle('open')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M2 12h20"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          <span>EN</span>
-        </button>
-        <div class="nav-lang-menu">
-          <a href="/en" data-lang="en" class="active">English</a>
-          <a href="/zh" data-lang="zh">简体中文</a>
-          <a href="/zh-TW" data-lang="zh-TW">繁體中文</a>
-          <a href="/ja" data-lang="ja">日本語</a>
-          <a href="/ko" data-lang="ko">한국어</a>
-          <a href="/vi" data-lang="vi">Tiếng Việt</a>
-        </div>
-      </div>
+      <a class="btn btn-ghost-d" href="/ads/signin">Sign in</a>
+      <a class="btn btn-primary" href="/publish/signup">Start free</a>
     </div>
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
-  <div class="wrap">
-    <div class="badge" data-reveal><span class="dot"></span><span data-i18n="hero.badge">Now live on the Model Context Protocol</span></div>
-    <h1 data-reveal style="--reveal-delay:80ms" data-i18n="hero.h1_html" data-i18n-html>The ad network<br>built for <span class="accent-pink">AI apps</span>.</h1>
-    <p class="sub" data-reveal style="--reveal-delay:160ms" data-i18n="hero.sub">Boost Boss helps AI developers monetize their apps and advertisers reach AI-native users. One MCP-powered API. Zero ops.</p>
-    <div class="hero-ctas" data-reveal style="--reveal-delay:240ms">
-      <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="hero.cta_monetize">Start monetizing →</a>
-      <a class="btn btn-outline btn-lg" href="/ads/signup" data-i18n="hero.cta_campaign">Boost a product</a>
-    </div>
+  <div class="aurora"></div>
+  <canvas id="particles"></canvas>
 
-    <!-- Network overview — two-sided marketplace visual. Publisher side
-         (earning) on the left, advertiser side (spending to reach) on the
-         right, Boost Boss as the hub routing bids in the middle. -->
-    <div class="hero-visual network-hero" data-reveal>
-      <!-- Publisher side — earning -->
-      <div class="network-side pub">
-        <div class="ns-label"><span class="dot"></span>Publishers</div>
-        <div class="ns-title">Earning from your AI app</div>
-        <div class="ns-row">
-          <span class="k">Today</span>
-          <span class="v" data-nh-count="2483" data-nh-dec="0" data-nh-pre="$">$0<span class="up">▲ 8%</span></span>
-        </div>
-        <div class="ns-row">
-          <span class="k">eCPM</span>
-          <span class="v" data-nh-count="4.21" data-nh-dec="2" data-nh-pre="$">$0<span class="up">▲ 12%</span></span>
-        </div>
-        <div class="ns-row">
-          <span class="k">Impressions</span>
-          <span class="v" data-nh-count="142" data-nh-dec="0" data-nh-suf="K">0K</span>
-        </div>
-        <div class="ns-chart" aria-hidden="true">
-          <span style="height: 30%"></span>
-          <span style="height: 45%"></span>
-          <span style="height: 38%"></span>
-          <span style="height: 58%"></span>
-          <span style="height: 52%"></span>
-          <span style="height: 72%"></span>
-          <span style="height: 68%"></span>
-          <span style="height: 85%"></span>
-        </div>
+  <div class="hero-grid">
+    <!-- LEFT -->
+    <div class="hero-copy">
+      <div class="badge"><span class="dot"></span>Now live on the Model Context Protocol</div>
+      <h1>
+        <span class="reveal-line"><span>The ad network</span></span>
+        <span class="reveal-line"><span>built for <em style="font-style:normal" class="grad">AI surfaces</em>.</span></span>
+      </h1>
+      <p class="sub">Boost Boss helps AI developers monetize their apps and advertisers reach AI-native users — one MCP-powered API, zero ops.</p>
+      <div class="moat">
+        <span class="strike">other networks see cookies</span>
+        <span class="arrow">→</span>
+        <span class="live">Boost Boss sees <b>intent</b></span>
       </div>
-
-      <!-- Center — Boost Boss routing hub -->
-      <div class="network-core" aria-hidden="true">
-        <div class="core-rings r1"></div>
-        <div class="core-rings r2"></div>
-        <div class="core-rings r3"></div>
-        <div class="core-disc"><span class="rocket">🚀</span></div>
-        <div class="core-label">Boost Boss<small>Benna · 5ms</small></div>
+      <div class="hero-ctas">
+        <a class="btn btn-primary btn-lg" href="#">Start monetizing →</a>
+        <a class="btn btn-ghost-d btn-lg" href="#">Boost a product</a>
       </div>
-
-      <!-- Advertiser side — reaching -->
-      <div class="network-side adv">
-        <div class="ns-label"><span class="dot"></span>Advertisers</div>
-        <div class="ns-title">Reaching AI-native users</div>
-        <div class="ns-row">
-          <span class="k">Spend (24h)</span>
-          <span class="v" data-nh-count="2750" data-nh-dec="0" data-nh-pre="$">$0</span>
-        </div>
-        <div class="ns-row">
-          <span class="k">CTR</span>
-          <span class="v" data-nh-count="6.2" data-nh-dec="1" data-nh-suf="%">0%<span class="up">▲ 3.8×</span></span>
-        </div>
-        <div class="ns-row">
-          <span class="k">eCPA</span>
-          <span class="v" data-nh-count="1.93" data-nh-dec="2" data-nh-pre="$">$0<span class="dn">▼ 11%</span></span>
-        </div>
-        <div class="ns-chart" aria-hidden="true">
-          <span style="height: 35%"></span>
-          <span style="height: 50%"></span>
-          <span style="height: 62%"></span>
-          <span style="height: 55%"></span>
-          <span style="height: 78%"></span>
-          <span style="height: 70%"></span>
-          <span style="height: 85%"></span>
-          <span style="height: 92%"></span>
+      <div class="trusted">
+        <p>Built for AI apps running on</p>
+        <div class="trusted-row">
+          <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span>
         </div>
       </div>
     </div>
+
+    <!-- RIGHT -->
+    <div class="stage" id="stage">
+      <svg class="connectors float" data-depth="6" viewBox="0 0 480 480" preserveAspectRatio="none">
+        <path class="flow-a" d="M 130 90 C 200 150, 200 240, 240 240" />
+        <path class="flow-b" d="M 350 390 C 280 330, 280 240, 240 240" />
+      </svg>
+
+      <div class="float gcard pub card-pub" data-depth="22">
+        <div class="gc-label pub"><span class="d"></span>Publishers</div>
+        <div class="gc-title">Earning from your AI app</div>
+        <div class="gc-row"><span class="k">Today</span><span class="v" data-count="2483" data-pre="$">$0<span class="up">▲ 8%</span></span></div>
+        <div class="gc-row"><span class="k">eCPM</span><span class="v" data-count="4.21" data-dec="2" data-pre="$">$0<span class="up">▲ 12%</span></span></div>
+        <div class="gc-chart"><span style="height:32%"></span><span style="height:46%"></span><span style="height:40%"></span><span style="height:60%"></span><span style="height:54%"></span><span style="height:74%"></span><span style="height:68%"></span><span style="height:88%"></span></div>
+      </div>
+
+      <div class="float core" data-depth="10">
+        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+        <div class="disc"><img src="/design-system/assets/rocket-logo.svg" alt=""></div>
+        <div class="core-tag">Boost Boss<small>Benna · 5ms</small></div>
+      </div>
+
+      <div class="float gcard adv card-adv" data-depth="22">
+        <div class="gc-label adv"><span class="d"></span>Advertisers</div>
+        <div class="gc-title">Reaching AI-native users</div>
+        <div class="gc-row"><span class="k">CTR</span><span class="v" data-count="6.2" data-dec="1" data-suf="%">0%<span class="up">▲ 3.8×</span></span></div>
+        <div class="gc-row"><span class="k">eCPA</span><span class="v" data-count="1.93" data-dec="2" data-pre="$">$0<span class="dn">▼ 11%</span></span></div>
+        <div class="gc-chart"><span style="height:36%"></span><span style="height:50%"></span><span style="height:62%"></span><span style="height:55%"></span><span style="height:78%"></span><span style="height:70%"></span><span style="height:86%"></span><span style="height:92%"></span></div>
+      </div>
+
+      <div class="float micro m1" data-depth="34"><span class="swatch" style="background:var(--bb-cyan)"></span>bid won · $4.21</div>
+      <div class="float micro m2" data-depth="40"><span class="swatch" style="background:var(--bb-pink)"></span>intent matched</div>
+    </div>
+  </div>
+
+  <div class="scroll-cue"><div class="mouse"></div>Scroll</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PARTNER MARQUEE -->
+<section class="marquee" aria-hidden="true">
+  <div class="marquee-label">Running inside the AI apps people use every day</div>
+  <div class="marquee-track">
+    <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span><span>Raycast</span><span>Vercel</span><span>LM Studio</span>
+    <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span><span>Raycast</span><span>Vercel</span><span>LM Studio</span>
   </div>
 </section>
 
-<!-- TRUSTED BY -->
-<section class="trusted">
-  <div class="wrap">
-    <p data-reveal data-i18n="trusted.label">Built for AI apps running on</p>
-    <div class="trusted-row">
-      <span>Claude MCP</span>
-      <span>OpenAI</span>
-      <span>Cursor</span>
-      <span>Replit</span>
-      <span>Windsurf</span>
-      <span>Perplexity</span>
-    </div>
-  </div>
-</section>
+<div class="divider"></div>
 
-<!-- FEATURE 1 — DEVELOPERS -->
-<section class="feature" id="developers">
+<!-- FEATURE 1 — PUBLISHERS -->
+<section class="section">
   <div class="wrap">
     <div class="feature-grid">
-      <div class="feature-text">
-        <span class="eyebrow pink" data-reveal data-i18n="dev.eyebrow">For publishers</span>
-        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="dev.h2">Monetize your AI app in one line of code.</h2>
-        <p data-i18n="dev.p">Drop in the Boost Boss SDK and turn free users into revenue without ruining UX. Native, contextual placements that fit naturally into AI chats, agents, and assistants.</p>
-        <ul class="bullet-list">
-          <li><span class="check">✓</span><span data-i18n="dev.b1_html" data-i18n-html><strong>Native ad formats</strong> — built for conversations, not banners.</span></li>
-          <li><span class="check">✓</span><span data-i18n="dev.b2_html" data-i18n-html><strong>Real-time payouts</strong> — track impressions, clicks, and earnings live.</span></li>
-          <li><span class="check">✓</span><span data-i18n="dev.b3_html" data-i18n-html><strong>Full creative control</strong> — decide what, when, and where ads appear.</span></li>
+      <div class="ftext" data-reveal="left">
+        <span class="eyebrow pink">For publishers · Lumi SDK</span>
+        <h2>Monetize your AI app in one line of code.</h2>
+        <p class="lead">Drop in the Lumi SDK and turn free users into revenue without ruining UX. Native, contextual placements that fit inside AI chats, agents, and assistants — no banners, no surveillance.</p>
+        <ul class="blist">
+          <li><span class="ck">✓</span><span><strong>Native ad formats</strong> — built for conversations, not billboards.</span></li>
+          <li><span class="ck">✓</span><span><strong>Real-time payouts</strong> — track impressions, clicks, and earnings live.</span></li>
+          <li><span class="ck">✓</span><span><strong>Full creative control</strong> — decide what, when, and where ads appear.</span></li>
         </ul>
-        <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="dev.cta">Integrate the SDK →</a>
+        <a class="btn btn-primary btn-lg" href="#">Integrate the SDK →</a>
       </div>
-      <div class="vis-card">
-        <pre class="code-block"><span class="c">// Add Boost Boss in 1 line</span>
+      <div class="vis-card" data-reveal="right" data-parallax data-speed="0.05" style="--reveal-delay:.1s">
+<pre class="code-block"><span class="c">// Add Boost Boss in one line</span>
 <span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
 
 <span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({
@@ -1167,438 +773,325 @@
 </section>
 
 <!-- FEATURE 2 — ADVERTISERS -->
-<section class="feature" id="advertisers">
+<section class="section">
   <div class="wrap">
     <div class="feature-grid reverse">
-      <div class="feature-text">
-        <span class="eyebrow cyan" data-reveal data-i18n="adv.eyebrow">For advertisers</span>
-        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="adv.h2">Reach the people building the future with AI.</h2>
-        <p data-i18n="adv.p">Our network delivers your ads directly inside AI applications — where the highest-intent, highest-value audience spends their time. Upload your product. Pick a goal. Benna delivers it everywhere.</p>
-        <ul class="bullet-list">
-          <li><span class="check cyan">✓</span><span data-i18n="adv.b1_html" data-i18n-html><strong>Intent-aware allocation</strong> — Benna sees what users are trying to do, not just what they searched.</span></li>
-          <li><span class="check cyan">✓</span><span data-i18n="adv.b2_html" data-i18n-html><strong>Performance pricing</strong> — CPM, CPC, CPA. Pay for what works.</span></li>
-          <li><span class="check cyan">✓</span><span data-i18n="adv.b3_html" data-i18n-html><strong>Transparent analytics</strong> — every impression, attribution and ROAS.</span></li>
+      <div class="ftext" data-reveal="right">
+        <span class="eyebrow cyan">For advertisers · SuperBoost</span>
+        <h2>Reach the people building the future with AI.</h2>
+        <p class="lead">Your ads run inside AI applications — where the highest-intent, highest-value audience spends its time. Upload your product, pick a goal, and Benna delivers it everywhere.</p>
+        <ul class="blist">
+          <li><span class="ck cyan">✓</span><span><strong>Intent-aware allocation</strong> — Benna sees what users are trying to do, not what they searched.</span></li>
+          <li><span class="ck cyan">✓</span><span><strong>Performance pricing</strong> — CPM, CPC, CPA. Pay for what works.</span></li>
+          <li><span class="ck cyan">✓</span><span><strong>Transparent analytics</strong> — every impression, attribution, and ROAS.</span></li>
         </ul>
-        <a class="btn btn-primary btn-lg" href="/ads/signup" data-i18n="adv.cta">Activate your boost →</a>
+        <a class="btn btn-primary btn-lg" href="#">Activate your boost →</a>
       </div>
-      <div class="vis-card">
-        <div class="campaign-mock">
-          <div class="campaign-row">
-            <span class="campaign-title" data-i18n="adv.camp1_title">Q2 Dev Tool Push</span>
-            <span class="pill pill-active" data-i18n="adv.pill_active">Active</span>
-          </div>
-          <div class="campaign-stats">
-            <span><strong>842K</strong> impressions</span>
-            <span><strong>6.2%</strong> CTR</span>
-            <span><strong>$0.18</strong> CPC</span>
-          </div>
+      <div class="vis-card" data-reveal="left" data-parallax data-speed="0.05" style="--reveal-delay:.1s">
+        <div class="camp">
+          <div class="camp-row"><span class="camp-title">Q2 Dev Tool Push</span><span class="pill pill-active">Active</span></div>
+          <div class="camp-stats"><span><strong>842K</strong> impressions</span><span><strong>6.2%</strong> CTR</span><span><strong>$1.93</strong> eCPA</span></div>
         </div>
-        <div class="campaign-mock">
-          <div class="campaign-row">
-            <span class="campaign-title" data-i18n="adv.camp2_title">AI Learners Retarget</span>
-            <span class="pill pill-active" data-i18n="adv.pill_active">Active</span>
-          </div>
-          <div class="campaign-stats">
-            <span><strong>318K</strong> impressions</span>
-            <span><strong>4.8%</strong> CTR</span>
-            <span><strong>$0.22</strong> CPC</span>
-          </div>
+        <div class="camp">
+          <div class="camp-row"><span class="camp-title">Agent Launch — NA</span><span class="pill pill-active">Active</span></div>
+          <div class="camp-stats"><span><strong>1.2M</strong> impressions</span><span><strong>4.8%</strong> CTR</span><span><strong>3.1×</strong> ROAS</span></div>
         </div>
-        <div class="campaign-mock">
-          <div class="campaign-row">
-            <span class="campaign-title" data-i18n="adv.camp3_title">New user welcome</span>
-            <span class="pill pill-paused" data-i18n="adv.pill_paused">Paused</span>
-          </div>
-          <div class="campaign-stats">
-            <span><strong>94K</strong> impressions</span>
-            <span><strong>3.2%</strong> CTR</span>
-            <span><strong>$0.31</strong> CPC</span>
-          </div>
+        <div class="camp">
+          <div class="camp-row"><span class="camp-title">Retarget — Power Users</span><span class="pill pill-paused">Paused</span></div>
+          <div class="camp-stats"><span><strong>318K</strong> impressions</span><span><strong>7.4%</strong> CTR</span><span><strong>$0.88</strong> eCPC</span></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FEATURE 3 — WHY MCP (3 CARDS) -->
-<section class="feature">
-  <div class="wrap">
-    <div class="section-header">
-      <span class="eyebrow yellow" data-reveal data-i18n="mcp.eyebrow">Built on MCP</span>
-      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="mcp.h2">A new protocol for a new era of ads.</h2>
-      <p data-i18n="mcp.p_html" data-i18n-html>The Model Context Protocol lets any AI agent call into Boost Boss to fetch, render, and measure ads — with consent, transparency, and attribution baked in.</p>
-    </div>
-    <div class="three-cards">
-      <div class="card-flat">
-        <div class="icon-chip chip-pink">⚡</div>
-        <h3 data-i18n="mcp.card1_h">Millisecond delivery</h3>
-        <p data-i18n="mcp.card1_p">Ads fetched and rendered in under 80ms — no jarring load states, no UX hit.</p>
+<!-- BENNA INTENT DECODER (pinned, scroll-scrubbed) -->
+<section class="decoder-stage" id="decStage">
+  <div class="decoder-pin">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow yellow">The intent moat · Benna AI</span>
+        <h2>Other ad networks see <s>cookies</s>.<br>Boost Boss sees <span class="ig">intent</span>.</h2>
       </div>
-      <div class="card-flat">
-        <div class="icon-chip chip-cyan">🎯</div>
-        <h3 data-i18n="mcp.card2_h">Context-aware</h3>
-        <p data-i18n="mcp.card2_p_html" data-i18n-html>Every impression is scored by <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 700;">Benna</a> — our AI optimization engine — so ads match what the user is actually trying to do.</p>
-      </div>
-      <div class="card-flat">
-        <div class="icon-chip chip-yellow">🔒</div>
-        <h3 data-i18n="mcp.card3_h">Privacy-first</h3>
-        <p data-i18n="mcp.card3_p">No third-party cookies. No fingerprints. Targeting lives inside your app, not outside.</p>
+      <div class="decoder-wrap">
+        <div class="decoder" id="decoder">
+          <div class="dec-head"><span class="dot"></span><span class="t">Benna · live intent decode</span></div>
+          <div class="dec-msg">“help me deploy a Next.js app to production”<span class="cursor">│</span></div>
+          <div class="dec-arrow"><span>decoding signals — scroll to watch</span><span class="line"></span></div>
+          <div class="dec-chips">
+            <span class="chip cyan"><span class="key">intent</span><span class="val">deploy</span></span>
+            <span class="chip"><span class="key">mcp_tool</span><span class="val">vercel-mcp</span></span>
+            <span class="chip"><span class="key">vertical</span><span class="val">devtools</span></span>
+            <span class="chip"><span class="key">stage</span><span class="val">production</span></span>
+            <span class="chip"><span class="key">host</span><span class="val">cursor</span></span>
+            <span class="chip pink"><span class="key">region</span><span class="val">US-CA</span></span>
+          </div>
+          <div class="dec-match">
+            <span class="ml">Highest-intent match · first-price auction won</span>
+            <span class="mr">
+              <span class="badge-app"><span class="ico">▲</span>Vercel Pro</span>
+              <span class="score">score 0.94</span>
+            </span>
+          </div>
+          <div class="dec-vs">A cookie network would only know <s>“last site visited”</s>. Benna knew the user was shipping to prod.</div>
+          <div class="dec-progress"><span id="decBar"></span></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- STATS -->
-<section class="stats-bar">
+<!-- STATS BAND -->
+<section class="section stats-band">
   <div class="wrap">
-    <div class="stats-row" data-reveal>
-      <div class="stat" data-reveal style="--reveal-delay:0ms">
-        <div class="n pink" data-count="2.4" data-decimals="1" data-suffix="B">0</div>
-        <div class="l" data-i18n="stats.label_calls">Monthly ad calls</div>
-      </div>
-      <div class="stat" data-reveal style="--reveal-delay:80ms">
-        <div class="n cyan" data-count="380" data-decimals="0" data-suffix="+">0</div>
-        <div class="l" data-i18n="stats.label_apps">AI apps on network</div>
-      </div>
-      <div class="stat" data-reveal style="--reveal-delay:160ms">
-        <div class="n yellow" data-count="6.1" data-decimals="1" data-suffix="%">0</div>
-        <div class="l" data-i18n="stats.label_ctr">Avg. CTR</div>
-      </div>
-      <div class="stat" data-reveal style="--reveal-delay:240ms">
-        <div class="n" data-count="12" data-decimals="0" data-prefix="$" data-suffix="M">$0</div>
-        <div class="l" data-i18n="stats.label_paid">Paid to publishers</div>
-      </div>
+    <div class="stats-row">
+      <div class="stat" data-reveal><div class="n pink" data-count="5" data-suf="ms">0</div><div class="l">Benna decision latency</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:.08s"><div class="n cyan" data-count="3.8" data-dec="1" data-suf="×">0</div><div class="l">CTR vs. legacy networks</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:.16s"><div class="n yellow" data-count="70" data-suf="%">0</div><div class="l">Publisher revenue share</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:.24s"><div class="n" data-count="10" data-suf=" min">0</div><div class="l">From signup to live</div></div>
     </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="how" id="how">
+<section class="section">
   <div class="wrap">
-    <div class="section-header">
-      <h2 data-reveal data-i18n="how.h2">Zero to revenue in under 10 minutes.</h2>
-      <p data-i18n="how.p">Whether you're an AI app developer or a brand trying to reach them, getting set up is fast.</p>
+    <div class="section-head" data-reveal>
+      <span class="eyebrow pink">How it works</span>
+      <h2>One API. Two sides. Zero ops.</h2>
+      <p>Whether you’re earning or reaching, you’re live in minutes — the network handles auctions, matching, and payouts.</p>
     </div>
     <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="icon-chip chip-pink">🔑</div>
-        <h3 data-i18n="how.s1_h">Get your API key</h3>
-        <p data-i18n="how.s1_p">Sign up as a developer or advertiser. Your keys are ready instantly — no waitlist, no demo required.</p>
+      <div class="step" data-reveal>
+        <span class="step-num">1</span>
+        <div class="chip-ico chip-pink">🔌</div>
+        <h3>Connect a surface</h3>
+        <p>Drop the Lumi SDK into your app or launch a SuperBoost campaign — one script tag or one MCP call.</p>
       </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="icon-chip chip-cyan">⚙️</div>
-        <h3 data-i18n="how.s2_h">Drop in the SDK</h3>
-        <p data-i18n="how.s2_p">One import. One function call. Your AI app is connected to the entire Boost Boss network.</p>
+      <div class="step" data-reveal style="--reveal-delay:.08s">
+        <span class="step-num">2</span>
+        <div class="chip-ico chip-cyan">🧠</div>
+        <h3>Benna scores the bid</h3>
+        <p>Every request is decoded for intent, tool, host, and region, then cleared in a first-price auction in ~5ms.</p>
       </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="icon-chip chip-yellow">💰</div>
-        <h3 data-i18n="how.s3_h">Launch and earn</h3>
-        <p data-i18n="how.s3_p">Go live, track performance in real time, and get paid out weekly — or spend budget and scale reach.</p>
+      <div class="step" data-reveal style="--reveal-delay:.16s">
+        <span class="step-num">3</span>
+        <div class="chip-ico chip-yellow">🚀</div>
+        <h3>Earn or convert</h3>
+        <p>Publishers get weekly payouts; advertisers get attributable conversions. Transparent reporting on both ends.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- BIG CTA -->
-<section class="big-cta">
-  <div class="big-cta-box">
-    <div class="deco-sparkle s1">✦</div>
-    <div class="deco-sparkle s2">✦</div>
-    <h2 data-reveal data-i18n="cta_big.h2_html" data-i18n-html>Open the box.<br>Start earning.</h2>
-    <p data-i18n="cta_big.p">Join the AI apps already monetizing with Boost Boss — and the brands reaching them.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-lg" href="/publish/signup" data-i18n="cta_big.cta_dev">Start as a developer</a>
-      <a class="btn btn-lg outline-white" href="/ads/signup" data-i18n="cta_big.cta_adv">Start as an advertiser</a>
+<section class="section">
+  <div class="wrap">
+    <div class="cta-box" data-reveal>
+      <h2>Ship ads that respect the conversation.</h2>
+      <p>Join the publishers and advertisers building the ad layer for AI-native software.</p>
+      <div class="cta-ctas">
+        <a class="btn btn-lg btn-white" href="#">Start monetizing →</a>
+        <a class="btn btn-lg btn-clear" href="#">Boost a product</a>
+      </div>
     </div>
   </div>
 </section>
-
-<!-- BENNA STRIP -->
-<section style="background: #0A0A14; color: #F5F5F7; padding: 64px 0;">
-  <div class="wrap" style="display: grid; grid-template-columns: auto 1fr auto; gap: 40px; align-items: center;">
-    <div style="display: flex; align-items: center; gap: 14px;">
-      <div style="width: 52px; height: 52px; filter: drop-shadow(0 0 18px rgba(157, 122, 255, 0.45)); flex-shrink: 0;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="52" height="52" role="img" aria-label="Benna">
-          <defs>
-            <linearGradient id="benna-strip-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#9D7AFF"/>
-              <stop offset="0.55" stop-color="#C76AFF"/>
-              <stop offset="1" stop-color="#FF9BEA"/>
-            </linearGradient>
-          </defs>
-          <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#benna-strip-bg)"/>
-          <path fill="white" fill-rule="evenodd" d="M 18 14 C 18 12.9 18.9 12 20 12 L 24 12 C 25.1 12 26 12.9 26 14 L 26 27 C 28.3 25.3 31 24.5 34 24.5 C 41.5 24.5 47.5 30.5 47.5 38 C 47.5 45.5 41.5 51.5 34 51.5 C 30.3 51.5 26.9 50 24.5 47.5 L 24.5 50 C 24.5 51.1 23.6 52 22.5 52 L 20 52 C 18.9 52 18 51.1 18 50 Z M 26 38 C 26 42.4 29.6 46 34 46 C 38.4 46 42 42.4 42 38 C 42 33.6 38.4 30 34 30 C 29.6 30 26 33.6 26 38 Z"/>
-          <circle cx="50" cy="16" r="2.5" fill="white" fill-opacity="0.75"/>
-        </svg>
-      </div>
-      <div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #9D7AFF; margin-bottom: 4px;" data-i18n="benna.eyebrow">The engine under the network</div>
-        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -0.02em;" data-i18n="benna.title">benna — AI optimization, built in.</div>
-      </div>
-    </div>
-    <p style="color: #A1A1B3; font-size: 15px; line-height: 1.55; max-width: 480px; margin: 0;" data-i18n="benna.p">Benna is the optimization engine that powers every decision on the Boost Boss network — predicting conversion probability on every impression, selecting the winning ad, and auto-tuning bids in under 5ms. Advertisers set targets, Benna does the rest.</p>
-    <a href="https://benna.ai" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; background: #F5F5F7; color: #0A0A14; border-radius: 10px; font-weight: 600; font-size: 14.5px; white-space: nowrap;" data-i18n="benna.cta">Learn more at benna.ai →</a>
-  </div>
-</section>
-
-<style>
-  @media (max-width: 900px) {
-    section[style*="0A0A14"] .wrap { grid-template-columns: 1fr !important; gap: 24px !important; text-align: center; }
-    section[style*="0A0A14"] .wrap > div:first-child { justify-content: center; }
-  }
-</style>
 
 <!-- FOOTER -->
-<footer style="background:#FAFAF7;border-top:1px solid #EAEAEF;padding:56px 0 32px;">
-  <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-    <div class="foot-grid" style="display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:48px;margin-bottom:40px;">
+<footer class="site">
+  <div class="wrap">
+    <div class="foot-grid">
       <div>
-        <div class="foot-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <img src="/favicon.svg?v=rocket-20260421" alt="" style="width:32px;height:32px;">
-          <span class="brand-name" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:-0.5px;">Boost Boss</span>
-        </div>
-        <p class="foot-tag" style="font-size:14px;color:#4B4B5E;line-height:1.6;">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
+        <div class="foot-brand"><img src="/design-system/assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight);">Boost Boss</span></div>
+        <p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
       </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Product</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/publish" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Publishers</a></li>
-          <li style="padding:5px 0;"><a href="/ads" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SuperBoost</a></li>
-          <li style="padding:5px 0;"><a href="/exchange" style="font-size:14px;color:#4B4B5E;text-decoration:none;">BBX</a></li>
-          <li style="padding:5px 0;"><a href="/pricing" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Pricing</a></li>
-          <li style="padding:5px 0;"><a href="/demo" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Live demo</a></li>
-          <li style="padding:5px 0;"><a href="https://affiliate.boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Affiliate</a></li>
-        </ul>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul><li><a href="/publish">Publishers</a></li><li><a href="#">SuperBoost</a></li><li><a href="#">BBX Exchange</a></li><li><a href="#">Pricing</a></li><li><a href="#">Live demo</a></li></ul>
       </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Resources</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/docs" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Documentation</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference" style="font-size:14px;color:#4B4B5E;text-decoration:none;">API reference</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference#sdks" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SDK</a></li>
-        </ul>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <ul><li><a href="#">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Benna whitepaper</a></li><li><a href="#">Status</a></li></ul>
       </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Company</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/about" style="font-size:14px;color:#4B4B5E;text-decoration:none;">About</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Contact</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Careers</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Legal</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/terms" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Terms of Service</a></li>
-          <li style="padding:5px 0;"><a href="/privacy" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Privacy Policy</a></li>
-          <li style="padding:5px 0;"><a href="/refunds" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Refund Policy</a></li>
-          <li style="padding:5px 0;"><a href="/aup" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Acceptable Use</a></li>
-          <li style="padding:5px 0;"><a href="/cookies" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Cookie Policy</a></li>
-          <li style="padding:5px 0;"><a href="/trust" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Trust center</a></li>
-        </ul>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul><li><a href="#">About</a></li><li><a href="#">Trust center</a></li><li><a href="#">Contact</a></li><li><a href="#">Careers</a></li></ul>
       </div>
     </div>
-    <div class="foot-bottom" style="padding-top:28px;border-top:1px solid #EAEAEF;font-size:13px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <span>© 2026 Boost Boss · All rights reserved.</span>
-      <span>Made for the AI era.</span>
-    </div>
+    <div class="foot-bottom"><span>© 2026 Boost Boss · All rights reserved.</span><span>Made for the AI era.</span></div>
   </div>
 </footer>
 
 <script>
-  // Close language dropdown when clicking outside it
-  document.addEventListener('click', function (e) {
-    var wrap = document.getElementById('navLangWrap');
-    if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+  // Entrance-animation gate: only animate when the page is actually
+  // visible AND motion is allowed. In hidden/paused contexts (export,
+  // print, background tab, html-to-image capture) CSS animations freeze,
+  // so the resting state stays the *visible* end-state and content never
+  // disappears. We add `.anim` to opt INTO the hidden→visible entrances.
+  (function(){
+    var ok = document.visibilityState === 'visible' &&
+             !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (ok) document.documentElement.classList.add('anim');
+    else document.addEventListener('visibilitychange', function once(){
+      if (document.visibilityState === 'visible' &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('anim');
+        document.removeEventListener('visibilitychange', once);
+      }
+    });
+  })();
+  var ANIM = document.documentElement.classList.contains('anim');
+
+  // Nav: frosted on scroll (page is dark end-to-end now)
+  const nav = document.getElementById('nav');
+  const parallaxEls = [...document.querySelectorAll('[data-parallax]')];
+  // Pinned Benna decoder — scroll-scrubbed chip reveal
+  const decStage = document.getElementById('decStage');
+  const decChips = decStage ? [...decStage.querySelectorAll('.chip')] : [];
+  const decMatch = decStage && decStage.querySelector('.dec-match');
+  const decVs = decStage && decStage.querySelector('.dec-vs');
+  const decBar = document.getElementById('decBar');
+  function decoderScrub(vh) {
+    if (!decStage) return;
+    const r = decStage.getBoundingClientRect();
+    const total = decStage.offsetHeight - vh;
+    const p = Math.min(Math.max(-r.top / total, 0), 1);
+    const cp = Math.min(Math.max((p - 0.08) / 0.6, 0), 1);
+    const lit = Math.round(cp * decChips.length);
+    decChips.forEach((c, i) => c.classList.toggle('on', i < lit));
+    if (decMatch) decMatch.classList.toggle('on', p > 0.72);
+    if (decVs) decVs.classList.toggle('on', p > 0.85);
+    if (decBar) decBar.style.width = (p * 100).toFixed(1) + '%';
+  }
+  const onScroll = () => {
+    const y = window.scrollY;
+    nav.classList.toggle('scrolled', y > 8);
+    if (ANIM) {
+      const vh = window.innerHeight;
+      for (const el of parallaxEls) {
+        const r = el.getBoundingClientRect();
+        const speed = parseFloat(el.dataset.speed || '0.06');
+        const offset = (r.top + r.height / 2 - vh / 2) * -speed;
+        el.style.setProperty('--py', offset.toFixed(1) + 'px');
+      }
+      decoderScrub(vh);
+    }
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // Animate chart bars stagger
+  document.querySelectorAll('.gc-chart').forEach(c => {
+    [...c.children].forEach((b, i) => b.style.animationDelay = (0.5 + i * 0.06) + 's');
   });
-</script>
-<script src="/i18n.js?v=bb-20260421"></script>
-<script>
-  /* ═══════════════════════════════════════════════════════════════════
-     Landing page ManyChat-style interactions
-       (a) Live hero chat mockup — AI conversations with Boost Boss sponsored
-           cards dropping in, cycling across 3 host apps
-       (b) Scroll-triggered fade-ups via IntersectionObserver
-       (c) Counter animations on stats bar
-     Pure vanilla JS, respects prefers-reduced-motion.
-     ═══════════════════════════════════════════════════════════════════ */
-  (function () {
-    'use strict';
-    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // ─────────────────────────────────────────────────────────────────
-    // (a) NETWORK OVERVIEW — the landing's distinguishing hero visual.
-    //     Animates the publisher + advertiser counter values when the
-    //     hero comes into view, and re-tweens them every 8s so the
-    //     marketplace feels alive.
-    // ─────────────────────────────────────────────────────────────────
-    function animateNhCounter(el) {
-      var target = parseFloat(el.getAttribute('data-nh-count') || '0');
-      var dec    = parseInt(el.getAttribute('data-nh-dec') || '0', 10);
-      var pre    = el.getAttribute('data-nh-pre') || '';
-      var suf    = el.getAttribute('data-nh-suf') || '';
-      var dur    = 1200;
-      var start  = performance.now();
-      // Preserve the up/down trend chips if present — only tween the leading number
-      var trend  = el.querySelector('.up, .dn');
-      var trendHTML = trend ? trend.outerHTML : '';
-      function step(now) {
-        var t = Math.min(1, (now - start) / dur);
-        var eased = 1 - Math.pow(1 - t, 3);
-        var val = (target * eased).toFixed(dec);
-        // Format with thousands separators when the number is big
-        if (target >= 1000 && dec === 0) val = Number(val).toLocaleString('en-US');
-        el.innerHTML = pre + val + suf + trendHTML;
-        if (t < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
+  // Counter animation
+  function animateCount(el) {
+    const target = parseFloat(el.dataset.count);
+    const dec = parseInt(el.dataset.dec || '0');
+    const pre = el.dataset.pre || '';
+    const suf = el.dataset.suf || '';
+    const badge = el.querySelector('.up, .dn');
+    const dur = 1400, t0 = performance.now();
+    function tick(t) {
+      const p = Math.min((t - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = (target * eased).toFixed(dec);
+      const num = dec === 0 ? Number(val).toLocaleString() : val;
+      el.firstChild.textContent = pre + num + suf;
+      if (p < 1) requestAnimationFrame(tick);
+      else if (badge) el.appendChild(badge);
     }
+    requestAnimationFrame(tick);
+  }
+  setTimeout(() => document.querySelectorAll('.v[data-count]').forEach(el => {
+    if (!ANIM) {
+      const dec = parseInt(el.dataset.dec || '0');
+      const num = dec === 0 ? Math.round(el.dataset.count).toLocaleString() : Number(el.dataset.count).toFixed(dec);
+      el.firstChild.textContent = (el.dataset.pre || '') + num + (el.dataset.suf || '');
+    } else animateCount(el);
+  }), 700);
 
-    function initNetworkHero() {
-      var nodes = document.querySelectorAll('[data-nh-count]');
-      if (!nodes.length) return;
-      if (prefersReduced) {
-        nodes.forEach(function (el) {
-          var target = parseFloat(el.getAttribute('data-nh-count') || '0');
-          var dec    = parseInt(el.getAttribute('data-nh-dec') || '0', 10);
-          var pre    = el.getAttribute('data-nh-pre') || '';
-          var suf    = el.getAttribute('data-nh-suf') || '';
-          var trend  = el.querySelector('.up, .dn');
-          var trendHTML = trend ? trend.outerHTML : '';
-          var val = target.toFixed(dec);
-          if (target >= 1000 && dec === 0) val = Number(val).toLocaleString('en-US');
-          el.innerHTML = pre + val + suf + trendHTML;
-        });
-        return;
-      }
-      if (!('IntersectionObserver' in window)) return;
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            nodes.forEach(animateNhCounter);
-            io.disconnect();
-          }
-        });
-      }, { threshold: 0.3 });
-      io.observe(nodes[0]);
-    }
+  // Parallax on mouse move
+  const stage = document.getElementById('stage');
+  let raf = null;
+  stage && addEventListener('mousemove', e => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      const r = stage.getBoundingClientRect();
+      const cx = (e.clientX - r.left - r.width / 2) / r.width;
+      const cy = (e.clientY - r.top - r.height / 2) / r.height;
+      stage.querySelectorAll('.float').forEach(f => {
+        const d = parseFloat(f.dataset.depth || '10');
+        const base = f.classList.contains('core') ? 'translate(-50%,-50%) ' : '';
+        f.style.transform = base + `translate(${-cx * d}px, ${-cy * d}px)`;
+      });
+      raf = null;
+    });
+  });
 
-    // ─────────────────────────────────────────────────────────────────
-    // (b) SCROLL REVEALS
-    // ─────────────────────────────────────────────────────────────────
-    function initReveals() {
-      var nodes = document.querySelectorAll('[data-reveal]');
-      if (prefersReduced || !('IntersectionObserver' in window)) {
-        nodes.forEach(function (n) { n.classList.add('is-visible'); });
-        return;
-      }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-      nodes.forEach(function (n) { io.observe(n); });
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // (c) COUNTER ANIMATIONS
-    // ─────────────────────────────────────────────────────────────────
-    function animateCounter(el) {
-      var target = parseFloat(el.getAttribute('data-count') || '0');
-      var dec    = parseInt(el.getAttribute('data-decimals') || '0', 10);
-      var pre    = el.getAttribute('data-prefix') || '';
-      var suf    = el.getAttribute('data-suffix') || '';
-      var dur    = 1400;
-      var start  = performance.now();
-      el.classList.add('counting');
-      function step(now) {
-        var t = Math.min(1, (now - start) / dur);
-        var eased = 1 - Math.pow(1 - t, 3);
-        el.textContent = pre + (target * eased).toFixed(dec) + suf;
-        if (t < 1) requestAnimationFrame(step);
-        else {
-          el.textContent = pre + target.toFixed(dec) + suf;
-          setTimeout(function () { el.classList.remove('counting'); }, 200);
+  // Particle network
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles, DPR;
+  const COLORS = ['255,45,120', '0,255,224', '4,190,254'];
+  function resize() {
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    W = canvas.width = innerWidth * DPR;
+    H = canvas.height = canvas.offsetHeight * DPR;
+    const count = Math.min(72, Math.floor(innerWidth / 22));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.18 * DPR, vy: (Math.random() - 0.5) * 0.18 * DPR,
+      r: (Math.random() * 1.6 + 0.6) * DPR,
+      c: COLORS[Math.floor(Math.random() * COLORS.length)]
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const linkDist = 130 * DPR;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fillStyle = `rgba(${p.c},0.8)`; ctx.fill();
+      for (let j = i + 1; j < particles.length; j++) {
+        const q = particles[j], dx = p.x - q.x, dy = p.y - q.y, dist = Math.hypot(dx, dy);
+        if (dist < linkDist) {
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = `rgba(${p.c},${0.14 * (1 - dist / linkDist)})`;
+          ctx.lineWidth = DPR; ctx.stroke();
         }
       }
-      requestAnimationFrame(step);
     }
-    function initCounters() {
-      var counters = document.querySelectorAll('[data-count]');
-      if (prefersReduced) {
-        counters.forEach(function (el) {
-          var pre = el.getAttribute('data-prefix') || '';
-          var suf = el.getAttribute('data-suffix') || '';
-          var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
-          el.textContent = pre + parseFloat(el.getAttribute('data-count') || '0').toFixed(dec) + suf;
-        });
-        return;
-      }
-      if (!('IntersectionObserver' in window)) return;
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) { animateCounter(entry.target); io.unobserve(entry.target); }
-        });
-      }, { threshold: 0.5 });
-      counters.forEach(function (el) { io.observe(el); });
-    }
+    requestAnimationFrame(draw);
+  }
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    resize(); draw(); addEventListener('resize', resize);
+  }
 
-    // Nav — frosted tint on scroll
-    function initNav() {
-      var nav = document.getElementById('mainNav');
-      if (!nav) return;
-      var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 40); };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-    }
-
-    function init() { initReveals(); initCounters(); initNetworkHero(); initNav(); }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-    else init();
-  })();
-</script>
-
-<script>
-  // If Supabase's OAuth flow errored out (e.g. stale PKCE state after a
-  // back/forward during sign-in), it falls back to Site URL — which is
-  // https://boostboss.ai, and Vercel rewrites that to /en, landing us
-  // here with ?error=…&error_code=…&error_description=… in the query.
-  // Redirect the user back to the signin page they came from (inferred
-  // from localStorage's "last OAuth attempt" marker) so they can retry
-  // without confusion — and clean the URL either way.
-  (function bounceFromOAuthError() {
-    try {
-      var params = new URLSearchParams(window.location.search);
-      var err = params.get("error");
-      if (!err) return;
-      // Clean URL so a refresh doesn't re-show the error.
-      var cleaned = window.location.pathname;
-      // Wipe any lingering stale PKCE state that caused the failure.
-      Object.keys(localStorage).forEach(function (k) {
-        if (k.indexOf("sb-") !== 0) return;
-        if (/code-verifier$/.test(k) || /flow-state$/.test(k) ||
-            /pkce|oauth-state/i.test(k)) {
-          localStorage.removeItem(k);
+  // ── Scroll reveals + on-view counters + decoder chip cascade ──
+  if (ANIM && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          if (e.target.matches('[data-reveal]')) e.target.classList.add('is-visible');
+          if (e.target.querySelector && e.target.querySelector('.n[data-count]'))
+            e.target.querySelectorAll('.n[data-count]').forEach(animateCount);
+          obs.unobserve(e.target);
         }
       });
-      // Infer where to send them: if bb_pub_* exists (previous publisher
-      // session attempt), go to /publish/signin; else /ads/signin.
-      var pub = localStorage.getItem("bb_pub_user") || localStorage.getItem("bb_pub_token");
-      var adv = localStorage.getItem("bb_adv_user") || localStorage.getItem("bb_adv_token");
-      var target = pub && !adv ? "/publish/signin"
-                  : adv && !pub ? "/ads/signin"
-                  : "/publish/signin";  // sensible default
-      // Forward the error params so the target page can show a message.
-      window.location.replace(target + "?" + params.toString());
-    } catch (_) {}
-  })();
+    }, { threshold: 0.25 });
+    document.querySelectorAll('[data-reveal], .stats-band').forEach(el => io.observe(el));
+  } else {
+    // No anim: everything resting-visible; just fill stat numbers
+    document.querySelectorAll('.n[data-count]').forEach(el => {
+      const dec = parseInt(el.dataset.dec || '0');
+      const num = dec === 0 ? Math.round(el.dataset.count).toLocaleString() : Number(el.dataset.count).toFixed(dec);
+      el.textContent = (el.dataset.pre || '') + num + (el.dataset.suf || '');
+    });
+  }
 </script>
-
 </body>
 </html>

@@ -3,1188 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boost Boss Exchange — Programmatic demand for AI-native inventory</title>
-<meta name="description" content="Boost Boss Exchange (BBX) is the programmatic ad exchange for AI-native inventory. OpenRTB 2.6. Sub-100ms bid latency. Transparent first-price auctions. Built for DSPs, agencies, and trading desks.">
-<meta property="og:title" content="Boost Boss Exchange — Programmatic demand for AI-native inventory">
-<meta property="og:description" content="OpenRTB 2.6 exchange for AI apps. Bid on users inside Claude, ChatGPT, Cursor and every MCP-powered surface.">
-<meta property="og:url" content="https://boostboss.ai/exchange">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Boost Boss Exchange — Programmatic demand for AI-native inventory">
-<meta name="twitter:description" content="OpenRTB 2.6 exchange for AI-native inventory. Connect your DSP to AI app audiences.">
-<link rel="canonical" href="https://boostboss.ai/exchange">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>BBX Exchange — Boost Boss</title>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --pink: #FF2D78;
-    --cyan: #04BEFE;
-    --yellow: #FFE600;
-    --violet: #7C3AED;
-    --violet-soft: #F3ECFF;
-    --ink: #1A1A2E;
-    --ink-soft: #4B4B5E;
-    --muted: #6B7280;
-    --line: #EAEAEF;
-    --bg: #FFFFFF;
-    --bg-soft: #FAFAF7;
-    --code-bg: #0F0F1A;
-  }
-
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-    font-size: 16px;
-  }
-  a { color: inherit; text-decoration: none; }
-  img, svg { display: block; max-width: 100%; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
-  code, pre { font-family: 'JetBrains Mono', monospace; }
-
-  /* NAV */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--line);
-  }
-  .nav-inner {
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
-  .brand-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
-  }
-  .brand-sub {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px; font-weight: 600; color: var(--violet);
-    padding: 3px 8px; border-radius: 6px; background: var(--violet-soft);
-    margin-left: 4px; letter-spacing: 0.3px;
-  }
-  .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a {
-    font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s;
-  }
-  .nav-links a:hover { color: var(--ink); }
-  .nav-ctas { display: flex; gap: 10px; align-items: center; }
-
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
-    padding: 9px 18px; border-radius: 8px;
-    border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
-    text-decoration: none; white-space: nowrap;
-  }
-  .btn-ghost { color: var(--ink); background: transparent; }
-  .btn-ghost:hover { background: var(--bg-soft); }
-  .btn-primary {
-    background: var(--violet); color: white; border-color: var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
-  }
-  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
-  .btn-outline {
-    background: white; color: var(--ink); border-color: var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
-  }
-  .btn-outline:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
-  .btn-lg { padding: 13px 24px; font-size: 15.5px; border-radius: 10px; }
-
-  /* HERO */
-  .hero { padding: 100px 0 80px; background: linear-gradient(180deg, #FFFFFF 0%, var(--violet-soft) 100%); }
-  .badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 14px; border-radius: 100px;
-    background: white; border: 1.5px solid var(--ink);
-    font-size: 13px; font-weight: 600; color: var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
-    margin-bottom: 28px;
-  }
-  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--violet); animation: pulse 2s infinite; }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-  .hero h1 {
-    font-size: clamp(44px, 6vw, 72px);
-    font-weight: 700; line-height: 1.05; margin-bottom: 24px; max-width: 900px;
-  }
-  .accent-violet { color: var(--violet); }
-  .hero .sub {
-    font-size: clamp(18px, 2vw, 22px);
-    color: var(--ink-soft); max-width: 680px; margin-bottom: 36px;
-  }
-  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-  .hero-micro {
-    font-size: 14px; color: var(--muted); margin-top: 8px;
-  }
-  .hero-micro strong { color: var(--ink); font-weight: 600; }
-
-  /* AUCTION VISUALIZER */
-  .auction-viz {
-    margin-top: 64px;
-    background: white; border: 1.5px solid var(--ink); border-radius: 16px;
-    box-shadow: 10px 10px 0 var(--ink);
-    padding: 36px; position: relative;
-  }
-  .auction-viz::before {
-    content: 'LIVE AUCTION';
-    position: absolute; top: -12px; left: 24px;
-    background: var(--violet); color: white;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-    font-size: 11px; letter-spacing: 1.5px;
-    padding: 4px 10px; border-radius: 4px;
-    border: 1.5px solid var(--ink);
-  }
-  .auction-flow {
-    display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
-    align-items: center; gap: 16px; margin-bottom: 28px;
-  }
-  .flow-node {
-    background: var(--bg-soft); border: 1.5px solid var(--ink); border-radius: 10px;
-    padding: 18px; text-align: center;
-  }
-  .flow-node.exchange { background: var(--violet); color: white; }
-  .flow-node.exchange h4 { color: white; }
-  .flow-node h4 { font-size: 15px; margin-bottom: 6px; }
-  .flow-node p { font-size: 12.5px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; }
-  .flow-node.exchange p { color: rgba(255,255,255,0.8); }
-  .flow-arrow {
-    font-size: 24px; color: var(--violet); font-weight: 700;
-  }
-  .bid-list {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-    padding-top: 20px; border-top: 1px dashed var(--line);
-  }
-  .bid-row {
-    background: white; border: 1.5px solid var(--line); border-radius: 8px;
-    padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
-  }
-  .bid-row.winner { border-color: var(--violet); background: var(--violet-soft); }
-  .bid-row .dsp { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .bid-row .bid { font-size: 18px; font-weight: 700; color: var(--ink); }
-  .bid-row .tag { font-size: 10px; color: var(--violet); font-weight: 600; margin-top: 4px; }
-  .bid-row.winner .tag::before { content: '★ '; }
-
-  /* STATS */
-  .stats {
-    padding: 72px 0;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    background: var(--bg-soft);
-  }
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px;
-  }
-  .stat h3 {
-    font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 700;
-    color: var(--violet); line-height: 1; margin-bottom: 8px;
-  }
-  .stat p { color: var(--ink-soft); font-size: 14.5px; }
-
-  /* SECTION */
-  .section { padding: 96px 0; }
-  .section h2 {
-    font-size: clamp(32px, 4vw, 48px); font-weight: 700;
-    margin-bottom: 16px; max-width: 780px; line-height: 1.1;
-  }
-  .section .sub-head {
-    font-size: 18px; color: var(--ink-soft); max-width: 700px; margin-bottom: 56px;
-  }
-  .eyebrow {
-    display: inline-block;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; padding: 4px 10px; border-radius: 4px;
-    margin-bottom: 20px;
-  }
-  .eyebrow.violet { color: var(--violet); background: var(--violet-soft); }
-
-  /* WHY BBX */
-  .why-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
-  }
-  .why-card {
-    background: white; border: 1.5px solid var(--ink); border-radius: 14px;
-    padding: 32px;
-    box-shadow: 6px 6px 0 var(--ink);
-    transition: transform 0.15s;
-  }
-  .why-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
-  .why-card .icon {
-    width: 48px; height: 48px; border-radius: 10px;
-    background: var(--violet-soft); display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px; font-size: 24px;
-  }
-  .why-card h3 { font-size: 20px; margin-bottom: 10px; }
-  .why-card p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.6; }
-
-  /* INTEGRATION */
-  .integration-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
-  }
-  .integration-text h3 { font-size: 26px; margin-bottom: 14px; }
-  .integration-text p { color: var(--ink-soft); font-size: 15.5px; margin-bottom: 16px; }
-  .integration-list { list-style: none; margin-top: 12px; }
-  .integration-list li {
-    padding: 10px 0; border-bottom: 1px dashed var(--line);
-    font-size: 14.5px; color: var(--ink-soft);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .integration-list li::before {
-    content: '✓'; color: var(--violet); font-weight: 700; font-size: 16px;
-  }
-  .code-block {
-    background: var(--code-bg); color: #E4E4E7;
-    border-radius: 12px; border: 1.5px solid var(--ink);
-    box-shadow: 8px 8px 0 var(--ink);
-    overflow: hidden;
-  }
-  .code-header {
-    background: #1A1A2E; padding: 10px 16px;
-    border-bottom: 1px solid #2C2C44;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .code-header span {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px;
-    color: #A1A1AA;
-  }
-  .code-header .lights { display: flex; gap: 6px; }
-  .code-header .lights span {
-    width: 10px; height: 10px; border-radius: 50%; background: #3F3F46;
-  }
-  .code-block pre {
-    padding: 20px; font-size: 13px; line-height: 1.7;
-    overflow-x: auto;
-  }
-  .code-block .k { color: #FF7ED4; }
-  .code-block .s { color: #4DF0A1; }
-  .code-block .n { color: #FFC857; }
-  .code-block .c { color: #6B7280; font-style: italic; }
-  .code-block .p { color: #A78BFA; }
-
-  /* AUCTION DYNAMICS */
-  .dynamics-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
-  }
-  .dynamics-card {
-    background: var(--bg-soft); border: 1.5px solid var(--ink); border-radius: 12px;
-    padding: 28px;
-    box-shadow: 4px 4px 0 var(--ink);
-  }
-  .dynamics-card h4 {
-    font-size: 18px; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .dynamics-card .badge-sm {
-    font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700;
-    letter-spacing: 1px; padding: 2px 8px; border-radius: 4px;
-    background: var(--ink); color: white;
-  }
-  .dynamics-card p { color: var(--ink-soft); font-size: 14px; line-height: 1.65; }
-  .dynamics-card ul {
-    margin-top: 12px; list-style: none; font-size: 13.5px; color: var(--ink-soft);
-  }
-  .dynamics-card ul li {
-    padding: 6px 0; padding-left: 18px; position: relative;
-  }
-  .dynamics-card ul li::before {
-    content: '→'; position: absolute; left: 0; color: var(--violet); font-weight: 700;
-  }
-
-  /* INVENTORY */
-  .inventory-table {
-    background: white; border: 1.5px solid var(--ink); border-radius: 14px;
-    box-shadow: 6px 6px 0 var(--ink);
-    overflow: hidden;
-  }
-  .inv-head, .inv-row {
-    display: grid;
-    grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr;
-    padding: 16px 24px;
-    align-items: center;
-  }
-  .inv-head {
-    background: var(--ink); color: white;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
-    font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .inv-row { border-bottom: 1px solid var(--line); font-size: 14.5px; }
-  .inv-row:last-child { border-bottom: none; }
-  .inv-row:hover { background: var(--bg-soft); }
-  .inv-row .app-name { font-weight: 600; }
-  .inv-row .app-meta { font-size: 12.5px; color: var(--muted); }
-  .inv-row .app-tag {
-    display: inline-block;
-    padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 600;
-    background: var(--violet-soft); color: var(--violet);
-  }
-  .inv-row .qps { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-
-  /* APPLY */
-  .apply-box {
-    background: var(--ink); color: white;
-    border-radius: 20px; border: 1.5px solid var(--ink);
-    box-shadow: 12px 12px 0 var(--violet);
-    padding: 56px; margin: 80px auto; max-width: 980px;
-    text-align: center;
-  }
-  .apply-box h2 { color: white; font-size: clamp(32px, 4vw, 44px); margin-bottom: 16px; }
-  .apply-box p { color: rgba(255,255,255,0.75); font-size: 17px; margin-bottom: 28px; max-width: 640px; margin-left: auto; margin-right: auto; }
-  .apply-box .btn-primary {
-    background: var(--violet); color: white; border-color: white;
-    box-shadow: 4px 4px 0 white;
-  }
-  .apply-box .btn-primary:hover { box-shadow: 5px 5px 0 white; }
-  .apply-box .btn-outline {
-    background: transparent; color: white; border-color: white;
-    box-shadow: 4px 4px 0 var(--violet);
-  }
-  .apply-box .btn-outline:hover { box-shadow: 5px 5px 0 var(--violet); }
-
-  /* FOOTER */
-  footer {
-    background: var(--bg-soft); border-top: 1px solid var(--line);
-    padding: 64px 0 32px;
-  }
-  .foot-grid {
-    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
-    margin-bottom: 48px;
-  }
-  .foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .foot-tag { color: var(--ink-soft); font-size: 14px; max-width: 320px; }
-  .foot-col h4 {
-    font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--muted); margin-bottom: 16px; font-weight: 600;
-  }
-  .foot-col ul { list-style: none; }
-  .foot-col li { margin-bottom: 10px; }
-  .foot-col a { font-size: 14px; color: var(--ink-soft); transition: color 0.15s; }
-  .foot-col a:hover { color: var(--ink); }
-  .foot-bottom {
-    border-top: 1px solid var(--line); padding-top: 24px;
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 13px; color: var(--muted);
-  }
-
-  /* LIVE AUCTION ANIMATION */
-  .bid-row { transition: all 0.4s ease; opacity: 0; transform: translateY(10px); }
-  .bid-row.visible { opacity: 1; transform: translateY(0); }
-  .bid-row.winner .bid { animation: bidPulse 0.6s ease; }
-  @keyframes bidPulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
-  .auction-viz .replay-btn {
-    position: absolute; top: -12px; right: 24px;
-    background: var(--ink); color: #fff; border: 1.5px solid var(--ink);
-    font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700;
-    padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.5px;
-    transition: all 0.15s;
-  }
-  .auction-viz .replay-btn:hover { background: var(--violet); }
-
-  /* BID LANDSCAPE */
-  .bid-landscape {
-    margin-top: 28px; padding-top: 20px; border-top: 1px dashed var(--line);
-  }
-  .bid-landscape h4 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
-  .bid-landscape canvas { width: 100%; height: 120px; border-radius: 8px; }
-
-  /* LIVE QPS */
-  .live-qps {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: 'JetBrains Mono', monospace; font-size: 13px;
-    color: var(--violet); font-weight: 600;
-  }
-  .live-qps .dot { width: 8px; height: 8px; border-radius: 50%; background: #10B981; animation: pulse 1.5s infinite; }
-
-  /* TOAST */
-  #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
-  .toast { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; transform: translateX(120%); transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px; }
-  .toast.show { transform: translateX(0); }
-  .toast.success { background: #027A48; }
-  .toast.info { background: var(--ink); }
-
-  /* COPY CURL BUTTON */
-  .copy-curl {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
-    background: var(--cyan); color: var(--ink); border: none; cursor: pointer;
-    transition: all 0.15s; font-family: 'JetBrains Mono', monospace;
-  }
-  .copy-curl:hover { opacity: 0.85; }
-
-  /* DARK MODE */
-  body.dark { --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF; --line: #374151; --bg: #111827; --bg-soft: #1F2937; --code-bg: #0D1117; --violet-soft: rgba(124,58,237,0.15); }
-  body.dark nav { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
-  body.dark .hero { background: linear-gradient(180deg, #111827 0%, #1a1530 100%); }
-  body.dark .why-card, body.dark .dynamics-card { background: #1F2937; border-color: #4B5563; box-shadow: 6px 6px 0 #374151; }
-  body.dark .auction-viz { background: #1F2937; border-color: #4B5563; box-shadow: 10px 10px 0 #374151; }
-  body.dark .bid-row { background: #1F2937; border-color: #4B5563; }
-  body.dark .bid-row.winner { background: rgba(124,58,237,0.15); border-color: var(--violet); }
-  body.dark .flow-node { background: #374151; border-color: #4B5563; }
-  body.dark .inventory-table { background: #1F2937; border-color: #4B5563; box-shadow: 6px 6px 0 #374151; }
-  body.dark .inv-row { border-bottom-color: #374151; }
-  body.dark .inv-row:hover { background: #374151; }
-  body.dark .badge { background: #1F2937; border-color: #4B5563; box-shadow: 3px 3px 0 #374151; }
-  body.dark .stats { background: #1F2937; border-color: #374151; }
-  body.dark .apply-box { background: #0D1117; box-shadow: 12px 12px 0 var(--violet); }
-  body.dark .code-block { background: #0D1117; border-color: #4B5563; box-shadow: 8px 8px 0 #374151; }
-  body.dark footer { background: #0D1117; border-color: #374151; }
-  body.dark .btn-primary { box-shadow: 3px 3px 0 #4B5563; }
-  body.dark .btn-outline { box-shadow: 3px 3px 0 #4B5563; border-color: #6B7280; }
-  .dark-toggle { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1; transition: all 0.15s; color: var(--ink); }
-  .dark-toggle:hover { background: var(--bg-soft); }
-
-  /* ANIMATED STATS */
-  .stat h3 { transition: color 0.3s; }
-  .stat h3.counting { color: var(--cyan); }
-
-  @media (max-width: 900px) {
-    .nav-links { display: none; }
-    .hero { padding: 64px 0 40px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
-    .why-grid, .dynamics-grid, .integration-grid { grid-template-columns: 1fr; }
-    .auction-flow { grid-template-columns: 1fr; }
-    .flow-arrow { transform: rotate(90deg); }
-    .bid-list { grid-template-columns: repeat(2, 1fr); }
-    .inv-head, .inv-row { grid-template-columns: 1.5fr 1fr 1fr; }
-    .inv-head :nth-child(4), .inv-row :nth-child(4),
-    .inv-head :nth-child(5), .inv-row :nth-child(5) { display: none; }
-    .apply-box { padding: 36px 24px; }
-    .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-  }
-
-  /* Language toggle — mirror of the landing page (index.html) */
-  .nav-lang-wrap { position: relative; }
-  .nav-lang {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 12px; border-radius: 9px;
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--ink);
-    font-size: 13.5px; font-weight: 600;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .nav-lang:hover {
-    border-color: var(--ink-soft);
-    background: var(--bg-soft);
-  }
-  .nav-lang svg { width: 16px; height: 16px; stroke-width: 1.8; }
-  .nav-lang-menu {
-    display: none;
-    position: absolute; top: calc(100% + 8px); right: 0;
-    min-width: 180px;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 8px;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
-    z-index: 200;
-  }
-  .nav-lang-wrap.open .nav-lang-menu { display: block; }
-  .nav-lang-menu a {
-    display: block;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 14.5px; color: var(--ink);
-    text-decoration: none;
-    font-weight: 500;
-    transition: background 0.1s, color 0.1s;
-  }
-  .nav-lang-menu a:hover { background: var(--bg-soft); }
-  .nav-lang-menu a.active { color: var(--pink); font-weight: 700; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font-body);color:var(--text-on-dark);background:var(--bb-surface-0);-webkit-font-smoothing:antialiased;font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden;--acc:#00FFE0;--accSoft:rgba(0,255,224,0.09);--accBorder:rgba(0,255,224,0.35)}
+  a{color:inherit;text-decoration:none}svg{display:block}
+  .wrap{max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+  .page-fx{position:fixed;inset:0;z-index:-5;pointer-events:none;background:radial-gradient(ellipse 44% 32% at 14% 6%,rgba(0,255,224,0.12),transparent 60%),radial-gradient(ellipse 42% 34% at 86% 30%,rgba(255,45,120,0.12),transparent 62%),radial-gradient(ellipse 52% 42% at 50% 96%,rgba(217,70,239,0.10),transparent 60%),var(--bb-surface-0)}
+  .page-fx.grain{z-index:-4;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+  nav{position:fixed;top:0;left:0;right:0;z-index:var(--z-nav);transition:background var(--dur-base),backdrop-filter var(--dur-base),border-color var(--dur-base);border-bottom:1px solid transparent}
+  nav.scrolled{background:var(--glass-dark-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-bottom:var(--glass-dark-border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-mark{width:34px;height:34px;filter:drop-shadow(0 4px 12px rgba(255,45,120,.35))}
+  .brand-name{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight);color:#fff;white-space:nowrap}
+  .sb-mark{margin-left:12px;padding-left:12px;border-left:1px solid rgba(255,255,255,.16);font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--acc)}
+  .sb-mark small{display:block;font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(244,244,248,.45);text-transform:uppercase}
+  .nav-links{display:flex;gap:24px;align-items:center}
+  .nav-links a{font-size:14px;font-weight:600;color:rgba(244,244,248,.72);transition:color var(--dur-fast)}
+  .nav-links a:hover{color:#fff}.nav-links a.active{color:var(--acc)}
+  .nav-ctas{display:flex;gap:10px;align-items:center}
+  @media(max-width:1080px){.nav-links,.sb-mark{display:none}}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-body);font-weight:600;font-size:14.5px;padding:9px 18px;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:transform var(--dur-fast) var(--ease-snappy),background var(--dur-fast),box-shadow var(--dur-fast),border-color var(--dur-fast);white-space:nowrap}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--bb-pink);color:#fff;border-color:var(--bb-pink);box-shadow:0 6px 20px rgba(255,45,120,.32)}
+  .btn-primary:hover{background:var(--bb-pink-dark);border-color:var(--bb-pink-dark);box-shadow:var(--glow-pink);transform:translateY(-2px)}
+  .btn-ghost-d{background:rgba(255,255,255,.05);color:#fff;border-color:rgba(255,255,255,.18)}
+  .btn-ghost-d:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-2px)}
+  .btn-lg{padding:14px 26px;font-size:15.5px;border-radius:var(--r-md)}
+  .section{position:relative;padding:var(--section-y) 0}
+  .divider{height:1px;max-width:var(--container);margin:0 auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);position:relative;overflow:hidden}
+  .divider::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:100%;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:sweep 5s linear infinite}
+  @keyframes sweep{to{left:130%}}
+  [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);transition-delay:var(--rd,0s)}
+  [data-reveal=left]{transform:translateX(-40px)}[data-reveal=right]{transform:translateX(40px)}
+  [data-reveal].is-visible{opacity:1;transform:none}
+  html:not(.anim) [data-reveal]{opacity:1!important;transform:none!important}
+  [data-parallax]{transform:translate3d(0,var(--py,0px),0);will-change:transform}
+  .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;padding:6px 13px;border-radius:var(--r-pill);margin-bottom:22px;background:var(--accSoft);border:1px solid var(--accBorder);color:var(--acc)}
+  .hero{position:relative;padding:var(--hero-top) 0 60px}
+  .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center}
+  @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:44px}}
+  .badge{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);padding:7px 15px;border-radius:var(--r-pill);font-size:13px;font-weight:500;color:rgba(244,244,248,.92);margin-bottom:24px}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:lp 1.9s var(--ease-out) infinite}
+  @keyframes lp{0%{box-shadow:0 0 0 0 var(--accSoft)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .hero h1{font-family:var(--font-display);font-size:clamp(38px,4.8vw,62px);font-weight:700;line-height:1.05;letter-spacing:var(--ls-display);color:#fff;margin-bottom:20px}
+  .hero h1 .acc{color:var(--acc)}.hero h1 s{color:rgba(244,244,248,.4);text-decoration-color:rgba(255,45,120,.7)}
+  .hero .sub{font-size:var(--fs-lead);color:rgba(244,244,248,.74);max-width:520px;margin-bottom:28px;line-height:1.5}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+  .hero-meta{display:flex;gap:26px;flex-wrap:wrap}
+  .hero-meta .m{font-size:13px;color:rgba(244,244,248,.55)}
+  .hero-meta .m b{display:block;font-family:var(--font-display);font-size:21px;color:#fff;font-weight:700}
+  .hero-meta .m b.acc{color:var(--acc)}
+  .section-head{max-width:720px;margin:0 auto 50px;text-align:center}
+  .section-head h2{font-family:var(--font-display);font-size:var(--fs-h2);font-weight:700;color:#fff;letter-spacing:var(--ls-heading);line-height:1.1;margin-bottom:14px}
+  .section-head h2 .acc{color:var(--acc)}
+  .section-head p{font-size:18px;color:rgba(244,244,248,.66)}
+  /* Console mockup */
+  .console{position:relative;background:linear-gradient(160deg,rgba(24,24,38,.95),rgba(12,12,22,.96));border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+  .cbar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)}
+  .cbar .dot{width:10px;height:10px;border-radius:50%}
+  .cbar .ct{margin-left:8px;font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.5)}
+  .cbar .live{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--acc)}
+  .cbar .live .d{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:lp2 1.7s infinite}
+  @keyframes lp2{0%,100%{opacity:1}50%{opacity:.3}}
+  .cbody{padding:18px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .kpi{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 13px}
+  .kpi .kl{font-size:10px;color:rgba(244,244,248,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+  .kpi .kv{font-family:var(--font-display);font-size:19px;font-weight:700;color:#fff}
+  .kpi .kv .up{font-size:11px;color:#34D399;margin-left:4px}.kpi .kv .dn{font-size:11px;color:var(--acc);margin-left:4px}
+  .cchart{height:74px;display:flex;align-items:flex-end;gap:4px;padding:0 2px;margin-bottom:16px}
+  .cchart span{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--acc),rgba(0,255,224,.18))}
+  .crow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px dashed rgba(255,255,255,.08)}
+  .crow .cn{font-size:13px;color:#fff;font-weight:600;display:flex;align-items:center;gap:9px}
+  .crow .cn .st{width:7px;height:7px;border-radius:50%;background:#34D399}
+  .crow .cn .st.p{background:var(--bb-yellow)}
+  .crow .cs{font-family:var(--font-mono);font-size:12px;color:rgba(244,244,248,.6)}
+  .float-pill{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;background:rgba(12,12,22,.9);border:1px solid var(--accBorder);box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;animation:bob 4.5s var(--ease-in-out) infinite}
+  .float-pill .sw{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+  .float-pill.p1{top:-14px;right:22px}.float-pill.p2{bottom:26px;left:-18px;animation-delay:1.3s}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  /* Marquee */
+  .marquee{position:relative;overflow:hidden;padding:26px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .marquee-label{text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:rgba(244,244,248,.4);margin-bottom:20px}
+  .marquee-track{display:flex;width:max-content;gap:56px;animation:marquee 26s linear infinite}
+  .marquee:hover .marquee-track{animation-play-state:paused}
+  .marquee-track span{font-family:var(--font-display);font-size:21px;font-weight:600;color:rgba(244,244,248,.5);white-space:nowrap}
+  @keyframes marquee{to{transform:translateX(-50%)}}
+  /* Intent target two-col */
+  .spot{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .spot .stext h2{font-family:var(--font-display);font-size:var(--fs-h2);color:#fff;line-height:1.1;letter-spacing:var(--ls-heading);margin-bottom:16px}
+  .spot .stext h2 .acc{color:var(--acc)}
+  .spot .stext p{font-size:17px;color:rgba(244,244,248,.66);margin-bottom:22px}
+  .spot .slist{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .spot .slist li{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:rgba(244,244,248,.88)}
+  .spot .slist .ck{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--acc);color:var(--bb-ink);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+  @media(max-width:880px){.spot{grid-template-columns:1fr;gap:36px}}
+  /* targeting chips visual */
+  .targ{background:linear-gradient(160deg,rgba(24,24,38,.9),rgba(12,12,22,.92));border:1px solid rgba(255,255,255,.1);border-radius:var(--r-xl);padding:24px;box-shadow:var(--shadow-xl)}
+  .targ .tt{font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+  .targ .tchips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+  .tchip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);font-size:12.5px;color:rgba(244,244,248,.85)}
+  .tchip.on{border-color:var(--accBorder);background:var(--accSoft);color:#fff}
+  .tchip .k{font-family:var(--font-mono);font-size:10px;color:rgba(244,244,248,.45)}
+  .targ .tbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:var(--r-md);background:linear-gradient(100deg,rgba(0,255,224,.14),rgba(255,45,120,.1));border:1px solid rgba(255,255,255,.12)}
+  .targ .tbar .tl{font-size:12.5px;color:rgba(244,244,248,.7)}
+  .targ .tbar .tr{font-family:var(--font-display);font-weight:700;color:#fff;font-size:15px}
+  /* Trust pillars */
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:880px){.pgrid{grid-template-columns:1fr}}
+  .pcard{position:relative;padding:26px 24px;background:linear-gradient(160deg,rgba(28,28,43,.6),rgba(15,15,26,.6));border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);transition:transform var(--dur-base) var(--ease-out),border-color var(--dur-base),box-shadow var(--dur-base)}
+  .pcard:hover{transform:translateY(-3px);border-color:var(--accBorder);box-shadow:var(--shadow-xl)}
+  .pcard .pico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:16px;background:var(--accSoft)}
+  .pcard h3{font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+  .pcard p{font-size:14px;color:rgba(244,244,248,.62);line-height:1.5}
+  /* Stats */
+  .stats-band{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.015)}
+  .stats-band::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 50% 90% at 15% 50%,rgba(0,255,224,.14),transparent 60%),radial-gradient(ellipse 50% 90% at 85% 50%,rgba(255,45,120,.12),transparent 60%)}
+  .stats-row{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+  .stat{text-align:center;color:#fff}
+  .stat .n{font-family:var(--font-display);font-size:var(--fs-stat);font-weight:700;line-height:1;margin-bottom:8px;letter-spacing:-.02em}
+  .stat .n.acc{color:var(--acc)}.stat .n.pink{color:var(--bb-pink)}.stat .n.yellow{color:var(--bb-yellow)}
+  .stat .l{font-size:14px;color:rgba(244,244,248,.55)}
+  /* Pricing strip */
+  .price-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:880px){.price-row{grid-template-columns:1fr}}
+  .price{padding:26px 24px;border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);background:rgba(255,255,255,.02);text-align:center}
+  .price .pm{font-family:var(--font-mono);font-size:12px;color:var(--acc);letter-spacing:.04em;margin-bottom:8px}
+  .price b{display:block;font-family:var(--font-display);font-size:26px;color:#fff;font-weight:700;margin-bottom:6px}
+  .price span{font-size:13.5px;color:rgba(244,244,248,.6)}
+  /* CTA */
+  .cta-box{position:relative;overflow:hidden;max-width:1000px;margin:0 auto;background:var(--grad-pink);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-2xl);box-shadow:var(--glow-pink),0 30px 80px rgba(0,0,0,.4);padding:70px 48px;text-align:center;color:#fff}
+  .cta-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 26% 50%,rgba(255,230,0,.22),transparent 55%),radial-gradient(circle at 80% 45%,rgba(0,255,224,.22),transparent 55%)}
+  .cta-box>*{position:relative;z-index:1}
+  .cta-box h2{font-family:var(--font-display);font-size:clamp(32px,4.4vw,50px);font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-bottom:16px}
+  .cta-box p{font-size:18px;opacity:.92;max-width:560px;margin:0 auto 30px}
+  .cta-ctas{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .cta-box .btn-white{background:#fff;color:var(--bb-pink);border-color:#fff}
+  .cta-box .btn-white:hover{background:var(--bb-ink);color:#fff;border-color:var(--bb-ink);transform:translateY(-2px)}
+  .cta-box .btn-clear{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+  .cta-box .btn-clear:hover{background:#fff;color:var(--bb-pink);border-color:#fff;transform:translateY(-2px)}
+  footer.site{border-top:1px solid rgba(255,255,255,.08);padding:54px 0 34px;margin-top:var(--section-y)}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:38px}
+  .foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .foot-brand img{width:30px;height:30px}.foot-brand .brand-name{color:#fff}
+  .foot-tag{font-size:14px;color:rgba(244,244,248,.6);line-height:1.6;max-width:300px}
+  .foot-col h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:rgba(244,244,248,.45);margin-bottom:14px}
+  .foot-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .foot-col a{font-size:14px;color:rgba(244,244,248,.66);transition:color var(--dur-fast)}
+  .foot-col a:hover{color:var(--acc)}
+  .foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:rgba(244,244,248,.45)}
+  @media(max-width:880px){.foot-grid{grid-template-columns:1fr 1fr;gap:30px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}[data-reveal]{opacity:1!important;transform:none!important}}
 </style>
 </head>
-<body>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-inner">
-    <a class="brand" href="/">
-      <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6" y="14" width="28" height="22" rx="3" fill="#FF2D78" stroke="#1A1A2E" stroke-width="2"/>
-        <rect x="6" y="14" width="28" height="6" fill="#1A1A2E"/>
-        <text x="20" y="32" text-anchor="middle" fill="white" font-family="Space Grotesk" font-size="11" font-weight="700">BB</text>
-        <rect x="2" y="6" width="36" height="5" rx="1.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2" transform="rotate(-8 20 8.5)"/>
-        <path d="M30 4 L32.5 -1 L35 4 L40 6.5 L35 9 L32.5 14 L30 9 L25 6.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-      </svg>
-      <span class="brand-name">Boost Boss</span>
-      <span class="brand-sub">EXCHANGE</span>
-    </a>
-    <div class="nav-links">
-      <a href="#why">Why BBX</a>
-      <a href="#integration">Integration</a>
-      <a href="#dynamics">Auction</a>
-      <a href="#inventory">Inventory</a>
-      <a href="/docs">Docs</a>
-      <a href="/trust">Trust</a>
-      <a href="/">Boost Boss ↗</a>
-    </div>
-    <div class="nav-ctas">
-      <div class="nav-lang-wrap" id="navLangWrap">
-        <button class="nav-lang" aria-label="Change language" onclick="document.getElementById('navLangWrap').classList.toggle('open')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M2 12h20"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          <span>EN</span>
-        </button>
-        <div class="nav-lang-menu">
-          <a href="/en" data-lang="en" class="active">English</a>
-          <a href="/zh" data-lang="zh">简体中文</a>
-          <a href="/zh-TW" data-lang="zh-TW">繁體中文</a>
-          <a href="/ja" data-lang="ja">日本語</a>
-          <a href="/ko" data-lang="ko">한국어</a>
-          <a href="/vi" data-lang="vi">Tiếng Việt</a>
-        </div>
-      </div>
-      <a class="btn btn-ghost" href="#apply">Contact</a>
-      <a class="btn btn-primary" href="#apply">Apply for access</a>
-    </div>
+<body style="--acc:#FFE600;--accSoft:rgba(255,230,0,0.09);--accBorder:rgba(255,230,0,0.35)">
+<div class="page-fx"></div><div class="page-fx grain"></div>
+<nav id="nav"><div class="nav-inner">
+  <a class="brand" href="/"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
+  <div class="nav-links">
+    <a href="/publish" class="">Publishers</a>
+    <a href="/ads" class="">SuperBoost Ads</a>
+    <a href="/exchange" class="active">BBX</a>
+    <a href="/pricing" class="">Pricing</a>
   </div>
-</nav>
-<div id="toastContainer"></div>
+  <div class="nav-ctas"><a class="btn btn-ghost-d" href="/demo">Live demo</a><a class="btn btn-primary" href="#">Start free</a></div>
+</div></nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="wrap">
-    <div class="badge"><span class="dot"></span>OpenRTB 2.6 · Annotated by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--violet); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · 42ms p50</div>
-    <h1>
-      The programmatic exchange for<br>
-      <span class="accent-violet">AI-native inventory</span>.
-    </h1>
-    <p class="sub">
-      BBX is how DSPs, agencies, and trading desks bid on impressions inside Claude, ChatGPT, Cursor, Perplexity, and every MCP-powered application. OpenRTB 2.6 compliant. First-price auctions. Full transparency.
-    </p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary btn-lg" href="#apply">Apply for access →</a>
-      <a class="btn btn-outline btn-lg" href="/docs">Read the API docs</a>
-    </div>
-    <div class="hero-micro"><strong>220B+</strong> monthly queries · <strong>42ms</strong> p50 latency · <strong>99.97%</strong> uptime · First-price auctions</div>
-
-    <!-- AUCTION VISUALIZER -->
-    <div class="auction-viz">
-      <button class="replay-btn" onclick="replayAuction()">↻ REPLAY</button>
-      <div class="auction-flow">
-        <div class="flow-node">
-          <h4>Publisher</h4>
-          <p>cursor.com/editor</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-node exchange">
-          <h4>BBX Auction</h4>
-          <p>bid.boostboss.ai</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-node">
-          <h4>Winning DSP</h4>
-          <p>42ms · $4.12 CPM</p>
-        </div>
-      </div>
-
-      <div class="bid-list">
-        <div class="bid-row">
-          <div class="dsp">DSP · The Trade Desk</div>
-          <div class="bid">$3.84</div>
-          <div class="tag">Bid received · 38ms</div>
-        </div>
-        <div class="bid-row">
-          <div class="dsp">DSP · DV360</div>
-          <div class="bid">$3.92</div>
-          <div class="tag">Bid received · 41ms</div>
-        </div>
-        <div class="bid-row winner">
-          <div class="dsp">DSP · Amazon Ads</div>
-          <div class="bid">$4.12</div>
-          <div class="tag">Winning bid · 42ms</div>
-        </div>
-        <div class="bid-row">
-          <div class="dsp">DSP · MediaMath</div>
-          <div class="bid">$3.61</div>
-          <div class="tag">Bid received · 44ms</div>
-        </div>
-      </div>
-
-      <!-- BID LANDSCAPE -->
-      <div class="bid-landscape">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h4>Bid landscape (last 1,000 auctions)</h4>
-          <div class="live-qps"><span class="dot"></span><span id="liveQps">8,412</span> QPS</div>
-        </div>
-        <canvas id="bidLandscape" height="120"></canvas>
-      </div>
-    </div>
+<section class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-copy">
+    <div class="badge"><span class="dot"></span>The ad network built for AI surfaces</div>
+    <div class="eyebrow">BBX · programmatic exchange</div>
+    <h1>The exchange for <span class="acc">AI-native</span> inventory.</h1>
+    <p class="sub">BBX opens Boost Boss supply to the open market: OpenRTB 2.6, first-price auctions, real-time Benna scoring on every bid. Plug in your DSP, agency desk, or trading stack and bid on intent.</p>
+    <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="#">Request a seat →</a><a class="btn btn-ghost-d btn-lg" href="#">Read the RTB docs</a></div>
   </div>
-</section>
-
-<!-- STATS -->
-<section class="stats">
-  <div class="wrap">
-    <div class="stats-grid">
-      <div class="stat">
-        <h3>220B+</h3>
-        <p>Monthly bid requests across the MCP network</p>
-      </div>
-      <div class="stat">
-        <h3>42ms</h3>
-        <p>Median auction latency (p50), end-to-end</p>
-      </div>
-      <div class="stat">
-        <h3>180+</h3>
-        <p>Publishers connected — Claude, Cursor, Perplexity, more</p>
-      </div>
-      <div class="stat">
-        <h3>99.97%</h3>
-        <p>Exchange uptime over trailing 12 months</p>
-      </div>
-    </div>
+  <div class="mock" data-reveal="right" data-parallax data-speed="0.05"><div class="console"><div class="cbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="ct">POST /api/rtb · OpenRTB 2.6</span><span class="live"><span class="d"></span>200 OK</span></div>
+   <div class="cbody"><pre style="font-family:var(--font-mono);font-size:12.5px;line-height:1.7;color:#E5E7EB;margin:0;white-space:pre-wrap"><span style="color:#6B7280">// bid request — enriched with MCP intent</span>
+{
+  "imp": [{ "id": "1", <span style="color:#FF6FA3">"bidfloor"</span>: 0.50 }],
+  <span style="color:#FF6FA3">"intent"</span>: <span style="color:var(--bb-yellow)">"deploy"</span>,
+  <span style="color:#FF6FA3">"mcp_tool"</span>: <span style="color:var(--bb-yellow)">"vercel-mcp"</span>,
+  <span style="color:#FF6FA3">"host"</span>: <span style="color:var(--bb-yellow)">"cursor"</span>,
+  <span style="color:#FF6FA3">"benna_score"</span>: <span style="color:var(--bb-cyan)">0.94</span>
+}</pre></div></div></div>
+</div></div></section>
+<div class="divider"></div>
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><div class="eyebrow">Built for buyers</div><h2>OpenRTB, the way you expect it.</h2><p>Standards-compliant, low-latency, and enriched with signals no other exchange has.</p></div>
+  <div class="pgrid"><div class="pcard" data-reveal style="--rd:0s"><div class="pico">⇄</div><h3>OpenRTB 2.6</h3><p>A spec your DSP already speaks. Standard bid requests, enriched with MCP intent fields.</p></div><div class="pcard" data-reveal style="--rd:0.06s"><div class="pico">⚡</div><h3>First-price, low-latency</h3><p>Transparent first-price clearing with Benna scoring in ~5ms per bid.</p></div><div class="pcard" data-reveal style="--rd:0.12s"><div class="pico">🔑</div><h3>Seat authentication</h3><p>Optional Bearer auth on RTB POST, per-seat controls, and spend caps.</p></div><div class="pcard" data-reveal style="--rd:0.18s"><div class="pico">🧠</div><h3>Intent-enriched bids</h3><p>Every request carries intent, tool, host, and a Benna score — bid on what users are doing.</p></div><div class="pcard" data-reveal style="--rd:0.24s"><div class="pico">📄</div><h3>sellers.json + ads.txt</h3><p>Full supply-chain transparency. Authorized, auditable, IAB-standard inventory.</p></div><div class="pcard" data-reveal style="--rd:0.3s"><div class="pico">📊</div><h3>Real-time reporting</h3><p>Win rate, clearing price, and pacing via API. Reconcile against your own logs.</p></div></div>
+</div></section><div class="divider"></div><section class="section stats-band"><div class="wrap"><div class="stats-row">
+     <div class="stat" data-reveal><div class="n acc" data-count="2.6" data-dec="1">0</div><div class="l">OpenRTB version</div></div>
+     <div class="stat" data-reveal style="--rd:.08s"><div class="n" data-count="5" data-suf="ms">0</div><div class="l">Benna scoring / bid</div></div>
+     <div class="stat" data-reveal style="--rd:.16s"><div class="n yellow" data-count="6.5" data-dec="1" data-suf="%">0</div><div class="l">RTB exchange fee</div></div>
+     <div class="stat" data-reveal style="--rd:.24s"><div class="n" data-count="100" data-suf="%">0</div><div class="l">First-price clearing</div></div>
+   </div></div></section>
+<section class="section"><div class="wrap"><div class="cta-box" data-reveal>
+  <h2>Bring your demand to BBX.</h2><p>Request a seat and start bidding on the highest-intent inventory in AI software.</p>
+  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="#">Request a seat →</a><a class="btn btn-lg btn-clear" href="#">Read the RTB docs</a></div>
+</div></div></section>
+<footer class="site"><div class="wrap">
+  <div class="foot-grid">
+    <div><div class="foot-brand"><img src="/design-system/assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight)">Boost Boss</span></div><p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p></div>
+    <div class="foot-col"><h4>Product</h4><ul><li><a href="/publish">Publishers</a></li><li><a href="/ads">SuperBoost</a></li><li><a href="/exchange">BBX Exchange</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/demo">Live demo</a></li></ul></div>
+    <div class="foot-col"><h4>Company</h4><ul><li><a href="/about">About</a></li><li><a href="/trust">Trust center</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div class="foot-col"><h4>Resources</h4><ul><li><a href="#">Documentation</a></li><li><a href="#">Benna whitepaper</a></li><li><a href="#">Status</a></li></ul></div>
   </div>
-</section>
-
-<!-- WHY BBX -->
-<section class="section" id="why">
-  <div class="wrap">
-    <span class="eyebrow violet">Why BBX</span>
-    <h2>The only exchange built for AI-native inventory.</h2>
-    <p class="sub-head">Legacy exchanges were designed for banner ads on news sites. BBX was designed from day one for prompts, tool calls, and conversational surfaces — the inventory your brand actually needs to reach.</p>
-
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="icon">⚡</div>
-        <h3>Unique signals</h3>
-        <p>Bid requests carry intent signals no other exchange has — prompt topic, MCP tool chain, model context, conversation stage. Target with precision legacy exchanges can't match.</p>
-      </div>
-      <div class="why-card">
-        <div class="icon">🔍</div>
-        <h3>Full transparency</h3>
-        <p>Every auction is logged. See bid shading, clearing price, win rate per publisher. Full ads.txt and sellers.json compliance. No hidden fees. Transparent exchange pricing.</p>
-      </div>
-      <div class="why-card">
-        <div class="icon">🧠</div>
-        <h3>AI-native audiences</h3>
-        <p>Every impression is annotated by <a href="https://benna.ai" target="_blank" rel="noopener" style="color: var(--violet); font-weight: 600;">Benna AI</a>, our optimization engine — classifying users as developer, student, researcher, or decision-maker in real time. Segments are actual humans expressing intent, not cookie proxies. Full architecture and A/B results in the <a href="/benna-whitepaper.pdf" target="_blank" rel="noopener" style="color: var(--violet); font-weight: 600; text-decoration: underline;">technical whitepaper</a>.</p>
-      </div>
-      <div class="why-card">
-        <div class="icon">📊</div>
-        <h3>First-price auctions</h3>
-        <p>No second-price games. Bid what you're willing to pay. Soft floors published transparently. Post-auction reports show you exactly how your bid placed against competing DSPs.</p>
-      </div>
-      <div class="why-card">
-        <div class="icon">🛡️</div>
-        <h3>Brand safety by design</h3>
-        <p>Every publisher passes editorial review. IAS, DoubleVerify, and HUMAN integrations native. Invalid traffic filtered pre-auction. Keyword and category blocklists enforced server-side.</p>
-      </div>
-      <div class="why-card">
-        <div class="icon">🌐</div>
-        <h3>Private marketplaces</h3>
-        <p>Set up PMPs with individual publishers via deal ID. Preferred deals, private auctions, and programmatic guaranteed — all supported through the standard OpenRTB flow.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INTEGRATION -->
-<section class="section" id="integration" style="background: var(--bg-soft);">
-  <div class="wrap">
-    <span class="eyebrow violet">Integration</span>
-    <h2>One endpoint. OpenRTB 2.6.</h2>
-    <p class="sub-head">Point your bidder at our endpoint, authenticate with your DSP key, and start receiving bid requests. Test environment live in under 24 hours. Production access after QA review.</p>
-
-    <div class="integration-grid">
-      <div class="integration-text">
-        <h3>Standard OpenRTB, extended for AI.</h3>
-        <p>Every bid request conforms to OpenRTB 2.6. We extend the standard with an <code>imp.ext.mcp_context</code> object carrying AI-native signals — user intent, MCP tool about to run, host app, session length — so Benna AI can score your bid the same way the first-party exchange does, and so your targeting engine can bid with confidence.</p>
-        <ul class="integration-list">
-          <li>OpenRTB 2.6 · Native 1.2 · VAST 4.2 · first-price</li>
-          <li>Sub-100ms end-to-end auction timeout · p50 4ms ranker</li>
-          <li>HTTPS only · TLS 1.3 · mTLS optional</li>
-          <li>Live endpoint: <code>POST https://boostboss.ai/api/rtb</code></li>
-          <li>Machine-readable spec: <a href="/openapi.json" style="color: var(--cyan); text-decoration: underline;"><code>/openapi.json</code></a> (tag <code>RTB</code>)</li>
-          <li>Full reference: <a href="/docs/api-reference#rtb-overview" style="color: var(--cyan); text-decoration: underline;">API reference / OpenRTB 2.6 (BBX)</a></li>
-          <li>PMP support via deal ID and PG deals</li>
-        </ul>
-      </div>
-      <div class="code-block">
-        <div class="code-header">
-          <div class="lights"><span></span><span></span><span></span></div>
-          <span>POST /api/rtb</span>
-        </div>
-<pre>{
-  <span class="s">"id"</span>: <span class="s">"bid_req_9a8b7c"</span>,
-  <span class="s">"at"</span>: <span class="n">1</span>, <span class="s">"tmax"</span>: <span class="n">200</span>, <span class="s">"cur"</span>: [<span class="s">"USD"</span>],
-  <span class="s">"imp"</span>: [{
-    <span class="s">"id"</span>: <span class="s">"1"</span>,
-    <span class="s">"tagid"</span>: <span class="s">"cursor.com/editor/python"</span>,
-    <span class="s">"bidfloor"</span>: <span class="n">1.50</span>, <span class="s">"bidfloorcur"</span>: <span class="s">"USD"</span>,
-    <span class="s">"native"</span>: { <span class="s">"ver"</span>: <span class="s">"1.2"</span>, <span class="s">"request"</span>: <span class="s">"{...Native 1.2}"</span> },
-    <span class="s">"ext"</span>: { <span class="s">"mcp_context"</span>: {
-      <span class="s">"intent"</span>: <span class="s">"debug_py"</span>,
-      <span class="s">"mcp_tool"</span>: <span class="s">"filesystem.read"</span>,
-      <span class="s">"host"</span>: <span class="s">"cursor.com"</span>,
-      <span class="s">"region"</span>: <span class="s">"us-west"</span>,
-      <span class="s">"session_len"</span>: <span class="n">42</span>
-    } }
-  }],
-  <span class="s">"site"</span>: { <span class="s">"domain"</span>: <span class="s">"cursor.com"</span>, <span class="s">"keywords"</span>: <span class="s">"python debugging"</span> },
-  <span class="s">"device"</span>: { <span class="s">"geo"</span>: { <span class="s">"country"</span>: <span class="s">"USA"</span>, <span class="s">"region"</span>: <span class="s">"us-west"</span> } },
-  <span class="s">"user"</span>: { <span class="s">"ext"</span>: { <span class="s">"session_len_min"</span>: <span class="n">42</span> } },
-  <span class="s">"bcat"</span>: [<span class="s">"IAB7-39"</span>], <span class="s">"badv"</span>: [<span class="s">"bad-competitor.com"</span>]
-}</pre>
-      </div>
-    </div>
-
-    <div style="margin-top: 48px; padding: 28px 32px; background: #0B0D2A; border: 2px solid var(--violet); border-radius: 14px; color: #fff;">
-      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px;">
-        <div style="max-width: 560px;">
-          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--cyan); text-transform: uppercase; margin-bottom: 6px;">Try it now — no auth required</div>
-          <h3 style="color: #fff; font-size: 22px; margin: 0 0 6px;">Live sandbox is open.</h3>
-          <p style="color: rgba(255,255,255,0.72); margin: 0; font-size: 14px;">Paste the cURL below into a terminal and get back a signed BidResponse with Benna attribution attached. Same endpoint that powers production — the sandbox uses demo campaigns (Cursor, Datadog, Railway) so no budget is spent.</p>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <a href="/docs/api-reference#rtb-overview" class="btn btn-primary" style="background: var(--violet); border-color: var(--violet);">Read RTB docs →</a>
-        </div>
-      </div>
-      <pre style="margin-top: 20px; padding: 18px 20px; background: #06081C; border-radius: 8px; color: #E4E4F2; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12.5px; line-height: 1.55; overflow-x: auto;">curl -X POST https://boostboss.ai/api/rtb \
-  -H <span style="color: #04BEFE;">'Content-Type: application/json'</span> \
-  -H <span style="color: #04BEFE;">'x-openrtb-version: 2.6'</span> \
-  -d <span style="color: #04BEFE;">'{"id":"demo","at":1,"cur":["USD"],
-      "imp":[{"id":"1","tagid":"cursor.com","bidfloor":1.5,
-              "native":{"ver":"1.2","request":"{\"ver\":\"1.2\",\"assets\":[{\"id\":1,\"required\":1,\"title\":{\"len\":60}},{\"id\":2,\"required\":1,\"img\":{\"type\":3,\"w\":1200,\"h\":628}},{\"id\":4,\"required\":1,\"data\":{\"type\":12,\"len\":25}}]}"}}],
-      "site":{"domain":"cursor.com","keywords":"python debugging traceback"},
-      "device":{"geo":{"country":"USA","region":"us-west"}},
-      "user":{"ext":{"session_len_min":42}}}'</span></pre>
-    </div>
-  </div>
-</section>
-
-<!-- AUCTION DYNAMICS -->
-<section class="section" id="dynamics">
-  <div class="wrap">
-    <span class="eyebrow violet">Auction mechanics</span>
-    <h2>First-price. Transparent. Predictable.</h2>
-    <p class="sub-head">We don't run opaque second-price auctions or dynamic floors that change based on what you bid. BBX auctions are straightforward: highest bid above the published floor wins.</p>
-
-    <div class="dynamics-grid">
-      <div class="dynamics-card">
-        <h4>First-price auction <span class="badge-sm">DEFAULT</span></h4>
-        <p>The highest bid above the floor wins and pays the bid amount. No second-price tricks. No hidden bid-shading on our side. What you bid is what you pay (minus any transparent fees, disclosed in every win notice).</p>
-        <ul>
-          <li>Bid = clearing price</li>
-          <li>Floors published in bid request (bidfloor)</li>
-          <li>Win notice includes burl + nurl per OpenRTB</li>
-        </ul>
-      </div>
-      <div class="dynamics-card">
-        <h4>Private marketplace <span class="badge-sm">PMP</span></h4>
-        <p>Negotiate deals directly with publishers. Preferred rates, guaranteed access, or invite-only auctions. Each deal gets a deal ID that surfaces in the bid request extensions block for your bidder to target.</p>
-        <ul>
-          <li>Preferred deal (fixed CPM, first look)</li>
-          <li>Private auction (invited DSPs only)</li>
-          <li>Programmatic guaranteed (volume commitment)</li>
-        </ul>
-      </div>
-      <div class="dynamics-card">
-        <h4>Transparent fee structure <span class="badge-sm">Flat</span></h4>
-        <p>One flat exchange fee on cleared spend. No inventory markup. No hidden fees. You see exactly what's happening at every layer — the full schedule is in the <a href="/advertiser-terms" style="color: var(--violet); font-weight: 600;">Advertiser Terms</a>.</p>
-        <ul>
-          <li>Demand-side exchange fee, posted</li>
-          <li>No buyer fees, no data fees</li>
-          <li>Publisher payout governed by Publisher Agreement</li>
-        </ul>
-      </div>
-      <div class="dynamics-card">
-        <h4>Supply path optimization <span class="badge-sm">SPO</span></h4>
-        <p>BBX is the direct supply path for 180+ AI-native publishers. No resellers. No duplicated auctions. One hop from you to the impression. Your ads.txt and sellers.json entries are clean and simple.</p>
-        <ul>
-          <li>Direct-only relationships (no reselling)</li>
-          <li>sellers.json published at boostboss.ai/sellers.json</li>
-          <li>OpenRTB supplychain object on every request</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INVENTORY -->
-<section class="section" id="inventory" style="background: var(--bg-soft);">
-  <div class="wrap">
-    <span class="eyebrow violet">Inventory</span>
-    <h2>The AI apps your buyers already ask about.</h2>
-    <p class="sub-head">Sample of live inventory on BBX. Full publisher list available after access approval. All publishers pass editorial review, ads.txt compliance, and human traffic verification.</p>
-
-    <div class="inventory-table">
-      <div class="inv-head">
-        <div>Publisher</div>
-        <div>Category</div>
-        <div>Audience</div>
-        <div>Avg QPS</div>
-        <div>p50 eCPM</div>
-      </div>
-      <div class="inv-row">
-        <div>
-          <div class="app-name">Cursor</div>
-          <div class="app-meta">cursor.com — AI-first IDE</div>
-        </div>
-        <div><span class="app-tag">Dev tools</span></div>
-        <div>1M+ developers</div>
-        <div class="qps">8,400</div>
-        <div class="qps">$4.12</div>
-      </div>
-      <div class="inv-row">
-        <div>
-          <div class="app-name">Perplexity</div>
-          <div class="app-meta">perplexity.ai — Answer engine</div>
-        </div>
-        <div><span class="app-tag">Search</span></div>
-        <div>20M+ researchers</div>
-        <div class="qps">42,200</div>
-        <div class="qps">$3.28</div>
-      </div>
-      <div class="inv-row">
-        <div>
-          <div class="app-name">Raycast</div>
-          <div class="app-meta">raycast.com — Command palette</div>
-        </div>
-        <div><span class="app-tag">Productivity</span></div>
-        <div>Prosumers</div>
-        <div class="qps">6,100</div>
-        <div class="qps">$2.94</div>
-      </div>
-      <div class="inv-row">
-        <div>
-          <div class="app-name">Replit Agent</div>
-          <div class="app-meta">replit.com — Agentic IDE</div>
-        </div>
-        <div><span class="app-tag">Dev tools</span></div>
-        <div>Students + devs</div>
-        <div class="qps">11,800</div>
-        <div class="qps">$2.64</div>
-      </div>
-      <div class="inv-row">
-        <div>
-          <div class="app-name">Warp</div>
-          <div class="app-meta">warp.dev — AI terminal</div>
-        </div>
-        <div><span class="app-tag">Dev tools</span></div>
-        <div>Senior engineers</div>
-        <div class="qps">3,200</div>
-        <div class="qps">$5.08</div>
-      </div>
-      <div class="inv-row">
-        <div>
-          <div class="app-name">Granola</div>
-          <div class="app-meta">granola.ai — Meeting notes</div>
-        </div>
-        <div><span class="app-tag">Productivity</span></div>
-        <div>Founders + PMs</div>
-        <div class="qps">1,900</div>
-        <div class="qps">$6.42</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- APPLY -->
-<section class="wrap">
-  <div class="apply-box" id="apply">
-    <h2>Ready to bid on AI-native inventory?</h2>
-    <p>Apply for BBX access. Test environment provisioned within 24 hours of approval. Production access after a 2-week QA window. Minimum spend commitment: $50k/month for seat access.</p>
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a class="btn btn-primary btn-lg" href="mailto:info@boostboss.ai?subject=BBX%20Access%20Request">Apply for access →</a>
-      <a class="btn btn-outline btn-lg" href="/docs">Read the technical docs</a>
-    </div>
-    <p style="font-size: 13px; margin-top: 24px; color: rgba(255,255,255,0.55);">
-      Already a buyer? <a href="mailto:info@boostboss.ai" style="color: var(--cyan); text-decoration: underline;">info@boostboss.ai</a> · RTB support: <a href="mailto:support@boostboss.ai" style="color: var(--cyan); text-decoration: underline;">support@boostboss.ai</a>
-    </p>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer style="background:#FAFAF7;border-top:1px solid #EAEAEF;padding:56px 0 32px;">
-  <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-    <div class="foot-grid" style="display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:48px;margin-bottom:40px;">
-      <div>
-        <div class="foot-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <img src="/favicon.svg?v=rocket-20260421" alt="" style="width:32px;height:32px;">
-          <span class="brand-name" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:-0.5px;">Boost Boss</span>
-        </div>
-        <p class="foot-tag" style="font-size:14px;color:#4B4B5E;line-height:1.6;">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Product</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/publish" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Publishers</a></li>
-          <li style="padding:5px 0;"><a href="/ads" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SuperBoost</a></li>
-          <li style="padding:5px 0;"><a href="/exchange" style="font-size:14px;color:#4B4B5E;text-decoration:none;">BBX</a></li>
-          <li style="padding:5px 0;"><a href="/pricing" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Pricing</a></li>
-          <li style="padding:5px 0;"><a href="/demo" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Live demo</a></li>
-          <li style="padding:5px 0;"><a href="https://affiliate.boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Affiliate</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Resources</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/docs" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Documentation</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference" style="font-size:14px;color:#4B4B5E;text-decoration:none;">API reference</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference#sdks" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SDK</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Company</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/about" style="font-size:14px;color:#4B4B5E;text-decoration:none;">About</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Contact</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Careers</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Legal</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/terms" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Terms of Service</a></li>
-          <li style="padding:5px 0;"><a href="/privacy" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Privacy Policy</a></li>
-          <li style="padding:5px 0;"><a href="/refunds" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Refund Policy</a></li>
-          <li style="padding:5px 0;"><a href="/aup" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Acceptable Use</a></li>
-          <li style="padding:5px 0;"><a href="/cookies" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Cookie Policy</a></li>
-          <li style="padding:5px 0;"><a href="/trust" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Trust center</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-bottom" style="padding-top:28px;border-top:1px solid #EAEAEF;font-size:13px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <span>© 2026 Boost Boss · All rights reserved.</span>
-      <span>Made for the AI era.</span>
-    </div>
-  </div>
-</footer>
-
+  <div class="foot-bottom"><span>© 2026 Boost Boss · All rights reserved.</span><span>Made for the AI era.</span></div>
+</div></footer>
 <script>
-// ── Toast ──
-function showToast(msg, type='success', dur=2500) {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.textContent = msg;
-  c.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
-}
-
-// ── Animated auction replay ──
-async function replayAuction() {
-  const rows = document.querySelectorAll('.bid-row');
-  rows.forEach(r => r.classList.remove('visible'));
-
-  // Try to fetch a real auction from /api/rtb
-  let realBid = null;
-  try {
-    const resp = await fetch('/api/rtb', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-openrtb-version': '2.6' },
-      body: JSON.stringify({
-        id: 'demo_' + Date.now(), at: 1, cur: ['USD'],
-        imp: [{ id: '1', tagid: 'cursor.com/editor', bidfloor: 1.5,
-          native: { ver: '1.2', request: '{"ver":"1.2","assets":[{"id":1,"required":1,"title":{"len":60}}]}' } }],
-        site: { domain: 'cursor.com', keywords: 'python debugging' },
-        device: { geo: { country: 'USA', region: 'us-west' } },
-        user: { ext: { session_len_min: 42 } },
-      }),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data.seatbid && data.seatbid[0] && data.seatbid[0].bid[0]) {
-        const b = data.seatbid[0].bid[0];
-        realBid = { price: b.price, adm: b.adm, latency: data.ext && data.ext.benna ? data.ext.benna.latency_ms : null };
-      }
-    }
-  } catch (_) {}
-
-  const dsps = [
-    { name: 'The Trade Desk', bid: '$' + (3.2 + Math.random() * 1.8).toFixed(2), ms: Math.round(30 + Math.random() * 20) },
-    { name: 'DV360', bid: '$' + (3.0 + Math.random() * 2.0).toFixed(2), ms: Math.round(35 + Math.random() * 15) },
-    { name: 'Amazon Ads', bid: realBid ? '$' + realBid.price.toFixed(2) : '$' + (3.5 + Math.random() * 2.5).toFixed(2), ms: realBid && realBid.latency ? Math.round(realBid.latency) : Math.round(32 + Math.random() * 18) },
-    { name: 'MediaMath', bid: '$' + (2.8 + Math.random() * 1.6).toFixed(2), ms: Math.round(38 + Math.random() * 12) },
-  ];
-
-  // Find winner
-  const bids = dsps.map(d => parseFloat(d.bid.substring(1)));
-  const winnerIdx = bids.indexOf(Math.max(...bids));
-
-  rows.forEach((row, i) => {
-    const d = dsps[i];
-    row.querySelector('.dsp').textContent = 'DSP · ' + d.name;
-    row.querySelector('.bid').textContent = d.bid;
-
-    row.classList.remove('winner');
-    if (i === winnerIdx) {
-      row.classList.add('winner');
-      row.querySelector('.tag').textContent = 'Winning bid · ' + d.ms + 'ms';
-      document.querySelector('.flow-node:last-child p').textContent = d.ms + 'ms · ' + d.bid + ' CPM';
-    } else {
-      row.querySelector('.tag').textContent = 'Bid received · ' + d.ms + 'ms';
-    }
-
-    setTimeout(() => row.classList.add('visible'), 200 + i * 300);
-  });
-}
-
-// Initial animation on page load
-setTimeout(replayAuction, 400);
-
-// ── Animated stat counters ──
-function animateCounters() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const text = el.textContent;
-        const num = parseFloat(text.replace(/[^0-9.]/g, ''));
-        const suffix = text.replace(/[0-9.]/g, '');
-        const duration = 1200;
-        const start = performance.now();
-        el.classList.add('counting');
-
-        function tick(now) {
-          const progress = Math.min((now - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          const current = num * eased;
-          if (text.includes('B+')) el.textContent = Math.round(current) + 'B+';
-          else if (text.includes('ms')) el.textContent = Math.round(current) + 'ms';
-          else if (text.includes('+')) el.textContent = Math.round(current) + '+';
-          else if (text.includes('%')) el.textContent = current.toFixed(2) + '%';
-          else el.textContent = text;
-
-          if (progress < 1) requestAnimationFrame(tick);
-          else { el.textContent = text; el.classList.remove('counting'); }
-        }
-        requestAnimationFrame(tick);
-        observer.unobserve(el);
-      }
-    });
-  }, { threshold: 0.3 });
-
-  document.querySelectorAll('.stat h3').forEach(el => observer.observe(el));
-}
-animateCounters();
-
-// ── Live QPS counter ──
-setInterval(() => {
-  const base = 8400;
-  const jitter = Math.round((Math.random() - 0.5) * 600);
-  document.getElementById('liveQps').textContent = (base + jitter).toLocaleString();
-}, 2000);
-
-// ── Bid landscape chart ──
-function drawBidLandscape() {
-  const canvas = document.getElementById('bidLandscape');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = 120 * dpr;
-  ctx.scale(dpr, dpr);
-  const w = rect.width, h = 120;
-
-  // Generate bid distribution (bell curve-ish)
-  const bins = 40;
-  const data = [];
-  for (let i = 0; i < bins; i++) {
-    const x = (i / bins) * 10; // $0 - $10 CPM range
-    const center = 3.8;
-    const spread = 1.5;
-    const y = Math.exp(-0.5 * Math.pow((x - center) / spread, 2)) * (0.7 + Math.random() * 0.3);
-    data.push(y);
-  }
-  const maxY = Math.max(...data);
-
-  const isDark = document.body.classList.contains('dark');
-
-  // Draw bars
-  const barW = (w - 20) / bins;
-  data.forEach((val, i) => {
-    const barH = (val / maxY) * (h - 30);
-    const x = 10 + i * barW;
-    const y = h - 15 - barH;
-
-    // Winner zone highlight
-    if (i >= 14 && i <= 18) {
-      ctx.fillStyle = isDark ? 'rgba(124,58,237,0.3)' : 'rgba(124,58,237,0.15)';
-    } else {
-      ctx.fillStyle = isDark ? 'rgba(124,58,237,0.6)' : 'rgba(124,58,237,0.4)';
-    }
-    ctx.beginPath();
-    ctx.roundRect(x, y, barW - 2, barH, 2);
-    ctx.fill();
-  });
-
-  // Labels
-  ctx.fillStyle = isDark ? '#9CA3AF' : '#6B7280';
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.textAlign = 'center';
-  for (let i = 0; i <= 10; i += 2) {
-    const x = 10 + (i / 10) * (w - 20);
-    ctx.fillText('$' + i, x, h - 2);
-  }
-
-  // Winner line
-  const winX = 10 + (4.12 / 10) * (w - 20);
-  ctx.strokeStyle = '#FF2D78';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([4, 3]);
-  ctx.beginPath();
-  ctx.moveTo(winX, 5);
-  ctx.lineTo(winX, h - 15);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  ctx.fillStyle = '#FF2D78';
-  ctx.font = 'bold 10px JetBrains Mono, monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('Winner $4.12', winX + 4, 14);
-}
-
-drawBidLandscape();
-window.addEventListener('resize', drawBidLandscape);
-
-// ── Copy cURL from sandbox ──
-const curlPre = document.querySelector('.apply-box + section pre, [style*="06081C"] + pre') ||
-  document.querySelector('pre[style]');
-// Add click-to-copy on sandbox cURL
-document.querySelectorAll('pre').forEach(pre => {
-  if (pre.textContent.includes('curl -X POST') && pre.textContent.includes('/api/rtb')) {
-    pre.style.cursor = 'pointer';
-    pre.title = 'Click to copy';
-    pre.addEventListener('click', () => {
-      navigator.clipboard.writeText(pre.textContent).then(() => showToast('cURL copied to clipboard'));
-    });
-  }
-});
-
-// ── Smooth anchor scrolling ──
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
-    if (target) {
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
+(function(){var ok=document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches;if(ok)document.documentElement.classList.add('anim');else document.addEventListener('visibilitychange',function o(){if(document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('anim');document.removeEventListener('visibilitychange',o)}});})();
+var ANIM=document.documentElement.classList.contains('anim');
+var nav=document.getElementById('nav');
+var px=[].slice.call(document.querySelectorAll('[data-parallax]'));
+function onS(){var y=scrollY;nav.classList.toggle('scrolled',y>8);if(ANIM){var vh=innerHeight;px.forEach(function(el){var r=el.getBoundingClientRect();var sp=parseFloat(el.dataset.speed||'0.05');el.style.setProperty('--py',((r.top+r.height/2-vh/2)*-sp).toFixed(1)+'px')})}}
+addEventListener('scroll',onS,{passive:true});onS();
+function animateCount(el){var t=parseFloat(el.dataset.count),d=parseInt(el.dataset.dec||'0'),pre=el.dataset.pre||'',suf=el.dataset.suf||'',t0=performance.now();(function tick(n){var p=Math.min((n-t0)/1300,1),e=1-Math.pow(1-p,3),v=(t*e).toFixed(d);el.textContent=pre+(d===0?Math.round(v).toLocaleString():v)+suf;if(p<1)requestAnimationFrame(tick)})(performance.now());}
+if(ANIM&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){if(e.target.matches('[data-reveal]'))e.target.classList.add('is-visible');if(e.target.querySelector&&e.target.querySelector('.n[data-count]'))e.target.querySelectorAll('.n[data-count]').forEach(animateCount);o.unobserve(e.target)}})},{threshold:.2});document.querySelectorAll('[data-reveal], .stats-band').forEach(function(el){io.observe(el)})}else{document.querySelectorAll('.n[data-count]').forEach(function(el){var d=parseInt(el.dataset.dec||'0');el.textContent=(el.dataset.pre||'')+(d===0?Math.round(el.dataset.count):Number(el.dataset.count).toFixed(d))+(el.dataset.suf||'')})}
 </script>
-
 </body>
 </html>

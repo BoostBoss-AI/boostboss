@@ -1,658 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- BB_I18N_PRELOAD: zero-flash language preference. Mirrors i18n.js. Do not edit by hand — run scripts/i18n_inject_preload.py. -->
-<style>html.bb-i18n-loading{visibility:hidden}</style>
-<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/computer':1,'/publish/browser':1,'/publish/browser-extension':1,'/publish/mobile':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
-<!-- /BB_I18N_PRELOAD -->
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumi for Computer App — Boost Boss</title>
-<meta name="description" content="Add ad revenue to your downloaded AI app. Lumi for Computer App ships ad placements native to Electron, Tauri, and native macOS/Windows/Linux. Video with sound allowed. 10 placements. Weekly payouts.">
-<meta property="og:title" content="Lumi for Computer App — Boost Boss">
-<meta property="og:description" content="Monetize your downloaded AI app. Electron, Tauri, native. 10 placements. Video with sound.">
-<meta property="og:url" content="https://boostboss.ai/publish/computer">
-<link rel="canonical" href="https://boostboss.ai/publish/computer">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Lumi — Computer App — Boost Boss · Lumi SDK</title>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --pink: #FF2D78; --pink-dark: #E01E65; --cyan: #04BEFE; --yellow: #FFE600;
-    --ink: #0F0F1A; --ink-soft: #4B4B5E; --muted: #6B7280; --line: #E5E7EB;
-    --bg: #FFFFFF; --bg-soft: #FAFAF7; --code-bg: #0F0F1A;
-  }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: var(--ink); line-height: 1.55;
-    -webkit-font-smoothing: antialiased; font-size: 16px;
-    background:
-      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%),
-      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%),
-      #FAFAF7;
-    background-attachment: fixed; min-height: 100vh;
-  }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-  .wrap-narrow { max-width: 880px; margin: 0 auto; padding: 0 24px; }
-  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
-
-  /* NAV */
-  nav.site-nav { position: sticky; top: 0; z-index: 100; background: transparent; transition: background 0.3s, border 0.3s, backdrop-filter 0.3s; border-bottom: 1px solid transparent; }
-  nav.site-nav.scrolled { background: rgba(250,250,247,0.86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(15,15,26,0.06); }
-  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 36px; height: 36px; }
-  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
-  /* Animated shimmer + blinking sparkle, matches /publish + /publish/signin. */
-  .lumi-mark {
-    display: inline-flex; align-items: center; gap: 4px;
-    margin-left: 12px; padding-left: 12px;
-    border-left: 1px solid rgba(15,15,26,0.12);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
-    background-image: linear-gradient(90deg, #FF2D78 0%, #D946EF 25%, #04BEFE 50%, #D946EF 75%, #FF2D78 100%);
-    background-size: 220% 100%;
-    background-position: 0% 50%;
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-    user-select: none;
-    animation: lumiShimmer 4s linear infinite;
-  }
-  .lumi-mark .sparkle {
-    color: #F59E0B; -webkit-text-fill-color: #F59E0B;
-    font-size: 17px; line-height: 1;
-    text-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
-    animation: lumiBlink 1.8s ease-in-out infinite;
-  }
-  @keyframes lumiShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 220% 50%; } }
-  @keyframes lumiBlink { 0%, 100% { opacity: 0.55; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.1); } }
-  @media (prefers-reduced-motion: reduce) { .lumi-mark, .lumi-mark .sparkle { animation: none; } }
-  @media (max-width: 760px) { .lumi-mark { display: none; } }
-  /* Logged-in pill — replaces nav CTAs when bb_pub_token is set. Frameless to match /ads. */
-  .auth-pill { display: inline-flex !important; align-items: center; gap: 8px; padding: 5px 14px 5px 5px !important; border-color: transparent !important; background: transparent !important; }
-  .auth-pill:hover { background: rgba(15,15,26,0.04) !important; border-color: transparent !important; }
-  .auth-pill .auth-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #FF2D78, #04BEFE); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; text-transform: uppercase; }
-  .auth-pill .auth-name { font-size: 13.5px; font-weight: 600; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .auth-pill .auth-arrow { opacity: 0.5; font-size: 12px; transition: transform 0.15s, opacity 0.15s; }
-  .auth-pill:hover .auth-arrow { opacity: 1; transform: translateX(2px); }
-  .nav-links { display: flex; gap: 26px; align-items: center; }
-  .nav-links a { font-size: 14.5px; font-weight: 700; color: var(--ink); opacity: 0.92; transition: color 0.15s, opacity 0.15s; white-space: nowrap; }
-  .nav-links a:hover { opacity: 1; color: var(--pink); }
-  .nav-links a.active { opacity: 1; color: var(--pink); }
-  .nav-ctas { display: flex; gap: 10px; align-items: center; }
-  .nav-lang-wrap { position: relative; }
-  .nav-lang { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; font-family: inherit; transition: background 0.15s, border-color 0.15s; }
-  .nav-lang:hover { border-color: var(--ink-soft); background: var(--bg-soft); }
-  .nav-lang svg { width: 16px; height: 16px; stroke-width: 1.8; }
-  .nav-lang-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 180px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14); z-index: 200; }
-  .nav-lang-wrap.open .nav-lang-menu { display: block; }
-  .nav-lang-menu a { display: block; padding: 11px 14px; border-radius: 8px; font-size: 14.5px; color: var(--ink); text-decoration: none; font-weight: 500; transition: background 0.1s, color 0.1s; }
-  .nav-lang-menu a:hover { background: var(--bg-soft); }
-  .nav-lang-menu a.active { color: var(--pink); font-weight: 700; }
-  .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; padding: 9px 20px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .btn-ghost { color: var(--ink); background: transparent; border-color: rgba(15,15,26,0.18); }
-  .btn-ghost:hover { background: rgba(15,15,26,0.04); border-color: rgba(15,15,26,0.32); }
-  .btn-primary { background: var(--pink); color: #fff; border-color: var(--pink); }
-  .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
-  .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 10px; }
-  .btn-block { width: 100%; }
-
-  /* HERO */
-  .hero { padding: 80px 0 60px; }
-  .eyebrow { display: inline-block; padding: 6px 13px; background: rgba(255, 45, 120, 0.10); color: var(--pink-dark); font-size: 12.5px; font-weight: 700; border-radius: 999px; margin-bottom: 18px; letter-spacing: 0.06em; text-transform: uppercase; }
-  .hero h1 { font-size: clamp(40px, 5.4vw, 64px); font-weight: 700; line-height: 1.05; margin-bottom: 22px; max-width: 880px; }
-  .hero h1 .grad { background: linear-gradient(90deg, var(--pink), var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero .sub { font-size: 19px; color: var(--ink-soft); max-width: 720px; margin-bottom: 32px; line-height: 1.5; }
-
-  /* SECTION HEADER */
-  section { padding: 70px 0; }
-  .section-eyebrow { display: block; font-size: 12.5px; font-weight: 700; color: var(--pink-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
-  h2.section-h { font-size: clamp(28px, 3.4vw, 38px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
-  .section-sub { font-size: 17px; color: var(--ink-soft); max-width: 640px; margin-bottom: 40px; }
-
-  /* HOW IT WORKS */
-  .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .how-step { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 28px 26px; }
-  .how-step .num { width: 36px; height: 36px; border-radius: 10px; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; font-family: 'Space Grotesk', sans-serif; margin-bottom: 18px; }
-  .how-step h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-  .how-step p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
-
-  /* CODE BLOCK */
-  .code-block { background: var(--code-bg); color: #E5E7EB; border-radius: 14px; padding: 28px 28px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; max-width: 880px; }
-  .code-block .kw { color: #C792EA; }
-  .code-block .str { color: #C3E88D; }
-  .code-block .fn { color: #82AAFF; }
-  .code-block .cm { color: #6B7280; font-style: italic; }
-  .code-caption { font-size: 14px; color: var(--ink-soft); margin-top: 14px; max-width: 880px; }
-  .code-caption a { color: var(--pink); font-weight: 600; }
-  .code-caption a:hover { text-decoration: underline; }
-
-  /* WHO THIS IS FOR */
-  .who { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .who ul { list-style: none; padding: 0; margin: 0; max-width: 760px; }
-  .who li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; font-size: 16px; color: var(--ink); }
-  .who li .check { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: rgba(4, 190, 254, 0.14); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; margin-top: 3px; }
-
-  /* REVENUE EXAMPLE */
-  .revenue-card { background: linear-gradient(140deg, rgba(255, 45, 120, 0.06), rgba(4, 190, 254, 0.06)); border: 1.5px solid var(--line); border-radius: 18px; padding: 36px 38px; max-width: 720px; }
-  .revenue-card .label { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 18px; }
-  .revenue-card .rev-row { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px dashed rgba(15,15,26,0.10); font-size: 15.5px; }
-  .revenue-card .rev-row:last-child { border-bottom: none; padding-top: 18px; font-size: 22px; font-weight: 700; }
-  .revenue-card .rev-row .v { color: var(--ink-soft); }
-  .revenue-card .rev-row:last-child .v { color: var(--pink-dark); font-family: 'Space Grotesk', sans-serif; }
-  .revenue-card .disclaimer { font-size: 12.5px; color: var(--muted); margin-top: 18px; line-height: 1.5; }
-
-  /* FAQ */
-  .faq-list { max-width: 880px; }
-  .faq-item { border-bottom: 1px solid var(--line); padding: 20px 0; }
-  .faq-item:first-child { padding-top: 0; }
-  .faq-item h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
-  .faq-item p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.55; }
-
-  /* PRODUCT SHOT */
-  .product-shot { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 28px; max-width: 880px; margin: 28px auto 0; box-shadow: 0 2px 24px -8px rgba(15,15,26,0.10); }
-  .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
-  .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
-
-  /* Phase G — real screenshot graceful fallback.
-     By default the inline SVG renders. If a real screenshot exists at
-     the img's src, onload fires and sets .has-real-img on the wrapper,
-     which hides the SVG and shows the img. If the screenshot 404s,
-     onerror removes the img and the SVG stays visible. */
-  .hero-mockup-wrap .hero-mockup-real { display: none; width: 100%; height: auto; border-radius: 10px; }
-  .hero-mockup-wrap.has-real-img .hero-mockup-real { display: block; }
-  .hero-mockup-wrap.has-real-img svg { display: none; }
-
-  /* SEE-IT (animated) section */
-  .see-it { padding: 40px 0 70px; }
-  .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
-  .see-it svg { display: block; width: 100%; height: auto; max-width: 760px; margin: 0 auto; }
-  .see-it .stage-caption { font-size: 14.5px; color: var(--ink-soft); text-align: center; margin-top: 20px; max-width: 680px; margin-left: auto; margin-right: auto; }
-  .see-it h2.section-h { text-align: center; }
-  .see-it .section-eyebrow { display: block; text-align: center; }
-  .see-it .section-sub { text-align: center; max-width: 660px; margin-left: auto; margin-right: auto; }
-
-  /* CTA FOOTER */
-  .cta-footer { padding: 90px 0 110px; text-align: center; }
-  .cta-footer h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 14px; }
-  .cta-footer p { font-size: 16.5px; color: var(--ink-soft); margin-bottom: 28px; }
-  .cta-footer .perk { display: inline-block; padding: 6px 14px; background: rgba(255, 230, 0, 0.16); color: #8a6d00; font-size: 13.5px; font-weight: 600; border-radius: 999px; margin-top: 16px; }
-
-  /* SITE FOOTER */
-  footer.site-footer { padding: 40px 0 60px; border-top: 1px solid var(--line); background: #fff; }
-  .footer-inner { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; align-items: center; }
-  .footer-brand { display: flex; align-items: center; gap: 10px; }
-  .footer-brand .brand-name { font-size: 16px; }
-  .footer-brand .brand-mark { width: 26px; height: 26px; }
-  .footer-links { display: flex; flex-wrap: wrap; gap: 22px; }
-  .footer-links a { font-size: 14px; color: var(--ink-soft); }
-  .footer-links a:hover { color: var(--ink); }
-  .footer-legal-links { gap: 18px; margin-top: 4px; }
-  .footer-legal-links a { font-size: 12px; color: var(--muted); }
-  .footer-copy { font-size: 13px; color: var(--muted); }
-
-  @media (max-width: 760px) {
-    .nav-links { display: none; }
-    .how-grid { grid-template-columns: 1fr; }
-    .hero { padding: 50px 0 40px; }
-    .code-block { padding: 22px 20px; font-size: 12.5px; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--text-on-dark);background:var(--bb-surface-0);-webkit-font-smoothing:antialiased;font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden}
+a{color:inherit;text-decoration:none}svg{display:block}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+.page-fx{position:fixed;inset:0;z-index:-5;pointer-events:none;background:radial-gradient(ellipse 44% 32% at 14% 8%,var(--accSoft),transparent 60%),radial-gradient(ellipse 44% 34% at 88% 30%,rgba(0,255,224,0.08),transparent 62%),radial-gradient(ellipse 52% 42% at 50% 96%,rgba(217,70,239,0.10),transparent 60%),var(--bb-surface-0)}
+.page-fx.grain{z-index:-4;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+nav{position:fixed;top:0;left:0;right:0;z-index:var(--z-nav);transition:background var(--dur-base),backdrop-filter var(--dur-base),border-color var(--dur-base);border-bottom:1px solid transparent}
+nav.scrolled{background:var(--glass-dark-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-bottom:var(--glass-dark-border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;filter:drop-shadow(0 4px 12px rgba(255,45,120,.35))}
+.brand-name{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight);color:#fff;white-space:nowrap}
+.lumi-mark{display:inline-flex;align-items:center;gap:4px;margin-left:12px;padding-left:12px;border-left:1px solid rgba(255,255,255,.16);font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:-.01em;background-image:linear-gradient(90deg,#FF2D78 0%,#D946EF 25%,#00FFE0 50%,#D946EF 75%,#FF2D78 100%);background-size:220% 100%;background-position:0% 50%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:lumiShimmer 4s linear infinite}
+.lumi-mark .sp{color:var(--bb-yellow);-webkit-text-fill-color:var(--bb-yellow);font-size:16px;animation:lumiBlink 1.8s ease-in-out infinite}
+@keyframes lumiShimmer{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+@keyframes lumiBlink{0%,100%{opacity:.55;transform:scale(.95)}50%{opacity:1;transform:scale(1.1)}}
+.nav-links{display:flex;gap:22px;align-items:center}
+.nav-links a{font-size:14px;font-weight:600;color:rgba(244,244,248,.72);transition:color var(--dur-fast)}
+.nav-links a:hover{color:#fff}.nav-links a.active{color:var(--acc)}
+.nav-ctas{display:flex;gap:10px;align-items:center}
+@media(max-width:1080px){.nav-links,.lumi-mark{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-body);font-weight:600;font-size:14.5px;padding:9px 18px;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:transform var(--dur-fast) var(--ease-snappy),background var(--dur-fast),box-shadow var(--dur-fast),border-color var(--dur-fast);white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--bb-pink);color:#fff;border-color:var(--bb-pink);box-shadow:0 6px 20px rgba(255,45,120,.32)}
+.btn-primary:hover{background:var(--bb-pink-dark);border-color:var(--bb-pink-dark);box-shadow:var(--glow-pink);transform:translateY(-2px)}
+.btn-ghost-d{background:rgba(255,255,255,.05);color:#fff;border-color:rgba(255,255,255,.18)}
+.btn-ghost-d:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-2px)}
+.btn-lg{padding:14px 26px;font-size:15.5px;border-radius:var(--r-md)}
+.section{position:relative;padding:var(--section-y) 0}
+.divider{height:1px;max-width:var(--container);margin:0 auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);position:relative;overflow:hidden}
+.divider::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:100%;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:sweep 5s linear infinite}
+@keyframes sweep{to{left:130%}}
+[data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);transition-delay:var(--rd,0s)}
+[data-reveal=left]{transform:translateX(-40px)}[data-reveal=right]{transform:translateX(40px)}[data-reveal=scale]{transform:scale(.94)}
+[data-reveal].is-visible{opacity:1;transform:none}
+html:not(.anim) [data-reveal]{opacity:1!important;transform:none!important}
+[data-parallax]{transform:translate3d(0,var(--py,0px),0);will-change:transform}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;padding:6px 13px;border-radius:var(--r-pill);margin-bottom:22px;background:var(--accSoft);border:1px solid var(--accBorder);color:var(--acc)}
+.eyebrow .ico{font-size:14px}
+.hero{position:relative;padding:var(--hero-top) 0 60px}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:44px}}
+.badge{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);padding:7px 15px;border-radius:var(--r-pill);font-size:13px;font-weight:500;color:rgba(244,244,248,.92);margin-bottom:24px}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:lp 1.9s var(--ease-out) infinite}
+@keyframes lp{0%{box-shadow:0 0 0 0 var(--accSoft)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.hero h1{font-family:var(--font-display);font-size:clamp(38px,4.8vw,60px);font-weight:700;line-height:1.05;letter-spacing:var(--ls-display);color:#fff;margin-bottom:20px}
+.hero h1 .acc{color:var(--acc)}
+.hero .sub{font-size:var(--fs-lead);color:rgba(244,244,248,.74);max-width:520px;margin-bottom:28px;line-height:1.5}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.hero-meta{display:flex;gap:26px;flex-wrap:wrap}
+.hero-meta .m{font-size:13px;color:rgba(244,244,248,.55)}
+.hero-meta .m b{display:block;font-family:var(--font-display);font-size:21px;color:#fff;font-weight:700}
+.hero-meta .m b.acc{color:var(--acc)}
+.section-head{max-width:700px;margin:0 auto 50px;text-align:center}
+.section-head h2{font-family:var(--font-display);font-size:var(--fs-h2);font-weight:700;color:#fff;letter-spacing:var(--ls-heading);line-height:1.1;margin-bottom:14px}
+.section-head h2 .acc{color:var(--acc)}
+.section-head p{font-size:18px;color:rgba(244,244,248,.66)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:880px){.pgrid{grid-template-columns:1fr}}
+.pcard{position:relative;padding:24px 22px;background:linear-gradient(160deg,rgba(28,28,43,.6),rgba(15,15,26,.6));border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);transition:transform var(--dur-base) var(--ease-out),border-color var(--dur-base),box-shadow var(--dur-base);overflow:hidden}
+.pcard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--acc),transparent);transform:scaleX(0);transform-origin:left;transition:transform var(--dur-base) var(--ease-out)}
+.pcard:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.2);box-shadow:var(--shadow-xl)}
+.pcard:hover::after{transform:scaleX(1)}
+.pcard .pico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:16px;background:var(--accSoft)}
+.pcard h3{font-family:var(--font-display);font-size:17px;font-weight:700;color:#fff;margin-bottom:7px}
+.pcard p{font-size:13.5px;color:rgba(244,244,248,.62);line-height:1.5;margin-bottom:14px}
+.pcard .rpm{font-family:var(--font-mono);font-size:11.5px;font-weight:700;color:var(--acc);letter-spacing:.02em}
+.spot{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.spot .stext h2{font-family:var(--font-display);font-size:var(--fs-h2);color:#fff;line-height:1.1;letter-spacing:var(--ls-heading);margin-bottom:16px}
+.spot .stext p{font-size:17px;color:rgba(244,244,248,.66);margin-bottom:22px}
+.spot .slist{list-style:none;display:flex;flex-direction:column;gap:12px}
+.spot .slist li{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:rgba(244,244,248,.88)}
+.spot .slist .ck{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--acc);color:var(--bb-ink);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+@media(max-width:880px){.spot{grid-template-columns:1fr;gap:36px}}
+.specs{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:880px){.specs{grid-template-columns:repeat(2,1fr)}}
+.spec{text-align:center;padding:26px 18px;border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);background:rgba(255,255,255,.02)}
+.spec b{display:block;font-family:var(--font-display);font-size:30px;font-weight:700;color:#fff;letter-spacing:-.02em}
+.spec b.acc{color:var(--acc)}
+.spec span{display:block;font-size:13px;color:rgba(244,244,248,.55);margin-top:6px}
+.cta-box{position:relative;overflow:hidden;max-width:1000px;margin:0 auto;background:var(--grad-pink);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-2xl);box-shadow:var(--glow-pink),0 30px 80px rgba(0,0,0,.4);padding:70px 48px;text-align:center;color:#fff}
+.cta-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 26% 50%,rgba(255,230,0,.22),transparent 55%),radial-gradient(circle at 80% 45%,rgba(0,255,224,.22),transparent 55%)}
+.cta-box>*{position:relative;z-index:1}
+.cta-box h2{font-family:var(--font-display);font-size:clamp(32px,4.4vw,50px);font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-bottom:16px}
+.cta-box p{font-size:18px;opacity:.92;max-width:540px;margin:0 auto 30px}
+.cta-ctas{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.cta-box .btn-white{background:#fff;color:var(--bb-pink);border-color:#fff}
+.cta-box .btn-white:hover{background:var(--bb-ink);color:#fff;border-color:var(--bb-ink);transform:translateY(-2px)}
+.cta-box .btn-clear{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.cta-box .btn-clear:hover{background:#fff;color:var(--bb-pink);border-color:#fff;transform:translateY(-2px)}
+footer.site{border-top:1px solid rgba(255,255,255,.08);padding:54px 0 34px;margin-top:var(--section-y)}
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:38px}
+.foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.foot-brand img{width:30px;height:30px}.foot-brand .brand-name{color:#fff}
+.foot-tag{font-size:14px;color:rgba(244,244,248,.6);line-height:1.6;max-width:300px}
+.foot-col h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:rgba(244,244,248,.45);margin-bottom:14px}
+.foot-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.foot-col a{font-size:14px;color:rgba(244,244,248,.66);transition:color var(--dur-fast)}
+.foot-col a:hover{color:var(--acc)}
+.foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:rgba(244,244,248,.45)}
+@media(max-width:880px){.foot-grid{grid-template-columns:1fr 1fr;gap:30px}}
+/* ---- Surface mockup ---- */
+.mock{position:relative}
+.frame{background:linear-gradient(160deg,rgba(24,24,38,.95),rgba(12,12,22,.96));border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.frame.win{border-radius:16px}
+.frame.phone{border-radius:34px;max-width:300px;margin:0 auto;padding:8px}
+.frame.phone .screen{border-radius:26px;overflow:hidden;background:#0c0c16}
+.fbar{display:flex;align-items:center;gap:7px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)}
+.fbar .dot{width:11px;height:11px;border-radius:50%}
+.fbar .url{margin-left:10px;font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.45);background:rgba(255,255,255,.05);padding:4px 12px;border-radius:7px;flex:1}
+.notch{height:22px;display:flex;align-items:center;justify-content:center}
+.notch::before{content:"";width:90px;height:6px;border-radius:6px;background:rgba(255,255,255,.16)}
+.fbody{padding:18px 16px;display:flex;flex-direction:column;gap:10px;min-height:300px}
+.bub{max-width:84%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.45}
+.bub.u{align-self:flex-end;background:var(--bb-ink);color:#fff;border-bottom-right-radius:4px}
+.bub.a{align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(244,244,248,.85);border-bottom-left-radius:4px}
+.adunit{position:relative;margin-top:6px;border:1.5px solid var(--accBorder);background:var(--accSoft);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:5px}
+.adunit::before{content:"✨ via Boost Boss";position:absolute;top:-9px;left:13px;background:var(--acc);color:var(--bb-ink);font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;letter-spacing:.3px;white-space:nowrap}
+.adunit .al{font-size:9px;font-weight:800;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
+.adunit .at{font-size:14px;font-weight:700;color:#fff;line-height:1.25}
+.adunit .as{font-size:12px;color:rgba(244,244,248,.7)}
+.adunit .acta{align-self:flex-start;margin-top:3px;background:var(--acc);color:var(--bb-ink);font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px}
+.adunit.video{align-items:stretch}
+.adunit .vthumb{height:96px;border-radius:9px;background:linear-gradient(135deg,var(--acc),rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative}
+.adunit .vthumb .play{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.adunit .vthumb .rew{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;color:#fff;background:rgba(0,0,0,.45);padding:3px 7px;border-radius:100px}
+.float-pill{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;background:rgba(12,12,22,.9);border:1px solid var(--accBorder);box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;animation:bob 4.5s var(--ease-in-out) infinite}
+.float-pill .sw{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.float-pill.p1{top:-14px;right:24px}.float-pill.p2{bottom:30px;left:-20px;animation-delay:1.3s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}[data-reveal]{opacity:1!important;transform:none!important}}
 </style>
-<script src="/i18n.js" defer></script>
 </head>
-<body>
+<body style="--acc:#FF2D78;--accSoft:rgba(255,45,120,0.10);--accBorder:rgba(255,45,120,0.35)">
+<div class="page-fx"></div><div class="page-fx grain"></div>
 
-<!-- NAV -->
-<nav class="site-nav">
-  <div class="nav-inner">
-    <a class="brand" href="/publish">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-      <span class="brand-name">Boost Boss</span>
-      <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
-    </a>
-    <div class="nav-links">
-      <a href="/publish/computer" class="active" data-i18n="subnav.computer">Computer App</a>
-      <a href="/publish/browser" data-i18n="subnav.browser">Browser App</a>
-      <a href="/publish/browser-extension" data-i18n="subnav.browser_extension">Browser Extension App</a>
-      <a href="/publish/mobile" data-i18n="subnav.mobile">Mobile App</a>
-    </div>
-    <div class="nav-ctas">
-      <div class="nav-lang-wrap" id="navLangWrap">
-        <button class="nav-lang" aria-label="Change language" onclick="document.getElementById('navLangWrap').classList.toggle('open')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M2 12h20"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          <span>EN</span>
-        </button>
-        <div class="nav-lang-menu">
-          <a href="/en" data-lang="en" class="active">English</a>
-          <a href="/zh" data-lang="zh">简体中文</a>
-          <a href="/zh-TW" data-lang="zh-TW">繁體中文</a>
-          <a href="/ja" data-lang="ja">日本語</a>
-          <a href="/ko" data-lang="ko">한국어</a>
-          <a href="/vi" data-lang="vi">Tiếng Việt</a>
-        </div>
-      </div>
-      <a class="btn btn-ghost" href="/publish/signin" data-i18n="publish.cta.sign_in">Sign in</a>
-      <a class="btn btn-primary" href="/publish/signup" data-i18n="publish.cta.start_earning">Start earning</a>
+<nav id="nav"><div class="nav-inner">
+  <a class="brand" href="/publish"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span><span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sp">✦</span></span></a>
+  <div class="nav-links"><a href="/publish/computer" class="active">Computer App</a><a href="/publish/browser" class="">Browser App</a><a href="/publish/browser-extension" class="">Extension</a><a href="/publish/mobile" class="">Mobile App</a></div>
+  <div class="nav-ctas"><a class="btn btn-ghost-d" href="/publish/signin">Sign in</a><a class="btn btn-primary" href="/publish/signup">Start earning</a></div>
+</div></nav>
+
+<section class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-copy">
+    <div class="badge"><span class="dot"></span>Lumi package · live in ~10 minutes</div>
+    <div class="eyebrow"><span class="ico">🖥</span>Lumi for Computer App</div>
+    <h1>Turn your desktop AI app into <span class="acc">revenue</span>.</h1>
+    <p class="sub">Electron, Tauri, native macOS / Windows / Linux. You own the whole window — so Lumi unlocks the richest formats in adtech, including full video pre-roll and sound.</p>
+    <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="#">Install Computer App SDK →</a><a class="btn btn-ghost-d btn-lg" href="#">View docs</a></div>
+    <div class="hero-meta">
+      <div class="m"><b class="acc">10</b>placements</div>
+      <div class="m"><b>Video</b>+ sound allowed</div>
+      <div class="m"><b>Weekly</b>payouts</div>
     </div>
   </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="wrap">
-    <span class="eyebrow" data-i18n="publish.computer.hero_eyebrow">Lumi for Computer App</span>
-    <h1 data-i18n="publish.computer.hero_h1_html" data-i18n-html>Monetize your downloaded AI app — <span class="grad">sound video included</span>.</h1>
-    <p class="sub" data-i18n="publish.computer.hero_sub">Electron, Tauri, native — if it's installed on Mac/Windows/Linux, Lumi can serve ads inside it. Window banners, sidebar slots, modal interstitials, and pre-roll video with sound (no browser autoplay restriction). 10 placements per app.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.computer.hero_cta">Start as a publisher →</a>
-  </div>
-</section>
-
-<!-- SEE IT APPEAR -->
-<section class="see-it">
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.see_eyebrow">See it appear</span>
-    <h2 class="section-h" data-i18n="publish.computer.see_h2_html" data-i18n-html>Your AI app responds first.<br>The sponsored block slides in after.</h2>
-    <p class="section-sub" data-i18n="publish.computer.see_sub">No interruption. No latency. Renders inside the desktop window — Electron, Tauri, or native — with sound video allowed.</p>
-    <div class="stage hero-mockup-wrap" aria-label="Animation: a sponsored block slides into a BriefBot Desktop response">
-      <!-- Phase G: real screenshot if /assets/publish/computer-hero.png exists; SVG fallback otherwise. -->
-      <img class="hero-mockup-real" src="/assets/publish/computer-hero.png"
-           alt="BriefBot Desktop showing a sponsored block in an AI response"
-           onload="this.parentElement.classList.add('has-real-img')"
-           onerror="this.remove()" />
-      <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
-        <style>
-          .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
-          @keyframes bb-rise {
-            0%, 28%   { opacity: 0; transform: translate(0, 26px); }
-            44%, 92%  { opacity: 1; transform: translate(0, 0); }
-            100%      { opacity: 0; transform: translate(0, 26px); }
-          }
-          .dot { animation: bb-pulse 1.4s ease-in-out infinite; opacity: 0.35; }
-          .dot:nth-of-type(2) { animation-delay: 0.18s; }
-          .dot:nth-of-type(3) { animation-delay: 0.36s; }
-          @keyframes bb-pulse { 0%, 60%, 100% { opacity: 0.35; } 30% { opacity: 1; } }
-          @media (prefers-reduced-motion: reduce) {
-            .ad-block { animation: none; opacity: 1; transform: translate(0, 0); }
-            .dot { animation: none; opacity: 0.6; }
-          }
-        </style>
-
-        <!-- Laptop bezel + base -->
-        <rect x="32" y="22" width="696" height="382" rx="14" fill="#1F1F2E"/>
-        <rect x="44" y="34" width="672" height="358" rx="6" fill="#FAFAF7"/>
-        <rect x="14" y="404" width="732" height="14" rx="3" fill="#15151F"/>
-        <rect x="14" y="404" width="732" height="6" fill="#2A2A3A"/>
-        <circle cx="380" cy="29" r="2.3" fill="#0A0A14"/>
-
-        <!-- Window chrome -->
-        <rect x="44" y="34" width="672" height="30" fill="#EFEEE9"/>
-        <circle cx="60" cy="49" r="5" fill="#FF5F57"/>
-        <circle cx="76" cy="49" r="5" fill="#FEBC2E"/>
-        <circle cx="92" cy="49" r="5" fill="#28C840"/>
-        <text x="380" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">BriefBot Desktop · Electron app</text>
-
-        <!-- Sidebar -->
-        <rect x="44" y="64" width="120" height="328" fill="#F4F3EE"/>
-        <rect x="58" y="80" width="92" height="22" rx="6" fill="#E5E4DD"/>
-        <rect x="58" y="112" width="76" height="9" rx="3" fill="#D8D7CF"/>
-        <rect x="58" y="128" width="92" height="9" rx="3" fill="#D8D7CF"/>
-        <rect x="58" y="144" width="60" height="9" rx="3" fill="#D8D7CF"/>
-        <text x="58" y="180" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#9CA3AF" letter-spacing="0.6">RECENT</text>
-        <rect x="58" y="190" width="92" height="8" rx="3" fill="#E5E4DD"/>
-        <rect x="58" y="204" width="68" height="8" rx="3" fill="#E5E4DD"/>
-        <rect x="58" y="218" width="80" height="8" rx="3" fill="#E5E4DD"/>
-
-        <!-- Chat: user msg -->
-        <rect x="320" y="86" width="380" height="38" rx="13" fill="#0F0F1A"/>
-        <text x="334" y="110" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF">How do I deploy my FastAPI app?</text>
-
-        <!-- Assistant intro -->
-        <circle cx="192" cy="148" r="10" fill="#D97757"/>
-        <text x="192" y="152" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">C</text>
-        <text x="210" y="152" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Looking up deployment options…</text>
-
-        <!-- Tool call indicator -->
-        <rect x="192" y="170" width="244" height="22" rx="6" fill="#EEF6FF" stroke="#BAD7F2" stroke-width="1"/>
-        <text x="200" y="185" font-family="JetBrains Mono, monospace" font-size="11" fill="#1B5FB6">⚙ deploy_helper.lookup_options</text>
-
-        <!-- Tool result block (always visible) -->
-        <rect x="192" y="204" width="500" height="86" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="204" y="224" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.4">TOOL RESULT</text>
-        <text x="204" y="244" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Best options for FastAPI deployment:</text>
-        <text x="204" y="262" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• RailRunner — git push deploys, $5/mo hobby tier</text>
-        <text x="204" y="278" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• EdgePort — global edge, Docker-based, free tier</text>
-
-        <!-- Sponsored block (the animated one) -->
-        <g class="ad-block">
-          <rect x="192" y="304" width="500" height="76" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
-          <rect x="192" y="304" width="500" height="20" rx="12" fill="#FFE6F0"/>
-          <rect x="192" y="314" width="500" height="10" fill="#FFE6F0"/>
-          <text x="204" y="318" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by DeployJet</text>
-          <text x="680" y="318" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
-
-          <rect x="204" y="334" width="40" height="40" rx="9" fill="#0F0F1A"/>
-          <text x="224" y="361" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">▲</text>
-
-          <text x="256" y="349" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#0F0F1A">DeployJet — Deploy in seconds. Scale forever.</text>
-          <text x="256" y="365" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
-          <rect x="608" y="340" width="76" height="26" rx="7" fill="#0F0F1A"/>
-          <text x="646" y="357" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
-        </g>
-      </svg>
-      <div class="stage-caption" data-i18n="publish.computer.see_caption">Lumi renders inside your desktop window with native chrome — Electron, Tauri, or native macOS/Windows/Linux. Sponsored blocks slide in after your AI output, with a clear disclosure label.</div>
-    </div>
-  </div>
-</section>
-
-<!-- PLACEMENTS -->
-<section>
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.placements_eyebrow">Placements you can serve</span>
-    <h2 class="section-h" data-i18n="publish.computer.placements_h2">10 placements built for desktop AI apps.</h2>
-    <div class="revenue-card" style="max-width: 880px;">
-      <div class="rev-row"><span>Sponsored citation</span><span class="v">$6.50 RPM</span></div>
-      <div class="rev-row"><span>Suggested chip</span><span class="v">$5.00 RPM</span></div>
-      <div class="rev-row"><span>Inline card</span><span class="v">$8.00 RPM</span></div>
-      <div class="rev-row"><span>Loading-state ad</span><span class="v">$4.50 RPM</span></div>
-      <div class="rev-row"><span>Pre-roll video (sound on)</span><span class="v">$18.00 RPM</span></div>
-      <div class="rev-row"><span>Window banner</span><span class="v">$7.50 RPM</span></div>
-      <div class="rev-row"><span>Sidebar slot</span><span class="v">$6.00 RPM</span></div>
-      <div class="rev-row"><span>Modal interstitial</span><span class="v">$12.00 RPM</span></div>
-      <div class="rev-row"><span>Empty-state hero</span><span class="v">$5.50 RPM</span></div>
-      <div class="rev-row"><span>System notification</span><span class="v">$9.00 RPM</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section>
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.how_eyebrow">How it works</span>
-    <h2 class="section-h" data-i18n="publish.computer.how_h2_html" data-i18n-html>From <code>npm install</code> to first impression in under 10 minutes.</h2>
-    <div class="how-grid">
-      <div class="how-step">
-        <div class="num">1</div>
-        <h4 data-i18n="publish.computer.how1_h4">Install in your desktop app</h4>
-        <p data-i18n="publish.computer.how1_p_html" data-i18n-html>Run <code>npx @boostbossai/install-desktop YOUR_PUBLISHER_ID</code> in your Electron, Tauri, or native build. The CLI wires up the SDK and initializes it for you.</p>
-      </div>
-      <div class="how-step">
-        <div class="num">2</div>
-        <h4 data-i18n="publish.computer.how2_h4">Mount placements</h4>
-        <p data-i18n="publish.computer.how2_p">Pick from 10 placement types — window banner, sidebar slot, modal interstitial, pre-roll video. Mount one or all.</p>
-      </div>
-      <div class="how-step">
-        <div class="num">3</div>
-        <h4 data-i18n="publish.computer.how3_h4">Earn per impression</h4>
-        <p data-i18n="publish.computer.how3_p">Boost Boss serves desktop-grade creatives with sound video allowed. You earn on every impression and every click.</p>
+  
+<div class="mock" data-reveal="right" data-parallax data-speed="0.05">
+  <div class="float-pill p1"><span class="sw"></span>$12.40 RPM · pre-roll</div>
+  <div class="float-pill p2"><span class="sw"></span>native, not a banner</div>
+  <div class="frame win">
+    <div class="fbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="url">yourapp.app · desktop</span></div>
+    <div class="fbody">
+      <div class="bub u">summarize this 40-page contract</div>
+      <div class="bub a">Here are the 6 key clauses — and one to flag…</div>
+      <div class="adunit">
+        <div class="al">Sponsored</div>
+        <div class="at">Ship faster with Linear</div>
+        <div class="as">The issue tracker high-output teams run on.</div>
+        <div class="acta">Try free →</div>
       </div>
     </div>
   </div>
-</section>
+</div>
+</div></div></section>
 
-<!-- INTEGRATION SNIPPET -->
-<section>
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.snippet_eyebrow">Integration snippet</span>
-    <h2 class="section-h" data-i18n="publish.computer.snippet_h2">A few lines, your desktop app.</h2>
-<pre class="code-block"><span class="cm"># One-time install in your Electron, Tauri, or native project root:</span>
-<span class="fn">npx</span> @boostbossai/install-desktop pub_xxx
+<div class="divider"></div>
 
-<span class="cm"># That's it. The CLI injects this into your renderer HTML for you:</span>
-&lt;<span class="kw">script</span> async src=<span class="str">"https://boostboss.ai/lumi/v1.js#publisherId=pub_xxx&amp;door=mcp"</span>&gt;&lt;/<span class="kw">script</span>&gt;
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><div class="eyebrow"><span class="ico">🖥</span>Placements</div><h2>10 ways to earn on <span class="acc">Computer App</span>.</h2><p>A downloaded app owns its whole window. That means premium, full-control formats other surfaces can’t run.</p></div>
+  <div class="pgrid">
+      <div class="pcard" data-reveal>
+        <div class="pico">▶</div>
+        <h3>Video pre-roll</h3>
+        <p>Full-screen branded video before a heavy task kicks off. The top-RPM format on desktop.</p>
+        <div class="rpm">up to $12 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">💬</div>
+        <h3>In-chat native</h3>
+        <p>A sponsored card that fits the conversation, served on real intent — never a banner.</p>
+        <div class="rpm">$6–9 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">🔊</div>
+        <h3>Sound ad</h3>
+        <p>Short audio spot during long-running generations or renders. Skippable, opt-aware.</p>
+        <div class="rpm">$5–7 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">🧱</div>
+        <h3>Sidebar unit</h3>
+        <p>A persistent, tasteful unit docked in your app chrome — always-on inventory.</p>
+        <div class="rpm">$4–6 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">⏸</div>
+        <h3>Idle takeover</h3>
+        <p>When the user steps away, reclaim the canvas with a full-window brand moment.</p>
+        <div class="rpm">$8–11 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">🎁</div>
+        <h3>Reward unlock</h3>
+        <p>Let users watch to unlock a premium action — opt-in, perfectly compliant.</p>
+        <div class="rpm">$10–14 RPM</div>
+      </div></div>
+</div></section>
 
-<span class="cm"># All 10 placements auto-mount on first launch. Window banner,
-# sidebar slot, modal interstitial, pre-roll video, and more.
-# No JS imports needed — placements attach to your renderer's DOM.</span></pre>
-    <p class="code-caption" data-i18n="publish.computer.snippet_caption_html" data-i18n-html>Sound video allowed — desktop apps aren't subject to browser autoplay rules. <a href="/docs/desktop">Full docs →</a></p>
+<div class="divider"></div>
 
-    <!-- PRODUCT SHOT: BriefBot Desktop with sponsored block in response -->
-    <div class="product-shot hero-mockup-wrap" aria-label="Sponsored block rendered inside a BriefBot Desktop response">
-      <!-- Phase G: real screenshot if /assets/publish/computer-product.png exists; SVG fallback otherwise. -->
-      <img class="hero-mockup-real" src="/assets/publish/computer-product.png"
-           alt="BriefBot Desktop with a sponsored block rendered inside an AI response"
-           onload="this.parentElement.classList.add('has-real-img')"
-           onerror="this.remove()" />
-      <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
-        <!-- Window chrome -->
-        <rect x="0" y="0" width="720" height="440" fill="#FAFAF7"/>
-        <rect x="0" y="0" width="720" height="36" fill="#EFEEE9"/>
-        <circle cx="18" cy="18" r="6" fill="#FF5F57"/>
-        <circle cx="38" cy="18" r="6" fill="#FEBC2E"/>
-        <circle cx="58" cy="18" r="6" fill="#28C840"/>
-        <text x="360" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">BriefBot Desktop · Electron app</text>
-
-        <!-- Sidebar -->
-        <rect x="0" y="36" width="120" height="404" fill="#F4F3EE"/>
-        <rect x="14" y="54" width="92" height="22" rx="6" fill="#E5E4DD"/>
-        <rect x="14" y="86" width="76" height="10" rx="3" fill="#D8D7CF"/>
-        <rect x="14" y="106" width="92" height="10" rx="3" fill="#D8D7CF"/>
-        <rect x="14" y="126" width="60" height="10" rx="3" fill="#D8D7CF"/>
-        <rect x="14" y="146" width="84" height="10" rx="3" fill="#D8D7CF"/>
-        <text x="14" y="186" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#9CA3AF" letter-spacing="0.6">RECENT</text>
-        <rect x="14" y="194" width="92" height="9" rx="3" fill="#E5E4DD"/>
-        <rect x="14" y="208" width="68" height="9" rx="3" fill="#E5E4DD"/>
-        <rect x="14" y="222" width="80" height="9" rx="3" fill="#E5E4DD"/>
-
-        <!-- Chat area -->
-        <!-- User message -->
-        <rect x="280" y="58" width="320" height="40" rx="14" fill="#0F0F1A"/>
-        <text x="296" y="83" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF">How do I deploy my FastAPI app?</text>
-
-        <!-- Claude response intro -->
-        <circle cx="148" cy="124" r="10" fill="#D97757"/>
-        <text x="148" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">C</text>
-        <text x="166" y="128" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">I'll check deployment options for FastAPI…</text>
-
-        <!-- Tool call indicator -->
-        <rect x="148" y="146" width="240" height="22" rx="6" fill="#EEF6FF" stroke="#BAD7F2" stroke-width="1"/>
-        <text x="156" y="161" font-family="JetBrains Mono, monospace" font-size="11" fill="#1B5FB6">⚙ deploy_helper.lookup_options</text>
-
-        <!-- Tool result block -->
-        <rect x="148" y="180" width="544" height="84" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="160" y="200" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.4">TOOL RESULT</text>
-        <text x="160" y="220" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Best options for FastAPI deployment:</text>
-        <text x="160" y="238" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• RailRunner — git push deploys, auto-scaling, $5/mo hobby tier</text>
-        <text x="160" y="254" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• EdgePort — global edge, Docker-based, generous free tier</text>
-
-        <!-- Sponsored block (the star) -->
-        <rect x="148" y="278" width="544" height="118" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
-        <rect x="148" y="278" width="544" height="22" rx="12" fill="#FFE6F0"/>
-        <rect x="148" y="290" width="544" height="10" fill="#FFE6F0"/>
-        <text x="160" y="293" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by DeployJet</text>
-        <text x="612" y="293" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
-
-        <!-- Sponsored content -->
-        <rect x="160" y="312" width="48" height="48" rx="10" fill="#0F0F1A"/>
-        <text x="184" y="343" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF">▲</text>
-
-        <text x="220" y="328" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">DeployJet — Deploy in seconds. Scale forever.</text>
-        <text x="220" y="346" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · Auto-deploy from GitHub · Built-in observability</text>
-
-        <rect x="220" y="362" width="100" height="26" rx="7" fill="#0F0F1A"/>
-        <text x="270" y="380" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#FFFFFF">Try DeployJet Free</text>
-
-        <text x="220" y="384" font-family="Inter, sans-serif" font-size="0" fill="#FFFFFF"></text>
-        <text x="334" y="380" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">deployjet.com</text>
-
-        <!-- Composer -->
-        <rect x="148" y="408" width="544" height="22" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
-        <text x="160" y="423" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Reply to Claude…</text>
-      </svg>
-      <div class="shot-caption" data-i18n="publish.computer.snippet_shot_caption">Real render. Sponsored block inside a downloaded desktop AI app — your window chrome, Lumi's bordered card.</div>
-    </div>
+<section class="section"><div class="wrap"><div class="spot">
+  <div class="stext" data-reveal="left">
+    <div class="eyebrow"><span class="ico">⚡</span>Top format</div>
+    <h2>Video pre-roll, the highest-RPM format on desktop.</h2>
+    <p>Because a downloaded app controls its full window, Lumi can run brand-grade video before a heavy task — with sound, at full size. That unlocks budgets banners never see.</p>
+    <ul class="slist"><li><span class="ck">✓</span><span>Full-window, sound-on — brand budgets, not remnant fill</span></li><li><span class="ck">✓</span><span>Fires on real task intent, scored by Benna in ~5ms</span></li><li><span class="ck">✓</span><span>Frequency-capped per session so UX stays clean</span></li><li><span class="ck">✓</span><span>Skippable controls and reporting built in</span></li></ul>
   </div>
-</section>
-
-<!-- WHO THIS IS FOR -->
-<section class="who">
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.who_eyebrow">Who this is for</span>
-    <h2 class="section-h" data-i18n="publish.computer.who_h2">If your AI app is downloaded, this is your path.</h2>
-    <ul>
-      <li><span class="check">✓</span><span data-i18n="publish.computer.who_li1_html" data-i18n-html>You ship an <strong>Electron</strong>, <strong>Tauri</strong>, or native macOS / Windows / Linux app.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.computer.who_li2">Examples: AI writing tools, code assistants, research apps, AI notetaking, desktop chat clients.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.computer.who_li3">You want sound-on video inventory that browsers can't fill — pre-roll and modal interstitials at premium CPMs.</span></li>
-      <li><span class="check">✓</span><span data-i18n="publish.computer.who_li4">You'd rather earn from ads than push freemium upsells in your own product.</span></li>
-    </ul>
+  <div data-reveal="right" data-parallax data-speed="0.04">
+    <div class="frame win"><div class="fbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="url">yourapp.app · desktop</span></div>
+    <div class="fbody"><div class="bub a">rendering your export…</div>
+      <div class="adunit "><div class="al">Sponsored</div><div class="at">Ship faster with Linear</div><div class="as">The issue tracker high-output teams run on.</div><div class="acta">Try free →</div></div>
+    </div></div>
   </div>
-</section>
+</div></div></section>
 
-<!-- REVENUE EXAMPLE -->
-<section>
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.rev_eyebrow">Revenue example</span>
-    <h2 class="section-h" data-i18n="publish.computer.rev_h2">What 5,000 daily users can earn.</h2>
-    <div class="revenue-card">
-      <span class="label" data-i18n="publish.computer.rev_label">Illustrative — not a guarantee</span>
-      <div class="rev-row"><span data-i18n="publish.computer.rev_row1">Daily active users</span><span class="v">5,000</span></div>
-      <div class="rev-row"><span data-i18n="publish.computer.rev_row2">Ad impressions per user per day</span><span class="v">~5</span></div>
-      <div class="rev-row"><span data-i18n="publish.computer.rev_row3">Daily impressions</span><span class="v">25,000</span></div>
-      <div class="rev-row"><span data-i18n="publish.computer.rev_row4">Blended eCPM (10 placements, sound video premium)</span><span class="v">$5</span></div>
-      <div class="rev-row"><span data-i18n="publish.computer.rev_row5">Monthly publisher revenue</span><span class="v">~$3,750</span></div>
-      <p class="disclaimer" data-i18n="publish.computer.rev_disclaimer">Numbers are illustrative for an established downloaded AI app. Actual revenue depends on session length, placement mix, fill rate, and audience. Apps that activate pre-roll video and modal interstitials sit at the top of the range.</p>
-    </div>
-  </div>
-</section>
+<div class="divider"></div>
 
-<!-- FAQ -->
-<section class="who">
-  <div class="wrap">
-    <span class="section-eyebrow" data-i18n="publish.computer.faq_eyebrow">Frequently asked</span>
-    <h2 class="section-h" data-i18n="publish.computer.faq_h2">The questions every desktop dev asks first.</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <h4 data-i18n="publish.computer.faq1_q">Does this work in Electron?</h4>
-        <p data-i18n="publish.computer.faq1_a">Yes. Lumi for Computer App ships first-class Electron support — runs in the renderer process, respects your contextIsolation and CSP settings, and doesn't require nodeIntegration.</p>
-      </div>
-      <div class="faq-item">
-        <h4 data-i18n="publish.computer.faq2_q">What about Tauri and native macOS/Windows/Linux?</h4>
-        <p data-i18n="publish.computer.faq2_a">Tauri uses a WebView, so the same JS package mounts inside. Native macOS (Swift), Windows (.NET/WinUI), and Linux apps use our REST API directly — same publisher ID, same dashboard.</p>
-      </div>
-      <div class="faq-item">
-        <h4 data-i18n="publish.computer.faq3_q">Can I really play video with sound?</h4>
-        <p data-i18n="publish.computer.faq3_a">Yes. Desktop apps escape browser autoplay rules — pre-roll video and modal interstitials can play with sound on by default. That's why desktop apps clear the highest video CPMs in the Lumi network.</p>
-      </div>
-      <div class="faq-item">
-        <h4 data-i18n="publish.computer.faq4_q">Can I block specific advertisers?</h4>
-        <p data-i18n="publish.computer.faq4_a">Yes. Category-level blocks (e.g., no recruiting ads) and domain-level blocks (e.g., never these specific competitors) — all controlled from your publisher dashboard.</p>
-      </div>
-      <div class="faq-item">
-        <h4 data-i18n="publish.computer.faq5_q">Does the app need to be always-online?</h4>
-        <p data-i18n="publish.computer.faq5_a">No. Lumi degrades gracefully when offline — placements simply don't render. We don't block your AI feature on ad load.</p>
-      </div>
-    </div>
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><h2>Built for the way computer apps ship.</h2></div>
+  <div class="specs">
+    <div class="spec" data-reveal style="--rd:0s"><b class="acc">$12</b><span>top pre-roll RPM</span></div><div class="spec" data-reveal style="--rd:0.06s"><b class="">10</b><span>placement types</span></div><div class="spec" data-reveal style="--rd:0.12s"><b class=""><5ms</b><span>Benna decision</span></div><div class="spec" data-reveal style="--rd:0.18s"><b class="">70%</b><span>revenue share</span></div>
   </div>
-</section>
+</div></section>
 
-<!-- CTA FOOTER -->
-<section class="cta-footer">
-  <div class="wrap">
-    <h2 data-i18n="publish.computer.cta_h2">Ready to monetize your downloaded AI app?</h2>
-    <p data-i18n="publish.computer.cta_p">10 placements. Sound video. Ten minutes to install. Weekly payouts.</p>
-    <a class="btn btn-primary btn-lg" href="/publish/signup" data-i18n="publish.computer.cta_btn">Apply as a Founding Publisher →</a>
-    <div><span class="perk" data-i18n="publish.computer.cta_perk">⚡ First 20 Computer App publishers get an elevated founding-publisher payout for 6 months</span></div>
-  </div>
-</section>
+<section class="section"><div class="wrap"><div class="cta-box" data-reveal>
+  <h2>Ship Computer App ads this week.</h2>
+  <p>Install the Lumi package for Computer App, drop in your placements, and start earning — weekly PayPal payouts, no contracts.</p>
+  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="#">Install Computer App SDK →</a><a class="btn btn-lg btn-clear" href="#">Talk to us</a></div>
+</div></div></section>
 
-<!-- SITE FOOTER — universal (matches /index.html) -->
-<footer style="background:#FAFAF7;border-top:1px solid #EAEAEF;padding:56px 0 32px;">
-  <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-    <div class="foot-grid" style="display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:48px;margin-bottom:40px;">
-      <div>
-        <div class="foot-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <img src="/favicon.svg?v=rocket-20260421" alt="" style="width:32px;height:32px;">
-          <span class="brand-name" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:-0.5px;">Boost Boss</span>
-        </div>
-        <p class="foot-tag" style="font-size:14px;color:#4B4B5E;line-height:1.6;">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Product</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/publish" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Publishers</a></li>
-          <li style="padding:5px 0;"><a href="/ads" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SuperBoost</a></li>
-          <li style="padding:5px 0;"><a href="/exchange" style="font-size:14px;color:#4B4B5E;text-decoration:none;">BBX</a></li>
-          <li style="padding:5px 0;"><a href="/pricing" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Pricing</a></li>
-          <li style="padding:5px 0;"><a href="/demo" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Live demo</a></li>
-          <li style="padding:5px 0;"><a href="https://affiliate.boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Affiliate</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Resources</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/docs" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Documentation</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference" style="font-size:14px;color:#4B4B5E;text-decoration:none;">API reference</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference#sdks" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SDK</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Company</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/about" style="font-size:14px;color:#4B4B5E;text-decoration:none;">About</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Contact</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Careers</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Legal</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/terms" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Terms of Service</a></li>
-          <li style="padding:5px 0;"><a href="/privacy" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Privacy Policy</a></li>
-          <li style="padding:5px 0;"><a href="/refunds" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Refund Policy</a></li>
-          <li style="padding:5px 0;"><a href="/aup" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Acceptable Use</a></li>
-          <li style="padding:5px 0;"><a href="/cookies" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Cookie Policy</a></li>
-          <li style="padding:5px 0;"><a href="/trust" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Trust center</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-bottom" style="padding-top:28px;border-top:1px solid #EAEAEF;font-size:13px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <span>© 2026 Boost Boss · All rights reserved.</span>
-      <span>Made for the AI era.</span>
-    </div>
+<footer class="site"><div class="wrap">
+  <div class="foot-grid">
+    <div><div class="foot-brand"><img src="/design-system/assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight)">Boost Boss</span></div><p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p></div>
+    <div class="foot-col"><h4>Publishers</h4><ul><li><a href="/publish/computer">Computer App</a></li><li><a href="/publish/browser">Browser App</a></li><li><a href="/publish/browser-extension">Extension</a></li><li><a href="/publish/mobile">Mobile App</a></li></ul></div>
+    <div class="foot-col"><h4>Resources</h4><ul><li><a href="#">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Payouts</a></li></ul></div>
+    <div class="foot-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Trust center</a></li><li><a href="#">Contact</a></li></ul></div>
   </div>
-</footer>
+  <div class="foot-bottom"><span>© 2026 Boost Boss · All rights reserved.</span><span>Made for the AI era.</span></div>
+</div></footer>
+
 <script>
-  // Top nav: transparent at top, frosted-glass on scroll. Matches /publish.
-  (function(){
-    var nav = document.querySelector('nav.site-nav');
-    if (!nav) return;
-    var on = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
-    document.addEventListener('scroll', on, { passive: true });
-    on();
-  })();
-  // Logged-in publisher: swap nav CTAs for a pill linking to /publish/dashboard.
-  (function(){
-    var token = localStorage.getItem('bb_pub_token');
-    if (!token) return;
-    var profile = {}, user = {};
-    try { profile = JSON.parse(localStorage.getItem('bb_pub_profile') || '{}') || {}; } catch (_) {}
-    try { user    = JSON.parse(localStorage.getItem('bb_pub_user')    || '{}') || {}; } catch (_) {}
-    var name = profile.app_name
-            || (user.email && String(user.email).split('@')[0])
-            || (profile.email && String(profile.email).split('@')[0])
-            || 'Dashboard';
-    var initial = String(name).trim().charAt(0).toUpperCase() || 'P';
-    var ctas = document.querySelector('.nav-ctas');
-    if (!ctas) return;
-    var esc = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); };
-    var lang = ctas.querySelector('.nav-lang-wrap');
-    ctas.innerHTML =
-      '<a href="/publish/dashboard" class="btn btn-ghost auth-pill" title="Go to your dashboard">' +
-      '<span class="auth-avatar">' + esc(initial) + '</span>' +
-      '<span class="auth-name">' + esc(name) + '</span>' +
-      '<span class="auth-arrow">→</span>' +
-      '</a>';
-    if (lang) ctas.insertBefore(lang, ctas.firstChild);
-  })();
+(function(){var ok=document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches;if(ok)document.documentElement.classList.add('anim');else document.addEventListener('visibilitychange',function o(){if(document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('anim');document.removeEventListener('visibilitychange',o)}});})();
+var ANIM=document.documentElement.classList.contains('anim');
+var nav=document.getElementById('nav');
+var px=[].slice.call(document.querySelectorAll('[data-parallax]'));
+function onS(){var y=scrollY;nav.classList.toggle('scrolled',y>8);if(ANIM){var vh=innerHeight;px.forEach(function(el){var r=el.getBoundingClientRect();var sp=parseFloat(el.dataset.speed||'0.05');el.style.setProperty('--py',((r.top+r.height/2-vh/2)*-sp).toFixed(1)+'px')})}}
+addEventListener('scroll',onS,{passive:true});onS();
+if(ANIM&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-visible');o.unobserve(e.target)}})},{threshold:.2});document.querySelectorAll('[data-reveal]').forEach(function(el){io.observe(el)})}
 </script>
 </body>
 </html>

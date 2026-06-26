@@ -1,1551 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- BB_I18N_PRELOAD: zero-flash language preference. Mirrors i18n.js. Do not edit by hand — run scripts/i18n_inject_preload.py. -->
-<style>html.bb-i18n-loading{visibility:hidden}</style>
-<script>(function(){var S=['en','zh','zh-TW','ja','ko','vi'],D='en',L={'/publish':1,'/publish/mcp':1,'/publish/ai-apps':1,'/publish/extensions':1,'/publish/bots':1,'/publish/no-code':1,'/ads':1};var p=location.pathname,seg=p.split('/')[1]||'',has=S.indexOf(seg)!==-1;if(!has){try{var sv=localStorage.getItem('bb_lang');if(sv&&S.indexOf(sv)!==-1&&sv!==D){var pp=p.split('?')[0].split('#')[0];if(pp.length>1&&pp.charAt(pp.length-1)==='/')pp=pp.slice(0,-1);if(L[pp]){location.replace('/'+sv+pp+(location.search||'')+(location.hash||''));return}}}catch(e){}}if(has&&seg!==D){var r=document.documentElement;r.classList.add('bb-i18n-loading');setTimeout(function(){r.classList.remove('bb-i18n-loading')},2000);}})();</script>
-<!-- /BB_I18N_PRELOAD -->
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SuperBoost Ads — Reach AI-native users</title>
-<meta name="description" content="SuperBoost Ads is the performance ad platform for the AI era. One product boost reaches four AI surfaces — MCP tools (Claude Desktop, Cursor), web AI apps, browser extensions, and chat bots. Benna allocates intelligently. Real bids. Real ROI.">
-<meta property="og:title" content="SuperBoost Ads — Reach AI-native users">
-<meta property="og:description" content="One product. Four AI surfaces. Reach users inside MCP tools, web AI apps, browser extensions, and chat bots. Benna handles the allocation.">
-<meta property="og:url" content="https://boostboss.ai/ads">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="SuperBoost Ads — Reach AI-native users">
-<meta name="twitter:description" content="One product. Four AI surfaces. The performance ad platform for AI-native audiences.">
-<link rel="canonical" href="https://boostboss.ai/advertiser">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>SuperBoost Ads — Boost Boss · Powered by Benna</title>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --pink: #FF2D78;
-    --pink-dark: #E01E65;
-    --cyan: #04BEFE;
-    --yellow: #FFE600;
-    --ink: #1A1A2E;
-    --ink-soft: #4B4B5E;
-    --muted: #6B7280;
-    --line: #EAEAEF;
-    --bg: #FFFFFF;
-    --bg-soft: #FAFAF7;
-  }
-
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--ink);
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-    font-size: 16px;
-    /* Shared pastel-tinted cream canvas (matches /publish & landing) */
-    background:
-      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%),
-      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%),
-      #FAFAF7;
-    background-attachment: fixed;
-    min-height: 100vh;
-  }
-  a { color: inherit; text-decoration: none; }
-  img, svg { display: block; max-width: 100%; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
-
-  /* NAV — floating (position: fixed) so the body canvas + hero gradient
-     sit behind it as one continuous background. Transparent on top of
-     the page; subtle frosted tint when scrolled. Matches /publish. */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: transparent;
-    transition: background 0.3s, backdrop-filter 0.3s, border 0.3s;
-  }
-  nav.scrolled {
-    background: rgba(250, 250, 247, 0.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(15, 15, 26, 0.06);
-  }
-  .nav-inner {
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
-  .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-  .brand-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
-  }
-  .brand-powered {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px; font-weight: 500; font-style: italic;
-    color: #6B7280; letter-spacing: 0; margin-top: 2px;
-  }
-  .brand-powered em {
-    color: #9D7AFF; font-style: italic; font-weight: 600;
-  }
-  .brand-sub {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px; font-weight: 600; color: var(--pink);
-    padding: 3px 8px; border-radius: 6px; background: #FFE6EE;
-    margin-left: 4px; letter-spacing: 0.3px;
-  }
-  .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a {
-    font-size: 14.5px; font-weight: 700; color: var(--ink);
-    opacity: 0.92;
-    transition: color 0.15s, opacity 0.15s;
-  }
-  .nav-links a:hover { opacity: 1; color: var(--pink); }
-  .nav-links a.active { opacity: 1; color: var(--pink); }
-  .nav-ctas { display: flex; gap: 10px; align-items: center; }
-  .nav-lang-wrap { position: relative; }
-  .nav-lang { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; font-family: inherit; transition: background 0.15s, border-color 0.15s; }
-  .nav-lang:hover { border-color: var(--ink-soft); background: var(--bg-soft); }
-  .nav-lang svg { width: 16px; height: 16px; stroke-width: 1.8; }
-  .nav-lang-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 180px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14); z-index: 200; }
-  .nav-lang-wrap.open .nav-lang-menu { display: block; }
-  .nav-lang-menu a { display: block; padding: 11px 14px; border-radius: 8px; font-size: 14.5px; color: var(--ink); text-decoration: none; font-weight: 500; transition: background 0.1s, color 0.1s; }
-  .nav-lang-menu a:hover { background: var(--bg-soft); }
-  .nav-lang-menu a.active { color: var(--pink); font-weight: 700; }
-
-  /* Logged-in advertiser pill — replaces "Sign in" / "Launch a campaign"
-     when bb_adv_token is set in localStorage. Same shape as the publisher
-     pill on /publish/* so the two sides feel like one product family. */
-  .auth-pill {
-    display: inline-flex !important;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 14px 5px 5px !important;
-  }
-  .auth-pill .auth-avatar {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-    text-transform: uppercase;
-  }
-  .auth-pill .auth-name {
-    font-size: 13.5px;
-    font-weight: 600;
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .auth-pill .auth-arrow {
-    opacity: 0.5;
-    font-size: 12px;
-    transition: transform 0.15s, opacity 0.15s;
-  }
-  .auth-pill:hover .auth-arrow { opacity: 1; transform: translateX(2px); }
-
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
-    padding: 9px 18px; border-radius: 8px;
-    border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
-    text-decoration: none; white-space: nowrap;
-  }
-  .btn-ghost { color: var(--ink); background: transparent; }
-  .btn-ghost:hover { background: var(--bg-soft); }
-  .btn-primary { background: var(--pink); color: #fff; border-color: var(--pink); }
-  .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
-  .btn-outline { background: #fff; color: var(--ink); border-color: var(--ink); }
-  .btn-outline:hover { background: var(--ink); color: #fff; }
-  .btn-lg { padding: 13px 24px; font-size: 15.5px; border-radius: 10px; }
-
-  /* HERO — top padding clears the fixed nav (64px) + breathing room */
-  .hero {
-    padding: 128px 0 88px;
-    text-align: center;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(4,190,254,0.08), transparent 40%),
-      radial-gradient(circle at 85% 30%, rgba(255,45,120,0.08), transparent 45%);
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--bg-soft); border: 1px solid var(--line);
-    padding: 6px 14px; border-radius: 100px;
-    font-size: 13px; font-weight: 500; color: var(--ink-soft);
-    margin-bottom: 28px;
-  }
-  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pink); }
-  .hero h1 {
-    font-size: clamp(40px, 6vw, 72px); font-weight: 700; line-height: 1.05;
-    letter-spacing: -0.035em; margin-bottom: 24px;
-  }
-  .hero h1 .accent-pink { color: var(--pink); }
-  .hero h1 .accent-cyan { color: var(--cyan); }
-  .hero p.sub {
-    font-size: clamp(17px, 1.6vw, 20px); color: var(--ink-soft);
-    max-width: 660px; margin: 0 auto 36px; line-height: 1.5;
-  }
-  .hero-ctas { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-  .hero-micro { margin-top: 18px; font-size: 13px; color: var(--muted); }
-
-  /* CAMPAIGN DASHBOARD MOCK */
-  .hero-visual { max-width: 1040px; margin: 64px auto 0; position: relative; }
-  .hero-card {
-    background: var(--bg-soft); border: 1.5px solid var(--ink);
-    border-radius: 18px; padding: 20px; box-shadow: 10px 10px 0 var(--ink);
-  }
-  .hero-card-inner {
-    background: #fff; border: 1px solid var(--line); border-radius: 12px;
-    padding: 24px;
-  }
-  .mock-topbar {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-bottom: 18px; border-bottom: 1px solid var(--line); margin-bottom: 20px;
-  }
-  .mock-topbar .title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; text-align: left; }
-  .mock-topbar .title small { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 2px; }
-  .mock-topbar .pill-live {
-    background: #D1FADF; color: #027A48; padding: 4px 12px;
-    border-radius: 100px; font-size: 12px; font-weight: 700;
-    letter-spacing: 0.3px; text-transform: uppercase;
-  }
-  .mock-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-  .mock-kpi {
-    background: var(--bg-soft); border: 1px solid var(--line);
-    border-radius: 10px; padding: 14px 16px; text-align: left;
-  }
-  .mock-kpi .k { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
-  .mock-kpi .v { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
-  .mock-kpi .t { font-size: 12px; color: #10B981; font-weight: 600; margin-top: 4px; }
-  .mock-kpi .t.red { color: var(--pink); }
-
-  .mock-chart-wrap {
-    background: var(--bg-soft); border: 1px solid var(--line);
-    border-radius: 10px; padding: 18px; text-align: left;
-  }
-  .mock-chart-wrap .k { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 12px; }
-  .mock-chart { height: 120px; display: flex; align-items: flex-end; gap: 6px; }
-  .mock-chart span { flex: 1; background: var(--pink); border-radius: 4px 4px 0 0; }
-  .mock-chart span:nth-child(even) { background: var(--cyan); }
-
-  /* TRUSTED */
-  .trusted { padding: 48px 0; }
-  .trusted p { text-align: center; font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 24px; }
-  .trusted-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; align-items: center; opacity: 0.65; }
-  .trusted-row span { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: var(--ink-soft); }
-
-  /* SECTIONS */
-  section.feature { padding: 96px 0; }
-  .feature-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
-  }
-  .feature-grid.reverse .feature-text { order: 2; }
-  .eyebrow {
-    display: inline-block; font-size: 13px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    padding: 5px 10px; border-radius: 6px; margin-bottom: 20px;
-  }
-  .eyebrow.pink { background: #FFE6EE; color: var(--pink); }
-  .eyebrow.cyan { background: #D6F5FE; color: #0195CC; }
-  .eyebrow.yellow { background: #FFF8B8; color: #8A7700; }
-  .feature-text h2 {
-    font-size: clamp(32px, 4vw, 48px); font-weight: 700;
-    line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px;
-  }
-  .feature-text p { font-size: 18px; color: var(--ink-soft); margin-bottom: 28px; line-height: 1.55; }
-  .bullet-list { list-style: none; margin-bottom: 32px; }
-  .bullet-list li {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 10px 0; font-size: 16px; color: var(--ink);
-  }
-  .check {
-    flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px;
-    background: var(--pink); color: #fff; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
-  }
-  .check.cyan { background: var(--cyan); }
-  .check.yellow { background: var(--yellow); color: var(--ink); }
-
-  .vis-card {
-    background: var(--bg-soft); border: 1.5px solid var(--ink);
-    border-radius: 16px; padding: 28px; box-shadow: 6px 6px 0 var(--ink);
-  }
-
-  /* TARGETING MOCK */
-  .targeting-mock { }
-  .targeting-mock .heading { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 14px; color: var(--ink); }
-  .signal-pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: #fff; border: 1.5px solid var(--ink);
-    border-radius: 100px; padding: 6px 14px;
-    font-size: 13px; font-weight: 600; margin: 0 6px 8px 0;
-  }
-  .signal-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
-  .signal-pill .dot.pink { background: var(--pink); }
-  .signal-pill .dot.cyan { background: var(--cyan); }
-  .signal-pill .dot.yellow { background: var(--yellow); }
-  .bid-block {
-    background: var(--ink); color: #fff; border-radius: 10px;
-    padding: 16px 18px; margin-top: 18px;
-    font-family: 'JetBrains Mono', 'Monaco', monospace; font-size: 12.5px;
-    line-height: 1.7;
-  }
-  .bid-block .label { color: var(--muted); }
-  .bid-block .win { color: var(--yellow); }
-  .bid-block .amt { color: var(--cyan); }
-  .bid-block .pink { color: var(--pink); }
-
-  /* CAMPAIGN CARD MOCK */
-  .campaign-mock {
-    background: #fff; border: 1px solid var(--line);
-    border-radius: 12px; padding: 20px; margin-bottom: 14px;
-  }
-  .campaign-mock:last-child { margin-bottom: 0; }
-  .campaign-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .campaign-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
-  .pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .pill-active { background: #D1FADF; color: #027A48; }
-  .pill-paused { background: #FFF3D6; color: #8A6A00; }
-  .campaign-stats { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
-  .campaign-stats strong { color: var(--ink); font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
-
-  /* 3 CARDS */
-  .three-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .card-flat {
-    background: var(--bg); border: 1.5px solid var(--ink);
-    border-radius: 14px; padding: 28px; transition: all 0.15s;
-  }
-  .card-flat:hover { transform: translateY(-4px); box-shadow: 6px 6px 0 var(--ink); }
-  .card-flat .icon-chip {
-    width: 44px; height: 44px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px; font-size: 22px; font-weight: 700;
-  }
-  .chip-pink { background: var(--pink); color: #fff; }
-  .chip-cyan { background: var(--cyan); color: var(--ink); }
-  .chip-yellow { background: var(--yellow); color: var(--ink); }
-  .card-flat h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .card-flat p { color: var(--ink-soft); font-size: 15px; }
-
-  /* STATS */
-  .stats-bar { padding: 64px 0; background: var(--ink); }
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
-  .stat { text-align: center; color: #fff; }
-  .stat .n {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 52px; font-weight: 700; line-height: 1;
-    margin-bottom: 8px; letter-spacing: -0.02em;
-  }
-  .stat .n.pink { color: var(--pink); }
-  .stat .n.cyan { color: var(--cyan); }
-  .stat .n.yellow { color: var(--yellow); }
-  .stat .l { font-size: 14px; color: #A0A0B0; font-weight: 500; }
-
-  /* PLACEMENTS ROW */
-  .placements-section { padding: 96px 0; text-align: center; }
-  .placements-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-    text-align: left; margin-top: 48px;
-  }
-  .placement {
-    border: 1.5px solid var(--ink); border-radius: 14px;
-    padding: 0; overflow: hidden; background: #fff;
-  }
-  .placement .pl-head {
-    background: var(--bg-soft); padding: 12px 16px;
-    border-bottom: 1.5px solid var(--ink); font-size: 12px;
-    color: var(--muted); font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .placement .pl-body { padding: 20px; }
-  .placement h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .placement p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
-  .mini-sponsored {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 10px; font-weight: 700; color: var(--pink);
-    background: #FFE6EE; padding: 2px 8px; border-radius: 100px;
-    letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 10px;
-  }
-
-  /* YOUR REACH — 4-door grid */
-  .reach-section { padding: 96px 0; }
-  .reach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 48px; }
-  .reach-card {
-    background: #fff; border: 1.5px solid var(--ink); border-radius: 14px;
-    padding: 0; overflow: hidden; display: flex; flex-direction: column;
-  }
-  .reach-card .rc-mockup {
-    background: var(--bg-soft); border-bottom: 1.5px solid var(--ink);
-    padding: 14px 14px 6px; aspect-ratio: 4 / 3;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .reach-card .rc-mockup svg { width: 100%; height: auto; max-height: 200px; display: block; }
-  .reach-card .rc-body { padding: 18px 18px 20px; flex: 1; display: flex; flex-direction: column; }
-  .reach-card .rc-eyebrow {
-    font-size: 11px; font-weight: 700; color: var(--pink);
-    letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px;
-  }
-  .reach-card h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
-  .reach-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.45; }
-  .reach-card .rc-foot {
-    margin-top: auto; padding-top: 12px; border-top: 1px dashed rgba(15,15,26,0.10);
-    font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace;
-  }
-  @media (max-width: 1080px) { .reach-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px)  { .reach-grid { grid-template-columns: 1fr; } }
-
-  /* HOW BIDDING WORKS */
-  section.how { padding: 96px 0; text-align: center; }
-  .section-header { max-width: 680px; margin: 0 auto 56px; text-align: center; }
-  .section-header h2 {
-    font-size: clamp(32px, 4vw, 44px); font-weight: 700;
-    letter-spacing: -0.03em; margin-bottom: 16px;
-  }
-  .section-header p { font-size: 18px; color: var(--ink-soft); }
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: left; }
-  .step {
-    padding: 32px 28px; border: 1.5px solid var(--line);
-    border-radius: 14px; background: #fff; position: relative;
-  }
-  .step-num {
-    position: absolute; top: 24px; right: 24px;
-    width: 32px; height: 32px; border: 1.5px solid var(--ink); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px;
-  }
-  .step h3 { font-size: 19px; font-weight: 700; margin: 16px 0 8px; }
-  .step p { font-size: 15px; color: var(--ink-soft); }
-  .step .icon-chip { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
-
-  /* PRICING */
-  section.pricing { padding: 96px 0; }
-  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
-  .price-card {
-    background: #fff; border: 1.5px solid var(--ink);
-    border-radius: 16px; padding: 32px 28px;
-    display: flex; flex-direction: column;
-  }
-  .price-card.featured {
-    background: var(--ink); color: #fff;
-    box-shadow: 10px 10px 0 var(--pink);
-  }
-  .price-card.featured h3, .price-card.featured .price { color: #fff; }
-  .price-card.featured .price-sub { color: #A0A0B0; }
-  .price-card.featured .bullet-list li { color: #fff; }
-  .price-tag {
-    display: inline-block; font-size: 12px; font-weight: 700;
-    padding: 4px 10px; border-radius: 6px; text-transform: uppercase;
-    letter-spacing: 0.6px; margin-bottom: 14px;
-  }
-  .price-tag.pink { background: #FFE6EE; color: var(--pink); }
-  .price-tag.cyan { background: #D6F5FE; color: #0195CC; }
-  .price-tag.dark { background: var(--yellow); color: var(--ink); }
-  .price-card h3 { font-size: 22px; margin-bottom: 8px; }
-  .price-card .price { font-family: 'Space Grotesk', sans-serif; font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
-  .price-card .price-sub { font-size: 14px; color: var(--muted); margin-top: 6px; margin-bottom: 24px; }
-  .price-card .btn { margin-top: auto; }
-
-  /* TESTIMONIAL */
-  section.quote { padding: 96px 0; text-align: center; }
-  .quote blockquote {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(24px, 3vw, 36px); font-weight: 600; line-height: 1.3;
-    max-width: 820px; margin: 0 auto 28px; letter-spacing: -0.02em;
-  }
-  .quote .accent { color: var(--pink); }
-  .quote .attr { font-size: 15px; color: var(--ink-soft); }
-  .quote .attr strong { font-family: 'Space Grotesk', sans-serif; color: var(--ink); }
-
-  /* BIG CTA */
-  section.big-cta { padding: 96px 24px; }
-  .big-cta-box {
-    /* Shared bottom-wedge gradient with yellow+cyan glow (matches /publish) */
-    background: linear-gradient(135deg, #FF2D78 0%, #E01E65 55%, #B81654 100%);
-    color: #fff;
-    border: 2px solid var(--ink); border-radius: 24px;
-    box-shadow: 12px 12px 0 var(--ink);
-    padding: 80px 48px; text-align: center;
-    max-width: 1000px; margin: 0 auto;
-    position: relative; overflow: hidden;
-  }
-  .big-cta-box::before {
-    content: ''; position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 30% 50%, rgba(255, 230, 0, 0.22), transparent 55%),
-      radial-gradient(circle at 75% 45%, rgba(4, 190, 254, 0.18), transparent 55%);
-    pointer-events: none;
-  }
-  .big-cta-box > * { position: relative; z-index: 1; }
-  .big-cta-box h2 {
-    font-size: clamp(36px, 5vw, 56px); color: #fff; font-weight: 700;
-    line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 20px;
-  }
-  .big-cta-box p { font-size: 18px; color: #fff; opacity: 0.9; max-width: 560px; margin: 0 auto 36px; }
-  .big-cta-box .btn { background: #fff; color: var(--pink); border-color: #fff; }
-  .big-cta-box .btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .big-cta-box .btn.outline-white { background: transparent; color: #fff; border-color: #fff; }
-  .big-cta-box .btn.outline-white:hover { background: #fff; color: var(--pink); }
-  .deco-sparkle { position: absolute; font-size: 40px; pointer-events: none; }
-  .deco-sparkle.s1 { top: 24px; left: 40px; }
-  .deco-sparkle.s2 { bottom: 24px; right: 40px; }
-
-  /* FOOTER */
-  footer { background: #fff; padding: 64px 0 32px; }
-  .foot-grid {
-    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-    gap: 40px; padding-bottom: 48px;
-  }
-  .foot-col h4 {
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1px;
-    color: var(--muted); margin-bottom: 16px;
-  }
-  .foot-col ul { list-style: none; }
-  .foot-col li { padding: 6px 0; }
-  .foot-col a { font-size: 14.5px; color: var(--ink-soft); }
-  .foot-col a:hover { color: var(--pink); }
-  .foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .foot-tag { font-size: 14px; color: var(--ink-soft); line-height: 1.6; max-width: 280px; }
-  .foot-bottom { display: flex; justify-content: space-between; padding-top: 24px; font-size: 13px; color: var(--muted); }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    .nav-links { display: none; }
-    .hero { padding: 104px 0 48px; }
-    .mock-kpis { grid-template-columns: 1fr 1fr; }
-    .feature-grid { grid-template-columns: 1fr; gap: 40px; }
-    .feature-grid.reverse .feature-text { order: 0; }
-    .three-cards, .placements-grid, .price-grid { grid-template-columns: 1fr; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
-    .steps { grid-template-columns: 1fr; }
-    .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-    .big-cta-box { padding: 56px 28px; box-shadow: 8px 8px 0 var(--ink); }
-  }
-
-  /* ═════════════════════════════════════════════════════════════════
-     ManyChat-style interactions — live chat mockup, scroll reveals,
-     counter animations. All pure CSS + vanilla JS, zero dependencies.
-     ═════════════════════════════════════════════════════════════════ */
-
-  /* ── LIVE CHAT MOCKUP (replaces the static dashboard in hero) ───── */
-  .chat-mock {
-    max-width: 560px; margin: 64px auto 0;
-    background: #fff; border-radius: 20px;
-    border: 1px solid var(--line);
-    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.08),
-                0 10px 28px rgba(15, 15, 26, 0.05);
-    overflow: hidden;
-    position: relative;
-  }
-  .chat-mock-head {
-    display: flex; align-items: center; gap: 10px;
-    padding: 14px 18px;
-    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
-    border-bottom: 1px solid var(--line);
-  }
-  .chat-mock-head .app-icon {
-    width: 30px; height: 30px; border-radius: 8px;
-    background: linear-gradient(135deg, #FF8A1F, #FF5E3A);
-    color: #fff;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 800; font-size: 15px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .chat-mock-head .app-name {
-    font-size: 14px; font-weight: 700; color: var(--ink);
-  }
-  .chat-mock-head .app-name small {
-    display: block; font-size: 11px; color: var(--muted);
-    font-weight: 500; margin-top: 1px;
-  }
-  .chat-mock-head .live-dot {
-    margin-left: auto;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #10B981;
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
-    animation: livePulse 1.8s ease-out infinite;
-  }
-  @keyframes livePulse {
-    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
-    70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-  }
-  .chat-mock-body {
-    padding: 22px 20px 20px;
-    min-height: 360px;
-    display: flex; flex-direction: column; gap: 12px;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(255, 45, 120, 0.04), transparent 40%),
-      radial-gradient(circle at 90% 100%, rgba(4, 190, 254, 0.04), transparent 40%),
-      #fff;
-  }
-  .chat-bubble {
-    max-width: 88%;
-    padding: 11px 14px;
-    border-radius: 14px;
-    font-size: 14px; line-height: 1.5;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-  .chat-bubble.visible { opacity: 1; transform: translateY(0); }
-  .chat-bubble.user {
-    align-self: flex-end;
-    background: var(--ink);
-    color: #fff;
-    border-bottom-right-radius: 4px;
-  }
-  .chat-bubble.ai {
-    align-self: flex-start;
-    background: var(--bg-soft);
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-bottom-left-radius: 4px;
-  }
-  .chat-typing {
-    display: inline-flex; gap: 4px; align-items: center;
-    padding: 14px 16px;
-    background: var(--bg-soft);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    border-bottom-left-radius: 4px;
-    align-self: flex-start;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-  .chat-typing.visible { opacity: 1; }
-  .chat-typing span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--muted);
-    animation: typingBounce 1.1s ease-in-out infinite;
-  }
-  .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
-  .chat-typing span:nth-child(3) { animation-delay: 0.30s; }
-  @keyframes typingBounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
-    30%          { transform: translateY(-3px); opacity: 1; }
-  }
-
-  /* Sponsored SuperBoost card — slides up from bottom with emphasis */
-  .chat-sponsor {
-    margin-top: 6px;
-    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
-    border: 1.5px solid var(--pink);
-    border-radius: 14px;
-    padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 6px;
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    box-shadow: 0 10px 28px rgba(255, 45, 120, 0.18);
-  }
-  .chat-sponsor.visible { opacity: 1; transform: translateY(0); }
-  .chat-sponsor::before {
-    content: '✨ via SuperBoost';
-    position: absolute; top: -10px; left: 14px;
-    background: var(--pink); color: #fff;
-    font-size: 10px; font-weight: 700;
-    padding: 3px 9px; border-radius: 100px;
-    letter-spacing: 0.4px;
-  }
-  .chat-sponsor .sp-label {
-    font-size: 10px; font-weight: 700; color: var(--pink);
-    text-transform: uppercase; letter-spacing: 0.6px;
-    margin-top: 4px;
-  }
-  .chat-sponsor .sp-title {
-    font-size: 15px; font-weight: 700; color: var(--ink);
-    line-height: 1.3;
-  }
-  .chat-sponsor .sp-sub {
-    font-size: 13px; color: var(--ink-soft); line-height: 1.45;
-  }
-  .chat-sponsor .sp-cta {
-    display: inline-block; align-self: flex-start;
-    margin-top: 4px;
-    background: var(--pink); color: #fff;
-    padding: 8px 14px; border-radius: 8px;
-    font-size: 13px; font-weight: 700;
-    transition: background 0.15s;
-  }
-  .chat-sponsor .sp-cta:hover { background: var(--pink-dark); }
-
-  /* Floating ambient pills around the chat (ManyChat-style playful touch) */
-  .hero-visual { position: relative; }
-  .float-pill {
-    position: absolute;
-    padding: 8px 14px; border-radius: 100px;
-    background: #fff;
-    border: 1px solid var(--line);
-    font-size: 12.5px; font-weight: 700;
-    color: var(--ink);
-    box-shadow: 0 8px 24px rgba(15, 15, 26, 0.08);
-    animation: floatBob 4s ease-in-out infinite;
-    white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 6px;
-    z-index: 2;
-  }
-  .float-pill .dot-color {
-    width: 8px; height: 8px; border-radius: 50%;
-  }
-  .float-pill.fp-1 { top: 10%; left: -12px; animation-delay: 0s; }
-  .float-pill.fp-2 { top: 40%; right: -20px; animation-delay: 0.8s; }
-  .float-pill.fp-3 { bottom: 14%; left: -30px; animation-delay: 1.6s; }
-  @keyframes floatBob {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-8px); }
-  }
-
-  /* ── SCROLL-TRIGGERED FADE-UP ──────────────────────────────────── */
-  /* Any element with [data-reveal] starts hidden. IntersectionObserver
-     toggles .is-visible to play the animation when it enters viewport. */
-  [data-reveal] {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
-                transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-    transition-delay: var(--reveal-delay, 0s);
-    will-change: opacity, transform;
-  }
-  [data-reveal].is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    [data-reveal] { opacity: 1; transform: none; transition: none; }
-    .chat-bubble, .chat-sponsor, .float-pill { opacity: 1 !important; transform: none !important; animation: none !important; }
-    .live-dot { animation: none !important; }
-  }
-
-  /* ── STATS COUNTER — shimmer when animating ───────────────────── */
-  .stat .n[data-count].counting {
-    background: linear-gradient(90deg, var(--pink), var(--pink) 50%, var(--cyan));
-    background-size: 200% 100%;
-    background-position: 100% 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: countShimmer 1.4s ease-out;
-  }
-  @keyframes countShimmer {
-    from { background-position: 100% 50%; }
-    to   { background-position: 0% 50%; }
-  }
-
-  /* AD-FORMAT BELT styles removed 2026-05-28 — the 6-card ad-format
-     carousel was retired from the /ads page. */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font-body);color:var(--text-on-dark);background:var(--bb-surface-0);-webkit-font-smoothing:antialiased;font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden;--acc:#00FFE0;--accSoft:rgba(0,255,224,0.09);--accBorder:rgba(0,255,224,0.35)}
+  a{color:inherit;text-decoration:none}svg{display:block}
+  .wrap{max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+  .page-fx{position:fixed;inset:0;z-index:-5;pointer-events:none;background:radial-gradient(ellipse 44% 32% at 14% 6%,rgba(0,255,224,0.12),transparent 60%),radial-gradient(ellipse 42% 34% at 86% 30%,rgba(255,45,120,0.12),transparent 62%),radial-gradient(ellipse 52% 42% at 50% 96%,rgba(217,70,239,0.10),transparent 60%),var(--bb-surface-0)}
+  .page-fx.grain{z-index:-4;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+  nav{position:fixed;top:0;left:0;right:0;z-index:var(--z-nav);transition:background var(--dur-base),backdrop-filter var(--dur-base),border-color var(--dur-base);border-bottom:1px solid transparent}
+  nav.scrolled{background:var(--glass-dark-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-bottom:var(--glass-dark-border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-mark{width:34px;height:34px;filter:drop-shadow(0 4px 12px rgba(255,45,120,.35))}
+  .brand-name{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight);color:#fff;white-space:nowrap}
+  .sb-mark{margin-left:12px;padding-left:12px;border-left:1px solid rgba(255,255,255,.16);font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--acc)}
+  .sb-mark small{display:block;font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.5px;color:rgba(244,244,248,.45);text-transform:uppercase}
+  .nav-links{display:flex;gap:24px;align-items:center}
+  .nav-links a{font-size:14px;font-weight:600;color:rgba(244,244,248,.72);transition:color var(--dur-fast)}
+  .nav-links a:hover{color:#fff}.nav-links a.active{color:var(--acc)}
+  .nav-ctas{display:flex;gap:10px;align-items:center}
+  @media(max-width:1080px){.nav-links,.sb-mark{display:none}}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-body);font-weight:600;font-size:14.5px;padding:9px 18px;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:transform var(--dur-fast) var(--ease-snappy),background var(--dur-fast),box-shadow var(--dur-fast),border-color var(--dur-fast);white-space:nowrap}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--bb-pink);color:#fff;border-color:var(--bb-pink);box-shadow:0 6px 20px rgba(255,45,120,.32)}
+  .btn-primary:hover{background:var(--bb-pink-dark);border-color:var(--bb-pink-dark);box-shadow:var(--glow-pink);transform:translateY(-2px)}
+  .btn-ghost-d{background:rgba(255,255,255,.05);color:#fff;border-color:rgba(255,255,255,.18)}
+  .btn-ghost-d:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-2px)}
+  .btn-lg{padding:14px 26px;font-size:15.5px;border-radius:var(--r-md)}
+  .section{position:relative;padding:var(--section-y) 0}
+  .divider{height:1px;max-width:var(--container);margin:0 auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);position:relative;overflow:hidden}
+  .divider::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:100%;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:sweep 5s linear infinite}
+  @keyframes sweep{to{left:130%}}
+  [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);transition-delay:var(--rd,0s)}
+  [data-reveal=left]{transform:translateX(-40px)}[data-reveal=right]{transform:translateX(40px)}
+  [data-reveal].is-visible{opacity:1;transform:none}
+  html:not(.anim) [data-reveal]{opacity:1!important;transform:none!important}
+  [data-parallax]{transform:translate3d(0,var(--py,0px),0);will-change:transform}
+  .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;padding:6px 13px;border-radius:var(--r-pill);margin-bottom:22px;background:var(--accSoft);border:1px solid var(--accBorder);color:var(--acc)}
+  .hero{position:relative;padding:var(--hero-top) 0 60px}
+  .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center}
+  @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:44px}}
+  .badge{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);padding:7px 15px;border-radius:var(--r-pill);font-size:13px;font-weight:500;color:rgba(244,244,248,.92);margin-bottom:24px}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:lp 1.9s var(--ease-out) infinite}
+  @keyframes lp{0%{box-shadow:0 0 0 0 var(--accSoft)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .hero h1{font-family:var(--font-display);font-size:clamp(38px,4.8vw,62px);font-weight:700;line-height:1.05;letter-spacing:var(--ls-display);color:#fff;margin-bottom:20px}
+  .hero h1 .acc{color:var(--acc)}.hero h1 s{color:rgba(244,244,248,.4);text-decoration-color:rgba(255,45,120,.7)}
+  .hero .sub{font-size:var(--fs-lead);color:rgba(244,244,248,.74);max-width:520px;margin-bottom:28px;line-height:1.5}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+  .hero-meta{display:flex;gap:26px;flex-wrap:wrap}
+  .hero-meta .m{font-size:13px;color:rgba(244,244,248,.55)}
+  .hero-meta .m b{display:block;font-family:var(--font-display);font-size:21px;color:#fff;font-weight:700}
+  .hero-meta .m b.acc{color:var(--acc)}
+  .section-head{max-width:720px;margin:0 auto 50px;text-align:center}
+  .section-head h2{font-family:var(--font-display);font-size:var(--fs-h2);font-weight:700;color:#fff;letter-spacing:var(--ls-heading);line-height:1.1;margin-bottom:14px}
+  .section-head h2 .acc{color:var(--acc)}
+  .section-head p{font-size:18px;color:rgba(244,244,248,.66)}
+  /* Console mockup */
+  .console{position:relative;background:linear-gradient(160deg,rgba(24,24,38,.95),rgba(12,12,22,.96));border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+  .cbar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)}
+  .cbar .dot{width:10px;height:10px;border-radius:50%}
+  .cbar .ct{margin-left:8px;font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.5)}
+  .cbar .live{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--acc)}
+  .cbar .live .d{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:lp2 1.7s infinite}
+  @keyframes lp2{0%,100%{opacity:1}50%{opacity:.3}}
+  .cbody{padding:18px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .kpi{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 13px}
+  .kpi .kl{font-size:10px;color:rgba(244,244,248,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+  .kpi .kv{font-family:var(--font-display);font-size:19px;font-weight:700;color:#fff}
+  .kpi .kv .up{font-size:11px;color:#34D399;margin-left:4px}.kpi .kv .dn{font-size:11px;color:var(--acc);margin-left:4px}
+  .cchart{height:74px;display:flex;align-items:flex-end;gap:4px;padding:0 2px;margin-bottom:16px}
+  .cchart span{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--acc),rgba(0,255,224,.18))}
+  .crow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px dashed rgba(255,255,255,.08)}
+  .crow .cn{font-size:13px;color:#fff;font-weight:600;display:flex;align-items:center;gap:9px}
+  .crow .cn .st{width:7px;height:7px;border-radius:50%;background:#34D399}
+  .crow .cn .st.p{background:var(--bb-yellow)}
+  .crow .cs{font-family:var(--font-mono);font-size:12px;color:rgba(244,244,248,.6)}
+  .float-pill{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;background:rgba(12,12,22,.9);border:1px solid var(--accBorder);box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;animation:bob 4.5s var(--ease-in-out) infinite}
+  .float-pill .sw{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+  .float-pill.p1{top:-14px;right:22px}.float-pill.p2{bottom:26px;left:-18px;animation-delay:1.3s}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  /* Marquee */
+  .marquee{position:relative;overflow:hidden;padding:26px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .marquee-label{text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:rgba(244,244,248,.4);margin-bottom:20px}
+  .marquee-track{display:flex;width:max-content;gap:56px;animation:marquee 26s linear infinite}
+  .marquee:hover .marquee-track{animation-play-state:paused}
+  .marquee-track span{font-family:var(--font-display);font-size:21px;font-weight:600;color:rgba(244,244,248,.5);white-space:nowrap}
+  @keyframes marquee{to{transform:translateX(-50%)}}
+  /* Intent target two-col */
+  .spot{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .spot .stext h2{font-family:var(--font-display);font-size:var(--fs-h2);color:#fff;line-height:1.1;letter-spacing:var(--ls-heading);margin-bottom:16px}
+  .spot .stext h2 .acc{color:var(--acc)}
+  .spot .stext p{font-size:17px;color:rgba(244,244,248,.66);margin-bottom:22px}
+  .spot .slist{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .spot .slist li{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:rgba(244,244,248,.88)}
+  .spot .slist .ck{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--acc);color:var(--bb-ink);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+  @media(max-width:880px){.spot{grid-template-columns:1fr;gap:36px}}
+  /* targeting chips visual */
+  .targ{background:linear-gradient(160deg,rgba(24,24,38,.9),rgba(12,12,22,.92));border:1px solid rgba(255,255,255,.1);border-radius:var(--r-xl);padding:24px;box-shadow:var(--shadow-xl)}
+  .targ .tt{font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+  .targ .tchips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+  .tchip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);font-size:12.5px;color:rgba(244,244,248,.85)}
+  .tchip.on{border-color:var(--accBorder);background:var(--accSoft);color:#fff}
+  .tchip .k{font-family:var(--font-mono);font-size:10px;color:rgba(244,244,248,.45)}
+  .targ .tbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:var(--r-md);background:linear-gradient(100deg,rgba(0,255,224,.14),rgba(255,45,120,.1));border:1px solid rgba(255,255,255,.12)}
+  .targ .tbar .tl{font-size:12.5px;color:rgba(244,244,248,.7)}
+  .targ .tbar .tr{font-family:var(--font-display);font-weight:700;color:#fff;font-size:15px}
+  /* Trust pillars */
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:880px){.pgrid{grid-template-columns:1fr}}
+  .pcard{position:relative;padding:26px 24px;background:linear-gradient(160deg,rgba(28,28,43,.6),rgba(15,15,26,.6));border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);transition:transform var(--dur-base) var(--ease-out),border-color var(--dur-base),box-shadow var(--dur-base)}
+  .pcard:hover{transform:translateY(-3px);border-color:var(--accBorder);box-shadow:var(--shadow-xl)}
+  .pcard .pico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:16px;background:var(--accSoft)}
+  .pcard h3{font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+  .pcard p{font-size:14px;color:rgba(244,244,248,.62);line-height:1.5}
+  /* Stats */
+  .stats-band{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.015)}
+  .stats-band::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 50% 90% at 15% 50%,rgba(0,255,224,.14),transparent 60%),radial-gradient(ellipse 50% 90% at 85% 50%,rgba(255,45,120,.12),transparent 60%)}
+  .stats-row{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+  .stat{text-align:center;color:#fff}
+  .stat .n{font-family:var(--font-display);font-size:var(--fs-stat);font-weight:700;line-height:1;margin-bottom:8px;letter-spacing:-.02em}
+  .stat .n.acc{color:var(--acc)}.stat .n.pink{color:var(--bb-pink)}.stat .n.yellow{color:var(--bb-yellow)}
+  .stat .l{font-size:14px;color:rgba(244,244,248,.55)}
+  /* Pricing strip */
+  .price-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:880px){.price-row{grid-template-columns:1fr}}
+  .price{padding:26px 24px;border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);background:rgba(255,255,255,.02);text-align:center}
+  .price .pm{font-family:var(--font-mono);font-size:12px;color:var(--acc);letter-spacing:.04em;margin-bottom:8px}
+  .price b{display:block;font-family:var(--font-display);font-size:26px;color:#fff;font-weight:700;margin-bottom:6px}
+  .price span{font-size:13.5px;color:rgba(244,244,248,.6)}
+  /* CTA */
+  .cta-box{position:relative;overflow:hidden;max-width:1000px;margin:0 auto;background:var(--grad-pink);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-2xl);box-shadow:var(--glow-pink),0 30px 80px rgba(0,0,0,.4);padding:70px 48px;text-align:center;color:#fff}
+  .cta-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 26% 50%,rgba(255,230,0,.22),transparent 55%),radial-gradient(circle at 80% 45%,rgba(0,255,224,.22),transparent 55%)}
+  .cta-box>*{position:relative;z-index:1}
+  .cta-box h2{font-family:var(--font-display);font-size:clamp(32px,4.4vw,50px);font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-bottom:16px}
+  .cta-box p{font-size:18px;opacity:.92;max-width:560px;margin:0 auto 30px}
+  .cta-ctas{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .cta-box .btn-white{background:#fff;color:var(--bb-pink);border-color:#fff}
+  .cta-box .btn-white:hover{background:var(--bb-ink);color:#fff;border-color:var(--bb-ink);transform:translateY(-2px)}
+  .cta-box .btn-clear{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+  .cta-box .btn-clear:hover{background:#fff;color:var(--bb-pink);border-color:#fff;transform:translateY(-2px)}
+  footer.site{border-top:1px solid rgba(255,255,255,.08);padding:54px 0 34px;margin-top:var(--section-y)}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:38px}
+  .foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .foot-brand img{width:30px;height:30px}.foot-brand .brand-name{color:#fff}
+  .foot-tag{font-size:14px;color:rgba(244,244,248,.6);line-height:1.6;max-width:300px}
+  .foot-col h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:rgba(244,244,248,.45);margin-bottom:14px}
+  .foot-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .foot-col a{font-size:14px;color:rgba(244,244,248,.66);transition:color var(--dur-fast)}
+  .foot-col a:hover{color:var(--acc)}
+  .foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:rgba(244,244,248,.45)}
+  @media(max-width:880px){.foot-grid{grid-template-columns:1fr 1fr;gap:30px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}[data-reveal]{opacity:1!important;transform:none!important}}
 </style>
-<script src="/i18n.js" defer></script>
 </head>
 <body>
+<div class="page-fx"></div><div class="page-fx grain"></div>
 
-<!-- NAV -->
-<nav id="mainNav">
-  <div class="nav-inner">
-    <a class="brand" href="/ads">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
-<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
-<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>
-<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
-<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
-<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-      <span class="brand-text">
-        <span class="brand-name">Super<span style="color: var(--pink);">Boost Ads</span></span>
-        <span class="brand-powered">Powered by <em>Benna</em></span>
-      </span>
-    </a>
-    <div class="nav-links">
-      <a href="#reach" data-i18n="ads.nav.reach">Your reach</a>
-      <a href="#targeting" data-i18n="ads.nav.targeting">Targeting</a>
-      <a href="#bidding" data-i18n="ads.nav.bidding">How it works</a>
-      <a href="#pricing" data-i18n="ads.nav.pricing">Pricing</a>
-      <a href="#brand-deals" data-i18n="ads.nav.brand_deals">Brand Deals</a>
-    </div>
-    <div class="nav-ctas">
-      <div class="nav-lang-wrap" id="navLangWrap">
-        <button class="nav-lang" aria-label="Change language" onclick="document.getElementById('navLangWrap').classList.toggle('open')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M2 12h20"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          <span>EN</span>
-        </button>
-        <div class="nav-lang-menu">
-          <a href="/en" data-lang="en" class="active">English</a>
-          <a href="/zh" data-lang="zh">简体中文</a>
-          <a href="/zh-TW" data-lang="zh-TW">繁體中文</a>
-          <a href="/ja" data-lang="ja">日本語</a>
-          <a href="/ko" data-lang="ko">한국어</a>
-          <a href="/vi" data-lang="vi">Tiếng Việt</a>
-        </div>
-      </div>
-      <a class="btn btn-ghost" href="/ads/signin" data-i18n="ads.nav.sign_in">Sign in</a>
-      <a class="btn btn-primary" href="/ads/signup" data-i18n="ads.nav.cta">Boost your product</a>
-    </div>
+<nav id="nav"><div class="nav-inner">
+  <a class="brand" href="/"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span><span class="sb-mark">SuperBoost<small>Powered by Benna</small></span></a>
+  <div class="nav-links">
+    <a href="#" class="active">Campaigns</a>
+    <a href="#">Targeting</a>
+    <a href="#">Pricing</a>
+    <a href="#">Trust</a>
   </div>
-</nav>
+  <div class="nav-ctas"><a class="btn btn-ghost-d" href="/ads/signin">Sign in</a><a class="btn btn-primary" href="/ads/signup">Launch a campaign</a></div>
+</div></nav>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="wrap">
-    <div class="badge" data-reveal data-i18n="ads.hero.badge_html" data-i18n-html><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · One product. Four AI surfaces.</div>
-    <h1 data-reveal style="--reveal-delay:80ms" data-i18n="ads.hero.h1_html" data-i18n-html>
-      Reach <span class="accent-pink">four AI surfaces</span><br>
-      from one product boost.
-    </h1>
-    <p class="sub" data-reveal style="--reveal-delay:160ms" data-i18n="ads.hero.sub">
-      SuperBoost Ads runs across MCP tools (Claude Desktop, Cursor), web AI chat, browser extensions, and chat bots — so your brand shows up wherever your audience is using AI. Upload your product. Pick a goal. Benna allocates the rest.
-    </p>
-    <div class="hero-ctas" data-reveal style="--reveal-delay:240ms">
-      <a class="btn btn-primary btn-lg" href="/ads/signup" data-i18n="ads.hero.cta_primary">Activate your first boost →</a>
-      <a class="btn btn-outline btn-lg" href="#bidding" data-i18n="ads.hero.cta_secondary">See how bidding works</a>
-    </div>
-    <div class="hero-micro" data-reveal style="--reveal-delay:320ms" data-i18n="ads.hero.micro">No setup fees · $100 starter credit · Live in under 10 minutes</div>
-  </div>
-</section>
-
-<!-- YOUR REACH — 4 surfaces, one product -->
-<section class="reach-section" id="reach">
-  <div class="wrap">
-    <div class="section-header">
-      <span class="eyebrow pink" data-reveal data-i18n="ads.reach.eyebrow">Your reach</span>
-      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.reach.h2">Four AI surfaces. One product.</h2>
-      <p data-i18n="ads.reach.sub">Your boost automatically distributes across every AI surface where your audience lives — MCP tools, web AI apps, browser extensions, and chat bots. Benna's intent matching decides where it lands; the auction picks the moment.</p>
-    </div>
-    <div class="reach-grid">
-
-      <!-- DOOR 1 — MCP Tools -->
-      <div class="reach-card" data-reveal>
-        <div class="rc-mockup">
-          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored block in a Claude Desktop tool response">
-            <rect x="6" y="6" width="268" height="188" rx="8" fill="#FAFAF7" stroke="#1F1F2E" stroke-width="1.5"/>
-            <rect x="6" y="6" width="268" height="20" rx="8" fill="#EFEEE9"/>
-            <rect x="6" y="20" width="268" height="6" fill="#EFEEE9"/>
-            <circle cx="16" cy="16" r="3" fill="#FF5F57"/><circle cx="26" cy="16" r="3" fill="#FEBC2E"/><circle cx="36" cy="16" r="3" fill="#28C840"/>
-            <text x="140" y="19" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7280">Claude Desktop</text>
-            <!-- User msg -->
-            <rect x="120" y="38" width="146" height="20" rx="6" fill="#0F0F1A"/>
-            <text x="128" y="51" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF">Deploy my FastAPI app?</text>
-            <!-- Tool result -->
-            <rect x="20" y="68" width="246" height="40" rx="6" fill="#FFFFFF" stroke="#E5E7EB"/>
-            <text x="28" y="81" font-family="Inter, sans-serif" font-size="7" font-weight="600" fill="#6B7280">TOOL RESULT</text>
-            <text x="28" y="93" font-family="Inter, sans-serif" font-size="8" fill="#0F0F1A">Railway, Fly.io, Vercel — all good options.</text>
-            <!-- Sponsored -->
-            <rect x="20" y="118" width="246" height="62" rx="6" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.4"/>
-            <rect x="20" y="118" width="246" height="14" rx="6" fill="#FFE6F0"/>
-            <text x="28" y="129" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
-            <rect x="28" y="140" width="22" height="22" rx="4" fill="#0F0F1A"/>
-            <text x="39" y="156" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">▲</text>
-            <text x="58" y="151" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds</text>
-            <text x="58" y="162" font-family="Inter, sans-serif" font-size="7.5" fill="#4B4B5E">Free hobby · git push to deploy</text>
-            <rect x="58" y="167" width="50" height="11" rx="3" fill="#0F0F1A"/>
-            <text x="83" y="175" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" font-weight="600" fill="#FFFFFF">Try Free →</text>
-          </svg>
-        </div>
-        <div class="rc-body">
-          <span class="rc-eyebrow" data-i18n="ads.reach.d1_eyebrow">Door 1 · MCP tools</span>
-          <h4 data-i18n="ads.reach.d1_h4_html" data-i18n-html>Inside Claude Desktop &amp; Cursor</h4>
-          <p data-i18n="ads.reach.d1_p">Your ad renders alongside MCP tool results. Highest-intent surface — developers seeing your brand the moment they ask "how do I deploy."</p>
-          <div class="rc-foot">surface: tool_response</div>
-        </div>
-      </div>
-
-      <!-- DOOR 2 — Web AI Apps -->
-      <div class="reach-card" data-reveal style="--reveal-delay:60ms">
-        <div class="rc-mockup">
-          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored card in a web AI chat conversation">
-            <rect x="6" y="6" width="268" height="188" rx="8" fill="#FFFFFF" stroke="#1F1F2E" stroke-width="1.5"/>
-            <rect x="6" y="6" width="268" height="22" rx="8" fill="#F1F1ED"/>
-            <rect x="6" y="22" width="268" height="6" fill="#F1F1ED"/>
-            <circle cx="16" cy="17" r="3" fill="#FF5F57"/><circle cx="26" cy="17" r="3" fill="#FEBC2E"/><circle cx="36" cy="17" r="3" fill="#28C840"/>
-            <rect x="48" y="13" width="200" height="9" rx="4" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="0.8"/>
-            <text x="55" y="20" font-family="Inter, sans-serif" font-size="6.5" fill="#6B7280">chat.myaiapp.com</text>
-            <!-- Sidebar -->
-            <rect x="6" y="28" width="64" height="166" fill="#0F0F1A"/>
-            <rect x="14" y="36" width="48" height="11" rx="3" fill="#FF2D78"/>
-            <text x="38" y="44" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#FFFFFF" font-weight="700">+ New chat</text>
-            <rect x="14" y="56" width="48" height="6" rx="2" fill="#1F1F2E"/>
-            <rect x="14" y="66" width="38" height="6" rx="2" fill="#1F1F2E"/>
-            <rect x="14" y="76" width="44" height="6" rx="2" fill="#1F1F2E"/>
-            <!-- User msg -->
-            <rect x="170" y="40" width="96" height="14" rx="5" fill="#0F0F1A"/>
-            <text x="178" y="50" font-family="Inter, sans-serif" font-size="7" fill="#FFFFFF">Best deploy option?</text>
-            <!-- Assistant -->
-            <text x="78" y="68" font-family="Inter, sans-serif" font-size="7" fill="#0F0F1A">Railway and Fly.io are solid.</text>
-            <!-- Sponsored -->
-            <rect x="78" y="78" width="188" height="58" rx="6" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.4"/>
-            <text x="86" y="89" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
-            <rect x="86" y="98" width="26" height="26" rx="5" fill="#0F0F1A"/>
-            <text x="99" y="116" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">▲</text>
-            <text x="120" y="105" font-family="Space Grotesk, sans-serif" font-size="8.5" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
-            <text x="120" y="116" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">Free hobby · global edge</text>
-            <rect x="120" y="121" width="40" height="9" rx="2" fill="#0F0F1A"/>
-            <text x="140" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
-            <text x="78" y="148" font-family="Inter, sans-serif" font-size="7" fill="#0F0F1A">Want me to walk through the Railway flow?</text>
-            <rect x="78" y="160" width="188" height="14" rx="7" fill="#FFFFFF" stroke="#E5E7EB"/>
-            <text x="86" y="169" font-family="Inter, sans-serif" font-size="6.5" fill="#9CA3AF">Send a message…</text>
-          </svg>
-        </div>
-        <div class="rc-body">
-          <span class="rc-eyebrow" data-i18n="ads.reach.d2_eyebrow">Door 2 · AI apps</span>
-          <h4 data-i18n="ads.reach.d2_h4">Inline in web AI chat</h4>
-          <p data-i18n="ads.reach.d2_p">ChatGPT-likes, vertical AI tools, agent UIs. Your sponsored card renders inline, same chrome as the AI's own messages — never interruptive.</p>
-          <div class="rc-foot">surface: chat</div>
-        </div>
-      </div>
-
-      <!-- DOOR 3 — Browser Extensions -->
-      <div class="reach-card" data-reveal style="--reveal-delay:120ms">
-        <div class="rc-mockup">
-          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored block in a browser extension side panel">
-            <rect x="6" y="6" width="268" height="188" rx="8" fill="#FFFFFF" stroke="#1F1F2E" stroke-width="1.5"/>
-            <rect x="6" y="6" width="268" height="22" rx="8" fill="#F1F1ED"/>
-            <rect x="6" y="22" width="268" height="6" fill="#F1F1ED"/>
-            <circle cx="16" cy="17" r="3" fill="#FF5F57"/><circle cx="26" cy="17" r="3" fill="#FEBC2E"/><circle cx="36" cy="17" r="3" fill="#28C840"/>
-            <rect x="48" y="13" width="160" height="9" rx="4" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="0.8"/>
-            <text x="55" y="20" font-family="Inter, sans-serif" font-size="6.5" fill="#6B7280">nytimes.com/article</text>
-            <rect x="220" y="13" width="14" height="9" rx="2" fill="#FF2D78"/>
-            <!-- Page (left) -->
-            <rect x="6" y="28" width="172" height="166" fill="#FAFAF7"/>
-            <text x="14" y="44" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#0F0F1A">AI infrastructure spend</text>
-            <text x="14" y="55" font-family="Inter, sans-serif" font-size="6" fill="#9CA3AF">April 29, 2026</text>
-            <rect x="14" y="62" width="156" height="44" rx="4" fill="#E5E4DD"/>
-            <text x="14" y="120" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">Demand for hosted AI services</text>
-            <text x="14" y="131" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">has tripled in the past year, but</text>
-            <text x="14" y="142" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">the bottleneck has shifted from</text>
-            <text x="14" y="153" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">raw compute to deployment.</text>
-            <!-- Side panel (right) -->
-            <rect x="178" y="28" width="96" height="166" fill="#FFFFFF" stroke="#E5E7EB"/>
-            <rect x="178" y="28" width="96" height="14" fill="#0F0F1A"/>
-            <text x="186" y="38" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#FFFFFF">Article AI</text>
-            <text x="186" y="56" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#9CA3AF" letter-spacing="0.4">SUMMARY</text>
-            <text x="186" y="68" font-family="Inter, sans-serif" font-size="6.5" fill="#0F0F1A">▸ AI infra demand 3× YoY</text>
-            <text x="186" y="78" font-family="Inter, sans-serif" font-size="6.5" fill="#0F0F1A">▸ Compute → deployment</text>
-            <text x="186" y="88" font-family="Inter, sans-serif" font-size="6.5" fill="#0F0F1A">▸ Integration is the lever</text>
-            <!-- Sponsored at bottom -->
-            <rect x="184" y="120" width="84" height="68" rx="5" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.4"/>
-            <text x="190" y="130" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
-            <rect x="190" y="136" width="20" height="20" rx="4" fill="#0F0F1A"/>
-            <text x="200" y="151" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">▲</text>
-            <text x="216" y="147" font-family="Space Grotesk, sans-serif" font-size="7" font-weight="700" fill="#0F0F1A">Vercel</text>
-            <text x="216" y="156" font-family="Inter, sans-serif" font-size="6" fill="#4B4B5E">Deploy fast</text>
-            <rect x="190" y="166" width="44" height="10" rx="2" fill="#0F0F1A"/>
-            <text x="212" y="174" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" font-weight="600" fill="#FFFFFF">Try Free →</text>
-          </svg>
-        </div>
-        <div class="rc-body">
-          <span class="rc-eyebrow" data-i18n="ads.reach.d3_eyebrow">Door 3 · Extensions</span>
-          <h4 data-i18n="ads.reach.d3_h4">Browser side panels</h4>
-          <p data-i18n="ads.reach.d3_p">Chrome, Edge, Firefox AI extensions — summarizers, writing assistants, sidebars. Contextual to whatever the user is reading. No surveillance, no cookies.</p>
-          <div class="rc-foot">surface: sidebar</div>
-        </div>
-      </div>
-
-      <!-- DOOR 4 — Bots -->
-      <div class="reach-card" data-reveal style="--reveal-delay:180ms">
-        <div class="rc-mockup">
-          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored attachment in a Telegram bot reply">
-            <defs>
-              <!-- Mask matching the rounded inner screen so straight-
-                   cornered content like the header strip, chat backdrop,
-                   and composer get clipped to the phone's rounded edge
-                   (otherwise their bottom corners pokes past the
-                   rounded phone bottom). -->
-              <clipPath id="d4-screen-clip">
-                <rect x="101" y="17" width="78" height="166" rx="11"/>
-              </clipPath>
-            </defs>
-            <rect x="6" y="6" width="268" height="188" rx="8" fill="#E7EBF0" stroke="#1F1F2E" stroke-width="1.5"/>
-            <!-- Phone frame centered -->
-            <rect x="98" y="14" width="84" height="172" rx="14" fill="#1F1F2E"/>
-            <rect x="101" y="17" width="78" height="166" rx="11" fill="#FFFFFF"/>
-            <rect x="128" y="20" width="24" height="6" rx="3" fill="#1F1F2E"/>
-            <g clip-path="url(#d4-screen-clip)">
-            <!-- Telegram header -->
-            <rect x="101" y="29" width="78" height="14" fill="#5288C1"/>
-            <circle cx="113" cy="36" r="4" fill="#FFFFFF"/>
-            <text x="113" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" font-weight="700" fill="#5288C1">D</text>
-            <text x="121" y="35" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#FFFFFF">DocBot</text>
-            <text x="121" y="41" font-family="Inter, sans-serif" font-size="4.5" fill="#D6E5F2">@docbot · online</text>
-            <!-- Chat backdrop -->
-            <rect x="101" y="43" width="78" height="128" fill="#E7EBF0"/>
-            <!-- User msg right -->
-            <rect x="124" y="48" width="50" height="14" rx="4" fill="#EFFDDE"/>
-            <text x="128" y="56" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Deploy options?</text>
-            <text x="170" y="62" text-anchor="end" font-family="Inter, sans-serif" font-size="3.5" fill="#9CA3AF">10:24 ✓✓</text>
-            <!-- Bot reply -->
-            <rect x="106" y="66" width="62" height="14" rx="4" fill="#FFFFFF"/>
-            <text x="110" y="74" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Railway and Fly.io.</text>
-            <!-- Sponsored card -->
-            <rect x="106" y="84" width="68" height="76" rx="4" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.2"/>
-            <rect x="106" y="84" width="68" height="22" rx="4" fill="#0F0F1A"/>
-            <rect x="106" y="100" width="68" height="6" fill="#0F0F1A"/>
-            <text x="140" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
-            <text x="110" y="116" font-family="Inter, sans-serif" font-size="4.5" font-weight="700" fill="#E01E65" letter-spacing="0.3">SPONSORED · Vercel</text>
-            <text x="110" y="126" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
-            <text x="110" y="135" font-family="Inter, sans-serif" font-size="5" fill="#4B4B5E">Free hobby · git push</text>
-            <rect x="110" y="142" width="38" height="11" rx="2" fill="#5288C1"/>
-            <text x="129" y="149" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="600" fill="#FFFFFF">Try Free</text>
-            <text x="152" y="149" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">vercel.com</text>
-            <!-- Composer -->
-            <rect x="101" y="171" width="78" height="12" fill="#F4F3EE"/>
-            <rect x="105" y="174" width="60" height="6" rx="3" fill="#FFFFFF"/>
-            <text x="108" y="179" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">Message…</text>
-            <circle cx="172" cy="177" r="4" fill="#5288C1"/>
-            <text x="172" y="180" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="700" fill="#FFFFFF">→</text>
-            </g><!-- /d4-screen-clip -->
-          </svg>
-        </div>
-        <div class="rc-body">
-          <span class="rc-eyebrow" data-i18n="ads.reach.d4_eyebrow">Door 4 · Bots</span>
-          <h4 data-i18n="ads.reach.d4_h4">Discord, Telegram, Slack</h4>
-          <p data-i18n="ads.reach.d4_p">AI bots reply with your sponsored message in the platform's native format — Discord embed, Telegram card, Slack attachment. Same campaign, three formats.</p>
-          <div class="rc-foot">surface: chat (bot)</div>
-        </div>
-      </div>
-
+<section class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-copy">
+    <div class="badge"><span class="dot"></span>SuperBoost · Powered by Benna AI</div>
+    <div class="eyebrow">For advertisers</div>
+    <h1>Spend on <s>cookies</s>?<br>Spend on <span class="acc">intent</span>.</h1>
+    <p class="sub">SuperBoost puts your product inside AI apps — in front of the highest-intent audience in software. Upload a creative, pick a goal, and Benna delivers it where it converts. Every dollar accountable.</p>
+    <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="#">Launch a campaign →</a><a class="btn btn-ghost-d btn-lg" href="#">Talk to sales</a></div>
+    <div class="hero-meta">
+      <div class="m"><b class="acc">3.8×</b>CTR vs. legacy</div>
+      <div class="m"><b>CPM · CPC · CPA</b>pay for outcomes</div>
+      <div class="m"><b>100%</b>auditable spend</div>
     </div>
   </div>
-</section>
-
-<!-- TRUSTED BY -->
-<section class="trusted" data-reveal>
-  <div class="wrap">
-    <p data-i18n="ads.trusted.label">Your ads shown inside</p>
-    <div class="trusted-row">
-      <span>Claude</span>
-      <span>ChatGPT</span>
-      <span>Cursor</span>
-      <span>Perplexity</span>
-      <span>Replit</span>
-      <span>Windsurf</span>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURE 1 — AI TARGETING -->
-<section class="feature" id="targeting">
-  <div class="wrap">
-    <div class="feature-grid">
-      <div class="feature-text">
-        <span class="eyebrow pink" data-reveal data-i18n="ads.targ.eyebrow">AI-native targeting · powered by Benna AI</span>
-        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.targ.h2_html" data-i18n-html>Target by what users are <em>trying to do</em> — not who they are.</h2>
-        <p data-i18n="ads.targ.p_html" data-i18n-html>Cookies are dead. Demographics are lazy. SuperBoost bids on real-time MCP signals — the intent, tools, and context of every AI session — so your ad lands the moment it's actually useful. Every bid is scored by <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">Benna AI</a>, our AI optimization engine — so you only pay when the signal actually predicts conversion.</p>
-        <ul class="bullet-list">
-          <li><span class="check">✓</span><span data-i18n="ads.targ.li1_html" data-i18n-html><strong>Intent signals</strong> — bid on "writing a pitch deck" or "debugging Python," not "males 25–34."</span></li>
-          <li><span class="check cyan">✓</span><span data-i18n="ads.targ.li2_html" data-i18n-html><strong>Tool context</strong> — target by which MCP tools and models are active in session.</span></li>
-          <li><span class="check yellow">✓</span><span data-i18n="ads.targ.li3_html" data-i18n-html><strong>Benna AI auto-optimization</strong> — set a target CPA, the engine adjusts bids on every auction. <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 600;">benna.ai ↗</a></span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.targ.li4_html" data-i18n-html><strong>Zero PII</strong> — all signals anonymized and aggregated at the protocol layer.</span></li>
-        </ul>
-        <a class="btn btn-primary btn-lg" href="/ads/signup" data-i18n="ads.targ.cta">Start targeting by intent →</a>
-      </div>
-      <div class="vis-card targeting-mock">
-        <div class="heading">Campaign: <strong>Cursor — Q2 dev acquisition</strong></div>
-        <div style="margin-bottom: 14px;">
-          <div style="font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Matching intent signals</div>
-          <span class="signal-pill"><span class="dot pink"></span>debugging python</span>
-          <span class="signal-pill"><span class="dot cyan"></span>writing tests</span>
-          <span class="signal-pill"><span class="dot yellow"></span>refactoring code</span>
-          <span class="signal-pill"><span class="dot pink"></span>code review</span>
-          <span class="signal-pill"><span class="dot cyan"></span>searching docs</span>
+  <div class="mock" data-reveal="right" data-parallax data-speed="0.05">
+    <div class="float-pill p1"><span class="sw"></span>ROAS 3.1×</div>
+    <div class="float-pill p2"><span class="sw"></span>brand-safe inventory</div>
+    <div class="console" id="console">
+      <div class="cbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="ct">SuperBoost · campaign console</span><span class="live"><span class="d"></span>LIVE</span></div>
+      <div class="cbody">
+        <div class="kpis">
+          <div class="kpi"><div class="kl">Spend 24h</div><div class="kv">$2,750</div></div>
+          <div class="kpi"><div class="kl">CTR</div><div class="kv">6.2%<span class="up">▲</span></div></div>
+          <div class="kpi"><div class="kl">eCPA</div><div class="kv">$1.93<span class="dn">▼</span></div></div>
         </div>
-        <div style="margin-bottom: 14px;">
-          <div style="font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Active MCP tools</div>
-          <span class="signal-pill"><span class="dot cyan"></span>filesystem</span>
-          <span class="signal-pill"><span class="dot pink"></span>github</span>
-          <span class="signal-pill"><span class="dot yellow"></span>terminal</span>
-        </div>
-        <div class="bid-block">
-          <span class="label">// RTB bid request · 47ms</span><br>
-          <span class="pink">match</span>: intent=<span class="amt">"debug python"</span>,<br>
-          &nbsp;&nbsp;model=<span class="amt">"claude-sonnet"</span><br>
-          <span class="pink">bid</span>: $<span class="amt">3.42</span> CPM · <span class="win">WON</span><br>
-          <span class="label">// served in 18ms</span>
-        </div>
+        <div class="cchart"><span style="height:38%"></span><span style="height:52%"></span><span style="height:46%"></span><span style="height:64%"></span><span style="height:58%"></span><span style="height:74%"></span><span style="height:70%"></span><span style="height:86%"></span><span style="height:80%"></span><span style="height:94%"></span></div>
+        <div class="crow"><span class="cn"><span class="st"></span>Q2 Dev Tool Push</span><span class="cs">842K impr · 6.2% CTR</span></div>
+        <div class="crow"><span class="cn"><span class="st"></span>Agent Launch — NA</span><span class="cs">1.2M impr · 3.1× ROAS</span></div>
+        <div class="crow"><span class="cn"><span class="st p"></span>Retarget — Power Users</span><span class="cs">318K impr · paused</span></div>
       </div>
     </div>
   </div>
-</section>
+</div></div></section>
 
-<!-- FEATURE 2 — CAMPAIGN MGMT -->
-<section class="feature" id="advertisers">
-  <div class="wrap">
-    <div class="feature-grid reverse">
-      <div class="feature-text">
-        <span class="eyebrow cyan" data-reveal data-i18n="ads.dash.eyebrow">Performance dashboard</span>
-        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.dash.h2">Every boost. Every signal. One dashboard.</h2>
-        <p data-i18n="ads.dash.p">Activate, pause, resume, and tune boosts in seconds. Live spend, conversion, and eCPA data — no 24-hour attribution lag. Benna shifts allocation automatically; you watch the breakdown.</p>
-        <ul class="bullet-list">
-          <li><span class="check cyan">✓</span><span data-i18n="ads.dash.li1_html" data-i18n-html><strong>Sub-second reporting</strong> — every bid, impression, and conversion streams live.</span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.dash.li2_html" data-i18n-html><strong>Auto-optimization rules</strong> — set CPA targets, we shift budget automatically.</span></li>
-          <li><span class="check yellow">✓</span><span data-i18n="ads.dash.li3_html" data-i18n-html><strong>Creative A/B</strong> — rotate variants and let the bidder pick winners.</span></li>
-        </ul>
-        <a class="btn btn-outline btn-lg" href="/ads/dashboard" data-i18n="ads.dash.cta">Open the dashboard →</a>
-      </div>
-      <div class="vis-card">
-        <div class="campaign-mock">
-          <div class="campaign-row">
-            <span class="campaign-title">Cursor — Dev Acquisition Q2</span>
-            <span class="pill pill-active">Active</span>
-          </div>
-          <div class="campaign-stats">
-            <span>Spend <strong>$12,480</strong></span>
-            <span>CVR <strong>4.8%</strong></span>
-            <span>eCPA <strong>$1.93</strong></span>
-          </div>
-        </div>
-        <div class="campaign-mock">
-          <div class="campaign-row">
-            <span class="campaign-title">Notion AI — Retention Boost</span>
-            <span class="pill pill-active">Active</span>
-          </div>
-          <div class="campaign-stats">
-            <span>Spend <strong>$8,210</strong></span>
-            <span>CVR <strong>3.2%</strong></span>
-            <span>eCPA <strong>$2.47</strong></span>
-          </div>
-        </div>
-        <div class="campaign-mock">
-          <div class="campaign-row">
-            <span class="campaign-title">Figma — Designer Upsell</span>
-            <span class="pill pill-paused">Paused</span>
-          </div>
-          <div class="campaign-stats">
-            <span>Spend <strong>$4,550</strong></span>
-            <span>CVR <strong>2.1%</strong></span>
-            <span>eCPA <strong>$3.80</strong></span>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="divider"></div>
+
+<!-- MARQUEE -->
+<section class="marquee" aria-hidden="true">
+  <div class="marquee-label">Reaching the builders inside</div>
+  <div class="marquee-track">
+    <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span><span>Raycast</span><span>Vercel</span><span>LM Studio</span>
+    <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span><span>Raycast</span><span>Vercel</span><span>LM Studio</span>
   </div>
 </section>
 
-<!-- FEATURE 3 — 3 CARDS -->
-<section class="feature">
-  <div class="wrap">
-    <div class="section-header">
-      <span class="eyebrow yellow" data-reveal data-i18n="ads.why.eyebrow">Why SuperBoost Ads</span>
-      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.why.h2">Ad tech rebuilt for the agent era.</h2>
-      <p data-i18n="ads.why.sub">Google's stack was built for web pages. Facebook's was built for feeds. We built ours for AI sessions — the new primary surface.</p>
-    </div>
-    <div class="three-cards">
-      <div class="card-flat">
-        <div class="icon-chip chip-pink">⚡</div>
-        <h3 data-i18n="ads.why.c1_h3">Context-aware bidding</h3>
-        <p data-i18n="ads.why.c1_p">Our auction sees the live session — what the user just asked, which tools fired, what came back. Bids go up when relevance goes up.</p>
+<div class="divider"></div>
+
+<!-- INTENT TARGETING -->
+<section class="section"><div class="wrap"><div class="spot">
+  <div class="stext" data-reveal="left">
+    <div class="eyebrow">The targeting moat</div>
+    <h2>Target what users are <span class="acc">trying to do</span> — not who they are.</h2>
+    <p>Legacy networks buy identity: a cookie, a device graph, a guess. Benna reads the live conversation and scores real intent in ~5ms — so your budget lands on the moment a user actually needs what you sell.</p>
+    <ul class="slist">
+      <li><span class="ck">✓</span><span>Target by <strong>intent, MCP tool, host app, vertical, and region</strong> — no PII, no third-party cookies.</span></li>
+      <li><span class="ck">✓</span><span><strong>First-price auctions</strong> — you see the clearing price, every time.</span></li>
+      <li><span class="ck">✓</span><span><strong>Benna optimization</strong> shifts spend to what converts, automatically.</span></li>
+    </ul>
+  </div>
+  <div data-reveal="right" data-parallax data-speed="0.04">
+    <div class="targ">
+      <div class="tt">Benna · matching your campaign to live intent</div>
+      <div class="tchips">
+        <span class="tchip on"><span class="k">intent</span> deploy</span>
+        <span class="tchip on"><span class="k">tool</span> vercel-mcp</span>
+        <span class="tchip on"><span class="k">vertical</span> devtools</span>
+        <span class="tchip"><span class="k">stage</span> production</span>
+        <span class="tchip"><span class="k">region</span> US-CA</span>
       </div>
-      <div class="card-flat">
-        <div class="icon-chip chip-cyan">🎯</div>
-        <h3 data-i18n="ads.why.c2_h3">Frictionless placements</h3>
-        <p data-i18n="ads.why.c2_p">Ads render as native cards inside AI chats and agent flows — not pop-ups, not banners. Users convert because the ad actually belongs there.</p>
-      </div>
-      <div class="card-flat">
-        <div class="icon-chip chip-yellow">📈</div>
-        <h3 data-i18n="ads.why.c3_h3">Transparent economics</h3>
-        <p data-i18n="ads.why.c3_p">See exactly what you pay, who you reach, and what converted. No black-box attribution. No hidden arbitrage. Transparent unified pricing.</p>
-      </div>
+      <div class="tbar"><span class="tl">Your campaign · bid won</span><span class="tr">match 0.94 · $1.93 eCPA</span></div>
     </div>
   </div>
-</section>
+</div></div></section>
+
+<div class="divider"></div>
+
+<!-- TRUST PILLARS -->
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><div class="eyebrow">Trust &amp; transparency</div><h2>Your money, fully <span class="acc">accountable</span>.</h2><p>You're the spender — so you get the receipts. Brand safety, real attribution, and fraud controls are defaults, not add-ons.</p></div>
+  <div class="pgrid">
+    <div class="pcard" data-reveal><div class="pico">🛡️</div><h3>Brand-safe by default</h3><p>Every publisher passes policy review. Gambling, adult, and spam verticals are filtered on both sides — your ad never lands somewhere it shouldn't.</p></div>
+    <div class="pcard" data-reveal style="--rd:.06s"><div class="pico">🔍</div><h3>Transparent auction</h3><p>First-price, clearing price visible. See the 6.5% RTB fee and network take itemized on every cleared impression. No black box.</p></div>
+    <div class="pcard" data-reveal style="--rd:.12s"><div class="pico">📊</div><h3>Real attribution</h3><p>Impression-, click-, and conversion-level reporting with ROAS. Export the raw events — reconcile against your own stack.</p></div>
+    <div class="pcard" data-reveal style="--rd:.18s"><div class="pico">🚫</div><h3>Fraud-screened traffic</h3><p>Invalid traffic filtering on every request before it bills. You pay for humans with intent, not bots.</p></div>
+    <div class="pcard" data-reveal style="--rd:.24s"><div class="pico">🎯</div><h3>Pay for outcomes</h3><p>CPM, CPC, or CPA — pick the model that matches your goal. Performance pricing means you pay for what works.</p></div>
+    <div class="pcard" data-reveal style="--rd:.3s"><div class="pico">🤝</div><h3>No lock-in</h3><p>Set your budget, pause anytime, withdraw unspent balance. We earn the next dollar of spend, every time.</p></div>
+  </div>
+</div></section>
 
 <!-- STATS -->
-<section class="stats-bar">
-  <div class="wrap">
-    <div class="stats-row" data-reveal>
-      <div class="stat" data-reveal style="--reveal-delay:0ms"><div class="n pink" data-count="1.2" data-decimals="1" data-suffix="B">0</div><div class="l" data-i18n="ads.stats.l1">Monthly AI sessions</div></div>
-      <div class="stat" data-reveal style="--reveal-delay:80ms"><div class="n cyan" data-count="3.8" data-decimals="1" data-suffix="×">0</div><div class="l" data-i18n="ads.stats.l2">vs. traditional display CTR</div></div>
-      <div class="stat" data-reveal style="--reveal-delay:160ms"><div class="n yellow" data-count="1.93" data-decimals="2" data-prefix="$">$0</div><div class="l" data-i18n="ads.stats.l3">Average eCPA</div></div>
-      <div class="stat" data-reveal style="--reveal-delay:240ms"><div class="n" data-count="47" data-decimals="0" data-suffix="ms">0</div><div class="l" data-i18n="ads.stats.l4">Median bid latency</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- PLACEMENTS -->
-<!-- (Old "Placements" 3-card section removed 2026-05-01 — superseded by the
-     "Your reach" 4-surface section above the fold.) -->
-
-<!-- HOW BIDDING WORKS -->
-<section class="how" id="bidding">
-  <div class="wrap">
-    <div class="section-header">
-      <h2 data-reveal data-i18n="ads.bid.h2">From brief to bid in under 10 minutes.</h2>
-      <p data-i18n="ads.bid.sub">No account managers. No minimum spend. No waitlist. Log in, set a goal, let the auction do the rest.</p>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="icon-chip chip-pink">🎯</div>
-        <h3 data-i18n="ads.bid.s1_h3">Set your target</h3>
-        <p data-i18n="ads.bid.s1_p">Pick an outcome — installs, signups, purchases — and a CPA goal. Upload creative or write copy inline.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="icon-chip chip-cyan">⚡</div>
-        <h3 data-i18n="ads.bid.s2_h3">Bid in real time</h3>
-        <p data-i18n="ads.bid.s2_p">Our auction evaluates every AI session against your targeting and bids on the ones most likely to convert.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="icon-chip chip-yellow">📊</div>
-        <h3 data-i18n="ads.bid.s3_h3">Scale what works</h3>
-        <p data-i18n="ads.bid.s3_p">Live dashboards surface winning creatives and audiences. Auto-rules reallocate budget every 15 minutes.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="section stats-band"><div class="wrap"><div class="stats-row">
+  <div class="stat" data-reveal><div class="n acc" data-count="3.8" data-dec="1" data-suf="×">0</div><div class="l">CTR vs. legacy networks</div></div>
+  <div class="stat" data-reveal style="--rd:.08s"><div class="n pink" data-count="11" data-suf="%">0</div><div class="l">Lower eCPA on average</div></div>
+  <div class="stat" data-reveal style="--rd:.16s"><div class="n yellow" data-count="5" data-suf="ms">0</div><div class="l">Benna decision latency</div></div>
+  <div class="stat" data-reveal style="--rd:.24s"><div class="n" data-count="100" data-suf="%">0</div><div class="l">Auditable, itemized spend</div></div>
+</div></div></section>
 
 <!-- PRICING -->
-<section class="pricing" id="pricing">
-  <div class="wrap">
-    <div class="section-header">
-      <span class="eyebrow cyan" data-reveal data-i18n="ads.price.eyebrow">Pricing</span>
-      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="ads.price.h2">Pay for outcomes. No agency tax.</h2>
-      <p data-i18n="ads.price.sub">Three ways to buy. All self-serve. All transparent. Your billing breakdown is always posted on your dashboard.</p>
-    </div>
-    <div class="price-grid">
-      <div class="price-card">
-        <span class="price-tag pink" data-i18n="ads.price.cpm_tag">Self-serve</span>
-        <h3>CPM</h3>
-        <div class="price">$2.40<span style="font-size: 16px; color: var(--muted); font-weight: 500;" data-i18n="ads.price.cpm_unit">/k</span></div>
-        <div class="price-sub" data-i18n="ads.price.cpm_sub">Pay per thousand AI-native impressions. Best for awareness.</div>
-        <ul class="bullet-list" style="margin-bottom: 28px;">
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpm_li1">$100 minimum spend</span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpm_li2">All placements</span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpm_li3">Live reporting</span></li>
-        </ul>
-        <a class="btn btn-outline" href="/ads/signup" data-i18n="ads.price.cpm_cta">Start with CPM</a>
-      </div>
-      <div class="price-card featured">
-        <span class="price-tag dark" data-i18n="ads.price.cpc_tag">Most popular</span>
-        <h3>CPC</h3>
-        <div class="price">$0.38<span style="font-size: 16px; color: #A0A0B0; font-weight: 500;" data-i18n="ads.price.cpc_unit">/click</span></div>
-        <div class="price-sub" data-i18n="ads.price.cpc_sub">Pay only when an AI user actually clicks through.</div>
-        <ul class="bullet-list" style="margin-bottom: 28px;">
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li1">$50 minimum spend</span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li2">Auto-optimized bidding</span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li3">Creative A/B built-in</span></li>
-          <li><span class="check">✓</span><span data-i18n="ads.price.cpc_li4">$100 starter credit</span></li>
-        </ul>
-        <a class="btn btn-primary" href="/ads/signup" data-i18n="ads.price.cpc_cta">Get $100 free credit</a>
-      </div>
-      <div class="price-card">
-        <span class="price-tag cyan" data-i18n="ads.price.cpa_tag">Performance</span>
-        <h3>CPA</h3>
-        <div class="price" data-i18n="ads.price.cpa_price">target-based</div>
-        <div class="price-sub" data-i18n="ads.price.cpa_sub">Pay only on signup, install, or purchase. Machine-learned bidding.</div>
-        <ul class="bullet-list" style="margin-bottom: 28px;">
-          <li><span class="check cyan">✓</span><span data-i18n="ads.price.cpa_li1">$500 minimum spend</span></li>
-          <li><span class="check cyan">✓</span><span data-i18n="ads.price.cpa_li2">Conversion tracking SDK</span></li>
-          <li><span class="check cyan">✓</span><span data-i18n="ads.price.cpa_li3">Dedicated optimization</span></li>
-        </ul>
-        <a class="btn btn-outline" href="/ads/signup" data-i18n="ads.price.cpa_cta">Talk to us</a>
-      </div>
-    </div>
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><div class="eyebrow">Performance pricing</div><h2>Pay for the outcome you choose.</h2></div>
+  <div class="price-row">
+    <div class="price" data-reveal><div class="pm">CPM</div><b>Reach</b><span>Pay per thousand impressions — for awareness inside high-intent apps.</span></div>
+    <div class="price" data-reveal style="--rd:.08s"><div class="pm">CPC</div><b>Clicks</b><span>Pay per click — only when a builder taps through to your product.</span></div>
+    <div class="price" data-reveal style="--rd:.16s"><div class="pm">CPA</div><b>Conversions</b><span>Pay per action — Benna optimizes spend straight to your goal.</span></div>
   </div>
-</section>
+</div></section>
 
-<!-- BRAND DEALS -->
-<section class="feature" id="brand-deals" style="background: var(--ink); color: #fff; padding: 96px 0;">
-  <div class="wrap">
-    <div class="section-header" style="text-align: center; margin-bottom: 56px;">
-      <span class="eyebrow" data-reveal style="background: var(--yellow); color: var(--ink); padding: 6px 12px; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em; font-size: 12px;" data-i18n="ads.brand.eyebrow">PREMIUM · DIRECT</span>
-      <h2 style="color: #fff; margin-top: 18px;" data-i18n="ads.brand.h2">Brand Deals — guaranteed AI-native placements.</h2>
-      <p style="color: #B0B0C0; max-width: 720px; margin: 16px auto 0;" data-i18n="ads.brand.sub">For non-tech brands that want to be seen by AI-native users with purchasing power — developers, researchers, early adopters, knowledge workers. Negotiated directly. Priced on reach, not auction.</p>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px;">
-      <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 28px;">
-        <div style="font-size: 28px; margin-bottom: 12px;">🎯</div>
-        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;" data-i18n="ads.brand.c1_h3">Guaranteed inventory</h3>
-        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;" data-i18n="ads.brand.c1_p">Lock exclusive placement inside specific AI tools, workflows, or session contexts for a defined period. Your brand, no auction, no surprises.</p>
-      </div>
-      <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 28px;">
-        <div style="font-size: 28px; margin-bottom: 12px;">💎</div>
-        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;" data-i18n="ads.brand.c2_h3">Fixed CPM pricing</h3>
-        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;" data-i18n="ads.brand.c2_p">Negotiated rates from $12 CPM. Predictable spend across the campaign window. Ideal for product launches, seasonal pushes, or category ownership.</p>
-      </div>
-      <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 28px;">
-        <div style="font-size: 28px; margin-bottom: 12px;">🤝</div>
-        <h3 style="color: #fff; font-size: 18px; margin-bottom: 10px;" data-i18n="ads.brand.c3_h3">White-glove ops</h3>
-        <p style="color: #B0B0C0; font-size: 15px; line-height: 1.55;" data-i18n="ads.brand.c3_p">Dedicated account manager, custom creative review, Benna AI audience match reports, and weekly performance readouts.</p>
-      </div>
-    </div>
-    <div style="background: linear-gradient(135deg, rgba(255,45,120,0.1), rgba(4,190,254,0.08)); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 40px; text-align: center;">
-      <div style="font-size: 14px; color: var(--yellow); font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px;" data-i18n="ads.brand.who_label">WHO THIS IS FOR</div>
-      <p style="color: #E0E0E8; font-size: 17px; max-width: 680px; margin: 0 auto 28px; line-height: 1.6;" data-i18n="ads.brand.who_p">Consumer brands (Coca-Cola, Samsung, Nike), auto (BMW, Tesla), finance (Chase, AmEx), and premium services that want first-touch access to the highest-intent digital audience on the planet — users inside AI tools.</p>
-      <a class="btn btn-primary btn-lg" href="mailto:info@boostboss.ai?subject=Brand%20Deal%20Inquiry" style="background: var(--pink); color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: 700; display: inline-block;" data-i18n="ads.brand.cta">Talk to our brand team →</a>
-      <div style="margin-top: 16px; font-size: 13px; color: #808090;" data-i18n="ads.brand.typical">Typical deals: $50k–$2M · 30–90 day campaigns · Approvals in under 1 week</div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIAL -->
-<section class="quote">
-  <div class="wrap">
-    <blockquote data-i18n="ads.quote.text_html" data-i18n-html>
-      "Boost Boss Ads is the first platform where our cost-per-signup actually <span class="accent">went down</span> as we scaled. AI-native targeting is the real thing — our pitch lands in the exact session a dev needs us."
-    </blockquote>
-    <div class="attr" data-i18n="ads.quote.attr_html" data-i18n-html><strong>Sarah Chen</strong> · Head of Growth, <span style="color: var(--pink); font-weight: 600;">Cursor</span></div>
-  </div>
-</section>
-
-<!-- BIG CTA -->
-<section class="big-cta">
-  <div class="big-cta-box">
-    <div class="deco-sparkle s1">✦</div>
-    <div class="deco-sparkle s2">✦</div>
-    <h2 data-reveal data-i18n="ads.big.h2_html" data-i18n-html>Your next customer<br>is using an AI app right now.</h2>
-    <p data-i18n="ads.big.p">Activate your first product boost in under 10 minutes. $100 in starter credit when you sign up today.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-lg" href="/ads/signup" data-i18n="ads.big.cta1">Claim $100 credit →</a>
-      <a class="btn btn-lg outline-white" href="#bidding" data-i18n="ads.big.cta2">How bidding works</a>
-    </div>
-  </div>
-</section>
+<!-- CTA -->
+<section class="section"><div class="wrap"><div class="cta-box" data-reveal>
+  <h2>Put your product where intent lives.</h2>
+  <p>Launch a SuperBoost campaign in minutes. Upload a creative, set a budget and a goal — Benna handles the rest, and you watch every dollar work.</p>
+  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="#">Launch a campaign →</a><a class="btn btn-lg btn-clear" href="#">Book a demo</a></div>
+</div></div></section>
 
 <!-- FOOTER -->
-<footer style="background:#FAFAF7;border-top:1px solid #EAEAEF;padding:56px 0 32px;">
-  <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-    <div class="foot-grid" style="display:grid;grid-template-columns:1.4fr repeat(4, 1fr);gap:48px;margin-bottom:40px;">
-      <div>
-        <div class="foot-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <img src="/favicon.svg?v=rocket-20260421" alt="" style="width:32px;height:32px;">
-          <span class="brand-name" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:-0.5px;">Boost Boss</span>
-        </div>
-        <p class="foot-tag" style="font-size:14px;color:#4B4B5E;line-height:1.6;">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Product</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/publish" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Publishers</a></li>
-          <li style="padding:5px 0;"><a href="/ads" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SuperBoost</a></li>
-          <li style="padding:5px 0;"><a href="/exchange" style="font-size:14px;color:#4B4B5E;text-decoration:none;">BBX</a></li>
-          <li style="padding:5px 0;"><a href="/pricing" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Pricing</a></li>
-          <li style="padding:5px 0;"><a href="/demo" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Live demo</a></li>
-          <li style="padding:5px 0;"><a href="https://affiliate.boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Affiliate</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Resources</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/docs" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Documentation</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference" style="font-size:14px;color:#4B4B5E;text-decoration:none;">API reference</a></li>
-          <li style="padding:5px 0;"><a href="/docs/api-reference#sdks" style="font-size:14px;color:#4B4B5E;text-decoration:none;">SDK</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Company</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/about" style="font-size:14px;color:#4B4B5E;text-decoration:none;">About</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Contact</a></li>
-          <li style="padding:5px 0;"><a href="mailto:info@boostboss.ai" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Careers</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;color:#1A1A2E;font-family:'Inter',sans-serif;">Legal</h4>
-        <ul style="list-style:none;padding:0;margin:0;">
-          <li style="padding:5px 0;"><a href="/terms" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Terms of Service</a></li>
-          <li style="padding:5px 0;"><a href="/privacy" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Privacy Policy</a></li>
-          <li style="padding:5px 0;"><a href="/refunds" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Refund Policy</a></li>
-          <li style="padding:5px 0;"><a href="/aup" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Acceptable Use</a></li>
-          <li style="padding:5px 0;"><a href="/cookies" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Cookie Policy</a></li>
-          <li style="padding:5px 0;"><a href="/trust" style="font-size:14px;color:#4B4B5E;text-decoration:none;">Trust center</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-bottom" style="padding-top:28px;border-top:1px solid #EAEAEF;font-size:13px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <span>© 2026 Boost Boss · All rights reserved.</span>
-      <span>Made for the AI era.</span>
-    </div>
+<footer class="site"><div class="wrap">
+  <div class="foot-grid">
+    <div><div class="foot-brand"><img src="/design-system/assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight)">Boost Boss</span></div><p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p></div>
+    <div class="foot-col"><h4>Advertisers</h4><ul><li><a href="#">SuperBoost</a></li><li><a href="#">Targeting</a></li><li><a href="#">Pricing</a></li><li><a href="#">BBX Exchange</a></li></ul></div>
+    <div class="foot-col"><h4>Resources</h4><ul><li><a href="#">Documentation</a></li><li><a href="#">Benna whitepaper</a></li><li><a href="#">Trust center</a></li></ul></div>
+    <div class="foot-col"><h4>Company</h4><ul><li><a href="/">Home</a></li><li><a href="/publish">Publishers</a></li><li><a href="#">Contact</a></li></ul></div>
   </div>
-</footer>
+  <div class="foot-bottom"><span>© 2026 Boost Boss · All rights reserved.</span><span>Made for the AI era.</span></div>
+</div></footer>
 
 <script>
-  /* ═══════════════════════════════════════════════════════════════════
-     ManyChat-style interactions for /ads
-       (1) Animated hero chat mockup — messages type out, sponsored
-           SuperBoost card drops in. Loops across 3 example scenarios.
-       (2) Scroll-triggered fade-ups via IntersectionObserver.
-       (3) Counter animations on stats numbers when stats bar enters view.
-     All vanilla JS, no deps. Respects prefers-reduced-motion.
-     ═══════════════════════════════════════════════════════════════════ */
-  (function () {
-    'use strict';
-    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // ─────────────────────────────────────────────────────────────────
-    // (1) SCROLL REVEALS — IntersectionObserver fade-ups
-    // ─────────────────────────────────────────────────────────────────
-    function initReveals() {
-      var nodes = document.querySelectorAll('[data-reveal]');
-      if (prefersReduced || !('IntersectionObserver' in window)) {
-        nodes.forEach(function (n) { n.classList.add('is-visible'); });
-        return;
-      }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-      nodes.forEach(function (n) { io.observe(n); });
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // (2) COUNTER ANIMATIONS on [data-count] when in view
-    // ─────────────────────────────────────────────────────────────────
-    function animateCounter(el) {
-      var target = parseFloat(el.getAttribute('data-count') || '0');
-      var dec    = parseInt(el.getAttribute('data-decimals') || '0', 10);
-      var pre    = el.getAttribute('data-prefix') || '';
-      var suf    = el.getAttribute('data-suffix') || '';
-      var dur    = 1400;
-      var start  = performance.now();
-      el.classList.add('counting');
-      function step(now) {
-        var t = Math.min(1, (now - start) / dur);
-        var eased = 1 - Math.pow(1 - t, 3);  // ease-out cubic
-        var val = target * eased;
-        el.textContent = pre + val.toFixed(dec) + suf;
-        if (t < 1) requestAnimationFrame(step);
-        else {
-          el.textContent = pre + target.toFixed(dec) + suf;
-          setTimeout(function () { el.classList.remove('counting'); }, 200);
-        }
-      }
-      requestAnimationFrame(step);
-    }
-
-    function initCounters() {
-      var counters = document.querySelectorAll('[data-count]');
-      if (prefersReduced) {
-        counters.forEach(function (el) {
-          var pre = el.getAttribute('data-prefix') || '';
-          var suf = el.getAttribute('data-suffix') || '';
-          var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
-          var val = parseFloat(el.getAttribute('data-count') || '0');
-          el.textContent = pre + val.toFixed(dec) + suf;
-        });
-        return;
-      }
-      if (!('IntersectionObserver' in window)) return;
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            animateCounter(entry.target);
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.5 });
-      counters.forEach(function (el) { io.observe(el); });
-    }
-
-    // (3) BELT CAROUSEL retired 2026-05-28 — initBelt() and its
-    //     associated .ad-carousel / .ad-slide / .browser-bar / .fmt-*
-    //     CSS rules were all removed when the 6-card ad-format showcase
-    //     was dropped from the /ads page.
-
-    // Nav — frosted tint on scroll
-    function initNav() {
-      var nav = document.getElementById('mainNav');
-      if (!nav) return;
-      var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 40); };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-    }
-
-    // If the visitor is already signed in, swap the "Sign in / Launch a campaign"
-    // nav CTAs for a single pill showing their display name → dashboard.
-    function initAuthNav() {
-      try {
-        // /ads marketing page → show the pill only if this browser has
-        // an Advertiser (SuperBoost Ads) session. Publisher sessions don't count.
-        var token = localStorage.getItem("bb_adv_token");
-        var userStr = localStorage.getItem("bb_adv_user");
-        var profileStr = localStorage.getItem("bb_adv_profile");
-        // Legacy fallback: pre-migration users have only bb_* generic keys.
-        // Adopt them here only if the legacy session's role == advertiser.
-        if (!token) {
-          var legacyUserStr = localStorage.getItem("bb_user");
-          if (legacyUserStr) {
-            try {
-              var lu = JSON.parse(legacyUserStr);
-              if (lu && lu.role === "advertiser") {
-                token = localStorage.getItem("bb_token");
-                userStr = legacyUserStr;
-                profileStr = localStorage.getItem("bb_profile");
-              }
-            } catch (_) {}
-          }
-        }
-        if (!token || !userStr) return;
-        var user = JSON.parse(userStr);
-        var profile = {};
-        try { profile = JSON.parse(profileStr || "{}"); } catch (_) {}
-
-        var name = profile.company_name || profile.app_name;
-        if (!name && user.email) name = String(user.email).split("@")[0];
-        if (!name) name = "Dashboard";
-
-        // Always link to the dashboard that matches the marketing page
-        // the visitor is on right now. /ads → advertiser dashboard.
-        // The dashboard itself handles role-mismatch (bounces to signup).
-        var dashUrl = "/ads/dashboard";
-        var ctas = document.querySelector(".nav-ctas");
-        if (!ctas) return;
-        var esc = function (s) {
-          return String(s).replace(/[&<>"']/g, function (c) {
-            return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
-          });
-        };
-        var initial = String(name).trim().charAt(0).toUpperCase() || 'A';
-        var lang = ctas.querySelector('.nav-lang-wrap');
-        ctas.innerHTML =
-          '<a href="' + dashUrl + '" class="btn btn-ghost auth-pill" title="Go to your dashboard">' +
-          '<span class="auth-avatar">' + esc(initial) + '</span>' +
-          '<span class="auth-name">' + esc(name) + '</span>' +
-          '<span class="auth-arrow">→</span>' +
-          '</a>';
-        if (lang) ctas.insertBefore(lang, ctas.firstChild);
-      } catch (e) { console.error("[initAuthNav]", e); }
-    }
-
-    function init() {
-      initReveals();
-      initCounters();
-      // initBelt removed 2026-05-28 — the AD-FORMAT BELT carousel was retired.
-      initNav();
-      initAuthNav();
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
+(function(){var ok=document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches;if(ok)document.documentElement.classList.add('anim');else document.addEventListener('visibilitychange',function o(){if(document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('anim');document.removeEventListener('visibilitychange',o)}});})();
+var ANIM=document.documentElement.classList.contains('anim');
+var nav=document.getElementById('nav');
+var px=[].slice.call(document.querySelectorAll('[data-parallax]'));
+function onS(){var y=scrollY;nav.classList.toggle('scrolled',y>8);if(ANIM){var vh=innerHeight;px.forEach(function(el){var r=el.getBoundingClientRect();var sp=parseFloat(el.dataset.speed||'0.05');el.style.setProperty('--py',((r.top+r.height/2-vh/2)*-sp).toFixed(1)+'px')})}}
+addEventListener('scroll',onS,{passive:true});onS();
+function animateCount(el){var t=parseFloat(el.dataset.count),d=parseInt(el.dataset.dec||'0'),pre=el.dataset.pre||'',suf=el.dataset.suf||'',t0=performance.now();(function tick(n){var p=Math.min((n-t0)/1300,1),e=1-Math.pow(1-p,3),v=(t*e).toFixed(d);el.textContent=pre+(d===0?Math.round(v).toLocaleString():v)+suf;if(p<1)requestAnimationFrame(tick)})(performance.now());}
+if(ANIM&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){if(e.target.matches('[data-reveal]'))e.target.classList.add('is-visible');if(e.target.querySelector&&e.target.querySelector('.n[data-count]'))e.target.querySelectorAll('.n[data-count]').forEach(animateCount);o.unobserve(e.target)}})},{threshold:.2});document.querySelectorAll('[data-reveal], .stats-band').forEach(function(el){io.observe(el)})}else{document.querySelectorAll('.n[data-count]').forEach(function(el){var d=parseInt(el.dataset.dec||'0');el.textContent=(el.dataset.pre||'')+(d===0?Math.round(el.dataset.count):Number(el.dataset.count).toFixed(d))+(el.dataset.suf||'')})}
 </script>
-
 </body>
 </html>
