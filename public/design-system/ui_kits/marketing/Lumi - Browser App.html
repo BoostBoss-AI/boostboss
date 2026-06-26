@@ -1,0 +1,282 @@
+<!-- @dsCard group="Publisher Surfaces" viewport="1440x920" name="Lumi — Browser App" subtitle="Publisher surface landing (dark): web AI app, one script tag, corner unit + interstitial, 8 placements" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — Browser App — Boost Boss · Lumi SDK</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/rocket-logo.svg">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--text-on-dark);background:var(--bb-surface-0);-webkit-font-smoothing:antialiased;font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden}
+a{color:inherit;text-decoration:none}svg{display:block}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+.page-fx{position:fixed;inset:0;z-index:-5;pointer-events:none;background:radial-gradient(ellipse 44% 32% at 14% 8%,var(--accSoft),transparent 60%),radial-gradient(ellipse 44% 34% at 88% 30%,rgba(0,255,224,0.08),transparent 62%),radial-gradient(ellipse 52% 42% at 50% 96%,rgba(217,70,239,0.10),transparent 60%),var(--bb-surface-0)}
+.page-fx.grain{z-index:-4;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+nav{position:fixed;top:0;left:0;right:0;z-index:var(--z-nav);transition:background var(--dur-base),backdrop-filter var(--dur-base),border-color var(--dur-base);border-bottom:1px solid transparent}
+nav.scrolled{background:var(--glass-dark-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-bottom:var(--glass-dark-border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);max-width:var(--container);margin:0 auto;padding:0 var(--gutter)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;filter:drop-shadow(0 4px 12px rgba(255,45,120,.35))}
+.brand-name{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight);color:#fff;white-space:nowrap}
+.lumi-mark{display:inline-flex;align-items:center;gap:4px;margin-left:12px;padding-left:12px;border-left:1px solid rgba(255,255,255,.16);font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:-.01em;background-image:linear-gradient(90deg,#FF2D78 0%,#D946EF 25%,#00FFE0 50%,#D946EF 75%,#FF2D78 100%);background-size:220% 100%;background-position:0% 50%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:lumiShimmer 4s linear infinite}
+.lumi-mark .sp{color:var(--bb-yellow);-webkit-text-fill-color:var(--bb-yellow);font-size:16px;animation:lumiBlink 1.8s ease-in-out infinite}
+@keyframes lumiShimmer{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+@keyframes lumiBlink{0%,100%{opacity:.55;transform:scale(.95)}50%{opacity:1;transform:scale(1.1)}}
+.nav-links{display:flex;gap:22px;align-items:center}
+.nav-links a{font-size:14px;font-weight:600;color:rgba(244,244,248,.72);transition:color var(--dur-fast)}
+.nav-links a:hover{color:#fff}.nav-links a.active{color:var(--acc)}
+.nav-ctas{display:flex;gap:10px;align-items:center}
+@media(max-width:1080px){.nav-links,.lumi-mark{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-body);font-weight:600;font-size:14.5px;padding:9px 18px;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:transform var(--dur-fast) var(--ease-snappy),background var(--dur-fast),box-shadow var(--dur-fast),border-color var(--dur-fast);white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--bb-pink);color:#fff;border-color:var(--bb-pink);box-shadow:0 6px 20px rgba(255,45,120,.32)}
+.btn-primary:hover{background:var(--bb-pink-dark);border-color:var(--bb-pink-dark);box-shadow:var(--glow-pink);transform:translateY(-2px)}
+.btn-ghost-d{background:rgba(255,255,255,.05);color:#fff;border-color:rgba(255,255,255,.18)}
+.btn-ghost-d:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.32);transform:translateY(-2px)}
+.btn-lg{padding:14px 26px;font-size:15.5px;border-radius:var(--r-md)}
+.section{position:relative;padding:var(--section-y) 0}
+.divider{height:1px;max-width:var(--container);margin:0 auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);position:relative;overflow:hidden}
+.divider::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:100%;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:sweep 5s linear infinite}
+@keyframes sweep{to{left:130%}}
+[data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);transition-delay:var(--rd,0s)}
+[data-reveal=left]{transform:translateX(-40px)}[data-reveal=right]{transform:translateX(40px)}[data-reveal=scale]{transform:scale(.94)}
+[data-reveal].is-visible{opacity:1;transform:none}
+html:not(.anim) [data-reveal]{opacity:1!important;transform:none!important}
+[data-parallax]{transform:translate3d(0,var(--py,0px),0);will-change:transform}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;padding:6px 13px;border-radius:var(--r-pill);margin-bottom:22px;background:var(--accSoft);border:1px solid var(--accBorder);color:var(--acc)}
+.eyebrow .ico{font-size:14px}
+.hero{position:relative;padding:var(--hero-top) 0 60px}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:44px}}
+.badge{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);padding:7px 15px;border-radius:var(--r-pill);font-size:13px;font-weight:500;color:rgba(244,244,248,.92);margin-bottom:24px}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:lp 1.9s var(--ease-out) infinite}
+@keyframes lp{0%{box-shadow:0 0 0 0 var(--accSoft)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.hero h1{font-family:var(--font-display);font-size:clamp(38px,4.8vw,60px);font-weight:700;line-height:1.05;letter-spacing:var(--ls-display);color:#fff;margin-bottom:20px}
+.hero h1 .acc{color:var(--acc)}
+.hero .sub{font-size:var(--fs-lead);color:rgba(244,244,248,.74);max-width:520px;margin-bottom:28px;line-height:1.5}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.hero-meta{display:flex;gap:26px;flex-wrap:wrap}
+.hero-meta .m{font-size:13px;color:rgba(244,244,248,.55)}
+.hero-meta .m b{display:block;font-family:var(--font-display);font-size:21px;color:#fff;font-weight:700}
+.hero-meta .m b.acc{color:var(--acc)}
+.section-head{max-width:700px;margin:0 auto 50px;text-align:center}
+.section-head h2{font-family:var(--font-display);font-size:var(--fs-h2);font-weight:700;color:#fff;letter-spacing:var(--ls-heading);line-height:1.1;margin-bottom:14px}
+.section-head h2 .acc{color:var(--acc)}
+.section-head p{font-size:18px;color:rgba(244,244,248,.66)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:880px){.pgrid{grid-template-columns:1fr}}
+.pcard{position:relative;padding:24px 22px;background:linear-gradient(160deg,rgba(28,28,43,.6),rgba(15,15,26,.6));border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);transition:transform var(--dur-base) var(--ease-out),border-color var(--dur-base),box-shadow var(--dur-base);overflow:hidden}
+.pcard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--acc),transparent);transform:scaleX(0);transform-origin:left;transition:transform var(--dur-base) var(--ease-out)}
+.pcard:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.2);box-shadow:var(--shadow-xl)}
+.pcard:hover::after{transform:scaleX(1)}
+.pcard .pico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:16px;background:var(--accSoft)}
+.pcard h3{font-family:var(--font-display);font-size:17px;font-weight:700;color:#fff;margin-bottom:7px}
+.pcard p{font-size:13.5px;color:rgba(244,244,248,.62);line-height:1.5;margin-bottom:14px}
+.pcard .rpm{font-family:var(--font-mono);font-size:11.5px;font-weight:700;color:var(--acc);letter-spacing:.02em}
+.spot{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.spot .stext h2{font-family:var(--font-display);font-size:var(--fs-h2);color:#fff;line-height:1.1;letter-spacing:var(--ls-heading);margin-bottom:16px}
+.spot .stext p{font-size:17px;color:rgba(244,244,248,.66);margin-bottom:22px}
+.spot .slist{list-style:none;display:flex;flex-direction:column;gap:12px}
+.spot .slist li{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:rgba(244,244,248,.88)}
+.spot .slist .ck{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--acc);color:var(--bb-ink);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+@media(max-width:880px){.spot{grid-template-columns:1fr;gap:36px}}
+.specs{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:880px){.specs{grid-template-columns:repeat(2,1fr)}}
+.spec{text-align:center;padding:26px 18px;border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);background:rgba(255,255,255,.02)}
+.spec b{display:block;font-family:var(--font-display);font-size:30px;font-weight:700;color:#fff;letter-spacing:-.02em}
+.spec b.acc{color:var(--acc)}
+.spec span{display:block;font-size:13px;color:rgba(244,244,248,.55);margin-top:6px}
+.cta-box{position:relative;overflow:hidden;max-width:1000px;margin:0 auto;background:var(--grad-pink);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-2xl);box-shadow:var(--glow-pink),0 30px 80px rgba(0,0,0,.4);padding:70px 48px;text-align:center;color:#fff}
+.cta-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 26% 50%,rgba(255,230,0,.22),transparent 55%),radial-gradient(circle at 80% 45%,rgba(0,255,224,.22),transparent 55%)}
+.cta-box>*{position:relative;z-index:1}
+.cta-box h2{font-family:var(--font-display);font-size:clamp(32px,4.4vw,50px);font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-bottom:16px}
+.cta-box p{font-size:18px;opacity:.92;max-width:540px;margin:0 auto 30px}
+.cta-ctas{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.cta-box .btn-white{background:#fff;color:var(--bb-pink);border-color:#fff}
+.cta-box .btn-white:hover{background:var(--bb-ink);color:#fff;border-color:var(--bb-ink);transform:translateY(-2px)}
+.cta-box .btn-clear{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.cta-box .btn-clear:hover{background:#fff;color:var(--bb-pink);border-color:#fff;transform:translateY(-2px)}
+footer.site{border-top:1px solid rgba(255,255,255,.08);padding:54px 0 34px;margin-top:var(--section-y)}
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:38px}
+.foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.foot-brand img{width:30px;height:30px}.foot-brand .brand-name{color:#fff}
+.foot-tag{font-size:14px;color:rgba(244,244,248,.6);line-height:1.6;max-width:300px}
+.foot-col h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:rgba(244,244,248,.45);margin-bottom:14px}
+.foot-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.foot-col a{font-size:14px;color:rgba(244,244,248,.66);transition:color var(--dur-fast)}
+.foot-col a:hover{color:var(--acc)}
+.foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:rgba(244,244,248,.45)}
+@media(max-width:880px){.foot-grid{grid-template-columns:1fr 1fr;gap:30px}}
+/* ---- Surface mockup ---- */
+.mock{position:relative}
+.frame{background:linear-gradient(160deg,rgba(24,24,38,.95),rgba(12,12,22,.96));border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow-xl),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.frame.win{border-radius:16px}
+.frame.phone{border-radius:34px;max-width:300px;margin:0 auto;padding:8px}
+.frame.phone .screen{border-radius:26px;overflow:hidden;background:#0c0c16}
+.fbar{display:flex;align-items:center;gap:7px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)}
+.fbar .dot{width:11px;height:11px;border-radius:50%}
+.fbar .url{margin-left:10px;font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.45);background:rgba(255,255,255,.05);padding:4px 12px;border-radius:7px;flex:1}
+.notch{height:22px;display:flex;align-items:center;justify-content:center}
+.notch::before{content:"";width:90px;height:6px;border-radius:6px;background:rgba(255,255,255,.16)}
+.fbody{padding:18px 16px;display:flex;flex-direction:column;gap:10px;min-height:300px}
+.bub{max-width:84%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.45}
+.bub.u{align-self:flex-end;background:var(--bb-ink);color:#fff;border-bottom-right-radius:4px}
+.bub.a{align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(244,244,248,.85);border-bottom-left-radius:4px}
+.adunit{position:relative;margin-top:6px;border:1.5px solid var(--accBorder);background:var(--accSoft);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:5px}
+.adunit::before{content:"✨ via Boost Boss";position:absolute;top:-9px;left:13px;background:var(--acc);color:var(--bb-ink);font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;letter-spacing:.3px;white-space:nowrap}
+.adunit .al{font-size:9px;font-weight:800;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
+.adunit .at{font-size:14px;font-weight:700;color:#fff;line-height:1.25}
+.adunit .as{font-size:12px;color:rgba(244,244,248,.7)}
+.adunit .acta{align-self:flex-start;margin-top:3px;background:var(--acc);color:var(--bb-ink);font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px}
+.adunit.video{align-items:stretch}
+.adunit .vthumb{height:96px;border-radius:9px;background:linear-gradient(135deg,var(--acc),rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative}
+.adunit .vthumb .play{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.adunit .vthumb .rew{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;color:#fff;background:rgba(0,0,0,.45);padding:3px 7px;border-radius:100px}
+.float-pill{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;background:rgba(12,12,22,.9);border:1px solid var(--accBorder);box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;animation:bob 4.5s var(--ease-in-out) infinite}
+.float-pill .sw{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.float-pill.p1{top:-14px;right:24px}.float-pill.p2{bottom:30px;left:-20px;animation-delay:1.3s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}[data-reveal]{opacity:1!important;transform:none!important}}
+</style>
+</head>
+<body style="--acc:#00FFE0;--accSoft:rgba(0,255,224,0.09);--accBorder:rgba(0,255,224,0.35)">
+<div class="page-fx"></div><div class="page-fx grain"></div>
+
+<nav id="nav"><div class="nav-inner">
+  <a class="brand" href="Publish%20Landing.html"><img class="brand-mark" src="../../assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span><span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sp">✦</span></span></a>
+  <div class="nav-links"><a href="Lumi%20-%20Computer%20App.html" class="">Computer App</a><a href="Lumi%20-%20Browser%20App.html" class="active">Browser App</a><a href="Lumi%20-%20Browser%20Extension%20App.html" class="">Extension</a><a href="Lumi%20-%20Mobile%20App.html" class="">Mobile App</a></div>
+  <div class="nav-ctas"><a class="btn btn-ghost-d" href="Publish%20Signin.html">Sign in</a><a class="btn btn-primary" href="Publish%20Signup.html">Start earning</a></div>
+</div></nav>
+
+<section class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-copy">
+    <div class="badge"><span class="dot"></span>Lumi package · live in ~10 minutes</div>
+    <div class="eyebrow"><span class="ico">🌐</span>Lumi for Browser App</div>
+    <h1>Monetize your web AI app with <span class="acc">one script tag</span>.</h1>
+    <p class="sub">Anything that runs in a browser at your own domain — chat UIs, AI image generators, no-code builders, dashboards. Drop in one async script and ad slots fire on intent.</p>
+    <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="#">Install Browser App SDK →</a><a class="btn btn-ghost-d btn-lg" href="#">View docs</a></div>
+    <div class="hero-meta">
+      <div class="m"><b class="acc">8</b>placements</div>
+      <div class="m"><b>1 tag</b>async install</div>
+      <div class="m"><b>Weekly</b>payouts</div>
+    </div>
+  </div>
+  
+<div class="mock" data-reveal="right" data-parallax data-speed="0.05">
+  <div class="float-pill p1"><span class="sw"></span>corner unit · live</div>
+  <div class="float-pill p2"><span class="sw"></span>fires on intent</div>
+  <div class="frame win">
+    <div class="fbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="url">app.yoursite.com</span></div>
+    <div class="fbody">
+      <div class="bub u">make me a hero image for a coffee brand</div>
+      <div class="bub a">Here are 4 directions — want me to refine one?</div>
+      <div class="adunit">
+        <div class="al">Sponsored</div>
+        <div class="at">Design assets in seconds — Recraft</div>
+        <div class="as">Brand-consistent visuals, on tap.</div>
+        <div class="acta">Start free →</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div></section>
+
+<div class="divider"></div>
+
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><div class="eyebrow"><span class="ico">🌐</span>Placements</div><h2>8 ways to earn on <span class="acc">Browser App</span>.</h2><p>One async tag, sovereign slots on your own domain. No iframes fighting your layout — native components that fit.</p></div>
+  <div class="pgrid">
+      <div class="pcard" data-reveal>
+        <div class="pico">◳</div>
+        <h3>Corner unit</h3>
+        <p>A compact, dismissible card that docks to a corner without blocking the canvas.</p>
+        <div class="rpm">$4–6 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">💬</div>
+        <h3>In-chat native</h3>
+        <p>Sponsored result woven into the response stream, served on conversation intent.</p>
+        <div class="rpm">$6–8 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">⏹</div>
+        <h3>Page interstitial</h3>
+        <p>A full-page brand moment between major actions — generations, exports, sign-in.</p>
+        <div class="rpm">$7–10 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">📄</div>
+        <h3>Inline card</h3>
+        <p>A native card placed in feeds, galleries, or results lists. Blends with your grid.</p>
+        <div class="rpm">$3–5 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">🔍</div>
+        <h3>Empty-state unit</h3>
+        <p>Turn blank screens into inventory with a helpful, relevant suggestion.</p>
+        <div class="rpm">$4–5 RPM</div>
+      </div>
+      <div class="pcard" data-reveal>
+        <div class="pico">🎟</div>
+        <h3>Reward gate</h3>
+        <p>Let users unlock a premium generation by engaging with a sponsor. Opt-in.</p>
+        <div class="rpm">$8–11 RPM</div>
+      </div></div>
+</div></section>
+
+<div class="divider"></div>
+
+<section class="section"><div class="wrap"><div class="spot">
+  <div class="stext" data-reveal="left">
+    <div class="eyebrow"><span class="ico">⚡</span>Top format</div>
+    <h2>Page interstitial — a full brand moment, perfectly timed.</h2>
+    <p>Between heavy actions, Lumi serves a full-page interstitial that respects the flow. Benna times it to natural breaks so it never interrupts a thought — just the waiting.</p>
+    <ul class="slist"><li><span class="ck">✓</span><span>Triggered on natural breaks, not mid-task</span></li><li><span class="ck">✓</span><span>One async tag — no SDK build step</span></li><li><span class="ck">✓</span><span>Native styling that inherits your theme</span></li><li><span class="ck">✓</span><span>Frequency caps + house-ad fallback included</span></li></ul>
+  </div>
+  <div data-reveal="right" data-parallax data-speed="0.04">
+    <div class="frame win"><div class="fbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="url">app.yoursite.com</span></div>
+    <div class="fbody"><div class="bub a">generating your export…</div>
+      <div class="adunit "><div class="al">Sponsored</div><div class="at">Design assets in seconds — Recraft</div><div class="as">Brand-consistent visuals, on tap.</div><div class="acta">Start free →</div></div>
+    </div></div>
+  </div>
+</div></div></section>
+
+<div class="divider"></div>
+
+<section class="section"><div class="wrap">
+  <div class="section-head" data-reveal><h2>Built for the way browser apps ship.</h2></div>
+  <div class="specs">
+    <div class="spec" data-reveal style="--rd:0s"><b class="acc">1</b><span>script tag to install</span></div><div class="spec" data-reveal style="--rd:0.06s"><b class="">8</b><span>placement types</span></div><div class="spec" data-reveal style="--rd:0.12s"><b class=""><5ms</b><span>Benna decision</span></div><div class="spec" data-reveal style="--rd:0.18s"><b class="">70%</b><span>revenue share</span></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap"><div class="cta-box" data-reveal>
+  <h2>Ship Browser App ads this week.</h2>
+  <p>Install the Lumi package for Browser App, drop in your placements, and start earning — weekly PayPal payouts, no contracts.</p>
+  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="#">Install Browser App SDK →</a><a class="btn btn-lg btn-clear" href="#">Talk to us</a></div>
+</div></div></section>
+
+<footer class="site"><div class="wrap">
+  <div class="foot-grid">
+    <div><div class="foot-brand"><img src="../../assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight)">Boost Boss</span></div><p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p></div>
+    <div class="foot-col"><h4>Publishers</h4><ul><li><a href="Lumi%20-%20Computer%20App.html">Computer App</a></li><li><a href="Lumi%20-%20Browser%20App.html">Browser App</a></li><li><a href="Lumi%20-%20Browser%20Extension%20App.html">Extension</a></li><li><a href="Lumi%20-%20Mobile%20App.html">Mobile App</a></li></ul></div>
+    <div class="foot-col"><h4>Resources</h4><ul><li><a href="#">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Payouts</a></li></ul></div>
+    <div class="foot-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Trust center</a></li><li><a href="#">Contact</a></li></ul></div>
+  </div>
+  <div class="foot-bottom"><span>© 2026 Boost Boss · All rights reserved.</span><span>Made for the AI era.</span></div>
+</div></footer>
+
+<script>
+(function(){var ok=document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches;if(ok)document.documentElement.classList.add('anim');else document.addEventListener('visibilitychange',function o(){if(document.visibilityState==='visible'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('anim');document.removeEventListener('visibilitychange',o)}});})();
+var ANIM=document.documentElement.classList.contains('anim');
+var nav=document.getElementById('nav');
+var px=[].slice.call(document.querySelectorAll('[data-parallax]'));
+function onS(){var y=scrollY;nav.classList.toggle('scrolled',y>8);if(ANIM){var vh=innerHeight;px.forEach(function(el){var r=el.getBoundingClientRect();var sp=parseFloat(el.dataset.speed||'0.05');el.style.setProperty('--py',((r.top+r.height/2-vh/2)*-sp).toFixed(1)+'px')})}}
+addEventListener('scroll',onS,{passive:true});onS();
+if(ANIM&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-visible');o.unobserve(e.target)}})},{threshold:.2});document.querySelectorAll('[data-reveal]').forEach(function(el){io.observe(el)})}
+</script>
+</body>
+</html>
