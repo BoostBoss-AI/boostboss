@@ -1,0 +1,51 @@
+<!-- @dsCard group="Components" viewport="1100x520" name="Navigation — Navbar · Footer" subtitle="Marketing top nav (dark + light) and the multi-column footer" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-body); background: var(--bb-bg-soft); }
+  .frame { margin-bottom: 22px; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--bb-line); }
+  .frame.dark { background: var(--bb-surface-0); position: relative; }
+  .frame.dark::before { content: ""; position: absolute; inset: 0; background: var(--mesh-dark); opacity: 0.5; pointer-events: none; }
+  .frame.light { background: var(--bb-bg-soft); }
+  .pad { padding-bottom: 60px; position: relative; }
+  .lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--bb-muted); margin: 0 0 10px 4px; }
+</style>
+</head>
+<body>
+  <div style="padding:22px;">
+    <div class="lbl">Navbar — dark hero theme (with Lumi mark)</div>
+    <div class="frame dark"><div class="pad" id="nav-dark"></div></div>
+
+    <div class="lbl">Navbar — light cream theme</div>
+    <div class="frame light"><div class="pad" id="nav-light"></div></div>
+
+    <div class="lbl">Footer — light</div>
+    <div class="frame light"><div id="footer-light"></div></div>
+  </div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="../../_ds_bundle.js"></script>
+  <script type="text/babel">
+    const { Navbar, Footer } = window.BoostBossDesignSystem_e46764;
+
+    ReactDOM.createRoot(document.getElementById('nav-dark')).render(
+      <Navbar theme="dark" lumiMark
+        links={[{label:'Computer App',href:'#'},{label:'Browser App',href:'#'},{label:'Extension',href:'#'},{label:'Mobile App',href:'#'}]}
+        secondary={{label:'Sign in',href:'#'}} cta={{label:'Start earning',href:'#'}} />
+    );
+    ReactDOM.createRoot(document.getElementById('nav-light')).render(
+      <Navbar theme="light"
+        links={[{label:'Publishers',href:'#'},{label:'SuperBoost Ads',href:'#'},{label:'BBX',href:'#'},{label:'Live Demo ↗',href:'#'}]}
+        secondary={{label:'Sign in',href:'#'}} cta={{label:'Start free',href:'#'}} />
+    );
+    ReactDOM.createRoot(document.getElementById('footer-light')).render(<Footer theme="light" />);
+  </script>
+</body>
+</html>

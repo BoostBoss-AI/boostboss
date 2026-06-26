@@ -1,0 +1,59 @@
+/* ─────────────────────────────────────────────────────────────────
+   Boost Boss Design System — colors
+   Generated from _ds_manifest.json. Single source of truth for the
+   marketing surfaces. Linked via styles.css.
+   ───────────────────────────────────────────────────────────────── */
+
+:root {
+  --bb-pink: #FF2D78;
+  --bb-pink-dark: #E01E65;
+  --bb-pink-deep: #B81654;
+  --bb-cyan: #00FFE0;
+  --bb-cyan-link: #04BEFE;
+  --bb-cyan-deep: #0195CC;
+  --bb-yellow: #FFE600;
+  --bb-yellow-deep: #8A7700;
+  --bb-ink: #0F0F1A;
+  --bb-ink-800: #1A1A2E;
+  --bb-ink-700: #252539;
+  --bb-ink-600: #353549;
+  --bb-ink-soft: #4B4B5E;
+  --bb-muted: #6B7280;
+  --bb-line: #EAEAEF;
+  --bb-line-soft: #E5E7EB;
+  --bb-bg: #FFFFFF;
+  --bb-bg-soft: #FAFAF7;
+  --bb-bg-cream: #FAFAFA;
+  --bb-surface-0: #0B0B14;
+  --bb-surface-1: #0F0F1A;
+  --bb-surface-2: #15151F;
+  --bb-surface-3: #1C1C2B;
+  --bb-success: #10B981;
+  --bb-success-bg: #D1FADF;
+  --bb-success-fg: #027A48;
+  --bb-warn: #8A6A00;
+  --bb-warn-bg: #FFF3D6;
+  --bb-danger: #B91C1C;
+  --bb-danger-bg: #FFE9E9;
+  --bb-pink-tint: #FFE6EE;
+  --bb-cyan-tint: #D6F5FE;
+  --bb-yellow-tint: #FFF8B8;
+  --text-strong: var(--bb-ink);
+  --text-body: var(--bb-ink-soft);
+  --text-muted: var(--bb-muted);
+  --text-on-dark: #F4F4F8;
+  --text-on-pink: #FFFFFF;
+  --surface-page: var(--bb-bg-soft);
+  --surface-card: var(--bb-bg);
+  --surface-dark: var(--bb-surface-1);
+  --surface-inset: var(--bb-bg-soft);
+  --border-hairline: var(--bb-line);
+  --border-card: var(--bb-line-soft);
+  --border-ink: var(--bb-ink-800);
+  --accent-primary: var(--bb-pink);
+  --accent-secondary: var(--bb-cyan);
+  --accent-spark: var(--bb-yellow);
+  --grad-brand: linear-gradient(90deg, var(--bb-pink), var(--bb-cyan));
+  --grad-pink: linear-gradient(135deg, #FF2D78 0%, #E01E65 55%, #B81654 100%);
+  --grad-aurora: linear-gradient(120deg, #FF2D78 0%, #D946EF 28%, #00FFE0 60%, #04BEFE 100%);
+}

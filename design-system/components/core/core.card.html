@@ -1,0 +1,97 @@
+<!-- @dsCard group="Components" viewport="760x540" name="Core — Button · Badge · Card" subtitle="Action buttons, eyebrows/status pills, and surface cards in all variants" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-body); background: var(--bb-bg-soft); color: var(--bb-ink); padding: 26px; }
+  .grp { margin-bottom: 26px; }
+  .lbl { font-family: var(--font-body); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--bb-muted); margin-bottom: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .dark-swatch { background: var(--bb-surface-1); border-radius: var(--r-md); padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .cards-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .pink-box { background: var(--grad-pink); border-radius: var(--r-md); padding: 16px; display: flex; gap: 12px; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="../../_ds_bundle.js"></script>
+  <script type="text/babel">
+    const { Button, Badge, Card } = window.BoostBossDesignSystem_e46764;
+
+    function Demo() {
+      return (
+        <React.Fragment>
+          <div className="grp">
+            <div className="lbl">Buttons — light surfaces</div>
+            <div className="row">
+              <Button variant="primary" iconRight="→">Start monetizing</Button>
+              <Button variant="outline">Boost a product</Button>
+              <Button variant="ghost">Read the docs</Button>
+              <Button variant="primary" size="lg" iconRight="→">Large CTA</Button>
+              <Button variant="primary" disabled>Disabled</Button>
+            </div>
+          </div>
+
+          <div className="grp">
+            <div className="lbl">Buttons — dark / pink surfaces</div>
+            <div className="row">
+              <div className="dark-swatch">
+                <Button variant="primary" iconRight="→">Start free</Button>
+                <Button variant="ghostDark">Sign in</Button>
+              </div>
+              <div className="pink-box">
+                <Button variant="white" iconRight="→">Start monetizing</Button>
+                <Button variant="ghostDark">Talk to us</Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grp">
+            <div className="lbl">Badges — eyebrows · status · live</div>
+            <div className="row">
+              <Badge tone="pink" uppercase>For publishers</Badge>
+              <Badge tone="cyan" uppercase>For advertisers</Badge>
+              <Badge tone="yellow" uppercase>The intent moat</Badge>
+              <Badge tone="success">Active</Badge>
+              <Badge tone="warn">Paused</Badge>
+              <Badge tone="cyan" dot>Now live on MCP</Badge>
+              <Badge tone="pink" variant="solid">BBX</Badge>
+              <Badge tone="neutral" variant="outline">OpenRTB 2.6</Badge>
+            </div>
+          </div>
+
+          <div className="grp">
+            <div className="lbl">Cards — soft · pop · glass · flat</div>
+            <div className="cards-row">
+              <Card variant="soft" hoverable padding={18}>
+                <strong style={{ fontFamily: 'var(--font-display)' }}>Soft</strong>
+                <div style={{ fontSize: 13, color: 'var(--bb-ink-soft)', marginTop: 4 }}>Hairline border, soft shadow.</div>
+              </Card>
+              <Card variant="pop" padding={18}>
+                <strong style={{ fontFamily: 'var(--font-display)' }}>Pop</strong>
+                <div style={{ fontSize: 13, color: 'var(--bb-ink-soft)', marginTop: 4 }}>Ink border + hard offset.</div>
+              </Card>
+              <Card variant="glass" padding={18}>
+                <strong style={{ fontFamily: 'var(--font-display)' }}>Glass</strong>
+                <div style={{ fontSize: 13, color: 'rgba(244,244,248,0.7)', marginTop: 4 }}>Dark translucent card.</div>
+              </Card>
+              <Card variant="flat" hoverable padding={18}>
+                <strong style={{ fontFamily: 'var(--font-display)' }}>Flat</strong>
+                <div style={{ fontSize: 13, color: 'var(--bb-ink-soft)', marginTop: 4 }}>Line border, hover-pop.</div>
+              </Card>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+  </script>
+</body>
+</html>

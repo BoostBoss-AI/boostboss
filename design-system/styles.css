@@ -1,0 +1,35 @@
+/* ─────────────────────────────────────────────────────────────────
+   Boost Boss Design System — styles.css (entry point)
+   Single global stylesheet. @imports the token layers in dependency
+   order: fonts → colors → typography → spacing → motion.
+   Link this from any HTML surface that wants the brand system.
+   ───────────────────────────────────────────────────────────────── */
+
+@import url('tokens/fonts.css');
+@import url('tokens/colors.css');
+@import url('tokens/typography.css');
+@import url('tokens/spacing.css');
+@import url('tokens/motion.css');
+
+/* ── Base reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-strong);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Display headings use Space Grotesk + tight tracking by default */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-heading);
+  line-height: var(--lh-tight);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+code, pre { font-family: var(--font-mono); }
