@@ -84,6 +84,28 @@ a{color:inherit;text-decoration:none}svg{display:block}
 .api-key-box{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;font-family:var(--font-mono);font-size:12.5px;color:#fff;word-break:break-all}
 .copy-btn{margin-left:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer}
 .copy-btn:hover{background:rgba(255,255,255,.18)}
+/* ── Compact-form overrides — match Claude Design framing ────────────────
+   The auth JS depends on the consent-box DOM (#accept-terms, #consent-label,
+   #consent-hint, #open-agreement) so we don't delete it. Instead we re-style
+   it into a tight single-line agreement matching the design's compact layout.
+   Form ends up the same visual height as the brand panel, so the card no
+   longer stretches and the brand side no longer gets awkward whitespace. */
+.fp .form-group{margin-bottom:14px}
+.consent-box{margin-top:4px;margin-bottom:14px}
+.consent-text{padding:8px 10px;font-size:11.5px;line-height:1.45;border-radius:8px}
+.consent-text.locked{opacity:1}
+.consent-text input{width:14px;height:14px;margin-top:1px}
+.consent-text span{display:inline}
+.consent-sub{display:none}  /* drop the bracketed sub-explanation */
+.consent-hint{display:none}  /* drop the "Open the agreement and scroll…" hint */
+.policy-link{font-size:11.5px}
+.pw-strength{margin-top:6px;height:2px}
+.pw-label{font-size:10.5px;min-height:0;margin-top:3px}
+.fp .alt-link{margin-top:14px;font-size:12.5px}
+.fp h1{font-size:24px;margin-bottom:4px}
+.fp .sub{font-size:13px;margin-bottom:18px}
+.btn-google{padding:10px 16px;font-size:13.5px}
+.divider-small{margin:4px 0 16px;font-size:11.5px}
 @media(max-width:820px){.card{grid-template-columns:1fr;max-width:440px}.bp{display:none}}
 /* ── Modals (kept on top of everything) ── */
 .policy-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
