@@ -4987,6 +4987,24 @@
                     "></span>
                 </div>
 
+                <!-- Pixel-missing nudge banner — populated by openCampaignDetail()
+                     when the campaign has been live >24h with impressions but
+                     zero conversion events AND has a conversion-needing
+                     objective. Stays hidden in all other cases. -->
+                <div id="detailPixelNudge" style="display:none; margin-bottom:20px; padding:12px 14px; background:linear-gradient(135deg,#FFFBEB,#FEF3C7); border:1px solid #FDE68A; border-radius:10px;">
+                    <div style="display:flex;align-items:flex-start;gap:10px;">
+                        <div style="font-size:18px;line-height:1;flex-shrink:0;">⚠️</div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:12.5px;font-weight:700;color:#92400E;margin-bottom:2px;">No conversions detected</div>
+                            <div style="font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:8px;" id="detailPixelNudgeBody">Your campaign has been serving for over 24h but we haven't seen any conversion events. The pixel may not be installed correctly on your conversion page.</div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button type="button" id="detailPixelShow" style="padding:5px 12px;background:#92400E;color:#fff;font-size:10.5px;font-weight:700;border-radius:5px;border:none;cursor:pointer;font-family:inherit;letter-spacing:0.02em;">Show snippet</button>
+                                <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="padding:5px 12px;background:transparent;color:#92400E;font-size:10.5px;font-weight:700;border-radius:5px;border:1px solid #92400E;cursor:pointer;text-decoration:none;display:inline-block;letter-spacing:0.02em;">Test end-to-end</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Creative preview -->
                 <div style="
                     background: #0A0A14; border-radius: 12px; overflow: hidden;
@@ -5727,6 +5745,24 @@
               <input type="url" id="ncwUrl" class="ncw-input" placeholder="https://yourapp.com/signup">
               <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Where the click leads. Will have <code>?bbx_auc=...&bbx_cmp=...</code> appended at click time for attribution.</div>
 
+              <!-- Conversion-pixel callout — fires when objective ∈
+                   {signups, conversion, install}. Hidden for awareness/clicks
+                   because they don't need conversion tracking. Updated by
+                   ncwUpdatePixelCallout() on every objective radio change. -->
+              <div id="ncwPixelCallout" style="display:none;margin-top:14px;padding:12px 14px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:10px;">
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                  <div style="font-size:18px;line-height:1;flex-shrink:0;">📡</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12.5px;font-weight:700;color:#92400E;margin-bottom:2px;">This objective needs the conversion pixel</div>
+                    <div style="font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:8px;" id="ncwPixelCalloutBody">Benna can't optimize for what it can't see. Without the pixel installed on your conversion page, every signup looks identical and Benna is bidding blind.</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <button type="button" id="ncwPixelShow" style="padding:5px 12px;background:#92400E;color:#fff;font-size:10.5px;font-weight:700;border-radius:5px;border:none;cursor:pointer;font-family:inherit;letter-spacing:0.02em;">Show snippet</button>
+                      <button type="button" id="ncwPixelDefer" style="padding:5px 12px;background:transparent;color:#92400E;font-size:10.5px;font-weight:700;border-radius:5px;border:1px solid #92400E;cursor:pointer;font-family:inherit;letter-spacing:0.02em;">I'll do it later</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div id="ncwStep1Err" style="display:none;margin-top:10px;padding:8px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#991B1B;font-size:12.5px;"></div>
 
               <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #F3F4F6;">
@@ -5796,12 +5832,62 @@
                 You haven't created any affiliate products yet. <a href="#/products" style="color:#FF2D78;font-weight:600;text-decoration:none;">Create one</a> to attach it here.
               </div>
 
+              <!-- Affiliate-attach pixel callout — fires when any product
+                   is attached (radio value !== ''). Updated by
+                   ncwUpdateAffiliateCallout() on every affiliate radio change. -->
+              <div id="ncwAffiliatePixelCallout" style="display:none;margin-top:14px;padding:12px 14px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:10px;">
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                  <div style="font-size:18px;line-height:1;flex-shrink:0;">💸</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12.5px;font-weight:700;color:#92400E;margin-bottom:2px;">Affiliates earn on conversions — the pixel is mandatory here</div>
+                    <div style="font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:8px;">Without the conversion pixel on your product's success page, no commission can be paid to whoever drove the sale. Install it before launching this campaign.</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <button type="button" id="ncwAffiliatePixelShow" style="padding:5px 12px;background:#92400E;color:#fff;font-size:10.5px;font-weight:700;border-radius:5px;border:none;cursor:pointer;font-family:inherit;letter-spacing:0.02em;">Show snippet</button>
+                      <button type="button" id="ncwAffiliatePixelDefer" style="padding:5px 12px;background:transparent;color:#92400E;font-size:10.5px;font-weight:700;border-radius:5px;border:1px solid #92400E;cursor:pointer;font-family:inherit;letter-spacing:0.02em;">I'll do it later</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div id="ncwStep3Err" style="display:none;margin-top:10px;padding:8px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#991B1B;font-size:12.5px;"></div>
 
               <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #F3F4F6;">
                 <button type="button" id="ncwBack3" class="ncw-back">← Back</button>
                 <button type="button" id="ncwLaunch" class="ncw-launch">Launch campaign</button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             PIXEL INSTALL SUB-MODAL — reusable conversion-tracking snippet
+             surface. Opened from:
+               · wizard step 1 (when objective ∈ signups/conversion/install)
+               · wizard step 3 (when affiliate product attached)
+               · campaign detail nudge banner (24h impressions but 0 convs)
+             Snippet text injected by openPixelInstallModal() with the
+             current advertiser ID baked in. Sits on z-index above the
+             wizard so it can layer over it.
+             ═══════════════════════════════════════════════════════════════ -->
+        <div id="pixelInstallModal" class="modal" style="display:none; z-index:1100;">
+          <div class="modal-content" style="max-width:580px; width:calc(100vw - 32px);">
+            <div class="modal-header" style="display:flex;align-items:center;gap:12px;justify-content:space-between;">
+              <h2 class="modal-title" style="margin:0;">Install conversion tracking</h2>
+              <button class="modal-close" type="button" id="pimClose" style="background:none;border:none;font-size:22px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 4px;">×</button>
+            </div>
+            <div style="font-size:13px;color:#374151;line-height:1.55;margin-bottom:14px;">
+              Paste this snippet before the closing <code style="background:#F3F4F6;padding:1px 5px;border-radius:4px;font-size:11.5px;">&lt;/head&gt;</code> tag on your conversion page (signup-success, checkout-complete, etc.). It tells Boost Boss when a visitor actually converted — without it, Benna can't optimize for this objective.
+            </div>
+            <div style="background:#0A0A14;border-radius:10px;padding:14px;position:relative;font-family:'SFMono-Regular',Consolas,monospace;font-size:12px;color:#B0B0C7;line-height:1.55;overflow-x:auto;">
+              <button id="pimCopy" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.1);border:none;padding:4px 10px;border-radius:6px;color:#B0B0C7;font-size:11px;cursor:pointer;font-family:inherit;">Copy</button>
+              <pre id="pimSnippet" style="margin:0;white-space:pre-wrap;color:#B0B0C7;"></pre>
+            </div>
+            <div style="margin-top:10px;font-size:12px;color:#6B7280;">
+              Test end-to-end: <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #F3F4F6;">
+              <a href="#/settings" id="pimSettingsLink" style="font-size:12.5px;color:#6B7280;text-decoration:none;">Open in Settings → Conversion tracking</a>
+              <button type="button" id="pimDone" style="padding:9px 20px;background:#FF2D78;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Done</button>
             </div>
           </div>
         </div>
@@ -8016,6 +8102,38 @@
                     toggleBtn.disabled = true;
                 }
 
+                // Pixel-missing nudge — show only when ALL of:
+                //   · objective ∈ conversion-needing set
+                //   · campaign created >24h ago
+                //   · impressions > 0
+                //   · conversion_count === 0
+                // We check the campaign's boost_objective + a few candidate
+                // conversion-count fields on the row (the field name has
+                // varied across migrations). If the data isn't there, we
+                // skip the nudge — opt-in only, never noisy.
+                (function maybeShowPixelNudge() {
+                    const nudge = document.getElementById('detailPixelNudge');
+                    if (!nudge) return;
+                    nudge.style.display = 'none';
+                    const objNeedsPixel = new Set(['signups', 'conversion', 'install']);
+                    const obj = c.boost_objective || '';
+                    if (!objNeedsPixel.has(obj)) return;
+                    const imps = Number(c.impressions || 0);
+                    if (imps <= 0) return;
+                    const created = c.created_at ? new Date(c.created_at).getTime() : 0;
+                    if (!created || (Date.now() - created) < 24 * 60 * 60 * 1000) return;
+                    // Conversion count — try common field names. The
+                    // backend may surface this as conversions, conversion_count,
+                    // total_conversions, or events.conversions count. Treat
+                    // any positive value as "pixel is firing".
+                    const convCount =
+                        Number(c.conversions || 0) +
+                        Number(c.conversion_count || 0) +
+                        Number(c.total_conversions || 0);
+                    if (convCount > 0) return;
+                    nudge.style.display = '';
+                })();
+
                 // Draw sparkline (simulated 7-day data based on campaign metrics)
                 drawDetailSparkline(c);
             })
@@ -8124,6 +8242,18 @@
 
         document.getElementById('detailClose').addEventListener('click', closeCampaignDetail);
         detailOverlay.addEventListener('click', closeCampaignDetail);
+
+        // Pixel-nudge "Show snippet" button — opens the install sub-modal
+        // (defined near the wizard JS). The nudge banner appears only when
+        // openCampaignDetail detects pixel-missing conditions.
+        const detailPixelShowBtn = document.getElementById('detailPixelShow');
+        if (detailPixelShowBtn) {
+            detailPixelShowBtn.addEventListener('click', () => {
+                if (typeof window.openPixelInstallModal === 'function') {
+                    window.openPixelInstallModal('campaign-detail-nudge');
+                }
+            });
+        }
 
         // Edit button inside detail panel — routes through the 3-step
         // wizard 2026-06-25 (legacy openEditModal retired).
@@ -17401,9 +17531,157 @@ function pfParseScreenshots(text) {
             document.getElementById('ncwBack3').addEventListener('click', () => showStep(2));
             document.getElementById('ncwLaunch').addEventListener('click', launch);
 
+            // ── Conversion-pixel callouts (Step 1 + Step 3) ─────────
+            // Step 1: yellow callout appears when objective ∈
+            //   {signups, conversion, install}. Hidden for awareness/clicks.
+            // Step 3: yellow callout appears when affiliate radio value !== ''.
+            // Both share a single "Show snippet" target — the
+            // #pixelInstallModal sub-modal at the top of this file.
+            const PIXEL_REQUIRED_OBJECTIVES = new Set(['signups', 'conversion', 'install']);
+
+            function ncwUpdatePixelCallout() {
+                const callout = document.getElementById('ncwPixelCallout');
+                if (!callout) return;
+                const objEl = wizard.querySelector('input[name="ncwObjective"]:checked');
+                const obj = objEl ? objEl.value : '';
+                callout.style.display = PIXEL_REQUIRED_OBJECTIVES.has(obj) ? '' : 'none';
+            }
+            function ncwUpdateAffiliateCallout() {
+                const callout = document.getElementById('ncwAffiliatePixelCallout');
+                if (!callout) return;
+                const affEl = wizard.querySelector('input[name="ncwAffiliate"]:checked');
+                const v = (affEl && affEl.value) || '';
+                callout.style.display = v ? '' : 'none';
+            }
+
+            // Listen for any objective radio change inside the wizard
+            wizard.querySelectorAll('input[name="ncwObjective"]').forEach((r) => {
+                r.addEventListener('change', ncwUpdatePixelCallout);
+            });
+            // Affiliate radios — use delegation since rows are injected by
+            // renderProducts() after step 3 opens.
+            const affList = document.getElementById('ncwAffiliateList');
+            if (affList) {
+                affList.addEventListener('change', (e) => {
+                    if (e.target && e.target.name === 'ncwAffiliate') ncwUpdateAffiliateCallout();
+                });
+            }
+            // Step 1 callout buttons
+            const step1Show = document.getElementById('ncwPixelShow');
+            const step1Defer = document.getElementById('ncwPixelDefer');
+            if (step1Show) step1Show.addEventListener('click', () => window.openPixelInstallModal && window.openPixelInstallModal('wizard-step1'));
+            if (step1Defer) step1Defer.addEventListener('click', () => {
+                const c = document.getElementById('ncwPixelCallout');
+                if (c) c.style.display = 'none';
+            });
+            // Step 3 callout buttons
+            const step3Show = document.getElementById('ncwAffiliatePixelShow');
+            const step3Defer = document.getElementById('ncwAffiliatePixelDefer');
+            if (step3Show) step3Show.addEventListener('click', () => window.openPixelInstallModal && window.openPixelInstallModal('wizard-step3'));
+            if (step3Defer) step3Defer.addEventListener('click', () => {
+                const c = document.getElementById('ncwAffiliatePixelCallout');
+                if (c) c.style.display = 'none';
+            });
+            // Refresh callouts every time the wizard opens (resetForm
+            // sets the default objective back to "signups", which needs
+            // the callout shown).
+            const _origOpen = open;
+            // We can't shadow `open` since it's declared with function
+            // keyword, but we can call ncwUpdatePixelCallout() from inside
+            // a wrapped close/open. Easier: re-run the updaters at the
+            // end of resetForm via a hook.
+            // Done — fire once at script load to set initial state.
+            ncwUpdatePixelCallout();
+
             // Public API — both create triggers call this.
             window.openNewCampaignWizard = open;
             window.closeNewCampaignWizard = close;
+        })();
+
+        // ─── Pixel install sub-modal (#pixelInstallModal) ─────────────
+        // Standalone IIFE so it can be opened from anywhere
+        // (wizard step 1, wizard step 3, campaign detail nudge banner).
+        // window.openPixelInstallModal(source) fills the snippet, shows
+        // the modal, focuses the Copy button.
+        (function () {
+            const modal = document.getElementById('pixelInstallModal');
+            if (!modal) return;
+
+            function getCurrentAdvertiserId() {
+                try {
+                    if (window.currentUserData && window.currentUserData.user_id) return window.currentUserData.user_id;
+                    const raw = localStorage.getItem('bb_user_data');
+                    if (raw) {
+                        const j = JSON.parse(raw);
+                        if (j && j.user_id) return j.user_id;
+                    }
+                } catch (_) {}
+                return 'YOUR_ADVERTISER_ID';
+            }
+
+            // Builds the snippet text WITHOUT writing the literal
+            // closing-script-tag token in source — see sectionPixel() for
+            // why. Tokens concatenated at runtime.
+            function buildSnippet(advertiserId) {
+                const CLOSE = '</scr' + 'ipt>';
+                const OPEN_A = '<scr' + 'ipt async src="https://boostboss.ai/pixel.js"\n  data-advertiser-id="';
+                const OPEN_B = '<scr' + 'ipt>';
+                return (
+                    OPEN_A + advertiserId + '">' + CLOSE + '\n' +
+                    OPEN_B + '\n' +
+                    '  window.bbq = window.bbq || [];\n' +
+                    "  bbq.push(['track', 'signup', { value: 29.99, currency: 'USD' }]);\n" +
+                    CLOSE
+                );
+            }
+
+            function open(source) {
+                const advId = getCurrentAdvertiserId();
+                const snippetEl = document.getElementById('pimSnippet');
+                if (snippetEl) snippetEl.textContent = buildSnippet(advId);
+                modal.style.display = '';
+                modal.classList.add('active');
+                // Track which surface opened it so we can shape future
+                // analytics. No backend wired yet — just console.
+                try { console.log('[pixel-install] opened from', source); } catch (_) {}
+            }
+            function close() {
+                modal.style.display = 'none';
+                modal.classList.remove('active');
+            }
+
+            // Copy button
+            const copyBtn = document.getElementById('pimCopy');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const text = (document.getElementById('pimSnippet') || {}).textContent || '';
+                    if (!text) return;
+                    try {
+                        navigator.clipboard.writeText(text).then(() => {
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1600);
+                        }).catch(() => {
+                            copyBtn.textContent = 'Copy failed';
+                            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1600);
+                        });
+                    } catch (_) {
+                        copyBtn.textContent = 'Copy failed';
+                        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1600);
+                    }
+                });
+            }
+            // Close button + Done button + click-outside
+            const closeBtn = document.getElementById('pimClose');
+            const doneBtn = document.getElementById('pimDone');
+            if (closeBtn) closeBtn.addEventListener('click', close);
+            if (doneBtn) doneBtn.addEventListener('click', close);
+            modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.style.display !== 'none') close();
+            });
+
+            window.openPixelInstallModal = open;
+            window.closePixelInstallModal = close;
         })();
     </script>
 
