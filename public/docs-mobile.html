@@ -4,101 +4,138 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumi for Mobile App · Docs — Boost Boss</title>
-<meta name="description" content="One terminal command. 10 placements including the highest-CPM ad format in adtech: rewarded video. React Native, Expo, iOS, Android.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, sans-serif; color: #0F0F1A; line-height: 1.65; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.06), transparent 60%), #FAFAF7; min-height: 100vh; }
-  a { color: #FF2D78; text-decoration: none; } a:hover { text-decoration: underline; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
-  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
-  h1 { font-size: 36px; margin-bottom: 12px; } h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; } h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
-  p { margin: 10px 0; color: #4B5563; }
-  code { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
-  pre { font-family: 'JetBrains Mono', monospace; background: #0F0F1A; color: #E5E7EB; padding: 18px 20px; border-radius: 10px; overflow-x: auto; margin: 14px 0; font-size: 14px; line-height: 1.6; }
-  pre code { background: transparent; padding: 0; color: inherit; }
-  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; } .nav a { color: #6B7280; }
-  .pill { display: inline-block; background: #FFE6F0; color: #BE185D; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
-  ul { padding-left: 22px; color: #4B5563; } ul li { margin: 5px 0; }
-  .callout { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #FF2D78; padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px; } .callout strong { color: #0F0F1A; }
-</style>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
+<link rel="stylesheet" href="/design-system/ui_kits/docs/_docs.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="nav"><a href="/docs">← Docs</a></div>
-  <span class="pill">Lumi for Mobile App</span>
-  <h1>The highest-CPM ad format in adtech, one command away.</h1>
-  <p>For iOS and Android apps — whether you build with React Native, Swift, or Kotlin. One CLI auto-detects which kind of project you're in and wires the right SDK underneath: <strong>native iOS</strong> (Swift/Obj-C via CocoaPods + SPM), <strong>native Android</strong> (Kotlin/Java via Gradle + Maven), or the <strong>React Native wrapper</strong> that bridges to both natives.</p>
 
-  <h2 id="install">Install</h2>
-  <pre><code>npx @boostbossai/install-mobile YOUR_PUBLISHER_ID</code></pre>
-  <p>What the CLI does:</p>
-  <ul>
-    <li>Auto-detects your project type — Xcode project → iOS native flavor, Gradle project → Android native flavor, RN <code>package.json</code> → React Native flavor</li>
-    <li>For React Native: runs <code>npm install @boostbossai/lumi-mobile</code>, wraps your root component's outermost JSX with <code>&lt;LumiProvider publisherId="..."&gt;</code>, and on Mac runs <code>cd ios &amp;&amp; pod install</code></li>
-    <li>For native iOS: adds <code>pod 'BoostBossLumi'</code> to your Podfile (or Swift Package Manager URL if you use SPM) and inserts the SDK init in <code>AppDelegate</code></li>
-    <li>For native Android: adds <code>implementation 'ai.boostboss:lumi:&lt;version&gt;'</code> to your <code>build.gradle.kts</code> and inserts the SDK init in <code>Application.onCreate</code></li>
-    <li>Writes <code>.lumi-install-log</code> so <code>--uninstall</code> can reverse everything</li>
-  </ul>
-  <p>If auto-detect picks wrong, force the flavor with <code>--platform=ios</code>, <code>--platform=android</code>, or <code>--platform=rn</code>.</p>
-  <p>Rebuild your app (<code>npx expo run:ios</code> / <code>npx react-native run-ios</code> / Xcode / Android Studio). The <strong>Mobile App</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 60 seconds.</p>
+<!-- TOP BAR -->
+<header class="doc-top">
+  <a class="doc-brand" href="Docs Template.html">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+    <b>Boost Boss</b><span>Docs</span>
+  </a>
+  <div class="doc-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search docs<kbd>⌘K</kbd></div>
+  <nav class="doc-top-links">
+    <a href="#">Dashboard</a>
+    <a href="#">API status</a>
+    <a href="#">Support</a>
+    <a class="doc-top-cta" href="#">Get API keys</a>
+  </nav>
+</header>
 
-  <h3 id="three-flavors">Why three flavors instead of one</h3>
-  <p>SKAdNetwork (iOS) and Play Install Referrer (Android) are the standard install-attribution APIs every mobile ad network has to hit — and they're only callable from native code. JavaScript can't reach them. AppLovin, Unity, and IronSource all ship the same shape: native iOS SDK + native Android SDK + thin wrappers on top for React Native, Unity, Flutter, and Cordova. Lumi follows that pattern. Your React Native install gets the same underlying attribution stack as a native Swift install, because the RN package links the native SDKs at build time.</p>
+<div class="doc-shell">
 
-  <h2 id="rewarded">Rewarded video — the premium unit</h2>
-  <p>The <code>&lt;BottomBanner /&gt;</code> auto-mounts when <code>LumiProvider</code> sees your app. The premium <code>&lt;RewardedVideo /&gt;</code> is opt-in — drop it anywhere a user would benefit from earning an in-app reward:</p>
-  <pre><code>import { RewardedVideo } from '@boostbossai/lumi-mobile';
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <div class="doc-sec">
+      <div class="doc-sec-l">Getting started</div>
+      <a href="/docs">Introduction</a>
+      <a href="/docs/quickstart">Quickstart</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Integration doors</div>
+      <a href="/docs/browser">Browser app</a>
+      <a href="/docs/browser/react" class="sub">React</a>
+      <a href="/docs/computer">Computer app</a>
+      <a href="/docs/extension">Browser extension</a>
+      <a href="/docs/mobile" class="on">Mobile app</a>
+      <a href="/docs/mcp">MCP server</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Protocols</div>
+      <a href="/docs/js-snippet">JS snippet</a>
+      <a href="/docs/npm-sdk">npm SDK</a>
+      <a href="/docs/rest-api">REST API</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Features</div>
+      <a href="/docs/activation-link">Activation links</a>
+      <a href="/docs/payouts">Payouts</a>
+      <a href="/docs/reporting">Reporting</a>
+      <a href="/docs/product-lifecycle">Product lifecycle</a>
+      <a href="/docs/api-reference">API reference</a>
+    </div>
+  </aside>
 
-&lt;RewardedVideo
-  buttonLabel="Watch ad for 10 credits"
-  onReward={(reward) =&gt; grantUserCredits(10)}
-/&gt;</code></pre>
-  <p>Rewarded video is the highest-CPM ad format in all of adtech ($25–50 CPM). Users opt in explicitly, watch a 15–30 second video, and you grant them their reward. Apple and Google App Store policies fully support this format — it's how AppLovin and Unity print money.</p>
+  <!-- MAIN -->
+  <main class="doc-main">
+    <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Integration doors</span><span class="sep">/</span><span style="color:var(--doc-soft)">Mobile app</span></div>
+    <h1 class="doc-h1">Mobile app</h1>
+    <p class="doc-sub"></p>
+    <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
 
-  <h2 id="what">10 placements auto-enable</h2>
-  <ul>
-    <li><strong>Sponsored citation</strong> · ~$4.50 RPM</li>
-    <li><strong>Suggested chip</strong> · ~$4.50 RPM</li>
-    <li><strong>Inline sponsored card</strong> · ~$6.50 RPM</li>
-    <li><strong>Loading-state ad</strong> · ~$7.00 RPM</li>
-    <li><strong>Pre-roll video</strong> · ~$11.00 RPM — sound-on (native apps escape browser autoplay)</li>
-    <li><strong>Rewarded video</strong> · <strong>~$35.00 RPM</strong> — opt-in for an in-app reward (highest CPM in adtech)</li>
-    <li><strong>Bottom banner</strong> · ~$6.50 RPM — persistent banner, auto-mounts at root</li>
-    <li><strong>Inline native banner</strong> · ~$7.50 RPM — feed-style placement</li>
-    <li><strong>Full-screen interstitial</strong> · ~$18.00 RPM — between major transitions</li>
-    <li><strong>Splash sponsor</strong> · ~$15.00 RPM — on app launch screen</li>
-  </ul>
+    <article class="prose" id="doc-body">
 
-  <h2 id="compatibility">Compatibility</h2>
-  <p><strong>Covers:</strong></p>
-  <ul>
-    <li>React Native — Expo SDK 50+ (managed workflow), bare RN 0.74+</li>
-    <li>Native iOS — Swift 5.5+ / Obj-C, iOS 14+, distributed via CocoaPods and Swift Package Manager</li>
-    <li>Native Android — Kotlin / Java, API 23+ (Android 6.0+), distributed via Maven Central and JitPack</li>
-    <li>Architectures: iOS arm64 + iOS Simulator (arm64 + x86_64), Android arm64-v8a + armeabi-v7a + x86_64</li>
-  </ul>
-  <p><strong>Does not cover (yet):</strong></p>
-  <ul>
-    <li>Flutter — track the issue at our <a href="https://github.com/boostbossai/boostboss/issues">GitHub</a> if you'd like to be notified when it ships</li>
-    <li>Unity — no roadmap; build complexity outweighs current AI-app overlap</li>
-    <li>Cordova / Capacitor / Ionic — use the Browser App SDK in the WebView shell instead, it works there</li>
-    <li>iOS &lt; 14, Android &lt; 6.0 — outside SKAdNetwork / modern attribution support windows</li>
-  </ul>
-  <p style="font-size:13px;color:#9CA3AF;">If your stack isn't listed and you'd like it supported, email <a href="mailto:support@boostboss.ai">support@boostboss.ai</a>. We prioritize SDK additions by publisher request volume.</p>
+    </article>
+  </main>
 
-  <h2 id="uninstall">Uninstall</h2>
-  <pre><code>npx @boostbossai/install-mobile --uninstall</code></pre>
-  <p>The CLI reads <code>.lumi-install-log</code>, reverses every patch (unwraps the <code>LumiProvider</code>, removes from Expo plugins, uninstalls the npm package), deletes the log.</p>
+  <!-- RIGHT TOC (auto-generated) -->
+  <aside class="doc-toc">
+    <div class="doc-toc-l">On this page</div>
+    <nav id="doc-toc-nav"></nav>
+  </aside>
 
-  <h2 id="privacy">Privacy posture</h2>
-  <div class="callout">
-    <strong>App-session scoped · no cross-app tracking · App Store / Play Store compliant.</strong>
-    <p style="margin-top:6px;">Session UUIDs are generated per app launch and discarded on close. No IDFA, no Google Advertising ID, no fingerprinting. Rewarded video is opt-in by user click (Apple guideline 4.5.4 explicit allowlist). No background data collection. Full <a href="/privacy">privacy policy</a>.</p>
-  </div>
-
-  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi for Mobile App v0.1.0 · 2026-06-20</p>
 </div>
+
+<script>
+(function(){
+  // ---- language tabs (per code block) ----
+  document.querySelectorAll('[data-code]').forEach(function(block){
+    var tabs=block.querySelectorAll('.code-tab');
+    var pres=block.querySelectorAll('pre[data-lang]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var lang=tab.dataset.lang;
+        tabs.forEach(function(t){t.classList.toggle('on',t===tab)});
+        pres.forEach(function(p){p.classList.toggle('on',p.dataset.lang===lang)});
+      });
+    });
+    // copy visible code
+    var copyBtn=block.querySelector('[data-copy]');
+    if(copyBtn){
+      copyBtn.addEventListener('click',function(){
+        var pre=block.querySelector('pre.on')||block.querySelector('pre');
+        var txt=pre?pre.innerText:'';
+        var done=function(){var s=copyBtn.querySelector('span');copyBtn.classList.add('copied');if(s)s.textContent='Copied';setTimeout(function(){copyBtn.classList.remove('copied');if(s)s.textContent='Copy'},1600);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,done);}else{done();}
+      });
+    }
+  });
+
+  // ---- slugify + anchor links + auto TOC ----
+  var body=document.getElementById('doc-body');
+  var tocNav=document.getElementById('doc-toc-nav');
+  var heads=body.querySelectorAll('h2, h3');
+  var slugs={};
+  var items=[];
+  heads.forEach(function(h){
+    var base=h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(slugs[base]!=null){slugs[base]++;base=base+'-'+slugs[base];}else{slugs[base]=0;}
+    h.id=base;
+    // anchor link inside heading
+    var a=document.createElement('a');
+    a.href='#'+base;a.className='anchor';a.setAttribute('aria-label','Link to this section');a.innerHTML='#';
+    h.insertBefore(a,h.firstChild);
+    // toc entry
+    var t=document.createElement('a');
+    t.href='#'+base;t.textContent=h.textContent.replace(/^#/,'');
+    if(h.tagName==='H3')t.className='h3';
+    t.dataset.target=base;
+    tocNav.appendChild(t);
+    items.push({id:base,el:h,link:t});
+  });
+
+  // ---- scroll-spy ----
+  function onScroll(){
+    var y=window.scrollY+90,cur=items.length?items[0].id:null;
+    items.forEach(function(it){ if(it.el.offsetTop<=y)cur=it.id; });
+    items.forEach(function(it){ it.link.classList.toggle('on',it.id===cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+</script>
 </body>
 </html>

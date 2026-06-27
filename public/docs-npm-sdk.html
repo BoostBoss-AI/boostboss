@@ -4,81 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumi SDK for browser extensions — Boost Boss Docs</title>
-<meta name="description" content="Lumi SDK for browser extensions, Electron, and Tauri apps. Manifest v3 native, runs in service workers and content scripts. React (LumiSlot, LumiProvider) and Vue (provideLumi, LumiSlot) bindings included.">
-<meta property="og:title" content="Lumi SDK for browser extensions — Boost Boss Docs">
-<meta property="og:url" content="https://boostboss.ai/docs/npm-sdk">
-<link rel="canonical" href="https://boostboss.ai/docs/npm-sdk">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/docs.css">
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
+<link rel="stylesheet" href="/design-system/ui_kits/docs/_docs.css">
 </head>
 <body>
 
-<nav class="docs-nav">
-  <div class="nav-inner">
-    <a class="brand" href="/">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-      <span class="brand-name">Boost Boss</span>
-      <span class="brand-tag">docs</span>
-    </a>
-    <!-- nav-right (Publishers / Advertisers) removed 2026-06-06.
-         Brand-only nav across the docs section. -->
-  </div>
-</nav>
+<!-- TOP BAR -->
+<header class="doc-top">
+  <a class="doc-brand" href="Docs Template.html">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+    <b>Boost Boss</b><span>Docs</span>
+  </a>
+  <div class="doc-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search docs<kbd>⌘K</kbd></div>
+  <nav class="doc-top-links">
+    <a href="#">Dashboard</a>
+    <a href="#">API status</a>
+    <a href="#">Support</a>
+    <a class="doc-top-cta" href="#">Get API keys</a>
+  </nav>
+</header>
 
-<div class="docs-shell">
-  <aside class="docs-sidebar">
-    <div class="side-section">
-      <h6>Getting started</h6>
-      <ul>
-        <li><a href="/docs">Overview</a></li>
-        <li><a href="/docs/quickstart">Quickstart</a></li>
-      </ul>
-    </div>
-    <div class="side-section">
-      <h6>Publisher integration</h6>
-      <ul>
-        <li><a href="/docs/mcp">Lumi SDK for MCP</a></li>
-        <li><a href="/docs/js-snippet">Lumi SDK script tag</a></li>
-        <li><a href="/docs/npm-sdk" class="active">Lumi SDK for browser extensions</a></li>
-        <li><a href="/docs/rest-api">Lumi API for Bots</a></li>
-      </ul>
-    </div>
-    <div class="side-section">
-      <h6>Reference</h6>
-      <ul>
-        <li><a href="/docs/api-reference">API reference</a></li>
-        <li><a href="/docs/reporting">Reporting</a></li>
-        <li><a href="/docs/payouts">Payouts</a></li>
-        
-      </ul>
-    </div>
-      <div class="side-section">
-      <h6>Policies</h6>
-      <ul>
-        <li><a href="/terms">Terms of Service</a></li>
-        <li><a href="/privacy">Privacy Policy</a></li>
-        <li><a href="/refunds">Refund Policy</a></li>
-        <li><a href="/aup">Acceptable Use</a></li>
-        <li><a href="/cookies">Cookie Policy</a></li>
-        <li><a href="/publisher-agreement">Publisher Agreement</a></li>
-        <li><a href="/advertiser-terms">Advertiser Terms</a></li>
-      </ul>
-    </div>
-</aside>
+<div class="doc-shell">
 
-  <main class="docs-main">
-    <div class="breadcrumbs">
-      <a href="/docs">Docs</a><span class="sep">/</span>
-      <span>Lumi SDK for browser extensions</span>
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <div class="doc-sec">
+      <div class="doc-sec-l">Getting started</div>
+      <a href="/docs">Introduction</a>
+      <a href="/docs/quickstart">Quickstart</a>
     </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Integration doors</div>
+      <a href="/docs/browser">Browser app</a>
+      <a href="/docs/browser/react" class="sub">React</a>
+      <a href="/docs/computer">Computer app</a>
+      <a href="/docs/extension">Browser extension</a>
+      <a href="/docs/mobile">Mobile app</a>
+      <a href="/docs/mcp">MCP server</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Protocols</div>
+      <a href="/docs/js-snippet">JS snippet</a>
+      <a href="/docs/npm-sdk" class="on">npm SDK</a>
+      <a href="/docs/rest-api">REST API</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Features</div>
+      <a href="/docs/activation-link">Activation links</a>
+      <a href="/docs/payouts">Payouts</a>
+      <a href="/docs/reporting">Reporting</a>
+      <a href="/docs/product-lifecycle">Product lifecycle</a>
+      <a href="/docs/api-reference">API reference</a>
+    </div>
+  </aside>
 
-    <h1>Lumi SDK for browser extensions</h1>
-    <p class="lede">For Chrome / Edge / Firefox extensions, Electron apps, Tauri apps, and any environment where the Lumi SDK script tag doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>) and Vue (<code>provideLumi</code> + <code>&lt;LumiSlot /&gt;</code>) bindings included.</p>
+  <!-- MAIN -->
+  <main class="doc-main">
+    <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Protocols</span><span class="sep">/</span><span style="color:var(--doc-soft)">npm SDK</span></div>
+    <h1 class="doc-h1">Lumi SDK for browser extensions</h1>
+    <p class="doc-sub">For Chrome / Edge / Firefox extensions, Electron apps, Tauri apps, and any environment where the Lumi SDK script tag doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>) and Vue (<code>provideLumi</code> + <code>&lt;LumiSlot /&gt;</code>) bindings included.</p>
+    <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
 
-    <div class="callout info">
+    <article class="prose" id="doc-body">
+<div class="callout info">
       <strong>v1.2.0 — beta.</strong>
       <p><code>@boostbossai/lumi-sdk@1.2.0</code> — <code>npm install @boostbossai/lumi-sdk</code>. Three entry points: <code>@boostbossai/lumi-sdk</code> (vanilla <code>Lumi</code> class), <code>@boostbossai/lumi-sdk/react</code> (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>), <code>@boostbossai/lumi-sdk/vue</code> (<code>&lt;LumiSlot /&gt;</code> + <code>provideLumi</code>). Manifest v3 compliant — zero <code>eval</code>, zero remote code execution. Sandbox flow works without signup using <code>publisherId: "pub_test_demo"</code>. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
@@ -168,7 +157,74 @@ lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>, {
         <div class="nav-title">REST API</div>
       </a>
     </div>
+    </article>
   </main>
+
+  <!-- RIGHT TOC (auto-generated) -->
+  <aside class="doc-toc">
+    <div class="doc-toc-l">On this page</div>
+    <nav id="doc-toc-nav"></nav>
+  </aside>
+
 </div>
+
+<script>
+(function(){
+  // ---- language tabs (per code block) ----
+  document.querySelectorAll('[data-code]').forEach(function(block){
+    var tabs=block.querySelectorAll('.code-tab');
+    var pres=block.querySelectorAll('pre[data-lang]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var lang=tab.dataset.lang;
+        tabs.forEach(function(t){t.classList.toggle('on',t===tab)});
+        pres.forEach(function(p){p.classList.toggle('on',p.dataset.lang===lang)});
+      });
+    });
+    // copy visible code
+    var copyBtn=block.querySelector('[data-copy]');
+    if(copyBtn){
+      copyBtn.addEventListener('click',function(){
+        var pre=block.querySelector('pre.on')||block.querySelector('pre');
+        var txt=pre?pre.innerText:'';
+        var done=function(){var s=copyBtn.querySelector('span');copyBtn.classList.add('copied');if(s)s.textContent='Copied';setTimeout(function(){copyBtn.classList.remove('copied');if(s)s.textContent='Copy'},1600);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,done);}else{done();}
+      });
+    }
+  });
+
+  // ---- slugify + anchor links + auto TOC ----
+  var body=document.getElementById('doc-body');
+  var tocNav=document.getElementById('doc-toc-nav');
+  var heads=body.querySelectorAll('h2, h3');
+  var slugs={};
+  var items=[];
+  heads.forEach(function(h){
+    var base=h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(slugs[base]!=null){slugs[base]++;base=base+'-'+slugs[base];}else{slugs[base]=0;}
+    h.id=base;
+    // anchor link inside heading
+    var a=document.createElement('a');
+    a.href='#'+base;a.className='anchor';a.setAttribute('aria-label','Link to this section');a.innerHTML='#';
+    h.insertBefore(a,h.firstChild);
+    // toc entry
+    var t=document.createElement('a');
+    t.href='#'+base;t.textContent=h.textContent.replace(/^#/,'');
+    if(h.tagName==='H3')t.className='h3';
+    t.dataset.target=base;
+    tocNav.appendChild(t);
+    items.push({id:base,el:h,link:t});
+  });
+
+  // ---- scroll-spy ----
+  function onScroll(){
+    var y=window.scrollY+90,cur=items.length?items[0].id:null;
+    items.forEach(function(it){ if(it.el.offsetTop<=y)cur=it.id; });
+    items.forEach(function(it){ it.link.classList.toggle('on',it.id===cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+</script>
 </body>
 </html>

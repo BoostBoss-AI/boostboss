@@ -3,118 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumi for Browser App · React wrapper — Boost Boss</title>
-<meta name="description" content="A 12-line React component that mounts the Lumi script tag. Optional — the bare script tag works in React without it.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: #0F0F1A; line-height: 1.65; font-size: 16px;
-    background:
-      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%),
-      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.06), transparent 60%),
-      #FAFAF7;
-    min-height: 100vh;
-  }
-  a { color: #FF2D78; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
-  h1, h2 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
-  h1 { font-size: 32px; margin-bottom: 12px; }
-  h2 { font-size: 22px; margin-top: 36px; margin-bottom: 10px; }
-  p { margin: 10px 0; color: #4B5563; }
-  code {
-    font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
-    font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px;
-  }
-  pre {
-    font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
-    background: #0F0F1A; color: #E5E7EB;
-    padding: 18px 20px; border-radius: 10px; overflow-x: auto;
-    margin: 14px 0; font-size: 14px; line-height: 1.6;
-  }
-  pre code { background: transparent; padding: 0; color: inherit; }
-  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; }
-  .nav a { color: #6B7280; }
-  .pill {
-    display: inline-block; background: #FFE6F0; color: #E01E65;
-    padding: 4px 10px; border-radius: 100px; font-size: 11px;
-    font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-  .callout {
-    background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #04BEFE;
-    padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px;
-  }
-</style>
+<title>Lumi for Browser App · React wrapper — Boost Boss · Boost Boss Docs</title>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
+<link rel="stylesheet" href="/design-system/ui_kits/docs/_docs.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="nav"><a href="/docs/browser">← Lumi for Browser App docs</a></div>
-  <span class="pill">React / Next.js</span>
-  <h1>React wrapper for Lumi</h1>
-  <p>The bare <code>&lt;script&gt;</code> tag from the <a href="/docs/browser">main install doc</a> works fine in React, Next.js, and every other framework — paste it into <code>index.html</code> or <code>app/layout.tsx</code>. <strong>This wrapper is optional.</strong></p>
 
-  <div class="callout">
-    <strong>Why we don't ship this as an npm package.</strong>
-    <p style="margin-top:6px;">Two install paths means two ways to fail, two sets of docs, and two FAQs. We chose <em>one obvious way</em>. If you'd rather wrap the script tag in a component, copy the 12 lines below into your project. We don't ship or version an npm package — you control the wrapper.</p>
-  </div>
+<!-- TOP BAR -->
+<header class="doc-top">
+  <a class="doc-brand" href="Docs Template.html">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+    <b>Boost Boss</b><span>Docs</span>
+  </a>
+  <div class="doc-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search docs<kbd>⌘K</kbd></div>
+  <nav class="doc-top-links">
+    <a href="#">Dashboard</a>
+    <a href="#">API status</a>
+    <a href="#">Support</a>
+    <a class="doc-top-cta" href="#">Get API keys</a>
+  </nav>
+</header>
 
-  <h2>The wrapper</h2>
-  <p>Copy this into <code>components/LumiScript.tsx</code> (TypeScript) or <code>components/LumiScript.jsx</code> (plain JS):</p>
-  <pre><code>// components/LumiScript.tsx
-import { useEffect } from 'react';
+<div class="doc-shell">
 
-export function LumiScript({ publisherId }: { publisherId: string }) {
-  useEffect(() =&gt; {
-    if (document.querySelector('script[data-lumi]')) return;
-    const s = document.createElement('script');
-    s.src = `https://boostboss.ai/lumi/v1.js#${publisherId}`;
-    s.async = true;
-    s.setAttribute('data-lumi', 'browser-app');
-    document.head.appendChild(s);
-  }, [publisherId]);
-  return null;
-}</code></pre>
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <div class="doc-sec">
+      <div class="doc-sec-l">Getting started</div>
+      <a href="/docs">Introduction</a>
+      <a href="/docs/quickstart">Quickstart</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Integration doors</div>
+      <a href="/docs/browser">Browser app</a>
+      <a href="/docs/browser/react" class="sub on">React</a>
+      <a href="/docs/computer">Computer app</a>
+      <a href="/docs/extension">Browser extension</a>
+      <a href="/docs/mobile">Mobile app</a>
+      <a href="/docs/mcp">MCP server</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Protocols</div>
+      <a href="/docs/js-snippet">JS snippet</a>
+      <a href="/docs/npm-sdk">npm SDK</a>
+      <a href="/docs/rest-api">REST API</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Features</div>
+      <a href="/docs/activation-link">Activation links</a>
+      <a href="/docs/payouts">Payouts</a>
+      <a href="/docs/reporting">Reporting</a>
+      <a href="/docs/product-lifecycle">Product lifecycle</a>
+      <a href="/docs/api-reference">API reference</a>
+    </div>
+  </aside>
 
-  <h2>Use it</h2>
-  <p>Mount it once at your app root — the layout component for App Router, <code>_app.tsx</code> for Pages Router, or the root of your component tree for SPA setups:</p>
-  <pre><code>// app/layout.tsx (Next.js App Router)
-import { LumiScript } from '@/components/LumiScript';
+  <!-- MAIN -->
+  <main class="doc-main">
+    <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Integration doors</span><span class="sep">/</span><span style="color:var(--doc-soft)">React</span></div>
+    <h1 class="doc-h1">React</h1>
+    <p class="doc-sub"></p>
+    <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
 
-export default function RootLayout({ children }) {
-  return (
-    &lt;html lang="en"&gt;
-      &lt;body&gt;
-        &lt;LumiScript publisherId={process.env.NEXT_PUBLIC_LUMI_ID!} /&gt;
-        {children}
-      &lt;/body&gt;
-    &lt;/html&gt;
-  );
-}</code></pre>
+    <article class="prose" id="doc-body">
 
-  <h2>Notes</h2>
-  <ul style="padding-left:22px;color:#4B5563;">
-    <li><strong>Guard against double-mount.</strong> The <code>data-lumi</code> attribute check prevents Next.js Strict Mode from injecting the script twice during dev. In production this is a no-op.</li>
-    <li><strong>Pass the publisher ID via env var.</strong> Use <code>NEXT_PUBLIC_LUMI_ID</code> (Next.js), <code>VITE_LUMI_ID</code> (Vite), or your framework's public-env convention. Don't hardcode it into the component.</li>
-    <li><strong>Privacy posture unchanged.</strong> The wrapper imposes no extra data collection — it just mounts the same script tag the main doc shows. See <a href="/privacy#ads">privacy policy</a>.</li>
-    <li><strong>You own this wrapper.</strong> If Lumi ships a v2 with new options, you decide when to update it. We don't push npm version bumps that surprise you.</li>
-  </ul>
+    </article>
+  </main>
 
-  <h2>What about Server Components?</h2>
-  <p>The wrapper above is a Client Component (it uses <code>useEffect</code>). That's intentional — the script tag must mount on the client to access <code>window</code> and <code>document</code>. If you're in a Server Component context, render the script tag directly via Next.js's <code>&lt;Script&gt;</code> component:</p>
-  <pre><code>import Script from 'next/script';
+  <!-- RIGHT TOC (auto-generated) -->
+  <aside class="doc-toc">
+    <div class="doc-toc-l">On this page</div>
+    <nav id="doc-toc-nav"></nav>
+  </aside>
 
-&lt;Script
-  src={`https://boostboss.ai/lumi/v1.js#${process.env.NEXT_PUBLIC_LUMI_ID}`}
-  strategy="afterInteractive"
-/&gt;</code></pre>
-
-  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi v0.1.0 · 2026-06-20</p>
 </div>
+
+<script>
+(function(){
+  // ---- language tabs (per code block) ----
+  document.querySelectorAll('[data-code]').forEach(function(block){
+    var tabs=block.querySelectorAll('.code-tab');
+    var pres=block.querySelectorAll('pre[data-lang]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var lang=tab.dataset.lang;
+        tabs.forEach(function(t){t.classList.toggle('on',t===tab)});
+        pres.forEach(function(p){p.classList.toggle('on',p.dataset.lang===lang)});
+      });
+    });
+    // copy visible code
+    var copyBtn=block.querySelector('[data-copy]');
+    if(copyBtn){
+      copyBtn.addEventListener('click',function(){
+        var pre=block.querySelector('pre.on')||block.querySelector('pre');
+        var txt=pre?pre.innerText:'';
+        var done=function(){var s=copyBtn.querySelector('span');copyBtn.classList.add('copied');if(s)s.textContent='Copied';setTimeout(function(){copyBtn.classList.remove('copied');if(s)s.textContent='Copy'},1600);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,done);}else{done();}
+      });
+    }
+  });
+
+  // ---- slugify + anchor links + auto TOC ----
+  var body=document.getElementById('doc-body');
+  var tocNav=document.getElementById('doc-toc-nav');
+  var heads=body.querySelectorAll('h2, h3');
+  var slugs={};
+  var items=[];
+  heads.forEach(function(h){
+    var base=h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(slugs[base]!=null){slugs[base]++;base=base+'-'+slugs[base];}else{slugs[base]=0;}
+    h.id=base;
+    // anchor link inside heading
+    var a=document.createElement('a');
+    a.href='#'+base;a.className='anchor';a.setAttribute('aria-label','Link to this section');a.innerHTML='#';
+    h.insertBefore(a,h.firstChild);
+    // toc entry
+    var t=document.createElement('a');
+    t.href='#'+base;t.textContent=h.textContent.replace(/^#/,'');
+    if(h.tagName==='H3')t.className='h3';
+    t.dataset.target=base;
+    tocNav.appendChild(t);
+    items.push({id:base,el:h,link:t});
+  });
+
+  // ---- scroll-spy ----
+  function onScroll(){
+    var y=window.scrollY+90,cur=items.length?items[0].id:null;
+    items.forEach(function(it){ if(it.el.offsetTop<=y)cur=it.id; });
+    items.forEach(function(it){ it.link.classList.toggle('on',it.id===cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+</script>
 </body>
 </html>

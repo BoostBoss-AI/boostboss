@@ -4,89 +4,138 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumi for Browser Extension App · Docs — Boost Boss</title>
-<meta name="description" content="One terminal command. 8 placements. Boost Boss's runtime for Chrome / Edge / Brave / Opera Manifest V3 extensions.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, sans-serif; color: #0F0F1A; line-height: 1.65; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 176, 32, 0.06), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(255, 230, 0, 0.06), transparent 60%), #FAFAF7; min-height: 100vh; }
-  a { color: #FF2D78; text-decoration: none; } a:hover { text-decoration: underline; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
-  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
-  h1 { font-size: 36px; margin-bottom: 12px; } h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; } h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
-  p { margin: 10px 0; color: #4B5563; }
-  code { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
-  pre { font-family: 'JetBrains Mono', monospace; background: #0F0F1A; color: #E5E7EB; padding: 18px 20px; border-radius: 10px; overflow-x: auto; margin: 14px 0; font-size: 14px; line-height: 1.6; }
-  pre code { background: transparent; padding: 0; color: inherit; }
-  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; } .nav a { color: #6B7280; }
-  .pill { display: inline-block; background: #FEF3C7; color: #B45309; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
-  ul { padding-left: 22px; color: #4B5563; } ul li { margin: 5px 0; }
-  .callout { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #FFB020; padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px; } .callout strong { color: #0F0F1A; }
-</style>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
+<link rel="stylesheet" href="/design-system/ui_kits/docs/_docs.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="nav"><a href="/docs">← Docs</a></div>
-  <span class="pill">Lumi for Browser Extension App</span>
-  <h1>One terminal command. 8 placements.</h1>
-  <p>For Chrome / Edge / Brave / Opera browser extensions (Manifest V3). The install CLI patches your <code>manifest.json</code>, drops the SDK into your service worker, and wires popup + side panel + new-tab pages where they exist.</p>
 
-  <h2 id="install">Install</h2>
-  <p>From your extension's project root:</p>
-  <pre><code>npx @boostbossai/install-extension YOUR_PUBLISHER_ID</code></pre>
-  <p>What the CLI does:</p>
-  <ul>
-    <li>Runs <code>npm install @boostbossai/lumi-extension</code></li>
-    <li>Adds <code>"storage"</code> to your <code>permissions</code></li>
-    <li>Adds <code>"https://boostboss.ai/*"</code> to your <code>host_permissions</code></li>
-    <li>Prepends a 3-line init block to your background service worker</li>
-    <li>Adds a <code>&lt;script&gt;</code> tag to your <code>popup.html</code> / <code>sidepanel.html</code> / <code>newtab.html</code> if those exist</li>
-    <li>Writes a <code>.lumi-install-log</code> recording every change for symmetric uninstall</li>
-  </ul>
-  <p>Reload your extension in <code>chrome://extensions</code>. The <strong>Browser Extension</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 60 seconds.</p>
+<!-- TOP BAR -->
+<header class="doc-top">
+  <a class="doc-brand" href="Docs Template.html">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+    <b>Boost Boss</b><span>Docs</span>
+  </a>
+  <div class="doc-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search docs<kbd>⌘K</kbd></div>
+  <nav class="doc-top-links">
+    <a href="#">Dashboard</a>
+    <a href="#">API status</a>
+    <a href="#">Support</a>
+    <a class="doc-top-cta" href="#">Get API keys</a>
+  </nav>
+</header>
 
-  <h2 id="what">8 placements auto-enable</h2>
-  <ul>
-    <li><strong>Sponsored citation</strong> · ~$4.50 RPM</li>
-    <li><strong>Suggested chip</strong> · ~$4.50 RPM</li>
-    <li><strong>Inline sponsored card</strong> · ~$6.50 RPM</li>
-    <li><strong>Loading-state ad</strong> · ~$7.00 RPM</li>
-    <li><strong>Popup card</strong> · ~$7.50 RPM — sponsored card inside your toolbar popup</li>
-    <li><strong>Side panel slot</strong> · ~$8.00 RPM — sponsored card in Chrome's side panel API</li>
-    <li><strong>New-tab takeover</strong> · ~$16.00 RPM — hero unit if you override <code>chrome://newtab</code></li>
-    <li><strong>Install onboarding</strong> · ~$9.00 RPM — sponsor card during post-install flow</li>
-  </ul>
+<div class="doc-shell">
 
-  <h2 id="manifest">Manifest V3 only</h2>
-  <p>The Chrome Web Store has been Manifest V3-only since 2024. If your extension is still on V2, migrate first (<a href="https://developer.chrome.com/docs/extensions/migrating/">Chrome's guide</a>) and re-run the installer. The CLI errors out on V2 with a link to the migration guide.</p>
-  <p>The runtime is bundled into your extension's <code>node_modules/@boostbossai/lumi-extension/dist/</code> at install time — no remote code loading, no <code>eval</code>, fully Manifest V3 compliant.</p>
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <div class="doc-sec">
+      <div class="doc-sec-l">Getting started</div>
+      <a href="/docs">Introduction</a>
+      <a href="/docs/quickstart">Quickstart</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Integration doors</div>
+      <a href="/docs/browser">Browser app</a>
+      <a href="/docs/browser/react" class="sub">React</a>
+      <a href="/docs/computer">Computer app</a>
+      <a href="/docs/extension" class="on">Browser extension</a>
+      <a href="/docs/mobile">Mobile app</a>
+      <a href="/docs/mcp">MCP server</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Protocols</div>
+      <a href="/docs/js-snippet">JS snippet</a>
+      <a href="/docs/npm-sdk">npm SDK</a>
+      <a href="/docs/rest-api">REST API</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Features</div>
+      <a href="/docs/activation-link">Activation links</a>
+      <a href="/docs/payouts">Payouts</a>
+      <a href="/docs/reporting">Reporting</a>
+      <a href="/docs/product-lifecycle">Product lifecycle</a>
+      <a href="/docs/api-reference">API reference</a>
+    </div>
+  </aside>
 
-  <h2 id="compatibility">Compatibility</h2>
-  <p><strong>Covers:</strong></p>
-  <ul>
-    <li>Chrome — Manifest V3, the Chrome Web Store's only supported manifest since 2024</li>
-    <li>Edge, Brave, Opera, Arc, Vivaldi — Chromium-based browsers that share Chrome's MV3 extension format</li>
-    <li>Popup, side panel, new-tab override, content scripts, service workers</li>
-  </ul>
-  <p><strong>Does not cover:</strong></p>
-  <ul>
-    <li>Firefox WebExtensions — Mozilla maintains a different manifest format (MV2 + their own MV3 dialect); no Lumi port planned</li>
-    <li>Safari Web Extensions — require App Store distribution + native Xcode wrapper; not on roadmap</li>
-    <li>Manifest V2 extensions — migrate to V3 first (<a href="https://developer.chrome.com/docs/extensions/migrating/">Chrome's guide</a>) and re-run the installer</li>
-  </ul>
-  <p style="font-size:13px;color:#9CA3AF;">Chrome MV3 covers ~95% of extension installs in the AI / productivity / developer-tool categories that Boost Boss serves. If your distribution depends on Firefox or Safari, ship Chrome first and we'll fund a port if the impression volume justifies it.</p>
+  <!-- MAIN -->
+  <main class="doc-main">
+    <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Integration doors</span><span class="sep">/</span><span style="color:var(--doc-soft)">Browser extension</span></div>
+    <h1 class="doc-h1">Browser extension</h1>
+    <p class="doc-sub"></p>
+    <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
 
-  <h2 id="uninstall">Uninstall</h2>
-  <pre><code>npx @boostbossai/install-extension --uninstall</code></pre>
-  <p>The CLI reads <code>.lumi-install-log</code>, reverses every patch (manifest, service worker, HTML files), uninstalls the npm package, deletes the log. Your extension is back to its pre-install state.</p>
+    <article class="prose" id="doc-body">
 
-  <h2 id="privacy">Privacy posture</h2>
-  <div class="callout">
-    <strong>Active-tab content only · session-storage scoped to your extension.</strong>
-    <p style="margin-top:6px;">The runtime reads the URL of the active tab plus your extension's own UI surfaces (popup / sidepanel / newtab). Nothing is read from other tabs unless you've granted the extension cross-tab permissions yourself. Session UUIDs are stored in <code>chrome.storage.session</code> (auto-cleared on browser restart). No <code>localStorage</code>, no cookies, no cross-site tracking.</p>
-  </div>
+    </article>
+  </main>
 
-  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi for Browser Extension App v0.1.0 · 2026-06-20</p>
+  <!-- RIGHT TOC (auto-generated) -->
+  <aside class="doc-toc">
+    <div class="doc-toc-l">On this page</div>
+    <nav id="doc-toc-nav"></nav>
+  </aside>
+
 </div>
+
+<script>
+(function(){
+  // ---- language tabs (per code block) ----
+  document.querySelectorAll('[data-code]').forEach(function(block){
+    var tabs=block.querySelectorAll('.code-tab');
+    var pres=block.querySelectorAll('pre[data-lang]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var lang=tab.dataset.lang;
+        tabs.forEach(function(t){t.classList.toggle('on',t===tab)});
+        pres.forEach(function(p){p.classList.toggle('on',p.dataset.lang===lang)});
+      });
+    });
+    // copy visible code
+    var copyBtn=block.querySelector('[data-copy]');
+    if(copyBtn){
+      copyBtn.addEventListener('click',function(){
+        var pre=block.querySelector('pre.on')||block.querySelector('pre');
+        var txt=pre?pre.innerText:'';
+        var done=function(){var s=copyBtn.querySelector('span');copyBtn.classList.add('copied');if(s)s.textContent='Copied';setTimeout(function(){copyBtn.classList.remove('copied');if(s)s.textContent='Copy'},1600);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,done);}else{done();}
+      });
+    }
+  });
+
+  // ---- slugify + anchor links + auto TOC ----
+  var body=document.getElementById('doc-body');
+  var tocNav=document.getElementById('doc-toc-nav');
+  var heads=body.querySelectorAll('h2, h3');
+  var slugs={};
+  var items=[];
+  heads.forEach(function(h){
+    var base=h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(slugs[base]!=null){slugs[base]++;base=base+'-'+slugs[base];}else{slugs[base]=0;}
+    h.id=base;
+    // anchor link inside heading
+    var a=document.createElement('a');
+    a.href='#'+base;a.className='anchor';a.setAttribute('aria-label','Link to this section');a.innerHTML='#';
+    h.insertBefore(a,h.firstChild);
+    // toc entry
+    var t=document.createElement('a');
+    t.href='#'+base;t.textContent=h.textContent.replace(/^#/,'');
+    if(h.tagName==='H3')t.className='h3';
+    t.dataset.target=base;
+    tocNav.appendChild(t);
+    items.push({id:base,el:h,link:t});
+  });
+
+  // ---- scroll-spy ----
+  function onScroll(){
+    var y=window.scrollY+90,cur=items.length?items[0].id:null;
+    items.forEach(function(it){ if(it.el.offsetTop<=y)cur=it.id; });
+    items.forEach(function(it){ it.link.classList.toggle('on',it.id===cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+</script>
 </body>
 </html>

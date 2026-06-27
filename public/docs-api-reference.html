@@ -4,395 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boost Boss Docs — API reference</title>
-<meta name="description" content="The full Boost Boss API reference. Publisher, advertiser, seller, and affiliate endpoints with real paths, auth model, and response shapes.">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Boost Boss Docs — API reference">
-<meta name="twitter:description" content="API reference for publishers, advertisers, sellers, and affiliates.">
-<link rel="canonical" href="https://boostboss.ai/docs/api-reference">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --pink: #FF2D78; --pink-dark: #E01E65;
-    --cyan: #04BEFE; --yellow: #FFE600;
-    --ink: #1A1A2E; --ink-soft: #4B4B5E;
-    --muted: #6B7280; --line: #EAEAEF;
-    --bg: #FFFFFF; --bg-soft: #FAFAF7;
-    --code-bg: #1A1A2E;
-  }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: var(--bg); color: var(--ink);
-    line-height: 1.6; -webkit-font-smoothing: antialiased; font-size: 15px;
-  }
-  a { color: inherit; text-decoration: none; }
-  img, svg { display: block; max-width: 100%; }
-  h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
-  code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
-
-  nav.top {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--line);
-  }
-  .nav-inner {
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
-  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
-  .brand-sub {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 12px; font-weight: 600; color: var(--ink);
-    padding: 3px 8px; border-radius: 6px; background: var(--yellow);
-    margin-left: 4px; letter-spacing: 0.3px;
-  }
-
-  .docs-layout {
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: 256px 1fr;
-    gap: 0; padding: 0 24px;
-  }
-  aside.sidebar {
-    position: sticky; top: 64px;
-    align-self: start;
-    height: calc(100vh - 64px);
-    overflow-y: auto;
-    padding: 32px 0 48px;
-  }
-  .side-group { margin-bottom: 28px; }
-  .side-group h5 {
-    font-family: 'Inter', sans-serif;
-    font-size: 11px; font-weight: 700;
-    color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 10px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .side-group h5 .chip {
-    display: inline-flex; width: 6px; height: 6px; border-radius: 50%;
-  }
-  .side-group h5 .chip.pink { background: var(--pink); }
-  .side-group h5 .chip.cyan { background: var(--cyan); }
-  .side-group h5 .chip.yellow { background: var(--yellow); }
-  .side-group h5 .chip.ink { background: var(--ink); }
-  .side-group h5 .chip.green { background: #10B981; }
-  .side-links { list-style: none; }
-  .side-links li a {
-    display: block; padding: 6px 10px;
-    font-size: 13.5px; color: var(--ink-soft);
-    border-radius: 6px; margin-bottom: 1px;
-    border-left: 2px solid transparent;
-    transition: all 0.1s;
-  }
-  .side-links li a:hover { background: var(--bg-soft); color: var(--ink); }
-  .side-links li a.active {
-    color: var(--ink); font-weight: 600;
-    border-left-color: var(--pink);
-    background: #FFE6EE;
-  }
-  .method-tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9.5px; font-weight: 700;
-    padding: 1px 5px; border-radius: 3px;
-    margin-right: 6px; letter-spacing: 0.3px;
-  }
-  .method-tag.get { background: #D6F5FE; color: #0195CC; }
-  .method-tag.post { background: #D1FADF; color: #027A48; }
-  .method-tag.patch { background: #FFF3D6; color: #8A6A00; }
-  .method-tag.del { background: #FFE6EE; color: var(--pink); }
-
-  main.content {
-    padding: 48px 56px 100px;
-    max-width: 892px;
-    min-width: 0;
-  }
-  .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
-  .crumbs a { color: var(--ink-soft); }
-  .crumbs a:hover { color: var(--pink); }
-  main h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 14px; }
-  main h2 { font-size: 26px; font-weight: 700; margin: 56px 0 16px; padding-top: 16px; border-top: 1px solid var(--line); letter-spacing: -0.02em; }
-  main h2:first-of-type { border-top: none; padding-top: 0; margin-top: 48px; }
-  main h3 { font-size: 19px; font-weight: 700; margin: 32px 0 10px; letter-spacing: -0.01em; }
-  main h4 { font-size: 15px; font-weight: 700; margin: 24px 0 8px; }
-  main p { font-size: 15px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.65; }
-  main p code, main li code { background: var(--bg-soft); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; font-size: 13px; color: var(--pink); }
-  main a.inline-link { color: var(--pink); font-weight: 500; border-bottom: 1px dashed var(--pink); }
-  main a.inline-link:hover { background: #FFE6EE; }
-  main ul { margin-bottom: 16px; padding-left: 22px; }
-  main ul li { font-size: 15px; color: var(--ink-soft); margin-bottom: 6px; line-height: 1.6; }
-  main strong { color: var(--ink); }
-
-  .docs-hero {
-    background: var(--bg-soft);
-    border: 1.5px solid var(--ink); border-radius: 16px;
-    padding: 28px 32px; margin-bottom: 48px;
-    box-shadow: 6px 6px 0 var(--ink);
-    position: relative; overflow: hidden;
-  }
-  .docs-hero h1 { font-size: 32px; margin-bottom: 8px; }
-  .docs-hero p { font-size: 16px; color: var(--ink-soft); margin-bottom: 0; }
-  .docs-hero .deco { position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; opacity: 0.9; }
-
-  .code-block {
-    background: var(--code-bg); color: #E5E7EB;
-    border-radius: 10px; padding: 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; line-height: 1.75;
-    overflow-x: auto; margin: 14px 0 18px;
-    border: 1px solid var(--ink);
-  }
-  .code-block.with-head { padding: 0; overflow: hidden; }
-  .code-head {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 16px; background: #111122;
-    border-bottom: 1px solid #2A2A3E;
-    font-size: 11px; color: #A0A0B0;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .code-head .lang { font-weight: 600; color: #fff; }
-  .code-head .copy {
-    color: var(--cyan); cursor: pointer; font-weight: 500;
-    padding: 2px 8px; border-radius: 4px; transition: background 0.1s;
-  }
-  .code-head .copy:hover { background: rgba(4,190,254,0.15); }
-  .code-block pre {
-    padding: 16px 20px; font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; line-height: 1.75; white-space: pre;
-  }
-  .k { color: var(--pink); }
-  .s { color: var(--yellow); }
-  .c { color: #6B7280; font-style: italic; }
-  .f { color: var(--cyan); }
-  .n { color: #F9FAFB; }
-  .b { color: #A78BFA; }
-
-  .endpoint {
-    border: 1.5px solid var(--ink); border-radius: 10px;
-    padding: 14px 16px; margin-bottom: 14px;
-    background: #fff;
-    display: flex; align-items: center; gap: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    flex-wrap: wrap;
-  }
-  .endpoint .method {
-    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
-    letter-spacing: 0.3px; flex-shrink: 0;
-  }
-  .endpoint .method.post { background: #D1FADF; color: #027A48; }
-  .endpoint .method.get { background: #D6F5FE; color: #0195CC; }
-  .endpoint .method.patch { background: #FFF3D6; color: #8A6A00; }
-  .endpoint .method.del { background: #FFE6EE; color: var(--pink); }
-  .endpoint .path { font-size: 14px; color: var(--ink); font-weight: 600; }
-  .endpoint .desc { margin-left: auto; font-size: 12.5px; color: var(--muted); font-family: 'Inter', sans-serif; }
-
-  .params {
-    width: 100%; border-collapse: separate; border-spacing: 0;
-    margin: 14px 0 20px;
-    border: 1px solid var(--line); border-radius: 10px;
-    overflow: hidden; font-size: 14px;
-  }
-  .params thead { background: var(--bg-soft); }
-  .params th {
-    text-align: left; padding: 10px 14px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 12px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    color: var(--muted); border-bottom: 1px solid var(--line);
-  }
-  .params td { padding: 12px 14px; vertical-align: top; border-bottom: 1px solid var(--line); font-size: 13.5px; }
-  .params tbody tr:last-child td { border-bottom: none; }
-  .params td.param-name { font-family: 'JetBrains Mono', monospace; color: var(--ink); font-weight: 600; }
-  .params td.param-type { color: var(--pink); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
-  .params td.param-desc { color: var(--ink-soft); }
-  .params .required { display: inline-block; font-size: 10px; font-weight: 700; background: var(--pink); color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
-
-  .callout {
-    display: flex; gap: 14px;
-    padding: 14px 18px; border-radius: 10px;
-    margin: 16px 0;
-    font-size: 14px; color: var(--ink-soft);
-    border: 1.5px solid;
-  }
-  .callout .icon {
-    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700;
-  }
-  .callout.info { background: #F0FBFF; border-color: var(--cyan); }
-  .callout.info .icon { background: var(--cyan); color: var(--ink); }
-  .callout.warn { background: #FFFBEB; border-color: var(--yellow); }
-  .callout.warn .icon { background: var(--yellow); color: var(--ink); }
-  .callout.tip { background: #FFE6EE; border-color: var(--pink); }
-  .callout.tip .icon { background: var(--pink); color: #fff; }
-
-  .role-pill {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 3px 9px; border-radius: 999px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    border: 1px solid;
-    margin-right: 6px;
-    vertical-align: 2px;
-  }
-  .role-pill.pub { background: #E6F8FF; border-color: var(--cyan); color: #0195CC; }
-  .role-pill.adv { background: #FFE6EE; border-color: var(--pink); color: var(--pink); }
-  .role-pill.sel { background: #FFF3D6; border-color: #D9A800; color: #856100; }
-  .role-pill.aff { background: #DCFCE7; border-color: #10B981; color: #027A48; }
-
-  .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 22px 0 28px; }
-  @media (max-width: 700px) { .role-grid { grid-template-columns: 1fr; } }
-  .role-jump {
-    display: block; padding: 16px 18px;
-    border: 1px solid var(--line); border-left: 4px solid var(--pink);
-    border-radius: 10px; background: #fff;
-    transition: all 0.15s ease;
-  }
-  .role-jump:hover { border-color: var(--ink); transform: translateY(-1px); }
-  .role-jump.pub { border-left-color: var(--cyan); }
-  .role-jump.adv { border-left-color: var(--pink); }
-  .role-jump.sel { border-left-color: #D9A800; }
-  .role-jump.aff { border-left-color: #10B981; }
-  .role-jump h3 { font-size: 15px; margin: 0 0 4px; }
-  .role-jump p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
-
-  .foot-nav {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-    margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line);
-  }
-  .foot-nav a { padding: 16px 20px; border: 1.5px solid var(--line); border-radius: 10px; transition: all 0.15s; }
-  .foot-nav a:hover { border-color: var(--ink); transform: translateY(-2px); }
-  .foot-nav .dir { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
-  .foot-nav .ttl { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
-  .foot-nav a.next { text-align: right; }
-
-  .back-top {
-    position: fixed; bottom: 28px; right: 28px; z-index: 80;
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--ink); color: #fff; border: none; cursor: pointer;
-    display: none; align-items: center; justify-content: center;
-    font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    transition: all 0.2s;
-  }
-  .back-top.visible { display: flex; }
-  .back-top:hover { background: var(--pink); transform: translateY(-2px); }
-
-  @media (max-width: 1100px) { .docs-layout { grid-template-columns: 240px 1fr; } }
-  @media (max-width: 768px) {
-    .docs-layout { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
-    aside.sidebar {
-      position: static; height: auto; overflow: visible;
-      padding: 24px 0 8px;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 24px;
-    }
-    main.content { padding: 24px 0 60px; }
-  }
-</style>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
+<link rel="stylesheet" href="/design-system/ui_kits/docs/_docs.css">
 </head>
 <body>
 
-<nav class="top">
-  <div class="nav-inner">
-    <a class="brand" href="/docs">
-      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-      <span class="brand-name">Boost Boss</span>
-      <span class="brand-sub">API</span>
-    </a>
-  </div>
-</nav>
+<!-- TOP BAR -->
+<header class="doc-top">
+  <a class="doc-brand" href="Docs Template.html">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+    <b>Boost Boss</b><span>Docs</span>
+  </a>
+  <div class="doc-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search docs<kbd>⌘K</kbd></div>
+  <nav class="doc-top-links">
+    <a href="#">Dashboard</a>
+    <a href="#">API status</a>
+    <a href="#">Support</a>
+    <a class="doc-top-cta" href="#">Get API keys</a>
+  </nav>
+</header>
 
-<div class="docs-layout">
+<div class="doc-shell">
 
-  <aside class="sidebar">
-    <div class="side-group">
-      <h5><span class="chip ink"></span>Getting started</h5>
-      <ul class="side-links">
-        <li><a href="#introduction" class="active">Introduction</a></li>
-        <li><a href="#auth">Authentication</a></li>
-        <li><a href="#environments">Environments</a></li>
-        <li><a href="#common-patterns">Common patterns</a></li>
-      </ul>
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <div class="doc-sec">
+      <div class="doc-sec-l">Getting started</div>
+      <a href="/docs">Introduction</a>
+      <a href="/docs/quickstart">Quickstart</a>
     </div>
-    <div class="side-group">
-      <h5><span class="chip cyan"></span>Publisher</h5>
-      <ul class="side-links">
-        <li><a href="#pub-mcp"><span class="method-tag post">POST</span>MCP JSON-RPC</a></li>
-        <li><a href="#pub-ad-request"><span class="method-tag post">POST</span>Ad request (REST)</a></li>
-        <li><a href="#pub-track"><span class="method-tag post">POST</span>Track event</a></li>
-      </ul>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Integration doors</div>
+      <a href="/docs/browser">Browser app</a>
+      <a href="/docs/browser/react" class="sub">React</a>
+      <a href="/docs/computer">Computer app</a>
+      <a href="/docs/extension">Browser extension</a>
+      <a href="/docs/mobile">Mobile app</a>
+      <a href="/docs/mcp">MCP server</a>
     </div>
-    <div class="side-group">
-      <h5><span class="chip pink"></span>Advertiser</h5>
-      <ul class="side-links">
-        <li><a href="#adv-campaigns"><span class="method-tag get">GET</span>List campaigns</a></li>
-        <li><a href="#adv-create-campaign"><span class="method-tag post">POST</span>Create campaign</a></li>
-        <li><a href="#adv-update-campaign"><span class="method-tag patch">PATCH</span>Update campaign</a></li>
-        <li><a href="#adv-stats"><span class="method-tag get">GET</span>Stats</a></li>
-        <li><a href="#adv-billing"><span class="method-tag post">POST</span>Deposit funds</a></li>
-        <li><a href="#adv-conversions"><span class="method-tag post">POST</span>Conversion postback</a></li>
-      </ul>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Protocols</div>
+      <a href="/docs/js-snippet">JS snippet</a>
+      <a href="/docs/npm-sdk">npm SDK</a>
+      <a href="/docs/rest-api">REST API</a>
     </div>
-    <div class="side-group">
-      <h5><span class="chip yellow"></span>Seller (MoR)</h5>
-      <ul class="side-links">
-        <li><a href="#sel-products"><span class="method-tag get">GET</span>Products</a></li>
-        <li><a href="#sel-pricing-plans"><span class="method-tag get">GET</span>Pricing plans</a></li>
-        <li><a href="#sel-product-orders"><span class="method-tag get">GET</span>Product orders</a></li>
-        <li><a href="#sel-vouchers-validate"><span class="method-tag post">POST</span>Validate voucher</a></li>
-        <li><a href="#sel-vouchers-redeem"><span class="method-tag post">POST</span>Redeem voucher</a></li>
-        <li><a href="#sel-payouts"><span class="method-tag get">GET</span>Seller payouts</a></li>
-      </ul>
-    </div>
-    <div class="side-group">
-      <h5><span class="chip green"></span>Affiliate</h5>
-      <ul class="side-links">
-        <li><a href="#aff-redirect"><span class="method-tag get">GET</span>Share link redirect</a></li>
-        <li><a href="#aff-sales"><span class="method-tag get">GET</span>Sales report</a></li>
-      </ul>
-    </div>
-    <div class="side-group">
-      <h5><span class="chip ink"></span>Benna ranking</h5>
-      <ul class="side-links">
-        <li><a href="#benna-overview">Overview</a></li>
-        <li><a href="#benna-predict"><span class="method-tag post">POST</span>Predict</a></li>
-        <li><a href="#benna-status"><span class="method-tag get">GET</span>Engine status</a></li>
-      </ul>
-    </div>
-    <div class="side-group">
-      <h5><span class="chip cyan"></span>BBX OpenRTB 2.6</h5>
-      <ul class="side-links">
-        <li><a href="#rtb-overview">Overview</a></li>
-        <li><a href="#rtb-bid"><span class="method-tag post">POST</span>Bid request</a></li>
-        <li><a href="#rtb-response">Bid response</a></li>
-        <li><a href="#rtb-win-loss"><span class="method-tag get">GET</span>Win / loss notice</a></li>
-        <li><a href="#rtb-status"><span class="method-tag get">GET</span>Adapter status</a></li>
-      </ul>
-    </div>
-    <div class="side-group">
-      <h5><span class="chip ink"></span>Reference</h5>
-      <ul class="side-links">
-        <li><a href="#webhooks">Webhooks</a></li>
-        <li><a href="#rate-limits">Rate limits</a></li>
-        <li><a href="#errors">Error codes</a></li>
-        <li><a href="#changelog">Changelog</a></li>
-      </ul>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Features</div>
+      <a href="/docs/activation-link">Activation links</a>
+      <a href="/docs/payouts">Payouts</a>
+      <a href="/docs/reporting">Reporting</a>
+      <a href="/docs/product-lifecycle">Product lifecycle</a>
+      <a href="/docs/api-reference" class="on">API reference</a>
     </div>
   </aside>
 
-  <main class="content">
-    <div class="crumbs"><a href="/docs">Docs</a> / <span>API reference</span></div>
+  <!-- MAIN -->
+  <main class="doc-main">
+    <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Features</span><span class="sep">/</span><span style="color:var(--doc-soft)">API reference</span></div>
+    <h1 class="doc-h1">Boost Boss API reference</h1>
+    <p class="doc-sub">Every shipped endpoint, organized by role. Real paths, real auth, real response shapes pulled from the live handlers.</p>
+    <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
+
+    <article class="prose" id="doc-body">
+<div class="crumbs"><a href="/docs">Docs</a> / <span>API reference</span></div>
 
     <div class="docs-hero">
       <svg class="deco" viewBox="0 0 80 80" fill="none"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/></svg>
-      <h1 id="introduction">Boost Boss API reference</h1>
+      
       <p>Every shipped endpoint, organized by role. Real paths, real auth, real response shapes pulled from the live handlers.</p>
     </div>
 
@@ -1054,46 +733,74 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
         <div class="ttl">Activation link integration</div>
       </a>
     </div>
+    </article>
   </main>
+
+  <!-- RIGHT TOC (auto-generated) -->
+  <aside class="doc-toc">
+    <div class="doc-toc-l">On this page</div>
+    <nav id="doc-toc-nav"></nav>
+  </aside>
+
 </div>
 
-<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
-
 <script>
-  // ── Scroll-spy on the left sidebar ──
-  const sideLinks = document.querySelectorAll('aside.sidebar .side-links a');
-  const headings  = document.querySelectorAll('main h2, main h3');
-  function onScroll() {
-    let current = 'introduction';
-    headings.forEach(h => { if (h.id && h.getBoundingClientRect().top < 180) current = h.id; });
-    sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-    document.getElementById('backTop').classList.toggle('visible', window.scrollY > 600);
+(function(){
+  // ---- language tabs (per code block) ----
+  document.querySelectorAll('[data-code]').forEach(function(block){
+    var tabs=block.querySelectorAll('.code-tab');
+    var pres=block.querySelectorAll('pre[data-lang]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var lang=tab.dataset.lang;
+        tabs.forEach(function(t){t.classList.toggle('on',t===tab)});
+        pres.forEach(function(p){p.classList.toggle('on',p.dataset.lang===lang)});
+      });
+    });
+    // copy visible code
+    var copyBtn=block.querySelector('[data-copy]');
+    if(copyBtn){
+      copyBtn.addEventListener('click',function(){
+        var pre=block.querySelector('pre.on')||block.querySelector('pre');
+        var txt=pre?pre.innerText:'';
+        var done=function(){var s=copyBtn.querySelector('span');copyBtn.classList.add('copied');if(s)s.textContent='Copied';setTimeout(function(){copyBtn.classList.remove('copied');if(s)s.textContent='Copy'},1600);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,done);}else{done();}
+      });
+    }
+  });
+
+  // ---- slugify + anchor links + auto TOC ----
+  var body=document.getElementById('doc-body');
+  var tocNav=document.getElementById('doc-toc-nav');
+  var heads=body.querySelectorAll('h2, h3');
+  var slugs={};
+  var items=[];
+  heads.forEach(function(h){
+    var base=h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(slugs[base]!=null){slugs[base]++;base=base+'-'+slugs[base];}else{slugs[base]=0;}
+    h.id=base;
+    // anchor link inside heading
+    var a=document.createElement('a');
+    a.href='#'+base;a.className='anchor';a.setAttribute('aria-label','Link to this section');a.innerHTML='#';
+    h.insertBefore(a,h.firstChild);
+    // toc entry
+    var t=document.createElement('a');
+    t.href='#'+base;t.textContent=h.textContent.replace(/^#/,'');
+    if(h.tagName==='H3')t.className='h3';
+    t.dataset.target=base;
+    tocNav.appendChild(t);
+    items.push({id:base,el:h,link:t});
+  });
+
+  // ---- scroll-spy ----
+  function onScroll(){
+    var y=window.scrollY+90,cur=items.length?items[0].id:null;
+    items.forEach(function(it){ if(it.el.offsetTop<=y)cur=it.id; });
+    items.forEach(function(it){ it.link.classList.toggle('on',it.id===cur); });
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll',onScroll,{passive:true});
   onScroll();
-
-  // ── Smooth anchor links ──
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const t = document.querySelector(a.getAttribute('href'));
-      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', a.getAttribute('href')); }
-    });
-  });
-
-  // ── Copy code buttons ──
-  function copyCode(btn) {
-    const block = btn.closest('.code-block');
-    const text = block.querySelector('pre').innerText;
-    navigator.clipboard.writeText(text).then(() => {
-      const orig = btn.textContent;
-      btn.textContent = 'Copied ✓';
-      setTimeout(() => btn.textContent = orig, 1400);
-    });
-  }
-  document.querySelectorAll('.code-head .copy').forEach(btn => {
-    btn.addEventListener('click', () => copyCode(btn));
-  });
+})();
 </script>
-
 </body>
 </html>

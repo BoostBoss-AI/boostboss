@@ -4,88 +4,138 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumi for Computer App · Docs — Boost Boss</title>
-<meta name="description" content="One terminal command. 10 placements. Boost Boss's runtime for Electron and Tauri AI apps.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, sans-serif; color: #0F0F1A; line-height: 1.65; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.06), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(157, 122, 255, 0.06), transparent 60%), #FAFAF7; min-height: 100vh; }
-  a { color: #FF2D78; text-decoration: none; } a:hover { text-decoration: underline; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
-  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #0F0F1A; }
-  h1 { font-size: 36px; margin-bottom: 12px; } h2 { font-size: 24px; margin-top: 36px; margin-bottom: 10px; } h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; color: #4B5563; }
-  p { margin: 10px 0; color: #4B5563; }
-  code { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; }
-  pre { font-family: 'JetBrains Mono', monospace; background: #0F0F1A; color: #E5E7EB; padding: 18px 20px; border-radius: 10px; overflow-x: auto; margin: 14px 0; font-size: 14px; line-height: 1.6; }
-  pre code { background: transparent; padding: 0; color: inherit; }
-  .nav { font-size: 13px; margin-bottom: 24px; color: #6B7280; } .nav a { color: #6B7280; }
-  .pill { display: inline-block; background: #F3E8FF; color: #7C3AED; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
-  ul { padding-left: 22px; color: #4B5563; } ul li { margin: 5px 0; }
-  .callout { background: #FFFFFF; border: 1px solid #E5E7EB; border-left: 3px solid #9D7AFF; padding: 14px 18px; border-radius: 10px; margin: 18px 0; font-size: 14.5px; } .callout strong { color: #0F0F1A; }
-</style>
+<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
+<link rel="stylesheet" href="/design-system/styles.css">
+<link rel="stylesheet" href="/design-system/ui_kits/docs/_docs.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="nav"><a href="/docs">← Docs</a></div>
-  <span class="pill">Lumi for Computer App</span>
-  <h1>One terminal command. 10 placements.</h1>
-  <p>For downloaded AI apps built with Electron or Tauri. The install CLI patches your renderer HTML, links your publisher account, and prints a banner showing all 10 placements that auto-enabled.</p>
 
-  <h2 id="install">Install</h2>
-  <p>From your Electron app's project root:</p>
-  <pre><code>npx @boostbossai/install-desktop YOUR_PUBLISHER_ID</code></pre>
-  <p>Your publisher ID is shown on your <a href="/publish/dashboard">dashboard</a>. The CLI detects Electron in your <code>package.json</code>, finds your renderer HTML (typically <code>public/index.html</code> or <code>src/renderer/index.html</code>), and inserts a single <code>&lt;script&gt;</code> tag in <code>&lt;head&gt;</code>. No code changes required.</p>
-  <p>Restart your app. The <strong>Computer App</strong> verify badge on your dashboard flips to <strong>Connected</strong> within 60 seconds.</p>
+<!-- TOP BAR -->
+<header class="doc-top">
+  <a class="doc-brand" href="Docs Template.html">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
+    <b>Boost Boss</b><span>Docs</span>
+  </a>
+  <div class="doc-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search docs<kbd>⌘K</kbd></div>
+  <nav class="doc-top-links">
+    <a href="#">Dashboard</a>
+    <a href="#">API status</a>
+    <a href="#">Support</a>
+    <a class="doc-top-cta" href="#">Get API keys</a>
+  </nav>
+</header>
 
-  <h2 id="what">What this gives you</h2>
-  <p>All 10 Computer App placements auto-enable. Boost Boss's auction picks which one serves per ad request.</p>
-  <ul>
-    <li><strong>Sponsored citation</strong> · ~$4.50 RPM — woven into AI-generated answers</li>
-    <li><strong>Suggested chip</strong> · ~$4.50 RPM — tappable quick-reply pill</li>
-    <li><strong>Inline sponsored card</strong> · ~$6.50 RPM — content card in chat flow</li>
-    <li><strong>Loading-state ad</strong> · ~$7.00 RPM — shown during AI generation</li>
-    <li><strong>Pre-roll video</strong> · ~$10.00 RPM — sound-on (no browser autoplay restriction)</li>
-    <li><strong>Window banner</strong> · ~$7.50 RPM — top-of-window strip</li>
-    <li><strong>Sidebar slot</strong> · ~$7.00 RPM — anchored in app sidebar/inspector</li>
-    <li><strong>Modal interstitial</strong> · ~$18.00 RPM — full-modal sponsor between flows</li>
-    <li><strong>Empty-state hero</strong> · ~$8.50 RPM — hero unit on empty views</li>
-    <li><strong>System notification</strong> · ~$5.00 RPM — sparingly, OS notification</li>
-  </ul>
+<div class="doc-shell">
 
-  <h2 id="compatibility">Compatibility</h2>
-  <p><strong>Covers:</strong></p>
-  <ul>
-    <li>Electron — any version with a renderer HTML file, current LTS recommended</li>
-    <li>Tauri — Rust shell + WebView renderer (add the script tag manually + the CSP entries below)</li>
-    <li>Any desktop app that renders its UI in a WebView (NW.js, Neutralino) — install via the script tag</li>
-    <li>macOS, Windows, Linux — the runtime is platform-agnostic JavaScript inside your renderer</li>
-  </ul>
-  <p><strong>Does not cover:</strong></p>
-  <ul>
-    <li>Native macOS apps in Swift / Obj-C using AppKit or SwiftUI — no WebView surface to attach to</li>
-    <li>Native Windows apps in WinUI / WPF / Win32 — same reason</li>
-    <li>Native Linux apps in GTK / Qt — same reason</li>
-    <li>Flutter Desktop — no DOM, no script tag entry point</li>
-  </ul>
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <div class="doc-sec">
+      <div class="doc-sec-l">Getting started</div>
+      <a href="/docs">Introduction</a>
+      <a href="/docs/quickstart">Quickstart</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Integration doors</div>
+      <a href="/docs/browser">Browser app</a>
+      <a href="/docs/browser/react" class="sub">React</a>
+      <a href="/docs/computer" class="on">Computer app</a>
+      <a href="/docs/extension">Browser extension</a>
+      <a href="/docs/mobile">Mobile app</a>
+      <a href="/docs/mcp">MCP server</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Protocols</div>
+      <a href="/docs/js-snippet">JS snippet</a>
+      <a href="/docs/npm-sdk">npm SDK</a>
+      <a href="/docs/rest-api">REST API</a>
+    </div>
+    <div class="doc-sec">
+      <div class="doc-sec-l">Features</div>
+      <a href="/docs/activation-link">Activation links</a>
+      <a href="/docs/payouts">Payouts</a>
+      <a href="/docs/reporting">Reporting</a>
+      <a href="/docs/product-lifecycle">Product lifecycle</a>
+      <a href="/docs/api-reference">API reference</a>
+    </div>
+  </aside>
 
-  <h3 id="tauri">Tauri install</h3>
-  <p>The install CLI's Electron auto-patch doesn't run on Tauri projects (different file layout). Add the script tag manually to your renderer HTML's <code>&lt;head&gt;</code>:</p>
-  <pre><code>&lt;script async src="https://boostboss.ai/lumi/v1.js#YOUR_PUBLISHER_ID" data-lumi-door="mcp"&gt;&lt;/script&gt;</code></pre>
-  <p>And add to your <code>tauri.conf.json</code> CSP: <code>script-src https://boostboss.ai; connect-src https://boostboss.ai;</code></p>
-  <p>The <code>data-lumi-door="mcp"</code> attribute is what tells the runtime to fire the Computer App handshake instead of the Browser App one — same shared runtime, different verify badge.</p>
+  <!-- MAIN -->
+  <main class="doc-main">
+    <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Integration doors</span><span class="sep">/</span><span style="color:var(--doc-soft)">Computer app</span></div>
+    <h1 class="doc-h1">Computer app</h1>
+    <p class="doc-sub"></p>
+    <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
 
-  <h2 id="uninstall">Uninstall</h2>
-  <p>From the same project root:</p>
-  <pre><code>npx @boostbossai/install-desktop --uninstall</code></pre>
-  <p>The CLI reads <code>.lumi-install-log</code>, reverses every patch byte-for-byte, deletes the log, and prints confirmation. Restart your app — no more impressions serve from this install.</p>
+    <article class="prose" id="doc-body">
 
-  <h2 id="privacy">Privacy posture</h2>
-  <div class="callout">
-    <strong>Active app window only · no persistence · no cross-session tracking.</strong>
-    <p style="margin-top:6px;">The runtime reads only what's visible in your app's renderer at the moment of an ad request. Nothing is persisted across app launches. Native sound + video are allowed because Electron renderers run in your app process, not a browser tab.</p>
-  </div>
+    </article>
+  </main>
 
-  <p style="margin-top:48px;font-size:13px;color:#9CA3AF;">Boost Boss · Lumi for Computer App v0.1.0 · 2026-06-20</p>
+  <!-- RIGHT TOC (auto-generated) -->
+  <aside class="doc-toc">
+    <div class="doc-toc-l">On this page</div>
+    <nav id="doc-toc-nav"></nav>
+  </aside>
+
 </div>
+
+<script>
+(function(){
+  // ---- language tabs (per code block) ----
+  document.querySelectorAll('[data-code]').forEach(function(block){
+    var tabs=block.querySelectorAll('.code-tab');
+    var pres=block.querySelectorAll('pre[data-lang]');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var lang=tab.dataset.lang;
+        tabs.forEach(function(t){t.classList.toggle('on',t===tab)});
+        pres.forEach(function(p){p.classList.toggle('on',p.dataset.lang===lang)});
+      });
+    });
+    // copy visible code
+    var copyBtn=block.querySelector('[data-copy]');
+    if(copyBtn){
+      copyBtn.addEventListener('click',function(){
+        var pre=block.querySelector('pre.on')||block.querySelector('pre');
+        var txt=pre?pre.innerText:'';
+        var done=function(){var s=copyBtn.querySelector('span');copyBtn.classList.add('copied');if(s)s.textContent='Copied';setTimeout(function(){copyBtn.classList.remove('copied');if(s)s.textContent='Copy'},1600);};
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,done);}else{done();}
+      });
+    }
+  });
+
+  // ---- slugify + anchor links + auto TOC ----
+  var body=document.getElementById('doc-body');
+  var tocNav=document.getElementById('doc-toc-nav');
+  var heads=body.querySelectorAll('h2, h3');
+  var slugs={};
+  var items=[];
+  heads.forEach(function(h){
+    var base=h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(slugs[base]!=null){slugs[base]++;base=base+'-'+slugs[base];}else{slugs[base]=0;}
+    h.id=base;
+    // anchor link inside heading
+    var a=document.createElement('a');
+    a.href='#'+base;a.className='anchor';a.setAttribute('aria-label','Link to this section');a.innerHTML='#';
+    h.insertBefore(a,h.firstChild);
+    // toc entry
+    var t=document.createElement('a');
+    t.href='#'+base;t.textContent=h.textContent.replace(/^#/,'');
+    if(h.tagName==='H3')t.className='h3';
+    t.dataset.target=base;
+    tocNav.appendChild(t);
+    items.push({id:base,el:h,link:t});
+  });
+
+  // ---- scroll-spy ----
+  function onScroll(){
+    var y=window.scrollY+90,cur=items.length?items[0].id:null;
+    items.forEach(function(it){ if(it.el.offsetTop<=y)cur=it.id; });
+    items.forEach(function(it){ it.link.classList.toggle('on',it.id===cur); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+</script>
 </body>
 </html>
