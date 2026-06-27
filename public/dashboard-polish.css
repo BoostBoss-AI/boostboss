@@ -1,0 +1,145 @@
+/* ============================================================================
+   Boost Boss — Dashboard Polish Layer
+   Link AFTER public/dashboard-shell.css on every dashboard. Override-only.
+   ----------------------------------------------------------------------------
+   PRINCIPLES
+   · Polish, never redesign. This file changes ONLY visual properties
+     (color, shadow, radius, type, blur, transitions). It never alters
+     layout flow, hit targets, hrefs, or anything the SPA's JS depends on.
+   · Continuity with the new marketing system: Space Grotesk display,
+     Inter body, the refined pink CTA, and a faint aurora-mesh ambient.
+   · Work WITH the shell's JS, not against it — the .is-active toggle,
+     the data-shell-sidebar="collapsed" width/opacity transitions, and the
+     hashchange routing are all preserved. We add effects, never remove
+     the shell's own transitions.
+   · Selectors match the existing rendered DOM only. No invented classes.
+   · BB tokens referenced as var(--bb-*, #hex) so the file is self-sufficient
+     even if the design-system token sheet isn't linked on a given page.
+
+   SECTIONS
+   [0] Token bridge      — remap --shell-* design tokens to the BB system
+   [1] Sidebar chrome    — ambient aurora, brand type, active bar, hover, user pill
+   [2] Top chrome        — glass backdrop
+   (card / button / table / modal / form passes land in later sections)
+   ========================================================================== */
+
+
+/* ── [0] TOKEN BRIDGE ───────────────────────────────────────────────────────
+   Same hex in most cases — this just routes the shell through the BB system so
+   later passes inherit one source of truth. Values that intentionally shift are
+   noted. Shadows/cards are deliberately left for the card pass.            */
+:root {
+  --shell-brand-pink:        var(--bb-pink, #FF2D78);
+  --shell-brand-pink-dark:   var(--bb-pink-dark, #E01E65);
+  --shell-brand-cyan:        var(--bb-cyan-link, #04BEFE);
+  --shell-ink:               var(--bb-ink, #0F0F1A);   /* #1A1A2E → #0F0F1A, deeper */
+  --shell-font-sans:         var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+  --shell-font-display:      var(--font-display, 'Space Grotesk', 'Inter', sans-serif);
+  --shell-sidebar-border:    rgba(255,255,255,0.06);   /* refined from #1F2030 */
+
+  /* polish-local vars (scoped names, won't collide with --shell-*) */
+  --polish-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* ── [1] SIDEBAR CHROME ─────────────────────────────────────────────────── */
+
+/* Ambient aurora — a very low-opacity pink+cyan mesh over the dark sidebar,
+   echoing the marketing hero. Layered ABOVE the base bg so the bg token still
+   shows through; fixed attachment keeps it calm while the nav scrolls. */
+.shell-sidebar {
+  background-image:
+    radial-gradient(120% 42% at 0% 0%,   rgba(255, 45, 120, 0.10), transparent 60%),
+    radial-gradient(120% 38% at 100% 100%, rgba(4, 190, 254, 0.07), transparent 60%);
+  background-repeat: no-repeat;
+  background-attachment: local;
+  border-right: 1px solid var(--shell-sidebar-border);
+}
+
+/* Brand block — tighten the wordmark with the display face. */
+.shell-sidebar__product {
+  font-family: var(--shell-font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.shell-sidebar__product .accent { color: var(--bb-pink, #FF2D78); }
+.shell-sidebar__product .powered-by {
+  font-family: var(--shell-font-sans);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.shell-sidebar__product .powered-by em {
+  color: var(--bb-violet, #9D7AFF);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Section labels — quieter, wider tracking. */
+.shell-nav-section-label {
+  font-family: var(--shell-font-sans);
+  letter-spacing: 0.10em;
+  color: var(--shell-sidebar-text-muted, #7C7E89);
+}
+
+/* Nav rows — smoother hover, no layout change. (Adds a background/color
+   transition only; the shell's own label-opacity transition is untouched.) */
+.shell-nav-item {
+  transition: background-color 0.16s var(--polish-ease),
+              color 0.16s var(--polish-ease);
+}
+.shell-nav-item:hover {
+  background: rgba(255, 255, 255, 0.045);
+}
+.shell-nav-item__label {
+  font-family: var(--shell-font-sans);
+  letter-spacing: -0.005em;
+}
+
+/* Active row — keep the signature pink edge bar, refine to a soft gradient
+   with a faint glow and slightly crisper width. */
+.shell-nav-item.is-active {
+  background: rgba(255, 45, 120, 0.10);
+  color: var(--shell-sidebar-text-active, #fff);
+}
+.shell-nav-item.is-active::before {
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, #FF2D78 0%, #E01E65 100%);
+  box-shadow: 0 0 12px rgba(255, 45, 120, 0.55);
+}
+.shell-nav-item.is-active .shell-nav-item__icon { color: var(--bb-pink, #FF2D78); }
+
+/* Bottom user pill — give it a contained card treatment. */
+.shell-sidebar__user {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--shell-radius-lg, 12px);
+  transition: background-color 0.16s var(--polish-ease),
+              border-color 0.16s var(--polish-ease);
+}
+.shell-sidebar__user:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.shell-sidebar__user-text { font-family: var(--shell-font-sans); }
+
+/* Collapse toggle — gentler resting state, pink on hover. */
+.shell-collapse-btn {
+  transition: background-color 0.16s var(--polish-ease), color 0.16s var(--polish-ease);
+}
+.shell-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--bb-pink, #FF2D78);
+}
+
+
+/* ── [2] TOP CHROME ─────────────────────────────────────────────────────── */
+
+/* Frosted glass top bar — translucent + blur so content scrolls under it
+   like the marketing nav. Hairline base border kept. */
+.shell-topbar {
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--shell-border, #E5E7EB);
+}

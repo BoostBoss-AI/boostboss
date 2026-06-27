@@ -16,6 +16,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Phase 1 dashboard shell — shared with /publish/dashboard (developer.html). -->
     <link rel="stylesheet" href="/dashboard-shell.css">
+    <!-- Polish layer (override-only) — must load AFTER dashboard-shell.css.
+         Tightly scoped to .shell-* selectors; no HTML changes, no JS hooks
+         touched. First pass covers sidebar + top chrome only. -->
+    <link rel="stylesheet" href="/dashboard-polish.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- qrcode-generator: pure-JS QR rendering for the 2FA enrollment QR.
          Loaded sync because Settings can call it on first open and we'd
