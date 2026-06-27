@@ -1,18 +1,19 @@
+<!-- @dsCard group="Auth" viewport="1100x720" name="Auth flow — forgot / check-email / reset / confirm" subtitle="One card, 4 modes via data-mode (icon + copy swap). Continuous with signin split-screen chrome." -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Account recovery — Boost Boss</title>
-<link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
-<link rel="stylesheet" href="/design-system/styles.css">
-<link rel="stylesheet" href="/design-system/ui_kits/auth-flow/_auth.css">
+<link rel="icon" type="image/svg+xml" href="../../assets/rocket-logo.svg">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="_auth.css">
 </head>
 <body data-mode="forgot" style="--acc:#FF2D78;--accSoft:rgba(255,45,120,0.12);--accSoft2:rgba(255,45,120,0.16);--accBorder:rgba(255,45,120,0.4)">
 <div class="page-fx"></div>
 <div class="topbar">
-  <a class="brand" href="/publish/signin"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
-  <a class="back" href="/publish/signin">← Back to sign in</a>
+  <a class="brand" href="Publish%20Signin.html"><img class="brand-mark" src="../../assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
+  <a class="back" href="Publish%20Signin.html">← Back to sign in</a>
 </div>
 
 <main class="auth">
@@ -38,7 +39,7 @@
           <div class="field"><label for="fe">Email</label><div class="inp"><input type="email" id="fe" placeholder="you@yourapp.com" autocomplete="email"></div></div>
           <button class="submit" type="button" onclick="setMode('check-email')">Send reset link</button>
         </form>
-        <p class="switch">Remembered it? <a href="/publish/signin">Back to sign in</a></p>
+        <p class="switch">Remembered it? <a href="Publish%20Signin.html">Back to sign in</a></p>
       </div>
 
       <!-- CHECK EMAIL -->
@@ -49,7 +50,7 @@
         <div class="expire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Link expires in 30 minutes</div>
         <button class="ghost-btn" type="button">Open email app</button>
         <p class="meta-line">Didn't get it? <span class="lnk" onclick="resend(this)">Resend link</span> · check your spam folder</p>
-        <p class="switch"><a href="/publish/signin">Back to sign in</a></p>
+        <p class="switch"><a href="Publish%20Signin.html">Back to sign in</a></p>
       </div>
 
       <!-- RESET PASSWORD -->
@@ -64,7 +65,7 @@
           <div class="field"><label for="cp">Confirm password</label><div class="inp"><input type="password" id="cp" placeholder="Re-enter your password" autocomplete="new-password"><button type="button" class="toggle" data-for="cp">Show</button></div></div>
           <button class="submit" type="button" onclick="setMode('confirm')">Update password</button>
         </form>
-        <p class="switch"><a href="/publish/signin">Back to sign in</a></p>
+        <p class="switch"><a href="Publish%20Signin.html">Back to sign in</a></p>
       </div>
 
       <!-- CONFIRM -->
@@ -72,7 +73,7 @@
         <div class="fp-icon" style="background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.4);color:#34D399"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div>
         <h1>You're all set</h1>
         <p class="fsub">Your password has been updated. Sign in with your new credentials to pick up where you left off.</p>
-        <a class="submit" href="/publish/signin" style="display:block;text-align:center;text-decoration:none">Continue to sign in</a>
+        <a class="submit" href="Publish%20Signin.html" style="display:block;text-align:center;text-decoration:none">Continue to sign in</a>
         <p class="meta-line">Need a hand? <a href="#">Contact support</a></p>
       </div>
 
@@ -114,42 +115,5 @@
   // init from body data-mode (real routes set this server-side)
   setMode(document.body.getAttribute('data-mode') || 'forgot');
 </script>
-
-<script>
-// URL-aware mode detection. Routes that resolve to auth-flow.html:
-//   /ads/forgot-password   /publish/forgot-password   -> forgot
-//   /ads/check-email       /publish/check-email       -> check-email
-//   /ads/reset-password    /publish/reset-password    -> reset
-//   /ads/confirm           /publish/confirm           -> confirm
-// Default to 'forgot' if path doesn't match.
-(function(){
-  var path = (window.location.pathname || '').toLowerCase();
-  var mode = 'forgot';
-  if (path.indexOf('check-email') > -1) mode = 'check-email';
-  else if (path.indexOf('reset-password') > -1) mode = 'reset';
-  else if (path.indexOf('confirm') > -1) mode = 'confirm';
-  document.body.setAttribute('data-mode', mode);
-  // Hide the prototype mode-switcher in production
-  var switcher = document.querySelector('.proto-switch, [data-proto-switch]');
-  if (switcher) switcher.style.display = 'none';
-  // Also hide buttons with onclick="setMode(...)" — they are prototype only
-  document.querySelectorAll('button[onclick*="setMode"]').forEach(function(b){
-    if (b.closest('[data-show]')) return; // keep buttons INSIDE mode panels
-    b.style.display = 'none';
-  });
-  // Update topbar back-link based on role detected in path
-  var back = document.querySelector('.topbar .back, a.back');
-  if (back) {
-    if (path.indexOf('/publish') > -1) {
-      back.setAttribute('href', '/publish/signin');
-      back.textContent = '← Back to sign in';
-    } else {
-      back.setAttribute('href', '/ads/signin');
-      back.textContent = '← Back to sign in';
-    }
-  }
-})();
-</script>
-
 </body>
 </html>
