@@ -143,3 +143,479 @@
   backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--shell-border, #E5E7EB);
 }
+
+
+/* ── [3] CARDS ──────────────────────────────────────────────────────────────
+   Refines surface only: shadow, radius, border, hover smoothness.
+   NEVER touches the .stat-card::before accent bars (the 4-variant semantic
+   color system) or any card's background/padding/layout.
+
+   Two target groups:
+   A) .stat-card        — class-based, base CSS is specificity 010, ours is
+                          010 and loads later, so plain overrides win. No !important.
+   B) inline-styled panels — border/radius are inline (1000), so the three
+                          surface props need !important to override. Add new
+                          panel IDs to the --polish-card-list selector below;
+                          do NOT add !important to anything else.            */
+
+/* ---- polish shadow tokens (scoped names) ---- */
+:root {
+  --polish-card-shadow:
+    0 1px 2px rgba(15, 15, 26, 0.04),
+    0 8px 24px rgba(15, 15, 26, 0.05);
+  --polish-card-shadow-hover:
+    0 2px 4px rgba(15, 15, 26, 0.05),
+    0 14px 32px rgba(255, 45, 120, 0.10);
+  --polish-card-radius: 16px;   /* gentle bump from 14 */
+}
+
+/* ── [3A] KPI STAT CARDS (class-based) ── */
+.stat-card {
+  border-color: var(--bb-line, #EAEAEF);
+  border-radius: var(--polish-card-radius);
+  box-shadow: var(--polish-card-shadow);
+  transition: transform 0.22s var(--polish-ease),
+              box-shadow 0.22s var(--polish-ease),
+              border-color 0.22s var(--polish-ease);
+}
+/* keep the deliberate lift — just smoother easing + refined shadow color */
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--polish-card-shadow-hover);
+  border-color: rgba(255, 45, 120, 0.35);
+}
+/* DO NOT style .stat-card::before — the 4 accent gradients stay exactly as-is */
+
+/* slight type refinement inside the tile (no structure change) */
+.stat-card .stat-label {
+  letter-spacing: 0.01em;
+  color: var(--bb-muted, #6B7280);
+}
+.stat-card .stat-value {
+  font-family: var(--font-display, 'Space Grotesk', 'Inter', sans-serif);
+  letter-spacing: -0.02em;
+}
+
+/* ── [3B] INLINE-STYLED CONTENT PANELS (target by ID) ──
+   Add each white inline-styled panel's ID to this list as we go.
+   The three surface props use !important ONLY to beat the inline border/radius. */
+#pilotProductPicker {
+  border: 1px solid var(--bb-line, #EAEAEF) !important;
+  border-radius: var(--polish-card-radius) !important;
+  box-shadow: var(--polish-card-shadow);          /* not inline → no !important */
+  transition: box-shadow 0.22s var(--polish-ease),
+              border-color 0.22s var(--polish-ease);
+}
+
+/* shared help-text hint pattern ("Click a row to open…") — consistent quiet style */
+#pilotProductPicker span[style*="11px"] {
+  color: var(--bb-muted, #9CA3AF);
+  letter-spacing: 0.01em;
+}
+
+
+/* ── [4] BUTTONS ────────────────────────────────────────────────────────────
+   Override-only. PROTECTS every hit area: no padding, height, font-size, or
+   line-height is touched on any variant. We refine color, gradient, shadow,
+   hover/active, and add focus-visible rings (none existed before).
+
+   All 5 button classes are independent (no .btn base) and specificity 010;
+   this file loads later so plain overrides win. Inline-styled buttons
+   (Settings/wizard pixel callouts, detail panel) are deferred to a [4B]
+   ID list as we sweep them.
+
+   FIXES baked in:
+   · .new-campaign-btn hover shadow was rgba(249,115,22) ORANGE → now pink
+   · .action-btn hover was solid ORANGE (read as destructive) → soft pink tint
+   · primary CTA solid #FF2D78 → real pink→pink-dark gradient (marketing parity)
+   · added :focus-visible pink ring to all variants (a11y)                    */
+
+/* shared focus ring — applies to every button variant */
+.new-campaign-btn:focus-visible,
+.action-btn:focus-visible,
+.ncw-next:focus-visible,
+.ncw-launch:focus-visible,
+.ncw-back:focus-visible,
+.ncw-link:focus-visible,
+.launch-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.40);
+}
+
+/* ── [4A] PRIMARY CTA (.new-campaign-btn) ──
+   Gradient + pink glow apply ONLY to true primaries. The inline "Cancel"
+   variant (style="background:#fff;…") is excluded so it keeps its ghost look. */
+.new-campaign-btn:not([style*="#fff"]) {
+  background: linear-gradient(135deg, #FF2D78 0%, #E01E65 100%);
+  box-shadow: 0 2px 8px rgba(255, 45, 120, 0.22);
+  transition: filter 0.15s ease, box-shadow 0.18s ease, transform 0.12s ease;
+}
+.new-campaign-btn:not([style*="#fff"]):hover {
+  filter: brightness(1.04);
+  box-shadow: 0 6px 16px rgba(255, 45, 120, 0.30);   /* pink, was orange */
+  transform: translateY(-1px);
+}
+.new-campaign-btn:not([style*="#fff"]):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 45, 120, 0.22);
+}
+/* the inline-white "Cancel" variant: give it a calm ghost hover */
+.new-campaign-btn[style*="#fff"]:hover { background: #F9FAFB !important; }
+
+/* ── [4A] ROW ACTION BUTTONS (.action-btn) ──
+   Hit area (6px 12px) untouched. Hover goes soft-pink instead of orange. */
+.action-btn {
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+.action-btn:hover {
+  background-color: rgba(255, 45, 120, 0.12);   /* was solid #F59E0B orange */
+  color: #E01E65;
+}
+
+/* ── [4A] WIZARD PRIMARY (.ncw-next, .ncw-launch) ──
+   Already the cleanest pattern — just gradient parity + smoother glow. */
+.ncw-next, .ncw-launch {
+  background: linear-gradient(135deg, #FF2D78 0%, #E01E65 100%);
+  box-shadow: 0 2px 8px rgba(255, 45, 120, 0.25);
+  transition: filter 0.14s ease, box-shadow 0.18s ease, transform 0.12s ease;
+}
+.ncw-next:hover, .ncw-launch:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 6px 16px rgba(255, 45, 120, 0.30);
+  transform: translateY(-1px);
+}
+.ncw-next:active, .ncw-launch:active { transform: translateY(0); }
+
+/* ── [4A] WIZARD GHOST (.ncw-back) ── */
+.ncw-back {
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.ncw-back:hover {
+  background: #FFF5F8;                 /* faint pink wash, not flat gray */
+  border-color: rgba(255, 45, 120, 0.30);
+  color: #E01E65;
+}
+
+/* ── [4A] WIZARD TEXT-LINK (.ncw-link) ── already correct; just smooth it */
+.ncw-link { transition: color 0.14s ease; }
+
+/* ── [4A] LEGACY .launch-btn — refine, don't break (may be off-screen) ── */
+.launch-btn {
+  transition: filter 0.15s ease, box-shadow 0.18s ease;
+}
+.launch-btn:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 6px 16px rgba(255, 45, 120, 0.28);
+}
+
+
+/* ── [5] FORMS ───────────────────────────────────────────────────────────────
+   Override-only. Touches color / focus-ring / hover-border / radius parity.
+   PROTECTED: padding, font-size, accent-color (native checks stay #FF2D78),
+   the .ncw-* :has(input:checked) pink-tint, and the toggle knob's JS-driven
+   left/transition/size. Two pre-existing bugs fixed here (see [5a]).
+   ------------------------------------------------------------------------- */
+
+/* [5a] BUGFIX — legacy .form-textarea / .form-select used an ORANGE focus
+   border + glow (palette leak) and a different bg (#FAFAF7) than .form-input
+   (#FFFFFF). Repaint focus to pink and unify the field bg to white. */
+.form-textarea,
+.form-select {
+  background-color: var(--bg-surface, #FFFFFF);
+}
+.form-textarea:focus,
+.form-select:focus {
+  border-color: var(--bb-pink, #FF2D78);
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.12);
+}
+
+/* [5b] Hover affordance on the legacy controls — border only, no box change. */
+.form-input:hover:not(:focus),
+.form-textarea:hover:not(:focus),
+.form-select:hover:not(:focus) {
+  border-color: #D1D5DB;
+}
+
+/* [5c] Universal keyboard focus ring for inline-styled inputs that have no
+   class hook (Settings fields, product modal, Creatives library). This file
+   only loads on dashboards, so bare element selectors are safe. Excludes the
+   already-styled .form-*/.ncw-* controls (they own their :focus) and native
+   checks/radios (they use accent-color). border-color is !important because
+   these inputs carry an inline border that would otherwise win. */
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.form-input):not(.ncw-input):focus-visible,
+textarea:not(.form-textarea):not(.ncw-input):focus-visible,
+select:not(.form-select):not(.ncw-input):focus-visible {
+  outline: none;
+  border-color: var(--bb-pink, #FF2D78) !important;
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.12);
+}
+
+/* [5d] Wizard radio/check — keep the :has(input:checked) pink-tint exactly as
+   is; just add a focus-within ring so keyboard users can see the active option.
+   This layers a shadow only; the checked bg/border state is untouched. */
+.ncw-radio:focus-within,
+.ncw-check:focus-within {
+  border-color: var(--bb-pink, #FF2D78);
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.10);
+}
+
+/* [5e] TOGGLE (#settingsNotify) — the track is the first <span> after the
+   native input; the knob (#settingsToggleKnob) is the second span and is
+   JS-positioned. Color the track pink when checked (overrides the hardcoded
+   inline #D1D5DB) and add a perceived focus ring. We NEVER touch the knob. */
+#settingsNotify:checked + span {
+  background: var(--bb-pink, #FF2D78) !important;
+}
+#settingsNotify:focus-visible + span {
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.25);
+}
+
+/* [5f] Conversion-tracking snippet — keep the dark "code / read-only" surface;
+   just bring its Copy button up to the ghost-hover language from the Buttons
+   pass. Color only; position/size stay inline. */
+#aSetPixelCopy {
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#aSetPixelCopy:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+}
+
+/* ── [6] TABS ────────────────────────────────────────────────────────────────
+   Three systems, all inline-styled. We refine active color/underline, add the
+   missing hover + focus-visible affordances, and give the wizard dots a glow —
+   without touching padding, font-size, the -1px overlap, or the JS-owned dot
+   background. Where JS writes inline (pilot tabs, dots) we use !important or
+   box-shadow (a property the JS never sets) so we never fight the script.
+   --------------------------------------------------------------------------- */
+
+/* [6A] Product-modal tabs (.pf-tab) — class-based active, easiest to refine.
+   The existing .pf-tab-active rule already wins with !important; we extend it
+   with a soft pink underglow and smooth the color/border transition.        */
+.pf-tab {
+  transition: color 0.16s var(--polish-ease),
+              border-bottom-color 0.16s var(--polish-ease);
+}
+.pf-tab.pf-tab-active {
+  color: var(--bb-pink, #FF2D78) !important;
+  border-bottom-color: var(--bb-pink, #FF2D78) !important;
+  /* faint glow cast just below the 2px underline — box-shadow doesn't disturb
+     the margin-bottom:-1px overlap or add any layout box */
+  box-shadow: 0 6px 12px -9px rgba(255, 45, 120, 0.55);
+}
+.pf-tab:hover:not(.pf-tab-active) {
+  color: #374151;   /* matches the existing hover token */
+}
+
+/* [6B] Boost Ads sub-tabs (.pilot-tab) — JS double-writes inline color +
+   borderBottomColor, so active styling needs !important to win. We also add
+   the hover state it was missing (with !important to beat the inline gray)
+   and a transition so the JS color flip animates instead of snapping.       */
+.pilot-tab {
+  transition: color 0.16s var(--polish-ease),
+              border-bottom-color 0.16s var(--polish-ease);
+}
+.pilot-tab.pilot-tab-active {
+  color: var(--bb-pink, #FF2D78) !important;
+  border-bottom-color: var(--bb-pink, #FF2D78) !important;
+  box-shadow: 0 6px 12px -9px rgba(255, 45, 120, 0.55);
+}
+/* hover affordance on inactive tabs — !important to override the inline #6B7280;
+   :not(.pilot-tab-active) keeps the active tab pink on hover */
+.pilot-tab:hover:not(.pilot-tab-active) {
+  color: #374151 !important;
+}
+
+/* [6C] Shared tab a11y — focus-visible ring on every tab. outline+offset adds
+   no layout box and won't shift the -1px overlap. Keyboard-only (focus-visible
+   excludes mouse clicks) so it never flashes on pointer use.                 */
+.pf-tab:focus-visible,
+.pilot-tab:focus-visible {
+  outline: 2px solid var(--bb-pink, #FF2D78);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+/* [6D] Wizard progress dots (.ncw-dot) — JS owns background (done/active both
+   #FF2D78, upcoming #E5E7EB). We never touch background; we add a soft pink
+   halo to whichever dots are pink, via an attribute-substring match on the
+   inline style the JS writes. box-shadow is untouched by the JS, so no fight.
+   NOTE: depends on the JS writing the exact hex "#FF2D78". If the JS ever
+   switches to rgb() or a CSS token, the halo silently no-ops (dot still
+   works); revisit this selector then. */
+.ncw-dot {
+  transition: box-shadow 0.22s var(--polish-ease),
+              transform 0.22s var(--polish-ease);
+}
+.ncw-dot[style*="FF2D78"],
+.ncw-dot[style*="ff2d78"] {
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.16),
+              0 0 8px rgba(255, 45, 120, 0.45);
+}
+/* upcoming (gray) dots stay flat — explicit reset in case a dot flips back */
+.ncw-dot[style*="E5E7EB"],
+.ncw-dot[style*="e5e7eb"] {
+  box-shadow: none;
+}
+
+/* ── [7] TABLES ──────────────────────────────────────────────────────────────
+   Two flavors: one class table (.campaigns-table) + ~5 inline tables. This pass
+   is mostly bug-fix + missing-affordance: kill the orange hover, add pink row
+   hover to the clickable inline tables, smooth the transitions. It touches
+   ONLY hover background + cursor + transition. No widths, no row heights, no
+   table-layout, no tabular-nums, no thead bg, no A/B header colors.          */
+
+/* [7A] campaigns-table — THE fix: hover tint was orange on a pink product.
+   !important so it wins even if the page's inline <style> loads after this
+   sheet. Only the hover *color* changes; the 0.15s transition already exists
+   and the 64px row height / fixed widths are never referenced here.          */
+.campaigns-table tbody tr:hover {
+  background-color: rgba(255, 45, 120, 0.05) !important;
+}
+
+/* [7B] Inline clickable table — Pilot "Active boosts" picker. Rows route to a
+   boost on click but had no hover affordance. The <tr> carries no inline
+   background, so a stylesheet rule paints cleanly; JS-owned *selection* writes
+   an inline background that (correctly) outranks this hover, so selected rows
+   keep their marker. cursor:pointer signals the rows are clickable.          */
+#pilotProductPills tr {
+  transition: background-color 0.15s var(--polish-ease);
+  cursor: pointer;
+}
+#pilotProductPills tr:hover {
+  background-color: rgba(255, 45, 120, 0.05);
+}
+
+/* [7C] Inline read-back tables — Settings billing + Compare results. Not
+   clickable, so a *quiet* neutral hover for row-tracking only (no cursor
+   change, no pink — pink would imply interactivity these rows don't have).
+   Compare A/B pink+blue header colors live inline and are never touched.     */
+#aSetBillingTableBody tr,
+#compareTableBody tr {
+  transition: background-color 0.15s var(--polish-ease);
+}
+#aSetBillingTableBody tr:hover,
+#compareTableBody tr:hover {
+  background-color: rgba(15, 15, 26, 0.025);
+}
+
+/* [7D] Empty-state polish — the .empty-state class table only. Inline empty
+   <td> rows keep their inline #9CA3AF (inline wins; consistent already).
+   This just warms the class-based empty state to match and centers calmly.   */
+.empty-state {
+  color: var(--bb-ink-50, #9CA3AF);
+}
+
+/* ── [8] MODALS ──────────────────────────────────────────────────────────────
+   Two systems: .modal class (3 modals) + 4 inline-styled modals. Bug-fix +
+   consistency: kill the orange close-X hover, unify the inline backdrops to one
+   shade with blur, add hover to the gray-square closes. Touches ONLY close-btn
+   color/bg + overlay background/blur. Never the sticky header, the flex-start
+   /padding-top anti-fat-band geometry, content max-height, or the JS display
+   toggle. Inline-styled props need !important to win (inline applies in every
+   state, including :hover); class props ride normal cascade order.            */
+
+/* [8A] THE fix — Pattern-A bare-X close hover was orange on a pink product.
+   Pink ties it back to brand, consistent with every other orange→pink
+   correction in this sheet. Covers the class close + the inline convert close.
+   !important guarantees the win over the inline color on #convertModalClose.  */
+.modal-close:hover {
+  color: var(--bb-pink, #FF2D78) !important;
+}
+#convertModalClose {
+  transition: color 0.16s var(--polish-ease);
+}
+#convertModalClose:hover {
+  color: var(--bb-pink, #FF2D78) !important;
+}
+
+/* [8B] Pattern-B gray-square closes (compare + settings) — keep the distinct
+   "quick-read modal" treatment, just add the missing hover. Inline bg #F3F4F6
+   → a touch darker. !important to beat the inline background; transition rides
+   free (no inline transition to fight).                                       */
+#settingsCloseBtn,
+#compareModal button[style*="F3F4F6"] {
+  transition: background-color 0.16s var(--polish-ease),
+              color 0.16s var(--polish-ease);
+}
+#settingsCloseBtn:hover,
+#compareModal button[style*="F3F4F6"]:hover {
+  background: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+/* [8C] Inline backdrop unification — the 4 inline modals ran .5 / .55 / .4 / .4
+   with blur on only two. Unify to one calm shade + blur(4) so they feel like
+   one system. The .modal CLASS stays at its heavier .7 (dense forms, longer
+   dwell) — intentionally NOT touched here. !important overrides the inline
+   background/filter on each overlay root.                                     */
+#depositModal,
+#convertModal,
+#compareModal,
+#settingsModal {
+  background: rgba(0, 0, 0, 0.55) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ── [9] STATUS PILLS ─────────────────────────────────────────────────────────
+   Two parallel systems. The JS-built inline map (pilot picker + audit) is the
+   RIGHT language: pastel-50 bg, dark-900 fg, 999px, 11px/700, +.02em, no
+   capitalize, in_review = BLUE. This pass migrates the CLASS system (.badge.*,
+   used in the campaigns table + detail header) onto that exact palette so the
+   two read as one. The .review → blue swap is the last orange-on-pink fix in
+   the product. Pure class overrides (cascade order); !important only on the
+   .review bug pair. The JS map, the CREDIT gradient pill, and the APPROVED
+   audit pills are already in-language — untouched. Pill geometry stays well
+   under the protected 64px campaigns-table row.                               */
+
+/* [9A] Base shape + typography → match the JS-built pill.
+   20px→999px, .8rem→11px, 600→700, +.02em, capitalize→none, padding to a
+   table-comfortable 4px/10px (JS uses 3px/9px; the extra px keeps the in-cell
+   pill tappable without changing row height).                                 */
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* [9B] Color variants → JS-built pastel-50 / dark-900 pairs. Explicit hex
+   (not the saturated var(--success)/--warning tints) so the class system and
+   the JS map are byte-identical. The tokens themselves are left alone for
+   their other uses.                                                           */
+.badge.live {
+  background: #ECFDF5;
+  color: #065F46;
+}
+.badge.paused {
+  background: #FFFBEB;
+  color: #92400E;
+}
+
+/* [9C] THE last-orange fix — .review was orange-tint/orange-fg; → blue, exactly
+   the JS map's in_review. !important guarantees it beats the inline <style>
+   regardless of sheet order — this is the headline correction of the pass.    */
+.badge.review {
+  background: #EFF6FF !important;
+  color: #1E40AF !important;
+}
+
+.badge.rejected {
+  background: #FEF2F2;
+  color: #991B1B;
+}
+
+/* [9D] Parity variants the class system was missing — so JS states that fall
+   through to a bare class badge (completed / depleted) render in-language
+   instead of unstyled. Mirrors the JS map 1:1.                                */
+.badge.completed {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+.badge.depleted {
+  background: #FEF2F2;
+  color: #991B1B;
+}

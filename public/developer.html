@@ -16,6 +16,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Phase 1 dashboard shell — shared with /ads/dashboard (advertiser.html). -->
     <link rel="stylesheet" href="/dashboard-shell.css">
+    <!-- Polish layer (override-only) — must load AFTER dashboard-shell.css.
+         Same sheet as advertiser.html. Sections [1][2][5][9] apply universally;
+         [3][4] partial; [6][7][8] are advertiser-only and inert here. -->
+    <link rel="stylesheet" href="/dashboard-polish.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- qrcode-generator: pure-JS QR rendering for the 2FA enrollment QR.
          Loaded sync because the Settings overlay can call it on first open

@@ -8019,7 +8019,14 @@
                 const statusEl = document.getElementById('detailStatus');
                 const statusClass = c.status === 'live' ? 'live' : c.status === 'paused' ? 'paused' : 'review';
                 statusEl.className = 'badge ' + statusClass;
-                statusEl.textContent = c.status || 'draft';
+                // Display-case the label at the source. dashboard-polish.css [9A]
+                // removed text-transform:capitalize, so the bare status string
+                // (e.g. 'live', 'in_review') would render lowercase. Match the
+                // line 7168 pattern: special-case 'in_review' → 'In Review',
+                // upper-first everything else.
+                const rawStatus = c.status || 'draft';
+                statusEl.textContent = rawStatus === 'in_review' ? 'In Review'
+                    : rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
                 document.getElementById('detailFormat').textContent = (c.format || 'native').toUpperCase();
                 document.getElementById('detailBilling').textContent = (c.billing_model || 'cpm').toUpperCase();
 
