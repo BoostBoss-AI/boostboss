@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BBX Exchange — Boost Boss</title>
+<title>Benna — The optimization engine inside Boost Boss</title>
+<meta name="description" content="Benna is the AI optimization engine inside Boost Boss. Predicts conversion probability on every impression in MCP-enabled apps and auto-tunes bids in real time. Other ad networks see cookies. Boost Boss sees intent.">
+<meta property="og:title" content="Benna — The optimization engine inside Boost Boss">
+<meta property="og:description" content="Predicts conversion probability on every impression in MCP-enabled apps. Sub-5ms scoring. Other ad networks see cookies — Boost Boss sees intent.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://boostboss.ai/benna">
 <link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
 <link rel="stylesheet" href="/design-system/styles.css">
 <style>
@@ -161,51 +166,80 @@
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}[data-reveal]{opacity:1!important;transform:none!important}}
 </style>
 </head>
-<body style="--acc:#FFE600;--accSoft:rgba(255,230,0,0.09);--accBorder:rgba(255,230,0,0.35)">
+<body style="--acc:#00FFE0;--accSoft:rgba(0,255,224,0.09);--accBorder:rgba(0,255,224,0.35)">
 <div class="page-fx"></div><div class="page-fx grain"></div>
 <nav id="nav"><div class="nav-inner">
   <a class="brand" href="/"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
   <div class="nav-links">
     <a href="/publish" class="">Publishers</a>
     <a href="/ads" class="">SuperBoost Ads</a>
-    <a href="/exchange" class="active">BBX</a>
+    <a href="/exchange" class="">BBX</a>
     <a href="/pricing" class="">Pricing</a>
-    <a href="/benna" class="">Benna</a>
+    <a href="/benna" class="active">Benna</a>
   </div>
   <div class="nav-ctas"><a class="btn btn-ghost-d" href="/demo">Live demo</a><a class="btn btn-primary" href="#">Start free</a></div>
 </div></nav>
 
 <section class="hero"><div class="wrap"><div class="hero-grid">
   <div class="hero-copy">
-    <div class="badge"><span class="dot"></span>The ad network built for AI surfaces</div>
-    <div class="eyebrow">BBX · programmatic exchange</div>
-    <h1>The exchange for <span class="acc">AI-native</span> inventory.</h1>
-    <p class="sub">BBX opens Boost Boss supply to the open market: OpenRTB 2.6, first-price auctions, real-time Benna scoring on every bid. Plug in your DSP, agency desk, or trading stack and bid on intent.</p>
-    <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="#">Request a seat →</a><a class="btn btn-ghost-d btn-lg" href="#">Read the RTB docs</a></div>
+    <div class="badge"><span class="dot"></span>The optimization engine inside Boost Boss</div>
+    <div class="eyebrow">Benna</div>
+    <h1><s>Other ad networks see cookies.</s><br>Boost Boss sees <span class="acc">intent</span>.</h1>
+    <p class="sub">Benna is the AI optimization engine that powers every decision on the Boost Boss network. On every impression inside an MCP-enabled app it predicts conversion probability in under 5 milliseconds — using signals legacy DSPs literally can't see.</p>
+    <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="/ads/signup">Run a Boost Ad →</a><a class="btn btn-ghost-d btn-lg" href="#how">How it works</a></div>
+    <div class="hero-meta">
+      <div class="m"><b class="acc">&lt;5ms</b>scoring per bid</div>
+      <div class="m"><b>6 signals</b>cookies can't see</div>
+      <div class="m"><b>2 surfaces</b>SuperBoost + BBX</div>
+    </div>
   </div>
-  <div class="mock" data-reveal="right" data-parallax data-speed="0.05"><div class="console"><div class="cbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="ct">POST /api/rtb · OpenRTB 2.6</span><span class="live"><span class="d"></span>200 OK</span></div>
-   <div class="cbody"><pre style="font-family:var(--font-mono);font-size:12.5px;line-height:1.7;color:#E5E7EB;margin:0;white-space:pre-wrap"><span style="color:#6B7280">// bid request — enriched with MCP intent</span>
-{
-  "imp": [{ "id": "1", <span style="color:#FF6FA3">"bidfloor"</span>: 0.50 }],
-  <span style="color:#FF6FA3">"intent"</span>: <span style="color:var(--bb-yellow)">"deploy"</span>,
-  <span style="color:#FF6FA3">"mcp_tool"</span>: <span style="color:var(--bb-yellow)">"vercel-mcp"</span>,
-  <span style="color:#FF6FA3">"host"</span>: <span style="color:var(--bb-yellow)">"cursor"</span>,
-  <span style="color:#FF6FA3">"benna_score"</span>: <span style="color:var(--bb-cyan)">0.94</span>
-}</pre></div></div></div>
+  <div class="mock" data-reveal="right" data-parallax data-speed="0.05"><div class="console"><div class="cbar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span><span class="ct">benna · scoring impression</span><span class="live"><span class="d"></span>LIVE</span></div>
+   <div class="cbody">
+     <div class="kpis">
+       <div class="kpi"><div class="kl">P(convert)</div><div class="kv">0.082<span class="up">↑ 3.8×</span></div></div>
+       <div class="kpi"><div class="kl">Bid score</div><div class="kv">0.94<span class="dn">★</span></div></div>
+       <div class="kpi"><div class="kl">Decision</div><div class="kv">WIN</div></div>
+     </div>
+     <div class="cchart"><span style="height:38%"></span><span style="height:54%"></span><span style="height:42%"></span><span style="height:66%"></span><span style="height:58%"></span><span style="height:78%"></span><span style="height:72%"></span><span style="height:88%"></span><span style="height:80%"></span><span style="height:94%"></span></div>
+     <div class="crow" style="border-top:none"><span class="cn"><span class="st"></span>MCP tool: deploy_helper</span><span class="cs">+0.31</span></div>
+     <div class="crow"><span class="cn"><span class="st"></span>Intent: serverless deploy</span><span class="cs">+0.42</span></div>
+     <div class="crow"><span class="cn"><span class="st p"></span>Session: 4th turn, builder</span><span class="cs">+0.18</span></div>
+     <div class="crow"><span class="cn"><span class="st"></span>Surface: Claude Desktop</span><span class="cs">+0.03</span></div>
+   </div></div>
+   <div class="float-pill p1"><span class="sw"></span>intent matched</div>
+   <div class="float-pill p2"><span class="sw"></span>bid won · $4.21</div></div>
 </div></div></section>
+
+<div class="divider"></div>
+<section class="section" id="how"><div class="wrap">
+  <div class="section-head" data-reveal>
+    <div class="eyebrow">What Benna sees</div>
+    <h2>Six signals <span class="acc">cookies can't capture</span>.</h2>
+    <p>Legacy DSPs guess at intent from cookies, fingerprints, and demographic graphs that the AI-native web is dismantling. Benna reads what the user is actually trying to do, in real time, from the conversation itself.</p>
+  </div>
+  <div class="pgrid">
+    <div class="pcard" data-reveal><div class="pico">🛠</div><h3>MCP tool context</h3><p>The exact tool the model just called — <span style="font-family:var(--font-mono);color:var(--acc)">deploy_helper.lookup</span>, <span style="font-family:var(--font-mono);color:var(--acc)">spreadsheet.format</span> — names the user's real-world task.</p></div>
+    <div class="pcard" data-reveal style="--rd:.06s"><div class="pico">💬</div><h3>Prompt intent</h3><p>The semantic shape of the question. "How do I deploy FastAPI?" carries different commercial intent than "what is FastAPI?"</p></div>
+    <div class="pcard" data-reveal style="--rd:.12s"><div class="pico">🪜</div><h3>Session stage</h3><p>Turn count, prior tool calls, prior topics. A 6th-turn debugging session converts very differently than a fresh exploratory chat.</p></div>
+    <div class="pcard" data-reveal style="--rd:0s"><div class="pico">🤖</div><h3>Host AI model</h3><p>Claude, GPT, open-source. Different model populations carry different buying patterns; Benna learns them per surface.</p></div>
+    <div class="pcard" data-reveal style="--rd:.06s"><div class="pico">🌐</div><h3>Host surface</h3><p>Claude Desktop, a browser side panel, a Telegram bot, a chat app — the surface shapes what creatives even fit, and Benna scores accordingly.</p></div>
+    <div class="pcard" data-reveal style="--rd:.12s"><div class="pico">📈</div><h3>Outcome feedback</h3><p>Real clicks, real conversions from pixel events. Every signal gets pruned or amplified by what actually drives outcomes downstream.</p></div>
+  </div>
+</div></section>
+
 <div class="divider"></div>
 <section class="section"><div class="wrap">
-  <div class="section-head" data-reveal><div class="eyebrow">Built for buyers</div><h2>OpenRTB, the way you expect it.</h2><p>Standards-compliant, low-latency, and enriched with signals no other exchange has.</p></div>
-  <div class="pgrid"><div class="pcard" data-reveal style="--rd:0s"><div class="pico">⇄</div><h3>OpenRTB 2.6</h3><p>A spec your DSP already speaks. Standard bid requests, enriched with MCP intent fields.</p></div><div class="pcard" data-reveal style="--rd:0.06s"><div class="pico">⚡</div><h3>First-price, low-latency</h3><p>Transparent first-price clearing with Benna scoring in ~5ms per bid.</p></div><div class="pcard" data-reveal style="--rd:0.12s"><div class="pico">🔑</div><h3>Seat authentication</h3><p>Optional Bearer auth on RTB POST, per-seat controls, and spend caps.</p></div><div class="pcard" data-reveal style="--rd:0.18s"><div class="pico">🧠</div><h3>Intent-enriched bids</h3><p>Every request carries intent, tool, host, and a Benna score — bid on what users are doing.</p></div><div class="pcard" data-reveal style="--rd:0.24s"><div class="pico">📄</div><h3>sellers.json + ads.txt</h3><p>Full supply-chain transparency. Authorized, auditable, IAB-standard inventory.</p></div><div class="pcard" data-reveal style="--rd:0.3s"><div class="pico">📊</div><h3>Real-time reporting</h3><p>Win rate, clearing price, and pacing via API. Reconcile against your own logs.</p></div></div>
-</div></section><div class="divider"></div><section class="section stats-band"><div class="wrap"><div class="stats-row">
-     <div class="stat" data-reveal><div class="n acc" data-count="2.6" data-dec="1">0</div><div class="l">OpenRTB version</div></div>
-     <div class="stat" data-reveal style="--rd:.08s"><div class="n" data-count="5" data-suf="ms">0</div><div class="l">Benna scoring / bid</div></div>
-     <div class="stat" data-reveal style="--rd:.16s"><div class="n yellow" data-count="6.5" data-dec="1" data-suf="%">0</div><div class="l">RTB exchange fee</div></div>
-     <div class="stat" data-reveal style="--rd:.24s"><div class="n" data-count="100" data-suf="%">0</div><div class="l">First-price clearing</div></div>
-   </div></div></section>
+  <div class="section-head" data-reveal><div class="eyebrow">Where Benna sits</div><h2>The engine inside <span class="acc">every Boost Boss decision</span>.</h2><p>Benna isn't a product you sign up for — it's the optimization layer the entire network runs on. Whichever side you're on, every impression gets scored before it clears.</p></div>
+  <div class="pgrid">
+    <div class="pcard" data-reveal><div class="pico">🚀</div><h3>SuperBoost Ads</h3><p>Advertisers set a target (CPM, CPC, or CPA). Benna decides every bid amount, every audience match, every creative variant — automatically, in real time.</p></div>
+    <div class="pcard" data-reveal style="--rd:.06s"><div class="pico">⇄</div><h3>BBX exchange</h3><p>Third-party DSPs bid into the same MCP-native inventory. Benna scores each bid against the host context before the auction clears.</p></div>
+    <div class="pcard" data-reveal style="--rd:.12s"><div class="pico">📡</div><h3>Lumi SDK signals</h3><p>The same Lumi packages publishers install for monetization stream the context Benna scores against. Same network, one feedback loop.</p></div>
+  </div>
+</div></section>
+
 <section class="section"><div class="wrap"><div class="cta-box" data-reveal>
-  <h2>Bring your demand to BBX.</h2><p>Request a seat and start bidding on the highest-intent inventory in AI software.</p>
-  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="#">Request a seat →</a><a class="btn btn-lg btn-clear" href="#">Read the RTB docs</a></div>
+  <h2>To use Benna, run a Boost Ad.</h2><p>Benna doesn't have its own sign-up. You access it by running campaigns on SuperBoost Ads — every impression you buy gets scored, every bid auto-tuned to your target.</p>
+  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="/ads/signup">Start a Boost Ad →</a><a class="btn btn-lg btn-clear" href="/ads">Tour SuperBoost</a></div>
 </div></div></section>
 <footer class="site"><div class="wrap">
   <div class="foot-grid">

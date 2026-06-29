@@ -131,6 +131,7 @@
     { "source": "/test/lumi-snippet-test", "destination": "/test/lumi-snippet-test.html" },
     { "source": "/trust", "destination": "/trust.html" },
     { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/benna",   "destination": "/benna.html"   },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/refunds", "destination": "/refunds.html" },
