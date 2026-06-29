@@ -50,6 +50,30 @@ How to read this:
 | **Quill** | Editor / Copy | content@boostboss.ai | semi |
 | **Iris** | Design | design@boostboss.ai | internal |
 
+## Email provisioning — who actually needs an inbox
+Internal agents coordinate through the command channel + shared memory, **not email** — email is
+for the outside world. So only external-facing functions need a real, monitored inbox.
+
+### External — MUST provision (customers send to / receive from these)
+| Inbox | Agent | Purpose |
+|---|---|---|
+| sandy@boostboss.ai | Sandy | outreach / acquisition |
+| onboarding@boostboss.ai | Robin | onboarding help |
+| support@boostboss.ai | Quinn | support questions |
+| success@boostboss.ai | Nova | retention / check-ins |
+| billing@boostboss.ai | Vault | advertiser receipts & billing |
+| payouts@boostboss.ai | Tally | publisher payout notices |
+| benna@boostboss.ai | Benna | advertiser optimization updates (optional) |
+| compliance@boostboss.ai | Aegis | ads.txt / IAB / abuse inquiries (optional, recommended) |
+
+### Standard role addresses (good hygiene, not tied to one agent)
+- `hello@` or `contact@` — general inbound (routes to Quinn)
+- `abuse@`, `privacy@` — compliance/legal standard (routes to Aegis)
+
+### Internal — OPTIONAL (only for labeling / logins; not needed to function)
+Atlas · Hermes · Forge · Argus · Lumen · Helm · Ledger · Sentinel · Pulse · Quill · Iris
+Give them handles (atlas@, hermes@ …) only if you want per-agent logins or labels.
+
 ---
 **Note on personas:** customer-facing names (Sandy, Robin, Quinn, Nova) are fictional personas,
 disclosed as AI where required. Never impersonate a real person. The Benna brand is singular —
