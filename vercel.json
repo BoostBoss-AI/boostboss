@@ -39,11 +39,23 @@
       "destination": "/affiliate-help.html"
     },
     {
+      "source": "/signin",
+      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
+      "destination": "/affiliate-signin.html"
+    },
+    {
+      "source": "/signup",
+      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
+      "destination": "/affiliate-signup.html"
+    },
+    {
       "source": "/((?!api/).*)",
       "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
       "destination": "/affiliate.html"
     },
     { "source": "/affiliate", "destination": "/affiliate.html" },
+    { "source": "/affiliate/signin", "destination": "/affiliate-signin.html" },
+    { "source": "/affiliate/signup", "destination": "/affiliate-signup.html" },
     { "source": "/affiliate/help", "destination": "/affiliate-help.html" },
     { "source": "/affiliate/help/article", "destination": "/affiliate-help-article.html" },
     { "source": "/help", "destination": "/affiliate-help.html" },

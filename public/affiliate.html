@@ -2650,16 +2650,24 @@ function clearErr(elId) {
 }
 
 // ── Wire up top-level CTAs ─────────────────────────────────────────
-document.getElementById('go-login').addEventListener('click',     () => showView('login'));
-document.getElementById('go-login-2').addEventListener('click',   () => showView('login'));
-document.getElementById('go-signup').addEventListener('click',    () => { setStep(1); showView('signup'); });
+// Landing CTAs now route to the standalone /affiliate/signin and /affiliate/signup
+// pages (served by public/affiliate-signin.html + public/affiliate-signup.html
+// via vercel.json rewrites). The in-file view-login + view-signup panes are kept
+// as fallback for internal redirects (loadDashboard on 401, etc.) but never
+// triggered by user-facing navigation anymore — that's how we match the design
+// 1:1 instead of trying to scope-rewrite the wired forms.
+document.getElementById('go-login').addEventListener('click',     (e) => { e.preventDefault(); window.location.href = '/affiliate/signin'; });
+document.getElementById('go-login-2').addEventListener('click',   (e) => { e.preventDefault(); window.location.href = '/affiliate/signin'; });
+document.getElementById('go-signup').addEventListener('click',    (e) => { e.preventDefault(); window.location.href = '/affiliate/signup'; });
 // Extra CTAs from new landing design — null-guarded.
 var __ghs = document.getElementById('go-signup-header');
-if (__ghs) __ghs.addEventListener('click', () => { setStep(1); showView('signup'); });
-document.querySelectorAll('.js-go-signup').forEach(function(el){ el.addEventListener('click', function(){ setStep(1); showView('signup'); }); });
+if (__ghs) __ghs.addEventListener('click', (e) => { e.preventDefault(); window.location.href = '/affiliate/signup'; });
+document.querySelectorAll('.js-go-signup').forEach(function(el){ el.addEventListener('click', function(e){ e.preventDefault(); window.location.href = '/affiliate/signup'; }); });
+// In-file pane back/switch buttons — still wired in case the panes get shown
+// via the dashboard's 401 fallback path. Harmless when the panes are hidden.
 document.getElementById('login-to-welcome').addEventListener('click',  () => showView('welcome'));
 document.getElementById('signup-to-welcome').addEventListener('click', () => showView('welcome'));
-document.getElementById('login-to-signup').addEventListener('click',   () => { setStep(1); showView('signup'); });
+document.getElementById('login-to-signup').addEventListener('click',   (e) => { e.preventDefault(); window.location.href = '/affiliate/signup'; });
 
 // ── Password Show/Hide toggle ────────────────────────────────────────
 // Wired for any input that has a sibling <button class="toggle" data-for="<id>">
@@ -3948,18 +3956,19 @@ function _affBoot() {
     loadDashboard().catch(() => showView('login'));
   } else {
     // Deep-link support from boostboss.ai homepage role-split dropdown:
-    //   /affiliate?action=signin → open login view immediately
-    //   /affiliate?action=signup → open signup view at step 1
-    // Skips the "land on welcome, click CTA, switch view" two-step. If no
-    // action param or session, fall through to the welcome landing.
+    //   /affiliate?action=signin → redirect to /affiliate/signin standalone page
+    //   /affiliate?action=signup → redirect to /affiliate/signup standalone page
+    // (Previously opened the in-file view-login/view-signup panes — those panes
+    // are kept as a fallback but the user-facing flow now uses the standalone
+    // pages that match the design 1:1.)
     try {
       const action = new URLSearchParams(window.location.search).get('action');
       if (action === 'signin' || action === 'login') {
-        showView('login');
+        window.location.replace('/affiliate/signin');
         return;
       }
       if (action === 'signup' || action === 'join') {
-        setStep(1); showView('signup');
+        window.location.replace('/affiliate/signup');
         return;
       }
     } catch (_) { /* URLSearchParams missing on ancient browsers — fall through */ }
