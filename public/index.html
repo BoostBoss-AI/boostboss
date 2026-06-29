@@ -200,6 +200,20 @@
     display: flex; align-items: center; justify-content: center;
   }
   .nav-dd-icon svg { width: 20px; height: 20px; display: block; }
+  /* Boost Boss rocket logo — sized to fill the chip with a touch of breathing
+     room. drop-shadow filter unset because the chip's pink tint already frames it. */
+  .nav-dd-icon .nav-dd-rocket {
+    width: 28px; height: 28px; display: block; filter: none;
+  }
+  /* Lumi ✦ sparkle — same glyph as the /publish lumi-mark wordmark, sized up to
+     fill the chip, deep-yellow color for contrast against the yellow-tint bg,
+     and a subtle text-shadow for soft glow. Display-font for the chunky weight. */
+  .nav-dd-icon .nav-dd-lumi {
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-size: 26px; font-weight: 700; line-height: 1;
+    color: #8A6A00;
+    text-shadow: 0 0 8px rgba(255, 230, 0, 0.55);
+  }
   /* Per-role icon tints — matches the affiliate landing's feature-grid
      pastel palette so the dropdown visual ties back to the product. */
   .nav-dd-icon.icon-advertise {
@@ -759,11 +773,8 @@
 
             <a class="nav-dd-row" role="menuitem" href="/ads/signin">
               <span class="nav-dd-icon icon-advertise" aria-hidden="true">
-                <!-- megaphone -->
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2z"/>
-                  <path d="M17 8a6 6 0 0 1 0 8"/>
-                </svg>
+                <!-- Boost Boss rocket -->
+                <img src="/design-system/assets/rocket-logo.svg" alt="" class="nav-dd-rocket">
               </span>
               <span>
                 <span class="nav-dd-label">Advertise</span>
@@ -773,12 +784,8 @@
 
             <a class="nav-dd-row" role="menuitem" href="/publish/signin">
               <span class="nav-dd-icon icon-monetize" aria-hidden="true">
-                <!-- code/script tag -->
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="16 18 22 12 16 6"/>
-                  <polyline points="8 6 2 12 8 18"/>
-                  <line x1="14" y1="4" x2="10" y2="20"/>
-                </svg>
+                <!-- Lumi shining star — same ✦ glyph used in /publish lumi-mark wordmark -->
+                <span class="nav-dd-lumi">✦</span>
               </span>
               <span>
                 <span class="nav-dd-label">Monetize</span>
