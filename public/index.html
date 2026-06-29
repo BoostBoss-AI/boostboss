@@ -147,18 +147,11 @@
      keyboard + touch. */
   .nav-dd { position: relative; display: inline-block; }
   .nav-dd .nav-dd-trigger {
-    /* Trigger inherits .btn / .btn-ghost-d or .btn-primary visual,
-       plus a tiny chevron indicator. */
-    display: inline-flex; align-items: center; gap: 6px;
+    /* Trigger inherits .btn / .btn-ghost-d or .btn-primary visual.
+       No chevron — matches AppLovin's clean button look; the dropdown
+       reveals on hover, no visual indicator needed. */
+    display: inline-flex; align-items: center;
   }
-  .nav-dd .nav-dd-trigger::after {
-    content: ''; width: 8px; height: 8px;
-    border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
-    transform: translateY(-2px) rotate(45deg);
-    transition: transform var(--dur-fast) var(--ease-snappy);
-  }
-  .nav-dd.open .nav-dd-trigger::after,
-  .nav-dd:hover .nav-dd-trigger::after { transform: translateY(0) rotate(-135deg); }
 
   .nav-dd-menu {
     position: absolute; right: 0; top: 100%;
@@ -792,21 +785,6 @@
                 <span class="nav-dd-sub">with Lumi SDK</span>
               </span>
             </a>
-
-            <a class="nav-dd-row" role="menuitem" href="/affiliate?action=signin">
-              <span class="nav-dd-icon icon-earn" aria-hidden="true">
-                <!-- share link -->
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 15l6-6"/>
-                  <path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"/>
-                  <path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"/>
-                </svg>
-              </span>
-              <span>
-                <span class="nav-dd-label">Earn</span>
-                <span class="nav-dd-sub">Affiliate program</span>
-              </span>
-            </a>
           </div>
         </div>
       </div>
@@ -843,20 +821,6 @@
               <span>
                 <span class="nav-dd-label">Monetize</span>
                 <span class="nav-dd-sub">earn from your AI app</span>
-              </span>
-            </a>
-
-            <a class="nav-dd-row" role="menuitem" href="/affiliate?action=signup">
-              <span class="nav-dd-icon icon-earn" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 15l6-6"/>
-                  <path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"/>
-                  <path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"/>
-                </svg>
-              </span>
-              <span>
-                <span class="nav-dd-label">Earn</span>
-                <span class="nav-dd-sub">share products you love</span>
               </span>
             </a>
           </div>
