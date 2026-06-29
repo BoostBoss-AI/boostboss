@@ -1126,6 +1126,167 @@
 @media(max-width:860px){#view-welcome .two-col{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){#view-welcome, #view-welcome *::before, #view-welcome *::after{animation:none!important;transition:none!important}}
 
+/* ═══════════ AUTH PANES (scoped to #view-login + #view-signup) ═══════════
+   Visual-skin port of the new Affiliate Signin/Signup designs onto the
+   existing wired auth flow. Every existing form-field ID (#li-email,
+   #li-pw, #li-submit, #s1-next, #s2-platform, #s2-handle, #s2-followers,
+   #s2-topic, #s3-email, #s3-pw, #s3-pw2, #s3-ref, #s3-submit, etc.) is
+   preserved — only the wrapping chrome changes. Wired auth backend stays
+   untouched. Both panes share the warm split-card aesthetic + left brand
+   panel; the right panel just contains whichever form belongs to the view. */
+#view-login, #view-signup {
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bb-pink: #FF2D78; --bb-pink-dark: #E01E65; --bb-pink-tint: #FFE6EE;
+  --bb-yellow-tint: #FFF8B8;
+  --bb-ink: #0F0F1A; --bb-ink-800: #1A1A2E; --bb-ink-soft: #4B4B5E;
+  --bb-muted: #6B7280; --bb-line: #EAEAEF; --bb-line-soft: #E5E7EB;
+  --bb-bg-soft: #FAFAF7;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 18px; --r-pill: 100px;
+  --shadow-md: 0 10px 28px rgba(15,15,26,0.08);
+  --shadow-lg: 0 20px 48px rgba(15,15,26,0.10);
+  --dur-fast: 0.15s; --dur-base: 0.25s;
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+/* warm aspirational backdrop — fixed under the form, only paints while
+   view-login or view-signup is visible (parent .hidden = display:none) */
+#view-login .warm-fx, #view-signup .warm-fx {
+  position: fixed; inset: 0; z-index: -3; pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 38% at 12% 0%, rgba(255,45,120,0.10), transparent 60%),
+    radial-gradient(ellipse 46% 40% at 92% 8%, rgba(255,230,0,0.12), transparent 62%),
+    radial-gradient(ellipse 60% 50% at 70% 100%, rgba(255,45,120,0.05), transparent 60%);
+}
+/* sticky top brand bar */
+#view-login header.aff, #view-signup header.aff {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(250,250,247,.82);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bb-line);
+}
+#view-login .aff-inner, #view-signup .aff-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; max-width: 1140px; margin: 0 auto; padding: 0 26px;
+}
+#view-login .brand, #view-signup .brand { display: flex; align-items: center; gap: 9px; }
+#view-login .brand-mark, #view-signup .brand-mark { width: 32px; height: 32px; }
+#view-login .brand-mark svg, #view-signup .brand-mark svg { width: 32px; height: 32px; }
+#view-login .brand-wm, #view-signup .brand-wm { display: flex; flex-direction: column; line-height: 1; }
+#view-login .brand-wm b, #view-signup .brand-wm b { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--bb-ink); }
+#view-login .brand-wm span, #view-signup .brand-wm span { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--bb-pink); margin-top: 2px; }
+#view-login .aff-back, #view-signup .aff-back {
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 600;
+  color: var(--bb-ink-soft); background: none; border: none;
+  cursor: pointer; padding: 6px 10px; border-radius: var(--r-sm);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+#view-login .aff-back:hover, #view-signup .aff-back:hover { background: rgba(15,15,26,.04); color: var(--bb-ink); }
+
+/* outer auth container */
+#view-login .auth, #view-signup .auth {
+  min-height: calc(100vh - 64px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 24px;
+  font-family: var(--font-body);
+  color: var(--bb-ink);
+}
+/* split card */
+#view-login .acard, #view-signup .acard {
+  width: 100%; max-width: 1000px;
+  display: grid; grid-template-columns: 1.04fr .96fr;
+  background: #fff; border: 1px solid var(--bb-line);
+  border-radius: var(--r-xl); overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+@media (max-width: 820px) {
+  #view-login .acard, #view-signup .acard { grid-template-columns: 1fr; max-width: 440px; }
+  #view-login .abp, #view-signup .abp { display: none; }
+}
+/* brand panel (left) */
+#view-login .abp, #view-signup .abp {
+  position: relative; padding: 46px 44px; overflow: hidden;
+  background: linear-gradient(158deg,#FFF3EC,#FFE9F1 58%,#FFF6E8);
+}
+#view-login .abp::before, #view-signup .abp::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 64% 52% at 16% 4%, rgba(255,45,120,.16), transparent 60%),
+    radial-gradient(ellipse 56% 48% at 92% 96%, rgba(255,230,0,.22), transparent 60%);
+}
+#view-login .abp > *, #view-signup .abp > * { position: relative; z-index: 1; }
+#view-login .abp .eyebrow, #view-signup .abp .eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.1px;
+  padding: 6px 13px; border-radius: var(--r-pill); margin-bottom: 18px;
+  background: var(--bb-pink-tint); color: var(--bb-pink);
+}
+#view-login .abp .eyebrow svg, #view-signup .abp .eyebrow svg { width: 14px; height: 14px; }
+#view-login .abp h2, #view-signup .abp h2 {
+  font-family: var(--font-display);
+  font-size: clamp(25px, 2.5vw, 32px); font-weight: 700;
+  color: var(--bb-ink); line-height: 1.08; letter-spacing: -.02em;
+  margin-bottom: 13px;
+}
+#view-login .abp h2 .acc, #view-signup .abp h2 .acc { color: var(--bb-pink); }
+#view-login .abp .lead, #view-signup .abp .lead {
+  font-size: 15px; color: var(--bb-ink-soft); line-height: 1.5;
+  margin-bottom: 26px; max-width: 340px;
+}
+#view-login .abl, #view-signup .abl {
+  list-style: none; padding: 0; margin: 0 0 28px;
+  display: flex; flex-direction: column; gap: 13px;
+}
+#view-login .abl li, #view-signup .abl li {
+  display: flex; gap: 12px; align-items: center;
+  font-size: 14.5px; color: var(--bb-ink-soft);
+}
+#view-login .abl .ck, #view-signup .abl .ck {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px;
+  background: var(--bb-pink-tint); color: var(--bb-pink);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+#view-login .abl b, #view-signup .abl b { color: var(--bb-ink); }
+#view-login .astat, #view-signup .astat {
+  background: rgba(255,255,255,.7);
+  border: 1px solid var(--bb-line-soft); border-radius: 14px;
+  padding: 15px 18px; display: flex; align-items: center; gap: 14px;
+  backdrop-filter: blur(6px);
+}
+#view-login .astat .aic, #view-signup .astat .aic {
+  flex-shrink: 0; width: 38px; height: 38px; border-radius: 11px;
+  background: var(--bb-pink-tint); color: var(--bb-pink);
+  display: flex; align-items: center; justify-content: center;
+}
+#view-login .astat .aic svg, #view-signup .astat .aic svg { width: 20px; height: 20px; }
+#view-login .astat .lbl, #view-signup .astat .lbl {
+  font-size: 13.5px; line-height: 1.5; color: var(--bb-ink-soft);
+}
+
+/* form panel (right) — strips the legacy .auth-wrap/.auth-card chrome
+   when it lives inside .afp so the wired form blends into the new
+   split-card without double-padding or duplicate shadows. */
+#view-login .afp, #view-signup .afp {
+  padding: 46px 44px; display: flex; flex-direction: column; justify-content: center;
+}
+#view-login .afp .auth-wrap, #view-signup .afp .auth-wrap {
+  min-height: 0; padding: 0; max-width: none;
+}
+#view-login .afp .auth-card, #view-signup .afp .auth-card {
+  background: transparent; padding: 0; border: none; box-shadow: none;
+  max-width: none; margin: 0;
+}
+#view-login .afp .step-h1, #view-signup .afp .step-h1 {
+  font-family: var(--font-display);
+  font-size: 25px; font-weight: 700; color: var(--bb-ink);
+  letter-spacing: -.02em; margin-bottom: 6px;
+}
+#view-login .afp .step-sub, #view-signup .afp .step-sub {
+  font-size: 14px; color: var(--bb-ink-soft); margin-bottom: 22px;
+}
+@media (max-width: 820px) {
+  #view-login .afp, #view-signup .afp { padding: 32px 26px; }
+}
 
 </style>
 </head>
@@ -1208,58 +1369,95 @@
 
 <!-- ════════════════════ LOGIN ════════════════════ -->
 <div id="view-login" class="hidden">
-  <nav class="pub-nav">
-    <div class="brand">
-      <img src="/favicon.svg?v=rocket-20260421" alt="Boost Boss">
-      <span class="name">Boost Boss</span>
-      <span class="tag" data-t="brand.tag">AFFILIATE</span>
-    </div>
-    <div>
-      <button class="ghost-btn" id="login-to-welcome" data-t="common.back_arrow">← Back</button>
-    </div>
-  </nav>
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <h1 class="step-h1" data-t="login.title">Welcome back</h1>
-      <p class="step-sub" data-t="login.sub">Sign in to your affiliate dashboard.</p>
-      <div id="err-login" class="err"></div>
-      <form id="form-login" novalidate>
-        <div class="field">
-          <label for="li-email" data-t="login.email">Email</label>
-          <input type="email" id="li-email" autocomplete="email" required>
+  <div class="warm-fx"></div>
+  <header class="aff"><div class="aff-inner">
+    <a class="brand" href="#" data-affiliate-route="home" style="cursor:pointer;text-decoration:none">
+      <span class="brand-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/></svg></span>
+      <span class="brand-wm"><b>Boost Boss</b><span>Affiliates</span></span>
+    </a>
+    <button class="aff-back" id="login-to-welcome" type="button" data-t="common.back_arrow">← Back</button>
+  </div></header>
+
+  <main class="auth">
+    <div class="acard">
+      <aside class="abp">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Boost Boss Affiliate Program</span>
+        <h2>Your audience.<br>Your link. Your <span class="acc">payout</span>.</h2>
+        <p class="lead">Promote products you actually believe in, earn a share of every sale, and cash out every week.</p>
+        <ul class="abl">
+          <li><span class="ck">✓</span><span><b>70%</b> affiliate pool split</span></li>
+          <li><span class="ck">✓</span><span><b>Weekly</b> PayPal payouts</span></li>
+          <li><span class="ck">✓</span><span><b>click_id</b> attribution on every link</span></li>
+        </ul>
+        <div class="astat">
+          <div class="aic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+          <div class="lbl">A marketplace built to help creators earn from the products they actually believe in — your audience, your links, your call.</div>
         </div>
-        <div class="field">
-          <label for="li-pw" data-t="login.password">Password</label>
-          <input type="password" id="li-pw" autocomplete="current-password" required>
-        </div>
-        <button type="submit" id="li-submit" class="btn-primary" style="width:100%;" data-t="login.submit">Sign in</button>
-      </form>
-      <div class="auth-toggle">
-        <span data-t="login.new_here">New here?</span> <button type="button" id="login-to-signup" data-t="login.create_account">Create an account</button>
-      </div>
-      <div class="auth-foot">
-        <span data-t="login.foot_prefix">By signing in you agree to the</span>
-        <a href="https://boostboss.ai/terms" data-t="common.terms">Terms of Service</a> <span data-t="common.and">and</span>
-        <a href="https://boostboss.ai/privacy" data-t="common.privacy">Privacy Policy</a>.
-      </div>
-    </div>
-  </div>
+      </aside>
+
+      <section class="afp">
+        <div class="auth-wrap">
+          <div class="auth-card">
+            <h1 class="step-h1" data-t="login.title">Welcome back</h1>
+            <p class="step-sub" data-t="login.sub">Sign in to your affiliate dashboard.</p>
+            <div id="err-login" class="err"></div>
+            <form id="form-login" novalidate>
+              <div class="field">
+                <label for="li-email" data-t="login.email">Email</label>
+                <input type="email" id="li-email" autocomplete="email" required>
+              </div>
+              <div class="field">
+                <label for="li-pw" data-t="login.password">Password</label>
+                <input type="password" id="li-pw" autocomplete="current-password" required>
+              </div>
+              <button type="submit" id="li-submit" class="btn-primary" style="width:100%;" data-t="login.submit">Sign in</button>
+            </form>
+            <div class="auth-toggle">
+              <span data-t="login.new_here">New here?</span> <button type="button" id="login-to-signup" data-t="login.create_account">Create an account</button>
+            </div>
+            <div class="auth-foot">
+              <span data-t="login.foot_prefix">By signing in you agree to the</span>
+              <a href="https://boostboss.ai/terms" data-t="common.terms">Terms of Service</a> <span data-t="common.and">and</span>
+              <a href="https://boostboss.ai/privacy" data-t="common.privacy">Privacy Policy</a>.
+            </div>
+          </div><!-- /.auth-card -->
+        </div><!-- /.auth-wrap -->
+      </section><!-- /.afp -->
+    </div><!-- /.acard -->
+  </main><!-- /.auth -->
 </div>
 
 <!-- ════════════════════ SIGNUP (3 steps) ════════════════════ -->
 <div id="view-signup" class="hidden">
-  <nav class="pub-nav">
-    <div class="brand">
-      <img src="/favicon.svg?v=rocket-20260421" alt="Boost Boss">
-      <span class="name">Boost Boss</span>
-      <span class="tag" data-t="brand.tag">AFFILIATE</span>
-    </div>
-    <div>
-      <button class="ghost-btn" id="signup-to-welcome" data-t="common.back_arrow">← Back</button>
-    </div>
-  </nav>
-  <div class="auth-wrap">
-    <div class="auth-card">
+  <div class="warm-fx"></div>
+  <header class="aff"><div class="aff-inner">
+    <a class="brand" href="#" data-affiliate-route="home" style="cursor:pointer;text-decoration:none">
+      <span class="brand-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/></svg></span>
+      <span class="brand-wm"><b>Boost Boss</b><span>Affiliates</span></span>
+    </a>
+    <button class="aff-back" id="signup-to-welcome" type="button" data-t="common.back_arrow">← Back</button>
+  </div></header>
+
+  <main class="auth">
+    <div class="acard">
+      <aside class="abp">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Join free · 60 seconds</span>
+        <h2>Start earning on what you already <span class="acc">recommend</span>.</h2>
+        <p class="lead">No application gate, no minimums. Create your account, pick your platform, and grab a tracked link.</p>
+        <ul class="abl">
+          <li><span class="ck">✓</span><span><b>70%</b> affiliate pool split</span></li>
+          <li><span class="ck">✓</span><span><b>Weekly</b> PayPal payouts</span></li>
+          <li><span class="ck">✓</span><span><b>No cap</b> on earnings</span></li>
+        </ul>
+        <div class="astat">
+          <div class="aic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+          <div class="lbl">Turn the recommendations you already make into commission — on the products you choose to share with your audience.</div>
+        </div>
+      </aside>
+
+      <section class="afp">
+        <div class="auth-wrap">
+          <div class="auth-card">
       <div class="step-pips">
         <div class="step-pip" id="pip-1"></div>
         <div class="step-pip" id="pip-2"></div>
@@ -1379,8 +1577,11 @@
           <a href="https://boostboss.ai/privacy" data-t="common.privacy">Privacy Policy</a>.
         </div>
       </div>
-    </div>
-  </div>
+          </div><!-- /.auth-card -->
+        </div><!-- /.auth-wrap -->
+      </section><!-- /.afp -->
+    </div><!-- /.acard -->
+  </main><!-- /.auth -->
 </div>
 
 <!-- ════════════════════ DASHBOARD ════════════════════ -->
