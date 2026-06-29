@@ -10,8 +10,11 @@ How to read this:
 ## Leadership
 | Agent | Role | Email | Facing |
 |---|---|---|---|
-| **Hermes** | Secretary (Chairman's interface) | hermes@boostboss.ai | internal (Chairman only) |
-| **Atlas** | CEO / Orchestrator | atlas@boostboss.ai | internal |
+| **Kristal** | Secretary (Chairman's interface) | kristal@boostboss.ai | internal (Chairman only) |
+| **Elon** | CEO / Orchestrator | elon@boostboss.ai | internal |
+
+> Names **confirmed** by the Chairman. (Note: the *runtime platform* is "Hermes Agent" by Nous —
+> distinct from Kristal the secretary agent. Different things that happen to share a Greek name.)
 
 ## Engineering (internal)
 | Agent | Role | Email | Facing |
@@ -71,7 +74,7 @@ for the outside world. So only external-facing functions need a real, monitored 
 - `abuse@`, `privacy@` — compliance/legal standard (routes to Aegis)
 
 ### Internal — OPTIONAL (only for labeling / logins; not needed to function)
-Atlas · Hermes · Forge · Argus · Lumen · Helm · Ledger · Sentinel · Pulse · Quill · Iris
+Elon · Kristal · Forge · Argus · Lumen · Helm · Ledger · Sentinel · Pulse · Quill · Iris
 Give them handles (atlas@, hermes@ …) only if you want per-agent logins or labels.
 
 ---
