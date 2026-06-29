@@ -1,0 +1,35 @@
+# Gate Policy — what runs free vs what waits for you
+
+The rule: **reversible runs, irreversible waits.** Anything an agent can undo cheaply, it just
+does. Anything that spends money, sends to a stranger, or changes production goes to the
+`action_queue` and waits for the Chairman's tap in Slack `#approvals`.
+
+## 🟢 Runs free (no approval)
+- Research, discovery, listening, intent capture.
+- Drafting, personalizing, scheduling (not sending).
+- Internal analysis, scoring, allocation modeling.
+- Replying to **inbound** DMs/questions within platform rules.
+- Onboarding a **self-serve** signup (they came to us).
+- Writing to shared memory; compiling reports.
+
+## 🔴 Waits for approval (writes to `action_queue`)
+| Action | Why gated |
+|---|---|
+| **Cold email / first-touch DM** to strangers | deliverability + legal (CAN-SPAM/GDPR); protect the domain |
+| **Money out** — payouts, refunds, any spend | irreversible; never autonomous |
+| **Production deploy** (`git push` / Vercel) | can break the live product |
+| **Pricing / take-rate changes** | revenue-affecting |
+| **Anything customer-facing in your name** at scale | brand risk |
+
+## How a gate works
+1. Agent prepares the action fully (e.g., 30 personalized emails) and writes one row to
+   `action_queue` with a human-readable `summary` and the full `detail` payload.
+2. It appears in the morning brief and in `#approvals` as a tap-to-approve item.
+3. Chairman approves → the proposing agent executes the stored payload. Rejects → it's dropped.
+4. Nothing in this list ever executes without that decision.
+
+## Loosening over time
+The cold-outbound gate is the one meant to relax. Once the sending domain is warmed and
+Benna-Reach has a proven, low-complaint track record, raise the auto-send threshold (e.g.,
+auto-send to high-fit prospects below a daily cap; keep edge cases gated). Money and deploys
+stay gated permanently.
