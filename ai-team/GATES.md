@@ -21,6 +21,24 @@ does. Anything that spends money, sends to a stranger, or changes production goe
 | **Pricing / take-rate changes** | revenue-affecting |
 | **Anything customer-facing in your name** at scale | brand risk |
 
+## 💰 Money-safety invariants (hard — machine-enforced, on top of the human gate)
+Money flows both ways: pay-in from advertisers, payout to publishers. To guarantee we never pay
+out more than we took in:
+
+1. **Payout basis = cleared, collected advertiser revenue × publisher share. Never accrued/promised.**
+   Each publisher earns a *fraction* of the revenue their inventory generated, so we structurally
+   cannot owe more than we collected. BB's take (e.g. 30%) is the margin, realized only after clearing.
+2. **Clear-before-pay.** Only count advertiser payments that have settled AND passed the
+   refund/chargeback window. Never pay on pending/uncleared funds.
+3. **Solvency batch guard.** Before any payout release: `Σ(batch) ≤ available_cleared_balance − reserve`.
+   A batch that fails is **blocked** — not even presented for approval.
+4. **Reserve buffer.** Hold a % (accountant-set) against chargebacks/disputes/fraud clawbacks
+   (cf. the 30-day affiliate clawback). No earnings accrue on invalid/fraud traffic.
+
+> Status: this policy is documented; the **enforcement is a product build task for the Finance
+> pillar** (cleared-revenue accounting + the solvency check). Until built, ALL payouts are
+> manually gated — Chairman verifies balance covers the batch before approving.
+
 ## How a gate works
 1. Agent prepares the action fully (e.g., 30 personalized emails) and writes one row to
    `action_queue` with a human-readable `summary` and the full `detail` payload.
