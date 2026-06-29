@@ -1127,17 +1127,13 @@
 @media(prefers-reduced-motion:reduce){#view-welcome, #view-welcome *::before, #view-welcome *::after{animation:none!important;transition:none!important}}
 
 /* ═══════════ AUTH PANES (scoped to #view-login + #view-signup) ═══════════
-   Full port of the new Affiliate Signin/Signup designs.
-   · Sign in: keeps wired IDs #li-email, #li-pw, #li-submit, #form-login,
-     #err-login; adds visual-only OAuth + Show/Remember/Forgot/Join-free.
-   · Sign up: 3-step wizard rewritten to match the new design's flow:
-       step 1 = creds (#sg-name, #sg-email, #sg-pw)
-       step 2 = audience (#sg-channel, #sg-size, #sg-niche, #sg-promo-chips)
-       step 3 = payouts (#sg-paypal, #sg-country, #sg-terms)
-     Step wrapper IDs (#step-1/2/3, #pip-1/2/3, #s1-next, #s2-back,
-     #s2-next, #s3-back, #s3-submit) preserved so existing show/hide +
-     click handlers still find their targets. account_type is defaulted
-     to 'individual' since the enterprise path isn't a near-term flow. */
+   Visual-skin port of the new Affiliate Signin/Signup designs onto the
+   existing wired auth flow. Every existing form-field ID (#li-email,
+   #li-pw, #li-submit, #s1-next, #s2-platform, #s2-handle, #s2-followers,
+   #s2-topic, #s3-email, #s3-pw, #s3-pw2, #s3-ref, #s3-submit, etc.) is
+   preserved — only the wrapping chrome changes. Wired auth backend stays
+   untouched. Both panes share the warm split-card aesthetic + left brand
+   panel; the right panel just contains whichever form belongs to the view. */
 #view-login, #view-signup {
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1528,154 +1524,125 @@
       <section class="afp">
         <div class="auth-wrap">
           <div class="auth-card">
+      <div class="step-pips">
+        <div class="step-pip" id="pip-1"></div>
+        <div class="step-pip" id="pip-2"></div>
+        <div class="step-pip" id="pip-3"></div>
+      </div>
 
-            <!-- progress dots — top of the right form panel -->
-            <div class="pdots">
-              <span class="pd on" id="pip-1"></span>
-              <span class="pd" id="pip-2"></span>
-              <span class="pd" id="pip-3"></span>
-            </div>
+      <!-- Step 1: account type -->
+      <div id="step-1">
+        <h1 class="step-h1" data-t="signup.s1_title">Tell us about you</h1>
+        <p class="step-sub" data-t="signup.s1_sub">Are you signing up as an individual creator or a registered business?</p>
+        <div class="radio-row" style="margin-bottom:24px;">
+          <div class="radio-card" data-account-type="individual">
+            <div class="lbl" data-t="signup.s1_individual">Individual</div>
+            <div class="dsc" data-t="signup.s1_individual_d">Creator, influencer, newsletter writer, anyone with an audience.</div>
+          </div>
+          <div class="radio-card" data-account-type="enterprise">
+            <div class="lbl" data-t="signup.s1_enterprise">Enterprise</div>
+            <div class="dsc" data-t="signup.s1_enterprise_d">Registered business managing affiliate distribution at scale.</div>
+          </div>
+        </div>
+        <div id="err-step-1" class="err"></div>
+        <div class="step-actions">
+          <button type="button" id="s1-next" class="btn-primary" data-t="common.continue">Continue</button>
+        </div>
+      </div>
 
-            <!-- ─── STEP 1 — account (name + email + password) ─── -->
-            <div id="step-1">
-              <p class="pstep">Step 1 of 3</p>
-              <h1 class="step-h1">Create your account</h1>
-              <p class="step-sub">Free forever — you only ever share the upside.</p>
+      <!-- Step 2: platform + audience -->
+      <div id="step-2" class="hidden">
+        <h1 class="step-h1" data-t="signup.s2_title">Where do you promote?</h1>
+        <p class="step-sub" data-t="signup.s2_sub">Pick your primary platform. You can add more later — this just helps us route the best offers your way.</p>
 
-              <div class="oauth">
-                <button type="button" class="obtn" onclick="alert('Google sign-up is coming soon — please use email for now.')">
-                  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.02-3.7H.92v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.98 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.92a9 9 0 0 0 0 8.1l3.06-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.59C13.46.9 11.43 0 9 0A9 9 0 0 0 .92 4.95l3.06 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
-                  Sign up with Google
-                </button>
-              </div>
-              <div class="or">or with email</div>
+        <div class="field">
+          <label for="s2-platform" data-t="signup.s2_platform">Primary platform</label>
+          <select id="s2-platform">
+            <option value="" disabled selected data-t="signup.s2_platform_ph">Select your platform…</option>
+            <option value="twitter">X / Twitter</option>
+            <option value="tiktok">TikTok</option>
+            <option value="youtube">YouTube</option>
+            <option value="instagram">Instagram</option>
+            <option value="reddit">Reddit</option>
+            <option value="discord">Discord</option>
+            <option value="telegram">Telegram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="newsletter" data-t="signup.s2_platform_newsletter">Newsletter (Substack, Beehiiv, etc.)</option>
+            <option value="blog" data-t="signup.s2_platform_blog">Blog / website</option>
+            <option value="podcast" data-t="signup.s2_platform_podcast">Podcast</option>
+            <option value="twitch">Twitch</option>
+            <option value="other" data-t="signup.s2_platform_other">Other / not sure</option>
+          </select>
+        </div>
 
-              <div id="err-step-1" class="err"></div>
-              <div class="field">
-                <label for="sg-name">Full name</label>
-                <div class="inp"><input type="text" id="sg-name" placeholder="Maya Chen" autocomplete="name"></div>
-              </div>
-              <div class="field">
-                <label for="sg-email">Email</label>
-                <div class="inp"><input type="email" id="sg-email" placeholder="you@email.com" autocomplete="email" required></div>
-              </div>
-              <div class="field">
-                <label for="sg-pw">Password</label>
-                <div class="inp">
-                  <input type="password" id="sg-pw" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required>
-                  <button type="button" class="toggle" data-for="sg-pw">Show</button>
-                </div>
-              </div>
-              <button type="button" id="s1-next" class="btn-primary btn-block" style="width:100%;">Continue →</button>
-            </div>
+        <div class="field">
+          <label for="s2-handle" data-t="signup.s2_handle">Your handle / URL</label>
+          <input type="text" id="s2-handle" placeholder="@yourname or full URL" data-t-placeholder="signup.s2_handle_ph">
+          <div class="hint" id="s2-handle-hint" data-t="signup.s2_handle_hint">Example: @yourhandle</div>
+        </div>
 
-            <!-- ─── STEP 2 — audience ─── -->
-            <div id="step-2" class="hidden">
-              <p class="pstep">Step 2 of 3</p>
-              <h1 class="step-h1">Tell us about your audience</h1>
-              <p class="step-sub">This helps us surface the products that'll pay you best. Takes 20 seconds.</p>
+        <div class="field">
+          <label for="s2-followers" data-t="signup.s2_followers">Audience size</label>
+          <select id="s2-followers">
+            <option value="" disabled selected data-t="signup.s2_followers_ph">Select range…</option>
+            <option value="under_1k" data-t="signup.s2_followers_under_1k">Under 1,000</option>
+            <option value="1k_10k">1,000 – 10,000</option>
+            <option value="10k_100k">10,000 – 100,000</option>
+            <option value="100k_1m" data-t="signup.s2_followers_100k_1m">100,000 – 1 million</option>
+            <option value="over_1m" data-t="signup.s2_followers_over_1m">Over 1 million</option>
+            <option value="other" data-t="signup.s2_platform_other">Other / not sure</option>
+          </select>
+        </div>
 
-              <div id="err-step-2" class="err"></div>
-              <div class="field">
-                <label for="sg-channel">Where will you mostly share?</label>
-                <div class="inp">
-                  <select id="sg-channel">
-                    <option value="" disabled selected>Pick your main channel</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="newsletter">Newsletter / blog</option>
-                    <option value="twitter">X / Twitter</option>
-                    <option value="instagram">Instagram / TikTok</option>
-                    <option value="podcast">Podcast</option>
-                    <option value="discord">Discord / community</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-              <div class="qrow">
-                <div class="field">
-                  <label for="sg-size">Audience size</label>
-                  <div class="inp">
-                    <select id="sg-size">
-                      <option value="" disabled selected>Select</option>
-                      <option value="under_1k">Under 1K</option>
-                      <option value="1k_10k">1K – 10K</option>
-                      <option value="10k_100k">10K – 100K</option>
-                      <option value="100k_1m">100K – 1M</option>
-                      <option value="over_1m">1M+</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="field">
-                  <label for="sg-niche">Primary niche</label>
-                  <div class="inp">
-                    <select id="sg-niche">
-                      <option value="" disabled selected>Select</option>
-                      <option value="ai-tech">AI &amp; tech tools</option>
-                      <option value="saas">SaaS &amp; productivity</option>
-                      <option value="marketing">Marketing &amp; growth</option>
-                      <option value="design">Design &amp; creative</option>
-                      <option value="finance">Finance</option>
-                      <option value="education">Education</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="field">
-                <label>What do you promote today?</label>
-                <div class="chips" id="sg-promo-chips">
-                  <button type="button" class="chip" data-v="software">Software</button>
-                  <button type="button" class="chip" data-v="courses">Courses</button>
-                  <button type="button" class="chip" data-v="physical">Physical goods</button>
-                  <button type="button" class="chip" data-v="nothing">Nothing yet</button>
-                </div>
-              </div>
-              <div class="navrow">
-                <button type="button" id="s2-back" class="btn-secondary">← Back</button>
-                <button type="button" id="s2-next" class="btn-primary">Continue →</button>
-              </div>
-            </div>
+        <div class="field">
+          <label for="s2-topic" data-t="signup.s2_topic">What does your audience care about?</label>
+          <input type="text" id="s2-topic" placeholder="e.g. AI tools, developer productivity, marketing, gaming…" maxlength="120" data-t-placeholder="signup.s2_topic_ph">
+          <div class="hint" data-t="signup.s2_topic_hint">Free text — we'll use this to match the right offers to you.</div>
+        </div>
 
-            <!-- ─── STEP 3 — payouts (PayPal + country + terms) ─── -->
-            <div id="step-3" class="hidden">
-              <p class="pstep">Step 3 of 3</p>
-              <h1 class="step-h1">Set up your payouts</h1>
-              <p class="step-sub">Earnings clear weekly and land here every Friday. You can change this anytime.</p>
+        <div id="err-step-2" class="err"></div>
+        <div class="step-actions">
+          <button type="button" id="s2-back" class="btn-secondary" data-t="common.back">Back</button>
+          <button type="button" id="s2-next" class="btn-primary" data-t="common.continue">Continue</button>
+        </div>
+      </div>
 
-              <div id="err-step-3" class="err"></div>
-              <div class="field">
-                <label for="sg-paypal">PayPal email</label>
-                <div class="inp"><input type="email" id="sg-paypal" placeholder="payouts@email.com" autocomplete="email"></div>
-              </div>
-              <div class="field">
-                <label for="sg-country">Country / region</label>
-                <div class="inp">
-                  <select id="sg-country">
-                    <option value="" disabled selected>Select your country</option>
-                    <option>United States</option>
-                    <option>United Kingdom</option>
-                    <option>Canada</option>
-                    <option>Australia</option>
-                    <option>Germany</option>
-                    <option>Taiwan</option>
-                    <option>Japan</option>
-                    <option>Singapore</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-              </div>
-              <div class="frow" style="align-items:flex-start">
-                <label style="align-items:flex-start">
-                  <input type="checkbox" id="sg-terms" style="margin-top:3px">
-                  I agree to the <a href="https://boostboss.ai/terms" target="_blank">Affiliate terms</a> &amp; <a href="https://boostboss.ai/privacy" target="_blank">Privacy policy</a>.
-                </label>
-              </div>
-              <div class="navrow">
-                <button type="button" id="s3-back" class="btn-secondary">← Back</button>
-                <button type="button" id="s3-submit" class="btn-primary">Finish &amp; start earning →</button>
-              </div>
-              <p class="legal">Payouts require a verified PayPal account. You won't be charged anything — affiliates only ever share the upside.</p>
-            </div>
+      <!-- Step 3: account credentials -->
+      <div id="step-3" class="hidden">
+        <h1 class="step-h1" data-t="signup.s3_title">Create your account</h1>
+        <p class="step-sub" data-t="signup.s3_sub">Last step. No email confirmation needed — you'll land straight in your dashboard.</p>
+
+        <div id="err-step-3" class="err"></div>
+
+        <div class="field">
+          <label for="s3-email" data-t="login.email">Email</label>
+          <input type="email" id="s3-email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="s3-pw" data-t="login.password">Password</label>
+          <input type="password" id="s3-pw" autocomplete="new-password" minlength="8" required>
+          <div class="hint" data-t="signup.s3_pw_hint">At least 8 characters.</div>
+        </div>
+        <div class="field">
+          <label for="s3-pw2" data-t="signup.s3_pw2">Confirm password</label>
+          <input type="password" id="s3-pw2" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="field">
+          <label for="s3-ref"><span data-t="signup.s3_ref">Referral code</span> <span style="color:var(--muted);font-weight:500;" data-t="signup.s3_ref_optional">(optional)</span></label>
+          <input type="text" id="s3-ref" maxlength="40" placeholder="Have one from a friend? Paste it here." data-t-placeholder="signup.s3_ref_ph">
+        </div>
+
+        <div class="step-actions">
+          <button type="button" id="s3-back" class="btn-secondary" data-t="common.back">Back</button>
+          <button type="button" id="s3-submit" class="btn-primary" data-t="signup.s3_submit">Create account</button>
+        </div>
+
+        <div class="auth-foot">
+          <span data-t="signup.s3_foot_prefix">By creating an account you agree to the</span>
+          <a href="https://boostboss.ai/terms" data-t="common.terms">Terms of Service</a> <span data-t="common.and">and</span>
+          <a href="https://boostboss.ai/privacy" data-t="common.privacy">Privacy Policy</a>.
+        </div>
+      </div>
           </div><!-- /.auth-card -->
         </div><!-- /.auth-wrap -->
       </section><!-- /.afp -->
@@ -2665,12 +2632,11 @@ function setStep(n) {
   ['step-1', 'step-2', 'step-3'].forEach((id, i) => {
     document.getElementById(id).classList.toggle('hidden', (i + 1) !== n);
   });
-  // New design's .pdots use the .on class to mark visited/active pips.
-  // Light up every pip with index <= current step.
   ['pip-1', 'pip-2', 'pip-3'].forEach((id, i) => {
     const pip = document.getElementById(id);
-    if (!pip) return;
-    pip.classList.toggle('on', (i + 1) <= n);
+    pip.classList.remove('active', 'done');
+    if (i + 1 === n) pip.classList.add('active');
+    else if (i + 1 < n) pip.classList.add('done');
   });
 }
 
@@ -2708,86 +2674,77 @@ document.querySelectorAll('.toggle[data-for]').forEach(function (btn) {
   });
 });
 
-// ── Step 1: credentials (name + email + password) ─────────────────
-// New design's step 1 collects creds first. account_type defaulted to
-// 'individual' since the enterprise path isn't a near-term flow.
-signupState.account_type = 'individual';
-
+// ── Step 1: account type ───────────────────────────────────────────
+document.querySelectorAll('[data-account-type]').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('[data-account-type]').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    signupState.account_type = card.getAttribute('data-account-type');
+    clearErr('err-step-1');
+  });
+});
 document.getElementById('s1-next').addEventListener('click', () => {
-  clearErr('err-step-1');
-  const name  = (document.getElementById('sg-name')   || {}).value;
-  const email = (document.getElementById('sg-email')  || {}).value;
-  const pw    = (document.getElementById('sg-pw')     || {}).value;
-  const nameT  = (name  || '').trim();
-  const emailT = (email || '').trim().toLowerCase();
-  if (!nameT)              { showErr('err-step-1', 'Please enter your full name.'); return; }
-  if (!emailT || !emailT.includes('@')) { showErr('err-step-1', 'Please enter a valid email.'); return; }
-  if (!pw || pw.length < 8) { showErr('err-step-1', 'Password must be at least 8 characters.'); return; }
-  signupState.display_name = nameT;
-  signupState.email        = emailT;
-  signupState.password     = pw;
+  if (!signupState.account_type) {
+    showErr('err-step-1', affT('errors.pick_one'));
+    return;
+  }
   setStep(2);
 });
 
-// ── Step 2: audience (channel + size + niche + chips) ─────────────
-// Chips are multi-select; tracked in signupState.promotes for the
-// payload (currently not consumed by the backend, but kept for forward
-// compatibility when /api/auth grows a 'promotes' field).
-signupState.promotes = [];
-document.querySelectorAll('#sg-promo-chips .chip').forEach(function (c) {
-  c.addEventListener('click', function () {
-    c.classList.toggle('on');
-    const v = c.getAttribute('data-v');
-    const i = signupState.promotes.indexOf(v);
-    if (c.classList.contains('on') && i === -1) signupState.promotes.push(v);
-    else if (!c.classList.contains('on') && i !== -1) signupState.promotes.splice(i, 1);
-  });
+// ── Step 2: platform + audience ────────────────────────────────────
+// Per-platform handle examples — looked up via affT() each time the
+// platform changes so the hint translates with the rest of the page.
+function _platformHint(v) {
+  const k = 'signup.platform_hint.' + (v || '');
+  const t = affT(k);
+  if (t) return t;
+  return affT('signup.platform_hint.default') || 'Where can people find you?';
+}
+document.getElementById('s2-platform').addEventListener('change', (e) => {
+  const v = e.target.value;
+  signupState.primary_platform = v;
+  const hint = document.getElementById('s2-handle-hint');
+  hint.textContent = _platformHint(v);
 });
-
 document.getElementById('s2-back').addEventListener('click', () => setStep(1));
 document.getElementById('s2-next').addEventListener('click', () => {
   clearErr('err-step-2');
-  const channel = (document.getElementById('sg-channel') || {}).value;
-  const size    = (document.getElementById('sg-size')    || {}).value;
-  const niche   = (document.getElementById('sg-niche')   || {}).value;
-  if (!channel) { showErr('err-step-2', 'Please pick your main channel.'); return; }
-  if (!size)    { showErr('err-step-2', 'Please pick your audience size.'); return; }
-  if (!niche)   { showErr('err-step-2', 'Please pick your primary niche.'); return; }
-  // Map new design's vocabulary onto wired backend fields
-  signupState.primary_platform = channel;
-  signupState.followers_range  = size;
-  signupState.audience_topic   = niche;
-  signupState.platform_handle  = ''; // optional, not collected by new design
+  const platform = document.getElementById('s2-platform').value;
+  const handle   = document.getElementById('s2-handle').value.trim();
+  const folls    = document.getElementById('s2-followers').value;
+  const topic    = document.getElementById('s2-topic').value.trim();
+  if (!platform) { showErr('err-step-2', affT('errors.pick_platform')); return; }
+  if (!handle)   { showErr('err-step-2', affT('errors.pick_handle')); return; }
+  if (!folls)    { showErr('err-step-2', affT('errors.pick_audience_size')); return; }
+  signupState.primary_platform = platform;
+  signupState.platform_handle  = handle;
+  signupState.followers_range  = folls;
+  signupState.audience_topic   = topic;
   setStep(3);
 });
 
-// ── Step 3: payouts (PayPal email + country + terms) → submit ─────
-// PayPal email + country are surfaced now, but stored locally and
-// passed to /api/auth?action=save_payout_method as a follow-up POST
-// AFTER the signup succeeds. The primary signup POST only needs the
-// account/audience fields the backend already accepts.
+// ── Step 3: credentials → submit ───────────────────────────────────
 document.getElementById('s3-back').addEventListener('click', () => setStep(2));
 document.getElementById('s3-submit').addEventListener('click', async () => {
   clearErr('err-step-3');
-  const paypal  = ((document.getElementById('sg-paypal')  || {}).value || '').trim().toLowerCase();
-  const country = ((document.getElementById('sg-country') || {}).value || '').trim();
-  const terms   = !!(document.getElementById('sg-terms') && document.getElementById('sg-terms').checked);
-  if (!terms) { showErr('err-step-3', 'You must accept the terms to finish.'); return; }
+  const email = document.getElementById('s3-email').value.trim().toLowerCase();
+  const pw1   = document.getElementById('s3-pw').value;
+  const pw2   = document.getElementById('s3-pw2').value;
+  const ref   = document.getElementById('s3-ref').value.trim();
+  if (!email)            { showErr('err-step-3', affT('errors.enter_email')); return; }
+  if (pw1.length < 8)    { showErr('err-step-3', affT('errors.pw_too_short')); return; }
+  if (pw1 !== pw2)       { showErr('err-step-3', affT('errors.pw_mismatch')); return; }
   const submitBtn = document.getElementById('s3-submit');
-  submitBtn.disabled = true; submitBtn.textContent = 'Creating your account…';
+  submitBtn.disabled = true; submitBtn.textContent = affT('signup.creating');
   try {
     const payload = {
-      email:               signupState.email,
-      password:            signupState.password,
-      display_name:        signupState.display_name,
-      account_type:        signupState.account_type || 'individual',
+      email, password: pw1,
+      account_type:        signupState.account_type,
       primary_platform:    signupState.primary_platform,
-      platform_handle:     signupState.platform_handle || '',
+      platform_handle:     signupState.platform_handle,
       followers_range:     signupState.followers_range,
       audience_topic:      signupState.audience_topic || null,
-      referral_code_used:  null,
-      payout_paypal_email: paypal || null,
-      payout_country:      country || null,
+      referral_code_used:  ref || null,
     };
     const r = await fetch(`${API_BASE}/api/auth?action=affiliate_signup`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2802,8 +2759,8 @@ document.getElementById('s3-submit').addEventListener('click', async () => {
     // dashboard with no token. Existing users (with another role + same
     // password) still get a session back and proceed normally.
     if (j.requires_confirmation) {
-      const submitBtn = document.getElementById('s3-submit');
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Finish & start earning →'; }
+      const submitBtn = document.querySelector('#form-signup-3 button[type=submit]') || document.querySelector('#form-signup button[type=submit]');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = affT('signup.s3_submit'); }
       // Inline confirmation banner — minimal DOM surgery, no new routes.
       const host = document.querySelector('#view-signup') || document.body;
       const existing = document.getElementById('aff-confirm-banner');
@@ -2823,8 +2780,8 @@ document.getElementById('s3-submit').addEventListener('click', async () => {
     setSession({ token: j.token, user: j.user });
     await loadDashboard();
   } catch (err) {
-    showErr('err-step-3', err.message || 'Signup failed. Please try again.');
-    submitBtn.disabled = false; submitBtn.textContent = 'Finish & start earning →';
+    showErr('err-step-3', err.message || affT('errors.signup_failed'));
+    submitBtn.disabled = false; submitBtn.textContent = affT('signup.s3_submit');
   }
 });
 
@@ -2845,7 +2802,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     if (r.status === 403 && j.code === 'not_affiliate') {
       // Has Boost Boss auth but never signed up as affiliate — route to signup
       showView('signup'); setStep(1);
-      document.getElementById('sg-email').value = email;
+      document.getElementById('s3-email').value = email;
       showErr('err-step-1', affT('errors.not_affiliate'));
       btn.disabled = false; btn.textContent = affT('login.submit');
       return;
@@ -3173,7 +3130,7 @@ async function loadDashboard() {
       clearSession();
       showView('signup'); setStep(1);
       const email = (session.user && session.user.email) || '';
-      if (email) document.getElementById('sg-email').value = email;
+      if (email) document.getElementById('s3-email').value = email;
       return;
     }
     me = await meR.json();
