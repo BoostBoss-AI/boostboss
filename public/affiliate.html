@@ -3669,6 +3669,22 @@ function _affBoot() {
   if (session && session.token) {
     loadDashboard().catch(() => showView('login'));
   } else {
+    // Deep-link support from boostboss.ai homepage role-split dropdown:
+    //   /affiliate?action=signin → open login view immediately
+    //   /affiliate?action=signup → open signup view at step 1
+    // Skips the "land on welcome, click CTA, switch view" two-step. If no
+    // action param or session, fall through to the welcome landing.
+    try {
+      const action = new URLSearchParams(window.location.search).get('action');
+      if (action === 'signin' || action === 'login') {
+        showView('login');
+        return;
+      }
+      if (action === 'signup' || action === 'join') {
+        setStep(1); showView('signup');
+        return;
+      }
+    } catch (_) { /* URLSearchParams missing on ancient browsers — fall through */ }
     showView('welcome');
   }
 }

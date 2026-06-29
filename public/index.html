@@ -137,6 +137,110 @@
   .btn-primary:hover { background: var(--bb-pink-dark); border-color: var(--bb-pink-dark); box-shadow: var(--glow-pink); transform: translateY(-2px); }
   .btn-ghost-d { background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.18); }
   .btn-ghost-d:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.32); transform: translateY(-2px); }
+
+  /* ────────────── ROLE-SPLIT DROPDOWN (Sign in + Start free) ──────────────
+     AppLovin-style. Hover the trigger button OR tab+enter on it → small
+     white card drops down with 3 rows (Advertise / Monetize / Earn). One
+     entry per role so a publisher / advertiser / affiliate self-selects
+     their door before committing to a wizard. Pure CSS hover-open; the
+     small JS toggle below adds aria-expanded + outside-click close for
+     keyboard + touch. */
+  .nav-dd { position: relative; display: inline-block; }
+  .nav-dd .nav-dd-trigger {
+    /* Trigger inherits .btn / .btn-ghost-d or .btn-primary visual,
+       plus a tiny chevron indicator. */
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-dd .nav-dd-trigger::after {
+    content: ''; width: 8px; height: 8px;
+    border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform var(--dur-fast) var(--ease-snappy);
+  }
+  .nav-dd.open .nav-dd-trigger::after,
+  .nav-dd:hover .nav-dd-trigger::after { transform: translateY(0) rotate(-135deg); }
+
+  .nav-dd-menu {
+    position: absolute; right: 0; top: 100%;
+    /* hover-bridge: top padding keeps the menu open as the cursor
+       crosses the gap between the trigger and the card. */
+    padding-top: 12px;
+    min-width: 320px;
+    opacity: 0; pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity var(--dur-fast) var(--ease-snappy),
+                transform var(--dur-fast) var(--ease-snappy);
+    z-index: 200;
+  }
+  .nav-dd:hover .nav-dd-menu,
+  .nav-dd.open .nav-dd-menu,
+  .nav-dd:focus-within .nav-dd-menu {
+    opacity: 1; pointer-events: auto; transform: translateY(0);
+  }
+  .nav-dd-card {
+    background: #fff;
+    border: 1px solid var(--bb-line-soft, #E5E7EB);
+    border-radius: 14px;
+    box-shadow: 0 18px 48px rgba(15,15,26,0.18),
+                0 2px 6px rgba(15,15,26,0.06);
+    padding: 10px;
+  }
+  .nav-dd-title {
+    display: block; padding: 6px 12px 8px;
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-size: 13px; font-weight: 700;
+    color: var(--bb-muted, #6B7280);
+    text-transform: none; letter-spacing: 0;
+  }
+  .nav-dd-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background var(--dur-fast);
+  }
+  .nav-dd-row:hover { background: var(--bb-bg-soft, #FAFAF7); }
+  .nav-dd-icon {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-dd-icon svg { width: 20px; height: 20px; display: block; }
+  /* Per-role icon tints — matches the affiliate landing's feature-grid
+     pastel palette so the dropdown visual ties back to the product. */
+  .nav-dd-icon.icon-advertise {
+    background: var(--bb-pink-tint, #FFE6EE);
+    color: var(--bb-pink, #FF2D78);
+  }
+  .nav-dd-icon.icon-monetize {
+    background: var(--bb-yellow-tint, #FFF8B8);
+    color: #8A6A00;
+  }
+  .nav-dd-icon.icon-earn {
+    background: var(--bb-cyan-tint, #D6F5FE);
+    color: var(--bb-cyan-deep, #0195CC);
+  }
+  .nav-dd-label {
+    display: block;
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-size: 14.5px; font-weight: 700;
+    color: var(--bb-ink, #0F0F1A);
+    line-height: 1.2;
+  }
+  .nav-dd-sub {
+    display: block;
+    font-size: 12.5px; font-weight: 500;
+    color: var(--bb-ink-soft, #4B4B5E);
+    margin-top: 2px; line-height: 1.3;
+  }
+  /* Mobile: stack the trigger button + an always-visible mini menu under
+     the hamburger nav-links collapse breakpoint. Keep desktop hover model
+     intact above ~860px. */
+  @media (max-width: 860px) {
+    .nav-dd-menu { position: static; min-width: 0; padding-top: 8px; }
+    .nav-dd-card { box-shadow: none; border: none; padding: 4px 0; }
+  }
   .btn-lg { padding: 14px 26px; font-size: 15.5px; border-radius: var(--r-md); }
 
   /* ════════════════════════════════════════════════════════════
@@ -651,8 +755,114 @@
       <a href="#">Live Demo ↗</a>
     </div>
     <div class="nav-ctas">
-      <a class="btn btn-ghost-d" href="/ads/signin">Sign in</a>
-      <a class="btn btn-primary" href="/publish/signup">Start free</a>
+
+      <!-- ── Sign in dropdown — 3 role-segmented entries ─────────────── -->
+      <div class="nav-dd" data-nav-dd="signin">
+        <button type="button" class="btn btn-ghost-d nav-dd-trigger"
+                aria-haspopup="menu" aria-expanded="false">Sign in</button>
+        <div class="nav-dd-menu" role="menu" aria-label="Sign in">
+          <div class="nav-dd-card">
+            <span class="nav-dd-title">Sign in to</span>
+
+            <a class="nav-dd-row" role="menuitem" href="/ads/signin">
+              <span class="nav-dd-icon icon-advertise" aria-hidden="true">
+                <!-- megaphone -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2z"/>
+                  <path d="M17 8a6 6 0 0 1 0 8"/>
+                </svg>
+              </span>
+              <span>
+                <span class="nav-dd-label">Advertise</span>
+                <span class="nav-dd-sub">with SuperBoost Ads</span>
+              </span>
+            </a>
+
+            <a class="nav-dd-row" role="menuitem" href="/publish/signin">
+              <span class="nav-dd-icon icon-monetize" aria-hidden="true">
+                <!-- code/script tag -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                  <line x1="14" y1="4" x2="10" y2="20"/>
+                </svg>
+              </span>
+              <span>
+                <span class="nav-dd-label">Monetize</span>
+                <span class="nav-dd-sub">with Lumi SDK</span>
+              </span>
+            </a>
+
+            <a class="nav-dd-row" role="menuitem" href="/affiliate?action=signin">
+              <span class="nav-dd-icon icon-earn" aria-hidden="true">
+                <!-- share link -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 15l6-6"/>
+                  <path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"/>
+                  <path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"/>
+                </svg>
+              </span>
+              <span>
+                <span class="nav-dd-label">Earn</span>
+                <span class="nav-dd-sub">Affiliate program</span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Start free dropdown — same 3 roles, signup destinations ── -->
+      <div class="nav-dd" data-nav-dd="signup">
+        <button type="button" class="btn btn-primary nav-dd-trigger"
+                aria-haspopup="menu" aria-expanded="false">Start free</button>
+        <div class="nav-dd-menu" role="menu" aria-label="Create an account">
+          <div class="nav-dd-card">
+            <span class="nav-dd-title">Create an account</span>
+
+            <a class="nav-dd-row" role="menuitem" href="/ads/signup">
+              <span class="nav-dd-icon icon-advertise" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2z"/>
+                  <path d="M17 8a6 6 0 0 1 0 8"/>
+                </svg>
+              </span>
+              <span>
+                <span class="nav-dd-label">Advertise</span>
+                <span class="nav-dd-sub">promote your product</span>
+              </span>
+            </a>
+
+            <a class="nav-dd-row" role="menuitem" href="/publish/signup">
+              <span class="nav-dd-icon icon-monetize" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                  <line x1="14" y1="4" x2="10" y2="20"/>
+                </svg>
+              </span>
+              <span>
+                <span class="nav-dd-label">Monetize</span>
+                <span class="nav-dd-sub">earn from your AI app</span>
+              </span>
+            </a>
+
+            <a class="nav-dd-row" role="menuitem" href="/affiliate?action=signup">
+              <span class="nav-dd-icon icon-earn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 15l6-6"/>
+                  <path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"/>
+                  <path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"/>
+                </svg>
+              </span>
+              <span>
+                <span class="nav-dd-label">Earn</span>
+                <span class="nav-dd-sub">share products you love</span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </nav>
@@ -1092,6 +1302,51 @@
       el.textContent = (el.dataset.pre || '') + num + (el.dataset.suf || '');
     });
   }
+
+  /* ── Role-split dropdown — keyboard + touch toggle ──────────────────
+     CSS :hover already handles desktop pointer. This adds:
+     · click/tap on trigger → toggles .open class (mobile + accessibility)
+     · Escape key → closes any open dropdown + returns focus to trigger
+     · click outside an open dropdown → closes it
+     · aria-expanded stays in sync */
+  (function () {
+    const dds = document.querySelectorAll('.nav-dd');
+    if (!dds.length) return;
+
+    function closeAll(except) {
+      dds.forEach(function (dd) {
+        if (dd === except) return;
+        dd.classList.remove('open');
+        const t = dd.querySelector('.nav-dd-trigger');
+        if (t) t.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    dds.forEach(function (dd) {
+      const trigger = dd.querySelector('.nav-dd-trigger');
+      if (!trigger) return;
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        const isOpen = dd.classList.contains('open');
+        closeAll(dd);
+        dd.classList.toggle('open', !isOpen);
+        trigger.setAttribute('aria-expanded', String(!isOpen));
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.nav-dd')) closeAll(null);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      const open = document.querySelector('.nav-dd.open');
+      if (!open) return;
+      const t = open.querySelector('.nav-dd-trigger');
+      closeAll(null);
+      if (t) t.focus();
+    });
+  })();
 </script>
 </body>
 </html>
