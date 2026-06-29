@@ -1284,6 +1284,56 @@
 #view-login .afp .step-sub, #view-signup .afp .step-sub {
   font-size: 14px; color: var(--bb-ink-soft); margin-bottom: 22px;
 }
+/* OAuth + divider */
+#view-login .oauth, #view-signup .oauth { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+#view-login .obtn, #view-signup .obtn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 11px 16px; border-radius: var(--r-sm);
+  background: #fff; border: 1.5px solid var(--bb-line-soft);
+  color: var(--bb-ink); font-family: var(--font-body);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+#view-login .obtn:hover, #view-signup .obtn:hover { border-color: var(--bb-ink-800); background: var(--bb-bg-soft); }
+#view-login .or, #view-signup .or {
+  display: flex; align-items: center; gap: 14px;
+  margin: 4px 0 18px; color: var(--bb-muted); font-size: 12px;
+}
+#view-login .or::before, #view-login .or::after,
+#view-signup .or::before, #view-signup .or::after {
+  content: ""; flex: 1; height: 1px; background: var(--bb-line);
+}
+/* input wrapper for show/hide password toggle */
+#view-login .field .inp, #view-signup .field .inp { position: relative; }
+#view-login .field .inp .toggle, #view-signup .field .inp .toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; color: var(--bb-muted); cursor: pointer;
+  background: none; border: none; font-family: var(--font-body); font-weight: 600;
+}
+#view-login .field .inp .toggle:hover, #view-signup .field .inp .toggle:hover { color: var(--bb-ink); }
+/* remember me + forgot row */
+#view-login .frow, #view-signup .frow {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 4px 0 18px; font-size: 13px;
+}
+#view-login .frow label, #view-signup .frow label {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--bb-ink-soft); cursor: pointer; font-family: var(--font-body);
+}
+#view-login .frow input, #view-signup .frow input { accent-color: var(--bb-pink); }
+#view-login .frow a, #view-signup .frow a {
+  color: var(--bb-pink); font-weight: 600; text-decoration: none;
+}
+#view-login .frow a:hover, #view-signup .frow a:hover { text-decoration: underline; }
+/* switch link at the bottom */
+#view-login .switch, #view-signup .switch {
+  margin-top: 18px; text-align: center; font-size: 13.5px; color: var(--bb-ink-soft);
+}
+#view-login .switch button, #view-signup .switch button {
+  color: var(--bb-pink); font-weight: 700; background: none; border: none;
+  font-family: var(--font-body); font-size: 13.5px; cursor: pointer; padding: 0;
+}
+#view-login .switch button:hover, #view-signup .switch button:hover { text-decoration: underline; }
 @media (max-width: 820px) {
   #view-login .afp, #view-signup .afp { padding: 32px 26px; }
 }
@@ -1399,22 +1449,38 @@
         <div class="auth-wrap">
           <div class="auth-card">
             <h1 class="step-h1" data-t="login.title">Welcome back</h1>
-            <p class="step-sub" data-t="login.sub">Sign in to your affiliate dashboard.</p>
+            <p class="step-sub" data-t="login.sub">Sign in to your affiliate account.</p>
+
+            <!-- OAuth — Google. Visual-only for now; click shows a 'coming soon'
+                 message until the affiliate Supabase OAuth flow is wired. -->
+            <div class="oauth">
+              <button type="button" class="obtn" id="li-google" onclick="alert('Google sign-in is coming soon — please use email for now.')">
+                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.02-3.7H.92v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.98 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.92a9 9 0 0 0 0 8.1l3.06-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.59C13.46.9 11.43 0 9 0A9 9 0 0 0 .92 4.95l3.06 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+                Continue with Google
+              </button>
+            </div>
+            <div class="or">or with email</div>
+
             <div id="err-login" class="err"></div>
             <form id="form-login" novalidate>
               <div class="field">
                 <label for="li-email" data-t="login.email">Email</label>
-                <input type="email" id="li-email" autocomplete="email" required>
+                <div class="inp"><input type="email" id="li-email" placeholder="you@email.com" autocomplete="email" required></div>
               </div>
               <div class="field">
                 <label for="li-pw" data-t="login.password">Password</label>
-                <input type="password" id="li-pw" autocomplete="current-password" required>
+                <div class="inp">
+                  <input type="password" id="li-pw" placeholder="••••••••" autocomplete="current-password" required>
+                  <button type="button" class="toggle" data-for="li-pw">Show</button>
+                </div>
               </div>
-              <button type="submit" id="li-submit" class="btn-primary" style="width:100%;" data-t="login.submit">Sign in</button>
+              <div class="frow">
+                <label><input type="checkbox" id="li-remember" checked> Remember me</label>
+                <a href="mailto:support@boostboss.ai?subject=Affiliate%20password%20reset" id="li-forgot">Forgot password?</a>
+              </div>
+              <button type="submit" id="li-submit" class="btn-primary btn-block" style="width:100%;" data-t="login.submit">Sign in</button>
             </form>
-            <div class="auth-toggle">
-              <span data-t="login.new_here">New here?</span> <button type="button" id="login-to-signup" data-t="login.create_account">Create an account</button>
-            </div>
+            <p class="switch">New to the program? <button type="button" id="login-to-signup" data-t="login.create_account">Join free</button></p>
             <div class="auth-foot">
               <span data-t="login.foot_prefix">By signing in you agree to the</span>
               <a href="https://boostboss.ai/terms" data-t="common.terms">Terms of Service</a> <span data-t="common.and">and</span>
@@ -2433,16 +2499,20 @@ const AFF_LANG_LS_KEY = 'bb_aff_lang';
 const AFF_SUPPORTED_LANGS = ['en', 'zh', 'zh-TW', 'ja', 'ko', 'vi'];
 
 function resolveAffLang() {
+  // Priority order:
+  //   1. URL path prefix (/en, /zh-TW, etc.) — if present, that's authoritative
+  //   2. User's explicit choice from the language switcher (localStorage)
+  //   3. English default — do NOT auto-detect from navigator.language anymore;
+  //      browser-detection was flipping the page to Chinese on Taiwan macOS even
+  //      when the URL was /en. English is the safer marketing-surface default.
+  try {
+    const pathLang = (window.location.pathname.match(/^\/(en|zh-TW|zh|ja|ko|vi)(\/|$|#)/) || [])[1];
+    if (pathLang && AFF_SUPPORTED_LANGS.indexOf(pathLang) !== -1) return pathLang;
+  } catch (_) {}
   try {
     const saved = localStorage.getItem(AFF_LANG_LS_KEY);
     if (saved && AFF_SUPPORTED_LANGS.indexOf(saved) !== -1) return saved;
   } catch (_) {}
-  const nav = (navigator.language || 'en').toLowerCase();
-  if (nav.indexOf('zh-tw') === 0 || nav.indexOf('zh-hk') === 0 || nav.indexOf('zh-hant') === 0) return 'zh-TW';
-  if (nav.indexOf('zh') === 0) return 'zh';
-  if (nav.indexOf('ja') === 0) return 'ja';
-  if (nav.indexOf('ko') === 0) return 'ko';
-  if (nav.indexOf('vi') === 0) return 'vi';
   return 'en';
 }
 
@@ -2590,6 +2660,19 @@ document.querySelectorAll('.js-go-signup').forEach(function(el){ el.addEventList
 document.getElementById('login-to-welcome').addEventListener('click',  () => showView('welcome'));
 document.getElementById('signup-to-welcome').addEventListener('click', () => showView('welcome'));
 document.getElementById('login-to-signup').addEventListener('click',   () => { setStep(1); showView('signup'); });
+
+// ── Password Show/Hide toggle ────────────────────────────────────────
+// Wired for any input that has a sibling <button class="toggle" data-for="<id>">
+// (currently #li-pw on the sign-in form; extend to signup password fields the
+// same way if/when the design adds them inside .field .inp wrappers).
+document.querySelectorAll('.toggle[data-for]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var input = document.getElementById(btn.getAttribute('data-for'));
+    if (!input) return;
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+    else                            { input.type = 'password'; btn.textContent = 'Show'; }
+  });
+});
 
 // ── Step 1: account type ───────────────────────────────────────────
 document.querySelectorAll('[data-account-type]').forEach(card => {
