@@ -180,63 +180,65 @@
   }
   .nav-dd-title {
     display: block; padding: 6px 12px 8px;
-    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    /* Inherits Inter from --font-body so the dropdown matches the rest of
+       the nav + body text. No more Space Grotesk here — that's reserved
+       for hero/section display headings. */
+    font-family: var(--font-body);
     font-size: 13px; font-weight: 700;
     color: var(--bb-muted, #6B7280);
     text-transform: none; letter-spacing: 0;
   }
   .nav-dd-row {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 14px;
     padding: 10px 12px;
     border-radius: 10px;
     text-decoration: none;
     transition: background var(--dur-fast);
   }
   .nav-dd-row:hover { background: var(--bb-bg-soft, #FAFAF7); }
+  /* Icon container — no background chip per design call. Just a sized box
+     that centers the icon and keeps the row geometry consistent. */
   .nav-dd-icon {
     flex-shrink: 0;
-    width: 38px; height: 38px;
-    border-radius: 10px;
+    width: 36px; height: 36px;
+    background: transparent;
     display: flex; align-items: center; justify-content: center;
   }
-  .nav-dd-icon svg { width: 20px; height: 20px; display: block; }
-  /* Boost Boss rocket logo — sized to fill the chip with a touch of breathing
-     room. drop-shadow filter unset because the chip's pink tint already frames it. */
+  .nav-dd-icon svg { width: 22px; height: 22px; display: block; }
+  /* Boost Boss rocket logo — multicolor SVG reads cleanly on the white card. */
   .nav-dd-icon .nav-dd-rocket {
-    width: 28px; height: 28px; display: block; filter: none;
+    width: 32px; height: 32px; display: block;
   }
-  /* Lumi ✦ sparkle — same glyph as the /publish lumi-mark wordmark, sized up to
-     fill the chip, deep-yellow color for contrast against the yellow-tint bg,
-     and a subtle text-shadow for soft glow. Display-font for the chunky weight. */
+  /* Lumi ✦ sparkle — same glyph used in /publish lumi-mark wordmark, with the
+     same lumiBlink animation so the icon actually feels "shining." Amber color
+     for legibility on white + soft yellow text-shadow as halo. */
   .nav-dd-icon .nav-dd-lumi {
-    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-family: var(--font-body);
     font-size: 26px; font-weight: 700; line-height: 1;
-    color: #8A6A00;
-    text-shadow: 0 0 8px rgba(255, 230, 0, 0.55);
+    color: var(--bb-yellow-deep, #8A7700);
+    -webkit-text-fill-color: var(--bb-yellow-deep, #8A7700);
+    text-shadow: 0 0 10px rgba(255, 230, 0, 0.6),
+                 0 0 4px rgba(255, 230, 0, 0.35);
+    animation: navDdLumiBlink 1.8s ease-in-out infinite;
   }
-  /* Per-role icon tints — matches the affiliate landing's feature-grid
-     pastel palette so the dropdown visual ties back to the product. */
-  .nav-dd-icon.icon-advertise {
-    background: var(--bb-pink-tint, #FFE6EE);
-    color: var(--bb-pink, #FF2D78);
+  @keyframes navDdLumiBlink {
+    0%, 100% { opacity: 0.65; transform: scale(0.95); }
+    50%      { opacity: 1;    transform: scale(1.10); }
   }
-  .nav-dd-icon.icon-monetize {
-    background: var(--bb-yellow-tint, #FFF8B8);
-    color: #8A6A00;
-  }
-  .nav-dd-icon.icon-earn {
-    background: var(--bb-cyan-tint, #D6F5FE);
-    color: var(--bb-cyan-deep, #0195CC);
+  /* Reduced motion — respect user preference, kill the blink */
+  @media (prefers-reduced-motion: reduce) {
+    .nav-dd-icon .nav-dd-lumi { animation: none; opacity: 1; transform: none; }
   }
   .nav-dd-label {
     display: block;
-    font-family: var(--font-display, 'Space Grotesk', sans-serif);
-    font-size: 14.5px; font-weight: 700;
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 700;
     color: var(--bb-ink, #0F0F1A);
     line-height: 1.2;
   }
   .nav-dd-sub {
     display: block;
+    font-family: var(--font-body);
     font-size: 12.5px; font-weight: 500;
     color: var(--bb-ink-soft, #4B4B5E);
     margin-top: 2px; line-height: 1.3;
@@ -806,10 +808,7 @@
 
             <a class="nav-dd-row" role="menuitem" href="/ads/signup">
               <span class="nav-dd-icon icon-advertise" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2z"/>
-                  <path d="M17 8a6 6 0 0 1 0 8"/>
-                </svg>
+                <img src="/design-system/assets/rocket-logo.svg" alt="" class="nav-dd-rocket">
               </span>
               <span>
                 <span class="nav-dd-label">Advertise</span>
@@ -819,11 +818,7 @@
 
             <a class="nav-dd-row" role="menuitem" href="/publish/signup">
               <span class="nav-dd-icon icon-monetize" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="16 18 22 12 16 6"/>
-                  <polyline points="8 6 2 12 8 18"/>
-                  <line x1="14" y1="4" x2="10" y2="20"/>
-                </svg>
+                <span class="nav-dd-lumi">✦</span>
               </span>
               <span>
                 <span class="nav-dd-label">Monetize</span>
