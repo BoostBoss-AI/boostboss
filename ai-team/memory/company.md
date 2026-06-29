@@ -29,10 +29,23 @@ publishers earn. When they win, we win (we only earn when we deliver — take ra
 - Merchant of Record; PayPal handles pay-in and payout (single-provider rule for the TW entity).
 - Payouts: biweekly Friday batches, Tuesday cutoff, $1 min. 2FA gates cashout.
 
+## Timing thesis (why now)
+The AI-application boom is AppLovin's mobile-games moment. New AI apps are just starting to emerge.
+Be the network already there when supply explodes. **Supply-first:** without publishers we can't
+persuade advertisers to spend, so we build supply Day 1 — advertiser spend (most of our revenue)
+follows the inventory. The cold-start phase won't last long.
+
+## Targets
+- **Year-1:** 50,000 publisher products live as ad surfaces (devs across web / desktop / extension /
+  mobile who can't or won't build billing). See `playbooks/benna-reach.md`.
+- **Immediate beachhead:** first 20 publishers.
+
 ## Current state (update this line as it changes)
 - **Day 1 of operations: 2026-06-29.** Product live. Ad network + affiliate working. Bank wired to PayPal.
-- Goal in sight: first 20 publishers (supply side). Onboarding flow is ready.
-- Live focus: Engineering · Benna · Supply prep. Demand/Finance/Trust/Growth seats armed, activate on signal.
+- Live focus: Engineering · Benna · Supply prep (Benna-Reach playbook loaded). Demand/Finance/Trust/
+  Growth seats armed, activate on signal.
+- Resources in place: admin panel governs what needs human approval; per-function emails provisioned.
+- ⚠️ Open: confirm publisher revenue split (70/30 vs 85/15 conflict in records) before any outreach quotes it.
 
 ## Operating gates (hard rules)
 - No autonomous money movement, deploys, or cold sends — those wait in `action_queue` for the Chairman.
