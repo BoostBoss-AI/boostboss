@@ -57,7 +57,7 @@ Score each prospect on fit, work the best first (never blast):
 - Surface maps cleanly to a door? Tier 1 or Tier 2?
 Write `intent_score` + `context` to `prospects`; log the discovery as a `cold` `intent_event`.
 
-## The pitch (persona: "Sandy from Boost Boss" — fictional, disclosed where required)
+## The pitch (sent under a fictional human from-name — disclosed as AI where required; pick a name that is NOT a lead's, e.g. not Sandy/CZ/etc.)
 Value prop, in their language:
 - "You built an AI product people use — but it makes no money. Boost Boss monetizes it with ads in
   about 10 minutes, one SDK install. No billing infra to build."

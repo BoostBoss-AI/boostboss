@@ -1,53 +1,71 @@
-# Team Roster — armed but idle
+# Team Roster — v7 (locked) · armed but idle
 
-All seats are **defined and standing**. An idle agent costs nothing — it only runs when invoked
-or triggered. "Full team operation" = full team *armed on the trigger*, not full team busy.
+All seats are defined and standing. An idle agent costs nothing — no API calls until invoked or
+triggered. "Full team" = full team **armed on the trigger**, not full team busy.
 
-Legend — **Status:** 🟢 live now · 🟡 armed, activates on trigger
-Each seat: role · key tools · activation trigger.
+Status: 🟢 live now · 🟡 armed, activates on trigger.
 
 ## Leadership
-| Seat | Status | Tools | Activates |
-|---|---|---|---|
-| **Hermes** (Secretary) | 🟢 | chat, schedule, memory | always — runs the standup |
-| **CEO / Atlas** (Orchestrator) | 🟢 | task dispatch, all agent access | always — on any order/trigger |
+| Seat | Status | Activates |
+|---|---|---|
+| **Kristal** — Secretary | 🟢 | always — your interface, runs the standup |
+| **Elon** — CEO | 🟢 | always — dispatches to leads |
 
-## Pillar: Engineering (platform)
-| Seat | Status | Tools | Activates |
-|---|---|---|---|
-| Coder | 🟢 | repo, Vercel, Supabase | feature/bugfix order |
-| Reviewer | 🟢 | repo, test runner (174 tests) | any PR / pre-deploy |
-| SDK Maint. | 🟡 | npm, sdk/ | SDK issue or publish task |
-| DevOps | 🟢 | Vercel, git, env | deploy request (gated) |
+## CEO's direct reports
+| Lead | Department | Status |
+|---|---|---|
+| **Peter** | Engineering | 🟢 |
+| **Mike** | Finance | 🟡 |
+| **CZ** | COO (Benna + BBX) | 🟢 |
+| **Sandy** | Growth & Content | 🟡 |
 
-## Pillar: Benna (customer brain / spine)
-| Seat | Status | Tools | Activates |
-|---|---|---|---|
-| **Benna-Ads** (Optimization) | 🟢 | scoring, allocation, embeddings | live auctions / impressions |
-| Benna-Reach (Acquisition antenna) | 🟡 | Product Hunt, MCP registry, GitHub, X, email draft | standing roam order (sends gated) |
-| Onboarding Concierge | 🟢 | product APIs, docs, install help | new signup event |
-| Support Triage | 🟡 | FAQ, routing to Eng/Finance | inbound question |
-| Retention | 🟡 | usage data, Benna | customer at-risk / lifecycle event |
+## Engineering (Peter)
+| Function | Status | Activates |
+|---|---|---|
+| Coder | 🟢 | feature / bugfix order |
+| Reviewer / QA | 🟢 | any change · the 174-test gate |
+| SDK Maintainer | 🟡 | SDK issue or publish task |
+| DevOps | 🟢 | deploy request (gated) |
 
-## Pillar: Finance (money rails)
-| Seat | Status | Tools | Activates |
-|---|---|---|---|
-| Pay-in | 🟡 | PayPal (read), Supabase | new deposit |
-| Payouts | 🟡 | PayPal Payouts (gated), ledger | biweekly Friday batch (Tue cutoff) |
-| Attribution | 🟡 | click_id, conversions | sale / commission event |
+## Finance (Mike)
+| Function | Status | Activates |
+|---|---|---|
+| Pay-in / Receipts | 🟡 | new advertiser deposit |
+| Payouts | 🟡 | biweekly Fri batch (Tue cutoff) — gated |
+| Attribution & Solvency | 🟡 | sale / commission event · solvency check before payouts |
 
-## Back office: Exchange & Trust (internal rails → feeds Benna)
-| Seat | Status | Tools | Activates |
-|---|---|---|---|
-| Compliance | 🟡 | ads.txt, sellers.json, IAB | compliance check / publisher onboard |
-| Fraud | 🟡 | auction logs, anomaly checks | suspicious traffic |
-| Reporting | 🟡 | analytics | scheduled / on request |
+## COO (CZ) → ◆ Benna — Main Product (Lead: Benna)
+**Supply Team** (publishers)
+| Function | Status | Activates |
+|---|---|---|
+| Acquisition → Lumi SDK | 🟡 | standing roam order (sends gated) |
+| Onboarding | 🟢 | new publisher signup |
+| Earnings & Tracking | 🟡 | payout cycle / performance |
+| Support | 🟡 | inbound question |
 
-## Growth & Content (feeds Benna-Reach)
-| Seat | Status | Tools | Activates |
-|---|---|---|---|
-| Editor / Copy | 🟡 | site, /publish copy | content order |
-| Design | 🟡 | assets | creative order |
+**Demand Team** (advertisers)
+| Function | Status | Activates |
+|---|---|---|
+| Acquisition → SuperBoost | 🟡 | standing roam order (sends gated) |
+| Optimization | 🟢 | live auctions / impressions |
+| Budget Allocation | 🟡 | advertiser budget set / pilot |
+| Support | 🟡 | inbound question |
 
-**Day-1 live set:** Hermes, CEO/Atlas, Coder, Reviewer, DevOps, Benna-Ads, Onboarding.
-**First to wake on Catalyst #1 (first real deposit):** Benna-Reach (gated), Support Triage, Pay-in, Payouts.
+## COO (CZ) → Exchange & Trust (BBX) — closed · in-house bids (opens to external DSPs later)
+| Function | Status | Activates |
+|---|---|---|
+| Auction / Bidding Ops | 🟡 | bid request / clearing |
+| Compliance | 🟡 | publisher onboard · ads.txt / sellers.json |
+| Fraud / Quality | 🟡 | suspicious traffic |
+| Reporting | 🟡 | scheduled / on request |
+
+## Growth & Content (Sandy)
+| Function | Status | Activates |
+|---|---|---|
+| Content / Social | 🟡 | content / social order |
+| Traffic / Distribution | 🟡 | campaign / SEO |
+| Design | 🟡 | creative order |
+
+---
+**Day-1 live set:** Kristal · Elon · Peter · CZ · Coder · Reviewer/QA · DevOps · Optimization · Onboarding.
+**First to wake on Catalyst #1 (first real deposit):** Acquisition (gated) · Support · Pay-in · Payouts.

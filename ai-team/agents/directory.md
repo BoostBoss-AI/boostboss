@@ -1,83 +1,55 @@
-# Team Directory — names, roles, emails
+# Team Directory — v7 (locked)
 
-How to read this:
-- **Customer-facing** agents use a **human name** and sign outgoing messages (customers see them).
-- **Internal** agents use a **codename** — never seen outside the company.
-- **Functional inboxes** (support@, billing@, payouts@) are role addresses; a human-named agent
-  staffs them (e.g. Quinn answers support@).
-- All names are **proposals — rename anything.** Once you settle them, provision the inboxes below.
+**Reporting chain:** Andy (Chairman) → Kristal (Secretary · your interface) → Elon (CEO) →
+department leads → function workers.
+
+**Naming rule:** named = the people you address (leads). Workers are **function-only** — the
+orchestrator calls them by role, no personas. Leads are addressed in the command channel, not email.
 
 ## Leadership
-| Agent | Role | Email | Facing |
-|---|---|---|---|
-| **Kristal** | Secretary (Chairman's interface) | kristal@boostboss.ai | internal (Chairman only) |
-| **Elon** | CEO / Orchestrator | elon@boostboss.ai | internal |
-
-> Names **confirmed** by the Chairman. (Note: the *runtime platform* is "Hermes Agent" by Nous —
-> distinct from Kristal the secretary agent. Different things that happen to share a Greek name.)
-
-## Engineering (internal)
-| Agent | Role | Email | Facing |
-|---|---|---|---|
-| **Forge** | Coder | dev@boostboss.ai | internal |
-| **Argus** | Reviewer / QA | qa@boostboss.ai | internal |
-| **Lumen** | SDK Maintainer | sdk@boostboss.ai | internal |
-| **Helm** | DevOps | ops@boostboss.ai | internal |
-
-## Benna (customer brain / spine)
-| Agent | Role | Email | Facing |
-|---|---|---|---|
-| **Benna** | Optimization (Benna-Ads) | benna@boostboss.ai | advertiser-facing |
-| **Sandy** | Acquisition / Outreach (Benna-Reach) | sandy@boostboss.ai | customer-facing |
-| **Robin** | Onboarding Concierge | onboarding@boostboss.ai | customer-facing |
-| **Quinn** | Support Triage | support@boostboss.ai | customer-facing |
-| **Nova** | Retention / Success | success@boostboss.ai | customer-facing |
-
-## Finance (money rails)
-| Agent | Role | Email | Facing |
-|---|---|---|---|
-| **Vault** | Pay-in / Billing | billing@boostboss.ai | advertiser-facing (receipts) |
-| **Tally** | Payouts | payouts@boostboss.ai | publisher-facing (payout notices) |
-| **Ledger** | Attribution | (internal) | internal |
-
-## Exchange & Trust (internal back office)
-| Agent | Role | Email | Facing |
-|---|---|---|---|
-| **Aegis** | Compliance | compliance@boostboss.ai | internal |
-| **Sentinel** | Fraud / Quality | trust@boostboss.ai | internal |
-| **Pulse** | Reporting | reports@boostboss.ai | internal |
-
-## Growth & Content
-| Agent | Role | Email | Facing |
-|---|---|---|---|
-| **Quill** | Editor / Copy | content@boostboss.ai | semi |
-| **Iris** | Design | design@boostboss.ai | internal |
-
-## Email provisioning — who actually needs an inbox
-Internal agents coordinate through the command channel + shared memory, **not email** — email is
-for the outside world. So only external-facing functions need a real, monitored inbox.
-
-### External — MUST provision (customers send to / receive from these)
-| Inbox | Agent | Purpose |
+| Name | Role | Reports to |
 |---|---|---|
-| sandy@boostboss.ai | Sandy | outreach / acquisition |
-| onboarding@boostboss.ai | Robin | onboarding help |
-| support@boostboss.ai | Quinn | support questions |
-| success@boostboss.ai | Nova | retention / check-ins |
-| billing@boostboss.ai | Vault | advertiser receipts & billing |
-| payouts@boostboss.ai | Tally | publisher payout notices |
-| benna@boostboss.ai | Benna | advertiser optimization updates (optional) |
-| compliance@boostboss.ai | Aegis | ads.txt / IAB / abuse inquiries (optional, recommended) |
+| **Andy** | Chairman (you) | — |
+| **Kristal** | Secretary · your interface | Andy |
+| **Elon** | CEO · orchestrator | Andy |
 
-### Standard role addresses (good hygiene, not tied to one agent)
-- `hello@` or `contact@` — general inbound (routes to Quinn)
-- `abuse@`, `privacy@` — compliance/legal standard (routes to Aegis)
+## CEO's direct reports (the leads you address via Elon)
+| Name | Department | Notes |
+|---|---|---|
+| **Peter** | Engineering | platform · product |
+| **Mike** | Finance | receipts · payouts · solvency |
+| **CZ** | COO | manages the two product departments below (Benna + BBX) |
+| **Sandy** | Growth & Content | social · traffic |
 
-### Internal — OPTIONAL (only for labeling / logins; not needed to function)
-Elon · Kristal · Forge · Argus · Lumen · Helm · Ledger · Sentinel · Pulse · Quill · Iris
-Give them handles (atlas@, hermes@ …) only if you want per-agent logins or labels.
+## Under COO (CZ) — the two product departments
+### ◆ Benna — Main Product · Lead: **Benna**
+- **Supply Team** (publishers): Acquisition → **Lumi SDK** · Onboarding · Earnings & Tracking · Support
+- **Demand Team** (advertisers): Acquisition → **SuperBoost** · Optimization · Budget Allocation · Support
+
+### Exchange & Trust (BBX) — no separate lead (CZ covers) · closed, in-house bids (opens to external DSPs later)
+- Auction / Bidding Ops · Compliance · Fraud / Quality · Reporting
+
+## Other departments (report to CEO directly)
+- **Engineering** (Peter): Coder · Reviewer / QA · SDK Maintainer · DevOps
+- **Finance** (Mike): Pay-in / Receipts · Payouts · Attribution & Solvency
+- **Growth & Content** (Sandy): Content / Social · Traffic / Distribution · Design
 
 ---
-**Note on personas:** customer-facing names (Sandy, Robin, Quinn, Nova) are fictional personas,
-disclosed as AI where required. Never impersonate a real person. The Benna brand is singular —
-"one Benna, many hands" — even though several internal agents power it.
+
+## Email provisioning — only customer-facing FUNCTIONS need inboxes
+Leads (Peter, Mike, CZ, Benna, Sandy, Elon, Kristal) are addressed in the command channel — **no
+inboxes needed**. Workers that talk to the outside world map to your existing addresses:
+
+| Inbox | Function |
+|---|---|
+| promo@boostboss.ai | Acquisition (supply + demand outreach) |
+| info@boostboss.ai | Onboarding / general inbound |
+| support@boostboss.ai | Support (both sides) |
+| billing@boostboss.ai | Pay-in / Receipts |
+| payouts@boostboss.ai | Payouts (create if not present) |
+| legal@boostboss.ai | Compliance |
+| admin@boostboss.ai | system / admin panel |
+| andy@boostboss.ai | you |
+
+Transactional mail (receipts, payout notices) auto-sends from `billing@` / `payouts@` via Supabase + Resend.
+For 1:1 cold outreach you may later add a human-name address (e.g. `sandy@`) since it lands better than `promo@`.
