@@ -2942,8 +2942,8 @@ class MyApp : Application() {
             <div class="section" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
                 <div style="background:#F9FAFB;border-radius:12px;padding:14px 16px;">
                     <div style="font-size:13px;color:#6B7280;">Earnings available</div>
-                    <div style="font-size:24px;font-weight:600;margin:4px 0 2px;">$0.00</div>
-                    <div style="font-size:12px;color:#9CA3AF;">Next payout — · paid all-time $0</div>
+                    <div id="bb-bill-earn" style="font-size:24px;font-weight:600;margin:4px 0 2px;">$0.00</div>
+                    <div id="bb-bill-earn-sub" style="font-size:12px;color:#9CA3AF;">Next payout — · paid all-time $0</div>
                 </div>
                 <div style="background:#F9FAFB;border-radius:12px;padding:14px 16px;">
                     <div style="font-size:13px;color:#6B7280;">Ad credits</div>
@@ -10607,5 +10607,29 @@ class MyApp : Application() {
          attribute selects the publisher-tailored system prompt
          (revenue split, placements, four integration doors, etc.). -->
     <script src="/assist.js" data-surface="publisher" defer></script>
+<script>
+/* Phase 3b — billing view: real earnings (isolated + null-safe; a fault here
+   cannot affect the main dashboard). Credits/usage/category stay placeholder. */
+(function(){
+  function fmt(n){ var v = Number(n); return Number.isFinite(v) ? '$' + v.toFixed(2) : '$0.00'; }
+  async function loadBilling(){
+    try {
+      var prof = JSON.parse(localStorage.getItem('bb_dev_data') || 'null');
+      if (!prof || !prof.api_key) return;
+      var r = await fetch('/api/billing?action=earnings&key=' + encodeURIComponent(prof.api_key));
+      if (!r || !r.ok) return;
+      var d = await r.json();
+      var earnEl = document.getElementById('bb-bill-earn');
+      if (earnEl) earnEl.textContent = fmt(d.pending_payout);
+      var subEl = document.getElementById('bb-bill-earn-sub');
+      if (subEl) subEl.textContent = 'Next payout ' + (d.next_payout_date || '—') + ' · paid all-time ' + fmt(d.total_earnings);
+    } catch (e) { /* non-fatal */ }
+  }
+  function maybeLoad(){ try { if ((location.hash || '').indexOf('billing') >= 0) loadBilling(); } catch (e) {} }
+  window.addEventListener('hashchange', maybeLoad);
+  window.addEventListener('load', maybeLoad);
+  maybeLoad();
+})();
+</script>
 </body>
 </html>
