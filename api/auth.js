@@ -2365,6 +2365,7 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     const { error } = await supabaseAdmin.from("developers").insert({
       id: userId, email, app_name: app_name || "My AI App",
       api_key: apiKey, status: "active",
+      calibration_status: "calibrating",  // cold-start: prove real traffic before monetizing (db/29)
       integration_door: integration_door,  // nullable; whitelisted above
     });
     if (error) console.error("[Auth] Developer insert error:", error.message);
