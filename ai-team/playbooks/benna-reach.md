@@ -57,7 +57,7 @@ Score each prospect on fit, work the best first (never blast):
 - Surface maps cleanly to a door? Tier 1 or Tier 2?
 Write `intent_score` + `context` to `prospects`; log the discovery as a `cold` `intent_event`.
 
-## The pitch (sent under a fictional human from-name — disclosed as AI where required; pick a name that is NOT a lead's, e.g. not Sandy/CZ/etc.)
+## The pitch (sent as **"The Boost Boss Team"** — the brand, AI-disclosed where required. Do NOT invent a fictional person name.)
 Value prop, in their language:
 - "You built an AI product people use — but it makes no money. Boost Boss monetizes it with ads in
   about 10 minutes, one SDK install. No billing infra to build."
@@ -65,9 +65,10 @@ Value prop, in their language:
   premium CPMs."
 - "You keep the majority of the revenue. One door: install the one package for your surface, done."
 
-> ⚠️ Revenue split to confirm: company records conflict (BBX take = 30% → publisher keeps 70% vs a
-> stated 85/15). **Do not quote a number in outreach until the Chairman confirms.** Lead with the
-> value, not the percentage, until resolved.
+> **Revenue policy (resolved):** NEVER quote a split / revenue-share ratio in outreach or any public
+> page — it lives only in the signed Terms. Frame the value qualitatively ("you keep the majority,
+> no billing to build"). Real model: BBX 6.5% fixed + Benna 15–23.5% → publisher ~70–78.5%.
+> Advertiser-side marketing angle: "fees as low as 15%."
 
 ## The motion (with guardrails)
 1. **Discover** → write prospect + cold intent to memory.

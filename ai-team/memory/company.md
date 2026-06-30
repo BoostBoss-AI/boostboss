@@ -24,7 +24,10 @@ publishers earn. When they win, we win (we only earn when we deliver — take ra
 - **Benna AI** — the optimization engine *and* the customer-journey spine.
 
 ## Money model (verified)
-- BBX ad exchange take = 30% (publisher keeps 70%).
+- Take = **BBX/RTB fee 6.5% (fixed)** + **Benna optimization 15–23.5% (variable; standard 23.5%)**.
+  Standard total take 30% → **publisher keeps ~70%** (best case ~78.5% when the Benna fee is 15%).
+  The payout engine already implements this (6.5% RTB + 23.5% network). The dashboard's flat "85%" is a bug to fix.
+- **Policy: NEVER show the split / revenue-share ratio on any public or marketing page — it lives ONLY in the signed Terms/contract.** Marketing may frame the *advertiser* side as "fees as low as 15%."
 - Affiliate commission = 30% **of the affiliate pool** the seller sets (not of the sale); affiliate gets 70%.
 - Merchant of Record; PayPal handles pay-in and payout (single-provider rule for the TW entity).
 - Payouts: biweekly Friday batches, Tuesday cutoff, $1 min. 2FA gates cashout.

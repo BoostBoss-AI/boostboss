@@ -1,0 +1,4 @@
+# Never commit secrets — webhook URLs, tokens, keys
+slack-webhook*.txt
+*.secret
+*.key
