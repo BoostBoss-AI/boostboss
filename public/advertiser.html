@@ -3037,6 +3037,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.payouts">Payouts</span>
             </button>
+            <button class="shell-nav-item" data-shell-section="billing">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+              <span class="shell-nav-item__label">Billing &amp; usage</span>
+            </button>
             <!-- Promote nav removed 2026-06-25. Balance cards (MoR earnings +
                  Ad credit) moved to the top of the Payouts page. The 'Active
                  campaigns' table was redundant with Boost Ads' own performance
@@ -4754,6 +4758,49 @@
                 </div>
               </div>
             </div><!-- /[data-shell-route="payouts"] -->
+
+            <!-- ═══════ ROUTE: billing (advertiser — preview, mirrors publisher) ═══════
+                 JS-free static layout; live ad-credits via an isolated script before </body>. -->
+            <div data-shell-route="billing">
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title">Billing &amp; usage</h1>
+                    <div class="shell-page-sub">Ad credits, spend, and usage — preview (live data wiring next)</div>
+                </div>
+            </div>
+            <div class="section" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                <div style="background:#F9FAFB;border-radius:12px;padding:14px 16px;">
+                    <div style="font-size:13px;color:#6B7280;">Ad credits</div>
+                    <div id="bb-adv-credits" style="font-size:24px;font-weight:600;margin:4px 0 2px;">$0.00</div>
+                    <div id="bb-adv-credits-sub" style="font-size:12px;color:#9CA3AF;">available · top up to add more</div>
+                </div>
+                <div style="background:#F9FAFB;border-radius:12px;padding:14px 16px;">
+                    <div style="font-size:13px;color:#6B7280;">Spend this cycle</div>
+                    <div style="font-size:24px;font-weight:600;margin:4px 0 2px;">$0.00</div>
+                    <div style="font-size:12px;color:#9CA3AF;">across all campaigns</div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Usage this cycle</div>
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:#374151;margin-bottom:5px;"><span>Ad credits used</span><span style="color:#9CA3AF;">0%</span></div>
+                    <div style="height:8px;background:#F3F4F6;border-radius:99px;overflow:hidden;"><div style="width:0%;height:100%;background:#2563EB;border-radius:99px;"></div></div>
+                </div>
+                <div>
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:#374151;margin-bottom:5px;"><span>Impressions reached</span><span style="color:#9CA3AF;">0</span></div>
+                    <div style="height:8px;background:#F3F4F6;border-radius:99px;overflow:hidden;"><div style="width:0%;height:100%;background:#059669;border-radius:99px;"></div></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Where your ads reached · by category</div>
+                <div style="height:14px;border-radius:99px;background:#F3F4F6;margin-bottom:10px;"></div>
+                <div style="font-size:12px;color:#9CA3AF;">No category data yet</div>
+            </div>
+            <div class="section">
+                <div class="section-title">Recent activity</div>
+                <div style="font-size:13px;color:#9CA3AF;padding:8px 0;">No transactions yet · every credit is itemized.</div>
+            </div>
+            </div><!-- /[data-shell-route="billing"] -->
 
             <!-- ROUTE: promote — RETIRED 2026-06-25.
                  Balance cards (MoR earnings + Ad credit) moved to top of
@@ -6595,7 +6642,7 @@
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'payouts'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'payouts', 'billing'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -17700,5 +17747,27 @@ function pfParseScreenshots(text) {
          advertiser dashboard. Single self-contained script; talks to
          /api/assist (POST). Uses ANTHROPIC_API_KEY on the backend. -->
     <script src="/assist.js" data-surface="advertiser" defer></script>
+<script>
+/* Phase 3b — advertiser billing view: real ad-credits balance (isolated + null-safe;
+   a fault here cannot affect the main dashboard). Spend/usage/category stay placeholder. */
+(function(){
+  function fmt(n){ var v = Number(n); return Number.isFinite(v) ? '$' + v.toFixed(2) : '$0.00'; }
+  async function loadAdvBilling(){
+    try {
+      var token = localStorage.getItem('bb_session_token') || localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token');
+      if (!token) return;
+      var r = await fetch('/api/billing?action=balance', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!r || !r.ok) return;
+      var d = await r.json();
+      var el = document.getElementById('bb-adv-credits');
+      if (el) el.textContent = fmt(d.balance);
+    } catch (e) { /* non-fatal */ }
+  }
+  function maybeLoad(){ try { if ((location.hash || '').indexOf('billing') >= 0) loadAdvBilling(); } catch (e) {} }
+  window.addEventListener('hashchange', maybeLoad);
+  window.addEventListener('load', maybeLoad);
+  maybeLoad();
+})();
+</script>
 </body>
 </html>
