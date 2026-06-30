@@ -2364,14 +2364,14 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
       id: userId, email, company_name: company_name || email.split("@")[0], balance: STARTER_CREDIT,
     });
     if (error) console.error("[Auth] Advertiser insert error:", error.message);
-    // Record the grant in the credit ledger (db/35). Fire-and-forget + non-fatal —
-    // signup must never break if the ledger table isn't there yet.
+    // Record the free starter grant in the existing transactions ledger (type='grant').
+    // Fire-and-forget + non-fatal — signup must never break on it.
     if (!error) {
-      supabaseAdmin.from("advertiser_credit_ledger").insert({
-        advertiser_id: userId, kind: "grant", amount_usd: STARTER_CREDIT,
-        balance_after_usd: STARTER_CREDIT, ref: "signup_starter", note: "Free starter credit",
-      }).then(({ error: ledErr }) => {
-        if (ledErr) console.error("[Auth] starter-credit ledger insert failed:", ledErr.message);
+      supabaseAdmin.from("transactions").insert({
+        advertiser_id: userId, type: "grant", amount: STARTER_CREDIT,
+        description: "Free starter credit", provider: "boostboss", status: "completed",
+      }).then(({ error: txErr }) => {
+        if (txErr) console.error("[Auth] starter-credit transaction insert failed:", txErr.message);
       });
     }
   } else {
