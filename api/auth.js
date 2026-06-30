@@ -2356,10 +2356,24 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
   // Insert the missing profile row for this role. We do this even before
   // confirmation so it's ready the moment they click the email link.
   if (role === "advertiser") {
+    // Cold-start: grant a small, bounded free starter credit so a new advertiser
+    // can launch a (calibration) campaign immediately. Exposure is bounded to this
+    // amount; Phase 4 (advertiser calibration) gates it to free calibration inventory.
+    const STARTER_CREDIT = Number(process.env.BBX_STARTER_CREDIT_USD) || 25;
     const { error } = await supabaseAdmin.from("advertisers").insert({
-      id: userId, email, company_name: company_name || email.split("@")[0], balance: 0,
+      id: userId, email, company_name: company_name || email.split("@")[0], balance: STARTER_CREDIT,
     });
     if (error) console.error("[Auth] Advertiser insert error:", error.message);
+    // Record the grant in the credit ledger (db/35). Fire-and-forget + non-fatal —
+    // signup must never break if the ledger table isn't there yet.
+    if (!error) {
+      supabaseAdmin.from("advertiser_credit_ledger").insert({
+        advertiser_id: userId, kind: "grant", amount_usd: STARTER_CREDIT,
+        balance_after_usd: STARTER_CREDIT, ref: "signup_starter", note: "Free starter credit",
+      }).then(({ error: ledErr }) => {
+        if (ledErr) console.error("[Auth] starter-credit ledger insert failed:", ledErr.message);
+      });
+    }
   } else {
     const apiKey = makeApiKey("dev", userId);
     const { error } = await supabaseAdmin.from("developers").insert({
