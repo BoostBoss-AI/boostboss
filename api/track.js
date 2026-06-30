@@ -347,7 +347,27 @@ module.exports = async function handler(req, res) {
     // count here (Phase B): when billing_model='cpa' and the conversion_type
     // matches the campaign's conversion_event_types allowlist, charge bid_amount.
     const billable = ["impression", "click", "video_complete", "conversion"].includes(event);
-    if (!isSandbox && !(inheritedSandbox === true) && billable) {
+    // Calibration gate (cold-start, db/29_publisher_calibration.sql): a publisher in
+    // 'calibrating' status serves real ads but neither side is charged — the impression
+    // only proves traffic and counts toward graduation. Default status 'live' (and a
+    // missing column / unapplied migration) leaves all existing billing behavior unchanged.
+    let calibrating = false;
+    if (!isSandbox && !(inheritedSandbox === true) && billable && developerId) {
+      const { data: _dev } = await sb.from("developers")
+        .select("calibration_status, impressions_calibrated, calibration_threshold")
+        .eq("id", developerId).maybeSingle();
+      if (_dev && _dev.calibration_status === "calibrating") {
+        calibrating = true;
+        if (event === "impression") {
+          const _next = (_dev.impressions_calibrated || 0) + 1;
+          await sb.from("developers").update({
+            impressions_calibrated: _next,
+            ...(_next >= (_dev.calibration_threshold || 1000) ? { calibration_status: "live" } : {}),
+          }).eq("id", developerId);
+        }
+      }
+    }
+    if (!isSandbox && !(inheritedSandbox === true) && billable && !calibrating) {
       const { data: campaign } = await sb.from("campaigns")
         .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget, conversion_event_types")
         .eq("id", campaignId).single();
