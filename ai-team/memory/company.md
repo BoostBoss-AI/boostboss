@@ -50,6 +50,15 @@ follows the inventory. The cold-start phase won't last long.
 - Resources in place: admin panel governs what needs human approval; per-function emails provisioned.
 - ⚠️ Open: confirm publisher revenue split (70/30 vs 85/15 conflict in records) before any outreach quotes it.
 
+## Cold-start model (agreed — see specs/cold-start.md)
+- **Beachhead:** study/homework AI cluster first; win one dense niche before breadth.
+- Publishers earn from **ad spend (~70%), not affiliate**. Both sides start in a **calibration period**.
+- **Matched calibration + two pools** (free advertisers → calibrating publishers; paid → graduated) = zero subsidy.
+- Dual-sided audience **self-liquidates** a dense niche; small seed budget only as backstop.
+- **Pricing: credits** (token-style top-up) with transparent CPM/CPC/CPA + dollar accounting; free starter credits for advertisers.
+- **Cadence:** supply daily within beachhead; demand weekly into real inventory (~3–5 publishers : 1 advertiser).
+- Billing/usage dashboard spec: `specs/dashboard-billing-usage.md`.
+
 ## Operating gates (hard rules)
 - No autonomous money movement, deploys, or cold sends — those wait in `action_queue` for the Chairman.
 - Outbound to strangers is **gated** until the sending domain is warmed and proven. Honor opt-out.

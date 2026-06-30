@@ -3,6 +3,12 @@
 > The team's first real playbook. This is the knowledge that used to live only in the Chairman's
 > head. Every correction the Chairman makes becomes a new line here.
 
+## Beachhead focus (cold-start)
+Densify ONE niche first — the **study/homework AI cluster** (StudyX, Studyable, StudyMonkey and
+peers) — before going broad. Liquidity comes from density, and the dual-sided audience (apps that
+both monetize *and* want users) lets the niche self-liquidate. See `specs/cold-start.md`.
+Onboarding is **install → calibration (prove traffic, no DAU gate) → monetize** — pitch the zero-risk install.
+
 ## Mission
 Recruit AI-product developers to install Boost Boss as their monetization surface (publishers).
 - **Year-1 target:** 50,000 publisher products live as ad surfaces.
