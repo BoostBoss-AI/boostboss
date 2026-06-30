@@ -3501,7 +3501,7 @@ class MyApp : Application() {
                     app_name: data.developer.app_name || 'Publisher',
                     api_key: data.developer.api_key,
                     app_id: data.developer.app_id,
-                    revenue_share_pct: data.developer.revenue_share_pct || 85,
+                    revenue_share_pct: data.developer.revenue_share_pct || 70,
                     formats: data.developer.formats || { native: true, image: true, corner: true },
                     api_key_login: true,
                 };
@@ -3647,7 +3647,7 @@ class MyApp : Application() {
                 return {
                     total_earnings: parseFloat(data.totals?.earnings) || 0,
                     total_impressions: data.totals?.impressions || 0,
-                    revenue_share: data.developer?.revenue_share_pct || 85,
+                    revenue_share: data.developer?.revenue_share_pct || 70,
                     rpm: parseFloat(data.totals?.rpm) || 0,
                     daily,
                     // BBX per-placement breakdown — from placement_daily_stats view
@@ -3669,7 +3669,7 @@ class MyApp : Application() {
                     stats = {
                         total_earnings: 0,
                         total_impressions: 0,
-                        revenue_share: 85,
+                        revenue_share: 70,
                         rpm: 0,
                         daily: []
                     };
@@ -5424,7 +5424,7 @@ class MyApp : Application() {
                             app_name: profile.app_name || user.email?.split('@')[0] || 'My App',
                             api_key: profile.api_key || 'bb_dev_sk_' + user.id.replace(/-/g, '').substring(0, 18),
                             app_id: profile.app_id || 'app_' + user.id.substring(0, 8),
-                            revenue_share_pct: profile.revenue_share_pct || 85,
+                            revenue_share_pct: profile.revenue_share_pct || 70,
                             formats: { native: true, image: true, corner: true }
                         };
                         localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));

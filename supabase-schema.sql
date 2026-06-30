@@ -22,7 +22,7 @@ CREATE TABLE developers (
   app_name TEXT NOT NULL,
   api_key TEXT UNIQUE NOT NULL DEFAULT 'bb_dev_' || substr(md5(random()::text), 1, 24),
   app_id TEXT UNIQUE NOT NULL DEFAULT 'app_' || substr(md5(random()::text), 1, 12),
-  revenue_share_pct NUMERIC(5,2) DEFAULT 65.00,
+  revenue_share_pct NUMERIC(5,2) DEFAULT 70.00,
   total_earnings NUMERIC(12,2) DEFAULT 0.00,
   mcp_endpoint TEXT DEFAULT 'https://api.boostboss.ai/api/mcp',
   -- Ad format controls

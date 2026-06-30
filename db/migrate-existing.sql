@@ -23,7 +23,7 @@ EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
 DO $$ BEGIN
-  ALTER TABLE public.developers ADD COLUMN revenue_share_pct numeric(5,2) DEFAULT 85.00;
+  ALTER TABLE public.developers ADD COLUMN revenue_share_pct numeric(5,2) DEFAULT 70.00;
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
@@ -99,8 +99,8 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
--- ── Update revenue_share from 65% to 85% if it was set to old default ──
-UPDATE public.developers SET revenue_share_pct = 85.00 WHERE revenue_share_pct = 65.00;
+-- ── Normalize revenue_share to the engine value (70%) from any legacy default ──
+UPDATE public.developers SET revenue_share_pct = 70.00 WHERE revenue_share_pct IN (65.00, 85.00);
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- Done. Now run deploy.sql — the CREATE TABLE IF NOT EXISTS will be

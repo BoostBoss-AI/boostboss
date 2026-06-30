@@ -27,7 +27,7 @@ create table if not exists public.developers (
   app_id             text unique not null default 'app_' || substr(md5(random()::text), 1, 12),
   publisher_domain   text,                    -- site.domain for payout matching (e.g. cursor.com)
   stripe_account_id  text,                    -- Stripe Connect account for payouts
-  revenue_share_pct  numeric(5,2) default 85.00,  -- updated from 65% to match billing.js 85/15 split
+  revenue_share_pct  numeric(5,2) default 70.00,  -- matches engine payout: 1 - TAKE_RATE (6.5% RTB + 23.5% network)
   total_earnings     numeric(12,2) default 0.00,
   mcp_endpoint       text default 'https://boostboss.ai/api/mcp',
   format_corner      boolean default true,
