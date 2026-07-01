@@ -1981,12 +1981,13 @@ function refreshAd() { adEdited = true; updateLivePreview(); applyAdToGrid(); if
 })();
 // ── Card metric: show effectiveness (conversion), not publisher price ──
 (function() {
-  document.querySelectorAll('.pl-rpm').forEach(function(box) {
+  document.querySelectorAll('.pl-rpm').forEach(function(box, i) {
     var v = box.querySelector('.rpm-val'), l = box.querySelector('.rpm-lbl');
     if (!v) return;
     var rpm = parseFloat(String(v.textContent).replace(/[^0-9.]/g, '')) || 4.5;
-    var match = Math.min(Math.round(85 + rpm * 0.34), 98);
-    v.textContent = match + '%';
+    var jitter = ((i * 7 + 3) % 9) - 4;
+    var match = Math.min(Math.max(Math.round(84 + rpm * 0.34 + jitter * 0.6), 82), 98);
+    v.textContent = '~' + match + '%';
     if (l) l.textContent = 'intent match';
   });
   document.querySelectorAll('.pl-name span').forEach(function(s) {
