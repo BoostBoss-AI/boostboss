@@ -53,7 +53,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 
 /* ── Door Tabs ──────────────────────────────────────────────── */
 .tabs-wrap{position:sticky;top:60px;z-index:50;background:rgba(11,11,20,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07);padding:0}
-.tabs{display:flex;max-width:1200px;margin:0 auto;padding:0 32px;overflow-x:auto;scrollbar-width:none}
+.tabs{display:flex;justify-content:center;max-width:1200px;margin:0 auto;padding:0 32px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{display:flex;align-items:center;gap:9px;padding:16px 20px;font-size:14px;font-weight:600;color:rgba(244,244,248,.5);cursor:pointer;background:transparent;border:none;border-bottom:2px solid transparent;-webkit-appearance:none;appearance:none;transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0}
 .tab .tab-icon{font-size:17px}
@@ -74,8 +74,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 @media(max-width:600px){.placements{grid-template-columns:1fr}}
 
 /* ── Placement Card ─────────────────────────────────────────── */
-.pl-card{background:linear-gradient(160deg,rgba(22,22,36,.95),rgba(12,12,22,.97));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s}
-.pl-card:hover{border-color:rgba(0,255,224,.3);transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.pl-card{position:relative;background:linear-gradient(160deg,rgba(22,22,36,.95),rgba(12,12,22,.97));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;transition:border-color .2s,transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+.pl-card:hover{border-color:rgba(0,255,224,.5);transform:scale(1.4);z-index:60;box-shadow:0 30px 80px rgba(0,0,0,.65)}
+.placements:hover .pl-card:not(:hover){opacity:.55;transition:opacity .25s}
 .pl-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
 .pl-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .pl-name{font-family:var(--font-display);font-size:15px;font-weight:700;color:#fff}
