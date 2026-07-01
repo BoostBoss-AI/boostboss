@@ -74,8 +74,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 @media(max-width:600px){.placements{grid-template-columns:1fr}}
 
 /* ── Placement Card ─────────────────────────────────────────── */
-.pl-card{position:relative;background:linear-gradient(160deg,rgba(22,22,36,.95),rgba(12,12,22,.97));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;transition:border-color .2s,transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
-.pl-card:hover,.pl-card.zoomed{border-color:rgba(0,255,224,.5)!important;transform:scale(1.4)!important;z-index:60;box-shadow:0 30px 80px rgba(0,0,0,.65)!important}
+.pl-card{position:relative;background:linear-gradient(160deg,rgba(22,22,36,.95),rgba(12,12,22,.97));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;transition:transform .11s ease,opacity .5s ease,border-color .2s,box-shadow .2s}
+.pl-card:hover,.pl-card.zoomed{border-color:rgba(0,255,224,.5);transform:scale(1.4);z-index:60;box-shadow:0 30px 80px rgba(0,0,0,.65);transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s,border-color .2s}
 .placements:hover .pl-card:not(:hover){opacity:.5!important;transition:opacity .25s}
 .pl-card{cursor:zoom-in}.pl-card.zoomed{cursor:zoom-out}
 .pl-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -1590,15 +1590,12 @@ if ('IntersectionObserver' in window) {
     entries.forEach(function(e) {
       if (e.isIntersecting) {
         e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
+        io.unobserve(e.target);
       }
     });
   }, { threshold: 0.08 });
-  document.querySelectorAll('.pl-card').forEach(function(el, i) {
+  document.querySelectorAll('.pl-card').forEach(function(el) {
     el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity .5s ease, transform .5s ease';
-    el.style.transitionDelay = (i % 3 * 0.07) + 's';
     io.observe(el);
   });
 }
