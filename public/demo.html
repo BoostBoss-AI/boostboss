@@ -116,6 +116,36 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 .scene-corner-cta{display:block;text-align:center;background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:13px;padding:9px;border-radius:9px;text-decoration:none;margin-bottom:8px}
 .scene-corner-spon{font-size:10px;color:rgba(255,255,255,.35);text-align:center;letter-spacing:.04em}
 @media(max-width:600px){.scene-side{display:none}.scene-corner{width:240px}}
+.sc-cite{display:inline-flex;align-items:center;gap:6px;background:rgba(0,255,224,.08);border:1px solid rgba(0,255,224,.3);border-radius:8px;padding:3px 9px;color:#00FFE0;font-weight:600;opacity:0;transition:opacity .5s}
+.scene.play .sc-cite{opacity:1}
+.sc-badge{font-size:9px;background:#00FFE0;color:#04121a;border-radius:4px;padding:1px 5px;font-weight:700}
+.sc-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.sc-chip{font-size:13px;padding:8px 14px;border-radius:100px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65)}
+.sc-chip.spon{background:rgba(0,255,224,.1);border-color:rgba(0,255,224,.35);color:#00FFE0;font-weight:600;opacity:0;transform:translateY(10px);transition:.5s}
+.scene.play .sc-chip.spon{opacity:1;transform:translateY(0)}
+.sc-inline{margin-top:10px;display:flex;gap:12px;align-items:center;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:12px;padding:14px;opacity:0;transform:translateY(14px);transition:.5s}
+.scene.play .sc-inline{opacity:1;transform:translateY(0)}
+.sc-inline .l{width:40px;height:40px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:19px}
+.sc-inline .hl{font-size:14px;font-weight:700;color:#fff}
+.sc-inline .bd{font-size:12.5px;color:rgba(255,255,255,.6)}
+.sc-inline .cta{margin-left:auto;background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:8px;text-decoration:none;white-space:nowrap}
+.sc-hero{margin:auto;text-align:center;max-width:440px;opacity:0;transform:scale(.96);transition:.5s}
+.scene.play .sc-hero{opacity:1;transform:scale(1)}
+.sc-hero .l{width:56px;height:56px;margin:0 auto 16px;border-radius:14px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:28px}
+.sc-hero h3{font-size:22px;color:#fff;font-weight:700;margin-bottom:10px}
+.sc-hero p{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:18px;line-height:1.5}
+.sc-hero .cta{display:inline-block;background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:14px;padding:11px 22px;border-radius:10px;text-decoration:none}
+.sc-loading{margin:auto;text-align:center}
+.sc-think{color:rgba(255,255,255,.5);font-size:14px;margin-bottom:20px}
+.sc-settings-wrap{flex:1;padding:28px 34px;overflow:hidden}
+.sc-settings-wrap h3{color:#fff;font-size:18px;margin-bottom:18px}
+.sc-srow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:14px}
+.sc-toggle{width:38px;height:22px;border-radius:100px;background:rgba(0,255,224,.4);position:relative;flex-shrink:0}
+.sc-toggle::after{content:"";position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff}
+.sc-inter{position:absolute;inset:0;background:rgba(5,5,12,.86);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s;z-index:8}
+.scene.play .sc-inter{opacity:1}
+.sc-inter-card{width:360px;max-width:80%;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:16px;padding:26px;text-align:center;transform:scale(.94);transition:transform .5s}
+.scene.play .sc-inter-card{transform:scale(1)}
 .pl-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
 .pl-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .pl-name{font-family:var(--font-display);font-size:15px;font-weight:700;color:#fff}
@@ -437,7 +467,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
     <div class="placements">
 
       <!-- 1. Corner -->
-      <div class="pl-card" data-scene="scene-corner-browser">
+      <div class="pl-card" data-scene="corner-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Corner Unit</div><div class="pl-kind">kind: corner</div></div>
@@ -474,7 +504,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 2. Sponsored Citation -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="citation-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: citation</div></div>
@@ -506,7 +536,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 3. Suggested Chip -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="chip-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: chip</div></div>
@@ -541,7 +571,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 4. Inline Sponsored Card -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="card-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: card</div></div>
@@ -579,7 +609,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 5. Empty-State Hero -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="hero-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Empty-State Hero</div><div class="pl-kind">kind: hero</div></div>
@@ -603,7 +633,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 6. Loading-State Ad -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="loading-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading</div></div>
@@ -635,7 +665,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 7. Settings Page Slot -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="settings-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Settings Page Slot</div><div class="pl-kind">kind: settings</div></div>
@@ -673,7 +703,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 8. Page Interstitial -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="interstitial-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Page Interstitial</div><div class="pl-kind">kind: interstitial</div></div>
@@ -1602,35 +1632,10 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
   </div>
 </footer>
 
-<!-- ── Full-app preview scene overlay (exemplar: Browser Corner Unit) ── -->
+<!-- ── Full-app preview scene overlay (JS-rendered) ── -->
 <div id="scene-overlay" class="scene-overlay">
   <button class="scene-close" aria-label="Close preview">✕</button>
-  <div class="scene" id="scene-corner-browser">
-    <div class="scene-cap">🌐 Browser App — the Corner Unit, shown inside a full-size AI web app</div>
-    <div class="scene-app">
-      <div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">chat.myaiapp.com</span></div>
-      <div class="scene-main">
-        <div class="scene-side">
-          <div class="scene-newchat">+ New chat</div>
-          <div class="scene-hist a">Deploying a Next.js app</div>
-          <div class="scene-hist">Refactor auth flow</div>
-          <div class="scene-hist">Optimize SQL query</div>
-          <div class="scene-hist">Debug webpack build</div>
-        </div>
-        <div class="scene-chat">
-          <div class="scene-msg u"><div class="scene-ava u">You</div><div class="scene-bub">How do I deploy a Next.js app to production?</div></div>
-          <div class="scene-msg a"><div class="scene-ava a">AI</div><div class="scene-bub">You can deploy Next.js to Vercel in one command: <code>vercel --prod</code>. Connect your repo in the dashboard and every commit ships automatically. To self-host, <code>next build &amp;&amp; next start</code> behind a reverse proxy works well.</div></div>
-          <div class="scene-input"><span>Ask anything…</span><span class="scene-send">↑</span></div>
-        </div>
-      </div>
-      <div class="scene-corner">
-        <button class="scene-corner-x" onclick="return false">✕</button>
-        <div class="scene-corner-row"><div class="scene-corner-logo">⚡</div><div><div class="scene-corner-hl">Ship AI features 10× faster</div><div class="scene-corner-bd">Cursor — the AI-first code editor. Free to start.</div></div></div>
-        <a class="scene-corner-cta" href="#" onclick="return false">Try Cursor free →</a>
-        <div class="scene-corner-spon">Sponsored · via Boost Boss</div>
-      </div>
-    </div>
-  </div>
+  <div class="scene" id="scene-stage"></div>
 </div>
 
 <script>
@@ -1669,26 +1674,59 @@ if ('IntersectionObserver' in window) {
   });
 }
 
-// ── Click a placement with a full-app scene → open animated preview ──
+// ── Full-app preview scenes (click a placement) ─────────────────
 var sceneOverlay = document.getElementById('scene-overlay');
+var sceneStage = document.getElementById('scene-stage');
+var _side = '<div class="scene-side"><div class="scene-newchat">+ New chat</div><div class="scene-hist a">Deploying a Next.js app</div><div class="scene-hist">Refactor auth flow</div><div class="scene-hist">Optimize SQL query</div><div class="scene-hist">Debug webpack build</div></div>';
+function browserApp(mainInner, overlayAd) {
+  return '<div class="scene-app"><div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">chat.myaiapp.com</span></div>'
+    + '<div class="scene-main">' + _side + mainInner + '</div>' + (overlayAd || '') + '</div>';
+}
+function chatBody(inner) {
+  return '<div class="scene-chat">' + inner + '<div class="scene-input"><span>Ask anything…</span><span class="scene-send">↑</span></div></div>';
+}
+var _uMsg = '<div class="scene-msg u"><div class="scene-ava u">You</div><div class="scene-bub">How do I deploy a Next.js app to production?</div></div>';
+function aMsg(html) { return '<div class="scene-msg a"><div class="scene-ava a">AI</div><div class="scene-bub">' + html + '</div></div>'; }
+var _spon = '<div class="scene-corner-spon">Sponsored · via Boost Boss</div>';
+var cornerAd = '<div class="scene-corner"><button class="scene-corner-x" onclick="return false">✕</button><div class="scene-corner-row"><div class="scene-corner-logo">⚡</div><div><div class="scene-corner-hl">Ship AI features 10× faster</div><div class="scene-corner-bd">Cursor — the AI-first code editor. Free to start.</div></div></div><a class="scene-corner-cta" href="#" onclick="return false">Try Cursor free →</a>' + _spon + '</div>';
+
+var SCENES = {
+  'corner-browser': { cap: '🌐 Browser App — Corner Unit in a full-size AI web app', html: function() {
+    return browserApp(chatBody(_uMsg + aMsg('You can deploy Next.js to Vercel in one command: <code>vercel --prod</code>. Connect your repo and every commit ships automatically.')), cornerAd); } },
+  'citation-browser': { cap: '🌐 Browser App — Sponsored Citation inside the answer', html: function() {
+    return browserApp(chatBody(_uMsg + aMsg('You can deploy Next.js to Vercel in one command. <span class="sc-cite"><span class="sc-badge">Ad</span> Cursor IDE — AI-native development</span> is also worth checking to speed things up.'))); } },
+  'chip-browser': { cap: '🌐 Browser App — Suggested Chip below the reply', html: function() {
+    return browserApp(chatBody(_uMsg + aMsg('Here is how to set up a Python virtual environment…') + '<div class="sc-chips"><span class="sc-chip">🔁 Run again</span><span class="sc-chip">📋 Copy</span><span class="sc-chip spon">⚡ Try Cursor AI</span></div>')); } },
+  'card-browser': { cap: '🌐 Browser App — Inline Sponsored Card in the chat flow', html: function() {
+    return browserApp(chatBody(_uMsg + aMsg('Here is your code review summary…') + '<div class="sc-inline"><div class="l">⚡</div><div><div class="hl">Ship code faster with Cursor AI</div><div class="bd">AI-native editor with real-time suggestions. Free plan available.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon)); } },
+  'hero-browser': { cap: '🌐 Browser App — Empty-State Hero', html: function() {
+    return browserApp(chatBody('<div class="sc-hero"><div class="l">⚡</div><h3>Build faster with Cursor AI</h3><p>The AI-first code editor. Autocomplete, refactors, and inline chat — all in one. Used by 100,000+ engineers.</p><a class="cta" href="#" onclick="return false">Try Cursor free →</a>' + _spon + '</div>')); } },
+  'loading-browser': { cap: '🌐 Browser App — Loading-State Ad', html: function() {
+    return browserApp(chatBody('<div class="sc-loading"><div class="sc-think">AI is thinking…</div><div class="sc-inline" style="max-width:380px;margin:0 auto"><div class="l">⚡</div><div><div class="hl">Cursor AI — code 10× faster</div><div class="bd">AI autocomplete, refactors, and inline chat.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon + '</div>')); } },
+  'settings-browser': { cap: '🌐 Browser App — Settings Page Slot', html: function() {
+    return browserApp('<div class="sc-settings-wrap"><h3>Settings</h3><div class="sc-srow">Dark mode<span class="sc-toggle"></span></div><div class="sc-srow">Notifications<span class="sc-toggle"></span></div><div class="sc-inline" style="margin-top:20px"><div class="l">⚡</div><div><div class="hl">Upgrade your dev workflow</div><div class="bd">Cursor AI — free to start.</div></div><a class="cta" href="#" onclick="return false">Learn more</a></div>' + _spon + '</div>'); } },
+  'interstitial-browser': { cap: '🌐 Browser App — Page Interstitial takeover', html: function() {
+    return browserApp(chatBody(_uMsg + aMsg('Here is your deployment guide…')), '<div class="sc-inter"><div class="sc-inter-card"><div class="scene-corner-logo" style="margin:0 auto 14px">⚡</div><div class="scene-corner-hl" style="font-size:18px;margin-bottom:8px">Write code 10× faster</div><div class="scene-corner-bd" style="margin-bottom:16px">Cursor AI — autocomplete, inline chat, and refactors that understand your codebase.</div><a class="scene-corner-cta" href="#" onclick="return false">Try free →</a>' + _spon + '</div></div>'); } }
+};
+
 function openScene(id) {
-  var scene = document.getElementById(id);
-  if (!scene || !sceneOverlay) return;
-  sceneOverlay.querySelectorAll('.scene').forEach(function(s) { s.style.display = 'none'; s.classList.remove('play'); });
-  scene.style.display = 'block';
+  var cfg = SCENES[id];
+  if (!cfg || !sceneStage) return;
+  sceneStage.classList.remove('play');
+  sceneStage.innerHTML = '<div class="scene-cap">' + cfg.cap + '</div>' + cfg.html();
   sceneOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  setTimeout(function() { scene.classList.add('play'); }, 650);   // ad animates in
+  setTimeout(function() { sceneStage.classList.add('play'); }, 550);
 }
 function closeScene() {
   if (!sceneOverlay) return;
   sceneOverlay.classList.remove('open');
   document.body.style.overflow = '';
-  sceneOverlay.querySelectorAll('.scene').forEach(function(s) { s.classList.remove('play'); });
+  sceneStage.classList.remove('play');
 }
 document.querySelectorAll('.pl-card[data-scene]').forEach(function(card) {
   card.addEventListener('click', function(ev) {
-    if (ev.target.closest('a, button')) return;   // let the ad CTAs work
+    if (ev.target.closest('a, button')) return;
     openScene(card.getAttribute('data-scene'));
   });
 });
