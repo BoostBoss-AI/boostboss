@@ -75,8 +75,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 
 /* ── Placement Card ─────────────────────────────────────────── */
 .pl-card{position:relative;background:linear-gradient(160deg,rgba(22,22,36,.95),rgba(12,12,22,.97));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;transition:border-color .2s,transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
-.pl-card:hover{border-color:rgba(0,255,224,.5);transform:scale(1.4);z-index:60;box-shadow:0 30px 80px rgba(0,0,0,.65)}
-.placements:hover .pl-card:not(:hover){opacity:.55;transition:opacity .25s}
+.pl-card:hover,.pl-card.zoomed{border-color:rgba(0,255,224,.5)!important;transform:scale(1.4)!important;z-index:60;box-shadow:0 30px 80px rgba(0,0,0,.65)!important}
+.placements:hover .pl-card:not(:hover){opacity:.5!important;transition:opacity .25s}
+.pl-card{cursor:zoom-in}.pl-card.zoomed{cursor:zoom-out}
 .pl-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
 .pl-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .pl-name{font-family:var(--font-display);font-size:15px;font-weight:700;color:#fff}
@@ -1601,6 +1602,16 @@ if ('IntersectionObserver' in window) {
     io.observe(el);
   });
 }
+
+// ── Click a card to pin/enlarge (works on trackpad + touch) ─────
+document.querySelectorAll('.pl-card').forEach(function(card) {
+  card.addEventListener('click', function(ev) {
+    if (ev.target.closest('a, button')) return;   // let the ad CTAs work
+    var wasZoom = card.classList.contains('zoomed');
+    document.querySelectorAll('.pl-card.zoomed').forEach(function(c) { c.classList.remove('zoomed'); });
+    if (!wasZoom) card.classList.add('zoomed');
+  });
+});
 
 // ── URL hash → open correct door ───────────────────────────────
 (function() {
