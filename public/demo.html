@@ -1956,7 +1956,20 @@ function updateLivePreview() {
   var c = document.getElementById('tp-cta'); if (c) { c.textContent = AD.cta; c.setAttribute('href', AD.url); }
   var lp = document.getElementById('tryit-logo-preview'); if (lp) lp.innerHTML = adLogoHTML();
 }
-function refreshAd() { updateLivePreview(); if (sceneOverlay && sceneOverlay.classList.contains('open')) applyAd(sceneStage); }
+var adEdited = false;
+function applyAdToGrid() {
+  document.querySelectorAll('.pl-preview').forEach(function(p) {
+    p.querySelectorAll('.corner-logo,.ad-card-logo,.ad-loading-ico,.ad-logo,.hero-logo,.interstitial-logo,.settings-ad-logo,.splash-brand-logo,.onboarding-logo,.notif-icon,.win-banner-logo,.bottom-banner-logo').forEach(function(el) { el.innerHTML = adLogoHTML(); });
+    p.querySelectorAll('.hl,.ad-hl,.hero-hl,.interstitial-hl,.splash-hl,.onboarding-hl,.notif-hl').forEach(function(el) { el.textContent = AD.name; });
+    p.querySelectorAll('.bod,.ad-body,.hero-bod,.interstitial-bod,.splash-bd,.onboarding-bod,.notif-bod').forEach(function(el) { el.textContent = AD.desc; });
+    p.querySelectorAll('.cta,.corner-btn,.ad-card-cta,.ad-loading-btn,.settings-ad-cta,.hero-cta,.interstitial-cta,.splash-cta,.onboarding-cta,.win-banner-cta,.bottom-banner-cta').forEach(function(el) { el.textContent = AD.cta; });
+    var wb = p.querySelector('.win-banner-text'); if (wb) wb.innerHTML = '<strong>Sponsored:</strong> ' + _esc(AD.name) + ' — ' + _esc(AD.desc);
+    var na = p.querySelector('.notif-app'); if (na) na.textContent = AD.name + ' · Sponsored';
+    p.querySelectorAll('.ad-citation').forEach(function(el) { var b = el.querySelector('.sup-badge'); el.textContent = ''; if (b) el.appendChild(b); el.appendChild(document.createTextNode(' ' + AD.name)); });
+    p.querySelectorAll('.ad-chip').forEach(function(el) { var b = el.querySelector('.chip-sp'); el.textContent = ''; if (b) el.appendChild(b); el.appendChild(document.createTextNode(' ' + AD.name)); });
+  });
+}
+function refreshAd() { adEdited = true; updateLivePreview(); applyAdToGrid(); if (sceneOverlay && sceneOverlay.classList.contains('open')) applyAd(sceneStage); }
 (function() {
   var n = document.getElementById('ad-name'), d = document.getElementById('ad-desc'), u = document.getElementById('ad-url'), lg = document.getElementById('ad-logo');
   if (n) n.addEventListener('input', function() { AD.name = n.value.trim() || 'Your Brand'; refreshAd(); });
@@ -1970,7 +1983,7 @@ function openScene(id) {
   if (!cfg || !sceneStage) return;
   sceneStage.classList.remove('play');
   sceneStage.innerHTML = '<div class="scene-cap">' + cfg.cap + '</div>' + cfg.html();
-  applyAd(sceneStage);
+  if (adEdited) applyAd(sceneStage);
   sceneOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   setTimeout(function() { sceneStage.classList.add('play'); }, 550);
