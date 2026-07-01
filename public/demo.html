@@ -327,7 +327,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 .loading-bar.w80{width:80%}
 .loading-bar.w60{width:60%}
 .ad-loading{background:rgba(0,255,224,.06);border:1px solid rgba(0,255,224,.2);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:10px;margin-top:4px}
-.ad-loading-ico{font-size:20px;flex-shrink:0}
+.ad-loading-ico{font-size:18px;flex-shrink:0;width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;overflow:hidden;background-size:cover;background-position:center}
 .ad-loading-text .hl{font-size:11.5px;font-weight:700;color:#fff}
 .ad-loading-text .sub{font-size:10px;color:rgba(244,244,248,.5)}
 .ad-loading-btn{margin-left:auto;font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:6px;background:rgba(0,255,224,.15);color:#00FFE0;flex-shrink:0}
@@ -1932,9 +1932,14 @@ var SCENES = {
 var AD = { icon: '⚡', logo: '', name: 'Cursor', desc: 'The AI-first code editor. Free to start.', cta: 'Learn more →', url: 'https://cursor.com' };
 function _esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function adLogoHTML() { return AD.logo ? '<img class="ad-img" src="' + _esc(AD.logo) + '" alt="">' : _esc(AD.icon); }
+function setLogo(el) {
+  if (!el) return;
+  if (AD.logo) { el.textContent = ''; el.style.backgroundImage = 'url("' + AD.logo + '")'; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; }
+  else { el.style.backgroundImage = ''; el.textContent = AD.icon; }
+}
 function applyAd(root) {
   if (!root) return;
-  root.querySelectorAll('.scene-corner-logo,.sc-inline .l,.sc-extad-logo,.sc-ntad .l,.sc-hero .l,.sc-wb-logo,.sc-macnotif-icon,.sc-splash-logo').forEach(function(el) { el.innerHTML = adLogoHTML(); });
+  root.querySelectorAll('.scene-corner-logo,.sc-inline .l,.sc-extad-logo,.sc-ntad .l,.sc-hero .l,.sc-wb-logo,.sc-macnotif-icon,.sc-splash-logo').forEach(setLogo);
   root.querySelectorAll('.scene-corner-hl,.sc-inline .hl,.sc-extad-hl,.sc-ntad .hl,.sc-hero h3,.sc-splash-hl').forEach(function(el) { el.textContent = AD.name; });
   root.querySelectorAll('.scene-corner-bd,.sc-inline .bd,.sc-extad-bd,.sc-ntad .bd,.sc-hero p,.sc-splash-bd').forEach(function(el) { el.textContent = AD.desc; });
   root.querySelectorAll('.scene-corner-cta,.sc-inline .cta,.sc-extad-cta,.sc-ntad .cta,.sc-hero .cta,.sc-splash-cta,.sc-wb-cta').forEach(function(el) { el.textContent = AD.cta; el.setAttribute('href', AD.url); el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener'); el.onclick = null; });
@@ -1946,16 +1951,16 @@ function applyAd(root) {
   root.querySelectorAll('.sc-preroll').forEach(function(el) { el.textContent = AD.icon + ' ' + AD.name + ' · Sponsored'; });
 }
 function updateLivePreview() {
-  var l = document.getElementById('tp-logo'); if (l) l.innerHTML = adLogoHTML();
+  setLogo(document.getElementById('tp-logo'));
   var n = document.getElementById('tp-name'); if (n) n.textContent = AD.name;
   var d = document.getElementById('tp-desc'); if (d) d.textContent = AD.desc;
   var c = document.getElementById('tp-cta'); if (c) { c.textContent = AD.cta; c.setAttribute('href', AD.url); }
-  var lp = document.getElementById('tryit-logo-preview'); if (lp) lp.innerHTML = adLogoHTML();
+  setLogo(document.getElementById('tryit-logo-preview'));
 }
 var adEdited = false;
 function applyAdToGrid() {
   document.querySelectorAll('.pl-preview').forEach(function(p) {
-    p.querySelectorAll('.corner-logo,.ad-card-logo,.ad-loading-ico,.ad-logo,.hero-logo,.interstitial-logo,.settings-ad-logo,.splash-brand-logo,.onboarding-logo,.notif-icon,.win-banner-logo,.bottom-banner-logo').forEach(function(el) { el.innerHTML = adLogoHTML(); });
+    p.querySelectorAll('.corner-logo,.ad-card-logo,.ad-loading-ico,.ad-logo,.hero-logo,.interstitial-logo,.settings-ad-logo,.splash-brand-logo,.onboarding-logo,.notif-icon,.win-banner-logo,.bottom-banner-logo').forEach(setLogo);
     p.querySelectorAll('.hl,.ad-hl,.hero-hl,.interstitial-hl,.splash-hl,.onboarding-hl,.notif-hl').forEach(function(el) { el.textContent = AD.name; });
     p.querySelectorAll('.bod,.ad-body,.hero-bod,.interstitial-bod,.splash-bd,.onboarding-bod,.notif-bod').forEach(function(el) { el.textContent = AD.desc; });
     p.querySelectorAll('.cta,.corner-btn,.ad-card-cta,.ad-loading-btn,.settings-ad-cta,.hero-cta,.interstitial-cta,.splash-cta,.onboarding-cta,.win-banner-cta,.bottom-banner-cta').forEach(function(el) { el.textContent = AD.cta; });
