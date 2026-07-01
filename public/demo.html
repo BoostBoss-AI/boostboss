@@ -525,7 +525,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
     <div class="hero-stats">
       <div class="hero-stat"><div class="n">37</div><div class="l">total placements</div></div>
       <div class="hero-stat"><div class="n">4</div><div class="l">AI-native surfaces</div></div>
-      <div class="hero-stat"><div class="n" style="color:#00FFE0">6.5%</div><div class="l">peak conversion rate</div></div>
+      <div class="hero-stat"><div class="n" style="color:#00FFE0">98%</div><div class="l">peak intent match</div></div>
       <div class="hero-stat"><div class="n">2–4×</div><div class="l">vs. display-ad CTR</div></div>
     </div>
   </div>
@@ -1985,12 +1985,12 @@ function refreshAd() { adEdited = true; updateLivePreview(); applyAdToGrid(); if
     var v = box.querySelector('.rpm-val'), l = box.querySelector('.rpm-lbl');
     if (!v) return;
     var rpm = parseFloat(String(v.textContent).replace(/[^0-9.]/g, '')) || 4.5;
-    var conv = Math.min(0.9 + rpm * 0.16, 7.2);
-    v.textContent = conv.toFixed(1) + '%';
-    if (l) l.textContent = 'conv. rate';
+    var match = Math.min(Math.round(85 + rpm * 0.34), 98);
+    v.textContent = match + '%';
+    if (l) l.textContent = 'intent match';
   });
   document.querySelectorAll('.pl-name span').forEach(function(s) {
-    if (/RPM/i.test(s.textContent)) s.textContent = 'Top converter';
+    if (/RPM/i.test(s.textContent)) s.textContent = 'Peak intent';
   });
 })();
 function openScene(id) {
