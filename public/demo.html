@@ -146,6 +146,84 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 .scene.play .sc-inter{opacity:1}
 .sc-inter-card{width:360px;max-width:80%;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:16px;padding:26px;text-align:center;transform:scale(.94);transition:transform .5s}
 .scene.play .sc-inter-card{transform:scale(1)}
+.scene-extpage{flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:13px;opacity:.45}
+.scene-extpage span{display:block;height:11px;border-radius:5px;background:rgba(255,255,255,.08)}
+.scene-extpage span:nth-child(1){width:55%}.scene-extpage span:nth-child(2){width:80%}.scene-extpage span:nth-child(3){width:40%}.scene-extpage span:nth-child(4){width:70%}.scene-extpage span:nth-child(5){width:60%}
+.scene-extpanel{width:340px;flex-shrink:0;background:#0d0d16;border-left:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column}
+.scene-extpanel-h{padding:14px 16px;font-size:13px;font-weight:600;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.07)}
+.scene-extpanel .scene-chat{padding:18px}
+.scene-extwrap{position:relative}
+.scene-extpopup{position:absolute;top:10px;right:18px;width:256px;background:#12121e;border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.6);padding:14px;z-index:6}
+.scene-extpopup-h{font-size:14px;font-weight:700;color:#fff;margin-bottom:12px}
+.scene-extqa{font-size:13px;color:rgba(255,255,255,.7);padding:9px 10px;border-radius:8px;background:rgba(255,255,255,.04);margin-bottom:7px}
+.sc-extad{display:flex;align-items:center;gap:10px;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:10px;padding:11px;margin-top:8px;opacity:0;transform:translateY(10px);transition:.5s}
+.scene.play .sc-extad{opacity:1;transform:translateY(0)}
+.sc-extad-logo{width:34px;height:34px;flex-shrink:0;border-radius:8px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:16px}
+.sc-extad-hl{font-size:13px;font-weight:700;color:#fff}
+.sc-extad-bd{font-size:11.5px;color:rgba(255,255,255,.6)}
+.sc-extad-cta{margin-left:auto;background:#00FFE0;color:#04121a;font-weight:700;font-size:12px;padding:7px 12px;border-radius:7px;text-decoration:none}
+.scene-newtab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px}
+.scene-newtab-date{font-size:26px;color:#fff;font-weight:600}
+.scene-newtab-search{width:min(70%,440px);text-align:center;padding:14px;border-radius:100px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);font-size:14px}
+.sc-ntad{width:min(70%,440px);text-align:center;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:14px;padding:22px;opacity:0;transform:translateY(16px);transition:.5s}
+.scene.play .sc-ntad{opacity:1;transform:translateY(0)}
+.sc-ntad .l{width:48px;height:48px;margin:0 auto 12px;border-radius:12px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:24px}
+.sc-ntad .hl{font-size:17px;font-weight:700;color:#fff;margin-bottom:6px}
+.sc-ntad .bd{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px}
+.sc-ntad .cta{display:inline-block;background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:13px;padding:10px 20px;border-radius:9px;text-decoration:none}
+.scene-install{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px}
+.scene-install-badge{font-size:19px;color:#00FFE0;font-weight:700}
+.scene-deskbar{background:rgba(255,255,255,.05)}
+.scene-desktitle{margin-left:12px;font-size:12.5px;color:rgba(255,255,255,.55);font-weight:600}
+.sc-winbanner{display:flex;align-items:center;gap:10px;padding:11px 18px;background:linear-gradient(90deg,rgba(0,255,224,.14),rgba(0,160,255,.14));border-bottom:1px solid rgba(0,255,224,.25);font-size:13px;color:rgba(255,255,255,.85);transform:translateY(-100%);opacity:0;transition:.5s}
+.scene.play .sc-winbanner{transform:translateY(0);opacity:1}
+.sc-wb-logo{width:26px;height:26px;flex-shrink:0;border-radius:7px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:14px}
+.sc-wb-cta{margin-left:auto;background:#00FFE0;color:#04121a;font-weight:700;font-size:12px;padding:6px 12px;border-radius:7px;text-decoration:none;white-space:nowrap}
+.sc-sidead{margin-top:auto;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:10px;padding:12px;text-align:center;opacity:0;transform:translateY(12px);transition:.5s}
+.scene.play .sc-sidead{opacity:1;transform:translateY(0)}
+.sc-sidead .sc-extad-logo{margin:0 auto 8px}
+.sc-sidead .sc-extad-hl{font-size:13px;font-weight:700;color:#fff}
+.sc-sidead .sc-extad-bd{font-size:11.5px;color:rgba(255,255,255,.6);margin-bottom:8px}
+.sc-sidead .sc-extad-cta{display:inline-block;margin:0}
+.scene-deskwall{background:radial-gradient(circle at 30% 20%,#1a1a3a,#0a0a14)}
+.scene-deskmenu{padding:10px 16px;background:rgba(0,0,0,.3);font-size:12px;color:rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.06)}
+.sc-macnotif{position:absolute;top:56px;right:24px;width:330px;display:flex;gap:12px;background:rgba(30,30,42,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.5);transform:translateX(120%);opacity:0;transition:.55s cubic-bezier(.2,.8,.2,1)}
+.scene.play .sc-macnotif{transform:translateX(0);opacity:1}
+.sc-macnotif-icon{width:38px;height:38px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:18px}
+.sc-macnotif-t{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
+.sc-macnotif-b{font-size:12px;color:rgba(255,255,255,.65);line-height:1.4}
+.scene-mobile{display:flex;justify-content:center;align-items:center;height:min(76vh,660px)}
+.scene-phone{position:relative;width:340px;height:100%;max-height:660px;background:#0d0d16;border:2px solid rgba(255,255,255,.14);border-radius:34px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.6);display:flex;flex-direction:column}
+.scene-statusbar{display:flex;justify-content:space-between;padding:12px 22px 6px;font-size:12px;color:rgba(255,255,255,.6);font-weight:600}
+.scene-mhead{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;font-size:14px;font-weight:600;color:#fff;border-bottom:1px solid rgba(255,255,255,.07)}
+.scene-mbody{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.scene-mchat{flex:1;display:flex;flex-direction:column;gap:16px;padding:18px}
+.scene-mchat .scene-bub{font-size:13.5px}
+.sc-mbanner{position:absolute;left:10px;right:10px;bottom:12px;display:flex;align-items:center;gap:10px;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.5);transform:translateY(150%);opacity:0;transition:.5s}
+.scene.play .sc-mbanner{transform:translateY(0);opacity:1}
+.sc-splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 26px;opacity:0;transition:opacity .5s}
+.scene.play .sc-splash{opacity:1}
+.sc-splash-tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:12px}
+.sc-splash-logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:14px}
+.sc-splash-hl{font-size:21px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px}
+.sc-splash-bd{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:18px;line-height:1.5}
+.sc-splash-cta{display:inline-block;background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:14px;padding:12px 26px;border-radius:11px;text-decoration:none}
+.sc-splash-skip{font-size:12px;color:rgba(255,255,255,.4);margin-top:14px}
+.sc-feed{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.sc-feed-card{height:88px;border-radius:12px;background:rgba(255,255,255,.05);flex-shrink:0}
+.sc-mnative{display:flex;align-items:center;gap:10px;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:12px;padding:12px;opacity:0;transform:translateY(12px);transition:.5s}
+.scene.play .sc-mnative{opacity:1;transform:translateY(0)}
+.sc-minter{position:absolute;inset:0;background:rgba(5,5,12,.9);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;opacity:0;transition:opacity .5s;z-index:8}
+.scene.play .sc-minter{opacity:1}
+.sc-minter-card{transform:scale(.92);transition:transform .5s}
+.scene.play .sc-minter-card{transform:scale(1)}
+.sc-video{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#12122a,#07070f);opacity:0;transition:opacity .5s}
+.scene.play .sc-video{opacity:1}
+.sc-video-play{width:64px;height:64px;border-radius:50%;background:rgba(0,255,224,.15);border:2px solid #00FFE0;color:#00FFE0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.sc-video-badge{position:absolute;top:14px;left:14px;font-size:11px;background:rgba(0,0,0,.5);color:#fff;padding:5px 10px;border-radius:6px}
+.sc-video-skip{position:absolute;top:14px;right:14px;font-size:11px;background:rgba(0,0,0,.5);color:#fff;padding:5px 10px;border-radius:6px}
+.sc-reward{position:absolute;bottom:22px;background:#00FFE0;color:#04121a;font-weight:700;font-size:13px;padding:8px 16px;border-radius:100px}
+.sc-preroll{position:absolute;bottom:18px;font-size:12px;color:rgba(255,255,255,.75)}
 .pl-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
 .pl-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .pl-name{font-family:var(--font-display);font-size:15px;font-weight:700;color:#fff}
@@ -751,7 +829,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
     <div class="placements">
 
       <!-- 9. Popup Card -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="popup-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Popup Card</div><div class="pl-kind">kind: popup_card</div></div>
@@ -787,7 +865,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 10. Side Panel Slot -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="sidepanel-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Side Panel Slot</div><div class="pl-kind">kind: side_panel</div></div>
@@ -819,7 +897,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 11. New-Tab Takeover -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="newtab-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">New-Tab Takeover</div><div class="pl-kind">kind: new_tab</div></div>
@@ -848,7 +926,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 12. Install Onboarding -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="install-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Install Onboarding</div><div class="pl-kind">kind: install_onboarding</div></div>
@@ -870,7 +948,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 13. Citation (Extension) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="citation-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: citation</div></div>
@@ -893,7 +971,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 14. Chip (Extension) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="chip-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: chip</div></div>
@@ -920,7 +998,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 15. Card (Extension) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="card-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: card</div></div>
@@ -951,7 +1029,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 16. Loading (Extension) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="loading-ext">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading</div></div>
@@ -1000,7 +1078,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
 
       <!-- 17–24: shared with browser (corner, citation, chip, card, hero, loading, settings, interstitial) -->
       <!-- Corner (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="corner-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Corner Unit</div><div class="pl-kind">kind: corner</div></div>
@@ -1030,7 +1108,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Citation (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="citation-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: citation</div></div>
@@ -1053,7 +1131,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Chip (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="chip-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: chip</div></div>
@@ -1081,7 +1159,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Card (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="card-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: card</div></div>
@@ -1112,7 +1190,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Hero (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="hero-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Empty-State Hero</div><div class="pl-kind">kind: hero</div></div>
@@ -1137,7 +1215,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Loading (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="loading-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading</div></div>
@@ -1164,7 +1242,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Settings (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="settings-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Settings Page Slot</div><div class="pl-kind">kind: settings</div></div>
@@ -1198,7 +1276,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- Interstitial (Computer) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="interstitial-comp">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Page Interstitial</div><div class="pl-kind">kind: interstitial</div></div>
@@ -1226,7 +1304,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 25. Window Banner ★ DESKTOP ONLY -->
-      <div class="pl-card" style="border-color:rgba(0,255,224,.15)">
+      <div class="pl-card" data-scene="winbanner-comp" style="border-color:rgba(0,255,224,.15)">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Window Banner <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,255,224,.12);color:#00FFE0;vertical-align:middle">Desktop only</span></div><div class="pl-kind">kind: window_banner</div></div>
@@ -1253,7 +1331,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 26. Sidebar Slot ★ DESKTOP ONLY -->
-      <div class="pl-card" style="border-color:rgba(0,255,224,.15)">
+      <div class="pl-card" data-scene="sidebar-comp" style="border-color:rgba(0,255,224,.15)">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Sidebar Slot <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,255,224,.12);color:#00FFE0;vertical-align:middle">Desktop only</span></div><div class="pl-kind">kind: sidebar</div></div>
@@ -1287,7 +1365,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 27. System Notification ★ DESKTOP ONLY -->
-      <div class="pl-card" style="border-color:rgba(0,255,224,.15)">
+      <div class="pl-card" data-scene="sysnotif-comp" style="border-color:rgba(0,255,224,.15)">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">System Notification <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,255,224,.12);color:#00FFE0;vertical-align:middle">Desktop only</span></div><div class="pl-kind">kind: system_notification</div></div>
@@ -1329,7 +1407,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
     <div class="placements">
 
       <!-- 28. Bottom Banner -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="bottombanner-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Bottom Banner</div><div class="pl-kind">kind: bottom_banner</div></div>
@@ -1359,7 +1437,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 29. Splash Sponsor -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="splash-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Splash Sponsor</div><div class="pl-kind">kind: splash_sponsor</div></div>
@@ -1383,7 +1461,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 30. Inline Native Banner -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="native-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Inline Native Banner</div><div class="pl-kind">kind: inline_native_banner</div></div>
@@ -1409,7 +1487,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 31. Inline Sponsored Card (Mobile) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="card-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: inline_sponsored_card</div></div>
@@ -1437,7 +1515,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 32. Sponsored Citation (Mobile) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="citation-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: sponsored_citation</div></div>
@@ -1460,7 +1538,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 33. Suggested Chip (Mobile) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="chip-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: suggested_chip</div></div>
@@ -1487,7 +1565,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 34. Loading-State Ad (Mobile) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="loading-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading_state_ad</div></div>
@@ -1514,7 +1592,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 35. Interstitial (Mobile) -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="interstitial-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Interstitial</div><div class="pl-kind">kind: interstitial</div></div>
@@ -1542,7 +1620,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 36. Rewarded Video -->
-      <div class="pl-card" style="border-color:rgba(255,230,0,.18)">
+      <div class="pl-card" data-scene="rewarded-mob" style="border-color:rgba(255,230,0,.18)">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Rewarded Video <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,230,0,.1);color:#FFE600;vertical-align:middle">~$35 RPM</span></div><div class="pl-kind">kind: rewarded_video</div></div>
@@ -1569,7 +1647,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
 
       <!-- 37. Pre-Roll Video -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="preroll-mob">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Pre-Roll Video</div><div class="pl-kind">kind: pre_roll_video</div></div>
@@ -1690,7 +1768,91 @@ function aMsg(html) { return '<div class="scene-msg a"><div class="scene-ava a">
 var _spon = '<div class="scene-corner-spon">Sponsored · via Boost Boss</div>';
 var cornerAd = '<div class="scene-corner"><button class="scene-corner-x" onclick="return false">✕</button><div class="scene-corner-row"><div class="scene-corner-logo">⚡</div><div><div class="scene-corner-hl">Ship AI features 10× faster</div><div class="scene-corner-bd">Cursor — the AI-first code editor. Free to start.</div></div></div><a class="scene-corner-cta" href="#" onclick="return false">Try Cursor free →</a>' + _spon + '</div>';
 
+function extPanel(inner) {
+  return '<div class="scene-app"><div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">docs.example.com</span></div>'
+    + '<div class="scene-main"><div class="scene-extpage"><span></span><span></span><span></span><span></span></div>'
+    + '<div class="scene-extpanel"><div class="scene-extpanel-h">🧩 Claude · Side Panel</div>' + inner + '</div></div></div>';
+}
+function extPopup(cardHtml) {
+  return '<div class="scene-app"><div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">news.example.com</span></div>'
+    + '<div class="scene-main scene-extwrap"><div class="scene-extpage"><span></span><span></span><span></span><span></span><span></span></div>'
+    + '<div class="scene-extpopup"><div class="scene-extpopup-h">My AI Extension</div><div class="scene-extqa">✍️ Summarize page</div><div class="scene-extqa">🌐 Translate selection</div>' + cardHtml + '</div></div></div>';
+}
+function extNewTab(adHtml) {
+  return '<div class="scene-app"><div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">New Tab</span></div>'
+    + '<div class="scene-newtab"><div class="scene-newtab-date">Wednesday, July 1</div><div class="scene-newtab-search">Search the web…</div>' + adHtml + '</div></div>';
+}
+function extInstall(adHtml) {
+  return '<div class="scene-app"><div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">chrome://extensions</span></div>'
+    + '<div class="scene-install"><div class="scene-install-badge">🎉 Extension installed!</div>' + adHtml + '</div></div>';
+}
+function desktopApp(mainInner, overlayAd) {
+  return '<div class="scene-app"><div class="scene-appbar scene-deskbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-desktitle">Desktop AI App</span></div>'
+    + '<div class="scene-main">' + _side + mainInner + '</div>' + (overlayAd || '') + '</div>';
+}
+function mobileApp(headerLabel, inner, overlayAd) {
+  return '<div class="scene-mobile"><div class="scene-phone"><div class="scene-statusbar"><span>9:41</span><span>●●● ▮</span></div><div class="scene-mhead"><span>‹</span><span>' + headerLabel + '</span><span>⋯</span></div><div class="scene-mbody">' + inner + '</div>' + (overlayAd || '') + '</div></div>';
+}
+function mChat(inner) { return '<div class="scene-mchat">' + inner + '</div>'; }
 var SCENES = {
+  'bottombanner-mob': { cap: '📱 Mobile App — Bottom Banner (auto-mount)', html: function() {
+    return mobileApp('AI Study App', mChat(_uMsg + aMsg('Here is your study plan for today…')), '<div class="sc-mbanner"><div class="sc-extad-logo" style="width:30px;height:30px;font-size:14px">⚡</div><div><div class="sc-extad-hl" style="font-size:12.5px">Cursor AI — code faster</div><div class="sc-extad-bd" style="font-size:11px">AI-native editor. Free.</div></div><a class="sc-extad-cta" href="#" onclick="return false">Try</a></div>'); } },
+  'splash-mob': { cap: '📱 Mobile App — Splash Sponsor (auto-mount)', html: function() {
+    return mobileApp('AI Study App', '<div class="sc-splash"><div class="sc-splash-tag">Today\'s sponsor</div><div class="sc-splash-logo">⚡</div><div class="sc-splash-hl">Code 10× faster with Cursor AI</div><div class="sc-splash-bd">The AI-first editor trusted by 100,000+ developers.</div><a class="sc-splash-cta" href="#" onclick="return false">Try Cursor for free</a><div class="sc-splash-skip">Skip →</div>' + _spon + '</div>'); } },
+  'native-mob': { cap: '📱 Mobile App — Inline Native Banner', html: function() {
+    return mobileApp('AI Study Feed', '<div class="sc-feed"><div class="sc-feed-card"></div><div class="sc-mnative"><div class="sc-extad-logo">⚡</div><div><div class="sc-extad-hl">Cursor AI — code smarter</div><div class="sc-extad-bd">Free plan · AI-native editor</div></div><a class="sc-extad-cta" href="#" onclick="return false">Try</a></div><div class="sc-feed-card"></div>' + _spon + '</div>'); } },
+  'card-mob': { cap: '📱 Mobile App — Inline Sponsored Card', html: function() {
+    return mobileApp('AI Chat', mChat(_uMsg + aMsg('Here is your study plan for today…') + '<div class="sc-inline"><div class="l">⚡</div><div><div class="hl">Cursor — AI-native editor</div><div class="bd">Autocomplete, inline chat, free plan.</div></div><a class="cta" href="#" onclick="return false">Try</a></div>' + _spon)); } },
+  'citation-mob': { cap: '📱 Mobile App — Sponsored Citation', html: function() {
+    return mobileApp('AI Chat', mChat(_uMsg + aMsg('You can solve this in Python — see <span class="sc-cite"><span class="sc-badge">Ad</span> Cursor AI — Python support</span> for AI-powered help.'))); } },
+  'chip-mob': { cap: '📱 Mobile App — Suggested Chip', html: function() {
+    return mobileApp('AI Chat', mChat(_uMsg + aMsg('Here is the solution to your algorithm question…') + '<div class="sc-chips"><span class="sc-chip">📋 Copy</span><span class="sc-chip spon">⚡ Code it in Cursor</span></div>')); } },
+  'loading-mob': { cap: '📱 Mobile App — Loading-State Ad', html: function() {
+    return mobileApp('AI Chat', mChat('<div class="sc-loading"><div class="sc-think">AI is thinking…</div><div class="sc-inline" style="margin:0 auto"><div class="l">⚡</div><div><div class="hl">Cursor AI — code smarter</div><div class="bd">AI editor, free to start.</div></div><a class="cta" href="#" onclick="return false">Try</a></div>' + _spon + '</div>')); } },
+  'interstitial-mob': { cap: '📱 Mobile App — Interstitial', html: function() {
+    return mobileApp('AI Chat', mChat(_uMsg + aMsg('One moment…')), '<div class="sc-minter"><div class="sc-minter-card"><div class="sc-splash-logo" style="margin:0 auto 12px">⚡</div><div class="sc-splash-hl">Code faster with AI</div><div class="sc-splash-bd">Cursor — the AI editor that understands your codebase.</div><a class="sc-splash-cta" href="#" onclick="return false">Try free</a><div class="sc-splash-skip">Skip</div>' + _spon + '</div></div>'); } },
+  'rewarded-mob': { cap: '📱 Mobile App — Rewarded Video (~$35 RPM)', html: function() {
+    return mobileApp('AI Study App', '<div class="sc-video"><div class="sc-video-badge">Ad · Watch to earn 10 credits</div><div class="sc-video-play">▶</div><div class="sc-reward">🎁 +10 credits</div>' + _spon + '</div>'); } },
+  'preroll-mob': { cap: '📱 Mobile App — Pre-Roll Video', html: function() {
+    return mobileApp('AI Study App', '<div class="sc-video"><div class="sc-video-skip">Skip ad → 5s</div><div class="sc-video-play">▶</div><div class="sc-preroll">⚡ Cursor AI · Sponsored — Learn more</div>' + _spon + '</div>'); } },
+  'corner-comp': { cap: '🖥️ Computer App — Corner Unit in a desktop AI app', html: function() {
+    return desktopApp(chatBody(_uMsg + aMsg('For this Rust async task, the cleanest pattern is a spawned task with a channel.')), cornerAd); } },
+  'citation-comp': { cap: '🖥️ Computer App — Sponsored Citation', html: function() {
+    return desktopApp(chatBody(_uMsg + aMsg('For this Rust async task, <span class="sc-cite"><span class="sc-badge">Ad</span> Cursor AI — Rust autocomplete</span> understands borrowing context better than most tools.'))); } },
+  'chip-comp': { cap: '🖥️ Computer App — Suggested Chip', html: function() {
+    return desktopApp(chatBody(_uMsg + aMsg('Here is the optimised SQL query…') + '<div class="sc-chips"><span class="sc-chip">📋 Copy</span><span class="sc-chip">🔁 Regenerate</span><span class="sc-chip spon">⚡ Run in Cursor</span></div>')); } },
+  'card-comp': { cap: '🖥️ Computer App — Inline Sponsored Card', html: function() {
+    return desktopApp(chatBody(_uMsg + aMsg('I ran the linter — 3 issues found.') + '<div class="sc-inline"><div class="l">⚡</div><div><div class="hl">Fix lint issues in real time with Cursor</div><div class="bd">AI understands your project context, not just syntax.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon)); } },
+  'hero-comp': { cap: '🖥️ Computer App — Empty-State Hero', html: function() {
+    return desktopApp(chatBody('<div class="sc-hero"><div class="l">⚡</div><h3>Start with Cursor AI</h3><p>Ask your AI assistant anything — or open a project in Cursor to code alongside it.</p><a class="cta" href="#" onclick="return false">Try Cursor free →</a>' + _spon + '</div>')); } },
+  'loading-comp': { cap: '🖥️ Computer App — Loading-State Ad', html: function() {
+    return desktopApp(chatBody('<div class="sc-loading"><div class="sc-think">Processing…</div><div class="sc-inline" style="margin:0 auto"><div class="l">⚡</div><div><div class="hl">Cursor AI — ship 10× faster</div><div class="bd">AI autocomplete + inline chat.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon + '</div>')); } },
+  'settings-comp': { cap: '🖥️ Computer App — Settings Page Slot', html: function() {
+    return desktopApp('<div class="sc-settings-wrap"><h3>Preferences</h3><div class="sc-srow">Theme<span class="sc-toggle"></span></div><div class="sc-srow">AI keys<span class="sc-toggle"></span></div><div class="sc-inline" style="margin-top:20px"><div class="l">⚡</div><div><div class="hl">Power up your editor</div><div class="bd">Cursor AI — free to start.</div></div><a class="cta" href="#" onclick="return false">Try</a></div>' + _spon + '</div>'); } },
+  'interstitial-comp': { cap: '🖥️ Computer App — Page Interstitial', html: function() {
+    return desktopApp(chatBody(_uMsg + aMsg('Building your project…')), '<div class="sc-inter"><div class="sc-inter-card"><div class="scene-corner-logo" style="margin:0 auto 14px">⚡</div><div class="scene-corner-hl" style="font-size:18px;margin-bottom:8px">Build faster with AI</div><div class="scene-corner-bd" style="margin-bottom:16px">Cursor AI — the editor that understands your entire codebase.</div><a class="scene-corner-cta" href="#" onclick="return false">Try Cursor →</a>' + _spon + '</div></div>'); } },
+  'winbanner-comp': { cap: '🖥️ Computer App — Window Banner (desktop-only)', html: function() {
+    return '<div class="scene-app"><div class="scene-appbar scene-deskbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-desktitle">Desktop AI App</span></div><div class="sc-winbanner"><span class="sc-wb-logo">⚡</span><span><b>Sponsored:</b> Cursor AI — code 10× faster with AI autocomplete and inline chat</span><a class="sc-wb-cta" href="#" onclick="return false">Try free</a></div><div class="scene-main">' + _side + chatBody(_uMsg + aMsg('Sure — here is how to structure that module…')) + '</div></div>'; } },
+  'sidebar-comp': { cap: '🖥️ Computer App — Sidebar Slot (desktop-only)', html: function() {
+    return '<div class="scene-app"><div class="scene-appbar scene-deskbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-desktitle">Desktop AI App</span></div><div class="scene-main"><div class="scene-side"><div class="scene-newchat">+ New chat</div><div class="scene-hist a">Rust async task</div><div class="scene-hist">SQL optimization</div><div class="sc-sidead"><div class="sc-extad-logo">⚡</div><div class="sc-extad-hl">Cursor AI — ship faster</div><div class="sc-extad-bd">Free plan. Real AI context.</div><a class="sc-extad-cta" href="#" onclick="return false">Try free</a>' + _spon + '</div></div>' + chatBody(_uMsg + aMsg('Here is the fix for that borrow-checker error…')) + '</div></div>'; } },
+  'sysnotif-comp': { cap: '🖥️ Computer App — System Notification (desktop-only)', html: function() {
+    return '<div class="scene-app scene-deskwall"><div class="scene-deskmenu">🖥️  Desktop AI App  ·  File   Edit   View</div><div class="sc-macnotif"><div class="sc-macnotif-icon">⚡</div><div><div class="sc-macnotif-t">Cursor AI · Sponsored</div><div class="sc-macnotif-b">Write code 10× faster — AI autocomplete, inline chat, and refactors.</div><div class="sc-macnotif-b" style="margin-top:5px;opacity:.55">Sponsored · via Boost Boss</div></div></div></div>'; } },
+  'popup-ext': { cap: '🧩 Browser Extension — Popup Card', html: function() {
+    return extPopup('<div class="sc-extad"><div class="sc-extad-logo">⚡</div><div><div class="sc-extad-hl">Cursor AI — code faster</div><div class="sc-extad-bd">AI-native editor. Free.</div></div><a class="sc-extad-cta" href="#" onclick="return false">Try</a></div>' + _spon); } },
+  'sidepanel-ext': { cap: '🧩 Browser Extension — Side Panel Slot', html: function() {
+    return extPanel(chatBody(aMsg('Here is a quick summary of this page…') + '<div class="sc-inline"><div class="l">⚡</div><div><div class="hl">Cursor AI</div><div class="bd">Code 10× faster with AI.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon)); } },
+  'newtab-ext': { cap: '🧩 Browser Extension — New-Tab Takeover', html: function() {
+    return extNewTab('<div class="sc-ntad"><div class="l">⚡</div><div class="hl">Cursor AI — The AI-first editor</div><div class="bd">Write, refactor, and debug faster. 100k context. Free plan.</div><a class="cta" href="#" onclick="return false">Try free</a>' + _spon + '</div>'); } },
+  'install-ext': { cap: '🧩 Browser Extension — Install Onboarding', html: function() {
+    return extInstall('<div class="sc-hero"><div class="l">⚡</div><h3>Level up with Cursor AI</h3><p>Now that you are supercharging your browser, supercharge your editor too — AI autocomplete, refactors, and chat.</p><a class="cta" href="#" onclick="return false">Try Cursor free →</a>' + _spon + '</div>'); } },
+  'citation-ext': { cap: '🧩 Browser Extension — Sponsored Citation', html: function() {
+    return extPanel(chatBody(aMsg('To speed this up, try an AI-native editor — <span class="sc-cite"><span class="sc-badge">Ad</span> Cursor — AI code editor</span> is popular for this workflow.'))); } },
+  'chip-ext': { cap: '🧩 Browser Extension — Suggested Chip', html: function() {
+    return extPanel(chatBody(aMsg('Here is the refactored version of your function…') + '<div class="sc-chips"><span class="sc-chip">✍️ Explain</span><span class="sc-chip spon">⚡ Open in Cursor</span></div>')); } },
+  'card-ext': { cap: '🧩 Browser Extension — Inline Sponsored Card', html: function() {
+    return extPanel(chatBody(aMsg('Your PR looks good. Here are 3 things to address…') + '<div class="sc-inline"><div class="l">⚡</div><div><div class="hl">Catch bugs before review with Cursor</div><div class="bd">AI code review inline — right in your editor.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon)); } },
+  'loading-ext': { cap: '🧩 Browser Extension — Loading-State Ad', html: function() {
+    return extPanel(chatBody('<div class="sc-loading"><div class="sc-think">Claude is reading your page…</div><div class="sc-inline" style="margin:0 auto"><div class="l">⚡</div><div><div class="hl">Cursor AI — code smarter</div><div class="bd">AI editor with 100k context.</div></div><a class="cta" href="#" onclick="return false">Try free</a></div>' + _spon + '</div>')); } },
   'corner-browser': { cap: '🌐 Browser App — Corner Unit in a full-size AI web app', html: function() {
     return browserApp(chatBody(_uMsg + aMsg('You can deploy Next.js to Vercel in one command: <code>vercel --prod</code>. Connect your repo and every commit ships automatically.')), cornerAd); } },
   'citation-browser': { cap: '🌐 Browser App — Sponsored Citation inside the answer', html: function() {
