@@ -225,7 +225,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 .sc-reward{position:absolute;bottom:22px;background:#00FFE0;color:#04121a;font-weight:700;font-size:13px;padding:8px 16px;border-radius:100px}
 .sc-preroll{position:absolute;bottom:18px;font-size:12px;color:rgba(255,255,255,.75)}
 .tryit{max-width:1200px;margin:0 auto;padding:6px 32px 0}
-.tryit-inner{display:flex;gap:24px;background:linear-gradient(160deg,rgba(0,255,224,.06),rgba(0,160,255,.04));border:1px solid rgba(0,255,224,.22);border-radius:18px;padding:22px 24px;flex-wrap:wrap}
+.tryit-inner{display:flex;gap:24px;align-items:center;background:linear-gradient(160deg,rgba(0,255,224,.06),rgba(0,160,255,.04));border:1px solid rgba(0,255,224,.22);border-radius:18px;padding:22px 24px;flex-wrap:wrap}
 .tryit-form{flex:1;min-width:300px}
 .tryit-head{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
 .tryit-head em{color:#00FFE0;font-style:normal}
@@ -239,8 +239,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 .tryit-logo-preview{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden}
 .tryit-logo-txt{font-size:9px;color:rgba(255,255,255,.5)}
 .tryit-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;flex-wrap:wrap}
-.tryit-hint{font-size:12.5px;color:rgba(0,255,224,.85);font-weight:600}
-.tryit-signup{background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:13.5px;padding:11px 20px;border-radius:10px;text-decoration:none;white-space:nowrap}
+.tryit-hint{text-align:center;font-size:14px;color:rgba(0,255,224,.9);font-weight:600;margin:16px 0 2px}
 .tryit-live{width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
 .tryit-live-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4)}
 .tryit-ad{background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.3);border-radius:14px;padding:16px;text-align:center}
@@ -550,10 +549,6 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
         <input type="text" id="ad-desc" placeholder="Quick description" value="The AI-first code editor. Free to start." maxlength="72" aria-label="Quick description">
         <input type="url" id="ad-url" placeholder="https://yoursite.com" value="https://cursor.com" aria-label="Landing URL">
       </div>
-      <div class="tryit-actions">
-        <span class="tryit-hint">👇 Now click any placement below to see it live</span>
-        <a class="tryit-signup" href="/ads">Launch this ad — sign up free →</a>
-      </div>
     </div>
     <div class="tryit-live">
       <div class="tryit-live-label">Live preview</div>
@@ -566,6 +561,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
       </div>
     </div>
   </div>
+  <div class="tryit-hint">👇 Now click any placement below to see it live</div>
 </section>
 
 <!-- DOOR TABS -->
