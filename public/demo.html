@@ -75,9 +75,47 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,11,20,.9)
 
 /* ── Placement Card ─────────────────────────────────────────── */
 .pl-card{position:relative;background:linear-gradient(160deg,rgba(22,22,36,.95),rgba(12,12,22,.97));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;transition:transform .11s ease,opacity .5s ease,border-color .2s,box-shadow .2s}
-.pl-card:hover,.pl-card.zoomed{border-color:rgba(0,255,224,.5);transform:scale(1.4);z-index:60;box-shadow:0 30px 80px rgba(0,0,0,.65);transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s,border-color .2s}
-.placements:hover .pl-card:not(:hover){opacity:.5!important;transition:opacity .25s}
-.pl-card{cursor:zoom-in}.pl-card.zoomed{cursor:zoom-out}
+.pl-card:hover{border-color:rgba(0,255,224,.4);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4);transition:transform .16s ease,box-shadow .2s,border-color .2s}
+.pl-card[data-scene]{cursor:pointer}
+.pl-card[data-scene]::after{content:"Click to preview in a full app \2192";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:12px;font-weight:600;color:#04121a;background:linear-gradient(90deg,#00FFE0,#00c8ff);padding:8px;opacity:0;transform:translateY(100%);transition:opacity .2s,transform .2s;z-index:4;pointer-events:none}
+.pl-card[data-scene]:hover::after{opacity:1;transform:translateY(0)}
+/* ── Full-app preview scene (click a placement) ─────────────────── */
+.scene-overlay{position:fixed;inset:0;z-index:2000;background:rgba(5,5,12,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:32px}
+.scene-overlay.open{display:flex;animation:sceneFade .2s ease}
+@keyframes sceneFade{from{opacity:0}to{opacity:1}}
+.scene-close{position:absolute;top:22px;right:26px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:18px;cursor:pointer;z-index:3}
+.scene-close:hover{background:rgba(255,255,255,.16)}
+.scene{width:100%;max-width:1100px}
+.scene-cap{text-align:center;color:rgba(244,244,248,.7);font-size:14px;font-weight:600;margin-bottom:14px}
+.scene-app{position:relative;height:min(70vh,620px);background:#0d0d16;border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.6)}
+.scene-appbar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07)}
+.scene-appbar .d{width:12px;height:12px;border-radius:50%}
+.scene-appbar .d.r{background:#FF5F57}.scene-appbar .d.y{background:#FEBC2E}.scene-appbar .d.g{background:#28C840}
+.scene-url{margin-left:12px;font-size:12px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:4px 12px;border-radius:8px}
+.scene-main{display:flex;height:calc(100% - 45px)}
+.scene-side{width:220px;flex-shrink:0;background:rgba(255,255,255,.02);border-right:1px solid rgba(255,255,255,.06);padding:14px 10px;display:flex;flex-direction:column;gap:6px}
+.scene-newchat{font-size:13px;font-weight:600;color:#fff;background:rgba(0,255,224,.12);border:1px solid rgba(0,255,224,.25);border-radius:8px;padding:9px 12px;margin-bottom:8px}
+.scene-hist{font-size:13px;color:rgba(255,255,255,.55);padding:9px 12px;border-radius:8px}
+.scene-hist.a{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.scene-chat{flex:1;display:flex;flex-direction:column;padding:26px 32px;gap:20px;overflow:hidden}
+.scene-msg{display:flex;gap:12px;max-width:82%}
+.scene-msg.u{align-self:flex-end;flex-direction:row-reverse}
+.scene-ava{width:30px;height:30px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.scene-ava.u{background:#2b2b40;color:#fff}.scene-ava.a{background:linear-gradient(135deg,#00FFE0,#00a0ff);color:#04121a}
+.scene-bub{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:13px 16px;font-size:14px;line-height:1.55;color:rgba(244,244,248,.9)}
+.scene-bub code{background:rgba(0,255,224,.12);color:#00FFE0;padding:1px 6px;border-radius:5px;font-size:13px}
+.scene-input{margin-top:auto;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 18px;color:rgba(255,255,255,.4);font-size:14px}
+.scene-send{width:28px;height:28px;border-radius:8px;background:#00FFE0;color:#04121a;display:flex;align-items:center;justify-content:center;font-weight:700}
+.scene-corner{position:absolute;right:22px;bottom:22px;width:300px;background:linear-gradient(160deg,#16162a,#0c0c17);border:1px solid rgba(0,255,224,.35);border-radius:14px;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.55);opacity:0;transform:translateY(30px) scale(.96);transition:opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1);z-index:5}
+.scene.play .scene-corner{opacity:1;transform:translateY(0) scale(1)}
+.scene-corner-x{position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer}
+.scene-corner-row{display:flex;gap:11px;margin-bottom:12px}
+.scene-corner-logo{width:38px;height:38px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,#00FFE0,#00a0ff);display:flex;align-items:center;justify-content:center;font-size:18px}
+.scene-corner-hl{font-size:14px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:3px}
+.scene-corner-bd{font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.4}
+.scene-corner-cta{display:block;text-align:center;background:linear-gradient(90deg,#00FFE0,#00c8ff);color:#04121a;font-weight:700;font-size:13px;padding:9px;border-radius:9px;text-decoration:none;margin-bottom:8px}
+.scene-corner-spon{font-size:10px;color:rgba(255,255,255,.35);text-align:center;letter-spacing:.04em}
+@media(max-width:600px){.scene-side{display:none}.scene-corner{width:240px}}
 .pl-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
 .pl-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .pl-name{font-family:var(--font-display);font-size:15px;font-weight:700;color:#fff}
@@ -399,7 +437,7 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
     <div class="placements">
 
       <!-- 1. Corner -->
-      <div class="pl-card">
+      <div class="pl-card" data-scene="scene-corner-browser">
         <div class="pl-header">
           <div class="pl-header-top">
             <div><div class="pl-name">Corner Unit</div><div class="pl-kind">kind: corner</div></div>
@@ -1564,6 +1602,37 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
   </div>
 </footer>
 
+<!-- ── Full-app preview scene overlay (exemplar: Browser Corner Unit) ── -->
+<div id="scene-overlay" class="scene-overlay">
+  <button class="scene-close" aria-label="Close preview">✕</button>
+  <div class="scene" id="scene-corner-browser">
+    <div class="scene-cap">🌐 Browser App — the Corner Unit, shown inside a full-size AI web app</div>
+    <div class="scene-app">
+      <div class="scene-appbar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="scene-url">chat.myaiapp.com</span></div>
+      <div class="scene-main">
+        <div class="scene-side">
+          <div class="scene-newchat">+ New chat</div>
+          <div class="scene-hist a">Deploying a Next.js app</div>
+          <div class="scene-hist">Refactor auth flow</div>
+          <div class="scene-hist">Optimize SQL query</div>
+          <div class="scene-hist">Debug webpack build</div>
+        </div>
+        <div class="scene-chat">
+          <div class="scene-msg u"><div class="scene-ava u">You</div><div class="scene-bub">How do I deploy a Next.js app to production?</div></div>
+          <div class="scene-msg a"><div class="scene-ava a">AI</div><div class="scene-bub">You can deploy Next.js to Vercel in one command: <code>vercel --prod</code>. Connect your repo in the dashboard and every commit ships automatically. To self-host, <code>next build &amp;&amp; next start</code> behind a reverse proxy works well.</div></div>
+          <div class="scene-input"><span>Ask anything…</span><span class="scene-send">↑</span></div>
+        </div>
+      </div>
+      <div class="scene-corner">
+        <button class="scene-corner-x" onclick="return false">✕</button>
+        <div class="scene-corner-row"><div class="scene-corner-logo">⚡</div><div><div class="scene-corner-hl">Ship AI features 10× faster</div><div class="scene-corner-bd">Cursor — the AI-first code editor. Free to start.</div></div></div>
+        <a class="scene-corner-cta" href="#" onclick="return false">Try Cursor free →</a>
+        <div class="scene-corner-spon">Sponsored · via Boost Boss</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Nav scroll ──────────────────────────────────────────────────
 window.addEventListener('scroll', function() {
@@ -1600,15 +1669,35 @@ if ('IntersectionObserver' in window) {
   });
 }
 
-// ── Click a card to pin/enlarge (works on trackpad + touch) ─────
-document.querySelectorAll('.pl-card').forEach(function(card) {
+// ── Click a placement with a full-app scene → open animated preview ──
+var sceneOverlay = document.getElementById('scene-overlay');
+function openScene(id) {
+  var scene = document.getElementById(id);
+  if (!scene || !sceneOverlay) return;
+  sceneOverlay.querySelectorAll('.scene').forEach(function(s) { s.style.display = 'none'; s.classList.remove('play'); });
+  scene.style.display = 'block';
+  sceneOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(function() { scene.classList.add('play'); }, 650);   // ad animates in
+}
+function closeScene() {
+  if (!sceneOverlay) return;
+  sceneOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  sceneOverlay.querySelectorAll('.scene').forEach(function(s) { s.classList.remove('play'); });
+}
+document.querySelectorAll('.pl-card[data-scene]').forEach(function(card) {
   card.addEventListener('click', function(ev) {
     if (ev.target.closest('a, button')) return;   // let the ad CTAs work
-    var wasZoom = card.classList.contains('zoomed');
-    document.querySelectorAll('.pl-card.zoomed').forEach(function(c) { c.classList.remove('zoomed'); });
-    if (!wasZoom) card.classList.add('zoomed');
+    openScene(card.getAttribute('data-scene'));
   });
 });
+if (sceneOverlay) {
+  sceneOverlay.addEventListener('click', function(ev) {
+    if (ev.target === sceneOverlay || ev.target.closest('.scene-close')) closeScene();
+  });
+}
+document.addEventListener('keydown', function(ev) { if (ev.key === 'Escape') closeScene(); });
 
 // ── URL hash → open correct door ───────────────────────────────
 (function() {
