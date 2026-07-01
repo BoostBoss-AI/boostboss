@@ -525,8 +525,8 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:40px 0;margin-top:0}
     <div class="hero-stats">
       <div class="hero-stat"><div class="n">37</div><div class="l">total placements</div></div>
       <div class="hero-stat"><div class="n">4</div><div class="l">AI-native surfaces</div></div>
-      <div class="hero-stat"><div class="n" style="color:#00FFE0">~$35</div><div class="l">peak RPM (rewarded video)</div></div>
-      <div class="hero-stat"><div class="n">70%</div><div class="l">publisher revenue share</div></div>
+      <div class="hero-stat"><div class="n" style="color:#00FFE0">6.5%</div><div class="l">peak conversion rate</div></div>
+      <div class="hero-stat"><div class="n">2–4×</div><div class="l">vs. display-ad CTR</div></div>
     </div>
   </div>
 </section>
@@ -1978,6 +1978,20 @@ function refreshAd() { adEdited = true; updateLivePreview(); applyAdToGrid(); if
   if (u) u.addEventListener('input', function() { AD.url = u.value.trim() || '#'; refreshAd(); });
   if (lg) lg.addEventListener('change', function() { var f = lg.files && lg.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(e) { AD.logo = e.target.result; refreshAd(); }; r.readAsDataURL(f); });
   updateLivePreview();
+})();
+// ── Card metric: show effectiveness (conversion), not publisher price ──
+(function() {
+  document.querySelectorAll('.pl-rpm').forEach(function(box) {
+    var v = box.querySelector('.rpm-val'), l = box.querySelector('.rpm-lbl');
+    if (!v) return;
+    var rpm = parseFloat(String(v.textContent).replace(/[^0-9.]/g, '')) || 4.5;
+    var conv = Math.min(0.9 + rpm * 0.16, 7.2);
+    v.textContent = conv.toFixed(1) + '%';
+    if (l) l.textContent = 'conv. rate';
+  });
+  document.querySelectorAll('.pl-name span').forEach(function(s) {
+    if (/RPM/i.test(s.textContent)) s.textContent = 'Top converter';
+  });
 })();
 function openScene(id) {
   var cfg = SCENES[id];
