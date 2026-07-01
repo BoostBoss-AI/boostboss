@@ -1062,18 +1062,18 @@
           <span class="tryit-logo-txt">Logo</span>
           <input type="file" id="ad-logo" accept="image/*" hidden>
         </label>
-        <input type="text" id="ad-name" placeholder="Company name" value="Cursor" maxlength="28" aria-label="Company name">
-        <input type="text" id="ad-desc" placeholder="Quick description" value="The AI-first code editor. Free to start." maxlength="72" aria-label="Quick description">
-        <input type="url" id="ad-url" placeholder="https://yoursite.com" value="https://cursor.com" aria-label="Landing URL">
+        <input type="text" id="ad-name" placeholder="Company name" maxlength="28" aria-label="Company name">
+        <input type="text" id="ad-desc" placeholder="Quick description" maxlength="72" aria-label="Quick description">
+        <input type="url" id="ad-url" placeholder="https://yoursite.com" aria-label="Landing URL">
       </div>
     </div>
     <div class="tryit-live">
       <div class="tryit-live-label">Live preview</div>
       <div class="tryit-ad">
         <div class="tryit-ad-logo" id="tp-logo">⚡</div>
-        <div class="tryit-ad-hl" id="tp-name">Cursor</div>
-        <div class="tryit-ad-bd" id="tp-desc">The AI-first code editor. Free to start.</div>
-        <a class="tryit-ad-cta" id="tp-cta" href="https://cursor.com" target="_blank" rel="noopener">Learn more →</a>
+        <div class="tryit-ad-hl" id="tp-name">Your Brand</div>
+        <div class="tryit-ad-bd" id="tp-desc">Your product, in one line.</div>
+        <a class="tryit-ad-cta" id="tp-cta" href="#" target="_blank" rel="noopener">Learn more →</a>
         <div class="tryit-ad-spon">Sponsored · via Boost Boss</div>
       </div>
     </div>
@@ -2665,7 +2665,7 @@ var SCENES = {
 };
 
 // ── Personalization: the visitor's creative flows into every scene ──
-var AD = { icon: '⚡', logo: '', name: 'Cursor', desc: 'The AI-first code editor. Free to start.', cta: 'Learn more →', url: 'https://cursor.com' };
+var AD = { icon: '⚡', logo: '', name: 'Your Brand', desc: 'Your product, in one line.', cta: 'Learn more →', url: '#' };
 function _esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function adLogoHTML() { return AD.logo ? '<img class="ad-img" src="' + _esc(AD.logo) + '" alt="">' : _esc(AD.icon); }
 function setLogo(el) {
@@ -2714,6 +2714,7 @@ function refreshAd() { adEdited = true; updateLivePreview(); applyAdToGrid(); if
   if (u) u.addEventListener('input', function() { AD.url = u.value.trim() || '#'; refreshAd(); });
   if (lg) lg.addEventListener('change', function() { var f = lg.files && lg.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(e) { AD.logo = e.target.result; refreshAd(); }; r.readAsDataURL(f); });
   updateLivePreview();
+  applyAdToGrid();
 })();
 // ── Card metric: show effectiveness (conversion), not publisher price ──
 (function() {
@@ -2735,7 +2736,7 @@ function openScene(id) {
   if (!cfg || !sceneStage) return;
   sceneStage.classList.remove('play');
   sceneStage.innerHTML = '<div class="scene-cap">' + cfg.cap + '</div>' + cfg.html();
-  if (adEdited) applyAd(sceneStage);
+  applyAd(sceneStage);
   sceneOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   setTimeout(function() { sceneStage.classList.add('play'); }, 550);
