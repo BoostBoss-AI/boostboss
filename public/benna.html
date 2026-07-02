@@ -164,7 +164,7 @@
   .sw-track.a{animation:sw-flow-a 42s linear infinite}
   .sw-track.b{animation:sw-flow-b 35s linear infinite}
   .sw-track.c{animation:sw-flow-c 48s linear infinite}
-  .scoring-wall:hover .sw-track{animation-play-state:paused}
+  .sw-track:hover{animation-play-state:paused}
   @keyframes sw-flow-a{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   @keyframes sw-flow-b{from{transform:translateX(-50%)}to{transform:translateX(0)}}
   @keyframes sw-flow-c{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -248,23 +248,6 @@
 </section>
 
 <div class="divider"></div>
-<section class="section" id="how"><div class="wrap">
-  <div class="section-head" data-reveal>
-    <div class="eyebrow">What Benna sees</div>
-    <h2>Six signals <span class="acc">cookies can't capture</span>.</h2>
-    <p>Legacy DSPs guess at intent from cookies, fingerprints, and demographic graphs that the AI-native web is dismantling. Benna reads what the user is actually trying to do, in real time, from the conversation itself.</p>
-  </div>
-  <div class="pgrid">
-    <div class="pcard" data-reveal><div class="pico">🛠</div><h3>MCP tool context</h3><p>The exact tool the model just called — <span style="font-family:var(--font-mono);color:var(--acc)">deploy_helper.lookup</span>, <span style="font-family:var(--font-mono);color:var(--acc)">spreadsheet.format</span> — names the user's real-world task.</p></div>
-    <div class="pcard" data-reveal style="--rd:.06s"><div class="pico">💬</div><h3>Prompt intent</h3><p>The semantic shape of the question. "How do I deploy FastAPI?" carries different commercial intent than "what is FastAPI?"</p></div>
-    <div class="pcard" data-reveal style="--rd:.12s"><div class="pico">🪜</div><h3>Session stage</h3><p>Turn count, prior tool calls, prior topics. A 6th-turn debugging session converts very differently than a fresh exploratory chat.</p></div>
-    <div class="pcard" data-reveal style="--rd:0s"><div class="pico">🤖</div><h3>Host AI model</h3><p>Claude, GPT, open-source. Different model populations carry different buying patterns; Benna learns them per surface.</p></div>
-    <div class="pcard" data-reveal style="--rd:.06s"><div class="pico">🌐</div><h3>Host surface</h3><p>Claude Desktop, a browser side panel, a Telegram bot, a chat app — the surface shapes what creatives even fit, and Benna scores accordingly.</p></div>
-    <div class="pcard" data-reveal style="--rd:.12s"><div class="pico">📈</div><h3>Outcome feedback</h3><p>Real clicks, real conversions from pixel events. Every signal gets pruned or amplified by what actually drives outcomes downstream.</p></div>
-  </div>
-</div></section>
-
-<div class="divider"></div>
 <section class="section"><div class="wrap">
   <div class="section-head" data-reveal><div class="eyebrow">Where Benna sits</div><h2>The engine inside <span class="acc">every Boost Boss decision</span>.</h2><p>Benna isn't a product you sign up for — it's the optimization layer the entire network runs on. Whichever side you're on, every impression gets scored before it clears.</p></div>
   <div class="pgrid">
@@ -274,10 +257,6 @@
   </div>
 </div></section>
 
-<section class="section"><div class="wrap"><div class="cta-box" data-reveal>
-  <h2>To use Benna, run a Boost Ad.</h2><p>Benna doesn't have its own sign-up. You access it by running campaigns on SuperBoost Ads — every impression you buy gets scored, every bid auto-tuned to your target.</p>
-  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="/ads/signup">Start a Boost Ad →</a><a class="btn btn-lg btn-clear" href="/ads">Tour SuperBoost</a></div>
-</div></div></section>
 <footer class="site"><div class="wrap">
   <div class="foot-grid">
     <div><div class="foot-brand"><img src="/design-system/assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight)">Boost Boss</span></div><p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p></div>
