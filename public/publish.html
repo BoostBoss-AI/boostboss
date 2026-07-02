@@ -213,10 +213,10 @@
   /* ───────── CTA ───────── */
   .cta-box {
     position: relative; overflow: hidden; max-width: 1000px; margin: 0 auto;
-    background: var(--grad-pink); border: 2px solid rgba(255,255,255,0.14); border-radius: var(--r-2xl);
-    box-shadow: var(--glow-pink); padding: 70px 48px; text-align: center; color: #fff;
+    background: transparent; border: none; border-radius: 0;
+    box-shadow: none; padding: 70px 48px; text-align: center; color: #fff;
   }
-  .cta-box::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 26% 50%, rgba(255,230,0,0.22), transparent 55%), radial-gradient(circle at 80% 45%, rgba(0,255,224,0.22), transparent 55%); }
+  .cta-box::before { content: none; }
   .cta-box > * { position: relative; z-index: 1; }
   .cta-box h2 { font-family: var(--font-display); font-size: clamp(32px, 4.4vw, 50px); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 16px; }
   .cta-box p { font-size: 18px; opacity: 0.92; max-width: 540px; margin: 0 auto 30px; }
