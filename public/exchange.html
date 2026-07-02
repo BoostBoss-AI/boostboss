@@ -147,6 +147,16 @@
   .cta-box .btn-white:hover{background:var(--bb-ink);color:#fff;border-color:var(--bb-ink);transform:translateY(-2px)}
   .cta-box .btn-clear{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
   .cta-box .btn-clear:hover{background:#fff;color:var(--bb-pink);border-color:#fff;transform:translateY(-2px)}
+  .cta-min{text-align:center;max-width:720px;margin:0 auto;padding:30px 0}
+  .cta-min h2{font-family:var(--font-display);font-size:clamp(34px,4.8vw,58px);font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.05;margin-bottom:18px}
+  .cta-min p{font-size:18px;color:rgba(244,244,248,.6);max-width:560px;margin:0 auto 30px;line-height:1.5}
+  .wl-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:520px;margin:0 auto}
+  .wl-input{flex:1;min-width:230px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.18);border-radius:var(--r-md);padding:14px 18px;color:#fff;font-family:inherit;font-size:16px;transition:border-color var(--dur-fast)}
+  .wl-input::placeholder{color:rgba(255,255,255,.4)}
+  .wl-input:focus{outline:none;border-color:var(--accBorder)}
+  .wl-form .btn-lg{padding:14px 26px}
+  .wl-msg{margin-top:16px;font-size:14px;min-height:20px;color:var(--acc)}
+  .wl-msg.err{color:#FF6B8A}
   footer.site{border-top:1px solid rgba(255,255,255,.08);padding:54px 0 34px;margin-top:var(--section-y)}
   .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:38px}
   .foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -203,9 +213,14 @@
      <div class="stat" data-reveal style="--rd:.16s"><div class="n yellow" data-count="6.5" data-dec="1" data-suf="%">0</div><div class="l">RTB exchange fee</div></div>
      <div class="stat" data-reveal style="--rd:.24s"><div class="n" data-count="100" data-suf="%">0</div><div class="l">First-price clearing</div></div>
    </div></div></section>
-<section class="section"><div class="wrap"><div class="cta-box" data-reveal>
-  <h2>Bring your demand to BBX.</h2><p>Request a seat and start bidding on the highest-intent inventory in AI software.</p>
-  <div class="cta-ctas"><a class="btn btn-lg btn-white" href="#">Request a seat →</a><a class="btn btn-lg btn-clear" href="#">Read the RTB docs</a></div>
+<section class="section"><div class="wrap"><div class="cta-min" data-reveal>
+  <h2>Bring your demand to BBX.</h2>
+  <p>BBX is opening to external demand partners soon. Join the waitlist to get early access to the highest-intent inventory in AI software.</p>
+  <form class="wl-form" id="wlForm" novalidate>
+    <input class="wl-input" type="email" id="wlEmail" placeholder="you@company.com" autocomplete="email" aria-label="Work email" required>
+    <button class="btn btn-primary btn-lg" type="submit" id="wlBtn">Join the waitlist →</button>
+  </form>
+  <div class="wl-msg" id="wlMsg" role="status" aria-live="polite"></div>
 </div></div></section>
 <footer class="site"><div class="wrap">
   <div class="foot-grid">
@@ -225,6 +240,26 @@ function onS(){var y=scrollY;nav.classList.toggle('scrolled',y>8);if(ANIM){var v
 addEventListener('scroll',onS,{passive:true});onS();
 function animateCount(el){var t=parseFloat(el.dataset.count),d=parseInt(el.dataset.dec||'0'),pre=el.dataset.pre||'',suf=el.dataset.suf||'',t0=performance.now();(function tick(n){var p=Math.min((n-t0)/1300,1),e=1-Math.pow(1-p,3),v=(t*e).toFixed(d);el.textContent=pre+(d===0?Math.round(v).toLocaleString():v)+suf;if(p<1)requestAnimationFrame(tick)})(performance.now());}
 if(ANIM&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){if(e.target.matches('[data-reveal]'))e.target.classList.add('is-visible');if(e.target.querySelector&&e.target.querySelector('.n[data-count]'))e.target.querySelectorAll('.n[data-count]').forEach(animateCount);o.unobserve(e.target)}})},{threshold:.2});document.querySelectorAll('[data-reveal], .stats-band').forEach(function(el){io.observe(el)})}else{document.querySelectorAll('.n[data-count]').forEach(function(el){var d=parseInt(el.dataset.dec||'0');el.textContent=(el.dataset.pre||'')+(d===0?Math.round(el.dataset.count):Number(el.dataset.count).toFixed(d))+(el.dataset.suf||'')})}
+/* ── Waitlist form ── */
+(function(){
+  var f=document.getElementById('wlForm'); if(!f) return;
+  var email=document.getElementById('wlEmail'), btn=document.getElementById('wlBtn'), msg=document.getElementById('wlMsg');
+  var RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/, orig=btn.textContent;
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=(email.value||'').trim();
+    msg.className='wl-msg';
+    if(!RE.test(v)){ msg.textContent='Please enter a valid email.'; msg.className='wl-msg err'; return; }
+    btn.disabled=true; btn.textContent='Joining…';
+    fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v,source:'bbx'})})
+      .then(function(r){return r.json().catch(function(){return {}})})
+      .then(function(d){
+        if(d&&d.ok){ f.reset(); msg.textContent="You're on the list — we'll be in touch."; msg.className='wl-msg'; btn.textContent='Added ✓'; }
+        else { msg.textContent=(d&&d.error)||'Something went wrong. Please try again.'; msg.className='wl-msg err'; btn.disabled=false; btn.textContent=orig; }
+      })
+      .catch(function(){ msg.textContent='Network error. Please try again.'; msg.className='wl-msg err'; btn.disabled=false; btn.textContent=orig; });
+  });
+})();
 </script>
 </body>
 </html>
