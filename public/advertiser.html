@@ -3024,6 +3024,11 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
               <span class="shell-nav-item__label">Usage</span>
             </button>
+            <span class="shell-nav-section-label">Developer</span>
+            <button class="shell-nav-item" data-shell-section="api">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+              <span class="shell-nav-item__label" data-t="shell.nav.api">API &amp; Automation</span>
+            </button>
             <span class="shell-nav-section-label">Account</span>
             <!-- Account — flat nav item, logout icon on right -->
             <button class="shell-nav-item shell-nav-item--account" id="shellAccountNavItem" onclick="if(typeof openSettingsModal==='function')openSettingsModal();">
@@ -4859,6 +4864,116 @@
             </div>
             </div><!-- /[data-shell-route="billing"] -->
 
+            <!-- ═════════════════════════════════════════════════════════════
+                 ROUTE: api — "API & Automation" developer page.
+                 Hash: #/api. Nav item data-shell-section="api".
+                 VALID_ROUTES + dashboard-shell.css allowlist both carry 'api'.
+                 API key CRUD wired to /api/api-keys (GET meta / POST create /
+                 POST ?action=revoke). Auth header uses currentUser.token like
+                 every other authed fetch on this page. Loader IIFE lives in a
+                 dedicated <script> after the section (mirrors products/payouts).
+                 ═════════════════════════════════════════════════════════════ -->
+            <div data-shell-route="api">
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="api.page_title">API &amp; Automation</h1>
+                    <div class="shell-page-sub" data-t="api.page_sub">Programmatic access to your campaigns and performance data. Manage your API key and read the REST quickstart.</div>
+                </div>
+            </div>
+
+            <!-- API key management -->
+            <div class="section">
+                <div class="section-title" data-t="api.key_section">API key</div>
+                <div id="apiKeyStatus" style="font-size:13px;color:#9CA3AF;padding:6px 0;">Loading…</div>
+
+                <!-- No-key state -->
+                <div id="apiKeyEmpty" style="display:none;">
+                    <div style="font-size:13px;color:#6B7280;margin-bottom:12px;">You don't have an API key yet. Generate one to start calling the Boost Boss REST API.</div>
+                    <button id="apiKeyGenerate" style="
+                        padding:10px 18px;background:var(--accent-primary);color:#fff;border:none;
+                        border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+                    ">Generate API key</button>
+                </div>
+
+                <!-- Has-key state (masked metadata) -->
+                <div id="apiKeyHas" style="display:none;">
+                    <div style="
+                        background:#F9FAFB;border-radius:10px;padding:14px 16px;margin-bottom:14px;
+                        display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+                    ">
+                        <div>
+                            <div id="apiKeyPrefix" style="font-size:14px;font-weight:600;color:#374151;font-family:monospace;">bb_live_…</div>
+                            <div id="apiKeyMeta" style="font-size:12px;color:#9CA3AF;margin-top:3px;">Created —</div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button id="apiKeyRegenerate" style="
+                                padding:9px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;
+                                font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;white-space:nowrap;
+                            ">Regenerate</button>
+                            <button id="apiKeyRevoke" style="
+                                padding:9px 14px;border:1px solid #FECACA;border-radius:8px;background:#fff;
+                                font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#DC2626;white-space:nowrap;
+                            ">Revoke</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- One-time secret reveal (shown only right after create/regenerate) -->
+                <div id="apiKeyReveal" style="display:none;margin-top:8px;">
+                    <div style="
+                        background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;
+                        font-size:12.5px;color:#92400E;margin-bottom:10px;
+                    ">Copy it now — you won't be able to see it again.</div>
+                    <div style="display:flex;gap:8px;">
+                        <input id="apiKeySecret" type="text" readonly value="" style="
+                            flex:1;padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;
+                            font-size:13px;font-family:monospace;background:#FAFAFA;color:#111827;
+                        ">
+                        <button id="apiKeyCopy" style="
+                            padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;
+                            font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;white-space:nowrap;
+                        ">Copy</button>
+                    </div>
+                </div>
+
+                <!-- Scopes -->
+                <div style="margin-top:16px;">
+                    <div style="font-size:12px;font-weight:600;color:#6B7280;margin-bottom:6px;">Scopes</div>
+                    <div id="apiKeyScopes" style="display:flex;flex-wrap:wrap;gap:6px;">
+                        <span style="font-size:12px;color:#9CA3AF;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REST quickstart (static) -->
+            <div class="section">
+                <div class="section-title" data-t="api.quickstart">REST quickstart</div>
+                <div style="font-size:13px;color:#6B7280;margin-bottom:12px;">
+                    Authenticate every request with your key as a Bearer token.
+                </div>
+                <pre style="
+                    background:#0F172A;color:#E2E8F0;border-radius:10px;padding:14px 16px;
+                    font-size:12.5px;font-family:monospace;overflow-x:auto;margin:0 0 16px;line-height:1.6;
+                "><code>curl -H "Authorization: Bearer bb_live_…" \
+     https://boostboss.ai/api/campaigns</code></pre>
+
+                <div style="font-size:12px;font-weight:600;color:#6B7280;margin-bottom:8px;">Endpoint reference</div>
+                <div style="border:1px solid #F3F4F6;border-radius:10px;overflow:hidden;">
+                    <div style="display:flex;gap:12px;padding:10px 14px;border-bottom:1px solid #F3F4F6;font-size:13px;">
+                        <code style="font-family:monospace;color:#111827;min-width:150px;">/api/campaigns</code>
+                        <span style="color:#6B7280;">List, create, and pause campaigns.</span>
+                    </div>
+                    <div style="display:flex;gap:12px;padding:10px 14px;font-size:13px;">
+                        <code style="font-family:monospace;color:#111827;min-width:150px;">/api/stats</code>
+                        <span style="color:#6B7280;">Pull performance (impressions, clicks, spend).</span>
+                    </div>
+                </div>
+                <div style="font-size:12px;color:#9CA3AF;margin-top:12px;">
+                    Your key carries only the scopes shown above and cannot move money.
+                </div>
+            </div>
+            </div><!-- /[data-shell-route="api"] -->
+
             <!-- ROUTE: promote — RETIRED 2026-06-25.
                  Balance cards (MoR earnings + Ad credit) moved to top of
                  Payouts. Active campaigns table + 'Open Campaigns →' link
@@ -5024,18 +5139,11 @@
                     </div>
                     <div style="margin-bottom: 20px;">
                         <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;" data-t="settings.api_key">API Key</label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="password" id="settingsApiKey" readonly value="bb_live_••••••••••••" style="
-                                flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
-                                border-radius: 8px; font-size: 13px; font-family: monospace;
-                                background: #FAFAFA; color: #6B7280;
-                            ">
-                            <button id="settingsRevealKey" style="
-                                padding: 10px 14px; border: 1px solid #E5E7EB; border-radius: 8px;
-                                background: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
-                                font-family: inherit; color: #374151; white-space: nowrap;
-                            " data-t="settings.show">Show</button>
-                        </div>
+                        <a href="#/api" id="settingsApiKeyLink" style="
+                            display: block; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 13px; background: #FAFAFA; color: #2563EB;
+                            text-decoration: none; font-weight: 600;
+                        ">Manage your API key in API &amp; Automation →</a>
                     </div>
                     <div style="
                         background: #FAFAFA; border-radius: 10px; padding: 14px;
@@ -6701,7 +6809,7 @@
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'payouts', 'billing'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'payouts', 'billing', 'api'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -11782,10 +11890,7 @@
                 return `
                     <div style="${ROW}">
                         <label style="${LB}">${esc(t('api.key_label'))}</label>
-                        <div style="display:flex;gap:8px;">
-                            <input id="aSetKey" type="password" value="bb_live_••••••••••••" style="${FLD}font-family:monospace;font-size:12.5px;">
-                            <button id="aSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;font-family:inherit;">${esc(t('common.show'))}</button>
-                        </div>
+                        <a id="aSetApiLink" href="#/api" style="display:block;padding:11px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#FAFAFA;color:#2563EB;text-decoration:none;font-weight:600;font-size:13px;">Manage your API key in API &amp; Automation →</a>
                         <div style="${HINT}">${esc(t('api.key_hint'))}</div>
                     </div>
                     <div style="${ROW}margin-bottom:0;">
@@ -12092,14 +12197,11 @@
                         if (v) { navigator.clipboard.writeText(v); if (typeof showToast === 'function') showToast('Copied', 'success'); }
                     });
                 });
-                const reveal = settingsModal.querySelector('#aSetReveal');
-                if (reveal) reveal.addEventListener('click', () => {
-                    const inp = settingsModal.querySelector('#aSetKey');
-                    if (inp.type === 'password') {
-                        const uid = (u().api_key) || ('bb_live_' + String(u().user_id || 'demo').replace(/-/g, '').substring(0, 24));
-                        inp.value = uid; inp.type = 'text'; reveal.textContent = 'Hide';
-                    } else { inp.value = 'bb_live_••••••••••••'; inp.type = 'password'; reveal.textContent = 'Show'; }
-                });
+                // API key management moved to the "API & Automation" route
+                // (single source of truth). The Settings → API section now just
+                // links there; close the modal so the route content is visible.
+                const apiLink = settingsModal.querySelector('#aSetApiLink');
+                if (apiLink) apiLink.addEventListener('click', () => { closeModal(); });
                 const addF = settingsModal.querySelector('#aSetAddFunds');
                 if (addF) addF.addEventListener('click', () => {
                     closeModal();
@@ -13939,6 +14041,204 @@ function pfParseScreenshots(text) {
             }, 400);
             setTimeout(() => clearInterval(authPollInterval), 15000);
             // And once immediately in case we're already on the route.
+            setTimeout(maybeLoad, 100);
+        })();
+    </script>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         API & Automation route — key CRUD + REST quickstart.
+         Hash: #/api. API: /api/api-keys.
+           GET                 → { has_key, key_prefix, scopes[], created_at,
+                                   last_used_at }  (metadata, no secret)
+           POST                → { ok, api_key, key_prefix, scopes }  (create /
+                                   regenerate; api_key is the FULL secret, once)
+           POST ?action=revoke → { ok }
+         Owns: #apiKeyStatus/#apiKeyEmpty/#apiKeyHas/#apiKeyReveal/#apiKeyScopes
+               + the Generate/Regenerate/Revoke/Copy buttons.
+         Loads on hashchange when route resolves to 'api'. Auth header uses
+         currentUser.token — same pattern as every other authed fetch here.
+         ═════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            'use strict';
+
+            var loadedOnce = false;
+
+            function el(id) { return document.getElementById(id); }
+
+            function fmtDate(iso) {
+                if (!iso) return '—';
+                try {
+                    var d = new Date(iso);
+                    if (isNaN(d.getTime())) return '—';
+                    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                } catch (_) { return '—'; }
+            }
+
+            function renderScopes(scopes) {
+                var box = el('apiKeyScopes');
+                if (!box) return;
+                if (!Array.isArray(scopes) || scopes.length === 0) {
+                    box.innerHTML = '<span style="font-size:12px;color:#9CA3AF;">—</span>';
+                    return;
+                }
+                box.innerHTML = scopes.map(function (s) {
+                    var safe = String(s).replace(/[<>&"]/g, function (c) {
+                        return { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c];
+                    });
+                    return '<span style="font-size:11.5px;font-weight:600;color:#374151;background:#F3F4F6;' +
+                        'border-radius:99px;padding:4px 10px;font-family:monospace;">' + safe + '</span>';
+                }).join('');
+            }
+
+            function showState(which) {
+                // which: 'empty' | 'has'
+                var empty = el('apiKeyEmpty');
+                var has = el('apiKeyHas');
+                if (empty) empty.style.display = (which === 'empty') ? 'block' : 'none';
+                if (has) has.style.display = (which === 'has') ? 'block' : 'none';
+            }
+
+            function hideReveal() {
+                var r = el('apiKeyReveal');
+                if (r) r.style.display = 'none';
+                var inp = el('apiKeySecret');
+                if (inp) inp.value = '';
+            }
+
+            function authHeaders(json) {
+                var h = {};
+                if (json) h['Content-Type'] = 'application/json';
+                if (typeof currentUser !== 'undefined' && currentUser && currentUser.token) {
+                    h['Authorization'] = 'Bearer ' + currentUser.token;
+                }
+                return h;
+            }
+
+            function loadMeta() {
+                var status = el('apiKeyStatus');
+                if (!(typeof currentUser !== 'undefined' && currentUser && currentUser.token)) return;
+                if (status) { status.style.display = 'block'; status.textContent = 'Loading…'; }
+                fetch(API_BASE + '/api/api-keys', { headers: authHeaders(false) })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (status) status.style.display = 'none';
+                        renderScopes(data && data.scopes);
+                        if (data && data.has_key) {
+                            var prefix = el('apiKeyPrefix');
+                            var meta = el('apiKeyMeta');
+                            if (prefix) prefix.textContent = (data.key_prefix || 'bb_live_') + '…';
+                            if (meta) {
+                                var parts = ['Created ' + fmtDate(data.created_at)];
+                                if (data.last_used_at) parts.push('last used ' + fmtDate(data.last_used_at));
+                                meta.textContent = parts.join(' · ');
+                            }
+                            showState('has');
+                        } else {
+                            showState('empty');
+                        }
+                    })
+                    .catch(function () {
+                        if (status) { status.style.display = 'block'; status.textContent = 'Could not load API key status.'; }
+                    });
+            }
+
+            function createKey() {
+                var status = el('apiKeyStatus');
+                if (status) { status.style.display = 'block'; status.textContent = 'Generating…'; }
+                fetch(API_BASE + '/api/api-keys', { method: 'POST', headers: authHeaders(true), body: '{}' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (status) status.style.display = 'none';
+                        if (data && data.ok && data.api_key) {
+                            renderScopes(data.scopes);
+                            var reveal = el('apiKeyReveal');
+                            var inp = el('apiKeySecret');
+                            if (inp) inp.value = data.api_key;
+                            if (reveal) reveal.style.display = 'block';
+                            // Refresh masked metadata (has-key state) underneath.
+                            loadMeta();
+                        } else {
+                            if (status) { status.style.display = 'block'; status.textContent = 'Could not generate key.'; }
+                        }
+                    })
+                    .catch(function () {
+                        if (status) { status.style.display = 'block'; status.textContent = 'Could not generate key.'; }
+                    });
+            }
+
+            function revokeKey() {
+                if (!window.confirm('Revoke this API key? Any integrations using it will stop working immediately.')) return;
+                var status = el('apiKeyStatus');
+                if (status) { status.style.display = 'block'; status.textContent = 'Revoking…'; }
+                fetch(API_BASE + '/api/api-keys?action=revoke', { method: 'POST', headers: authHeaders(true), body: '{}' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (status) status.style.display = 'none';
+                        hideReveal();
+                        if (data && data.ok) {
+                            renderScopes([]);
+                            showState('empty');
+                        } else {
+                            if (status) { status.style.display = 'block'; status.textContent = 'Could not revoke key.'; }
+                        }
+                    })
+                    .catch(function () {
+                        if (status) { status.style.display = 'block'; status.textContent = 'Could not revoke key.'; }
+                    });
+            }
+
+            function copySecret() {
+                var inp = el('apiKeySecret');
+                var btn = el('apiKeyCopy');
+                if (!inp || !inp.value) return;
+                var done = function () {
+                    if (!btn) return;
+                    var orig = btn.textContent;
+                    btn.textContent = 'Copied';
+                    setTimeout(function () { btn.textContent = orig; }, 1500);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(inp.value).then(done, function () {
+                        inp.select(); try { document.execCommand('copy'); } catch (_) {} done();
+                    });
+                } else {
+                    inp.select(); try { document.execCommand('copy'); } catch (_) {} done();
+                }
+            }
+
+            function wire() {
+                var gen = el('apiKeyGenerate');
+                if (gen) gen.addEventListener('click', createKey);
+                var regen = el('apiKeyRegenerate');
+                if (regen) regen.addEventListener('click', function () {
+                    if (!window.confirm('Regenerate your API key? The current key stops working immediately and the new secret is shown only once.')) return;
+                    createKey();
+                });
+                var rev = el('apiKeyRevoke');
+                if (rev) rev.addEventListener('click', revokeKey);
+                var copy = el('apiKeyCopy');
+                if (copy) copy.addEventListener('click', copySecret);
+            }
+
+            function maybeLoad() {
+                var wrap = document.querySelector('[data-shell-active-route]');
+                if (!(wrap && wrap.getAttribute('data-shell-active-route') === 'api')) return;
+                if (!(typeof currentUser !== 'undefined' && currentUser && currentUser.token)) return;
+                if (loadedOnce) return;
+                loadedOnce = true;
+                loadMeta();
+            }
+
+            wire();
+            window.addEventListener('hashchange', maybeLoad);
+            var apiAuthPoll = setInterval(function () {
+                if (typeof currentUser !== 'undefined' && currentUser && currentUser.token) {
+                    clearInterval(apiAuthPoll);
+                    maybeLoad();
+                }
+            }, 400);
+            setTimeout(function () { clearInterval(apiAuthPoll); }, 15000);
             setTimeout(maybeLoad, 100);
         })();
     </script>

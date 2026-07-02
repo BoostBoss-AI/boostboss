@@ -25,6 +25,7 @@
 const crypto = require("crypto");
 const { verifyJwt } = require("./auth.js");
 const { embedTokens } = require("./_lib/embeddings.js");
+const { resolveAdvertiser } = require("./_lib/advertiser_auth.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -344,19 +345,12 @@ async function handleList(req, res) {
     // Now we derive advertiser_id server-side from the Bearer JWT and
     // ignore the query-string value entirely. Same pattern Task #152
     // applied to the products + billing endpoints.
-    const authHeader = (req.headers && req.headers.authorization) || "";
-    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (!bearer) return res.status(401).json({ error: "Bearer token required" });
-    let authedAdvertiserId = null;
-    try {
-      const { data, error } = await sb.auth.getUser(bearer);
-      if (error || !data || !data.user) {
-        return res.status(401).json({ error: "Invalid or expired session" });
-      }
-      authedAdvertiserId = data.user.id;
-    } catch (_) {
-      return res.status(401).json({ error: "Auth check failed" });
-    }
+    // Accepts EITHER a Boost Boss API key (bb_live_…) or a Supabase session
+    // JWT; both resolve to the caller's own advertiser_id. Query-string
+    // advertiser_id is ignored — see 2026-06-25 cross-tenant fix.
+    const auth = await resolveAdvertiser(req, sb);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    const authedAdvertiserId = auth.advertiserId;
 
     let q = sb.from("campaigns").select("*")
       .eq("advertiser_id", authedAdvertiserId)
@@ -386,19 +380,12 @@ async function handleGet(req, res) {
     // Cross-tenant fix 2026-06-25: enforce advertiser ownership on single
     // fetches too. Otherwise any caller with a valid token could request
     // any campaign id and read its full row.
-    const authHeader = (req.headers && req.headers.authorization) || "";
-    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (!bearer) return res.status(401).json({ error: "Bearer token required" });
-    let authedAdvertiserId = null;
-    try {
-      const { data, error } = await sb.auth.getUser(bearer);
-      if (error || !data || !data.user) {
-        return res.status(401).json({ error: "Invalid or expired session" });
-      }
-      authedAdvertiserId = data.user.id;
-    } catch (_) {
-      return res.status(401).json({ error: "Auth check failed" });
-    }
+    // Accepts EITHER a Boost Boss API key (bb_live_…) or a Supabase session
+    // JWT; both resolve to the caller's own advertiser_id. Query-string
+    // advertiser_id is ignored — see 2026-06-25 cross-tenant fix.
+    const auth = await resolveAdvertiser(req, sb);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    const authedAdvertiserId = auth.advertiserId;
 
     const { data, error } = await sb.from("campaigns").select("*")
       .eq("id", id)
@@ -417,14 +404,28 @@ async function handleGet(req, res) {
 async function handleCreate(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   const b = req.body || {};
+  // ── Cross-tenant fix 2026-06-25 (create path) ────────────────────────
+  // In production we derive the advertiser from the Bearer credential
+  // (API key OR session JWT) and IGNORE any advertiser_id in the body — a
+  // caller may only ever create campaigns for its OWN advertiser_id.
+  // Demo mode (no Supabase) keeps its open behavior and trusts the body.
+  const sbAuth = supa();
+  let authedAdvertiserId;
+  if (sbAuth) {
+    const auth = await resolveAdvertiser(req, sbAuth);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    authedAdvertiserId = auth.advertiserId;
+  } else {
+    authedAdvertiserId = b.advertiser_id;
+  }
   // 2026-06-25 — headline is no longer required at create time. The new
   // wizard launches campaigns with empty creative_* fields, and mcp.js
   // inherits headline/body/CTA from the advertiser's global creative_assets
   // library at impression time. cta_url stays required (per-campaign
-  // destination is the one field that can't inherit). advertiser_id stays
-  // required (server-derived from the JWT in handleList; legacy create
-  // path still accepts it in the body for back-compat).
-  if (!b.advertiser_id || !b.cta_url) {
+  // destination is the one field that can't inherit). advertiser_id is now
+  // server-derived from the Bearer credential in production; demo mode still
+  // requires it in the body since there is no auth there.
+  if (!authedAdvertiserId || !b.cta_url) {
     return res.status(400).json({ error: "Missing required fields: advertiser_id, cta_url" });
   }
   // Visual formats (image, corner, video, fullscreen) used to require a
@@ -464,13 +465,13 @@ async function handleCreate(req, res) {
     const { data: credits } = await sbCheck
       .from("advertiser_payouts")
       .select("amount")
-      .eq("advertiser_id", b.advertiser_id)
+      .eq("advertiser_id", authedAdvertiserId)
       .eq("status", "credited");
     const lifetimeCredit = (credits || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
     const { data: spend } = await sbCheck
       .from("advertiser_credit_spend")
       .select("amount")
-      .eq("advertiser_id", b.advertiser_id);
+      .eq("advertiser_id", authedAdvertiserId);
     const spendTotal = (spend || []).reduce((a, r) => a + (Number(r.amount) || 0), 0);
     const available = Math.round((lifetimeCredit - spendTotal) * 100) / 100;
     if (totalBudget > available + 0.001) {
@@ -489,7 +490,7 @@ async function handleCreate(req, res) {
     // "cam_<hex>" format worked for the in-memory demo Map but caused
     // 500s in production ("invalid input syntax for type uuid").
     id: b.id || crypto.randomUUID(),
-    advertiser_id: b.advertiser_id,
+    advertiser_id: authedAdvertiserId,
     // name: prefer explicit name, else first 40 chars of headline if any,
     // else a generic fallback. 2026-06-25: headline is now optional at
     // create time (library inheritance), so .slice() on undefined would
@@ -616,11 +617,11 @@ async function handleCreate(req, res) {
     if (sb) {
       const { count } = await sb.from("campaigns")
         .select("id", { count: "exact", head: true })
-        .eq("advertiser_id", b.advertiser_id);
+        .eq("advertiser_id", authedAdvertiserId);
       priorCount = count || 0;
     } else {
       for (const c of DEMO_CAMPAIGNS.values()) {
-        if (c.advertiser_id === b.advertiser_id) priorCount++;
+        if (c.advertiser_id === authedAdvertiserId) priorCount++;
       }
     }
     if (priorCount === 0) {
@@ -657,7 +658,7 @@ async function handleCreate(req, res) {
     if (useAdCredit) {
       try {
         await sb.from("advertiser_credit_spend").insert({
-          advertiser_id: b.advertiser_id,
+          advertiser_id: authedAdvertiserId,
           campaign_id:   data.id,
           amount:        totalBudget,
           currency:      "USD",
@@ -843,6 +844,12 @@ async function handleUpdate(req, res) {
 
   const sb = supa();
   if (sb) {
+    // ── Cross-tenant fix — resolve caller identity (API key OR session)
+    // and scope every read/write below to their own advertiser_id so a
+    // caller can never mutate another advertiser's campaign by id.
+    const auth = await resolveAdvertiser(req, sb);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    const authedAdvertiserId = auth.advertiserId;
     // Re-embed only when an MCP targeting axis actually changed; otherwise
     // we'd burn a Voyage request on every status / budget toggle.
     const targetingChanged = ["target_intent_tokens", "target_active_tools", "target_host_apps", "target_surfaces"]
@@ -852,7 +859,7 @@ async function handleUpdate(req, res) {
       // row, overlay the updates, then embed the union.
       const { data: existing } = await sb.from("campaigns")
         .select("target_intent_tokens, target_active_tools, target_host_apps, target_surfaces")
-        .eq("id", b.id).maybeSingle();
+        .eq("id", b.id).eq("advertiser_id", authedAdvertiserId).maybeSingle();
       const merged = Object.assign({}, existing || {}, updates);
       const embText = [
         ...(merged.target_intent_tokens || []),
@@ -863,8 +870,10 @@ async function handleUpdate(req, res) {
       const vec = await embedTokens(embText);
       if (vec) updates.intent_embedding = vec;
     }
-    const { data, error } = await sb.from("campaigns").update(updates).eq("id", b.id).select().single();
+    const { data, error } = await sb.from("campaigns").update(updates)
+      .eq("id", b.id).eq("advertiser_id", authedAdvertiserId).select().maybeSingle();
     if (error) return res.status(500).json({ error: error.message });
+    if (!data) return res.status(404).json({ error: "Campaign not found" });
     // Phase E.5 — re-sync per-door creatives if the advertiser sent a
     // per_door_creatives payload OR if the campaign-level copy moved
     // (so the inherited 'default' row stays in sync).
@@ -903,9 +912,15 @@ async function handlePauseResume(req, res, targetStatus) {
 
   const sb = supa();
   if (sb) {
+    // Cross-tenant fix — resolve caller (API key OR session) and scope the
+    // pause/resume to their own advertiser_id.
+    const auth = await resolveAdvertiser(req, sb);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    const authedAdvertiserId = auth.advertiserId;
     const { data, error } = await sb.from("campaigns")
       .update({ status: targetStatus, updated_at: now })
       .eq("id", id)
+      .eq("advertiser_id", authedAdvertiserId)
       .in("status", validFrom)
       .select().single();
     if (error || !data) {

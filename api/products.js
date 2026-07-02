@@ -33,6 +33,7 @@
 "use strict";
 
 const { createClient } = require("@supabase/supabase-js");
+const { looksLikeApiKey, resolveApiKeyToAdvertiser } = require("./_lib/advertiser_auth.js");
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "";
@@ -75,10 +76,19 @@ async function getAuthUser(req) {
 // pattern used by affiliate endpoints — no auto-create on the way in,
 // no auth carrying across roles.
 async function requireAdvertiser(req) {
-  const user = await getAuthUser(req);
-  if (!user) return { error: "unauthorized", status: 401 };
   const sb = sbAdmin();
   if (!sb) return { error: "Supabase not configured", status: 500 };
+  // API-key path — a Boost Boss API key (bb_live_…) resolves straight to
+  // its owning advertiser_id via advertiser_api_keys. The key IS the
+  // advertiser scope, so no auth.users → advertisers mapping is needed.
+  const bearer = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
+  if (looksLikeApiKey(bearer)) {
+    const advId = await resolveApiKeyToAdvertiser(bearer, sb);
+    if (!advId) return { error: "Invalid or revoked API key", status: 401 };
+    return { user: null, advertiserId: advId, via: "api_key" };
+  }
+  const user = await getAuthUser(req);
+  if (!user) return { error: "unauthorized", status: 401 };
   // We accept either: (a) an explicit advertisers row, OR (b) absence
   // of role tables (early-stage demo deployments). The campaigns table
   // already does this loose-check; we mirror it here.

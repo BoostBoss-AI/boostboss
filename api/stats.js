@@ -14,6 +14,8 @@ const HAS_SUPABASE = !!(
   (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)
 );
 
+const { resolveAdvertiser } = require("./_lib/advertiser_auth.js");
+
 let _supabase = null;
 function supa() {
   if (_supabase) return _supabase;
@@ -181,8 +183,17 @@ async function handleAdvertiserStats(id, req, res) {
   const sb = supa();
 
   if (sb) {
+    // ── Cross-tenant fix ─────────────────────────────────────────────
+    // The advertiser is derived from the Bearer credential (API key OR
+    // session JWT); the query-string ?id is IGNORED for scoping so a
+    // caller can only ever read its OWN stats. The dashboard already
+    // sends its own id + Bearer, so this is backward-compatible.
+    const auth = await resolveAdvertiser(req, sb);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    const authedAdvertiserId = auth.advertiserId;
+
     const { data: campaigns, error: cErr } = await sb
-      .from("campaigns").select("*").eq("advertiser_id", id)
+      .from("campaigns").select("*").eq("advertiser_id", authedAdvertiserId)
       .order("created_at", { ascending: false });
     if (cErr) return res.status(500).json({ error: cErr.message });
 
