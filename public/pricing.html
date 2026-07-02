@@ -76,6 +76,9 @@
   .rng::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(0,255,224,.18);cursor:pointer}
   .usage-bot{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.35)}
   .usage-bot .cost{color:var(--acc);font-weight:700;font-size:13px}
+  .calc-toggle{display:block;margin:14px auto 4px;padding:10px 22px;border-radius:100px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.18);color:#fff;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:background var(--dur-fast),border-color var(--dur-fast)}
+  .calc-toggle:hover{background:rgba(255,255,255,.09);border-color:var(--accBorder)}
+  .calc-toggle .chev{margin-left:6px;color:rgba(244,244,248,.6)}
   .calc-foot{padding:12px 24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:rgba(244,244,248,.35);border-top:1px solid rgba(255,255,255,.06)}
   .total-box{max-width:1040px;margin:22px auto 0;border:1px solid var(--accBorder);border-radius:var(--r-xl);padding:30px;text-align:center;background:radial-gradient(ellipse 70% 120% at 50% 0%,rgba(0,255,224,.10),transparent 70%),rgba(12,12,22,.6)}
   .total-box .tl{font-size:14px;color:rgba(244,244,248,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
@@ -166,7 +169,9 @@
       <div>Unit cost</div>
       <div class="r">Monthly usage &amp; cost</div>
     </div>
-    <div id="calcBody"><!-- rows injected --></div>
+    <div id="calcBody"><!-- first surface group injected --></div>
+    <div id="calcMore" style="display:none"><!-- remaining surface groups injected --></div>
+    <button id="calcToggle" class="calc-toggle" type="button">See 29 more placements <span class="chev">⌄</span></button>
     <div class="calc-foot">1,000,000 impressions/mo upper bound shown for estimation only · CPMs are starting floors — winning bids clear at or above them.</div>
   </div>
   <div class="total-box" data-reveal>
@@ -268,25 +273,32 @@ var SURFACES=[
 var MAX_IMP=1000000, STEP=10000;
 function money(n){return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function moneyR(n){return '$'+Math.round(n).toLocaleString('en-US')}
-function impFmt(n){return n>=1000?(n/1000).toLocaleString('en-US')+'k':n}
-var body=document.getElementById('calcBody');
+function impFmt(n){if(n>=1000000)return (n/1000000)+'M';if(n>=1000)return (n/1000).toLocaleString('en-US')+'k';return n}
+var body=document.getElementById('calcBody'), more=document.getElementById('calcMore');
 SURFACES.forEach(function(sf,si){
+  var target=si===0?body:more;
   var gh=document.createElement('div');gh.className='grp-head';
   gh.innerHTML='<div class="gi">'+sf.icon+'</div><div><div class="gt">'+sf.label+'</div></div><div class="gc">'+sf.items.length+' placements</div>';
-  body.appendChild(gh);
+  target.appendChild(gh);
   sf.items.forEach(function(it,ii){
     var perImp=it.cpm/1000;
     var row=document.createElement('div');row.className='prow';
     row.innerHTML=
       '<div><div class="pn">'+it.name+'</div><div class="pk">'+it.kind+'</div></div>'+
-      '<div class="unit">'+money(it.cpm)+' CPM<small>'+('$'+perImp.toFixed(4))+' / impression</small></div>'+
+      '<div class="unit">$'+perImp.toFixed(4)+'<small>per impression</small></div>'+
       '<div class="usage">'+
         '<div class="usage-top"><span>Monthly impressions</span><span class="imp" data-imp>0</span></div>'+
         '<input class="rng" type="range" min="0" max="'+MAX_IMP+'" step="'+STEP+'" value="0" data-cpm="'+it.cpm+'">'+
         '<div class="usage-bot"><span>0</span><span class="cost" data-cost>$0.00</span></div>'+
       '</div>';
-    body.appendChild(row);
+    target.appendChild(row);
   });
+});
+var calcToggle=document.getElementById('calcToggle');
+calcToggle.addEventListener('click',function(){
+  var hidden=more.style.display==='none';
+  more.style.display=hidden?'block':'none';
+  calcToggle.innerHTML=hidden?'See less <span class="chev">⌃</span>':'See 29 more placements <span class="chev">⌄</span>';
 });
 var grand=document.getElementById('grandTotal'), totalImps=document.getElementById('totalImps');
 var ranges=[].slice.call(body.querySelectorAll('.rng'));
