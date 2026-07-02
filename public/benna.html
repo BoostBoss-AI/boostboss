@@ -152,6 +152,33 @@
   .cta-box .btn-white:hover{background:var(--bb-ink);color:#fff;border-color:var(--bb-ink);transform:translateY(-2px)}
   .cta-box .btn-clear{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
   .cta-box .btn-clear:hover{background:#fff;color:var(--bb-pink);border-color:#fff;transform:translateY(-2px)}
+  /* Live scoring wall — flying JSON response cards */
+  .scoring-wall{position:relative;overflow:hidden}
+  .sw-head{text-align:center;max-width:720px;margin:0 auto 44px}
+  .sw-head .eyebrow{margin-bottom:16px}
+  .sw-head h2{font-family:var(--font-display);font-size:var(--fs-h2);font-weight:700;color:#fff;letter-spacing:var(--ls-heading);line-height:1.1;margin-bottom:14px}
+  .sw-head h2 .acc{color:var(--acc)}
+  .sw-head p{font-size:18px;color:rgba(244,244,248,.66)}
+  .sw-rows{display:flex;flex-direction:column;gap:16px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+  .sw-track{display:flex;width:max-content;will-change:transform}
+  .sw-track.a{animation:sw-flow-a 55s linear infinite}
+  .sw-track.b{animation:sw-flow-b 46s linear infinite}
+  .sw-track.c{animation:sw-flow-c 64s linear infinite}
+  .scoring-wall:hover .sw-track{animation-play-state:paused}
+  @keyframes sw-flow-a{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes sw-flow-b{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+  @keyframes sw-flow-c{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .sw-card{flex-shrink:0;width:288px;margin-right:16px;background:linear-gradient(165deg,rgba(22,24,38,.92),rgba(10,11,20,.94));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:13px 16px 15px;box-shadow:0 12px 34px rgba(0,0,0,.34)}
+  .sw-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;font-family:var(--font-mono);font-size:10px;letter-spacing:.4px}
+  .sw-status{display:inline-flex;align-items:center;gap:6px;color:#34D399;font-weight:700}
+  .sw-status .d{width:6px;height:6px;border-radius:50%;background:#34D399;box-shadow:0 0 8px #34D399}
+  .sw-ct{color:rgba(244,244,248,.32)}
+  .sw-card pre{margin:0;font-family:var(--font-mono);font-size:11.5px;line-height:1.55;color:rgba(244,244,248,.62);white-space:pre;overflow:hidden}
+  .sw-card .k{color:#7DD3FC}
+  .sw-card .s{color:var(--acc)}
+  .sw-card .n{color:#FBBF24}
+  .sw-card .win{color:#34D399;font-weight:700}
+  .sw-card .pass{color:#FF6B8A;font-weight:700}
   footer.site{border-top:1px solid rgba(255,255,255,.08);padding:54px 0 34px;margin-top:var(--section-y)}
   .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:38px}
   .foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -211,6 +238,16 @@
 </div></div></section>
 
 <div class="divider"></div>
+<section class="section scoring-wall">
+  <div class="wrap"><div class="sw-head" data-reveal>
+    <div class="eyebrow">Live scoring</div>
+    <h2>Every impression, <span class="acc">scored in real time</span>.</h2>
+    <p>Each request hits Benna, gets a conversion probability and a bid, and returns a win-or-pass decision — in under five milliseconds. This is the firehose.</p>
+  </div></div>
+  <div class="sw-rows" id="swRows"></div>
+</section>
+
+<div class="divider"></div>
 <section class="section" id="how"><div class="wrap">
   <div class="section-head" data-reveal>
     <div class="eyebrow">What Benna sees</div>
@@ -259,6 +296,45 @@ function onS(){var y=scrollY;nav.classList.toggle('scrolled',y>8);if(ANIM){var v
 addEventListener('scroll',onS,{passive:true});onS();
 function animateCount(el){var t=parseFloat(el.dataset.count),d=parseInt(el.dataset.dec||'0'),pre=el.dataset.pre||'',suf=el.dataset.suf||'',t0=performance.now();(function tick(n){var p=Math.min((n-t0)/1300,1),e=1-Math.pow(1-p,3),v=(t*e).toFixed(d);el.textContent=pre+(d===0?Math.round(v).toLocaleString():v)+suf;if(p<1)requestAnimationFrame(tick)})(performance.now());}
 if(ANIM&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){if(e.target.matches('[data-reveal]'))e.target.classList.add('is-visible');if(e.target.querySelector&&e.target.querySelector('.n[data-count]'))e.target.querySelectorAll('.n[data-count]').forEach(animateCount);o.unobserve(e.target)}})},{threshold:.2});document.querySelectorAll('[data-reveal], .stats-band').forEach(function(el){io.observe(el)})}else{document.querySelectorAll('.n[data-count]').forEach(function(el){var d=parseInt(el.dataset.dec||'0');el.textContent=(el.dataset.pre||'')+(d===0?Math.round(el.dataset.count):Number(el.dataset.count).toFixed(d))+(el.dataset.suf||'')})}
+/* ── Live scoring wall (flying JSON response cards) ── */
+(function(){
+  var host=document.getElementById('swRows'); if(!host) return;
+  var CARDS=[
+    {surface:"Claude Desktop", intent:"serverless deploy", p:0.082, bid:0.94, dec:"WIN", ms:4.2},
+    {surface:"Cursor", intent:"upgrade to pro", p:0.114, bid:0.97, dec:"WIN", ms:3.8},
+    {surface:"Perplexity", intent:"compare vendors", p:0.061, bid:0.71, dec:"WIN", ms:4.6},
+    {surface:"ChatGPT", intent:"casual chat", p:0.004, bid:0.12, dec:"PASS", ms:2.9},
+    {surface:"Windsurf", intent:"add auth", p:0.093, bid:0.90, dec:"WIN", ms:4.1},
+    {surface:"Raycast", intent:"find a CRM", p:0.128, bid:0.98, dec:"WIN", ms:3.5},
+    {surface:"LM Studio", intent:"benchmark models", p:0.047, bid:0.63, dec:"WIN", ms:4.9},
+    {surface:"Replit", intent:"deploy database", p:0.101, bid:0.95, dec:"WIN", ms:3.7},
+    {surface:"Claude Code", intent:"idle scroll", p:0.006, bid:0.09, dec:"PASS", ms:2.7},
+    {surface:"OpenAI API", intent:"scale infra", p:0.087, bid:0.92, dec:"WIN", ms:4.3},
+    {surface:"Gemini", intent:"pick analytics", p:0.119, bid:0.96, dec:"WIN", ms:3.9},
+    {surface:"Zed", intent:"add payments", p:0.134, bid:0.99, dec:"WIN", ms:3.4}
+  ];
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function card(c){
+    var decCls=c.dec==='WIN'?'win':'pass';
+    return '<div class="sw-card">'+
+      '<div class="sw-bar"><span class="sw-status"><span class="d"></span>200 OK</span><span class="sw-ct">APPLICATION/JSON</span></div>'+
+      '<pre>{\n'+
+      '  <span class="k">"surface"</span>: <span class="s">"'+esc(c.surface)+'"</span>,\n'+
+      '  <span class="k">"intent"</span>: <span class="s">"'+esc(c.intent)+'"</span>,\n'+
+      '  <span class="k">"p_convert"</span>: <span class="n">'+c.p.toFixed(3)+'</span>,\n'+
+      '  <span class="k">"bid_score"</span>: <span class="n">'+c.bid.toFixed(2)+'</span>,\n'+
+      '  <span class="k">"decision"</span>: <span class="'+decCls+'">"'+c.dec+'"</span>,\n'+
+      '  <span class="k">"latency_ms"</span>: <span class="n">'+c.ms.toFixed(1)+'</span>\n'+
+      '}</pre></div>';
+  }
+  [{cls:'a',items:[0,1,2,3]},{cls:'b',items:[4,5,6,7]},{cls:'c',items:[8,9,10,11]}].forEach(function(row){
+    var set=row.items.map(function(i){return card(CARDS[i]);}).join('');
+    var track=document.createElement('div');
+    track.className='sw-track '+row.cls;
+    track.innerHTML=set+set; /* duplicate for seamless -50% loop */
+    host.appendChild(track);
+  });
+})();
 </script>
 </body>
 </html>
