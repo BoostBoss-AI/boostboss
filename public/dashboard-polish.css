@@ -135,13 +135,43 @@
 
 /* ── [2] TOP CHROME ─────────────────────────────────────────────────────── */
 
-/* Frosted glass top bar — translucent + blur so content scrolls under it
-   like the marketing nav. Hairline base border kept. */
+/* Dark glass top bar — matches the content area's dark bg with subtle blur. */
 .shell-topbar {
-  background: rgba(255, 255, 255, 0.72);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
-  backdrop-filter: saturate(180%) blur(14px);
-  border-bottom: 1px solid var(--shell-border, #E5E7EB);
+  background: rgba(13, 13, 22, 0.88);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  backdrop-filter: saturate(140%) blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Search bar — dark surface, light placeholder */
+.shell-topbar__search {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.09);
+  color: rgba(240,240,248,0.55);
+}
+.shell-topbar__search:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+}
+.shell-topbar__search kbd {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.10);
+  color: rgba(240,240,248,0.40);
+}
+
+/* Icon buttons — light on dark */
+.shell-icon-btn {
+  color: rgba(240,240,248,0.55);
+}
+.shell-icon-btn:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.12);
+  color: #F0F0F8;
+}
+
+/* Breadcrumb text on dark bg */
+.shell-topbar__breadcrumb {
+  color: #F0F0F8;
 }
 
 
@@ -618,4 +648,766 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 .badge.depleted {
   background: #FEF2F2;
   color: #991B1B;
+}
+
+
+/* ── [11] PHASE 2 — 2-COLUMN HOME LAYOUT + NOTIFICATION BANNER ───────────────
+
+   Layout: full-width stat cards row stays on top, then below splits into:
+     [left col — ~65%]  chart / benna engine / existing content
+     [right col — ~35%] notification banner + quick-actions panel
+
+   Notification banner: contextual callout at top of right col (X Dev pattern).
+   Quick actions: chevron-row list for the most common next actions.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Home 2-col wrapper — wraps everything BELOW the stats row */
+.home-2col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+  margin-top: 20px;
+}
+@media (max-width: 1100px) {
+  .home-2col { grid-template-columns: 1fr; }
+}
+
+/* Right column stacks its children vertically */
+.home-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Notification banner */
+.dash-notif-banner {
+  background: linear-gradient(135deg, rgba(255,45,120,0.10), rgba(4,190,254,0.07));
+  border: 1px solid rgba(255,45,120,0.22);
+  border-radius: 14px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.dash-notif-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #FF2D78, #04BEFE);
+}
+.dash-notif-banner__kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #FF2D78;
+  margin-bottom: 5px;
+}
+.dash-notif-banner__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #F0F0F8;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.dash-notif-banner__body {
+  font-size: 12.5px;
+  color: #7C7E8F;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.dash-notif-banner__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #FF2D78;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: filter 0.15s ease, transform 0.12s ease;
+}
+.dash-notif-banner__cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.dash-notif-banner__dismiss {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  color: #5A5C6E;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-notif-banner__dismiss:hover { background: rgba(255,255,255,0.06); color: #F0F0F8; }
+
+/* Quick actions panel */
+.dash-quick-actions {
+  background: #13131E;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.dash-quick-actions__head {
+  padding: 14px 16px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5A5C6E;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dash-quick-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.14s ease;
+}
+.dash-quick-action:last-child { border-bottom: none; }
+.dash-quick-action:hover { background: rgba(255,255,255,0.04); }
+.dash-quick-action__icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.dash-quick-action__text { flex: 1; min-width: 0; }
+.dash-quick-action__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #D0D0DC;
+  display: block;
+  line-height: 1.3;
+}
+.dash-quick-action__sub {
+  font-size: 11.5px;
+  color: #5A5C6E;
+  display: block;
+  margin-top: 1px;
+}
+.dash-quick-action__chevron {
+  color: #3A3C4E;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: color 0.14s, transform 0.14s;
+}
+.dash-quick-action:hover .dash-quick-action__chevron {
+  color: #FF2D78;
+  transform: translateX(2px);
+}
+
+/* Date range buttons — dark-friendly override for the inline-styled pills */
+.date-range-btn, .pub-range-btn {
+  background: rgba(255,255,255,0.06) !important;
+  color: #7C7E8F !important;
+  border-color: rgba(255,255,255,0.10) !important;
+}
+.date-range-btn.active, .pub-range-btn.active {
+  background: #FF2D78 !important;
+  color: #fff !important;
+  border-color: #FF2D78 !important;
+}
+.date-range-btn:hover:not(.active), .pub-range-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.10) !important;
+  color: #F0F0F8 !important;
+}
+
+/* Integration filter select — dark override */
+#integrationFilter {
+  background: #1E1E2E !important;
+  color: #F0F0F8 !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
+/* Cross-door card — dark override */
+#crossDoorCard {
+  background: linear-gradient(135deg, rgba(255,45,120,0.06), rgba(4,190,254,0.04)) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* Date inputs — dark override */
+#dateRangeFrom, #dateRangeTo {
+  background: #1E1E2E !important;
+  color: #F0F0F8 !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  color-scheme: dark;
+}
+
+
+/* ── [10] DARK CONTENT AREA — card / page-head / table / pill overrides ──────
+   Phase 1: all content surfaces flip to dark. Scoped to dashboard shell only. */
+
+/* Page heading border — soften for dark bg */
+.shell-page-head {
+  border-bottom-color: rgba(255,255,255,0.07);
+}
+.shell-page-title {
+  color: #F0F0F8;
+}
+.shell-page-sub {
+  color: #7C7E8F;
+}
+
+/* Stat cards — dark surface, light text, keep colored accent stripes */
+.stat-card {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.20) !important;
+}
+.stat-card:hover {
+  border-color: rgba(255,45,120,0.30) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 14px 32px rgba(255,45,120,0.12) !important;
+}
+.stat-card .stat-label {
+  color: #7C7E8F !important;
+}
+.stat-card .stat-value {
+  color: #F0F0F8 !important;
+}
+.stat-card .stat-value.earnings { color: #FF2D78 !important; }
+.stat-card .stat-value.spend    { color: #F59E0B !important; }
+.stat-card .stat-trend {
+  color: #5A5C6E !important;
+}
+.stat-card .stat-trend.positive { color: #34D399 !important; }
+.stat-card .stat-trend.negative { color: #F87171 !important; }
+
+/* Chart / section containers — dark surface */
+.chart-section,
+.campaigns-section,
+.section {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.chart-title,
+.section-title,
+.campaigns-title {
+  color: #F0F0F8 !important;
+}
+.chart-summary {
+  border-bottom-color: rgba(255,255,255,0.07) !important;
+}
+.chart-summary-label {
+  color: #7C7E8F !important;
+}
+
+/* Tables — dark row hover */
+.campaigns-table thead tr {
+  background: #181828 !important;
+}
+.campaigns-table thead th {
+  color: #7C7E8F !important;
+  border-bottom-color: rgba(255,255,255,0.07) !important;
+}
+.campaigns-table tbody tr {
+  border-bottom-color: rgba(255,255,255,0.05) !important;
+}
+.campaigns-table tbody tr:hover {
+  background-color: rgba(255,45,120,0.06) !important;
+}
+.campaigns-table tbody td {
+  color: #D0D0DC !important;
+}
+
+/* Status pills — dark-friendly pastel tints */
+.badge.live     { background: rgba(16,185,129,0.15); color: #34D399; }
+.badge.paused   { background: rgba(245,158,11,0.15); color: #FCD34D; }
+.badge.review   { background: rgba(59,130,246,0.15) !important; color: #93C5FD !important; }
+.badge.rejected { background: rgba(239,68,68,0.15);  color: #FCA5A5; }
+.badge.completed{ background: rgba(255,255,255,0.07); color: #9CA3AF; }
+.badge.depleted { background: rgba(239,68,68,0.15);  color: #FCA5A5; }
+
+/* Form inputs on dark bg */
+.form-input,
+.form-textarea,
+.form-select {
+  background-color: #1E1E2E !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  color: #F0F0F8 !important;
+}
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #5A5C6E !important;
+}
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  background-color: #242436 !important;
+  border-color: var(--bb-pink, #FF2D78) !important;
+}
+
+/* Inline panel overrides for dark bg */
+#pilotProductPicker {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+#aSetBillingTableBody tr:hover,
+#compareTableBody tr:hover {
+  background-color: rgba(255,255,255,0.03) !important;
+}
+
+
+/* ── [12] PHASE 3 — COMPREHENSIVE DARK COMPLETION ────────────────────────────
+   Catches every remaining white/light inline-styled surface.
+   Strategy: broadest safe selectors first, then IDs for specific offenders.
+   All !important — these are overriding inline `style=""` attributes.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── SETTINGS MODAL (both dashboards — JS-rendered innerHTML) ── */
+#settingsModal > div,
+#settingsModal [style*="background:#fff"],
+#settingsModal [style*="background: #fff"],
+#settingsModal [style*="background: rgb(255"],
+#settingsModal [style*="background:#FFFFFF"],
+#settingsModal [style*="background: #FFFFFF"] {
+  background: #13131E !important;
+  color: #D0D0DC !important;
+}
+/* Settings nav panel */
+#aSetNav, #settingsModal nav {
+  background: #0F0F1A !important;
+  border-right-color: rgba(255,255,255,0.07) !important;
+}
+#aSetNav button, #settingsModal nav button {
+  color: #9CA3AF !important;
+  background: transparent !important;
+}
+/* Settings inner body */
+#aSetBody, #settingsModal [id$="Body"] {
+  background: #13131E !important;
+  color: #D0D0DC !important;
+}
+/* Settings close / cancel buttons (ghost style) */
+#aSetCancel, #aSetClose, #sSetCancel, #settingsCloseBtn,
+#sSetPayoutCancel, #sSetPayoutBack, #sSetMfaDisable,
+#sSetMfaEnrollCancel, #sSetMfaDisableCancel,
+#settingsModal button[style*="#fff"],
+#settingsModal button[style*="background:#fff"],
+#settingsModal button[style*="background: #fff"] {
+  background: #1E1E2E !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #D0D0DC !important;
+}
+/* Settings inner panels / card sections */
+#settingsModal [style*="border-radius"][style*="padding"],
+#settingsModal [style*="background:#F9FAFB"],
+#settingsModal [style*="background: #F9FAFB"],
+#settingsModal [style*="background:#F3F4F6"],
+#settingsModal [style*="background: #F3F4F6"] {
+  background: #1E1E2E !important;
+  color: #D0D0DC !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+/* Settings labels / headings */
+#settingsModal label, #settingsModal h3,
+#settingsModal [style*="color:#374151"],
+#settingsModal [style*="color: #374151"],
+#settingsModal [style*="color:#111827"],
+#settingsModal [style*="color:#0F0F1A"],
+#settingsModal [style*="color:#6B7280"] {
+  color: #9CA3AF !important;
+}
+/* Settings text inputs (inline-styled via FLD variable) */
+#settingsModal input:not([type=checkbox]):not([type=radio]),
+#settingsModal textarea,
+#settingsModal select {
+  background: #1A1A2E !important;
+  background-color: #1A1A2E !important;
+  color: #F0F0F8 !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+/* MFA QR code container needs white bg for scannability — keep it */
+#sSetMfaQR { background: #fff !important; }
+/* Disabled/read-only fields */
+#settingsModal input[disabled] {
+  background: #111120 !important;
+  color: #5A5C6E !important;
+}
+/* Copy buttons inside settings */
+.aSetCopy, #aSetReveal, #sSetRegen, #sSetPayoutEdit {
+  background: #1E1E2E !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  color: #B0B0C7 !important;
+}
+/* Export billing button */
+#aSetExportBilling {
+  background: #1E1E2E !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  color: #B0B0C7 !important;
+}
+/* Settings billing table */
+#settingsModal table th {
+  background: #181828 !important;
+  color: #7C7E8F !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+#settingsModal table td {
+  color: #D0D0DC !important;
+  border-color: rgba(255,255,255,0.05) !important;
+}
+
+/* ── NOTIFICATIONS DROPDOWN ── */
+#notifDropdown {
+  background: #13131E !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5) !important;
+}
+#notifDropdown * {
+  color: #D0D0DC !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+#notifDropdown [style*="background:#fff"],
+#notifDropdown [style*="background: #fff"],
+#notifDropdown [style*="background: #F"] {
+  background: #1A1A2E !important;
+}
+
+/* ── AUCTION INTELLIGENCE + BENNA ENGINE PANELS ── */
+#bbxAuctionSummary,
+.benna-engine,
+.performance-group,
+[id="bennaEnginePanel"] {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #D0D0DC !important;
+}
+#bbxAuctionSummary [style*="color:#9CA3AF"],
+#bbxAuctionSummary [style*="color: #9CA3AF"] {
+  color: #5A5C6E !important;
+}
+.benna-engine-head, .benna-engine-grid > * {
+  background: transparent !important;
+  color: #D0D0DC !important;
+}
+
+/* ── CAMPAIGNS PAGE — filter pills + search ── */
+#campaignSearch {
+  background: #1A1A2E !important;
+  color: #F0F0F8 !important;
+  border-color: rgba(255,255,255,0.10) !important;
+}
+#campaignSearch::placeholder { color: #5A5C6E !important; }
+/* Filter tab buttons (All / Live / Paused / In Review) */
+button[style*="border-radius: 100px"],
+button[style*="border-radius:100px"] {
+  background: rgba(255,255,255,0.06) !important;
+  color: #9CA3AF !important;
+  border-color: rgba(255,255,255,0.10) !important;
+}
+/* Active filter pill — pink */
+button.active[style*="border-radius: 100px"],
+button.active[style*="border-radius:100px"],
+#campaignFilterAll.active, #campaignFilterLive.active,
+#campaignFilterPaused.active, #campaignFilterReview.active {
+  background: #FF2D78 !important;
+  color: #fff !important;
+  border-color: #FF2D78 !important;
+}
+/* Export CSV / Compare ghost buttons */
+button[onclick*="exportCSV"], button[onclick*="openCompareModal"],
+button[style*="Export"], button[style*="Compare"] {
+  background: #1E1E2E !important;
+  color: #D0D0DC !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
+/* ── MODALS — cashout, compare, payout method, deposit ── */
+#cashoutModal > div, #cashoutErrModal > div,
+#compareModal > div,
+div[style*="background:#fff"][style*="border-radius"][style*="box-shadow"],
+div[style*="background: #fff"][style*="border-radius"][style*="box-shadow"] {
+  background: #13131E !important;
+  color: #D0D0DC !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+/* Modal ghost buttons */
+#cashoutCancel, #cashoutErrCancel,
+button[style*="background:#fff"][style*="border"],
+button[style*="background: #fff"][style*="border"] {
+  background: #1E1E2E !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #D0D0DC !important;
+}
+/* Modal headings */
+div[style*="box-shadow"] h2,
+div[style*="box-shadow"] h3 {
+  color: #F0F0F8 !important;
+}
+div[style*="box-shadow"] p,
+div[style*="box-shadow"] span:not(.badge) {
+  color: #9CA3AF !important;
+}
+
+/* ── PILOT / BOOST ADS TABLE ── */
+#pilotProductPills th {
+  background: #181828 !important;
+  color: #7C7E8F !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+#pilotProductPills td {
+  color: #D0D0DC !important;
+  border-color: rgba(255,255,255,0.05) !important;
+}
+/* Active boosts container */
+[style*="Active boosts"],
+div[style*="border-radius:12px"][style*="border:1px solid"] {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ── PUBLISHER: CREDENTIALS PANELS + PAYOUT MODAL ── */
+#promoteCashoutHistory,
+[id*="Credential"], [id*="credential"],
+div[style*="background:#FFFFFF"][style*="border-radius"] {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #D0D0DC !important;
+}
+/* Payout method modal */
+div[style*="background:#fff"][style*="border-radius:14px"],
+div[style*="background: #fff"][style*="border-radius:14px"] {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ── INLINE CODE TAGS (integration docs) ── */
+code[style*="background:#fff"],
+code[style*="background: #fff"] {
+  background: #1A1A2E !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #04BEFE !important;
+}
+
+/* ── GLOBAL INLINE TEXT COLOR RESET ── */
+/* Light grey body copy hardcoded to dark-mode-unfriendly hex */
+[style*="color:#374151"] { color: #B0B0C7 !important; }
+[style*="color: #374151"] { color: #B0B0C7 !important; }
+[style*="color:#4B5563"] { color: #9CA3AF !important; }
+[style*="color: #4B5563"] { color: #9CA3AF !important; }
+[style*="color:#1F2937"] { color: #D0D0DC !important; }
+[style*="color: #1F2937"] { color: #D0D0DC !important; }
+[style*="color:#111827"] { color: #E0E0EC !important; }
+[style*="color: #111827"] { color: #E0E0EC !important; }
+[style*="color:#0F0F1A"]:not(.shell-sidebar *) { color: #E0E0EC !important; }
+
+/* ── DATA-IS-LIVE / STATUS CHIP ── */
+.data-status-chip,
+div[style*="Data is live"],
+div[style*="Updated just now"] {
+  background: rgba(16,185,129,0.12) !important;
+  border: 1px solid rgba(16,185,129,0.25) !important;
+  color: #34D399 !important;
+}
+div[style*="Data is live"] *,
+div[style*="Updated just now"] * {
+  color: #34D399 !important;
+}
+
+/* ── INLINE LIGHT CONTAINER BACKGROUNDS (catch-all) ── */
+/* Any div with explicit white/near-white background that's NOT a button,
+   NOT in the sidebar, NOT a modal overlay, NOT a QR code */
+.shell-main div[style*="background:#fff"]:not(button):not(.shell-sidebar *),
+.shell-main div[style*="background: #fff"]:not(button):not(.shell-sidebar *),
+.shell-main div[style*="background:#FFFFFF"]:not(button),
+.shell-main div[style*="background: #FFFFFF"]:not(button),
+.shell-main div[style*="background: #F9FAFB"]:not(button),
+.shell-main div[style*="background:#F9FAFB"]:not(button),
+.shell-main div[style*="background: #F3F4F6"]:not(button),
+.shell-main div[style*="background:#F3F4F6"]:not(button),
+.shell-main section[style*="background:#fff"],
+.shell-main section[style*="background: #fff"] {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #D0D0DC !important;
+}
+
+/* Settings modal footer strip */
+#settingsModal [style*="border-top"][style*="padding"],
+#settingsModal > div > div:last-child,
+#settingsModal footer {
+  background: #0F0F1A !important;
+  border-top-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── LIGHT GRADIENT CONTAINERS → dark gradient ── */
+.shell-main [style*="background:linear-gradient"][style*="#fff"],
+.shell-main [style*="background: linear-gradient"][style*="#fff"],
+.shell-main [style*="background:linear-gradient"][style*="#FFF"],
+.shell-main [style*="background: linear-gradient"][style*="rgb(255"] {
+  background: linear-gradient(135deg, rgba(255,45,120,0.06), rgba(4,190,254,0.04)) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+
+/* ── [13] INTEGRATIONS PAGE — FULL DARK COMPLETION ───────────────────────────  */
+
+/* Integration door cards (ic-card — JS-rendered) */
+.ic-card {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  color: #D0D0DC !important;
+}
+.ic-card:hover {
+  background: #1A1A2E !important;
+  border-color: rgba(255,45,120,0.28) !important;
+}
+.ic-card .ic-name,
+.ic-card [style*="color:#1A1A2E"],
+.ic-card [style*="color: #1A1A2E"],
+.ic-card [style*="color:#374151"],
+.ic-card [style*="color:#0F0F1A"] { color: #F0F0F8 !important; }
+.ic-card [style*="color:#6B7280"],
+.ic-card [style*="color: #6B7280"] { color: #7C7E8F !important; }
+
+/* Verify badges — bottom status row */
+.verify-badge {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  color: #D0D0DC !important;
+}
+.verify-badge.active {
+  background: rgba(16,185,129,0.12) !important;
+  border-color: rgba(16,185,129,0.30) !important;
+}
+.verify-badge.detecting {
+  background: rgba(245,158,11,0.12) !important;
+  border-color: rgba(245,158,11,0.30) !important;
+}
+.verify-badge.test-only {
+  background: rgba(245,158,11,0.10) !important;
+  border-color: rgba(245,158,11,0.25) !important;
+}
+.verify-badge .verify-name { color: #D0D0DC !important; }
+.verify-badge .verify-status { color: #7C7E8F !important; }
+.verify-badge.active .verify-status { color: #34D399 !important; }
+
+/* Placements door nav tab strip */
+#placementsDoorNav {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.placement-door-tab {
+  color: #7C7E8F !important;
+}
+.placement-door-tab:hover {
+  background: rgba(255,255,255,0.05) !important;
+  color: #F0F0F8 !important;
+}
+.placement-door-tab.is-active {
+  background: rgba(255,45,120,0.12) !important;
+  border-color: rgba(255,45,120,0.28) !important;
+  color: #FF2D78 !important;
+}
+
+/* Feature sub-cards inside fw-panel (Electron, Tauri, Sound+Video, etc.) */
+.fw-panel div[style*="background:#F9FAFB"],
+.fw-panel div[style*="background: #F9FAFB"] {
+  background: #1A1A2E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.fw-panel div[style*="color:#4B5563"],
+.fw-panel div[style*="color: #4B5563"] { color: #9CA3AF !important; }
+.fw-panel div[style*="color:#6B7280"],
+.fw-panel div[style*="color: #6B7280"] { color: #7C7E8F !important; }
+.fw-panel h4[style*="color:#6B7280"] { color: #5A5C6E !important; }
+.fw-panel h5[style*="color:#6B7280"] { color: #5A5C6E !important; }
+
+/* iOS / Android info banners (light blue) */
+.fw-panel div[style*="background:#E0F2FE"],
+.fw-panel div[style*="background: #E0F2FE"] {
+  background: rgba(3,105,161,0.15) !important;
+  border-color: rgba(3,105,161,0.30) !important;
+  color: #93C5FD !important;
+}
+.fw-panel div[style*="background:#E0F2FE"] strong,
+.fw-panel div[style*="background: #E0F2FE"] strong { color: #BFDBFE !important; }
+
+/* Mobile flavor tabs (React Native / Native iOS / Native Android) */
+.mobile-flavor-tab[style*="background:#F3F4F6"],
+.mobile-flavor-tab[style*="background: #F3F4F6"] {
+  background: rgba(255,255,255,0.07) !important;
+  color: #B0B0C7 !important;
+}
+
+/* Verify panel border + heading */
+#integrationVerifyPanel {
+  border-top-color: rgba(255,255,255,0.07) !important;
+}
+#integrationVerifyPanel [style*="color:#1A1A2E"] { color: #F0F0F8 !important; }
+#integrationVerifyPanel [style*="color:#6B7280"] { color: #7C7E8F !important; }
+
+/* Placeholders loading panel (white card inside placementsContainer) */
+#placementsContainer div[style*="background:#fff"],
+#placementsContainer div[style*="background: #fff"] {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #5A5C6E !important;
+}
+
+/* Format gallery cards */
+.format-card {
+  background: #13131E !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #D0D0DC !important;
+}
+
+/* Onboarding banner (ob-step items) */
+.ob-step {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.ob-title { color: #F0F0F8 !important; }
+.ob-desc  { color: #9CA3AF !important; }
+.ob-cta {
+  background: #1E1E2E !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #D0D0DC !important;
+}
+.ob-cta:hover { background: #242436 !important; color: #F0F0F8 !important; }
+.ob-cta-primary {
+  background: #FF2D78 !important;
+  color: #fff !important;
+}
+.ob-bullet {
+  background: rgba(255,255,255,0.08) !important;
+  color: #9CA3AF !important;
+}
+
+/* Section intro text (inline #6B7280 paragraphs) */
+.section > p[style*="color: #6B7280"],
+.section > p[style*="color:#6B7280"] {
+  color: #7C7E8F !important;
+}
+
+/* Placements page footnote text */
+.shell-main [style*="color: #9CA3AF"],
+.shell-main [style*="color:#9CA3AF"] {
+  color: #5A5C6E !important;
+}
+
+/* Inline F3F4F6 code backgrounds (inline install commands within text) */
+.shell-main code[style*="background:#F3F4F6"],
+.shell-main code[style*="background: #F3F4F6"],
+.fw-panel code[style*="background:#F3F4F6"],
+.fw-panel code[style*="background: #F3F4F6"] {
+  background: #1A1A2E !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  color: #04BEFE !important;
 }

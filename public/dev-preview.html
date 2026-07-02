@@ -8,7 +8,7 @@
          If refresh fails, clears local session and redirects to
          /publish/signin?expired=1. MUST load before any other script
          that might issue an authed fetch (no defer attribute). -->
-    <script src="/auth-guard.js"></script>
+    <script></script>
     <title>Lumi SDK — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -5421,7 +5421,7 @@ class MyApp : Application() {
             // there is exactly one sign-in surface for publishers.
             document.getElementById('authView').classList.remove('active');
             document.getElementById('dashboardView').classList.remove('active');
-            window.location.replace('/publish/signin');
+            showDashboardView();
         }
 
         function showDashboardView() {

@@ -1,0 +1,100 @@
+<svg viewBox="0 0 1180 1100" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Helvetica Neue', 'PingFang SC', system-ui, sans-serif">
+  <title>Boost Boss All-AI Org Tree</title>
+  <desc>Chairman oversees a CEO orchestrator (Claude Code) that dispatches to seven departments; Supply is the moat department.</desc>
+  <rect x="0" y="0" width="1180" height="1100" fill="#F3EDE1"/>
+  <style>
+    .lead-box { fill: #ECDDC0; stroke: #A9712A; stroke-width: 2; }
+    .side-box { fill: #FBF8F1; stroke: #C9BBA0; stroke-width: 1.5; }
+    .dept-box { fill: #FBF8F1; stroke: #D9CCB4; stroke-width: 1.5; }
+    .moat-box { fill: #F4E9CF; stroke: #A9712A; stroke-width: 2; }
+    .chip { fill: #F0E9DA; stroke: #DCD0BB; stroke-width: 1; }
+    .link { fill: none; stroke: #B9A98C; stroke-width: 2; }
+    .t-title { fill: #2E2A24; font-weight: 700; }
+    .t-en { fill: #7A7065; font-weight: 500; }
+    .t-sub { fill: #7A7065; }
+    .t-chip { fill: #5E564B; }
+    .t-head { fill: #2E2A24; font-weight: 700; }
+    .t-accent { fill: #A9712A; font-weight: 700; }
+  </style>
+
+  <text x="40" y="34" class="t-head" font-size="20">Boost Boss · All-AI Org Structure</text>
+
+  <path class="link" d="M142,512 V540"/>
+  <path class="link" d="M245,466 H285 V556 H325"/>
+  <path class="link" d="M560,556 H600"/>
+  <path class="link" d="M600,130 V982"/>
+  <path class="link" d="M600,130 H620"/>
+  <path class="link" d="M600,272 H620"/>
+  <path class="link" d="M600,414 H620"/>
+  <path class="link" d="M600,556 H620"/>
+  <path class="link" d="M600,698 H620"/>
+  <path class="link" d="M600,840 H620"/>
+  <path class="link" d="M600,982 H620"/>
+
+  <rect class="lead-box" x="40" y="420" width="205" height="92" rx="14"/>
+  <text x="142" y="462" text-anchor="middle" class="t-title" font-size="17">Chairman · Me</text>
+  <text x="142" y="488" text-anchor="middle" class="t-sub" font-size="11">Set direction · Decide · Gatekeep</text>
+
+  <rect class="side-box" x="40" y="540" width="205" height="74" rx="14"/>
+  <text x="142" y="572" text-anchor="middle" class="t-title" font-size="15">Secretary Hermes</text>
+  <text x="142" y="594" text-anchor="middle" class="t-sub" font-size="11">Idea relay · Life assistant</text>
+
+  <rect class="lead-box" x="325" y="510" width="235" height="92" rx="14"/>
+  <text x="442" y="552" text-anchor="middle" class="t-title" font-size="17">CEO · Claude Code</text>
+  <text x="442" y="578" text-anchor="middle" class="t-sub" font-size="11">Orchestrate · Dispatch · Integrate</text>
+
+  <rect class="dept-box" x="620" y="70" width="520" height="120" rx="14"/>
+  <text x="640" y="106" class="t-title" font-size="16">Engineering</text>
+  <text x="762" y="106" class="t-en" font-size="13">· CTO</text>
+  <text x="640" y="128" class="t-sub" font-size="11">9 endpoints · OpenRTB · MCP serving · Supabase</text>
+  <rect class="chip" x="640" y="146" width="60" height="28" rx="8"/><text x="670" y="164" text-anchor="middle" class="t-chip" font-size="12">Coder</text>
+  <rect class="chip" x="710" y="146" width="80" height="28" rx="8"/><text x="750" y="164" text-anchor="middle" class="t-chip" font-size="12">Reviewer</text>
+  <rect class="chip" x="800" y="146" width="92" height="28" rx="8"/><text x="846" y="164" text-anchor="middle" class="t-chip" font-size="12">SDK Maint.</text>
+  <rect class="chip" x="902" y="146" width="74" height="28" rx="8"/><text x="939" y="164" text-anchor="middle" class="t-chip" font-size="12">DevOps</text>
+
+  <rect class="dept-box" x="620" y="212" width="520" height="120" rx="14"/>
+  <text x="640" y="248" class="t-title" font-size="16">Benna AI</text>
+  <text x="734" y="248" class="t-en" font-size="13">· Chief Scientist</text>
+  <text x="640" y="270" class="t-sub" font-size="11">Intent scoring · allocation across 37 placements · the moat engine</text>
+  <rect class="chip" x="640" y="288" width="72" height="28" rx="8"/><text x="676" y="306" text-anchor="middle" class="t-chip" font-size="12">Scoring</text>
+  <rect class="chip" x="722" y="288" width="92" height="28" rx="8"/><text x="768" y="306" text-anchor="middle" class="t-chip" font-size="12">Allocation</text>
+  <rect class="chip" x="824" y="288" width="118" height="28" rx="8"/><text x="883" y="306" text-anchor="middle" class="t-chip" font-size="12">Capture watch</text>
+
+  <rect class="moat-box" x="620" y="354" width="520" height="120" rx="14"/>
+  <text x="640" y="390" class="t-accent" font-size="16">★ Supply</text>
+  <text x="730" y="390" class="t-en" font-size="13">· Publisher (Moat — overweight)</text>
+  <text x="640" y="412" class="t-sub" font-size="11">AI-native supply · four doors · first 20 publishers</text>
+  <rect class="chip" x="640" y="430" width="96" height="28" rx="8"/><text x="688" y="448" text-anchor="middle" class="t-chip" font-size="12">Acquisition</text>
+  <rect class="chip" x="746" y="430" width="94" height="28" rx="8"/><text x="793" y="448" text-anchor="middle" class="t-chip" font-size="12">Integration</text>
+  <rect class="chip" x="850" y="430" width="78" height="28" rx="8"/><text x="889" y="448" text-anchor="middle" class="t-chip" font-size="12">Door-fit</text>
+
+  <rect class="dept-box" x="620" y="496" width="520" height="120" rx="14"/>
+  <text x="640" y="532" class="t-title" font-size="16">Demand</text>
+  <text x="722" y="532" class="t-en" font-size="13">· Advertiser</text>
+  <text x="640" y="554" class="t-sub" font-size="11">SuperBoost · Pilot upload-and-go · products-as-parent</text>
+  <rect class="chip" x="640" y="572" width="98" height="28" rx="8"/><text x="689" y="590" text-anchor="middle" class="t-chip" font-size="12">Onboarding</text>
+  <rect class="chip" x="748" y="572" width="82" height="28" rx="8"/><text x="789" y="590" text-anchor="middle" class="t-chip" font-size="12">Pilot ops</text>
+  <rect class="chip" x="840" y="572" width="94" height="28" rx="8"/><text x="887" y="590" text-anchor="middle" class="t-chip" font-size="12">Price audit</text>
+
+  <rect class="dept-box" x="620" y="638" width="520" height="120" rx="14"/>
+  <text x="640" y="674" class="t-title" font-size="16">Exchange &amp; Trust</text>
+  <text x="640" y="696" class="t-sub" font-size="11">BBX take rate · IAB compliance · transparent analytics</text>
+  <rect class="chip" x="640" y="714" width="94" height="28" rx="8"/><text x="687" y="732" text-anchor="middle" class="t-chip" font-size="12">Compliance</text>
+  <rect class="chip" x="744" y="714" width="60" height="28" rx="8"/><text x="774" y="732" text-anchor="middle" class="t-chip" font-size="12">Fraud</text>
+  <rect class="chip" x="814" y="714" width="86" height="28" rx="8"/><text x="857" y="732" text-anchor="middle" class="t-chip" font-size="12">Reporting</text>
+
+  <rect class="dept-box" x="620" y="780" width="520" height="120" rx="14"/>
+  <text x="640" y="816" class="t-title" font-size="16">Finance &amp; Payments</text>
+  <text x="640" y="838" class="t-sub" font-size="11">MoR · PayPal in/out · biweekly payouts · 30% of pool</text>
+  <rect class="chip" x="640" y="856" width="66" height="28" rx="8"/><text x="673" y="874" text-anchor="middle" class="t-chip" font-size="12">Pay-in</text>
+  <rect class="chip" x="716" y="856" width="76" height="28" rx="8"/><text x="754" y="874" text-anchor="middle" class="t-chip" font-size="12">Payouts</text>
+  <rect class="chip" x="802" y="856" width="94" height="28" rx="8"/><text x="849" y="874" text-anchor="middle" class="t-chip" font-size="12">Attribution</text>
+
+  <rect class="dept-box" x="620" y="922" width="520" height="120" rx="14"/>
+  <text x="640" y="958" class="t-title" font-size="16">Growth &amp; Content</text>
+  <text x="640" y="980" class="t-sub" font-size="11">Landing pages · /publish copy · positioning · distribution</text>
+  <rect class="chip" x="640" y="998" width="66" height="28" rx="8"/><text x="673" y="1016" text-anchor="middle" class="t-chip" font-size="12">Editor</text>
+  <rect class="chip" x="716" y="998" width="58" height="28" rx="8"/><text x="745" y="1016" text-anchor="middle" class="t-chip" font-size="12">Copy</text>
+  <rect class="chip" x="784" y="998" width="70" height="28" rx="8"/><text x="819" y="1016" text-anchor="middle" class="t-chip" font-size="12">Design</text>
+  <rect class="chip" x="864" y="998" width="98" height="28" rx="8"/><text x="913" y="1016" text-anchor="middle" class="t-chip" font-size="12">Distribution</text>
+</svg>

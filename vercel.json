@@ -79,7 +79,6 @@
     { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/ads", "destination": "/ads.html" },
     { "source": "/ads/dashboard",     "destination": "/advertiser.html" },
     { "source": "/publish/dashboard", "destination": "/developer.html" },
-    { "source": "/demo", "destination": "/demo.html" },
     { "source": "/publish/signup", "destination": "/signup.html" },
     { "source": "/publish/signin", "destination": "/signup.html" },
     { "source": "/ads/signup", "destination": "/signup.html" },

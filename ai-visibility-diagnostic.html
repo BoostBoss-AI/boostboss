@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Can AI find you? — Boost Boss</title>
+<style>
+  :root{
+    --bg:#07070b;
+    --bg-2:#0d0d15;
+    --panel:#12121d;
+    --panel-2:#171725;
+    --line:rgba(255,255,255,.08);
+    --text:#f5f5fa;
+    --muted:#9a9ab0;
+    --faint:#6a6a82;
+    --accent:#7c5cff;
+    --accent-2:#a78bff;
+    --good:#3ddc97;
+    --warn:#ffb020;
+    --bad:#ff5470;
+    --radius:18px;
+    --max:980px;
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  body{
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(124,92,255,.18), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(61,220,151,.08), transparent 55%),
+      var(--bg);
+    min-height:100vh;
+  }
+  .wrap{max-width:var(--max);margin:0 auto;padding:28px 20px 80px;}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:6px 0 40px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.02em;}
+  .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 0 24px rgba(124,92,255,.5);}
+  .nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-left:22px;}
+  .nav a:hover{color:var(--text)}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border:1px solid var(--line);
+    border-radius:999px;background:rgba(255,255,255,.03);color:var(--accent-2);font-size:12.5px;font-weight:600;
+    letter-spacing:.02em;text-transform:uppercase;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);
+    animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:-.03em;margin:20px 0 14px;font-weight:800;}
+  h1 .grad{background:linear-gradient(120deg,#fff 10%,var(--accent-2) 60%,var(--accent));-webkit-background-clip:text;
+    background-clip:text;color:transparent;}
+  .sub{font-size:clamp(16px,2.4vw,20px);color:var(--muted);max-width:680px;line-height:1.5;}
+  .hero{text-align:center;display:flex;flex-direction:column;align-items:center;}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);
+    border-radius:var(--radius);}
+  .scanbox{width:100%;max-width:680px;margin:38px auto 0;padding:22px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .field{flex:1;min-width:220px;display:flex;flex-direction:column;gap:7px;text-align:left;}
+  label{font-size:12.5px;color:var(--faint);font-weight:600;letter-spacing:.02em;}
+  input,select{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    border-radius:12px;padding:14px 14px;font-size:15px;outline:none;}
+  input::placeholder{color:var(--faint)}
+  input:focus,select:focus{border-color:var(--accent)}
+  .surface{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--muted);font-size:14px;text-align:left;}
+  .surface input{width:auto;accent-color:var(--accent);}
+  .btn{margin-top:16px;width:100%;border:none;cursor:pointer;border-radius:12px;padding:15px 18px;
+    font-size:16px;font-weight:700;color:#fff;background:linear-gradient(120deg,var(--accent),var(--accent-2));
+    box-shadow:0 10px 30px rgba(124,92,255,.35);transition:transform .12s ease,opacity .2s;}
+  .btn:hover{transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .tiny{font-size:12px;color:var(--faint);margin-top:12px;text-align:center;}
+
+  /* scanning */
+  .scanning{display:none;max-width:680px;margin:30px auto 0;padding:26px;text-align:left;}
+  .scanning.show{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .scanline{display:flex;align-items:center;gap:12px;padding:9px 0;color:var(--muted);font-size:14.5px;
+    border-bottom:1px solid rgba(255,255,255,.04);}
+  .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.15);
+    border-top-color:var(--accent);animation:rot .7s linear infinite;flex:none;}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .tick{color:var(--good);font-weight:700;flex:none;width:16px;text-align:center;}
+  .cross{color:var(--bad);font-weight:700;flex:none;width:16px;text-align:center;}
+  .scanline .q{color:var(--text)}
+
+  /* results */
+  .results{display:none;max-width:780px;margin:34px auto 0;}
+  .results.show{display:block;animation:fade .35s ease}
+  .scoregrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.scoregrid{grid-template-columns:1fr}}
+  .metric{padding:24px;text-align:left;position:relative;overflow:hidden;}
+  .metric h3{margin:0 0 4px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);font-weight:700;}
+  .big{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;margin:10px 0 2px;}
+  .big.bad{color:var(--bad)} .big.warn{color:var(--warn)} .big.good{color:var(--good)}
+  .metric p{color:var(--muted);font-size:14.5px;line-height:1.5;margin:10px 0 0;}
+  .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.07);margin:16px 0 0;overflow:hidden;}
+  .bar > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--bad),var(--warn));}
+  .named{margin-top:22px;padding:22px;}
+  .named h4{margin:0 0 14px;font-size:15px;font-weight:700;}
+  .named h4 span{color:var(--accent-2)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:7px 12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);
+    font-size:13.5px;color:var(--muted);}
+  .chip.you{border-color:var(--bad);color:var(--bad);background:rgba(255,84,112,.08);}
+  .cta{margin-top:26px;padding:26px;text-align:center;background:
+      radial-gradient(500px 200px at 50% 0%, rgba(124,92,255,.16), transparent 70%),var(--panel);}
+  .cta h3{margin:0 0 8px;font-size:22px;letter-spacing:-.02em;}
+  .cta p{color:var(--muted);margin:0 auto 18px;max-width:520px;line-height:1.5;}
+  .ctarow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn2{cursor:pointer;border-radius:12px;padding:13px 22px;font-size:15px;font-weight:700;text-decoration:none;display:inline-block;}
+  .btn2.primary{color:#fff;background:linear-gradient(120deg,var(--accent),var(--accent-2));border:none;}
+  .btn2.ghost{color:var(--text);background:transparent;border:1px solid var(--line);}
+  .btn2.ghost:hover{border-color:var(--accent)}
+  .restart{margin:22px auto 0;display:block;background:none;border:none;color:var(--faint);font-size:13px;cursor:pointer;text-decoration:underline;}
+  .footnote{max-width:780px;margin:26px auto 0;font-size:12px;color:var(--faint);text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <div class="brand"><div class="logo"></div>Boost Boss</div>
+    <div><a href="#">Advertisers</a><a href="#">Publishers</a><a href="#">Pricing</a></div>
+  </div>
+
+  <div class="hero">
+    <span class="pill"><span class="dot"></span> Free AI visibility check</span>
+    <h1>Can AI <span class="grad">find you?</span></h1>
+    <p class="sub">Discovery moved inside AI assistants. When users ask Claude, ChatGPT, or Perplexity
+      for a tool like yours — does your name come up? Scan it in 10 seconds.</p>
+
+    <!-- INPUT -->
+    <div class="card scanbox" id="inputCard">
+      <div class="row">
+        <div class="field">
+          <label for="app">Your AI app</label>
+          <input id="app" placeholder="e.g. Acme Writer" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="cat">Category</label>
+          <select id="cat">
+            <option value="writing">AI writing tools</option>
+            <option value="coding">AI coding assistants</option>
+            <option value="image">AI image generators</option>
+            <option value="research">AI research / search</option>
+            <option value="meeting">AI meeting notetakers</option>
+            <option value="custom">Something else…</option>
+          </select>
+        </div>
+      </div>
+      <label class="surface">
+        <input type="checkbox" id="hasSurface" checked />
+        My app shows AI-generated responses to users (chat, answers, results)
+      </label>
+      <button class="btn" id="go">Scan my AI visibility →</button>
+      <div class="tiny">No signup. We query live assistant prompts for your category.</div>
+    </div>
+
+    <!-- SCANNING -->
+    <div class="card scanning" id="scanning">
+      <div id="scanLines"></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results" id="results">
+      <div class="scoregrid">
+        <div class="card metric">
+          <h3>AI Visibility Score</h3>
+          <div class="big bad" id="visScore">7<span style="font-size:24px;color:var(--faint)">/100</span></div>
+          <div class="bar"><i id="visBar" style="width:7%"></i></div>
+          <p id="visText">Across the prompts we ran, assistants named you in <b>0</b> of them. New users asking AI for a tool like yours are not hearing about you.</p>
+        </div>
+        <div class="card metric" id="revCard">
+          <h3>Revenue left on the table</h3>
+          <div class="big warn" id="revAmt">$—</div>
+          <p id="revText">You're already showing AI responses to users. Every one of those is an ad surface earning nothing today.</p>
+        </div>
+      </div>
+
+      <div class="card named">
+        <h4>When we asked for the best <span id="catName">AI writing tools</span>, assistants recommended:</h4>
+        <div class="chips" id="chips"></div>
+      </div>
+
+      <div class="card cta">
+        <h3 id="ctaHead">You're invisible in the place users now look.</h3>
+        <p id="ctaSub">Boost Boss places your app inside AI assistant responses — and lets you earn from the responses you already show. One account, both sides.</p>
+        <div class="ctarow">
+          <a class="btn2 primary" href="#" id="ctaPrimary">Get found by AI users →</a>
+          <a class="btn2 ghost" href="#" id="ctaSecondary">Monetize my AI surface</a>
+        </div>
+      </div>
+
+      <button class="restart" id="restart">← Scan a different app</button>
+      <div class="footnote" id="foot">
+        Demo preview. Scores shown are illustrative — wire <code>runScan()</code> to a live model call before launch.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- demo data: which tools assistants "name" per category ----
+const CATS = {
+  writing:  {label:"AI writing tools",       named:["Jasper","Copy.ai","Writesonic","Grammarly","Notion AI"]},
+  coding:   {label:"AI coding assistants",   named:["GitHub Copilot","Cursor","Codeium","Tabnine","Claude Code"]},
+  image:    {label:"AI image generators",    named:["Midjourney","DALL·E","Adobe Firefly","Ideogram","Leonardo"]},
+  research: {label:"AI research / search",   named:["Perplexity","Consensus","Elicit","Exa","You.com"]},
+  meeting:  {label:"AI meeting notetakers",  named:["Otter","Fireflies","Fathom","Granola","tl;dv"]},
+  custom:   {label:"tools in your category", named:["the 5 incumbents","two VC-backed names","an open-source option","a YC startup","a Product Hunt winner"]}
+};
+const ASSISTANTS = ["ChatGPT","Claude","Perplexity","Gemini","Copilot"];
+
+const $ = id => document.getElementById(id);
+
+$("go").addEventListener("click", runScan);
+$("restart").addEventListener("click", () => {
+  $("results").classList.remove("show");
+  $("inputCard").style.display = "";
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+function prompts(catLabel){
+  return [
+    `What's the best ${catLabel.replace(/^AI /,'')}?`,
+    `Recommend a ${catLabel.replace(/^AI /,'').replace(/s$/,'')} for a startup`,
+    `Top 5 ${catLabel.replace(/^AI /,'')} right now`,
+    `Which ${catLabel.replace(/^AI /,'').replace(/s$/,'')} should I try first?`
+  ];
+}
+
+async function runScan(){
+  const app = ($("app").value || "your app").trim();
+  const catKey = $("cat").value;
+  const cat = CATS[catKey];
+  const hasSurface = $("hasSurface").checked;
+
+  $("go").disabled = true;
+  $("inputCard").style.display = "none";
+  $("results").classList.remove("show");
+  const sc = $("scanning"); sc.classList.add("show");
+  const lines = $("scanLines"); lines.innerHTML = "";
+
+  // ---- SIMULATED SCAN. Replace this loop with real model calls. ----
+  // For each prompt, ask a model and check if `app` appears in the answer.
+  const qs = prompts(cat.label);
+  for (let i=0;i<qs.length;i++){
+    const row = document.createElement("div");
+    row.className = "scanline";
+    row.innerHTML = `<div class="spin"></div><div>Asking <b>${ASSISTANTS[i%ASSISTANTS.length]}</b>: <span class="q">"${qs[i]}"</span></div>`;
+    lines.appendChild(row);
+    await wait(620 + Math.random()*420);
+    // app is (demo) never named -> cross
+    row.querySelector(".spin").outerHTML = `<div class="cross">✕</div>`;
+    row.insertAdjacentHTML("beforeend", `<div style="margin-left:auto;color:var(--bad);font-size:13px;flex:none">not named</div>`);
+  }
+  await wait(450);
+  sc.classList.remove("show");
+  render(app, cat, hasSurface);
+  $("go").disabled = false;
+}
+
+function render(app, cat, hasSurface){
+  const score = 4 + Math.floor(Math.random()*8); // 4-11, illustrative
+  $("visScore").innerHTML = score + `<span style="font-size:24px;color:var(--faint)">/100</span>`;
+  $("visBar").style.width = score + "%";
+  $("visText").innerHTML = `Across the prompts we ran, assistants named <b>${esc(app)}</b> in <b>0</b> of them. New users asking AI for a tool like yours aren't hearing about you.`;
+  $("catName").textContent = cat.label;
+
+  // chips: incumbents named + "you" missing
+  const chips = $("chips"); chips.innerHTML = "";
+  cat.named.forEach(n => { const c=document.createElement("span"); c.className="chip"; c.textContent=n; chips.appendChild(c); });
+  const you=document.createElement("span"); you.className="chip you"; you.textContent=`${app} — not mentioned`; chips.appendChild(you);
+
+  // revenue panel only if they have a response surface
+  const revCard = $("revCard");
+  if (hasSurface){
+    revCard.style.display="";
+    const monthly = 1200 + Math.floor(Math.random()*3800);
+    $("revAmt").textContent = "$" + monthly.toLocaleString() + "/mo";
+    $("revText").innerHTML = `You're already showing AI responses to users. At a modest impression estimate, that surface could earn around <b>$${monthly.toLocaleString()}/mo</b> — it earns $0 today.`;
+    $("ctaSub").textContent = "Boost Boss places your app inside AI assistant responses — and lets you earn from the responses you already show. One account, both sides.";
+  } else {
+    revCard.style.display="none";
+    $("ctaSub").textContent = "Boost Boss places your app inside the AI assistant responses where users now decide what to try.";
+  }
+
+  $("ctaHead").textContent = `${app} is invisible in the place users now look.`;
+  $("results").classList.add("show");
+  $("results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+</script>
+</body>
+</html>

@@ -25,28 +25,28 @@
     --shell-brand-violet:      #9D7AFF;
     --shell-brand-yellow:      #FFE600;
 
-    --shell-ink:               #1A1A2E;
-    --shell-ink-soft:          #4B5563;
-    --shell-muted:             #6B7280;
-    --shell-muted-2:           #9CA3AF;
+    --shell-ink:               #F0F0F8;
+    --shell-ink-soft:          #B8BAC8;
+    --shell-muted:             #7C7E8F;
+    --shell-muted-2:           #5A5C6E;
 
-    --shell-page-bg:           #FAFAF7;
-    --shell-surface:           #FFFFFF;
-    --shell-surface-2:         #F9FAFB;
-    --shell-surface-3:         #F3F4F6;
+    --shell-page-bg:           #0B0B14;
+    --shell-surface:           #13131E;
+    --shell-surface-2:         #181828;
+    --shell-surface-3:         #1E1E2E;
 
-    --shell-border:            #E5E7EB;
-    --shell-border-soft:       #F0F0F2;
-    --shell-border-strong:     #D1D5DB;
+    --shell-border:            rgba(255,255,255,0.08);
+    --shell-border-soft:       rgba(255,255,255,0.05);
+    --shell-border-strong:     rgba(255,255,255,0.13);
 
     --shell-success:           #1D9E75;
-    --shell-success-bg:        #ECFDF5;
+    --shell-success-bg:        rgba(29,158,117,0.12);
     --shell-warning:           #B97309;
-    --shell-warning-bg:        #FFF7E6;
+    --shell-warning-bg:        rgba(245,158,11,0.12);
     --shell-danger:            #E24B4A;
-    --shell-danger-bg:         #FEF2F2;
+    --shell-danger-bg:         rgba(226,75,74,0.12);
     --shell-info:              #2563EB;
-    --shell-info-bg:           #EFF6FF;
+    --shell-info-bg:           rgba(37,99,235,0.12);
 
     --shell-sidebar-bg:        #0F0F1A;
     --shell-sidebar-bg-hover:  #1A1A2E;
