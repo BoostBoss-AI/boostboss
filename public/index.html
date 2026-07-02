@@ -590,12 +590,12 @@
      ════════════════════════════════════════════════════════════ */
   .decoder-wrap { max-width: 860px; margin: 0 auto; }
   .decoder {
-    background: linear-gradient(165deg, #15151F 0%, #0F0F1A 100%);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: var(--r-2xl);
-    box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255,255,255,0.06);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     padding: 34px 36px 38px;
-    position: relative; overflow: hidden;
+    position: relative; overflow: visible;
   }
   .decoder::before {
     content: ""; position: absolute; inset: 0; pointer-events: none;
