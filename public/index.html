@@ -2712,11 +2712,12 @@ function applyAdToGrid() {
   });
 }
 function refreshAd() { adEdited = true; updateLivePreview(); applyAdToGrid(); if (sceneOverlay && sceneOverlay.classList.contains('open')) applyAd(sceneStage); }
+function normalizeAdUrl(v) { v = (v || '').trim(); if (!v) return '#'; if (/^(https?:)?\/\//i.test(v) || /^(mailto:|tel:|#)/i.test(v)) return v; return 'https://' + v; }
 (function() {
   var n = document.getElementById('ad-name'), d = document.getElementById('ad-desc'), u = document.getElementById('ad-url'), lg = document.getElementById('ad-logo');
   if (n) n.addEventListener('input', function() { AD.name = n.value.trim() || 'Your Brand'; refreshAd(); });
   if (d) d.addEventListener('input', function() { AD.desc = d.value.trim() || 'Your product, in one line.'; refreshAd(); });
-  if (u) u.addEventListener('input', function() { AD.url = u.value.trim() || '#'; refreshAd(); });
+  if (u) u.addEventListener('input', function() { AD.url = normalizeAdUrl(u.value); refreshAd(); });
   if (lg) lg.addEventListener('change', function() { var f = lg.files && lg.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(e) { AD.logo = e.target.result; refreshAd(); }; r.readAsDataURL(f); });
   updateLivePreview();
   applyAdToGrid();
