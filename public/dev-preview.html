@@ -39,10 +39,10 @@
             --bg-light: #0B0B14;
             --bg-card: #13131E;
             --bg-subtle: #1A1A2E;
-            --text-dark: #F0F0F8;
+            --text-dark: #E7E9EA;
             --text-secondary: #7C7E8F;
             --border-light: rgba(255,255,255,0.09);
-            --border-hover: rgba(255,255,255,0.15);
+            --border-hover: rgba(255,255,255,0.18);
             --gradient-primary: #FF2D78;
             --gradient-accent: #04BEFE;
             --shadow-card: 0 4px 20px rgba(0,0,0,0.30);
@@ -1988,30 +1988,39 @@
             <span class="shell-nav-item__label">Billing &amp; usage</span>
           </button>
           <span class="shell-nav-section-label">Account</span>
-          <button class="shell-nav-item" data-shell-section="settings">
-            <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-            <span class="shell-nav-item__label" data-t="shell.nav.settings">Settings</span>
+          <!-- Account — flat nav item, logout icon on right -->
+          <button class="shell-nav-item shell-nav-item--account" id="shellAccountNavItem" onclick="if(typeof openSettingsModal==='function')openSettingsModal();">
+            <span class="shell-nav-item__icon">
+              <div class="shell-sidebar__user-avatar" id="shellUserAvatar" style="width:18px;height:18px;font-size:9px;">·</div>
+            </span>
+            <span class="shell-nav-item__label">
+              <span class="shell-user-name" id="navAppName" data-t="chrome.account">Account</span>
+              <span class="shell-user-role" style="display:block;font-size:10.5px;font-weight:400;" data-t="shell.role.publisher">Publisher</span>
+            </span>
+            <button class="shell-account-logout-btn" title="Logout" onclick="event.stopPropagation();if(typeof handleLogout==='function')handleLogout();" style="margin-left:auto;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
           </button>
           </div>
 
-          <div class="shell-sidebar__foot">
-            <div class="shell-sidebar__user">
-              <div class="shell-sidebar__user-avatar" id="shellUserAvatar">·</div>
-              <div class="shell-sidebar__user-text">
-                <span class="shell-user-name" id="navAppName" data-t="chrome.account">Account</span>
-                <span class="shell-user-role" data-t="shell.role.publisher">Publisher</span>
-              </div>
-            </div>
-            <!-- Collapse toggle moved to .shell-sidebar__head 2026-06-06.
-                 This area is now user-info only. -->
-          </div>
+          <div class="shell-sidebar__foot" style="display:none;"></div>
         </aside>
 
         <!-- ─── Top bar ─────────────────────────────────────────── -->
         <header class="shell-topbar" role="banner">
-          <div class="shell-topbar__breadcrumb" id="shellBreadcrumb">
+          <!-- Brand cell — full logo + name, no divider, no collapse btn -->
+          <a href="/publish" class="shell-topbar__brand" title="Back to Lumi SDK" data-t-title="chrome.back">
+            <img src="/design-system/assets/rocket-logo.svg" class="shell-topbar__brand-logo" alt="Boost Boss" width="34" height="34">
+            <span class="shell-topbar__brand-name"><span class="lumi-wordmark">Lumi SDK</span> <span class="lumi-sparkle" style="color:#FFE600;">✦</span></span>
+          </a>
+
+          <!-- breadcrumb hidden — logo is the only brand in topbar -->
+          <div class="shell-topbar__breadcrumb" id="shellBreadcrumb" style="display:none;">
             <span class="shell-crumb" data-t="shell.nav.home">Home</span>
           </div>
+
+          <!-- spacer pushes actions to the right -->
+          <div style="flex:1;"></div>
 
           <button class="shell-topbar__search" onclick="if (typeof openCmdPalette === 'function') openCmdPalette();" title="Search actions" data-t-title="chrome.search_actions">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -2024,23 +2033,36 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               <span id="notifBadge" class="shell-icon-btn__badge" style="display: none;"></span>
             </button>
-            <div id="notifDropdown" style="display: none; position: absolute; top: 50px; right: 80px; width: 340px; background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 100; overflow: hidden;">
-              <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 14px; font-weight: 700;" data-t="chrome.notif_title">Notifications</span>
+            <div id="notifDropdown" style="display: none; position: absolute; top: 50px; right: 80px; width: 340px; background: #13131E; border: 1px solid #2F3336; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); z-index: 100; overflow: hidden;">
+              <div style="padding: 14px 18px; border-bottom: 1px solid #2F3336; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 14px; font-weight: 700; color:#E7E9EA;" data-t="chrome.notif_title">Notifications</span>
                 <button id="notifMarkAll" style="font-size: 11px; color: #FF2D78; background: none; border: none; cursor: pointer; font-weight: 600;" data-t="chrome.notif_mark_all">Mark all read</button>
               </div>
               <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
-              <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
-                <span style="font-size: 12px; color: #9CA3AF;" data-t="chrome.notif_recent">Only showing last 7 days</span>
+              <div style="padding: 10px 18px; border-top: 1px solid #2F3336; text-align: center;">
+                <span style="font-size: 12px; color: #71767B;" data-t="chrome.notif_recent">Only showing last 7 days</span>
               </div>
             </div>
 
-            <button class="shell-icon-btn" id="settingsBtn" title="Account Settings" data-t-title="chrome.settings_tip">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </button>
-            <button class="shell-icon-btn" onclick="handleLogout()" title="Logout" data-t-title="chrome.logout">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
+            <!-- Language picker (replaces settings gear) -->
+            <div class="shell-lang-picker" id="shellLangPicker">
+              <button class="shell-lang-btn" id="shellLangBtn" aria-haspopup="listbox" aria-expanded="false">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span id="shellLangLabel">English</span>
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="shell-lang-drop" id="shellLangDrop" role="listbox" style="display:none;">
+                <button class="shell-lang-opt is-active" data-lang="en">English</button>
+                <button class="shell-lang-opt" data-lang="zh">简体中文</button>
+                <button class="shell-lang-opt" data-lang="zh-TW">繁體中文</button>
+                <button class="shell-lang-opt" data-lang="ja">日本語</button>
+                <button class="shell-lang-opt" data-lang="ko">한국어</button>
+                <button class="shell-lang-opt" data-lang="vi">Tiếng Việt</button>
+              </div>
+            </div>
+
+            <!-- settings + logout hidden from topbar — now in sidebar footer -->
+            <button class="shell-icon-btn" id="settingsBtn" title="Account Settings" style="display:none;"></button>
           </div>
         </header>
 
@@ -10738,6 +10760,47 @@ class MyApp : Application() {
   window.addEventListener('hashchange', maybeLoad);
   window.addEventListener('load', maybeLoad);
   maybeLoad();
+})();
+</script>
+<script>
+// ── Language picker + Account section wiring ──────────────────────────
+(function(){
+  var btn = document.getElementById('shellLangBtn');
+  var drop = document.getElementById('shellLangDrop');
+  if (!btn || !drop) return;
+
+  // Sync label from localStorage
+  try {
+    var saved = localStorage.getItem('bb_dashboard_lang') || 'en';
+    var opt = drop.querySelector('[data-lang="' + saved + '"]');
+    if (opt) {
+      document.getElementById('shellLangLabel').textContent = opt.textContent;
+      drop.querySelectorAll('.shell-lang-opt').forEach(function(o){ o.classList.toggle('is-active', o.dataset.lang === saved); });
+    }
+  } catch(e){}
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = drop.style.display === 'block';
+    drop.style.display = open ? 'none' : 'block';
+    btn.setAttribute('aria-expanded', !open);
+  });
+
+  drop.querySelectorAll('.shell-lang-opt').forEach(function(o){
+    o.addEventListener('click', function(){
+      var lang = o.dataset.lang;
+      try { localStorage.setItem('bb_dashboard_lang', lang); } catch(e){}
+      document.getElementById('shellLangLabel').textContent = o.textContent;
+      drop.querySelectorAll('.shell-lang-opt').forEach(function(x){ x.classList.toggle('is-active', x === o); });
+      drop.style.display = 'none';
+      btn.setAttribute('aria-expanded', 'false');
+      // trigger existing i18n apply if present
+      if (typeof applyLanguage === 'function') applyLanguage(lang);
+      if (typeof window.BB_I18N === 'object' && window.BB_I18N.apply) window.BB_I18N.apply(lang);
+    });
+  });
+
+  document.addEventListener('click', function(){ drop.style.display = 'none'; btn.setAttribute('aria-expanded','false'); });
 })();
 </script>
 </body>
